@@ -1,0 +1,11 @@
+C:\Users\depint\source\repos\FirstOrderMemory\bin\Debug\net6.0\FirstOrderMemory.deps.json
+C:\Users\depint\source\repos\FirstOrderMemory\bin\Debug\net6.0\FirstOrderMemory.dll
+C:\Users\depint\source\repos\FirstOrderMemory\bin\Debug\net6.0\FirstOrderMemory.pdb
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.AssemblyInfoInputs.cache
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.AssemblyInfo.cs
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.csproj.CoreCompileInputs.cache
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.dll
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\refint\FirstOrderMemory.dll
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.pdb
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\ref\FirstOrderMemory.dll
