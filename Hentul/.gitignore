@@ -29,23 +29,22 @@
     *.pyc
     *.xml
     ipch/
-    FirstOrderMemory/obj/
-	FirstOrderMemory/bin/
-    FirstOrderMemory/[Bb]in
-    FirstOrderMemory/[Dd]ebug*/
+    Hentul/FirstOrderMemory/obj/
+	Hentul/FirstOrderMemory/bin/
+    Hentul/FirstOrderMemory/[Bb]in
+    Hentul/FirstOrderMemory/[Dd]ebug*/
     [Rr]elease*/
     Ankh.NoLoad
     
-    #Tooling
+#Tooling
     _ReSharper*/
     *.resharper
     [Tt]est[Rr]esult*
     
-    #Project files
+#Project files
     [Bb]uild/
-    
-    #Subversion files
+#Subversion files
     .svn
     
-    # Office Temp Files
+# Office Temp Files
     ~$*
