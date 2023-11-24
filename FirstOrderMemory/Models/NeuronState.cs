@@ -2,9 +2,9 @@
 {
     public enum NeuronState
     {
-        RESTING,
-        PREDICTED,
-        FIRING,
-        SPIKING
+        RESTING = 0,
+        PREDICTED = 50,
+        FIRING = 100,
+        SPIKING = 200
     }
 }
