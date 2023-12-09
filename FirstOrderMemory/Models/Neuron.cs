@@ -1,4 +1,5 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
+using System.Linq;
 
 namespace FirstOrderMemory.Models
 {   
@@ -10,10 +11,17 @@ namespace FirstOrderMemory.Models
     /// </summary>
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
+        #region FLAGS
+        public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
+        public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
+        public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
+        #endregion
         public Position NeuronID { get; private set; }
-        public List<Neuron>? ConnectedNeurons { get; private set; } = null;
+        public Dictionary<string, Synapse>? ConnectedNeuronsStrength { get; private set; } = null;
+        
+        public List<Neuron> ConnectedNeurons { get; private set; }
         public List<Segment>? Segments { get; private set; } = null;
         public NeuronState CurrentState { get; private set; }
 
@@ -32,7 +40,11 @@ namespace FirstOrderMemory.Models
 
         public void Fire()
         {
-            if(ConnectedNeurons == null || ConnectedNeurons?.Count == 0) return;
+            if (ConnectedNeurons == null || ConnectedNeurons?.Count == 0)
+            {
+                Console.WriteLine("No Neurons are Connected to this Neuron.");
+                return;
+            }
             ConnectedNeurons.ForEach(
                 neuron => neuron.ProcessSpikeFromNeuron(NeuronID)
                 );
@@ -54,6 +66,24 @@ namespace FirstOrderMemory.Models
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }
 
+
+        //Gets called when this neuron contributed to the firing neuron making a correct prediction
+        public void PramoteCorrectPrediction(Neuron callingNeuron)
+        {
+            TOTALNUMBEROFCORRECTPREDICTIONS++;
+            TOTALNUMBEROFPARTICIPATEDCYCLES++;
+
+            if(ConnectedNeurons.Count == 0)
+            {
+                throw new Exception("Not SUpposed to HAppen : Trying to Pramote connection on an neuron , not connected yet!");
+            }
+
+            if(ConnectedNeuronsStrength.TryGetValue(callingNeuron.NeuronID.ToString(), out Synapse synapse))
+            {
+                synapse.IncrementStrength();
+            }
+        }
+
         public bool Equals(Neuron? other)
         {
             return this.Voltage == other?.Voltage;
@@ -68,6 +98,19 @@ namespace FirstOrderMemory.Models
         {
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
+        }
+
+        internal void PruneCycleRefresh()
+        {
+            if(ConnectedNeuronsStrength == null || ConnectedNeuronsStrength.Count == 0)
+            { return; }
+
+            
+
+            foreach( var kvp in ConnectedNeuronsStrength)
+            {
+                var neuron = 
+            }
         }
     }
 }

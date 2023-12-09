@@ -68,6 +68,11 @@
                 x.FlushVoltage();
 
             });
-        }        
+        }
+
+        internal void PruneCycleRefresh()
+        {
+            this.Neurons.ForEach(neuron => neuron.PruneCycleRefresh());
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace FirstOrderMemory.Models
+﻿using FirstOrderMemory.BehaviourManagers;
+
+namespace FirstOrderMemory.Models
 {
     public class Position
     {
@@ -16,9 +18,24 @@
 
         public override string ToString()
         {           
-                return X.ToString() + " " + Y.ToString() + " " + Z.ToString();
+                return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
         }
 
+        public Neuron ConvertPosToNeuron(Position pos)
+        {
+            return BlockBehaviourManager.GetNeuronFromPosition(pos);
+        }
 
+        public Neuron ConvertStringpostoNeuron(string posString)
+        {
+            var parts = posString.Split('-');
+
+            if(parts.Length != 3 ) 
+            {
+                return BlockBehaviourManager.GetBlockBehaviourManager().Columns[X, Y].Neurons[Z];
+            }
+
+            return null;
+        }
     }
 }

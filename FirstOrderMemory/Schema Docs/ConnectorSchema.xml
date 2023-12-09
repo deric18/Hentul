@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Connections>
+	<Column x="0" y="0" >		<!--Column 1-->
+		<Neuron x="0" y="0" z="0">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="1">
+			<ProximalConnections>
+				<Neuron x="2" y="3" z="4" />
+				<Neuron x="8" y="9" z="1" />
+				<Neuron x="9" y="0" z="3" />
+				<Neuron x="3" y="2" z="8" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="2">
+			<ProximalConnections>
+				<Neuron x="2" y="3" z="4" />
+				<Neuron x="8" y="9" z="1" />
+				<Neuron x="9" y="0" z="3" />
+				<Neuron x="3" y="2" z="8" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="3">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="4">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="5">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="6">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="7">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="8">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="0" z="9">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+	</Column>
+	<Column x="0" y="1">		<!--Column 2-->
+		<Neuron x="0" y="1" z="0">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="1">
+			<ProximalConnections>
+				<Neuron x="2" y="3" z="4" />
+				<Neuron x="8" y="9" z="1" />
+				<Neuron x="9" y="0" z="3" />
+				<Neuron x="3" y="2" z="8" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="2">
+			<ProximalConnections>
+				<Neuron x="2" y="3" z="4" />
+				<Neuron x="8" y="9" z="1" />
+				<Neuron x="9" y="0" z="3" />
+				<Neuron x="3" y="2" z="8" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="3">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="4">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="5">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="6">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="7">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="8">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+		<Neuron x="0" y="1" z="9">
+			<ProximalConnections>
+				<Neuron x="0" y="0" z="1" />
+				<Neuron x="3" y="1" z="6" />
+				<Neuron x="1" y="7" z="3" />
+				<Neuron x="5" y="1" z="9" />
+			</ProximalConnections>
+		</Neuron>
+	</Column>
+</Connections>
