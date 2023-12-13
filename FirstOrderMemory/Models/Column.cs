@@ -4,6 +4,7 @@
     {
         public List<Neuron> Neurons { get; private set; }
         public Position ColumnID { get; private set; }        
+        public int Init { get; set; }
 
 
         public Column(int x, int y, int numberOfNeurons) 
@@ -12,8 +13,9 @@
             ColumnID = new Position(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons[i] = new Neuron(new Position(x, y, i));
+                Neurons.Add(new Neuron(new Position(x, y, i)));
             }            
+            Init = 0;
         }
 
 

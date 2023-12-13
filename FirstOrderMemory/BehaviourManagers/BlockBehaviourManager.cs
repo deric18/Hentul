@@ -16,6 +16,7 @@ namespace FirstOrderMemory.BehaviourManagers
         private List<Position> ColumnsThatBurst;
         private Dictionary<int, List<string>>? temporalFiringPairs = null;
         public Column[,] Columns { get; private set; }
+        public uint totalProximalConnections;
         private static BlockBehaviourManager _blockBehaviourManager;        
 
         public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 10)
@@ -30,11 +31,30 @@ namespace FirstOrderMemory.BehaviourManagers
 
         public static void InitConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
-            GetBlockBehaviourManager().Columns[x, y].Neurons[z].InitProximalConnectionForConnector(i, j, k);
+            if(x==i && y == j && z == k)
+            {
+                int breakpoint = 1;
+            }
+            try
+            {
+                Column col = GetBlockBehaviourManager().Columns[x, y];
+                if(col.Init <= 40)
+                {
+                    Neuron neuron = col.Neurons[z];
+                    neuron.InitProximalConnectionForConnector(i, j, k);
+                    int breakpoint = 1;
+                    BlockBehaviourManager.IncrementProximalConnectionCount();
+                    col.Init++;
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());   
+                int breakpoint = 1;
+            }
         }
 
-
-        private BlockBehaviourManager(int numColumns)
+        private BlockBehaviourManager(int numColumns = 10)
         {
             this.CycleNum = 0;
             this.NumColumns = numColumns;
@@ -45,13 +65,19 @@ namespace FirstOrderMemory.BehaviourManagers
             neuronsFiringLastCycle = new List<Neuron>();
             Columns = new Column[numColumns, numColumns];
             ColumnsThatBurst = new List<Position>();
-            for(int i = 0; i < numColumns; i++) 
+            totalProximalConnections = 0;
+            for (int i = 0; i < numColumns; i++) 
             {
                 for(int j = 0; j < numColumns; j++)
                 {
-                    Columns[i, j] = new Column(numColumns, i, j);
+                    Columns[i, j] = new Column(i, j, numColumns);
                 }
             }
+        }
+
+        private static void IncrementProximalConnectionCount()
+        {
+            GetBlockBehaviourManager().totalProximalConnections++;
         }
 
         private void PreCyclePrep()
@@ -129,6 +155,7 @@ namespace FirstOrderMemory.BehaviourManagers
             //Total New Pattern : None of the predicted neurons Fired 
             if (correctPredictionList.Count == 0 || ColumnsThatBurst.Count != 0)
             {
+                //Todo:
                 //How to wire Bursting Columns ?
                 //Everytime a neuron fires it should be given a chance to connect to another neuron of its wish( suggested wish)
 
@@ -210,23 +237,6 @@ namespace FirstOrderMemory.BehaviourManagers
                 _predictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron});
             }
         }
-
-        //public Neuron GetNeuronFromSTring(string posString)
-        //{
-        //    var parts = posString.Split('-');
-        //    foreach (var item in parts)
-        //    {
-        //        Console.WriteLine(item);
-        //    }
-
-        //    if (parts.Length != 3)
-        //    {
-        //        return BlockBehaviourManager.GetBlockBehaviourManager().Columns[X, Y].Neurons[Z];
-        //    }
-
-        //    return null;
-        //}
-      
 
         public static Neuron GetNeuronFromPosition(Position pos)
             => _blockBehaviourManager.Columns[pos.X, pos.Y].Neurons[pos.Z];

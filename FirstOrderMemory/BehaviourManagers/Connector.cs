@@ -4,7 +4,10 @@
 
     public class Connector
     {
-        public Connector() { }
+        private int neuronCounter;
+        public Connector() { 
+        neuronCounter = 0;
+        }
 
 
         public void ReadFromSchemaFile()
@@ -26,6 +29,7 @@
 
             for (int i = 0; i < numColumns; i++)
             {
+                neuronCounter = 0;
                 var item = columns[i];
 
                 var x = item.Attributes[0]?.Value;
@@ -34,6 +38,14 @@
                 //Column
                 foreach (XmlNode node in item.ChildNodes)
                 {   //Neuron
+
+                    if(neuronCounter >= 10)
+                    {
+                        int breakpoint = 1;                        
+                        break;
+                    }
+
+
                     if(node?.Attributes == null)
                     {
                         continue;
@@ -48,17 +60,16 @@
                     int c = Convert.ToInt32(node.Attributes[2]?.Value);
 
                     var proximalNodes = node.ChildNodes;
-                    //("ProximalConnections");
+                    
                     var neuronNodes = proximalNodes.Item(0).SelectNodes("Neuron");
 
                     if(neuronNodes.Count != 4)
                     {
                         throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() +  b.ToString() + c.ToString());
                     }
-                   foreach(XmlNode neuron in neuronNodes)
-                    {   //ProximalConnections                        
-
-                        if(neuron.Attributes.Count != 3)
+                    foreach(XmlNode neuron in neuronNodes)
+                    {               
+                        if(neuron?.Attributes.Count != 3)
                         {
                             throw new InvalidOperationException("Number of Attributes in Neuronal Node is not 3");
                         }
@@ -68,7 +79,9 @@
                         int g = Convert.ToInt32(neuron.Attributes[2].Value);
 
                         //Money Shot!!!
+                        BlockBehaviourManager.InitConnectionForConnector(a, b, c, e, f, g);
                     }
+                    neuronCounter++;
                 }
 
             }

@@ -34,6 +34,11 @@ namespace FirstOrderMemory.Models
         public Neuron(Position neuronId)
         {
             NeuronID = neuronId;
+            ConnectedNeurons = new List<Neuron>();
+            ConnectedNeuronsStrength = new Dictionary<string, Synapse>();
+            CurrentState = NeuronState.RESTING;
+            Voltage = 0;
+
         }
 
         public List<Neuron>? GetConnectedNeurons()
@@ -46,6 +51,7 @@ namespace FirstOrderMemory.Models
             //Needs work
             //Add it dictionary
             //Add it to ConnectedNeurons
+
             string key = Position.ConvertIKJtoString(i, j, k);
             if (ConnectedNeuronsStrength.TryGetValue(key, out var neuron))
             {
@@ -56,7 +62,6 @@ namespace FirstOrderMemory.Models
                 ConnectedNeuronsStrength.Add(key, new Synapse(NeuronID.ToString(), key, 0, PROXIMAL_CONNECTION_STRENGTH));
                 ConnectedNeurons.Add(Position.ConvertStringPosToNeuron(key));
             }
-
         }
 
         public void Fire()
