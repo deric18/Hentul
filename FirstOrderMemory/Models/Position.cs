@@ -26,16 +26,21 @@ namespace FirstOrderMemory.Models
             return BlockBehaviourManager.GetNeuronFromPosition(pos);
         }
 
-        public Neuron ConvertStringpostoNeuron(string posString)
+        public static Neuron ConvertStringPosToNeuron(string posString)
         {
             var parts = posString.Split('-');
 
             if(parts.Length != 3 ) 
             {
-                return BlockBehaviourManager.GetBlockBehaviourManager().Columns[X, Y].Neurons[Z];
+                return BlockBehaviourManager.GetBlockBehaviourManager().Columns[Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1])].Neurons[Convert.ToInt32(parts[3])];
             }
 
             return null;
+        }
+
+        public static string ConvertIKJtoString(int i, int j, int k)
+        {
+            return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
         }
     }
 }

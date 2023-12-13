@@ -15,13 +15,16 @@ namespace FirstOrderMemory.Models
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
+        private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         #endregion
+
+
         public Position NeuronID { get; private set; }
-        public Dictionary<string, Synapse>? ConnectedNeuronsStrength { get; private set; } = null;
-        
-        public List<Neuron> ConnectedNeurons { get; private set; }
+        public Dictionary<string, Synapse> ConnectedNeuronsStrength { get; private set; }
+
+        public List<Neuron> ConnectedNeurons { get; private set; } 
         public List<Segment>? Segments { get; private set; } = null;
         public NeuronState CurrentState { get; private set; }
 
@@ -36,6 +39,24 @@ namespace FirstOrderMemory.Models
         public List<Neuron>? GetConnectedNeurons()
         {
             return ConnectedNeurons;
+        }
+
+        public void InitProximalConnectionForConnector(int i, int j, int k)
+        {
+            //Needs work
+            //Add it dictionary
+            //Add it to ConnectedNeurons
+            string key = Position.ConvertIKJtoString(i, j, k);
+            if (ConnectedNeuronsStrength.TryGetValue(key, out var neuron))
+            {
+                Console.WriteLine("Connection Already Added");
+            }
+            else
+            {
+                ConnectedNeuronsStrength.Add(key, new Synapse(NeuronID.ToString(), key, 0, PROXIMAL_CONNECTION_STRENGTH));
+                ConnectedNeurons.Add(Position.ConvertStringPosToNeuron(key));
+            }
+
         }
 
         public void Fire()
@@ -109,7 +130,7 @@ namespace FirstOrderMemory.Models
 
             foreach( var kvp in ConnectedNeuronsStrength)
             {
-                var neuron = 
+               // var neuron = 
             }
         }
     }

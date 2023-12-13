@@ -1,5 +1,6 @@
 ﻿using FirstOrderMemory.Models;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace FirstOrderMemory.BehaviourManagers
 {
@@ -25,6 +26,11 @@ namespace FirstOrderMemory.BehaviourManagers
             }
 
             return BlockBehaviourManager._blockBehaviourManager;
+        }
+
+        public static void InitConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        {
+            GetBlockBehaviourManager().Columns[x, y].Neurons[z].InitProximalConnectionForConnector(i, j, k);
         }
 
 
@@ -109,7 +115,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             foreach (var item in _predictedNeuronsfromLastCycle.Keys)
             {
-                var neuronToAdd = GetNeuronFromSTring(item);
+                var neuronToAdd = Position.ConvertStringPosToNeuron(item);
 
                 if(neuronToAdd != null) 
                 {
@@ -136,7 +142,7 @@ namespace FirstOrderMemory.BehaviourManagers
                 {
                     foreach(var neuronString in contributingList)
                     {
-                        GetNeuronFromSTring(neuronString).PramoteCorrectPrediction(neuron);
+                        Position.ConvertStringPosToNeuron(neuronString).PramoteCorrectPrediction(neuron);
                     }
                 }
             }
@@ -205,17 +211,22 @@ namespace FirstOrderMemory.BehaviourManagers
             }
         }
 
-        public Neuron GetNeuronFromSTring(string posString)
-        {
-            var parts = posString.Split('-');
+        //public Neuron GetNeuronFromSTring(string posString)
+        //{
+        //    var parts = posString.Split('-');
+        //    foreach (var item in parts)
+        //    {
+        //        Console.WriteLine(item);
+        //    }
 
-            if (parts.Length != 3)
-            {
-                return BlockBehaviourManager.GetBlockBehaviourManager().Columns[X, Y].Neurons[Z];
-            }
+        //    if (parts.Length != 3)
+        //    {
+        //        return BlockBehaviourManager.GetBlockBehaviourManager().Columns[X, Y].Neurons[Z];
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
+      
 
         public static Neuron GetNeuronFromPosition(Position pos)
             => _blockBehaviourManager.Columns[pos.X, pos.Y].Neurons[pos.Z];
