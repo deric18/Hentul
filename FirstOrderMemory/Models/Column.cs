@@ -60,7 +60,7 @@
 
         internal bool PreCleanupCheck()
         {
-            return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).ToList().Count == 0;
+            return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).Count() > 0;
         }
 
         internal void PostCycleCleanup()

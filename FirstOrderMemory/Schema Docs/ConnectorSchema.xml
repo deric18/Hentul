@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Connections>
-	<Column x="0" y="0" id="1" >		
+	<Column x="0" y="0" id="1" >
 		<Neuron x="0" y="0" z="0">
 			<ProximalConnections>
 				<Neuron x="0" y="0" z="1" />
@@ -82,7 +82,7 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="1" Id="2">		
+	<Column x="0" y="1" Id="2">
 		<Neuron x="0" y="1" z="0">
 			<ProximalConnections>
 				<Neuron x="0" y="0" z="1" />
@@ -164,14 +164,14 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="2" Id="3">		
+	<Column x="0" y="2" Id="3">
 		<Neuron	 x="	0	" y="	2	" z="	0	">
-		<ProximalConnections>
-			<Neuron	 x="	0	" y="	7	" z="	1	"/>
-			<Neuron	 x="	3	" y="	0	" z="	6	"/>
-			<Neuron	 x="	4	" y="	7	" z="	6	"/>
-			<Neuron	 x="	0	" y="	8	" z="	5	"/>
-		</ProximalConnections>
+			<ProximalConnections>
+				<Neuron	 x="	0	" y="	7	" z="	1	"/>
+				<Neuron	 x="	3	" y="	0	" z="	6	"/>
+				<Neuron	 x="	4	" y="	7	" z="	6	"/>
+				<Neuron	 x="	0	" y="	8	" z="	5	"/>
+			</ProximalConnections>
 		</Neuron>
 		<Neuron	 x="	0	" y="	2	" z="	1	">
 			<ProximalConnections>
@@ -246,14 +246,14 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="3" Id="4">	
+	<Column x="0" y="3" Id="4">
 		<Neuron	 x="	0	" y="	3	" z="	0	">
-		<ProximalConnections>
-			<Neuron	 x="	6	" y="	8	" z="	7	"/>
-			<Neuron	 x="	7	" y="	7	" z="	7	"/>
-			<Neuron	 x="	1	" y="	8	" z="	6	"/>
-			<Neuron	 x="	8	" y="	3	" z="	3	"/>
-		</ProximalConnections>
+			<ProximalConnections>
+				<Neuron	 x="	6	" y="	8	" z="	7	"/>
+				<Neuron	 x="	7	" y="	7	" z="	7	"/>
+				<Neuron	 x="	1	" y="	8	" z="	6	"/>
+				<Neuron	 x="	8	" y="	3	" z="	3	"/>
+			</ProximalConnections>
 		</Neuron>
 		<Neuron	 x="	0	" y="	3	" z="	1	">
 			<ProximalConnections>
@@ -330,12 +330,12 @@
 	</Column>
 	<Column x="0" y="4" Id="5">
 		<Neuron	 x="	0	" y="	4	" z="	0	">
-		<ProximalConnections>
-			<Neuron	 x="	3	" y="	1	" z="	5	"/>
-			<Neuron	 x="	1	" y="	8	" z="	2	"/>
-			<Neuron	 x="	7	" y="	9	" z="	7	"/>
-			<Neuron	 x="	0	" y="	4	" z="	9	"/>
-		</ProximalConnections>
+			<ProximalConnections>
+				<Neuron	 x="	3	" y="	1	" z="	5	"/>
+				<Neuron	 x="	1	" y="	8	" z="	2	"/>
+				<Neuron	 x="	7	" y="	9	" z="	7	"/>
+				<Neuron	 x="	0	" y="	4	" z="	9	"/>
+			</ProximalConnections>
 		</Neuron>
 		<Neuron	 x="	0	" y="	4	" z="	1	">
 			<ProximalConnections>
@@ -410,14 +410,15 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="5" Id="6">	 <!--Column 6-->
+	<Column x="0" y="5" Id="6">
+		<!--Column 6-->
 		<Neuron	 x="	0	" y="	5	" z="	0	">
-		<ProximalConnections>
-			<Neuron	 x="	2	" y="	9	" z="	7	"/>
-			<Neuron	 x="	1	" y="	8	" z="	7	"/>
-			<Neuron	 x="	4	" y="	6	" z="	7	"/>
-			<Neuron	 x="	1	" y="	9	" z="	3	"/>
-		</ProximalConnections>
+			<ProximalConnections>
+				<Neuron	 x="	2	" y="	9	" z="	7	"/>
+				<Neuron	 x="	1	" y="	8	" z="	7	"/>
+				<Neuron	 x="	4	" y="	6	" z="	7	"/>
+				<Neuron	 x="	1	" y="	9	" z="	3	"/>
+			</ProximalConnections>
 		</Neuron>
 		<Neuron	 x="	0	" y="	5	" z="	1	">
 			<ProximalConnections>
@@ -492,14 +493,15 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="6">	<!--Column 7-->
+	<Column x="0" y="6">
+		<!--Column 7-->
 		<Neuron	 x="	0	" y="	6	" z="	0	">
-		<ProximalConnections>
-			<Neuron	 x="	6	" y="	5	" z="	2	"/>
-			<Neuron	 x="	1	" y="	4	" z="	3	"/>
-			<Neuron	 x="	2	" y="	2	" z="	1	"/>
-			<Neuron	 x="	6	" y="	9	" z="	4	"/>
-		</ProximalConnections>
+			<ProximalConnections>
+				<Neuron	 x="	6	" y="	5	" z="	2	"/>
+				<Neuron	 x="	1	" y="	4	" z="	3	"/>
+				<Neuron	 x="	2	" y="	2	" z="	1	"/>
+				<Neuron	 x="	6	" y="	9	" z="	4	"/>
+			</ProximalConnections>
 		</Neuron>
 		<Neuron	 x="	0	" y="	6	" z="	1	">
 			<ProximalConnections>
@@ -574,7 +576,8 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="7">	<!--Column 8-->
+	<Column x="0" y="7">
+		<!--Column 8-->
 		<Neuron	 x="	0	" y="	7	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	9	" y="	2	" z="	3	"/>
@@ -656,7 +659,8 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="8" >	<!--Column 9-->
+	<Column x="0" y="8" >
+		<!--Column 9-->
 		<Neuron	 x="	0	" y="	8	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	4	" y="	8	" z="	8	"/>
@@ -738,7 +742,8 @@
 			</ProximalConnections>
 		</Neuron>
 	</Column>
-	<Column x="0" y="9">	<!--Column 10-->
+	<Column x="0" y="9">
+		<!--Column 10-->
 		<Neuron	 x="	0	" y="	9	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	0	" y="	2	" z="	3	"/>
@@ -901,9 +906,10 @@
 				<Neuron	 x="	4	" y="	4	" z="	4	"/>
 				<Neuron	 x="	3	" y="	8	" z="	3	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	1	" > 	<!--Column 	12	" /-->
+	<Column 	x="	1	" y="	1	" >
+		<!--Column 	12	" /-->
 		<Neuron	 x="	1	" y="	1	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	3	" y="	4	" z="	8	"/>
@@ -983,9 +989,10 @@
 				<Neuron	 x="	9	" y="	1	" z="	7	"/>
 				<Neuron	 x="	9	" y="	6	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	2	" >		<!--Column 	12	" /-->
+	<Column 	x="	1	" y="	2	" >
+		<!--Column 	12	" /-->
 		<Neuron	 x="	1	" y="	2	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	2	" y="	6	" z="	6	"/>
@@ -1065,9 +1072,10 @@
 				<Neuron	 x="	1	" y="	1	" z="	5	"/>
 				<Neuron	 x="	9	" y="	5	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	3	" >		<!--Column 	13	" /-->
+	<Column 	x="	1	" y="	3	" >
+		<!--Column 	13	" /-->
 		<Neuron	 x="	1	" y="	3	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	5	" y="	9	" z="	9	"/>
@@ -1147,9 +1155,10 @@
 				<Neuron	 x="	0	" y="	0	" z="	3	"/>
 				<Neuron	 x="	2	" y="	5	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	4	" > 	<!--Column 	14	" /-->
+	<Column 	x="	1	" y="	4	" >
+		<!--Column 	14	" /-->
 		<Neuron	 x="	1	" y="	4	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	6	" y="	7	" z="	5	"/>
@@ -1229,9 +1238,10 @@
 				<Neuron	 x="	9	" y="	9	" z="	3	"/>
 				<Neuron	 x="	9	" y="	7	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	5	" >		<!--Column 	15	" /-->
+	<Column 	x="	1	" y="	5	" >
+		<!--Column 	15	" /-->
 		<Neuron	 x="	1	" y="	5	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	0	" y="	4	" z="	0	"/>
@@ -1311,9 +1321,10 @@
 				<Neuron	 x="	3	" y="	8	" z="	0	"/>
 				<Neuron	 x="	6	" y="	4	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	6	" >		<!--Column 	16	" /-->
+	<Column 	x="	1	" y="	6	" >
+		<!--Column 	16	" /-->
 		<Neuron	 x="	1	" y="	6	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	2	" y="	8	" z="	6	"/>
@@ -1393,9 +1404,10 @@
 				<Neuron	 x="	8	" y="	5	" z="	9	"/>
 				<Neuron	 x="	7	" y="	8	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	7	" >		<!--Column 	28	" /-->
+	<Column 	x="	1	" y="	7	" >
+		<!--Column 	28	" /-->
 		<Neuron	 x="	1	" y="	7	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	8	" y="	2	" z="	4	"/>
@@ -1475,9 +1487,10 @@
 				<Neuron	 x="	9	" y="	8	" z="	5	"/>
 				<Neuron	 x="	2	" y="	2	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	8	" > 		<!--Column 	29	" /-->
+	<Column 	x="	1	" y="	8	" >
+		<!--Column 	29	" /-->
 		<Neuron	 x="	1	" y="	8	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	7	" y="	9	" z="	9	"/>
@@ -1557,9 +1570,10 @@
 				<Neuron	 x="	5	" y="	9	" z="	7	"/>
 				<Neuron	 x="	0	" y="	2	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
-	<Column 	x="	1	" y="	9	" >		<!--Column 	30	" /-->
+	<Column 	x="	1	" y="	9	" >
+		<!--Column 	30	" /-->
 		<Neuron	 x="	1	" y="	9	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	5	" y="	8	" z="	1	"/>
@@ -1639,8 +1653,8 @@
 				<Neuron	 x="	7	" y="	7	" z="	6	"/>
 				<Neuron	 x="	7	" y="	0	" z="	3	"/>
 			</ProximalConnections>
-		</Neuron>		
-	</Column>							
+		</Neuron>
+	</Column>
 	<Column 	x="	2	" y="	0	" >
 		<!--Column 	31	" /-->
 		<Neuron	 x="	2	" y="	0	" z="	0	">
@@ -1722,7 +1736,7 @@
 				<Neuron	 x="	8	" y="	0	" z="	8	"/>
 				<Neuron	 x="	3	" y="	3	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	1	" >
 		<!--Column 	32	" /-->
@@ -1805,7 +1819,7 @@
 				<Neuron	 x="	0	" y="	2	" z="	8	"/>
 				<Neuron	 x="	3	" y="	7	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	2	" >
 		<!--Column 	33	" /-->
@@ -1888,7 +1902,7 @@
 				<Neuron	 x="	8	" y="	6	" z="	2	"/>
 				<Neuron	 x="	9	" y="	4	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	3	" >
 		<!--Column 	34	" /-->
@@ -1971,7 +1985,7 @@
 				<Neuron	 x="	1	" y="	9	" z="	2	"/>
 				<Neuron	 x="	4	" y="	2	" z="	7	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	4	" >
 		<!--Column 	35	" /-->
@@ -2054,7 +2068,7 @@
 				<Neuron	 x="	7	" y="	9	" z="	0	"/>
 				<Neuron	 x="	3	" y="	8	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	5	" >
 		<!--Column 	36	" /-->
@@ -2082,7 +2096,7 @@
 				<Neuron	 x="	8	" y="	8	" z="	9	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	1	" y="	5	" z="	3	">
+		<Neuron	 x="	2	" y="	5	" z="	3	">
 			<ProximalConnections>
 				<Neuron	 x="	5	" y="	9	" z="	2	"/>
 				<Neuron	 x="	0	" y="	2	" z="	7	"/>
@@ -2137,7 +2151,7 @@
 				<Neuron	 x="	0	" y="	3	" z="	1	"/>
 				<Neuron	 x="	7	" y="	3	" z="	2	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	6	" >
 		<!--Column 	37	" /-->
@@ -2220,7 +2234,7 @@
 				<Neuron	 x="	3	" y="	6	" z="	2	"/>
 				<Neuron	 x="	7	" y="	1	" z="	2	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	7	" >
 		<!--Column 	38	" /-->
@@ -2303,7 +2317,7 @@
 				<Neuron	 x="	7	" y="	3	" z="	2	"/>
 				<Neuron	 x="	7	" y="	1	" z="	2	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	8	" >
 		<!--Column 	39	" /-->
@@ -2386,7 +2400,7 @@
 				<Neuron	 x="	1	" y="	9	" z="	8	"/>
 				<Neuron	 x="	7	" y="	4	" z="	0	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	2	" y="	9	" >
 		<!--Column 	40	" /-->
@@ -2469,7 +2483,7 @@
 				<Neuron	 x="	2	" y="	0	" z="	5	"/>
 				<Neuron	 x="	3	" y="	2	" z="	3	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	0	" >
 		<!--Column 	41	" /-->
@@ -2552,7 +2566,7 @@
 				<Neuron	 x="	7	" y="	2	" z="	8	"/>
 				<Neuron	 x="	8	" y="	7	" z="	1	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	1	" >
 		<!--Column 	42	" /-->
@@ -2635,7 +2649,7 @@
 				<Neuron	 x="	3	" y="	4	" z="	5	"/>
 				<Neuron	 x="	7	" y="	1	" z="	0	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	2	" >
 		<!--Column 	43	" /-->
@@ -2718,7 +2732,7 @@
 				<Neuron	 x="	9	" y="	5	" z="	9	"/>
 				<Neuron	 x="	1	" y="	1	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	3	" >
 		<!--Column 	44	" /-->
@@ -2801,7 +2815,7 @@
 				<Neuron	 x="	9	" y="	3	" z="	7	"/>
 				<Neuron	 x="	1	" y="	4	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	4	" >
 		<!--Column 	45	" /-->
@@ -2884,7 +2898,7 @@
 				<Neuron	 x="	6	" y="	4	" z="	0	"/>
 				<Neuron	 x="	2	" y="	2	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	5	" >
 		<!--Column 	46	" /-->
@@ -2967,7 +2981,7 @@
 				<Neuron	 x="	4	" y="	0	" z="	7	"/>
 				<Neuron	 x="	8	" y="	3	" z="	3	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	6	" >
 		<!--Column 	47	" /-->
@@ -3050,7 +3064,7 @@
 				<Neuron	 x="	2	" y="	9	" z="	2	"/>
 				<Neuron	 x="	5	" y="	4	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	7	" >
 		<!--Column 	48	" /-->
@@ -3133,7 +3147,7 @@
 				<Neuron	 x="	5	" y="	9	" z="	7	"/>
 				<Neuron	 x="	3	" y="	0	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	8	" >
 		<!--Column 	49	" /-->
@@ -3216,7 +3230,7 @@
 				<Neuron	 x="	4	" y="	2	" z="	9	"/>
 				<Neuron	 x="	2	" y="	1	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	3	" y="	9	" >
 		<!--Column 	50	" /-->
@@ -3299,7 +3313,7 @@
 				<Neuron	 x="	6	" y="	8	" z="	0	"/>
 				<Neuron	 x="	8	" y="	2	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	0	" >
 		<!--Column 	51	" /-->
@@ -3382,7 +3396,7 @@
 				<Neuron	 x="	3	" y="	6	" z="	7	"/>
 				<Neuron	 x="	2	" y="	8	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	1	" >
 		<!--Column 	52	" /-->
@@ -3465,7 +3479,7 @@
 				<Neuron	 x="	1	" y="	6	" z="	4	"/>
 				<Neuron	 x="	8	" y="	3	" z="	3	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	2	" >
 		<!--Column 	53	" /-->
@@ -3548,7 +3562,7 @@
 				<Neuron	 x="	6	" y="	6	" z="	0	"/>
 				<Neuron	 x="	7	" y="	6	" z="	0	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	3	" >
 		<!--Column 	54	" /-->
@@ -3631,7 +3645,7 @@
 				<Neuron	 x="	0	" y="	5	" z="	4	"/>
 				<Neuron	 x="	0	" y="	8	" z="	1	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	4	" >
 		<!--Column 	55	" /-->
@@ -3714,7 +3728,7 @@
 				<Neuron	 x="	6	" y="	1	" z="	9	"/>
 				<Neuron	 x="	8	" y="	3	" z="	7	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	5	" >
 		<!--Column 	56	" /-->
@@ -3797,7 +3811,7 @@
 				<Neuron	 x="	5	" y="	6	" z="	0	"/>
 				<Neuron	 x="	1	" y="	3	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	6	" >
 		<!--Column 	57	" /-->
@@ -3880,7 +3894,7 @@
 				<Neuron	 x="	6	" y="	3	" z="	5	"/>
 				<Neuron	 x="	0	" y="	9	" z="	7	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	7	" >
 		<!--Column 	58	" /-->
@@ -3955,7 +3969,15 @@
 				<Neuron	 x="	4	" y="	5	" z="	0	"/>
 				<Neuron	 x="	2	" y="	6	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
+		<Neuron	 x="	4	" y="	7	" z="	9	">
+			<ProximalConnections>
+				<Neuron	 x="	2	" y="	6	" z="	6	"/>
+				<Neuron	 x="	1	" y="	7	" z="	0	"/>
+				<Neuron	 x="	6	" y="	3	" z="	5	"/>
+				<Neuron	 x="	0	" y="	9	" z="	7	"/>
+			</ProximalConnections>
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	8	" >
 		<!--Column 	59	" /-->
@@ -4038,7 +4060,7 @@
 				<Neuron	 x="	4	" y="	3	" z="	4	"/>
 				<Neuron	 x="	0	" y="	5	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	4	" y="	9	" >
 		<!--Column 	60	" /-->
@@ -4121,7 +4143,7 @@
 				<Neuron	 x="	1	" y="	9	" z="	5	"/>
 				<Neuron	 x="	6	" y="	9	" z="	0	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	5	" y="	0	" >
 		<!--Column 	61	" /-->
@@ -4204,7 +4226,7 @@
 				<Neuron	 x="	4	" y="	2	" z="	0	"/>
 				<Neuron	 x="	5	" y="	9	" z="	1	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	5	" y="	1	" >
 		<!--Column 	62	" /-->
@@ -4370,10 +4392,10 @@
 				<Neuron	 x="	1	" y="	3	" z="	8	"/>
 				<Neuron	 x="	2	" y="	1	" z="	2	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	5	" y="	3	" >
-		<!--Column 	64	" /-->	
+		<!--Column 	64	" /-->
 		<Neuron	 x="	5	" y="	3	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	9	" y="	4	" z="	4	"/>
@@ -4536,7 +4558,7 @@
 				<Neuron	 x="	2	" y="	7	" z="	2	"/>
 				<Neuron	 x="	0	" y="	8	" z="	1	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	5	" y="	5	" >
 		<!--Column 	66	" /-->
@@ -4785,7 +4807,7 @@
 				<Neuron	 x="	0	" y="	7	" z="	2	"/>
 				<Neuron	 x="	1	" y="	6	" z="	9	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	5	" y="	8	" >
 		<!--Column 	69	" /-->
@@ -5034,7 +5056,7 @@
 				<Neuron	 x="	2	" y="	0	" z="	2	"/>
 				<Neuron	 x="	9	" y="	3	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	6	" y="	1	" >
 		<!--Column 	72	" /-->
@@ -5117,7 +5139,7 @@
 				<Neuron	 x="	3	" y="	5	" z="	6	"/>
 				<Neuron	 x="	3	" y="	3	" z="	7	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	6	" y="	2	" >
 		<!--Column 	73	" /-->
@@ -5199,86 +5221,6 @@
 				<Neuron	 x="	2	" y="	0	" z="	4	"/>
 				<Neuron	 x="	0	" y="	5	" z="	8	"/>
 				<Neuron	 x="	4	" y="	6	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	4	" z="	2	"/>
-				<Neuron	 x="	9	" y="	5	" z="	3	"/>
-				<Neuron	 x="	3	" y="	9	" z="	7	"/>
-				<Neuron	 x="	9	" y="	0	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	8	" z="	6	"/>
-				<Neuron	 x="	8	" y="	6	" z="	4	"/>
-				<Neuron	 x="	6	" y="	6	" z="	8	"/>
-				<Neuron	 x="	2	" y="	2	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	0	" z="	6	"/>
-				<Neuron	 x="	3	" y="	3	" z="	2	"/>
-				<Neuron	 x="	1	" y="	2	" z="	8	"/>
-				<Neuron	 x="	7	" y="	3	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	6	" z="	0	"/>
-				<Neuron	 x="	1	" y="	1	" z="	9	"/>
-				<Neuron	 x="	1	" y="	6	" z="	7	"/>
-				<Neuron	 x="	5	" y="	8	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	5	" z="	1	"/>
-				<Neuron	 x="	3	" y="	1	" z="	6	"/>
-				<Neuron	 x="	1	" y="	6	" z="	3	"/>
-				<Neuron	 x="	9	" y="	5	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	0	" z="	2	"/>
-				<Neuron	 x="	6	" y="	0	" z="	4	"/>
-				<Neuron	 x="	4	" y="	8	" z="	4	"/>
-				<Neuron	 x="	4	" y="	7	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	3	" z="	1	"/>
-				<Neuron	 x="	0	" y="	6	" z="	7	"/>
-				<Neuron	 x="	7	" y="	2	" z="	9	"/>
-				<Neuron	 x="	7	" y="	6	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	2	" z="	1	"/>
-				<Neuron	 x="	3	" y="	3	" z="	7	"/>
-				<Neuron	 x="	3	" y="	0	" z="	1	"/>
-				<Neuron	 x="	0	" y="	1	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	4	" z="	0	"/>
-				<Neuron	 x="	8	" y="	0	" z="	7	"/>
-				<Neuron	 x="	7	" y="	9	" z="	8	"/>
-				<Neuron	 x="	7	" y="	0	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	2	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	9	" z="	6	"/>
-				<Neuron	 x="	7	" y="	7	" z="	2	"/>
-				<Neuron	 x="	4	" y="	2	" z="	1	"/>
-				<Neuron	 x="	4	" y="	0	" z="	2	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -5364,86 +5306,6 @@
 				<Neuron	 x="	6	" y="	1	" z="	2	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	7	" z="	4	"/>
-				<Neuron	 x="	5	" y="	7	" z="	9	"/>
-				<Neuron	 x="	7	" y="	7	" z="	3	"/>
-				<Neuron	 x="	5	" y="	0	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	1	" z="	7	"/>
-				<Neuron	 x="	8	" y="	4	" z="	8	"/>
-				<Neuron	 x="	0	" y="	7	" z="	2	"/>
-				<Neuron	 x="	2	" y="	8	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	4	" z="	2	"/>
-				<Neuron	 x="	8	" y="	7	" z="	5	"/>
-				<Neuron	 x="	2	" y="	3	" z="	2	"/>
-				<Neuron	 x="	0	" y="	2	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	7	" z="	3	"/>
-				<Neuron	 x="	7	" y="	1	" z="	3	"/>
-				<Neuron	 x="	2	" y="	3	" z="	3	"/>
-				<Neuron	 x="	2	" y="	3	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	3	" z="	7	"/>
-				<Neuron	 x="	5	" y="	7	" z="	7	"/>
-				<Neuron	 x="	2	" y="	0	" z="	4	"/>
-				<Neuron	 x="	3	" y="	7	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	9	" z="	0	"/>
-				<Neuron	 x="	2	" y="	6	" z="	4	"/>
-				<Neuron	 x="	9	" y="	6	" z="	5	"/>
-				<Neuron	 x="	6	" y="	4	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	8	" z="	3	"/>
-				<Neuron	 x="	0	" y="	9	" z="	1	"/>
-				<Neuron	 x="	6	" y="	7	" z="	8	"/>
-				<Neuron	 x="	4	" y="	3	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	8	" z="	5	"/>
-				<Neuron	 x="	5	" y="	0	" z="	6	"/>
-				<Neuron	 x="	1	" y="	0	" z="	1	"/>
-				<Neuron	 x="	6	" y="	2	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	7	" z="	9	"/>
-				<Neuron	 x="	9	" y="	0	" z="	2	"/>
-				<Neuron	 x="	8	" y="	9	" z="	1	"/>
-				<Neuron	 x="	1	" y="	1	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	3	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	4	" z="	1	"/>
-				<Neuron	 x="	3	" y="	8	" z="	9	"/>
-				<Neuron	 x="	6	" y="	5	" z="	5	"/>
-				<Neuron	 x="	5	" y="	2	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	6	" y="	4	" >
 		<!--Column 	75	" /-->
@@ -5527,90 +5389,10 @@
 				<Neuron	 x="	5	" y="	5	" z="	2	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	9	" z="	3	"/>
-				<Neuron	 x="	6	" y="	7	" z="	7	"/>
-				<Neuron	 x="	8	" y="	1	" z="	3	"/>
-				<Neuron	 x="	8	" y="	7	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	2	" z="	4	"/>
-				<Neuron	 x="	1	" y="	4	" z="	9	"/>
-				<Neuron	 x="	2	" y="	7	" z="	6	"/>
-				<Neuron	 x="	7	" y="	1	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	8	" z="	6	"/>
-				<Neuron	 x="	0	" y="	4	" z="	3	"/>
-				<Neuron	 x="	5	" y="	6	" z="	6	"/>
-				<Neuron	 x="	1	" y="	7	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	2	" z="	5	"/>
-				<Neuron	 x="	1	" y="	4	" z="	5	"/>
-				<Neuron	 x="	8	" y="	4	" z="	9	"/>
-				<Neuron	 x="	3	" y="	8	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	0	" z="	5	"/>
-				<Neuron	 x="	1	" y="	7	" z="	5	"/>
-				<Neuron	 x="	8	" y="	1	" z="	1	"/>
-				<Neuron	 x="	2	" y="	4	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	5	" z="	3	"/>
-				<Neuron	 x="	0	" y="	8	" z="	3	"/>
-				<Neuron	 x="	4	" y="	1	" z="	9	"/>
-				<Neuron	 x="	7	" y="	3	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	4	" z="	7	"/>
-				<Neuron	 x="	4	" y="	1	" z="	9	"/>
-				<Neuron	 x="	1	" y="	0	" z="	2	"/>
-				<Neuron	 x="	2	" y="	8	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	2	" z="	6	"/>
-				<Neuron	 x="	6	" y="	8	" z="	4	"/>
-				<Neuron	 x="	7	" y="	2	" z="	6	"/>
-				<Neuron	 x="	6	" y="	0	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	9	" z="	7	"/>
-				<Neuron	 x="	6	" y="	0	" z="	9	"/>
-				<Neuron	 x="	1	" y="	5	" z="	6	"/>
-				<Neuron	 x="	2	" y="	4	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	4	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	2	" z="	6	"/>
-				<Neuron	 x="	9	" y="	8	" z="	2	"/>
-				<Neuron	 x="	5	" y="	7	" z="	9	"/>
-				<Neuron	 x="	7	" y="	8	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	6	" y="	5	" >
 		<!--Column 	76	" /-->
-		<Neuron	 x="	1	" y="	5	" z="	0	">
+		<Neuron	 x="	6	" y="	5	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	4	" y="	0	" z="	6	"/>
 				<Neuron	 x="	6	" y="	5	" z="	8	"/>
@@ -5689,7 +5471,7 @@
 				<Neuron	 x="	9	" y="	2	" z="	0	"/>
 				<Neuron	 x="	6	" y="	1	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	6	" y="	6	" >
 		<!--Column 	77	" /-->
@@ -5772,87 +5554,7 @@
 				<Neuron	 x="	3	" y="	1	" z="	2	"/>
 				<Neuron	 x="	8	" y="	3	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	2	" z="	6	"/>
-				<Neuron	 x="	1	" y="	1	" z="	1	"/>
-				<Neuron	 x="	8	" y="	1	" z="	8	"/>
-				<Neuron	 x="	6	" y="	8	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	4	" z="	1	"/>
-				<Neuron	 x="	8	" y="	6	" z="	7	"/>
-				<Neuron	 x="	2	" y="	8	" z="	6	"/>
-				<Neuron	 x="	1	" y="	6	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	1	" z="	7	"/>
-				<Neuron	 x="	0	" y="	6	" z="	9	"/>
-				<Neuron	 x="	8	" y="	4	" z="	5	"/>
-				<Neuron	 x="	1	" y="	4	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	1	" z="	5	"/>
-				<Neuron	 x="	0	" y="	0	" z="	8	"/>
-				<Neuron	 x="	5	" y="	7	" z="	1	"/>
-				<Neuron	 x="	8	" y="	6	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	7	" z="	0	"/>
-				<Neuron	 x="	6	" y="	6	" z="	7	"/>
-				<Neuron	 x="	0	" y="	0	" z="	9	"/>
-				<Neuron	 x="	5	" y="	0	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	8	" z="	9	"/>
-				<Neuron	 x="	9	" y="	9	" z="	6	"/>
-				<Neuron	 x="	9	" y="	7	" z="	4	"/>
-				<Neuron	 x="	9	" y="	2	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	1	" z="	8	"/>
-				<Neuron	 x="	6	" y="	7	" z="	2	"/>
-				<Neuron	 x="	3	" y="	2	" z="	5	"/>
-				<Neuron	 x="	7	" y="	8	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	1	" z="	7	"/>
-				<Neuron	 x="	7	" y="	6	" z="	8	"/>
-				<Neuron	 x="	1	" y="	9	" z="	8	"/>
-				<Neuron	 x="	7	" y="	1	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	6	" z="	6	"/>
-				<Neuron	 x="	3	" y="	6	" z="	0	"/>
-				<Neuron	 x="	8	" y="	8	" z="	0	"/>
-				<Neuron	 x="	6	" y="	9	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	6	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	6	" z="	0	"/>
-				<Neuron	 x="	1	" y="	1	" z="	6	"/>
-				<Neuron	 x="	3	" y="	7	" z="	7	"/>
-				<Neuron	 x="	9	" y="	2	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
+		</Neuron>		
 	</Column>
 	<Column 	x="	6	" y="	7	" >
 		<!--Column 	78	" /-->
@@ -5934,86 +5636,6 @@
 				<Neuron	 x="	1	" y="	2	" z="	7	"/>
 				<Neuron	 x="	9	" y="	5	" z="	7	"/>
 				<Neuron	 x="	5	" y="	7	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	5	" z="	6	"/>
-				<Neuron	 x="	3	" y="	5	" z="	8	"/>
-				<Neuron	 x="	8	" y="	4	" z="	9	"/>
-				<Neuron	 x="	4	" y="	9	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	4	" z="	2	"/>
-				<Neuron	 x="	6	" y="	8	" z="	4	"/>
-				<Neuron	 x="	4	" y="	7	" z="	8	"/>
-				<Neuron	 x="	8	" y="	2	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	3	" z="	0	"/>
-				<Neuron	 x="	3	" y="	2	" z="	4	"/>
-				<Neuron	 x="	9	" y="	4	" z="	1	"/>
-				<Neuron	 x="	1	" y="	4	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	1	" z="	3	"/>
-				<Neuron	 x="	7	" y="	7	" z="	2	"/>
-				<Neuron	 x="	1	" y="	7	" z="	5	"/>
-				<Neuron	 x="	5	" y="	1	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	6	" z="	0	"/>
-				<Neuron	 x="	2	" y="	6	" z="	0	"/>
-				<Neuron	 x="	3	" y="	1	" z="	3	"/>
-				<Neuron	 x="	5	" y="	8	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	8	" z="	4	"/>
-				<Neuron	 x="	5	" y="	6	" z="	3	"/>
-				<Neuron	 x="	5	" y="	6	" z="	1	"/>
-				<Neuron	 x="	1	" y="	7	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	9	" z="	0	"/>
-				<Neuron	 x="	4	" y="	2	" z="	3	"/>
-				<Neuron	 x="	1	" y="	8	" z="	4	"/>
-				<Neuron	 x="	9	" y="	5	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	4	" z="	9	"/>
-				<Neuron	 x="	8	" y="	0	" z="	2	"/>
-				<Neuron	 x="	1	" y="	9	" z="	4	"/>
-				<Neuron	 x="	1	" y="	0	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	9	" z="	1	"/>
-				<Neuron	 x="	2	" y="	3	" z="	4	"/>
-				<Neuron	 x="	5	" y="	8	" z="	7	"/>
-				<Neuron	 x="	8	" y="	4	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	7	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	7	" z="	7	"/>
-				<Neuron	 x="	6	" y="	4	" z="	3	"/>
-				<Neuron	 x="	0	" y="	5	" z="	3	"/>
-				<Neuron	 x="	6	" y="	5	" z="	3	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -6099,86 +5721,6 @@
 				<Neuron	 x="	6	" y="	2	" z="	2	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	4	" z="	3	"/>
-				<Neuron	 x="	9	" y="	9	" z="	8	"/>
-				<Neuron	 x="	5	" y="	5	" z="	0	"/>
-				<Neuron	 x="	9	" y="	9	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	0	" z="	9	"/>
-				<Neuron	 x="	5	" y="	6	" z="	7	"/>
-				<Neuron	 x="	2	" y="	3	" z="	0	"/>
-				<Neuron	 x="	4	" y="	8	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	5	" z="	6	"/>
-				<Neuron	 x="	0	" y="	1	" z="	2	"/>
-				<Neuron	 x="	6	" y="	6	" z="	3	"/>
-				<Neuron	 x="	0	" y="	4	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	9	" z="	3	"/>
-				<Neuron	 x="	2	" y="	8	" z="	2	"/>
-				<Neuron	 x="	7	" y="	6	" z="	3	"/>
-				<Neuron	 x="	0	" y="	6	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	6	" z="	4	"/>
-				<Neuron	 x="	8	" y="	5	" z="	7	"/>
-				<Neuron	 x="	7	" y="	0	" z="	1	"/>
-				<Neuron	 x="	7	" y="	6	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	4	" z="	7	"/>
-				<Neuron	 x="	4	" y="	5	" z="	1	"/>
-				<Neuron	 x="	3	" y="	2	" z="	5	"/>
-				<Neuron	 x="	5	" y="	5	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	7	" z="	9	"/>
-				<Neuron	 x="	2	" y="	1	" z="	0	"/>
-				<Neuron	 x="	8	" y="	8	" z="	0	"/>
-				<Neuron	 x="	9	" y="	4	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	5	" z="	7	"/>
-				<Neuron	 x="	7	" y="	0	" z="	7	"/>
-				<Neuron	 x="	4	" y="	2	" z="	4	"/>
-				<Neuron	 x="	0	" y="	6	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	0	" z="	8	"/>
-				<Neuron	 x="	9	" y="	3	" z="	9	"/>
-				<Neuron	 x="	4	" y="	8	" z="	9	"/>
-				<Neuron	 x="	2	" y="	1	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	8	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	8	" z="	7	"/>
-				<Neuron	 x="	9	" y="	3	" z="	4	"/>
-				<Neuron	 x="	3	" y="	8	" z="	9	"/>
-				<Neuron	 x="	7	" y="	5	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	6	" y="	9	" >
 		<!--Column 	80	" /-->
@@ -6260,86 +5802,6 @@
 				<Neuron	 x="	0	" y="	7	" z="	3	"/>
 				<Neuron	 x="	0	" y="	7	" z="	6	"/>
 				<Neuron	 x="	7	" y="	0	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	0	" z="	2	"/>
-				<Neuron	 x="	6	" y="	1	" z="	9	"/>
-				<Neuron	 x="	4	" y="	6	" z="	5	"/>
-				<Neuron	 x="	3	" y="	5	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	0	" z="	2	"/>
-				<Neuron	 x="	1	" y="	8	" z="	3	"/>
-				<Neuron	 x="	8	" y="	7	" z="	0	"/>
-				<Neuron	 x="	5	" y="	6	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	4	" z="	5	"/>
-				<Neuron	 x="	9	" y="	6	" z="	6	"/>
-				<Neuron	 x="	8	" y="	2	" z="	7	"/>
-				<Neuron	 x="	8	" y="	5	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	2	" z="	8	"/>
-				<Neuron	 x="	3	" y="	6	" z="	5	"/>
-				<Neuron	 x="	9	" y="	1	" z="	6	"/>
-				<Neuron	 x="	0	" y="	2	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	2	" z="	1	"/>
-				<Neuron	 x="	9	" y="	7	" z="	3	"/>
-				<Neuron	 x="	9	" y="	6	" z="	0	"/>
-				<Neuron	 x="	7	" y="	7	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	0	" z="	8	"/>
-				<Neuron	 x="	1	" y="	6	" z="	0	"/>
-				<Neuron	 x="	8	" y="	1	" z="	0	"/>
-				<Neuron	 x="	4	" y="	3	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	9	" z="	4	"/>
-				<Neuron	 x="	4	" y="	2	" z="	9	"/>
-				<Neuron	 x="	9	" y="	1	" z="	9	"/>
-				<Neuron	 x="	7	" y="	5	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	1	" z="	3	"/>
-				<Neuron	 x="	6	" y="	2	" z="	9	"/>
-				<Neuron	 x="	8	" y="	8	" z="	0	"/>
-				<Neuron	 x="	5	" y="	6	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	2	" z="	5	"/>
-				<Neuron	 x="	5	" y="	1	" z="	6	"/>
-				<Neuron	 x="	3	" y="	5	" z="	0	"/>
-				<Neuron	 x="	1	" y="	3	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	6	" y="	9	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	5	" z="	0	"/>
-				<Neuron	 x="	9	" y="	2	" z="	9	"/>
-				<Neuron	 x="	9	" y="	3	" z="	7	"/>
-				<Neuron	 x="	7	" y="	9	" z="	1	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -6424,7 +5886,7 @@
 				<Neuron	 x="	0	" y="	2	" z="	9	"/>
 				<Neuron	 x="	4	" y="	0	" z="	0	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	7	" y="	1	" >
 		<!--Column 	82	" /-->
@@ -6506,86 +5968,6 @@
 				<Neuron	 x="	8	" y="	5	" z="	4	"/>
 				<Neuron	 x="	7	" y="	2	" z="	8	"/>
 				<Neuron	 x="	9	" y="	9	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	9	" z="	2	"/>
-				<Neuron	 x="	0	" y="	5	" z="	8	"/>
-				<Neuron	 x="	4	" y="	2	" z="	7	"/>
-				<Neuron	 x="	3	" y="	5	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	0	" z="	2	"/>
-				<Neuron	 x="	8	" y="	1	" z="	8	"/>
-				<Neuron	 x="	1	" y="	8	" z="	2	"/>
-				<Neuron	 x="	4	" y="	3	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	6	" z="	8	"/>
-				<Neuron	 x="	9	" y="	0	" z="	2	"/>
-				<Neuron	 x="	9	" y="	8	" z="	0	"/>
-				<Neuron	 x="	1	" y="	2	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	4	" z="	0	"/>
-				<Neuron	 x="	9	" y="	0	" z="	4	"/>
-				<Neuron	 x="	7	" y="	9	" z="	6	"/>
-				<Neuron	 x="	1	" y="	9	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	6	" z="	2	"/>
-				<Neuron	 x="	2	" y="	7	" z="	2	"/>
-				<Neuron	 x="	2	" y="	9	" z="	0	"/>
-				<Neuron	 x="	8	" y="	1	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	0	" z="	4	"/>
-				<Neuron	 x="	9	" y="	8	" z="	4	"/>
-				<Neuron	 x="	6	" y="	3	" z="	7	"/>
-				<Neuron	 x="	5	" y="	4	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	9	" z="	6	"/>
-				<Neuron	 x="	9	" y="	9	" z="	0	"/>
-				<Neuron	 x="	9	" y="	7	" z="	2	"/>
-				<Neuron	 x="	4	" y="	4	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	4	" z="	9	"/>
-				<Neuron	 x="	0	" y="	7	" z="	5	"/>
-				<Neuron	 x="	2	" y="	2	" z="	4	"/>
-				<Neuron	 x="	4	" y="	7	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	7	" z="	7	"/>
-				<Neuron	 x="	9	" y="	1	" z="	5	"/>
-				<Neuron	 x="	6	" y="	7	" z="	0	"/>
-				<Neuron	 x="	6	" y="	5	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	1	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	7	" z="	9	"/>
-				<Neuron	 x="	1	" y="	7	" z="	2	"/>
-				<Neuron	 x="	4	" y="	0	" z="	7	"/>
-				<Neuron	 x="	9	" y="	1	" z="	6	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -6671,86 +6053,6 @@
 				<Neuron	 x="	3	" y="	8	" z="	5	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	1	" z="	4	"/>
-				<Neuron	 x="	1	" y="	5	" z="	9	"/>
-				<Neuron	 x="	5	" y="	8	" z="	6	"/>
-				<Neuron	 x="	1	" y="	8	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	0	" z="	9	"/>
-				<Neuron	 x="	6	" y="	3	" z="	2	"/>
-				<Neuron	 x="	5	" y="	4	" z="	3	"/>
-				<Neuron	 x="	0	" y="	4	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	7	" z="	8	"/>
-				<Neuron	 x="	1	" y="	1	" z="	9	"/>
-				<Neuron	 x="	8	" y="	3	" z="	7	"/>
-				<Neuron	 x="	7	" y="	2	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	7	" z="	8	"/>
-				<Neuron	 x="	0	" y="	0	" z="	6	"/>
-				<Neuron	 x="	6	" y="	3	" z="	0	"/>
-				<Neuron	 x="	3	" y="	8	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	5	" z="	9	"/>
-				<Neuron	 x="	0	" y="	3	" z="	5	"/>
-				<Neuron	 x="	5	" y="	6	" z="	2	"/>
-				<Neuron	 x="	7	" y="	0	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	3	" z="	9	"/>
-				<Neuron	 x="	5	" y="	8	" z="	0	"/>
-				<Neuron	 x="	5	" y="	0	" z="	8	"/>
-				<Neuron	 x="	7	" y="	9	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	8	" z="	4	"/>
-				<Neuron	 x="	7	" y="	9	" z="	0	"/>
-				<Neuron	 x="	5	" y="	7	" z="	0	"/>
-				<Neuron	 x="	4	" y="	2	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	0	" z="	6	"/>
-				<Neuron	 x="	7	" y="	0	" z="	4	"/>
-				<Neuron	 x="	8	" y="	3	" z="	7	"/>
-				<Neuron	 x="	5	" y="	4	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	7	" z="	7	"/>
-				<Neuron	 x="	0	" y="	3	" z="	8	"/>
-				<Neuron	 x="	8	" y="	4	" z="	4	"/>
-				<Neuron	 x="	6	" y="	3	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	2	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	7	" z="	3	"/>
-				<Neuron	 x="	0	" y="	9	" z="	8	"/>
-				<Neuron	 x="	1	" y="	2	" z="	4	"/>
-				<Neuron	 x="	5	" y="	4	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	7	" y="	3	" >
 		<!--Column 	84	" /-->
@@ -6832,86 +6134,6 @@
 				<Neuron	 x="	5	" y="	0	" z="	9	"/>
 				<Neuron	 x="	0	" y="	1	" z="	4	"/>
 				<Neuron	 x="	5	" y="	3	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	8	" z="	7	"/>
-				<Neuron	 x="	3	" y="	6	" z="	0	"/>
-				<Neuron	 x="	9	" y="	5	" z="	0	"/>
-				<Neuron	 x="	4	" y="	5	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	0	" z="	8	"/>
-				<Neuron	 x="	9	" y="	2	" z="	3	"/>
-				<Neuron	 x="	7	" y="	2	" z="	3	"/>
-				<Neuron	 x="	9	" y="	1	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	0	" z="	9	"/>
-				<Neuron	 x="	4	" y="	5	" z="	6	"/>
-				<Neuron	 x="	6	" y="	1	" z="	7	"/>
-				<Neuron	 x="	0	" y="	7	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	4	" z="	3	"/>
-				<Neuron	 x="	1	" y="	2	" z="	4	"/>
-				<Neuron	 x="	5	" y="	9	" z="	9	"/>
-				<Neuron	 x="	3	" y="	1	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	2	" z="	3	"/>
-				<Neuron	 x="	5	" y="	7	" z="	4	"/>
-				<Neuron	 x="	5	" y="	3	" z="	9	"/>
-				<Neuron	 x="	1	" y="	2	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	8	" z="	3	"/>
-				<Neuron	 x="	1	" y="	5	" z="	9	"/>
-				<Neuron	 x="	1	" y="	5	" z="	3	"/>
-				<Neuron	 x="	2	" y="	0	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	4	" z="	5	"/>
-				<Neuron	 x="	0	" y="	7	" z="	0	"/>
-				<Neuron	 x="	3	" y="	8	" z="	4	"/>
-				<Neuron	 x="	3	" y="	1	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	0	" z="	7	"/>
-				<Neuron	 x="	6	" y="	1	" z="	8	"/>
-				<Neuron	 x="	3	" y="	1	" z="	6	"/>
-				<Neuron	 x="	9	" y="	6	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	3	" z="	4	"/>
-				<Neuron	 x="	3	" y="	6	" z="	3	"/>
-				<Neuron	 x="	6	" y="	3	" z="	2	"/>
-				<Neuron	 x="	6	" y="	1	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	3	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	4	" z="	7	"/>
-				<Neuron	 x="	9	" y="	1	" z="	1	"/>
-				<Neuron	 x="	8	" y="	1	" z="	6	"/>
-				<Neuron	 x="	2	" y="	9	" z="	9	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -6997,90 +6219,10 @@
 				<Neuron	 x="	6	" y="	0	" z="	4	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	4	" z="	1	"/>
-				<Neuron	 x="	5	" y="	6	" z="	4	"/>
-				<Neuron	 x="	4	" y="	1	" z="	4	"/>
-				<Neuron	 x="	8	" y="	2	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	2	" z="	5	"/>
-				<Neuron	 x="	1	" y="	1	" z="	0	"/>
-				<Neuron	 x="	3	" y="	9	" z="	5	"/>
-				<Neuron	 x="	9	" y="	7	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	6	" z="	1	"/>
-				<Neuron	 x="	5	" y="	3	" z="	0	"/>
-				<Neuron	 x="	1	" y="	0	" z="	4	"/>
-				<Neuron	 x="	0	" y="	6	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	9	" z="	1	"/>
-				<Neuron	 x="	3	" y="	4	" z="	0	"/>
-				<Neuron	 x="	4	" y="	3	" z="	5	"/>
-				<Neuron	 x="	8	" y="	7	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	9	" z="	3	"/>
-				<Neuron	 x="	6	" y="	3	" z="	0	"/>
-				<Neuron	 x="	7	" y="	0	" z="	1	"/>
-				<Neuron	 x="	3	" y="	0	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	8	" z="	1	"/>
-				<Neuron	 x="	3	" y="	0	" z="	0	"/>
-				<Neuron	 x="	8	" y="	9	" z="	9	"/>
-				<Neuron	 x="	0	" y="	7	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	7	" z="	8	"/>
-				<Neuron	 x="	1	" y="	2	" z="	0	"/>
-				<Neuron	 x="	9	" y="	9	" z="	9	"/>
-				<Neuron	 x="	3	" y="	5	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	4	" z="	8	"/>
-				<Neuron	 x="	8	" y="	8	" z="	8	"/>
-				<Neuron	 x="	0	" y="	9	" z="	3	"/>
-				<Neuron	 x="	6	" y="	8	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	8	" z="	0	"/>
-				<Neuron	 x="	1	" y="	0	" z="	3	"/>
-				<Neuron	 x="	6	" y="	3	" z="	0	"/>
-				<Neuron	 x="	3	" y="	4	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	4	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	8	" z="	3	"/>
-				<Neuron	 x="	3	" y="	4	" z="	4	"/>
-				<Neuron	 x="	2	" y="	9	" z="	8	"/>
-				<Neuron	 x="	2	" y="	9	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	7	" y="	5	" >
 		<!--Column 	86	" /-->
-		<Neuron	 x="	1	" y="	5	" z="	0	">
+		<Neuron	 x="	7	" y="	5	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	4	" y="	1	" z="	0	"/>
 				<Neuron	 x="	5	" y="	5	" z="	1	"/>
@@ -7159,7 +6301,7 @@
 				<Neuron	 x="	5	" y="	1	" z="	6	"/>
 				<Neuron	 x="	8	" y="	1	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	7	" y="	6	" >
 		<!--Column 	87	" /-->
@@ -7241,86 +6383,6 @@
 				<Neuron	 x="	9	" y="	1	" z="	9	"/>
 				<Neuron	 x="	4	" y="	6	" z="	5	"/>
 				<Neuron	 x="	7	" y="	3	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	7	" z="	1	"/>
-				<Neuron	 x="	9	" y="	7	" z="	8	"/>
-				<Neuron	 x="	7	" y="	0	" z="	8	"/>
-				<Neuron	 x="	9	" y="	6	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	2	" z="	8	"/>
-				<Neuron	 x="	9	" y="	5	" z="	4	"/>
-				<Neuron	 x="	7	" y="	5	" z="	8	"/>
-				<Neuron	 x="	8	" y="	6	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	4	" z="	1	"/>
-				<Neuron	 x="	0	" y="	8	" z="	7	"/>
-				<Neuron	 x="	4	" y="	6	" z="	2	"/>
-				<Neuron	 x="	6	" y="	9	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	6	" z="	1	"/>
-				<Neuron	 x="	0	" y="	9	" z="	9	"/>
-				<Neuron	 x="	2	" y="	7	" z="	8	"/>
-				<Neuron	 x="	5	" y="	9	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	3	" z="	8	"/>
-				<Neuron	 x="	1	" y="	5	" z="	2	"/>
-				<Neuron	 x="	1	" y="	1	" z="	6	"/>
-				<Neuron	 x="	3	" y="	4	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	3	" z="	6	"/>
-				<Neuron	 x="	4	" y="	8	" z="	3	"/>
-				<Neuron	 x="	1	" y="	0	" z="	0	"/>
-				<Neuron	 x="	8	" y="	1	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	1	" z="	9	"/>
-				<Neuron	 x="	3	" y="	4	" z="	2	"/>
-				<Neuron	 x="	5	" y="	2	" z="	9	"/>
-				<Neuron	 x="	0	" y="	9	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	2	" z="	6	"/>
-				<Neuron	 x="	8	" y="	4	" z="	3	"/>
-				<Neuron	 x="	7	" y="	9	" z="	7	"/>
-				<Neuron	 x="	1	" y="	1	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	2	" z="	3	"/>
-				<Neuron	 x="	3	" y="	4	" z="	4	"/>
-				<Neuron	 x="	8	" y="	2	" z="	2	"/>
-				<Neuron	 x="	8	" y="	0	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	6	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	3	" z="	6	"/>
-				<Neuron	 x="	8	" y="	4	" z="	2	"/>
-				<Neuron	 x="	3	" y="	9	" z="	0	"/>
-				<Neuron	 x="	5	" y="	4	" z="	0	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -7405,7 +6467,7 @@
 				<Neuron	 x="	9	" y="	8	" z="	2	"/>
 				<Neuron	 x="	6	" y="	5	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	7	" y="	8	" >
 		<!--Column 	89	" /-->
@@ -7487,86 +6549,6 @@
 				<Neuron	 x="	2	" y="	9	" z="	6	"/>
 				<Neuron	 x="	6	" y="	9	" z="	9	"/>
 				<Neuron	 x="	4	" y="	3	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	6	" z="	9	"/>
-				<Neuron	 x="	2	" y="	8	" z="	1	"/>
-				<Neuron	 x="	2	" y="	1	" z="	9	"/>
-				<Neuron	 x="	3	" y="	9	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	9	" z="	1	"/>
-				<Neuron	 x="	5	" y="	1	" z="	6	"/>
-				<Neuron	 x="	9	" y="	0	" z="	7	"/>
-				<Neuron	 x="	9	" y="	5	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	7	" z="	1	"/>
-				<Neuron	 x="	9	" y="	4	" z="	4	"/>
-				<Neuron	 x="	4	" y="	9	" z="	0	"/>
-				<Neuron	 x="	4	" y="	3	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	5	" z="	5	"/>
-				<Neuron	 x="	6	" y="	0	" z="	2	"/>
-				<Neuron	 x="	9	" y="	4	" z="	8	"/>
-				<Neuron	 x="	8	" y="	1	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	4	" z="	6	"/>
-				<Neuron	 x="	8	" y="	0	" z="	8	"/>
-				<Neuron	 x="	6	" y="	8	" z="	6	"/>
-				<Neuron	 x="	0	" y="	1	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	9	" z="	6	"/>
-				<Neuron	 x="	9	" y="	8	" z="	1	"/>
-				<Neuron	 x="	8	" y="	1	" z="	4	"/>
-				<Neuron	 x="	3	" y="	4	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	0	" z="	9	"/>
-				<Neuron	 x="	1	" y="	8	" z="	8	"/>
-				<Neuron	 x="	0	" y="	0	" z="	8	"/>
-				<Neuron	 x="	3	" y="	3	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	8	" z="	0	"/>
-				<Neuron	 x="	0	" y="	1	" z="	2	"/>
-				<Neuron	 x="	9	" y="	2	" z="	9	"/>
-				<Neuron	 x="	8	" y="	9	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	1	" z="	3	"/>
-				<Neuron	 x="	9	" y="	4	" z="	9	"/>
-				<Neuron	 x="	3	" y="	7	" z="	6	"/>
-				<Neuron	 x="	9	" y="	9	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	8	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	8	" z="	0	"/>
-				<Neuron	 x="	5	" y="	2	" z="	1	"/>
-				<Neuron	 x="	6	" y="	7	" z="	4	"/>
-				<Neuron	 x="	4	" y="	9	" z="	2	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -7652,86 +6634,6 @@
 				<Neuron	 x="	6	" y="	1	" z="	6	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	8	" z="	9	"/>
-				<Neuron	 x="	3	" y="	2	" z="	1	"/>
-				<Neuron	 x="	5	" y="	0	" z="	0	"/>
-				<Neuron	 x="	1	" y="	9	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	3	" z="	2	"/>
-				<Neuron	 x="	5	" y="	0	" z="	7	"/>
-				<Neuron	 x="	3	" y="	6	" z="	3	"/>
-				<Neuron	 x="	9	" y="	3	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	8	" z="	6	"/>
-				<Neuron	 x="	8	" y="	8	" z="	2	"/>
-				<Neuron	 x="	5	" y="	1	" z="	0	"/>
-				<Neuron	 x="	0	" y="	0	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	0	" z="	8	"/>
-				<Neuron	 x="	5	" y="	9	" z="	6	"/>
-				<Neuron	 x="	6	" y="	8	" z="	1	"/>
-				<Neuron	 x="	5	" y="	6	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	2	" z="	0	"/>
-				<Neuron	 x="	9	" y="	0	" z="	9	"/>
-				<Neuron	 x="	9	" y="	3	" z="	6	"/>
-				<Neuron	 x="	1	" y="	6	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	1	" z="	1	"/>
-				<Neuron	 x="	9	" y="	9	" z="	2	"/>
-				<Neuron	 x="	8	" y="	9	" z="	4	"/>
-				<Neuron	 x="	7	" y="	1	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	5	" z="	8	"/>
-				<Neuron	 x="	3	" y="	3	" z="	9	"/>
-				<Neuron	 x="	7	" y="	5	" z="	8	"/>
-				<Neuron	 x="	4	" y="	7	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	5	" z="	3	"/>
-				<Neuron	 x="	8	" y="	4	" z="	3	"/>
-				<Neuron	 x="	2	" y="	9	" z="	8	"/>
-				<Neuron	 x="	0	" y="	3	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	1	" z="	5	"/>
-				<Neuron	 x="	6	" y="	8	" z="	9	"/>
-				<Neuron	 x="	1	" y="	4	" z="	9	"/>
-				<Neuron	 x="	7	" y="	3	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	7	" y="	9	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	7	" z="	5	"/>
-				<Neuron	 x="	8	" y="	3	" z="	8	"/>
-				<Neuron	 x="	1	" y="	7	" z="	0	"/>
-				<Neuron	 x="	5	" y="	1	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	8	" y="	0	" >
 		<!--Column 	91	" /-->
@@ -7813,86 +6715,6 @@
 				<Neuron	 x="	9	" y="	3	" z="	2	"/>
 				<Neuron	 x="	1	" y="	9	" z="	2	"/>
 				<Neuron	 x="	3	" y="	9	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	8	" z="	4	"/>
-				<Neuron	 x="	7	" y="	8	" z="	7	"/>
-				<Neuron	 x="	3	" y="	8	" z="	1	"/>
-				<Neuron	 x="	8	" y="	7	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	0	" z="	5	"/>
-				<Neuron	 x="	4	" y="	0	" z="	3	"/>
-				<Neuron	 x="	8	" y="	8	" z="	5	"/>
-				<Neuron	 x="	9	" y="	4	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	0	" z="	3	"/>
-				<Neuron	 x="	9	" y="	7	" z="	7	"/>
-				<Neuron	 x="	4	" y="	6	" z="	1	"/>
-				<Neuron	 x="	2	" y="	9	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	7	" z="	3	"/>
-				<Neuron	 x="	4	" y="	7	" z="	1	"/>
-				<Neuron	 x="	5	" y="	3	" z="	4	"/>
-				<Neuron	 x="	7	" y="	0	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	4	" z="	4	"/>
-				<Neuron	 x="	4	" y="	6	" z="	6	"/>
-				<Neuron	 x="	5	" y="	6	" z="	0	"/>
-				<Neuron	 x="	4	" y="	8	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	7	" z="	1	"/>
-				<Neuron	 x="	2	" y="	8	" z="	6	"/>
-				<Neuron	 x="	8	" y="	7	" z="	8	"/>
-				<Neuron	 x="	9	" y="	2	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	7	" z="	7	"/>
-				<Neuron	 x="	2	" y="	1	" z="	1	"/>
-				<Neuron	 x="	4	" y="	0	" z="	9	"/>
-				<Neuron	 x="	4	" y="	8	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	9	" z="	0	"/>
-				<Neuron	 x="	4	" y="	1	" z="	1	"/>
-				<Neuron	 x="	7	" y="	1	" z="	5	"/>
-				<Neuron	 x="	9	" y="	9	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	5	" z="	4	"/>
-				<Neuron	 x="	9	" y="	8	" z="	4	"/>
-				<Neuron	 x="	2	" y="	6	" z="	2	"/>
-				<Neuron	 x="	5	" y="	7	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	0	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	0	" z="	6	"/>
-				<Neuron	 x="	8	" y="	6	" z="	5	"/>
-				<Neuron	 x="	0	" y="	6	" z="	2	"/>
-				<Neuron	 x="	2	" y="	2	" z="	1	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -7978,86 +6800,6 @@
 				<Neuron	 x="	1	" y="	5	" z="	7	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	7	" z="	5	"/>
-				<Neuron	 x="	3	" y="	2	" z="	0	"/>
-				<Neuron	 x="	1	" y="	1	" z="	7	"/>
-				<Neuron	 x="	4	" y="	7	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	4	" z="	3	"/>
-				<Neuron	 x="	3	" y="	3	" z="	7	"/>
-				<Neuron	 x="	8	" y="	4	" z="	6	"/>
-				<Neuron	 x="	3	" y="	8	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	3	" z="	2	"/>
-				<Neuron	 x="	9	" y="	6	" z="	2	"/>
-				<Neuron	 x="	7	" y="	6	" z="	0	"/>
-				<Neuron	 x="	2	" y="	5	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	0	" z="	8	"/>
-				<Neuron	 x="	8	" y="	6	" z="	0	"/>
-				<Neuron	 x="	6	" y="	2	" z="	8	"/>
-				<Neuron	 x="	7	" y="	2	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	9	" z="	4	"/>
-				<Neuron	 x="	8	" y="	9	" z="	2	"/>
-				<Neuron	 x="	2	" y="	1	" z="	8	"/>
-				<Neuron	 x="	2	" y="	8	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	6	" z="	7	"/>
-				<Neuron	 x="	1	" y="	6	" z="	7	"/>
-				<Neuron	 x="	9	" y="	9	" z="	7	"/>
-				<Neuron	 x="	2	" y="	1	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	5	" z="	2	"/>
-				<Neuron	 x="	3	" y="	1	" z="	2	"/>
-				<Neuron	 x="	3	" y="	1	" z="	3	"/>
-				<Neuron	 x="	0	" y="	1	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	6	" z="	6	"/>
-				<Neuron	 x="	2	" y="	5	" z="	9	"/>
-				<Neuron	 x="	7	" y="	0	" z="	3	"/>
-				<Neuron	 x="	8	" y="	0	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	6	" z="	9	"/>
-				<Neuron	 x="	8	" y="	3	" z="	4	"/>
-				<Neuron	 x="	9	" y="	8	" z="	4	"/>
-				<Neuron	 x="	7	" y="	8	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	1	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	1	" z="	5	"/>
-				<Neuron	 x="	1	" y="	0	" z="	4	"/>
-				<Neuron	 x="	0	" y="	4	" z="	3	"/>
-				<Neuron	 x="	1	" y="	6	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	8	" y="	2	" >
 		<!--Column 	93	" /-->
@@ -8139,86 +6881,6 @@
 				<Neuron	 x="	2	" y="	5	" z="	3	"/>
 				<Neuron	 x="	8	" y="	6	" z="	5	"/>
 				<Neuron	 x="	9	" y="	5	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	0	" z="	4	"/>
-				<Neuron	 x="	5	" y="	7	" z="	4	"/>
-				<Neuron	 x="	0	" y="	0	" z="	4	"/>
-				<Neuron	 x="	2	" y="	4	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	6	" y="	8	" z="	2	"/>
-				<Neuron	 x="	7	" y="	9	" z="	0	"/>
-				<Neuron	 x="	7	" y="	6	" z="	9	"/>
-				<Neuron	 x="	3	" y="	7	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	9	" z="	4	"/>
-				<Neuron	 x="	6	" y="	6	" z="	7	"/>
-				<Neuron	 x="	2	" y="	4	" z="	9	"/>
-				<Neuron	 x="	8	" y="	9	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	5	" z="	4	"/>
-				<Neuron	 x="	5	" y="	7	" z="	8	"/>
-				<Neuron	 x="	9	" y="	4	" z="	6	"/>
-				<Neuron	 x="	8	" y="	1	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	7	" y="	6	" z="	6	"/>
-				<Neuron	 x="	0	" y="	0	" z="	2	"/>
-				<Neuron	 x="	7	" y="	0	" z="	7	"/>
-				<Neuron	 x="	2	" y="	0	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	9	" z="	4	"/>
-				<Neuron	 x="	6	" y="	4	" z="	4	"/>
-				<Neuron	 x="	0	" y="	9	" z="	7	"/>
-				<Neuron	 x="	4	" y="	5	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	6	" z="	7	"/>
-				<Neuron	 x="	3	" y="	2	" z="	2	"/>
-				<Neuron	 x="	2	" y="	7	" z="	8	"/>
-				<Neuron	 x="	5	" y="	7	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	5	" z="	1	"/>
-				<Neuron	 x="	0	" y="	0	" z="	0	"/>
-				<Neuron	 x="	4	" y="	8	" z="	2	"/>
-				<Neuron	 x="	7	" y="	7	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	2	" z="	1	"/>
-				<Neuron	 x="	6	" y="	7	" z="	9	"/>
-				<Neuron	 x="	5	" y="	0	" z="	9	"/>
-				<Neuron	 x="	4	" y="	2	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	2	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	4	" z="	0	"/>
-				<Neuron	 x="	4	" y="	6	" z="	6	"/>
-				<Neuron	 x="	7	" y="	6	" z="	7	"/>
-				<Neuron	 x="	0	" y="	0	" z="	0	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -8304,86 +6966,6 @@
 				<Neuron	 x="	2	" y="	2	" z="	7	"/>
 			</ProximalConnections>
 		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	1	" z="	5	"/>
-				<Neuron	 x="	1	" y="	4	" z="	7	"/>
-				<Neuron	 x="	3	" y="	4	" z="	0	"/>
-				<Neuron	 x="	6	" y="	1	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	8	" z="	5	"/>
-				<Neuron	 x="	0	" y="	5	" z="	3	"/>
-				<Neuron	 x="	0	" y="	0	" z="	2	"/>
-				<Neuron	 x="	1	" y="	5	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	8	" z="	9	"/>
-				<Neuron	 x="	0	" y="	7	" z="	0	"/>
-				<Neuron	 x="	0	" y="	9	" z="	0	"/>
-				<Neuron	 x="	5	" y="	8	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	0	" z="	9	"/>
-				<Neuron	 x="	3	" y="	3	" z="	8	"/>
-				<Neuron	 x="	2	" y="	0	" z="	5	"/>
-				<Neuron	 x="	7	" y="	9	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	2	" z="	1	"/>
-				<Neuron	 x="	7	" y="	9	" z="	0	"/>
-				<Neuron	 x="	7	" y="	2	" z="	2	"/>
-				<Neuron	 x="	2	" y="	1	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	8	" z="	3	"/>
-				<Neuron	 x="	8	" y="	1	" z="	6	"/>
-				<Neuron	 x="	6	" y="	9	" z="	9	"/>
-				<Neuron	 x="	7	" y="	3	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	3	" z="	5	"/>
-				<Neuron	 x="	8	" y="	7	" z="	6	"/>
-				<Neuron	 x="	0	" y="	0	" z="	7	"/>
-				<Neuron	 x="	8	" y="	1	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	1	" z="	3	"/>
-				<Neuron	 x="	6	" y="	5	" z="	6	"/>
-				<Neuron	 x="	2	" y="	9	" z="	6	"/>
-				<Neuron	 x="	6	" y="	8	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	1	" z="	3	"/>
-				<Neuron	 x="	8	" y="	4	" z="	2	"/>
-				<Neuron	 x="	3	" y="	4	" z="	6	"/>
-				<Neuron	 x="	5	" y="	2	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	3	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	7	" z="	6	"/>
-				<Neuron	 x="	0	" y="	3	" z="	9	"/>
-				<Neuron	 x="	2	" y="	3	" z="	1	"/>
-				<Neuron	 x="	8	" y="	6	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
 	</Column>
 	<Column 	x="	8	" y="	4	" >
 		<!--Column 	95	" /-->
@@ -8465,86 +7047,6 @@
 				<Neuron	 x="	1	" y="	9	" z="	0	"/>
 				<Neuron	 x="	5	" y="	6	" z="	2	"/>
 				<Neuron	 x="	0	" y="	0	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	1	" z="	3	"/>
-				<Neuron	 x="	6	" y="	1	" z="	6	"/>
-				<Neuron	 x="	3	" y="	3	" z="	2	"/>
-				<Neuron	 x="	9	" y="	9	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	1	" z="	5	"/>
-				<Neuron	 x="	5	" y="	9	" z="	8	"/>
-				<Neuron	 x="	9	" y="	8	" z="	3	"/>
-				<Neuron	 x="	3	" y="	1	" z="	3	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	1	" z="	9	"/>
-				<Neuron	 x="	3	" y="	9	" z="	0	"/>
-				<Neuron	 x="	4	" y="	5	" z="	3	"/>
-				<Neuron	 x="	2	" y="	2	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	4	" z="	0	"/>
-				<Neuron	 x="	5	" y="	2	" z="	1	"/>
-				<Neuron	 x="	0	" y="	1	" z="	1	"/>
-				<Neuron	 x="	2	" y="	0	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	3	" z="	7	"/>
-				<Neuron	 x="	4	" y="	5	" z="	5	"/>
-				<Neuron	 x="	6	" y="	1	" z="	7	"/>
-				<Neuron	 x="	9	" y="	0	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	8	" z="	4	"/>
-				<Neuron	 x="	9	" y="	9	" z="	6	"/>
-				<Neuron	 x="	8	" y="	1	" z="	1	"/>
-				<Neuron	 x="	3	" y="	6	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	5	" z="	5	"/>
-				<Neuron	 x="	8	" y="	7	" z="	7	"/>
-				<Neuron	 x="	0	" y="	2	" z="	8	"/>
-				<Neuron	 x="	3	" y="	4	" z="	5	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	9	" z="	3	"/>
-				<Neuron	 x="	5	" y="	4	" z="	4	"/>
-				<Neuron	 x="	1	" y="	9	" z="	7	"/>
-				<Neuron	 x="	7	" y="	8	" z="	2	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	0	" z="	2	"/>
-				<Neuron	 x="	5	" y="	4	" z="	9	"/>
-				<Neuron	 x="	5	" y="	2	" z="	1	"/>
-				<Neuron	 x="	1	" y="	2	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	4	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	3	" z="	9	"/>
-				<Neuron	 x="	9	" y="	1	" z="	8	"/>
-				<Neuron	 x="	3	" y="	9	" z="	2	"/>
-				<Neuron	 x="	8	" y="	5	" z="	7	"/>
 			</ProximalConnections>
 		</Neuron>
 	</Column>
@@ -8629,7 +7131,7 @@
 				<Neuron	 x="	5	" y="	0	" z="	9	"/>
 				<Neuron	 x="	7	" y="	3	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	8	" y="	6	" >
 		<!--Column 	97	" /-->
@@ -8712,7 +7214,7 @@
 				<Neuron	 x="	5	" y="	3	" z="	2	"/>
 				<Neuron	 x="	1	" y="	9	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	8	" y="	7	" >
 		<!--Column 	98	" /-->
@@ -8795,87 +7297,7 @@
 				<Neuron	 x="	5	" y="	3	" z="	3	"/>
 				<Neuron	 x="	1	" y="	0	" z="	0	"/>
 			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	0	" z="	0	"/>
-				<Neuron	 x="	5	" y="	5	" z="	0	"/>
-				<Neuron	 x="	5	" y="	0	" z="	7	"/>
-				<Neuron	 x="	8	" y="	2	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	1	">
-			<ProximalConnections>
-				<Neuron	 x="	4	" y="	6	" z="	2	"/>
-				<Neuron	 x="	0	" y="	3	" z="	8	"/>
-				<Neuron	 x="	4	" y="	0	" z="	7	"/>
-				<Neuron	 x="	7	" y="	8	" z="	1	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	2	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	6	" z="	7	"/>
-				<Neuron	 x="	8	" y="	3	" z="	8	"/>
-				<Neuron	 x="	1	" y="	8	" z="	4	"/>
-				<Neuron	 x="	6	" y="	9	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	3	">
-			<ProximalConnections>
-				<Neuron	 x="	5	" y="	8	" z="	6	"/>
-				<Neuron	 x="	0	" y="	3	" z="	7	"/>
-				<Neuron	 x="	2	" y="	3	" z="	6	"/>
-				<Neuron	 x="	1	" y="	0	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	4	">
-			<ProximalConnections>
-				<Neuron	 x="	8	" y="	4	" z="	9	"/>
-				<Neuron	 x="	5	" y="	4	" z="	4	"/>
-				<Neuron	 x="	7	" y="	5	" z="	3	"/>
-				<Neuron	 x="	7	" y="	5	" z="	0	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	5	">
-			<ProximalConnections>
-				<Neuron	 x="	2	" y="	4	" z="	6	"/>
-				<Neuron	 x="	8	" y="	9	" z="	7	"/>
-				<Neuron	 x="	8	" y="	9	" z="	9	"/>
-				<Neuron	 x="	0	" y="	7	" z="	6	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	6	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	8	" z="	4	"/>
-				<Neuron	 x="	3	" y="	9	" z="	6	"/>
-				<Neuron	 x="	6	" y="	8	" z="	3	"/>
-				<Neuron	 x="	0	" y="	5	" z="	8	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	7	">
-			<ProximalConnections>
-				<Neuron	 x="	9	" y="	8	" z="	9	"/>
-				<Neuron	 x="	4	" y="	6	" z="	4	"/>
-				<Neuron	 x="	5	" y="	8	" z="	7	"/>
-				<Neuron	 x="	0	" y="	8	" z="	9	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	8	">
-			<ProximalConnections>
-				<Neuron	 x="	3	" y="	0	" z="	8	"/>
-				<Neuron	 x="	4	" y="	4	" z="	6	"/>
-				<Neuron	 x="	5	" y="	2	" z="	0	"/>
-				<Neuron	 x="	1	" y="	9	" z="	4	"/>
-			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	8	" y="	7	" z="	9	">
-			<ProximalConnections>
-				<Neuron	 x="	1	" y="	0	" z="	9	"/>
-				<Neuron	 x="	2	" y="	3	" z="	2	"/>
-				<Neuron	 x="	4	" y="	6	" z="	4	"/>
-				<Neuron	 x="	8	" y="	7	" z="	7	"/>
-			</ProximalConnections>
-		</Neuron>
+		</Neuron>	
 	</Column>
 	<Column 	x="	8	" y="	8	" >
 		<!--Column 	99	" /-->
@@ -8958,7 +7380,7 @@
 				<Neuron	 x="	7	" y="	0	" z="	7	"/>
 				<Neuron	 x="	2	" y="	1	" z="	3	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	8	" y="	9	" >
 		<!--Column 	100	" /-->
@@ -9041,7 +7463,7 @@
 				<Neuron	 x="	6	" y="	5	" z="	0	"/>
 				<Neuron	 x="	9	" y="	8	" z="	2	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	0	" >
 		<!--Column 	101	" /-->
@@ -9124,7 +7546,7 @@
 				<Neuron	 x="	6	" y="	9	" z="	0	"/>
 				<Neuron	 x="	2	" y="	7	" z="	1	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	1	" >
 		<!--Column 	102	" /-->
@@ -9207,7 +7629,7 @@
 				<Neuron	 x="	7	" y="	3	" z="	9	"/>
 				<Neuron	 x="	9	" y="	5	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	2	" >
 		<!--Column 	103	" /-->
@@ -9290,7 +7712,7 @@
 				<Neuron	 x="	5	" y="	0	" z="	2	"/>
 				<Neuron	 x="	3	" y="	6	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	3	" >
 		<!--Column 	104	" /-->
@@ -9373,7 +7795,7 @@
 				<Neuron	 x="	3	" y="	5	" z="	6	"/>
 				<Neuron	 x="	3	" y="	3	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	4	" >
 		<!--Column 	105	" /-->
@@ -9456,19 +7878,11 @@
 				<Neuron	 x="	0	" y="	5	" z="	1	"/>
 				<Neuron	 x="	4	" y="	2	" z="	5	"/>
 			</ProximalConnections>
-		</Neuron>
-		<Neuron	 x="	9	" y="	4	" z="	0	">
-			<ProximalConnections>
-				<Neuron	 x="	0	" y="	1	" z="	3	"/>
-				<Neuron	 x="	8	" y="	7	" z="	6	"/>
-				<Neuron	 x="	5	" y="	2	" z="	7	"/>
-				<Neuron	 x="	7	" y="	3	" z="	6	"/>
-			</ProximalConnections>
 		</Neuron>		
 	</Column>
 	<Column 	x="	9	" y="	5	" >
 		<!--Column 	106	" /-->
-		<Neuron	 x="	1	" y="	5	" z="	0	">
+		<Neuron	 x="	9	" y="	5	" z="	0	">
 			<ProximalConnections>
 				<Neuron	 x="	5	" y="	8	" z="	3	"/>
 				<Neuron	 x="	2	" y="	3	" z="	6	"/>
@@ -9547,7 +7961,7 @@
 				<Neuron	 x="	4	" y="	5	" z="	1	"/>
 				<Neuron	 x="	6	" y="	1	" z="	7	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	6	" >
 		<!--Column 	107	" /-->
@@ -9630,7 +8044,7 @@
 				<Neuron	 x="	7	" y="	3	" z="	5	"/>
 				<Neuron	 x="	5	" y="	4	" z="	4	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	7	" >
 		<!--Column 	108	" /-->
@@ -9713,7 +8127,7 @@
 				<Neuron	 x="	7	" y="	7	" z="	7	"/>
 				<Neuron	 x="	7	" y="	2	" z="	9	"/>
 			</ProximalConnections>
-		</Neuron>	
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	8	" >
 		<!--Column 	109	" /-->
@@ -9796,7 +8210,7 @@
 				<Neuron	 x="	4	" y="	8	" z="	9	"/>
 				<Neuron	 x="	9	" y="	1	" z="	8	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 	</Column>
 	<Column 	x="	9	" y="	9	" >
 		<!--Column 	110	" /-->
@@ -9871,7 +8285,7 @@
 				<Neuron	 x="	3	" y="	5	" z="	7	"/>
 				<Neuron	 x="	0	" y="	7	" z="	6	"/>
 			</ProximalConnections>
-		</Neuron>		
+		</Neuron>
 		<Neuron	 x="	9	" y="	9	" z="	9	">
 			<ProximalConnections>
 				<Neuron	 x="	4	" y="	7	" z="	5	"/>

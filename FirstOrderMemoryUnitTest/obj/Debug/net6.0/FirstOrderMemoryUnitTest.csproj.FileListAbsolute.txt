@@ -101,3 +101,4 @@ C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\refint\Fi
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.pdb
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.genruntimeconfig.cache
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\ref\FirstOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\Schema Docs\AxonalSchema.xml

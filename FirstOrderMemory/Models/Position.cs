@@ -16,9 +16,14 @@ namespace FirstOrderMemory.Models
             Z = z;
         }
 
+        public bool Equals(Position pos)
+        {
+            return X == pos.X && Y == pos.Y && Z == pos.Z;
+        }
+
         public override string ToString()
-        {           
-                return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
+        {
+            return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
         }
 
         public Neuron ConvertPosToNeuron(Position pos)
@@ -26,16 +31,51 @@ namespace FirstOrderMemory.Models
             return BlockBehaviourManager.GetNeuronFromPosition(pos);
         }
 
+        public static Position ConvertStringToPosition(string key)
+        {
+            var parts = key.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+
+            return new Position(x, y, z);
+        }
+
         public static Neuron ConvertStringPosToNeuron(string posString)
         {
+            Neuron toRetrun = null;
             var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
 
-            if(parts.Length != 3 ) 
+            try
             {
-                return BlockBehaviourManager.GetBlockBehaviourManager().Columns[Convert.ToInt32(parts[0]), Convert.ToInt32(parts[1])].Neurons[Convert.ToInt32(parts[3])];
+                if (parts.Length != 3 || x > 9 || y > 9 || z > 9)
+                {
+                    int breakpoint = 1;
+                }
+
+                if (parts.Length == 3)
+                {
+
+                    toRetrun = BlockBehaviourManager.GetBlockBehaviourManager().Columns[x, y].Neurons[z];
+                }
+            }
+            catch (Exception e)
+            {
+                int bp = 1;
             }
 
-            return null;
+
+
+            if (toRetrun == null)
+            {
+                int bp1 = 1;
+            }
+
+            return toRetrun;
+
         }
 
         public static string ConvertIKJtoString(int i, int j, int k)

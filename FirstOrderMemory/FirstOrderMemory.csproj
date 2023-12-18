@@ -7,10 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Schema Docs\AxonalSchema.xml" />
     <None Remove="Schema Docs\ConnectorSchema.xml" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Schema Docs\AxonalSchema.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Schema Docs\ConnectorSchema.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

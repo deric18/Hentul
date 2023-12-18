@@ -1,0 +1,10 @@
+﻿1. Second Order memory will provide context for the context of the incoming pattern.
+2. Both order of memories provide an excellent mechanism for storing patterns and predicting intelligence.
+3. Associative memory works like a graph between different regions of the broader network.
+
+
+
+
+Questions:
+1. How to assemble location into the system ? (sensory motor inference).
+2. Also the motor signal from the motor cortex.
