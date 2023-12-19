@@ -56,7 +56,7 @@ namespace FirstOrderMemoryUnitTest
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    for (int k = 0; j < 10; k++)
+                    for (int k = 0; k < 10; k++)
                     {
                        if(bbManager.Columns[i, j].Neurons[k].flag != 8)
                        {
