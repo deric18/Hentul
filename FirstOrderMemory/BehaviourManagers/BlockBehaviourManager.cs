@@ -10,9 +10,9 @@ namespace FirstOrderMemory.BehaviourManagers
 
         private int NumColumns;
 
-        private Dictionary<string, List<string>> _predictedNeuronsForNextCycle;
+        public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
 
-        private Dictionary<string, List<string>> _predictedNeuronsfromLastCycle;
+        public Dictionary<string, List<string>> PredictedNeuronsfromLastCycle { get; private set; }
 
         public List<Neuron> NeuronsFiringThisCycle { get; private set; }
 
@@ -20,7 +20,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
         private List<Segment>? _predictedSegmentForThisCycle;
 
-        private List<Position> ColumnsThatBurst;
+        public List<Position> ColumnsThatBurst { get; private set; }
 
         private Dictionary<int, List<string>>? temporalFiringPairs = null;
 
@@ -52,10 +52,10 @@ namespace FirstOrderMemory.BehaviourManagers
 
             this.NumColumns = numColumns;
 
-            _predictedNeuronsfromLastCycle = new Dictionary<string, List<string>>();
+            PredictedNeuronsfromLastCycle = new Dictionary<string, List<string>>();
 
             //_predictedSegmentForThisCycle = new List<Segment>();
-            _predictedNeuronsForNextCycle = new Dictionary<string, List<string>>();
+            PredictedNeuronsForNextCycle = new Dictionary<string, List<string>>();
 
             NeuronsFiringThisCycle = new List<Neuron>();
 
@@ -91,7 +91,7 @@ namespace FirstOrderMemory.BehaviourManagers
         private void PreCyclePrep()
         {
             //Prepare all the neurons that are predicted 
-            if (_predictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
+            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
             {
                 Console.WriteLine("Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
                 throw new Exception("PreCycle Cleanup Exception!!!");
@@ -109,28 +109,47 @@ namespace FirstOrderMemory.BehaviourManagers
             ColumnsThatBurst.Clear();
         }
 
-        public void Fire(SDR incomingPattern)
+        public void Fire(SDR incomingPattern, bool ignorePrecyclePrep = false)
         {
             List<Neuron> neuronsFiringThisCycle = new List<Neuron>();
 
-            PreCyclePrep();
+            if(!ignorePrecyclePrep)
+                PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
                 return;
 
             for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
             {
-                var firingNeuronPosition = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Fire();
+                var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
-                if (firingNeuronPosition == null)
-                {
+                if (predictedNeuronPositioons?.Count == Columns[0,0].Neurons.Count)
+                {//burst
                     neuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                     ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                 }
                 else
-                {
-                    neuronsFiringThisCycle.Add(GetNeuronFromPosition(firingNeuronPosition));
+                {//selected predicted neurons
+                    neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                 }
+
+                predictedNeuronPositioons = null;
+            }
+
+            //if(incomingPattern.ActiveBits.Count > ColumnsThatBurst.Count)   //Slightly newer pattern coming in 
+            //{
+            //    //Fire all the winners first before bursting.
+
+
+            //}
+            //else if(ColumnsThatBurst.Count == incomingPattern.ActiveBits.Count)      //Brand New Patterncoming in for the first time
+            //{
+            //    //Fire all the bursts at once.
+            //}
+
+            foreach( var neuron in neuronsFiringThisCycle)
+            {
+                neuron.Fire();
             }
 
             Wire();
@@ -150,7 +169,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             List<Neuron> predictedNeuronList = new List<Neuron>();
 
-            foreach (var item in _predictedNeuronsfromLastCycle.Keys)
+            foreach (var item in PredictedNeuronsfromLastCycle.Keys)
             {
                 var neuronToAdd = Position.ConvertStringPosToNeuron(item);
 
@@ -185,7 +204,7 @@ namespace FirstOrderMemory.BehaviourManagers
             foreach (var neuron in correctPredictionList)
             {
                 List<string> contributingList;
-                if (_predictedNeuronsfromLastCycle.TryGetValue(neuron.NeuronID.ToString(), out contributingList))
+                if (PredictedNeuronsfromLastCycle.TryGetValue(neuron.NeuronID.ToString(), out contributingList))
                 {
                     foreach (var neuronString in contributingList)
                     {
@@ -216,17 +235,19 @@ namespace FirstOrderMemory.BehaviourManagers
 
             //Prepare the predicted list for next cycle Fire 
 
-            foreach (var kvp in _predictedNeuronsForNextCycle)
+            foreach (var kvp in PredictedNeuronsForNextCycle)
             {
-                _predictedNeuronsfromLastCycle[kvp.Key] = kvp.Value;
+                PredictedNeuronsfromLastCycle[kvp.Key] = kvp.Value;
             }
-            _predictedNeuronsForNextCycle.Clear();
+
+            PredictedNeuronsForNextCycle.Clear();
 
             NeuronsFiringLastCycle.Clear();
             foreach (var item in NeuronsFiringThisCycle)
             {
                 NeuronsFiringLastCycle.Add(item);
             }
+            
             NeuronsFiringThisCycle.Clear();
             CycleNum++;
             // Process Next pattern.          
@@ -304,7 +325,7 @@ namespace FirstOrderMemory.BehaviourManagers
         public void AddPredictedNeuron(Neuron predictedNeuron, string contributingNeuron)
         {
             List<string> contributingList = null;
-            if (_predictedNeuronsForNextCycle.Count > 0 && _predictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
             {
                 if (contributingList != null)
                 {
@@ -320,11 +341,11 @@ namespace FirstOrderMemory.BehaviourManagers
             }
             else
             {
-                _predictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
+                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
             }
         }
 
-        private bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron)
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron)
         {
             if (AxonalNeuron == null || DendriticNeuron == null)
                 return false;

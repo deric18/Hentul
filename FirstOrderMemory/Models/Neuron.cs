@@ -81,10 +81,10 @@ namespace FirstOrderMemory.Models
 
         public void ProcessSpikeFromNeuron(Position callingNeuron)
         {
-            if(!dendriticList.TryGetValue(callingNeuron.ToString(), out Synapse synapse)) 
-            {
-                throw new InvalidOperationException("ProcessSpikeFromNeuron: Only Axon connected to Neuron But Dendrite is not Connected to Axon!");
-            }
+            //if(!dendriticList.TryGetValue(callingNeuron.ToString(), out Synapse synapse)) 
+            //{
+            //    throw new InvalidOperationException("ProcessSpikeFromNeuron: Only Axon connected to Neuron But Dendrite is not Connected to Axon!");
+            //}
 
             CurrentState = NeuronState.PREDICTED;
             BlockBehaviourManager.GetBlockBehaviourManager().AddPredictedNeuron(this, callingNeuron.ToString());

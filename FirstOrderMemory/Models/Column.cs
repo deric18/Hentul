@@ -30,27 +30,25 @@
         /// </summary>
         /// <returns> null if it burst else NeuronID for the firing Neuron </returns>
         /// <exception cref="Exception"></exception>
-        internal Position? Fire()
+        internal List<Neuron>? GetPredictedNeuronsFromColumn()
         {
+            List<Neuron> toReturn = new List<Neuron>();
             List<Neuron> predictedNeurons = Neurons.Where(neuron => neuron.CurrentState == NeuronState.PREDICTED).ToList();
 
             if (predictedNeurons.Count() > 1 )          //Pick a winner
             {
                 //Pick the most strongly predicted neuron and then fire
                 predictedNeurons.Sort();
-                predictedNeurons[0].Fire();
-                return predictedNeurons[0].NeuronID;
+                return predictedNeurons;
             }
             else if (predictedNeurons.Count == 0)       //Burst
             {
                 //burst
-                Neurons.ForEach(x => x.Fire());
-                return null;
+                return Neurons;
             }
             else if(predictedNeurons.Count == 1)        //Simple Fire
             {
-                predictedNeurons[0].Fire();
-                return predictedNeurons[0].NeuronID;
+                return predictedNeurons;
             }
             else
             {

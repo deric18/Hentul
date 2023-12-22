@@ -9,11 +9,12 @@ namespace FirstOrderMemoryUnitTest
     {
         Connector connector;
         BlockBehaviourManager bbManager;
+        const int sizeOfColumns = 10;
 
        [SetUp]
         public void Setup()
         {
-            bbManager = BlockBehaviourManager.GetBlockBehaviourManager(10);    
+            bbManager = BlockBehaviourManager.GetBlockBehaviourManager(sizeOfColumns);    
             
             bbManager.Init();
         }
@@ -88,7 +89,7 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [Test]
-        public void TestFire()
+        public void TestBurstFireWithoutContext()
         {
             List<Position> posList = new List<Position>()
             {
@@ -102,13 +103,46 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(sdr);
 
+            Assert.AreEqual(4, bbManager.ColumnsThatBurst.Count);            
+
             var firingNeurons = bbManager.NeuronsFiringLastCycle;
 
-            Assert.IsTrue(firingNeurons.Count > 0);
-            Assert.IsTrue(firingNeurons[0].NeuronID.Equals(posList[0]));
-            Assert.IsTrue(firingNeurons[0].NeuronID.Equals(posList[0]));
-            Assert.IsTrue(firingNeurons[0].NeuronID.Equals(posList[0]));
-            Assert.IsTrue(firingNeurons[0].NeuronID.Equals(posList[0]));
+            Assert.AreEqual(firingNeurons.Count, posList.Count * sizeOfColumns);
+
+            for(int i=0; i < posList.Count; i++)
+            {
+                Assert.IsTrue(firingNeurons.Where(x => x.NeuronID.Equals(posList[i])).Count() > 0);
+            }            
+        }
+
+
+        [Test]
+        public void TestWire(Synapse? value1)
+        {
+            //fire a neuron which has an already established connection to a known other neuron
+            //Fire a pattern that fires the other known neuron
+            //check if the connection b/w both is strengthened.
+
+            var prefiringNeuron = bbManager.Columns[0, 2].Neurons[0];
+            var postFiringNeuron = bbManager.Columns[5, 3].Neurons[9];
+
+            bbManager.ConnectTwoNeurons(prefiringNeuron, postFiringNeuron);
+
+            prefiringNeuron.Fire();
+
+            SDR incomingpattern = GenerateSDRfromPosition(new Position(5, 3));
+
+            postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse preFireSynapse);
+
+            uint strenghtBeforeFire = preFireSynapse.strength; 
+
+            bbManager.Fire(incomingpattern, true);
+
+            postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse value2);
+
+            uint strengthAfterFire = value2.strength;
+
+            Assert.IsTrue(strenghtBeforeFire < strengthAfterFire);
 
         }
 
@@ -117,9 +151,9 @@ namespace FirstOrderMemoryUnitTest
            return new SDR(10,10, posList);
         }
 
-        public void TestWire()
+        private SDR GenerateSDRfromPosition(Position pos)
         {
-
+            return new SDR(10, 10, new List<Position>() { pos });
         }
     }
 }
