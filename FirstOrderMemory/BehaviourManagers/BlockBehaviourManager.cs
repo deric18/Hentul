@@ -201,14 +201,15 @@ namespace FirstOrderMemory.BehaviourManagers
             }
 
             //Else PramoteCorrectlyPredictedConnections
-            foreach (var neuron in correctPredictionList)
+            foreach (var correctlyPredictedNeuron in correctPredictionList)
             {
                 List<string> contributingList;
-                if (PredictedNeuronsfromLastCycle.TryGetValue(neuron.NeuronID.ToString(), out contributingList))
+                if (PredictedNeuronsfromLastCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                 {
-                    foreach (var neuronString in contributingList)
+                    foreach (var contributingNeuron in contributingList)
                     {
-                        Position.ConvertStringPosToNeuron(neuronString).PramoteCorrectPrediction(neuron);
+                        Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+                        correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(Position.ConvertStringPosToNeuron(contributingNeuron));
                     }
                 }
             }
@@ -299,7 +300,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
                 Neuron neuron = col.Neurons[z];
 
-                neuron.InitProximalConnectionForConnector(i, j, k);
+                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
 
                 BlockBehaviourManager.IncrementProximalConnectionCount();
 

@@ -1,13 +1,10 @@
 namespace FirstOrderMemoryUnitTest
 {
-
     using FirstOrderMemory.BehaviourManagers;
-    using FirstOrderMemory.Models;
-    using System;
+    using FirstOrderMemory.Models;   
 
     public class ConnectorTests
-    {
-        Connector connector;
+    {        
         BlockBehaviourManager bbManager;
         const int sizeOfColumns = 10;
 
@@ -116,8 +113,8 @@ namespace FirstOrderMemoryUnitTest
         }
 
 
-        [Test]
-        public void TestWire(Synapse? value1)
+        [Test(Author = "Deric")]
+        public void TestWire()
         {
             //fire a neuron which has an already established connection to a known other neuron
             //Fire a pattern that fires the other known neuron
@@ -134,13 +131,13 @@ namespace FirstOrderMemoryUnitTest
 
             postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse preFireSynapse);
 
-            uint strenghtBeforeFire = preFireSynapse.strength; 
+            uint strenghtBeforeFire = preFireSynapse.GetStrength(); 
 
             bbManager.Fire(incomingpattern, true);
 
             postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse value2);
 
-            uint strengthAfterFire = value2.strength;
+            uint strengthAfterFire = value2.GetStrength();
 
             Assert.IsTrue(strenghtBeforeFire < strengthAfterFire);
 

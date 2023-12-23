@@ -8,21 +8,30 @@ namespace FirstOrderMemory.Models
         public string SourceNeuronId { get; private set; }
         public string TargetNeuronId { get; private set; }
         public ulong lastFiredCycle {  get; private set; }
-        
-        public uint strength {  get; private set; } 
 
-        public Synapse(string sourceNeuronId, string targetNeuronId, ulong lastFiredCycle, uint strength)
+        public ConnectionType cType { get; private set; }
+        
+        private uint _strength {  get; set; } 
+
+        public Synapse(string sourceNeuronId, string targetNeuronId, ulong lastFiredCycle, uint strength, ConnectionType cType)
         {
             Id = Guid.NewGuid();
             SourceNeuronId = sourceNeuronId;
             TargetNeuronId = targetNeuronId;
             this.lastFiredCycle = lastFiredCycle;
-            this.strength = strength;
+            this._strength = strength;
+            this.cType = cType;
+        }
+
+        public uint GetStrength()
+        {
+            lastFiredCycle = BlockBehaviourManager.GetBlockBehaviourManager().CycleNum;
+            return _strength;
         }
 
         public void IncrementStrength()
         {
-            this.strength += 1;
+            this._strength += 1;
             this.lastFiredCycle = BlockBehaviourManager.GetBlockBehaviourManager().CycleNum;
         }
     }
