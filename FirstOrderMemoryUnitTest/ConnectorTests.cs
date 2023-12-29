@@ -131,7 +131,9 @@ namespace FirstOrderMemoryUnitTest
 
             postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse preFireSynapse);
 
-            uint strenghtBeforeFire = preFireSynapse.GetStrength(); 
+            uint strenghtBeforeFire = preFireSynapse.GetStrength();
+
+            bbManager.AddtoPredictedNeuronFromLastCycleMock(postFiringNeuron, prefiringNeuron);
 
             bbManager.Fire(incomingpattern, true);
 

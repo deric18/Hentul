@@ -206,16 +206,20 @@ namespace FirstOrderMemory.BehaviourManagers
                 List<string> contributingList;
                 if (PredictedNeuronsfromLastCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                 {
+                    if(contributingList.Count == 0)
+                    {
+                        throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                    }
                     foreach (var contributingNeuron in contributingList)
                     {
-                        Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+                        //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
                         correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(Position.ConvertStringPosToNeuron(contributingNeuron));
                     }
                 }
             }
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (this.CycleNum % 50 == 0)
+            if (this.CycleNum > 3000000 && this.CycleNum % 50 == 0)
             {
                 foreach (var col in this.Columns)
                 {
@@ -244,12 +248,14 @@ namespace FirstOrderMemory.BehaviourManagers
             PredictedNeuronsForNextCycle.Clear();
 
             NeuronsFiringLastCycle.Clear();
+
             foreach (var item in NeuronsFiringThisCycle)
             {
                 NeuronsFiringLastCycle.Add(item);
             }
             
             NeuronsFiringThisCycle.Clear();
+
             CycleNum++;
             // Process Next pattern.          
         }
@@ -344,6 +350,12 @@ namespace FirstOrderMemory.BehaviourManagers
             {
                 PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
             }
+        }
+
+        public void AddtoPredictedNeuronFromLastCycleMock(Neuron neuronToAdd, Neuron contributingNeuron)
+        {
+           
+            PredictedNeuronsfromLastCycle.Add(neuronToAdd.NeuronID.ToString(), new List<string>() { contributingNeuron.NeuronID.ToString()});
         }
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron)

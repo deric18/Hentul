@@ -101,26 +101,26 @@ namespace FirstOrderMemory.Models
 
 
         //Gets called when this neuron contributed to the firing neuron making a correct prediction
-        public void PramoteCorrectPredictionAxonal(Neuron correctlyPredictedNeuron)
-        {
-            TOTALNUMBEROFCORRECTPREDICTIONS++;           
+        //public void PramoteCorrectPredictionAxonal(Neuron correctlyPredictedNeuron)
+        //{
+        //    TOTALNUMBEROFCORRECTPREDICTIONS++;           
 
-            if (AxonalList.Count == 0)
-            {
-                throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
-            }
+        //    if (AxonalList.Count == 0)
+        //    {
+        //        throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
+        //    }
 
-            if (AxonalList.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out Synapse synapse))
-            {
-                if(synapse == null)
-                {
-                    Console.WriteLine("PramoteCorrectPredictionAxonal: Trying to increment strength on a synapse object that was null!!!");
-                    throw new InvalidOperationException("Not Supposed to happen!");
-                }
+        //    if (AxonalList.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out Synapse synapse))
+        //    {
+        //        if(synapse == null)
+        //        {
+        //            Console.WriteLine("PramoteCorrectPredictionAxonal: Trying to increment strength on a synapse object that was null!!!");
+        //            throw new InvalidOperationException("Not Supposed to happen!");
+        //        }
 
-                synapse.IncrementStrength();
-            }
-        }
+        //        synapse.IncrementStrength();
+        //    }
+        //}
 
         //Gets called when this neuron fired correctly and needs to boost the strength on the contributing neuron
         public void PramoteCorrectPredictionDendronal(Neuron contributingNeuron)
@@ -130,7 +130,7 @@ namespace FirstOrderMemory.Models
                 throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
             }
 
-            if (AxonalList.TryGetValue(contributingNeuron.NeuronID.ToString(), out Synapse synapse))
+            if (dendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out Synapse synapse))
             {
                 if (synapse == null)
                 {
