@@ -89,7 +89,7 @@ namespace FirstOrderMemory.Models
                 multiplier += synapse.GetStrength();
             }
 
-            Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE
+            Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
         }
 
         public void ProcessSpikeFromSegment(Position callingSegment, DistalSegmentSpikeType spikeType)
