@@ -37,6 +37,11 @@
                 int x = Convert.ToInt32(item.Attributes[0]?.Value);
                 var y = Convert.ToInt32(item.Attributes[1]?.Value);
 
+                //if(x == 0 && y == 1) 
+                //{
+                //    int breakpoint = 0;
+                //}
+
                 BlockBehaviourManager.GetBlockBehaviourManager().Columns[x, y].Init++;
 
                 foreach (XmlNode node in item.ChildNodes)

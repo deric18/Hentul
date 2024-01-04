@@ -8,7 +8,7 @@ namespace FirstOrderMemoryUnitTest
         BlockBehaviourManager bbManager;
         const int sizeOfColumns = 10;
 
-       [SetUp]
+       [OneTimeSetUp]
         public void Setup()
         {
             bbManager = BlockBehaviourManager.GetBlockBehaviourManager(sizeOfColumns);    
@@ -24,6 +24,11 @@ namespace FirstOrderMemoryUnitTest
             {
                 for(int j = 0; j < 10; j++)
                 {
+                    if (bbManager.Columns[i, j].Init == 4)
+                    {
+                        int breakpoint = 0;
+                    }
+
                     Assert.AreEqual(1, bbManager.Columns[i, j].Init);
                 }
             }
@@ -114,7 +119,7 @@ namespace FirstOrderMemoryUnitTest
 
 
         [Test(Author = "Deric")]
-        public void TestWire()
+        public void TestWire1()
         {
             //fire a neuron which has an already established connection to a known other neuron
             //Fire a pattern that fires the other known neuron
@@ -141,7 +146,13 @@ namespace FirstOrderMemoryUnitTest
 
             uint strengthAfterFire = value2.GetStrength();
 
-            Assert.IsTrue(strenghtBeforeFire < strengthAfterFire);
+            Assert.AreEqual(1, strengthAfterFire - strenghtBeforeFire);
+
+        }
+
+        [Test, Ignore("In Progress")]
+        public void TestWire2()
+        {
 
         }
 
