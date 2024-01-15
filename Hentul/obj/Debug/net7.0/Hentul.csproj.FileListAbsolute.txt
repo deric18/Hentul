@@ -18,3 +18,4 @@ C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\refint\Hentul.dll
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.pdb
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.genruntimeconfig.cache
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\ref\Hentul.dll
+C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.sourcelink.json

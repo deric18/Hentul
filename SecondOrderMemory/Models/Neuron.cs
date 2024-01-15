@@ -16,6 +16,7 @@ namespace SecondOrderMemory.Models
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
+        private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int DISTAL_CONNECTION_STRENGTH = 10;
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
@@ -259,7 +260,8 @@ namespace SecondOrderMemory.Models
             return true;
         }
 
-        public bool AddToDistalList(string key)
+        //Get Called for Dendritic End of the Neuron
+        public bool AddToDistalList(string key, ConnectionType? cType = null)
         {
             var neuronToAdd = Position.ConvertStringPosToNeuron(key);
 
@@ -267,6 +269,36 @@ namespace SecondOrderMemory.Models
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
             }
+
+            //Only for Temporal and Apical Connections
+            if (cType != null)
+            {
+                if(cType.Equals(ConnectionType.TEMPRORAL))
+                {
+
+                    if (dendriticList.TryGetValue(key, out var synapse1))
+                    {
+                        Console.WriteLine("Connection Already Added");
+
+                        synapse1.IncrementStrength();
+
+                        return false;
+
+                    }
+                    else
+                    {
+
+                        dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+
+                        var item = Position.ConvertStringPosToNeuron(key);
+
+                        ConnectedNeurons.Add(item);
+
+                        return true;
+                    }
+                }
+            }
+                        
 
             if (dendriticList.TryGetValue(key, out var synapse))
             {
@@ -290,6 +322,7 @@ namespace SecondOrderMemory.Models
             }
         }
 
+        //Gets called for the axonal end of the neuron
         public bool AddtoAxonalList(string key)
         {
             var neuronToAdd = Position.ConvertStringPosToNeuron(key);
@@ -355,6 +388,8 @@ namespace SecondOrderMemory.Models
         AXONTONEURON,
         PRXOMALDENDRITETONEURON,
         DISTALDENDRITETONEURON,
-        NMDATONEURON
+        NMDATONEURON,
+        TEMPRORAL,
+        APICAL
     }
 }

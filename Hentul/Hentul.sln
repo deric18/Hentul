@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemory", "..\Firs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemoryUnitTest", "..\FirstOrderMemoryUnitTest\FirstOrderMemoryUnitTest.csproj", "{38ECDCB2-F5A2-4D24-8863-F23B6AD18392}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecondOrderMemory", "..\SecondOrderMemory\SecondOrderMemory.csproj", "{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemory", "..\SecondOrderMemory\SecondOrderMemory.csproj", "{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

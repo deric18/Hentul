@@ -26,9 +26,17 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Column[,] Columns { get; private set; }
 
+        public Neuron[,] TemporalLineArray { get; private set; }
+
+        public Neuron[,] ApicalLineArray { get; private set; }
+
         public uint totalProximalConnections;
 
         public uint totalAxonalConnections;
+
+        private bool IsApical;
+
+        private bool isTemporal;
 
         public Connector connector { get; private set; }    
 
@@ -61,6 +69,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
             NeuronsFiringLastCycle = new List<Neuron>();
 
+            TemporalLineArray = new Neuron[numColumns, numColumns];
+
+            ApicalLineArray = new Neuron[numColumns, numColumns];
+
             Columns = new Column[numColumns, numColumns];
 
             ColumnsThatBurst = new List<Position>();
@@ -69,6 +81,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
             totalAxonalConnections = 0;
 
+            isTemporal = false;
+
+            IsApical = false;
+
             for (int i = 0; i < numColumns; i++)
             {
                 for (int j = 0; j < numColumns; j++)
@@ -76,6 +92,9 @@ namespace SecondOrderMemory.BehaviourManagers
                     Columns[i, j] = new Column(i, j, numColumns);
                 }
             }
+
+            GenerateTemporalLines();
+            GenerateAxonalLines();
            
         }
 
@@ -159,13 +178,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private void Wire()
         {
-            //Get all the neurons that fired this cycle ,
-            //Get all the neurons that were predicted from last cycle.
-            //compare them against the ones that were predicted , if matched strengthen
 
-            // else if its a new pattern, make these connections with the neurons that fired previous cycle , also connect neurons that fired this cycle and prepare neurons that and predicted this cycle
-
-            //Technical : Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
+            //Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
 
             List<Neuron> predictedNeuronList = new List<Neuron>();
 
@@ -227,7 +241,65 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
+            // Todo: Do wiring for Temporal and apical lines as well. 
+
+            if(isTemporal)
+            {
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+
+
+
+            }
+
+            if(IsApical)
+            {
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+
+
+            }
+
+
+
+
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
+
+
+        }
+
+
+        private void GenerateTemporalLines()
+        {
+            // How to get temporal lines inserted into this mix
+            // I have column objects vertical ones these will need to work on a horizontal basis
+
+            //Questions:
+            //1.Should voltage be distributed across all the neurons in the temporal line or just few neurons.
+
+            for(int i=0;i<NumColumns;i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    for (int k = 0; k < NumColumns; k++)
+                    {
+                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, j].Neurons[i]);
+                    }
+                }
+            }
+
+        }
+
+        private void GenerateAxonalLines()
+        {
+            for (int i = 0; i < NumColumns; i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    for (int k = 0; k < NumColumns; k++)
+                    {
+                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[i, j].Neurons[k]);
+                    }
+                }
+            }
         }
 
         private void PostCycleCleanup()
@@ -358,7 +430,7 @@ namespace SecondOrderMemory.BehaviourManagers
             PredictedNeuronsfromLastCycle.Add(neuronToAdd.NeuronID.ToString(), new List<string>() { contributingNeuron.NeuronID.ToString()});
         }
 
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron)
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType? cType = null)
         {
             if (AxonalNeuron == null || DendriticNeuron == null)
                 return false;
@@ -366,15 +438,13 @@ namespace SecondOrderMemory.BehaviourManagers
             if(AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))
             {
                 Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
-
                 return false;
             }
 
             AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString());
-            DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString());
+            DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);
 
             return true;
-
         }
 
         public static Neuron GetNeuronFromPosition(Position pos)

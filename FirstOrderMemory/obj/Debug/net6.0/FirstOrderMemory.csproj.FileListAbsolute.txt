@@ -11,3 +11,4 @@ C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.
 C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\ref\FirstOrderMemory.dll
 C:\Users\depint\source\repos\FirstOrderMemory\bin\Debug\net6.0\Schema Docs\ConnectorSchema.xml
 C:\Users\depint\source\repos\FirstOrderMemory\bin\Debug\net6.0\Schema Docs\AxonalSchema.xml
+C:\Users\depint\source\repos\FirstOrderMemory\obj\Debug\net6.0\FirstOrderMemory.sourcelink.json
