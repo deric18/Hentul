@@ -22,7 +22,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public List<Position> ColumnsThatBurst { get; private set; }
 
-        private Dictionary<int, List<string>>? temporalFiringPairs = null;
+        private List<Neuron> temporalContributors { get; set; }
+
+        private List<Neuron> apicalContributors { get; set; }
 
         public Column[,] Columns { get; private set; }
 
@@ -52,8 +54,6 @@ namespace SecondOrderMemory.BehaviourManagers
             return BlockBehaviourManager._blockBehaviourManager;
         }
 
-
-
         private BlockBehaviourManager(int numColumns = 10)
         {
             this.CycleNum = 0;
@@ -68,6 +68,10 @@ namespace SecondOrderMemory.BehaviourManagers
             NeuronsFiringThisCycle = new List<Neuron>();
 
             NeuronsFiringLastCycle = new List<Neuron>();
+
+            temporalContributors = new List<Neuron>();
+
+            apicalContributors = new List<Neuron>();
 
             TemporalLineArray = new Neuron[numColumns, numColumns];
 
@@ -94,7 +98,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
 
             GenerateTemporalLines();
-            GenerateAxonalLines();
+            GenerateApicalLines();
            
         }
 
@@ -138,43 +142,79 @@ namespace SecondOrderMemory.BehaviourManagers
             if (incomingPattern.ActiveBits.Count == 0)
                 return;
 
-            for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
+            switch(incomingPattern.InputPatternType)
             {
-                var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
+                case iType.SPATIAL:
+                    {
+                        for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
+                        {
+                            var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
-                if (predictedNeuronPositioons?.Count == Columns[0,0].Neurons.Count)
-                {//burst
-                    neuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
-                    ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
-                }
-                else
-                {//selected predicted neurons
-                    neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
-                }
+                            if (predictedNeuronPositioons?.Count == Columns[0, 0].Neurons.Count)
+                            {//burst
+                                neuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
+                                ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
+                            }
+                            else
+                            {//selected predicted neurons
+                                neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
+                            }
 
-                predictedNeuronPositioons = null;
-            }
+                            predictedNeuronPositioons = null;
+                        }
 
-            //if(incomingPattern.ActiveBits.Count > ColumnsThatBurst.Count)   //Slightly newer pattern coming in 
-            //{
-            //    //Fire all the winners first before bursting.
+                        foreach (var neuron in neuronsFiringThisCycle)
+                        {
+                            neuron.Fire();
+                        }
 
+                        break;
+                    }
+                case iType.TEMPORAL:
+                    {
+                        isTemporal = true;
 
-            //}
-            //else if(ColumnsThatBurst.Count == incomingPattern.ActiveBits.Count)      //Brand New Patterncoming in for the first time
-            //{
-            //    //Fire all the bursts at once.
-            //}
+                        List<Neuron> neuronsToPolarizeList = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits);
 
-            foreach( var neuron in neuronsFiringThisCycle)
-            {
-                neuron.Fire();
+                        if(neuronsToPolarizeList.Count != 0)
+                        {
+                            foreach(var neuronToPolarize in neuronsToPolarizeList)
+                            {
+                                Neuron temporalNeuron = neuronToPolarize.GetMyTemporalPartner();
+                                neuronToPolarize.ProcessSpikeFromNeuron(temporalNeuron.NeuronID);
+                                temporalContributors.Add(neuronToPolarize);                                
+                            }
+                        }
+
+                        break;
+                    }
+                case iType.APICAL:
+                    {
+                        IsApical = true;
+
+                        List<Neuron> neuronsToPolarizeList = new List<Neuron>();
+                        incomingPattern.ActiveBits.ForEach(pos => {
+                            neuronsToPolarizeList.AddRange(Columns[pos.X, pos.Y].Neurons);
+                            });
+
+                        if (neuronsToPolarizeList.Count != 0)
+                        {
+                            foreach (var neuronToPolarize in neuronsToPolarizeList)
+                            {
+                                Neuron apicalNeuron = neuronToPolarize.GetMyTemporalPartner();
+                                neuronToPolarize.ProcessSpikeFromNeuron(apicalNeuron.NeuronID);
+                                apicalContributors.Add(neuronToPolarize);
+                            }
+                        }
+
+                        break;
+                    }
             }
 
             Wire();
 
             PostCycleCleanup();
-        }
+        }       
 
         private void Wire()
         {
@@ -230,7 +270,37 @@ namespace SecondOrderMemory.BehaviourManagers
                         correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(Position.ConvertStringPosToNeuron(contributingNeuron));
                     }
                 }
+            }          
+
+            if(isTemporal)
+            {
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+                if(temporalContributors.Count != 0)
+                {
+                    foreach(var neuron in temporalContributors)
+                    {
+                        neuron.StrengthenTemporalConnection();
+                    }
+                }
+                 
+                isTemporal = false;
             }
+
+            if(IsApical)
+            {
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+
+                if (apicalContributors.Count != 0)
+                {
+                    foreach (var neuron in apicalContributors)
+                    {
+                        neuron.StrengthenApicalConnection();
+                    }
+                }
+
+                IsApical = false;
+            }
+
 
             //Every 50 Cycles Prune unused and under Firing Connections
             if (this.CycleNum > 3000000 && this.CycleNum % 50 == 0)
@@ -241,65 +311,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
-            // Todo: Do wiring for Temporal and apical lines as well. 
-
-            if(isTemporal)
-            {
-                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-
-
-
-            }
-
-            if(IsApical)
-            {
-                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-
-
-            }
-
-
-
-
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
-
-
-        }
-
-
-        private void GenerateTemporalLines()
-        {
-            // How to get temporal lines inserted into this mix
-            // I have column objects vertical ones these will need to work on a horizontal basis
-
-            //Questions:
-            //1.Should voltage be distributed across all the neurons in the temporal line or just few neurons.
-
-            for(int i=0;i<NumColumns;i++)
-            {
-                for (int j = 0; j < NumColumns; j++)
-                {
-                    for (int k = 0; k < NumColumns; k++)
-                    {
-                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, j].Neurons[i]);
-                    }
-                }
-            }
-
-        }
-
-        private void GenerateAxonalLines()
-        {
-            for (int i = 0; i < NumColumns; i++)
-            {
-                for (int j = 0; j < NumColumns; j++)
-                {
-                    for (int k = 0; k < NumColumns; k++)
-                    {
-                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[i, j].Neurons[k]);
-                    }
-                }
-            }
         }
 
         private void PostCycleCleanup()
@@ -325,11 +337,68 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 NeuronsFiringLastCycle.Add(item);
             }
-            
+
             NeuronsFiringThisCycle.Clear();
 
             CycleNum++;
             // Process Next pattern.          
+        }
+
+
+        private void GenerateTemporalLines()
+        {
+            // How to get temporal lines inserted into this mix
+            // I have column objects vertical ones these will need to work on a horizontal basis
+
+            //Questions:
+            //1.Should voltage be distributed across all the neurons in the temporal line or just few neurons.
+
+            for(int i=0;i<NumColumns;i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    for (int k = 0; k < NumColumns; k++)
+                    {
+                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, j].Neurons[i]);
+                    }
+                }
+            }
+
+        }
+
+        private void GenerateApicalLines()
+        {
+            for (int i = 0; i < NumColumns; i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    for (int k = 0; k < NumColumns; k++)
+                    {
+                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[i, j].Neurons[k]);
+                    }
+                }
+            }
+        }
+      
+
+        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position> positionLists)
+        {
+            List<Neuron> toReturn = new List<Neuron>();
+
+            if (positionLists.Count == 0)
+                return toReturn;
+
+            toReturn = new List<Neuron>();
+
+            foreach (var position in positionLists)
+            {
+                for (int i = 0; i < this.NumColumns; i++)
+                {
+                    toReturn.Add(this.Columns[i, position.Y].Neurons[position.X]);
+                }
+            }
+
+            return toReturn;
         }
 
         public void AddNeuronToCurrentFiringCycle(Neuron neuron)

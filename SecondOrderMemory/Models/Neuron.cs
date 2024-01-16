@@ -17,6 +17,10 @@ namespace SecondOrderMemory.Models
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
+        private const int APICAL_CONNECTION_STRENGTH = 100;
+        private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
+        private const int APICAL_NEURONAL_FIRE_VALUE = 40;
+        private const int NMDA_NEURONAL_FIRE_VALUE = 100;
         private const int DISTAL_CONNECTION_STRENGTH = 10;
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
@@ -62,7 +66,7 @@ namespace SecondOrderMemory.Models
             {
                 foreach(Synapse synapse in AxonalList.Values)
                 {
-                    Position.ConvertStringPosToNeuron(synapse.TargetNeuronId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.SourceNeuronId));
+                    Position.ConvertStringPosToNeuron(synapse.TargetNeuronId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.SourceNeuronId), synapse);
                 }
 
                 CurrentState = NeuronState.FIRING;
@@ -77,23 +81,45 @@ namespace SecondOrderMemory.Models
             return;
         }
 
-        public void ProcessSpikeFromNeuron(Position callingNeuron)
+        public void ProcessSpikeFromNeuron(Position callingNeuron, Synapse? axonalsynapse = null)
         {
             //TODO : 
             //Need to account for proximal spike vs distal spike vs NMDA Distal Spike Types.
 
             uint multiplier = 1;
+
             CurrentState = NeuronState.PREDICTED;
+
             BlockBehaviourManager.GetBlockBehaviourManager().AddPredictedNeuron(this, callingNeuron.ToString());
+
             if(dendriticList.TryGetValue(callingNeuron.ToString(), out var synapse))
             {
                 multiplier += synapse.GetStrength();
             }
 
-            Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
+            switch(synapse.cType)
+            {
+                case ConnectionType.DISTALDENDRITETONEURON:
+                    Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
+                    break;
+                case ConnectionType.PRXOMALDENDRITETONEURON:
+                    Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
+                    break;
+                case ConnectionType.TEMPRORAL:
+                    Voltage += TEMPORAL_NEURON_FIRE_VALUE;
+                    break;
+                case ConnectionType.APICAL:
+                    Voltage += APICAL_NEURONAL_FIRE_VALUE;
+                    break;
+                case ConnectionType.NMDATONEURON:
+                    Voltage += NMDA_NEURONAL_FIRE_VALUE;
+                    break;
+            }
+
+            
         }
 
-        public void ProcessSpikeFromSegment(Position callingSegment, DistalSegmentSpikeType spikeType)
+        public void ProcessSpikeFromSegment(Position callingSegment, FIRETYPE spikeType)
         {
             Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
 
@@ -101,27 +127,29 @@ namespace SecondOrderMemory.Models
         }
 
 
-        //Gets called when this neuron contributed to the firing neuron making a correct prediction
-        //public void PramoteCorrectPredictionAxonal(Neuron correctlyPredictedNeuron)
-        //{
-        //    TOTALNUMBEROFCORRECTPREDICTIONS++;           
+        public Neuron GetMyTemporalPartner()
+        {
+            string pos = dendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.SourceNeuronId;
 
-        //    if (AxonalList.Count == 0)
-        //    {
-        //        throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
-        //    }
+            if (!string.IsNullOrEmpty(pos))
+            {
+                return BlockBehaviourManager.GetNeuronFromPosition(Position.ConvertStringToPosition(pos));
+            }
 
-        //    if (AxonalList.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out Synapse synapse))
-        //    {
-        //        if(synapse == null)
-        //        {
-        //            Console.WriteLine("PramoteCorrectPredictionAxonal: Trying to increment strength on a synapse object that was null!!!");
-        //            throw new InvalidOperationException("Not Supposed to happen!");
-        //        }
+            return null;
+        }       
 
-        //        synapse.IncrementStrength();
-        //    }
-        //}
+        private Neuron GetMyApicalPartner()
+        {
+            string pos = dendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.SourceNeuronId;
+
+            if (!string.IsNullOrEmpty(pos))
+            {
+                return BlockBehaviourManager.GetNeuronFromPosition(Position.ConvertStringToPosition(pos));
+            }
+
+            return null;
+        }
 
         //Gets called when this neuron fired correctly and needs to boost the strength on the contributing neuron
         public void PramoteCorrectPredictionDendronal(Neuron contributingNeuron)
@@ -141,6 +169,16 @@ namespace SecondOrderMemory.Models
 
                 synapse.IncrementStrength();
             }
+        }
+
+        public void StrengthenTemporalConnection()
+        {
+            PramoteCorrectPredictionDendronal(GetMyTemporalPartner());
+        }
+
+        public void StrengthenApicalConnection()
+        {
+            PramoteCorrectPredictionDendronal(GetMyApicalPartner());
         }
 
         public void InitProximalConnectionForDendriticConnection(int i, int j, int k)

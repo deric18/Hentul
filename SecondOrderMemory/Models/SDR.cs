@@ -6,6 +6,8 @@
         public uint Breadth { get; private set; }
         public List<Position> ActiveBits { get; private set; }        
 
+        public iType InputPatternType { get; private set; }
+
         public uint Size() => Length * Breadth;
 
         public SDR(uint length, uint breadth)
@@ -15,11 +17,12 @@
             this.ActiveBits = new List<Position>();
         }
 
-        public SDR(uint length, uint breadth, List<Position> activeBits)
+        public SDR(uint length, uint breadth, List<Position> activeBits, iType inputPatternType)
         {
             this.Length = length;
             this.Breadth = breadth;
             this.ActiveBits = activeBits;
+            InputPatternType = inputPatternType;
         }
 
         public SDR(string s, uint length, uint breadth)
