@@ -97,8 +97,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
-            GenerateTemporalLines();
-            GenerateApicalLines();
+           
            
         }
 
@@ -109,6 +108,11 @@ namespace SecondOrderMemory.BehaviourManagers
             connector.ReadDendriticSchema();
 
             connector.ReadAxonalSchema();
+
+            GenerateTemporalLines();
+            
+            GenerateApicalLines();
+
         }
 
         private void PreCyclePrep()
@@ -363,13 +367,17 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
+                    
+
                     for (int k = 0; k < NumColumns; k++)
                     {
-                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, j].Neurons[i], ConnectionType.TEMPRORAL);
+                        if (TemporalLineArray[k, j]  == null)
+                            TemporalLineArray[k, j] = new Neuron(new Position(k, j, 0, 'T'), NeuronType.TEMPORAL);
+
+                        ConnectTwoNeurons(TemporalLineArray[k, j], Columns[i, j].Neurons[k], ConnectionType.TEMPRORAL);
                     }
                 }
             }
-
         }
 
         private void GenerateApicalLines()
@@ -378,6 +386,8 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
+                    ApicalLineArray[i, j] = new Neuron(new Position(i, j, 0, 'A'), NeuronType.APICAL);
+
                     for (int k = 0; k < NumColumns; k++)
                     {
                         ConnectTwoNeurons(ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
@@ -436,8 +446,6 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 int breakpoint = 1;
             }
-
-
         }
 
         public static void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
@@ -506,23 +514,37 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType? cType = null)
         {
+            if(cType != null)
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }
+
             if (AxonalNeuron == null || DendriticNeuron == null)
                 return false;
 
-            if(AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))
+            if(AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID) && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
             {
                 Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
                 return false;
             }
 
-            AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString());
-            DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);
-
-            return true;
+            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString()) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);            
         }
 
-        public static Neuron GetNeuronFromPosition(Position pos)
-            => _blockBehaviourManager.Columns[pos.X, pos.Y].Neurons[pos.Z];
+        public static Neuron GetNeuronFromPosition(char w, int x, int y, int z)
+        {
+            if (w == 'N')
+            {
+                return _blockBehaviourManager.Columns[x, y].Neurons[z];
+            }
+            else if (w == 'T' || w == 'A')
+            {
+                return _blockBehaviourManager.TemporalLineArray[x, y];
+            }            
+
+            return null;
+        }
 
         private static void IncrementProximalConnectionCount()
         {

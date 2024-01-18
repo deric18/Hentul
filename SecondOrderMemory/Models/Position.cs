@@ -4,16 +4,20 @@ namespace SecondOrderMemory.Models
 {
     public class Position
     {
+        public char W { get; private set; }
+
         public int X { get; private set; }
         public int Y { get; private set; }
 
-        public int Z { get; private set; }
+        public int Z { get; private set; }        
 
-        public Position(int x, int y, int z = 0)
+        public Position(int x, int y, int z = 0, char w = 'N')
         {
+            W = w;
             X = x;
             Y = y;
             Z = z;
+            W = w;
         }
 
         public bool Equals(Position pos)
@@ -22,13 +26,13 @@ namespace SecondOrderMemory.Models
         }
 
         public override string ToString()
-        {
-            return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
+        {           
+                return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString() + "-" + W.ToString();
         }
 
         public Neuron ConvertPosToNeuron(Position pos)
         {
-            return BlockBehaviourManager.GetNeuronFromPosition(pos);
+            return BlockBehaviourManager.GetNeuronFromPosition(pos.W, pos.X, pos.Y, pos.Z);
         }
 
         public static Position ConvertStringToPosition(string key)
@@ -42,12 +46,16 @@ namespace SecondOrderMemory.Models
         }
 
         public static Neuron ConvertStringPosToNeuron(string posString)
-        {
-            Neuron toRetrun = null;
-            var parts = posString.Split('-');
+        {         
+            var parts = posString.Split('-');                 
             int x = Convert.ToInt32(parts[0]);
             int y = Convert.ToInt32(parts[1]);
             int z = Convert.ToInt32(parts[2]);
+            char nType = 'N';
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
 
             try
             {
@@ -55,31 +63,26 @@ namespace SecondOrderMemory.Models
                 {
                     int breakpoint = 1;
                 }
-
-                if (parts.Length == 3)
-                {
-
-                    toRetrun = BlockBehaviourManager.GetBlockBehaviourManager().Columns[x, y].Neurons[z];
-                }
+               
+                return BlockBehaviourManager.GetNeuronFromPosition(nType, x, y, z);
+                
             }
             catch (Exception e)
             {
                 int bp = 1;
             }
-
-
-
-            if (toRetrun == null)
-            {
-                int bp1 = 1;
-            }
-
-            return toRetrun;
-
+            return null;
         }
 
-        public static string ConvertIKJtoString(int i, int j, int k)
+        public static string ConvertIKJtoString(int i, int j, int k, char w = 'N')
         {
+            if (w == 'N')
+                return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
+            else if (w == 'T')
+                return i.ToString() + "-" + j.ToString() + "-" + k.ToString() + "-" + w;
+            else if (w == 'A')
+                return i.ToString() + "-" + j.ToString() + "-" + k.ToString() + "-" + w;
+
             return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
         }
     }
