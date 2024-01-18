@@ -22,7 +22,7 @@ namespace SecondOrderMemory.Models
 
         public bool Equals(Position pos)
         {
-            return X == pos.X && Y == pos.Y && Z == pos.Z;
+            return X == pos.X && Y == pos.Y && Z == pos.Z && W == pos.W;
         }
 
         public override string ToString()

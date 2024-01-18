@@ -40,6 +40,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private bool isTemporal;
 
+        public bool IsSpatial;
         public Connector connector { get; private set; }    
 
         private static BlockBehaviourManager _blockBehaviourManager;
@@ -88,6 +89,8 @@ namespace SecondOrderMemory.BehaviourManagers
             isTemporal = false;
 
             IsApical = false;
+
+            IsSpatial = false;
 
             for (int i = 0; i < numColumns; i++)
             {
@@ -178,21 +181,21 @@ namespace SecondOrderMemory.BehaviourManagers
                             neuron.Fire();
                         }
 
+                        IsSpatial = true;
+
                         break;
                     }
                 case iType.TEMPORAL:
                     {
                         isTemporal = true;
 
-                        List<Neuron> neuronsToPolarizeList = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits);
+                        List<Neuron> temporalLineNeurons = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits);
 
-                        if(neuronsToPolarizeList.Count != 0)
+                        if(temporalLineNeurons.Count != 0)
                         {
-                            foreach(var neuronToPolarize in neuronsToPolarizeList)
+                            foreach(var temporalNeuron in temporalLineNeurons)
                             {
-                                Neuron temporalNeuron = neuronToPolarize.GetMyTemporalPartner();
-                                neuronToPolarize.ProcessSpikeFromNeuron(temporalNeuron.NeuronID);
-                                temporalContributors.Add(neuronToPolarize);                                
+                                temporalNeuron.Fire();                            
                             }
                         }
 
@@ -221,7 +224,8 @@ namespace SecondOrderMemory.BehaviourManagers
                     }
             }
 
-            Wire();
+            if(IsSpatial == true)
+                Wire();
 
             PostCycleCleanup();
         }       
@@ -396,7 +400,25 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
         
-        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position> positionLists)
+        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position> activeBits)
+        {
+            List<Neuron> temporalNeurons = new List<Neuron>();
+
+            if (activeBits.Count == 0)
+                return temporalNeurons;            
+
+            foreach (var position in activeBits)
+            {
+                for (int i = 0; i < this.NumColumns; i++)
+                {
+                    temporalNeurons.Add(TemporalLineArray[position.Y, position.X]);
+                }
+            }
+
+            return temporalNeurons;
+        }
+
+        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates2(List<Position> positionLists)
         {
             List<Neuron> toReturn = new List<Neuron>();
 

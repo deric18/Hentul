@@ -134,7 +134,7 @@ namespace FirstOrderMemory.BehaviourManagers
                     neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                 }
 
-                predictedNeuronPositioons.Clear();
+                predictedNeuronPositioons = null;
             }
 
             //if(incomingPattern.ActiveBits.Count > ColumnsThatBurst.Count)   //Slightly newer pattern coming in 

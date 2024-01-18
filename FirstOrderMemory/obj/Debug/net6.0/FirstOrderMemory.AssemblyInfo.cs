@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FirstOrderMemory")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+48321cf635d1013006940028442754f1d6ecfef5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b0c3f81cf57603d7c67b24d5eb9e25d6cbd8fe9")]
 [assembly: System.Reflection.AssemblyProductAttribute("FirstOrderMemory")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FirstOrderMemory")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
