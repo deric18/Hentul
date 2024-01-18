@@ -124,7 +124,8 @@ namespace FirstOrderMemory.BehaviourManagers
                 var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
                 if (predictedNeuronPositioons?.Count == Columns[0,0].Neurons.Count)
-                {//burst
+                {  
+                    //burst
                     neuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                     ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                 }
@@ -133,7 +134,7 @@ namespace FirstOrderMemory.BehaviourManagers
                     neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                 }
 
-                predictedNeuronPositioons = null;
+                predictedNeuronPositioons.Clear();
             }
 
             //if(incomingPattern.ActiveBits.Count > ColumnsThatBurst.Count)   //Slightly newer pattern coming in 

@@ -146,6 +146,12 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 case iType.SPATIAL:
                     {
+                        if(IsApical == true || isTemporal == true)
+                        {
+                            Console.WriteLine("BlockBheaviourManager : FIRE : Invalid Execution Order!!!");
+                            throw new InvalidOperationException();
+                        }
+
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
                         {
                             var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
@@ -359,7 +365,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     for (int k = 0; k < NumColumns; k++)
                     {
-                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, j].Neurons[i]);
+                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, j].Neurons[i], ConnectionType.TEMPRORAL);
                     }
                 }
             }
@@ -374,13 +380,12 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     for (int k = 0; k < NumColumns; k++)
                     {
-                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[i, j].Neurons[k]);
+                        ConnectTwoNeurons(ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
                     }
                 }
             }
         }
-      
-
+        
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position> positionLists)
         {
             List<Neuron> toReturn = new List<Neuron>();

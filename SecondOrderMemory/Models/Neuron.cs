@@ -28,10 +28,8 @@ namespace SecondOrderMemory.Models
         #endregion
 
         public Position NeuronID { get; private set; }
-
         public Dictionary<string, Synapse> AxonalList { get; private set; }
         public Dictionary<string, Synapse> dendriticList { get; private set; }
-
         public List<Neuron> ConnectedNeurons { get; private set; }
         public List<Segment>? Segments { get; private set; } = null;
         public NeuronState CurrentState { get; private set; }
@@ -117,7 +115,7 @@ namespace SecondOrderMemory.Models
             }
 
             
-        }
+        }        
 
         public void ProcessSpikeFromSegment(Position callingSegment, FIRETYPE spikeType)
         {
@@ -311,7 +309,7 @@ namespace SecondOrderMemory.Models
             //Only for Temporal and Apical Connections
             if (cType != null)
             {
-                if(cType.Equals(ConnectionType.TEMPRORAL))
+                if(cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
                 {
 
                     if (dendriticList.TryGetValue(key, out var synapse1))
@@ -325,8 +323,14 @@ namespace SecondOrderMemory.Models
                     }
                     else
                     {
-
-                        dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                        if (cType.Equals(ConnectionType.TEMPRORAL))
+                        {
+                            dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                        }
+                        else if (cType.Equals(ConnectionType.APICAL))
+                        {
+                            dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                        }
 
                         var item = Position.ConvertStringPosToNeuron(key);
 
@@ -335,6 +339,7 @@ namespace SecondOrderMemory.Models
                         return true;
                     }
                 }
+                
             }
                         
 

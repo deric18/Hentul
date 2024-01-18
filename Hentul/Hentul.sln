@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemoryUnitTest", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemory", "..\SecondOrderMemory\SecondOrderMemory.csproj", "{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemoryUnitTest", "..\SecondORderMemoryUnitTest\SecondOrderMemoryUnitTest.csproj", "{800DFB2C-A582-4716-8586-284C3EABC7C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{800DFB2C-A582-4716-8586-284C3EABC7C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{800DFB2C-A582-4716-8586-284C3EABC7C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{800DFB2C-A582-4716-8586-284C3EABC7C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{800DFB2C-A582-4716-8586-284C3EABC7C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

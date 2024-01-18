@@ -7,8 +7,8 @@ C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemor
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.AssemblyInfoInputs.cache
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.AssemblyInfo.cs
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.csproj.CoreCompileInputs.cache
+C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.sourcelink.json
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.dll
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\refint\SecondOrderMemory.dll
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.pdb
 C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\ref\SecondOrderMemory.dll
-C:\Users\depint\source\repos\SecondOrderMemory\obj\Debug\net6.0\SecondOrderMemory.sourcelink.json
