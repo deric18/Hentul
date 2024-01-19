@@ -227,6 +227,7 @@ namespace SecondOrderMemory.BehaviourManagers
             if(IsSpatial == true)
                 Wire();
 
+            if(isTemporal == false && IsApical == false)
             PostCycleCleanup();
         }       
 
@@ -325,6 +326,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
+            IsSpatial = false;
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
         }
 
@@ -361,24 +363,19 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private void GenerateTemporalLines()
         {
-            // How to get temporal lines inserted into this mix
-            // I have column objects vertical ones these will need to work on a horizontal basis
-
-            //Questions:
-            //1.Should voltage be distributed across all the neurons in the temporal line or just few neurons.
-
-            for(int i=0;i<NumColumns;i++)
+            // T : (x,y, z) => (0,y,x)
+       
+            for(int i=0; i<NumColumns; i++)
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
-                    
+
+                    if (TemporalLineArray[i, j] == null)
+                        TemporalLineArray[i, j] = new Neuron(new Position(0, i, j, 'T'), NeuronType.TEMPORAL);
 
                     for (int k = 0; k < NumColumns; k++)
-                    {
-                        if (TemporalLineArray[k, j]  == null)
-                            TemporalLineArray[k, j] = new Neuron(new Position(k, j, 0, 'T'), NeuronType.TEMPORAL);
-
-                        ConnectTwoNeurons(TemporalLineArray[k, j], Columns[i, j].Neurons[k], ConnectionType.TEMPRORAL);
+                    {                        
+                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                     }
                 }
             }
@@ -408,11 +405,8 @@ namespace SecondOrderMemory.BehaviourManagers
                 return temporalNeurons;            
 
             foreach (var position in activeBits)
-            {
-                for (int i = 0; i < this.NumColumns; i++)
-                {
-                    temporalNeurons.Add(TemporalLineArray[position.Y, position.X]);
-                }
+            {               
+                temporalNeurons.Add(TemporalLineArray[position.Y, position.X]);             
             }
 
             return temporalNeurons;
@@ -560,10 +554,14 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 return _blockBehaviourManager.Columns[x, y].Neurons[z];
             }
-            else if (w == 'T' || w == 'A')
+            else if (w == 'T')
+            {
+                return _blockBehaviourManager.TemporalLineArray[y, z];
+            }            
+            else if(w == 'A')
             {
                 return _blockBehaviourManager.TemporalLineArray[x, y];
-            }            
+            }
 
             return null;
         }

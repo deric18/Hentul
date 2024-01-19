@@ -26,8 +26,8 @@ namespace SecondORderMemoryUnitTest
             Neuron temporalNeuron2 = bbManager.Columns[5, 3].Neurons[9];
 
 
-            Assert.AreEqual("5-4-0-T", temporalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("9-3-0-T", temporalNeuron2.GetMyTemporalPartner().NeuronID.ToString());
+            Assert.AreEqual("0-4-5-T", temporalNeuron1.NeuronID.ToString());
+            Assert.AreEqual("0-3-9-T", temporalNeuron2.GetMyTemporalPartner().NeuronID.ToString());
 
         }
 
@@ -42,7 +42,7 @@ namespace SecondORderMemoryUnitTest
 
             Neuron normalNeuron = GetSpatialNeuronFromTemporalCoordinate(position);
 
-            Position temporalNeuronPosition = new Position(position.X, position.Y, 0, 'T');
+            Position temporalNeuronPosition = new Position(0, position.Y, position.X, 'T');
 
             if (normalNeuron.dendriticList.TryGetValue(temporalNeuronPosition.ToString(), out Synapse preSynapse))
             {
@@ -58,11 +58,13 @@ namespace SecondORderMemoryUnitTest
 
             var temporalNeuron = normalNeuron.GetMyTemporalPartner();
 
-            Assert.IsTrue(temporalNeuron.NeuronID.Equals(temporalNeuronPosition));
+            Assert.AreEqual(temporalNeuron.NeuronID.ToString(),temporalNeuronPosition.ToString());
 
             Assert.AreEqual((uint)100, previousStrength);
 
-            Assert.AreEqual(currentStrength, previousStrength);            
+            Assert.AreEqual(currentStrength, previousStrength);
+
+            Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
             
         }
 
@@ -77,7 +79,7 @@ namespace SecondORderMemoryUnitTest
 
         }
 
-        public void TestAPicalFiring()
+        public void TestApicalFiring()
         {
 
         }

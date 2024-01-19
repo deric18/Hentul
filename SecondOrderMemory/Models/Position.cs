@@ -38,11 +38,12 @@ namespace SecondOrderMemory.Models
         public static Position ConvertStringToPosition(string key)
         {
             var parts = key.Split('-');
+            
             int x = Convert.ToInt32(parts[0]);
             int y = Convert.ToInt32(parts[1]);
             int z = Convert.ToInt32(parts[2]);
-
-            return new Position(x, y, z);
+            char w = Convert.ToChar(parts[3]);
+            return new Position(x, y, z, w);
         }
 
         public static Neuron ConvertStringPosToNeuron(string posString)

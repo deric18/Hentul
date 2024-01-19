@@ -302,7 +302,7 @@ namespace SecondOrderMemory.Models
         public bool AddToDistalList(string axonalNeuronId, ConnectionType? cType = null)
         {
 
-            if(axonalNeuronId == "5-4-0-T")
+            if(axonalNeuronId == "0-4-5-T")
             {
                 bool breakpoint = false;
                 breakpoint = true;
