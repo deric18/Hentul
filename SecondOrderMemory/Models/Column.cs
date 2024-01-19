@@ -68,6 +68,14 @@
                 x.FlushVoltage();
 
             });
+
+            //foreach (var neuron in Neurons)
+            //{
+            //    if(neuron.TAContributors.Count > 0)
+            //    {
+            //        neuron.CleanUpContributersList();
+            //    }
+            //}
         }
 
         internal void PruneCycleRefresh()

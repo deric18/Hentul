@@ -64,13 +64,45 @@ namespace SecondORderMemoryUnitTest
 
             Assert.AreEqual(currentStrength, previousStrength);
 
-            Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
-            
+            Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);            
         }
 
+        [TestMethod]
         public void TestTemporalWiring()
         {
+            SDR temporalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            SDR spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
+            Position position = spatialInputPattern.ActiveBits[0];
+
+            uint previousStrength = 0, currentStrength = 0;
+            
+            Neuron normalNeuron = Position.ConvertStringPosToNeuron(position.ToString());
+
+            var temporalNeuron = normalNeuron.GetMyTemporalPartner();
+
+            if (normalNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
+            {
+                previousStrength = preSynapse.GetStrength();
+            }
+
+            bbManager.Fire(temporalInputPattern, true);
+            bbManager.Fire(spatialInputPattern, true);
+
+            if (normalNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
+            {
+                currentStrength = postSynapse.GetStrength();
+            }
+
+            
+
+            Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuron.NeuronID.ToString());
+
+            Assert.IsTrue(currentStrength > previousStrength);
+
+            Assert.AreEqual(currentStrength, previousStrength);
+
+            Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
         }
 
 
@@ -112,6 +144,37 @@ namespace SecondORderMemoryUnitTest
             }
 
             return new SDR(10, 10, posList, inputPatternType);
+        }
+
+        private SDR GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
+        {
+            Random rand = new Random();
+            int numPos = rand.Next(0, 10);
+            List<Position> spatialPosList = new List<Position>()
+            {
+                new Position(2,4),
+                new Position(8,3),
+                new Position(7,2),
+                new Position(0,0)
+            };
+
+            List<Position> temporalPosList = new List<Position>()
+            {
+                new Position(2,4),
+                new Position(8,3),
+                new Position(7,2),
+                new Position(0,0)
+            };
+
+
+            if(inputPatternType == iType.TEMPORAL)
+            {
+                return new SDR(10, 10, temporalPosList, inputPatternType);
+            }
+            else
+            {
+                 return new SDR(10, 10, spatialPosList, inputPatternType);
+            }
         }
     }
 }

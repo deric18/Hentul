@@ -23,12 +23,14 @@ namespace SecondOrderMemory.Models
         private const int NMDA_NEURONAL_FIRE_VALUE = 100;
         private const int DISTAL_CONNECTION_STRENGTH = 10;
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
         #endregion
 
         public Position NeuronID { get; private set; }
         public NeuronType nType { get; private set; }
+        public Dictionary<string, char> TAContributors { get; private set; }
         public Dictionary<string, Synapse> AxonalList { get; private set; }
         public Dictionary<string, Synapse> dendriticList { get; private set; }
         public List<Neuron> ConnectedNeurons { get; private set; }
@@ -44,6 +46,7 @@ namespace SecondOrderMemory.Models
         {
             NeuronID = neuronId;
             this.nType = nType;
+            TAContributors = new Dictionary<string, char>();
             ConnectedNeurons = new List<Neuron>();
             dendriticList = new Dictionary<string, Synapse>();
             AxonalList = new Dictionary<string, Synapse>();
@@ -66,7 +69,7 @@ namespace SecondOrderMemory.Models
             {
                 foreach(Synapse synapse in AxonalList.Values)
                 {
-                    Position.ConvertStringPosToNeuron(synapse.DendronalNeuronalId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.AxonalNeuronId), synapse);
+                    Position.ConvertStringPosToNeuron(synapse.DendronalNeuronalId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.AxonalNeuronId), synapse.cType);
                 }
 
                 CurrentState = NeuronState.FIRING;
@@ -81,42 +84,58 @@ namespace SecondOrderMemory.Models
             return;
         }
 
-        public void ProcessSpikeFromNeuron(Position callingNeuron, Synapse? axonalsynapse = null)
+        public void ProcessSpikeFromNeuron(Position callingNeuron, ConnectionType cType = ConnectionType.PRXOMALDENDRITETONEURON)
         {
-            //TODO : 
-            //Need to account for proximal spike vs distal spike vs NMDA Distal Spike Types.
-
             uint multiplier = 1;
 
             CurrentState = NeuronState.PREDICTED;
 
             BlockBehaviourManager.GetBlockBehaviourManager().AddPredictedNeuron(this, callingNeuron.ToString());
 
+            if(cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
+            {
+                if(!TAContributors.TryGetValue(callingNeuron.ToString(), out char w))
+                {
+                    TAContributors.Add(callingNeuron.ToString(), 'T');
+                }                 
+                else
+                {
+                    bool breakpoint = false;
+                    breakpoint = true;
+                }
+            }
+
             if(dendriticList.TryGetValue(callingNeuron.ToString(), out var synapse))
             {
                 multiplier += synapse.GetStrength();
-            }
 
-            switch(synapse.cType)
+                switch (synapse.cType)
+                {
+                    case ConnectionType.DISTALDENDRITETONEURON:
+                        Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
+                        break;
+                    case ConnectionType.PRXOMALDENDRITETONEURON:
+                        Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
+                        break;
+                    case ConnectionType.TEMPRORAL:
+                        Voltage += TEMPORAL_NEURON_FIRE_VALUE;
+                        break;
+                    case ConnectionType.APICAL:
+                        Voltage += APICAL_NEURONAL_FIRE_VALUE;
+                        break;
+                    case ConnectionType.NMDATONEURON:
+                        Voltage += NMDA_NEURONAL_FIRE_VALUE;
+                        break;
+                }
+            }
+            else if(cType.Equals(ConnectionType.AXONTONEURON))
             {
-                case ConnectionType.DISTALDENDRITETONEURON:
-                    Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
-                    break;
-                case ConnectionType.PRXOMALDENDRITETONEURON:
-                    Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
-                    break;
-                case ConnectionType.TEMPRORAL:
-                    Voltage += TEMPORAL_NEURON_FIRE_VALUE;
-                    break;
-                case ConnectionType.APICAL:
-                    Voltage += APICAL_NEURONAL_FIRE_VALUE;
-                    break;
-                case ConnectionType.NMDATONEURON:
-                    Voltage += NMDA_NEURONAL_FIRE_VALUE;
-                    break;
+                Voltage += PROXIMAL_AXON_TO_NEURON_FIRE_VALUE;
             }
-
-            
+            else
+            {
+                throw new InvalidOperationException("ProcessSpikeFormNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
+            }
         }        
 
         public void ProcessSpikeFromSegment(Position callingSegment, FIRETYPE spikeType)
@@ -136,7 +155,7 @@ namespace SecondOrderMemory.Models
                 return Position.ConvertStringPosToNeuron(pos);
             }
 
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
         }       
 
         private Neuron GetMyApicalPartner()
@@ -195,6 +214,11 @@ namespace SecondOrderMemory.Models
         {
             string key = Position.ConvertIKJtoString(i, j, k);
             AddNewAxonalConnection(key);
+        }
+
+        public void CleanUpContributersList()
+        {
+            TAContributors.Clear();
         }
 
         private bool AddNewAxonalConnection(string key)
@@ -381,7 +405,7 @@ namespace SecondOrderMemory.Models
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key)
+        public bool AddtoAxonalList(string key, ConnectionType connectionType)
         {
             var neuronToAdd = Position.ConvertStringPosToNeuron(key);
 
@@ -401,7 +425,7 @@ namespace SecondOrderMemory.Models
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, AXONAL_CONNECTION, connectionType));
 
                 var item = Position.ConvertStringPosToNeuron(key);
 
@@ -438,6 +462,11 @@ namespace SecondOrderMemory.Models
             {
                 // var neuron = 
             }
+        }
+
+        internal bool DidItContribute(Neuron temporalContributor)
+        {
+            return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
     }
 

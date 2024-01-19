@@ -152,13 +152,7 @@ namespace SecondOrderMemory.BehaviourManagers
             switch(incomingPattern.InputPatternType)
             {
                 case iType.SPATIAL:
-                    {
-                        if(IsApical == true || isTemporal == true)
-                        {
-                            Console.WriteLine("BlockBheaviourManager : FIRE : Invalid Execution Order!!!");
-                            throw new InvalidOperationException();
-                        }
-
+                    {                        
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
                         {
                             var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
@@ -195,7 +189,9 @@ namespace SecondOrderMemory.BehaviourManagers
                         {
                             foreach(var temporalNeuron in temporalLineNeurons)
                             {
-                                temporalNeuron.Fire();                            
+                                temporalNeuron.Fire();
+
+                                temporalContributors.Add(temporalNeuron);
                             }
                         }
 
@@ -236,65 +232,76 @@ namespace SecondOrderMemory.BehaviourManagers
 
             //Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
 
-            List<Neuron> predictedNeuronList = new List<Neuron>();
-
-            foreach (var item in PredictedNeuronsfromLastCycle.Keys)
+            if (IsSpatial)
             {
-                var neuronToAdd = Position.ConvertStringPosToNeuron(item);
+                List<Neuron> predictedNeuronList = new List<Neuron>();
 
-                if (neuronToAdd != null)
+                foreach (var item in PredictedNeuronsfromLastCycle.Keys)
                 {
-                    predictedNeuronList.Add(neuronToAdd);
-                }
-            };
+                    var neuronToAdd = Position.ConvertStringPosToNeuron(item);
 
-            var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-
-
-            //Total New Pattern : None of the predicted neurons Fired 
-            if (correctPredictionList.Count == 0 || ColumnsThatBurst.Count != 0)
-            {
-                //Todo:
-                //How to wire Bursting Columns ?
-                //Figure out what neurons fired in the last cycle and try to wire them
-                foreach(var dendriticNeuronItem in NeuronsFiringThisCycle)
-                {
-                    foreach( var axonalNeuronItem in NeuronsFiringLastCycle)
+                    if (neuronToAdd != null)
                     {
-                        //Connect last cycle firing neuronal axons this cycle firing dendrites
+                        predictedNeuronList.Add(neuronToAdd);
+                    }
+                };
 
-                        ConnectTwoNeurons(axonalNeuronItem, dendriticNeuronItem);
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+
+
+                //Total New Pattern : None of the predicted neurons Fired 
+                if (correctPredictionList.Count == 0 || ColumnsThatBurst.Count != 0)
+                {
+                    //Todo:
+                    //How to wire Bursting Columns ?
+                    //Figure out what neurons fired in the last cycle and try to wire them
+                    foreach (var dendriticNeuronItem in NeuronsFiringThisCycle)
+                    {
+                        foreach (var axonalNeuronItem in NeuronsFiringLastCycle)
+                        {
+                            //Connect last cycle firing neuronal axons this cycle firing dendrites
+
+                            ConnectTwoNeurons(axonalNeuronItem, dendriticNeuronItem, ConnectionType.AXONTONEURON);
+                        }
+                    }
+
+                }
+
+                //Else PramoteCorrectlyPredictedConnections
+                foreach (var correctlyPredictedNeuron in correctPredictionList)
+                {
+                    List<string> contributingList;
+                    if (PredictedNeuronsfromLastCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                    {
+                        if (contributingList.Count == 0)
+                        {
+                            throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                        }
+                        foreach (var contributingNeuron in contributingList)
+                        {
+                            //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+                            correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(Position.ConvertStringPosToNeuron(contributingNeuron));
+                        }
                     }
                 }
 
+                IsSpatial = false;
             }
-
-            //Else PramoteCorrectlyPredictedConnections
-            foreach (var correctlyPredictedNeuron in correctPredictionList)
-            {
-                List<string> contributingList;
-                if (PredictedNeuronsfromLastCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                {
-                    if(contributingList.Count == 0)
-                    {
-                        throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                    }
-                    foreach (var contributingNeuron in contributingList)
-                    {
-                        //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-                        correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(Position.ConvertStringPosToNeuron(contributingNeuron));
-                    }
-                }
-            }          
 
             if(isTemporal)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-                if(temporalContributors.Count != 0)
+                foreach(var neuron in NeuronsFiringThisCycle)
                 {
-                    foreach(var neuron in temporalContributors)
+                    if (neuron.nType.Equals(NeuronType.NORMAL))
                     {
-                        neuron.StrengthenTemporalConnection();
+                        foreach (var temporalContributor in temporalContributors)
+                        {
+                            if (neuron.DidItContribute(temporalContributor))
+                            {
+                                neuron.PramoteCorrectPredictionDendronal(temporalContributor);
+                            }
+                        }
                     }
                 }
                  
@@ -305,11 +312,14 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
 
-                if (apicalContributors.Count != 0)
+                foreach (var neuron in NeuronsFiringThisCycle)
                 {
-                    foreach (var neuron in apicalContributors)
+                    foreach (var apicalContributor in apicalContributors)
                     {
-                        neuron.StrengthenApicalConnection();
+                        if (neuron.DidItContribute(apicalContributor))
+                        {
+                            neuron.PramoteCorrectPredictionDendronal(apicalContributor);
+                        }
                     }
                 }
 
@@ -326,7 +336,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
-            IsSpatial = false;
+            
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
         }
 
@@ -528,7 +538,7 @@ namespace SecondOrderMemory.BehaviourManagers
             PredictedNeuronsfromLastCycle.Add(neuronToAdd.NeuronID.ToString(), new List<string>() { contributingNeuron.NeuronID.ToString()});
         }
 
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType? cType = null)
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
             if(cType != null)
             {
@@ -545,7 +555,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 return false;
             }
 
-            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString()) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);            
+            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);            
         }
 
         public static Neuron GetNeuronFromPosition(char w, int x, int y, int z)
