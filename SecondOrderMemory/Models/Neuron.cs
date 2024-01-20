@@ -88,6 +88,12 @@ namespace SecondOrderMemory.Models
         {
             uint multiplier = 1;
 
+            if(NeuronID.ToString().Equals("2-4-2-N"))
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }
+
             CurrentState = NeuronState.PREDICTED;
 
             BlockBehaviourManager.GetBlockBehaviourManager().AddPredictedNeuron(this, callingNeuron.ToString());

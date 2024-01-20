@@ -79,9 +79,13 @@ namespace SecondORderMemoryUnitTest
             
             Neuron normalNeuron = Position.ConvertStringPosToNeuron(position.ToString());
 
-            var temporalNeuron = normalNeuron.GetMyTemporalPartner();
+            Position overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
-            if (normalNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
+            var overlapNeuron = BlockBehaviourManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
+
+            var temporalNeuron = overlapNeuron.GetMyTemporalPartner();
+
+            if (overlapNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
                 previousStrength = preSynapse.GetStrength();
             }
@@ -89,22 +93,18 @@ namespace SecondORderMemoryUnitTest
             bbManager.Fire(temporalInputPattern, true);
             bbManager.Fire(spatialInputPattern, true);
 
-            if (normalNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
+
+            if (overlapNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
                 currentStrength = postSynapse.GetStrength();
             }
-
             
-
             Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuron.NeuronID.ToString());
 
-            Assert.IsTrue(currentStrength > previousStrength);
-
-            Assert.AreEqual(currentStrength, previousStrength);
+            Assert.IsTrue(currentStrength > previousStrength);            
 
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
         }
-
 
         public void TestApicalLine()
         {
@@ -121,6 +121,10 @@ namespace SecondORderMemoryUnitTest
 
         }
 
+        private Position GetSpatialAndTemporalOverlap(Position spatial, Position temporal)
+        {
+            return new Position(spatial.X, spatial.Y, temporal.X);
+        }
 
         private Neuron GetSpatialNeuronFromTemporalCoordinate(Position pos)
         {
@@ -160,7 +164,7 @@ namespace SecondORderMemoryUnitTest
 
             List<Position> temporalPosList = new List<Position>()
             {
-                new Position(2,4),
+                new Position(0,4),
                 new Position(8,3),
                 new Position(7,2),
                 new Position(0,0)
