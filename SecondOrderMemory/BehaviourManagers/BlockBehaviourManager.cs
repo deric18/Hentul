@@ -1,6 +1,4 @@
 ﻿using SecondOrderMemory.Models;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace SecondOrderMemory.BehaviourManagers
 {
@@ -98,10 +96,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     Columns[i, j] = new Column(i, j, numColumns);
                 }
-            }
-
-           
-           
+            }                      
         }
 
         public void Init()
@@ -201,18 +196,13 @@ namespace SecondOrderMemory.BehaviourManagers
                     {
                         IsApical = true;
 
-                        List<Neuron> neuronsToPolarizeList = new List<Neuron>();
-                        incomingPattern.ActiveBits.ForEach(pos => {
-                            neuronsToPolarizeList.AddRange(Columns[pos.X, pos.Y].Neurons);
-                            });
-
-                        if (neuronsToPolarizeList.Count != 0)
+                        if (ApicalLineArray != null)
                         {
-                            foreach (var neuronToPolarize in neuronsToPolarizeList)
+                            foreach (var apicalNeuron in ApicalLineArray)
                             {
-                                Neuron apicalNeuron = neuronToPolarize.GetMyTemporalPartner();
-                                neuronToPolarize.ProcessSpikeFromNeuron(apicalNeuron.NeuronID);
-                                apicalContributors.Add(neuronToPolarize);
+                                apicalNeuron.Fire();
+
+                                apicalContributors.Add(apicalNeuron);
                             }
                         }
 
@@ -336,6 +326,10 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
+            if(IsSpatial == false && isTemporal == false && IsApical == false)
+            {
+                PostCycleCleanup();
+            }
             
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
         }
@@ -570,7 +564,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }            
             else if(w == 'A')
             {
-                return _blockBehaviourManager.TemporalLineArray[x, y];
+                return _blockBehaviourManager.ApicalLineArray[x, y];
             }
 
             return null;

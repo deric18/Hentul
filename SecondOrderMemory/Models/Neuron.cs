@@ -164,7 +164,7 @@ namespace SecondOrderMemory.Models
             throw new InvalidOperationException("Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
         }       
 
-        private Neuron GetMyApicalPartner()
+        public Neuron GetMyApicalPartner()
         {
             string pos = dendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.AxonalNeuronId;
 
@@ -332,7 +332,7 @@ namespace SecondOrderMemory.Models
         public bool AddToDistalList(string axonalNeuronId, ConnectionType? cType = null)
         {
 
-            if(axonalNeuronId == "0-4-5-T")
+            if(axonalNeuronId == "2-4-0-A")
             {
                 bool breakpoint = false;
                 breakpoint = true;
@@ -361,7 +361,7 @@ namespace SecondOrderMemory.Models
                     {
                         Console.WriteLine("Connection Already Added");
 
-                        synapse1.IncrementStrength();
+                        //synapse1.IncrementStrength();
 
                         return false;
 

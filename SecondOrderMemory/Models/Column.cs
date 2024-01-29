@@ -33,7 +33,7 @@
         internal List<Neuron>? GetPredictedNeuronsFromColumn()
         {
             List<Neuron> toReturn = new List<Neuron>();
-            List<Neuron> predictedNeurons = Neurons.Where(neuron => neuron.CurrentState == NeuronState.PREDICTED).ToList();
+            List<Neuron> predictedNeurons = Neurons.Where(neuron => neuron.CurrentState != NeuronState.RESTING).ToList();
 
             if (predictedNeurons.Count() > 1 )          //Pick a winner
             {
@@ -69,13 +69,13 @@
 
             });
 
-            //foreach (var neuron in Neurons)
-            //{
-            //    if(neuron.TAContributors.Count > 0)
-            //    {
-            //        neuron.CleanUpContributersList();
-            //    }
-            //}
+            foreach (var neuron in Neurons)
+            {
+                if (neuron.TAContributors.Count > 0)
+                {
+                    neuron.CleanUpContributersList();
+                }
+            }
         }
 
         internal void PruneCycleRefresh()

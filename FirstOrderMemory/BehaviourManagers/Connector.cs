@@ -10,11 +10,38 @@
         }
 
 
-        public void ReadDendriticSchema()
+        public void ReadDendriticSchema(int fileSize, int numberOfRows)
         {
+            int a, b, c;            
+            Random rand = new Random();
+
+            if (numberOfRows != 10)
+            {
+                for(int i=0; i< fileSize; i++)
+                {
+                    for (int j = 0; j < fileSize; j++)
+                    {                        
+                        for (int k = 0; k < numberOfRows; k++)
+                        {                                                        
+                            a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
+
+                            if( i == a && j == b  && k == c)
+                            {
+                                do
+                                {
+                                    a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
+                                }
+                                while (i != a && j != b && k != c);
+                            }
+                            BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, a, b, c);
+                        }
+                    }                    
+                }
+            }
+            else
+            { 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\FirstOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";
-            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\FirstOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";           
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -28,86 +55,118 @@
 
             var numColumns = columns.Count;
 
-            for (int i = 0; i < numColumns; i++)
-            {//Column
-                neuronCounter = 0;
+                for (int i = 0; i < numColumns; i++)
+                {//Column
+                    neuronCounter = 0;
 
-                var item = columns[i];
+                    var item = columns[i];
 
-                int x = Convert.ToInt32(item.Attributes[0]?.Value);
-                var y = Convert.ToInt32(item.Attributes[1]?.Value);
-
-                //if(x == 0 && y == 1) 
-                //{
-                //    int breakpoint = 0;
-                //}
-
-                BlockBehaviourManager.GetBlockBehaviourManager().Columns[x, y].Init++;
-
-                foreach (XmlNode node in item.ChildNodes)
-                {   //Neuron                   
-
-                    if (node?.Attributes == null)
-                    {
-                        continue;
-                    }
-
-                    if (node.Attributes.Count != 3)
-                    {
-                        throw new InvalidOperationException("Invalid Neuron Id Supplied in Schema");
-                    }
-
-                    int a = Convert.ToInt32(node.Attributes[0]?.Value);
-                    int b = Convert.ToInt32(node.Attributes[1]?.Value);
-                    int c = Convert.ToInt32(node.Attributes[2]?.Value);
-
-                    var proximalNodes = node.ChildNodes;
-
-                    var neuronNodes = proximalNodes.Item(0)
-                        .SelectNodes("Neuron");
-
-                    if (neuronNodes.Count != 4)
-                    {
-                        throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
-                    }
+                    int x = Convert.ToInt32(item.Attributes[0]?.Value);
+                    var y = Convert.ToInt32(item.Attributes[1]?.Value);
 
 
-                    foreach (XmlNode neuron in neuronNodes)
-                    {
-                        if (neuron?.Attributes?.Count != 3)
+                    //if(x == 0 && y == 1) 
+                    //{
+                    //    int breakpoint = 0;
+                    //}
+
+                    BlockBehaviourManager.GetBlockBehaviourManager().Columns[x, y].Init++;
+
+                    foreach (XmlNode node in item.ChildNodes)
+                    {   //Neuron                   
+
+                        if (node?.Attributes == null)
                         {
-                            throw new InvalidOperationException("Number of Attributes in Neuronal Node is not 3");
+                            continue;
                         }
 
-                        int e = Convert.ToInt32(neuron.Attributes[0].Value);
-                        int f = Convert.ToInt32(neuron.Attributes[1].Value);
-                        int g = Convert.ToInt32(neuron.Attributes[2].Value);
+                        if (node.Attributes.Count != 3)
+                        {
+                            throw new InvalidOperationException("Invalid Neuron Id Supplied in Schema");
+                        }
 
-                        //Money Shot!!!
-                        BlockBehaviourManager.InitDendriticConnectionForConnector(a, b, c, e, f, g);
+                        int a1 = Convert.ToInt32(node.Attributes[0]?.Value);
+                        int b1 = Convert.ToInt32(node.Attributes[1]?.Value);
+                        int c1 = Convert.ToInt32(node.Attributes[2]?.Value);
+
+                        var proximalNodes = node.ChildNodes;
+
+                        var neuronNodes = proximalNodes.Item(0)
+                            .SelectNodes("Neuron");
+
+                        if (neuronNodes.Count != 4)
+                        {
+                            throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a1.ToString() + b1.ToString() + c1.ToString());
+                        }
+
+
+                        foreach (XmlNode neuron in neuronNodes)
+                        {
+                            if (neuron?.Attributes?.Count != 3)
+                            {
+                                throw new InvalidOperationException("Number of Attributes in Neuronal Node is not 3");
+                            }
+
+                            int e = Convert.ToInt32(neuron.Attributes[0].Value);
+                            int f = Convert.ToInt32(neuron.Attributes[1].Value);
+                            int g = Convert.ToInt32(neuron.Attributes[2].Value);
+
+                            //Money Shot!!!
+                            BlockBehaviourManager.InitDendriticConnectionForConnector(a1, b1, c1, e, f, g);
+                        }
+
+                        neuronCounter++;
                     }
-
-                    neuronCounter++;
                 }
-
             }
         }
 
-        public void ReadAxonalSchema()
-        {
-            XmlDocument document = new XmlDocument();            
-            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+        public void ReadAxonalSchema(int fileSize, int numRows)
+        {            
+            int a, b, c;
+            Random rand = new Random();
 
-            if (!File.Exists(axonalDocumentPath))
+            if (numRows != 10)
             {
-                throw new FileNotFoundException(axonalDocumentPath);
+                for (int i = 0; i < fileSize; i++)
+                {
+                    for (int j = 0; j < fileSize; j++)
+                    {
+                        for (int k = 0; k < numRows; k++)
+                        {
+                            a = rand.Next(0, fileSize); b = rand.Next(0, fileSize); c = rand.Next(0, numRows);
+
+                            if (i == a && j == b && k == c)
+                            {
+                                do
+                                {
+                                    a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numRows);
+                                }
+                                while (i != a && j != b && k != c);
+                            }
+
+                            BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, a, b, c);
+                        }
+                    }
+                }
+
             }
+            else
+            {
+
+                XmlDocument document = new XmlDocument();
+                string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+
+                if (!File.Exists(axonalDocumentPath))
+                {
+                    throw new FileNotFoundException(axonalDocumentPath);
+                }
 
 
-            document.Load(axonalDocumentPath);
+                document.Load(axonalDocumentPath);
 
-            XmlNodeList columns = document.GetElementsByTagName("axonalConnection");
-         
+                XmlNodeList columns = document.GetElementsByTagName("axonalConnection");
+
                 for (int icount = 0; icount < columns.Count; icount++)
                 {//axonalConnection
 
@@ -132,30 +191,23 @@
                             throw new InvalidDataException();
                         }
 
-                    try
-                    {
-                        int i = Convert.ToInt32(axon.Attributes[0].Value);
-                        int j = Convert.ToInt32(axon.Attributes[1].Value);
-                        int k = Convert.ToInt32(axon.Attributes[2].Value);                        
+                        try
+                        {
+                            int i = Convert.ToInt32(axon.Attributes[0].Value);
+                            int j = Convert.ToInt32(axon.Attributes[1].Value);
+                            int k = Convert.ToInt32(axon.Attributes[2].Value);
 
-                        BlockBehaviourManager.InitAxonalConnectionForConnector(x, y, z, i, j, k);
+                            BlockBehaviourManager.InitAxonalConnectionForConnector(x, y, z, i, j, k);
 
+                        }
+                        catch (Exception e)
+                        {
+                            int bp = 1;
+
+                        }
                     }
-                    catch(Exception e)
-                    {
-                        int bp = 1;
-
-                    }
-                       
-
-                    }
-
-
-
                 }
-                  
-
-
+            }
         }
     }
 }

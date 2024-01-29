@@ -1,6 +1,4 @@
 ﻿using FirstOrderMemory.Models;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace FirstOrderMemory.BehaviourManagers
 {
@@ -8,7 +6,11 @@ namespace FirstOrderMemory.BehaviourManagers
     {
         public ulong CycleNum { get; private set; }
 
-        private int NumColumns;
+        private int NumColumns { get; set; }
+
+        private int FileSize { get; set; }
+
+        private int NumRows { get; set; } 
 
         public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
 
@@ -34,7 +36,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
         private static BlockBehaviourManager _blockBehaviourManager;
 
-        public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 10)
+        public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 100)
         {
             if (BlockBehaviourManager._blockBehaviourManager == null)
             {
@@ -46,11 +48,20 @@ namespace FirstOrderMemory.BehaviourManagers
 
 
 
-        private BlockBehaviourManager(int numColumns = 10)
+        private BlockBehaviourManager(int numColumns, int numRows = 1)
         {
             this.CycleNum = 0;
 
             this.NumColumns = numColumns;
+
+            this.NumRows = numRows;
+
+            if(Math.Sqrt(numColumns) %  1 != 0)
+            {
+                throw new InvalidDataException("Supplied Value for Number Of Columns is Invalid");
+            }
+
+            this.FileSize = (int)Math.Sqrt(numColumns);
 
             PredictedNeuronsfromLastCycle = new Dictionary<string, List<string>>();
 
@@ -69,11 +80,11 @@ namespace FirstOrderMemory.BehaviourManagers
 
             totalAxonalConnections = 0;
 
-            for (int i = 0; i < numColumns; i++)
+            for (int i = 0; i < FileSize; i++)
             {
-                for (int j = 0; j < numColumns; j++)
+                for (int j = 0; j < FileSize; j++)
                 {
-                    Columns[i, j] = new Column(i, j, numColumns);
+                    Columns[i, j] = new Column(i, j, numRows);
                 }
             }
            
@@ -83,9 +94,9 @@ namespace FirstOrderMemory.BehaviourManagers
         {
             connector = new Connector();
 
-            connector.ReadDendriticSchema();
+            connector.ReadDendriticSchema(FileSize, NumRows);
 
-            connector.ReadAxonalSchema();
+            connector.ReadAxonalSchema(FileSize, NumRows);
         }
 
         private void PreCyclePrep()
@@ -97,8 +108,8 @@ namespace FirstOrderMemory.BehaviourManagers
                 throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
-            for (int i = 0; i < NumColumns; i++)
-                for (int j = 0; j < NumColumns; j++)
+            for (int i = 0; i < FileSize; i++)
+                for (int j = 0; j < FileSize; j++)
                 {
                     if (Columns[i, j].PreCleanupCheck())
                     {
@@ -130,23 +141,12 @@ namespace FirstOrderMemory.BehaviourManagers
                     ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                 }
                 else
-                {//selected predicted neurons
+                {   //selected predicted neurons
                     neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                 }
 
                 predictedNeuronPositioons = null;
-            }
-
-            //if(incomingPattern.ActiveBits.Count > ColumnsThatBurst.Count)   //Slightly newer pattern coming in 
-            //{
-            //    //Fire all the winners first before bursting.
-
-
-            //}
-            //else if(ColumnsThatBurst.Count == incomingPattern.ActiveBits.Count)      //Brand New Patterncoming in for the first time
-            //{
-            //    //Fire all the bursts at once.
-            //}
+            }           
 
             foreach( var neuron in neuronsFiringThisCycle)
             {
@@ -378,8 +378,8 @@ namespace FirstOrderMemory.BehaviourManagers
 
         }
 
-        public static Neuron GetNeuronFromPosition(Position pos)
-            => _blockBehaviourManager.Columns[pos.X, pos.Y].Neurons[pos.Z];
+        public static Neuron GetNeuronFromPosition(int x, int y, int z)
+            => _blockBehaviourManager.Columns[x, y].Neurons[z];
 
         private static void IncrementProximalConnectionCount()
         {

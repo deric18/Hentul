@@ -6,12 +6,12 @@ namespace FirstOrderMemoryUnitTest
     public class ConnectorTests
     {        
         BlockBehaviourManager bbManager;
-        const int sizeOfColumns = 10;
+        const int numColumns = 100;
 
        [OneTimeSetUp]
         public void Setup()
         {
-            bbManager = BlockBehaviourManager.GetBlockBehaviourManager(sizeOfColumns);    
+            bbManager = BlockBehaviourManager.GetBlockBehaviourManager(numColumns);    
             
             bbManager.Init();
         }
@@ -109,7 +109,7 @@ namespace FirstOrderMemoryUnitTest
 
             var firingNeurons = bbManager.NeuronsFiringLastCycle;
 
-            Assert.AreEqual(firingNeurons.Count, posList.Count * sizeOfColumns);
+            Assert.AreEqual(firingNeurons.Count, posList.Count * numColumns);
 
             for(int i=0; i < posList.Count; i++)
             {

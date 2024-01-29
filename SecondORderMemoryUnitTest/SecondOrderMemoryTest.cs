@@ -106,17 +106,75 @@ namespace SecondORderMemoryUnitTest
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
         }
 
+        [TestMethod]
         public void TestApicalLine()
         {
 
+            Neuron apicalNeuron1 = bbManager.Columns[2, 4].Neurons[5].GetMyApicalPartner();
+            Neuron apicalNeuron2 = bbManager.Columns[5, 3].Neurons[9].GetMyApicalPartner();
+
+
+
+            Assert.AreEqual("2-4-0-A", apicalNeuron1.NeuronID.ToString());
+            Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
         }
 
+        [TestMethod]
         public void TestApicalFiring()
         {
+            SDR apicalInputPattern = GenerateRandomSDRfromPosition(iType.APICAL);            
+
+            Position apicalPos = apicalInputPattern.ActiveBits[0];
+
+            Neuron apicalFiredNormalNeuron = bbManager.Columns[apicalPos.X, apicalPos.Y].Neurons[apicalPos.Z];
+
+            int voltageBeforeFire = apicalFiredNormalNeuron.Voltage;
+
+            bbManager.Fire(apicalInputPattern, true);
+
+            int voltagAfterFire = apicalFiredNormalNeuron.Voltage;
+
+            Assert.IsTrue(voltagAfterFire > voltageBeforeFire);
+
 
         }
 
+        [TestMethod]
         public void TestApicalWiring()
+        {
+            SDR apicalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.APICAL);
+            SDR spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+
+            Position position = spatialInputPattern.ActiveBits[0];
+
+            uint previousStrength = 0, currentStrength = 0;
+
+            Neuron normalNeuron = Position.ConvertStringPosToNeuron(position.ToString());
+           
+            var apicalNeuron = normalNeuron.GetMyApicalPartner();
+
+            if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse preSynapse))
+            {
+                previousStrength = preSynapse.GetStrength();
+            }
+
+            bbManager.Fire(apicalInputPattern, true);
+            bbManager.Fire(spatialInputPattern, true);
+
+
+            if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse postSynapse))
+            {
+                currentStrength = postSynapse.GetStrength();
+            }
+
+            Assert.AreEqual(apicalNeuron.NeuronID.ToString(), apicalNeuron.NeuronID.ToString());
+
+            Assert.IsTrue(currentStrength > previousStrength);
+
+            Assert.AreEqual(NeuronState.FIRING, apicalNeuron.CurrentState);
+        }
+
+        public void TestTemporalAndApicalFiringAndWiring()
         {
 
         }

@@ -227,7 +227,7 @@ namespace FirstOrderMemory.Models
 
                 if (neuronToAdd.NeuronID.Equals(NeuronID))
                 {
-                    throw new InvalidOperationException("Canot connect neuron to itself");
+                    throw new InvalidOperationException("Cannot connect neuron to itself");
                 }
 
                 if (dendriticList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))

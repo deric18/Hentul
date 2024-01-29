@@ -91,6 +91,16 @@
             "related": ".xml"
           }
         }
+      },
+      "SecondOrderMemory/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/SecondOrderMemory.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SecondOrderMemory.dll": {}
+        }
       }
     }
   },
@@ -350,10 +360,16 @@
         "system.runtime.4.3.0.nupkg.sha512",
         "system.runtime.nuspec"
       ]
+    },
+    "SecondOrderMemory/1.0.0": {
+      "type": "project",
+      "path": "../SecondOrderMemory/SecondOrderMemory.csproj",
+      "msbuildProject": "../SecondOrderMemory/SecondOrderMemory.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net7.0": [
+      "SecondOrderMemory >= 1.0.0",
       "System.Collections >= 4.3.0",
       "System.Drawing.Common >= 7.0.0"
     ]
@@ -388,7 +404,11 @@
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+              "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
