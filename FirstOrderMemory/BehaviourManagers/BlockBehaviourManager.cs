@@ -36,11 +36,11 @@ namespace FirstOrderMemory.BehaviourManagers
 
         private static BlockBehaviourManager _blockBehaviourManager;
 
-        public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 100)
+        public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 100, int numRows = 1)
         {
             if (BlockBehaviourManager._blockBehaviourManager == null)
             {
-                BlockBehaviourManager._blockBehaviourManager = new BlockBehaviourManager(numColumns);
+                BlockBehaviourManager._blockBehaviourManager = new BlockBehaviourManager(numColumns, numRows);
             }
 
             return BlockBehaviourManager._blockBehaviourManager;
@@ -72,7 +72,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             NeuronsFiringLastCycle = new List<Neuron>();
 
-            Columns = new Column[numColumns, numColumns];
+            Columns = new Column[FileSize, FileSize];
 
             ColumnsThatBurst = new List<Position>();
 
@@ -120,7 +120,7 @@ namespace FirstOrderMemory.BehaviourManagers
             ColumnsThatBurst.Clear();
         }
 
-        public void Fire(SDR incomingPattern, bool ignorePrecyclePrep = false)
+        public void Fire(SDR incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
             List<Neuron> neuronsFiringThisCycle = new List<Neuron>();
 
@@ -128,7 +128,9 @@ namespace FirstOrderMemory.BehaviourManagers
                 PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
-                return;
+            {
+                throw new InvalidDataException("Fire(): SDR sent with Empty Active Bits!!!");
+            }               
 
             for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
             {
@@ -155,19 +157,12 @@ namespace FirstOrderMemory.BehaviourManagers
 
             Wire();
 
+            if(!ignorePostCycleCleanUp)
             PostCycleCleanup();
         }
 
         private void Wire()
-        {
-            //Get all the neurons that fired this cycle ,
-            //Get all the neurons that were predicted from last cycle.
-            //compare them against the ones that were predicted , if matched strengthen
-
-            // else if its a new pattern, make these connections with the neurons that fired previous cycle , also connect neurons that fired this cycle and prepare neurons that and predicted this cycle
-
-            //Technical : Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
-
+        {           
             List<Neuron> predictedNeuronList = new List<Neuron>();
 
             foreach (var item in PredictedNeuronsfromLastCycle.Keys)

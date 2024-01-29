@@ -5,6 +5,8 @@
     public class Connector
     {
         private int neuronCounter;
+        private const int NUMBEROFPROXIMALDENDRITICCONNECTIONSPERNEURON = 4;
+        private const int NUMBEROFPROXIMALAXONALCONNECTIONSPERNEURON = 2;
         public Connector() { 
         neuronCounter = 0;
         }
@@ -22,18 +24,22 @@
                     for (int j = 0; j < fileSize; j++)
                     {                        
                         for (int k = 0; k < numberOfRows; k++)
-                        {                                                        
-                            a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
-
-                            if( i == a && j == b  && k == c)
+                        {
+                            for (int l = 0; l < NUMBEROFPROXIMALDENDRITICCONNECTIONSPERNEURON; l++)
                             {
-                                do
+                                a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
+
+                                if (i == a && j == b && k == c)
                                 {
-                                    a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
+                                    do
+                                    {
+                                        a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
+                                    }
+                                    while (i != a && j != b && k != c);
                                 }
-                                while (i != a && j != b && k != c);
+
+                                BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, a, b, c);
                             }
-                            BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, a, b, c);
                         }
                     }                    
                 }
@@ -134,18 +140,21 @@
                     {
                         for (int k = 0; k < numRows; k++)
                         {
-                            a = rand.Next(0, fileSize); b = rand.Next(0, fileSize); c = rand.Next(0, numRows);
-
-                            if (i == a && j == b && k == c)
+                            for (int l = 0; l < NUMBEROFPROXIMALAXONALCONNECTIONSPERNEURON; l++)
                             {
-                                do
-                                {
-                                    a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numRows);
-                                }
-                                while (i != a && j != b && k != c);
-                            }
+                                a = rand.Next(0, fileSize); b = rand.Next(0, fileSize); c = rand.Next(0, numRows);
 
-                            BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, a, b, c);
+                                if (i == a && j == b && k == c)
+                                {
+                                    do
+                                    {
+                                        a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numRows);
+                                    }
+                                    while (i != a && j != b && k != c);
+                                }
+
+                                BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, a, b, c);
+                            }
                         }
                     }
                 }

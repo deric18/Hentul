@@ -54,7 +54,8 @@ namespace FirstOrderMemory.Models
             if (AxonalList == null || AxonalList?.Count == 0)
             {
                 Console.WriteLine("No Neurons are Connected to this Neuron : " + NeuronID.ToString());
-                return;
+
+                throw new InvalidOperationException("Neuron Does not have any Axonal Connections to Fire!!!");
             }
 
             try
