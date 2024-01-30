@@ -2,22 +2,22 @@
 {
     public class SDR : IEquatable<SDR>
     {
-        public uint Length { get; private set; }
-        public uint Breadth { get; private set; }
+        public int Length { get; private set; }
+        public int Breadth { get; private set; }
         public List<Position> ActiveBits { get; private set; }        
 
         public iType InputPatternType { get; private set; }
 
-        public uint Size() => Length * Breadth;
+        public int Size() => Length * Breadth;
 
-        public SDR(uint length, uint breadth)
+        public SDR(int length, int breadth)
         {
             this.Length = length;
             this.Breadth = breadth;
             this.ActiveBits = new List<Position>();
         }
 
-        public SDR(uint length, uint breadth, List<Position> activeBits, iType inputPatternType)
+        public SDR(int length, int breadth, List<Position> activeBits, iType inputPatternType)
         {
             this.Length = length;
             this.Breadth = breadth;
@@ -25,7 +25,7 @@
             InputPatternType = inputPatternType;
         }
 
-        public SDR(string s, uint length, uint breadth)
+        public SDR(string s, int length, int breadth)
         {
             Length = length;
             Breadth = breadth;

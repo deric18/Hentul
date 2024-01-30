@@ -23,3 +23,5 @@ C:\Users\depint\source\repos\Hentul\bin\Debug\net7.0\Schema Docs\AxonalSchema.xm
 C:\Users\depint\source\repos\Hentul\bin\Debug\net7.0\Schema Docs\ConnectorSchema.xml
 C:\Users\depint\source\repos\Hentul\bin\Debug\net7.0\SecondOrderMemory.dll
 C:\Users\depint\source\repos\Hentul\bin\Debug\net7.0\SecondOrderMemory.pdb
+C:\Users\depint\source\repos\Hentul\bin\Debug\net7.0\FirstOrderMemory.dll
+C:\Users\depint\source\repos\Hentul\bin\Debug\net7.0\FirstOrderMemory.pdb

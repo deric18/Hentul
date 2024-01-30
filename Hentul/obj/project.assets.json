@@ -92,6 +92,16 @@
           }
         }
       },
+      "FirstOrderMemory/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/FirstOrderMemory.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FirstOrderMemory.dll": {}
+        }
+      },
       "SecondOrderMemory/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
@@ -361,6 +371,11 @@
         "system.runtime.nuspec"
       ]
     },
+    "FirstOrderMemory/1.0.0": {
+      "type": "project",
+      "path": "../FirstOrderMemory/FirstOrderMemory.csproj",
+      "msbuildProject": "../FirstOrderMemory/FirstOrderMemory.csproj"
+    },
     "SecondOrderMemory/1.0.0": {
       "type": "project",
       "path": "../SecondOrderMemory/SecondOrderMemory.csproj",
@@ -369,6 +384,7 @@
   },
   "projectFileDependencyGroups": {
     "net7.0": [
+      "FirstOrderMemory >= 1.0.0",
       "SecondOrderMemory >= 1.0.0",
       "System.Collections >= 4.3.0",
       "System.Drawing.Common >= 7.0.0"
@@ -405,6 +421,9 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
+            "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj": {
+              "projectPath": "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj"
+            },
             "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
               "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj"
             }

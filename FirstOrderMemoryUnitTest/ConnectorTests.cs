@@ -159,6 +159,41 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
+        [Test]
+        public void TestByteEncoder()
+        {
+            ByteEncoder encoder = new ByteEncoder(100, 8);
+
+            encoder.Encode(0, 1, 2);
+
+            var sdr = encoder.GetDenseSDR();
+
+            Assert.AreEqual(3 * 8, sdr.ActiveBits.Count);
+            Assert.AreEqual("3-0-0", sdr.ActiveBits[0].ToString());
+            Assert.AreEqual("9-7-0", sdr.ActiveBits[23].ToString());
+
+        }
+
+        [Test]
+        public void TestGetSDRAfterPostCycleCleanup()
+        {
+            SDR iSdr = GenerateNewRandomSDR(new List<Position>() { 
+                new Position(5,5), 
+                new Position(2,5),
+                new Position(0,7)
+            });
+
+            bbManager.Fire(iSdr);
+
+            SDR result = bbManager.GetSDR();
+
+            Assert.AreEqual(iSdr.ActiveBits.Count, result.ActiveBits.Count);
+
+            Assert.IsTrue(iSdr.ActiveBits[0].Equals(result.ActiveBits[0]));
+            Assert.IsTrue(iSdr.ActiveBits[1].Equals(result.ActiveBits[1]));
+            Assert.IsTrue(iSdr.ActiveBits[2].Equals(result.ActiveBits[2]));
+
+        }
 
         [Test(Author = "Deric")]
         public void TestWire1()

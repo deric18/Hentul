@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v7.0": {
       "Hentul/1.0.0": {
         "dependencies": {
+          "FirstOrderMemory": "1.0.0",
           "SecondOrderMemory": "1.0.0",
           "System.Collections": "4.3.0",
           "System.Drawing.Common": "7.0.0"
@@ -66,6 +67,11 @@
           "Microsoft.NETCore.Targets": "1.1.0"
         }
       },
+      "FirstOrderMemory/1.0.0": {
+        "runtime": {
+          "FirstOrderMemory.dll": {}
+        }
+      },
       "SecondOrderMemory/1.0.0": {
         "runtime": {
           "SecondOrderMemory.dll": {}
@@ -120,6 +126,11 @@
       "sha512": "sha512-JufQi0vPQ0xGnAczR13AUFglDyVYt4Kqnz1AZaiKZ5+GICq0/1MH/mO/eAJHt/mHW1zjKBJd7kV26SrxddAhiw==",
       "path": "system.runtime/4.3.0",
       "hashPath": "system.runtime.4.3.0.nupkg.sha512"
+    },
+    "FirstOrderMemory/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "SecondOrderMemory/1.0.0": {
       "type": "project",

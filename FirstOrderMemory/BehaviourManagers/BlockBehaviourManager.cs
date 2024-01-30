@@ -32,7 +32,9 @@ namespace FirstOrderMemory.BehaviourManagers
 
         public uint totalAxonalConnections;
 
-        public Connector connector { get; private set; }    
+        public Connector connector { get; private set; }
+
+        private SDR Sdr { get; set; }
 
         private static BlockBehaviourManager _blockBehaviourManager;
 
@@ -120,6 +122,11 @@ namespace FirstOrderMemory.BehaviourManagers
             ColumnsThatBurst.Clear();
         }
 
+        public SDR GetSDR()
+        {
+            return Sdr;
+        }
+
         public void Fire(SDR incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
             List<Neuron> neuronsFiringThisCycle = new List<Neuron>();
@@ -153,7 +160,7 @@ namespace FirstOrderMemory.BehaviourManagers
             foreach( var neuron in neuronsFiringThisCycle)
             {
                 neuron.Fire();
-            }
+            }            
 
             Wire();
 
@@ -243,6 +250,15 @@ namespace FirstOrderMemory.BehaviourManagers
 
             PredictedNeuronsForNextCycle.Clear();
 
+            List<Position> posList = new List<Position>();
+
+            NeuronsFiringThisCycle.ForEach(neuron =>
+            {
+                posList.Add(neuron.NeuronID);
+            });
+
+            Sdr = new SDR(FileSize, FileSize, posList);            
+
             NeuronsFiringLastCycle.Clear();
 
             foreach (var item in NeuronsFiringThisCycle)
@@ -254,7 +270,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             CycleNum++;
             // Process Next pattern.          
-        }
+        }       
 
         public void AddNeuronToCurrentFiringCycle(Neuron neuron)
         {
