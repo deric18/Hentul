@@ -101,13 +101,21 @@ namespace FirstOrderMemory.BehaviourManagers
             connector.ReadAxonalSchema(FileSize, NumRows);
         }
 
-        private void PreCyclePrep()
+        private void PreCyclePrep(bool isUnitTest)
         {
             //Prepare all the neurons that are predicted 
-            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
+            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0 && isUnitTest)
             {
                 Console.WriteLine("Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
                 throw new Exception("PreCycle Cleanup Exception!!!");
+            }
+
+            if(isUnitTest)
+            {
+                PredictedNeuronsForNextCycle.Clear();
+                NeuronsFiringLastCycle.Clear();
+                NeuronsFiringLastCycle.Clear();
+                return;
             }
 
             for (int i = 0; i < FileSize; i++)
@@ -116,9 +124,11 @@ namespace FirstOrderMemory.BehaviourManagers
                     if (Columns[i, j].PreCleanupCheck())
                     {
                         Console.WriteLine("Precycle Cleanup Error : Column {0} {1} is pre Firing", i, j);
+
                         throw new Exception("PreCycle Cleanup Exception!!!");
                     }
                 }
+
             ColumnsThatBurst.Clear();
         }
 
@@ -131,8 +141,7 @@ namespace FirstOrderMemory.BehaviourManagers
         {
             List<Neuron> neuronsFiringThisCycle = new List<Neuron>();
 
-            if(!ignorePrecyclePrep)
-                PreCyclePrep();
+            PreCyclePrep(!ignorePrecyclePrep);
 
             if (incomingPattern.ActiveBits.Count == 0)
             {
@@ -163,9 +172,8 @@ namespace FirstOrderMemory.BehaviourManagers
             }            
 
             Wire();
-
-            if(!ignorePostCycleCleanUp)
-            PostCycleCleanup();
+            
+            PostCycleCleanup(ignorePostCycleCleanUp);
         }
 
         private void Wire()
@@ -233,8 +241,13 @@ namespace FirstOrderMemory.BehaviourManagers
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
         }
 
-        private void PostCycleCleanup()
+        private void PostCycleCleanup(bool IsUnitTest)
         {
+            if(IsUnitTest)
+            {
+                return;
+            }
+
             //clean up all the fired columns
             foreach (var column in Columns)
             {

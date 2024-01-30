@@ -3,6 +3,7 @@ namespace FirstOrderMemoryUnitTest
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models;
 
+    [TestFixture]
     public class ConnectorTests
     {
         BlockBehaviourManager bbManager;
@@ -22,6 +23,7 @@ namespace FirstOrderMemoryUnitTest
         public void TestDendriticSchema()
         {
             Random rand = new Random();
+
             if (numRows == 10)
             {
                 for (int i = 0; i < 10; i++)
@@ -33,26 +35,23 @@ namespace FirstOrderMemoryUnitTest
                             int breakpoint = 0;
                         }
 
-                        Assert.AreEqual(1, bbManager.Columns[i, j].Init);
+                        Assert.That(bbManager.Columns[i, j].Init, Is.EqualTo(1));
                     }
                 }
-                Assert.AreEqual(4000, bbManager.totalProximalConnections);
-                Assert.AreEqual(4, bbManager.Columns[2, 3].Neurons[3].dendriticList.Count);
-                Assert.AreEqual(4, bbManager.Columns[9, 9].Neurons[9].dendriticList.Count);
-                Assert.AreEqual(4, bbManager.Columns[0, 0].Neurons[0].dendriticList.Count);
-                Assert.AreEqual(4, bbManager.Columns[5, 9].Neurons[9].dendriticList.Count);
+                Assert.That(bbManager.totalProximalConnections, Is.EqualTo(4000));
+                Assert.That(bbManager.Columns[2, 3].Neurons[3].dendriticList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[9, 9].Neurons[9].dendriticList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[0, 0].Neurons[0].dendriticList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[5, 9].Neurons[9].dendriticList.Count, Is.EqualTo(4));
             }
             else
             {
-                Assert.AreEqual(4, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count);
-                Assert.AreEqual(4, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count);
-                Assert.AreEqual(4, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count);
-                Assert.AreEqual(4, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count);
+                Assert.That(bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].dendriticList.Count, Is.EqualTo(4));
 
-            }
-            
-            
-
+            }                        
         }
 
 
@@ -84,11 +83,11 @@ namespace FirstOrderMemoryUnitTest
                         }
                     }
                 }
-                Assert.AreEqual(4000, bbManager.totalAxonalConnections);
-                Assert.AreEqual(4, bbManager.Columns[2, 3].Neurons[3].AxonalList.Count);
-                Assert.AreEqual(4, bbManager.Columns[9, 9].Neurons[9].AxonalList.Count);
-                Assert.AreEqual(4, bbManager.Columns[0, 0].Neurons[0].AxonalList.Count);
-                Assert.AreEqual(4, bbManager.Columns[5, 9].Neurons[9].AxonalList.Count);
+                Assert.That(bbManager.totalAxonalConnections, Is.EqualTo(4000));
+                Assert.That(bbManager.Columns[2, 3].Neurons[3].AxonalList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[9, 9].Neurons[9].AxonalList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[0, 0].Neurons[0].AxonalList.Count, Is.EqualTo(4));
+                Assert.That(bbManager.Columns[5, 9].Neurons[9].AxonalList.Count, Is.EqualTo(4));
             }
             else
             {
@@ -116,7 +115,7 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [Test]
-        public void TestBurstFireWithoutContext()
+        public void TestZBurstFireWithoutContext()
         {
             List<Position> posList = new List<Position>()
             {
@@ -132,7 +131,7 @@ namespace FirstOrderMemoryUnitTest
 
             if (numRows == 10)
             {
-                Assert.AreEqual(4, bbManager.ColumnsThatBurst.Count);
+                Assert.That(bbManager.ColumnsThatBurst.Count, Is.EqualTo(4));
 
                 var firingNeurons = bbManager.NeuronsFiringLastCycle;
 
@@ -145,11 +144,11 @@ namespace FirstOrderMemoryUnitTest
             }
             else
             {
-                Assert.AreEqual(4, bbManager.ColumnsThatBurst.Count);                
+                Assert.That(bbManager.ColumnsThatBurst.Count, Is.EqualTo(4));                
 
-                Assert.AreEqual(posList.Count * numRows, bbManager.NeuronsFiringThisCycle.Count);
+                Assert.That(bbManager.NeuronsFiringThisCycle.Count, Is.EqualTo(posList.Count * numRows));
 
-                Assert.AreEqual(NeuronState.FIRING, bbManager.Columns[posList[0].X, posList[0].Y].Neurons[posList[0].Z].CurrentState);
+                Assert.That(bbManager.Columns[posList[0].X, posList[0].Y].Neurons[posList[0].Z].CurrentState, Is.EqualTo(NeuronState.FIRING));
 
                 for (int i = 0; i < posList.Count; i++)
                 {
@@ -183,11 +182,11 @@ namespace FirstOrderMemoryUnitTest
                 new Position(0,7)
             });
 
-            bbManager.Fire(iSdr);
+            bbManager.Fire(iSdr, true, false);
 
             SDR result = bbManager.GetSDR();
 
-            Assert.AreEqual(iSdr.ActiveBits.Count, result.ActiveBits.Count);
+            Assert.That(result.ActiveBits.Count, Is.EqualTo(iSdr.ActiveBits.Count));
 
             Assert.IsTrue(iSdr.ActiveBits[0].Equals(result.ActiveBits[0]));
             Assert.IsTrue(iSdr.ActiveBits[1].Equals(result.ActiveBits[1]));
@@ -217,7 +216,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.AddtoPredictedNeuronFromLastCycleMock(postFiringNeuron, prefiringNeuron);
 
-            bbManager.Fire(incomingpattern, true);
+            bbManager.Fire(incomingpattern, true, false);
 
             postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse value2);
 

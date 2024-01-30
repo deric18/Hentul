@@ -197,7 +197,9 @@ namespace SecondORderMemoryUnitTest
         private SDR GenerateRandomSDRfromPosition(iType inputPatternType)
         {
             Random rand = new Random();
-            int numPos = rand.Next(0, 10);
+
+            int numPos = rand.Next(1, 10);
+
             List<Position> posList = new List<Position>();
 
             for(int i=0; i < numPos; i++)
