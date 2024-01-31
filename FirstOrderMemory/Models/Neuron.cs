@@ -150,7 +150,10 @@ namespace FirstOrderMemory.Models
             //Add it to ConnectedNeurons
 
             string key = Position.ConvertIKJtoString(i, j, k);
-            AddNewProximalDendriticConnection(key);
+            if(!AddNewProximalDendriticConnection(key))
+            {
+                throw new InvalidOperationException("Operation Did not Succedd As Connection Already  Exists!");
+            }
         }
 
         public void InitAxonalConnectionForConnector(int i, int j, int k)

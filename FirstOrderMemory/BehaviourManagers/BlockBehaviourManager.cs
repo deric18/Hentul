@@ -104,7 +104,7 @@ namespace FirstOrderMemory.BehaviourManagers
         private void PreCyclePrep(bool isUnitTest)
         {
             //Prepare all the neurons that are predicted 
-            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0 && isUnitTest)
+            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0 && !isUnitTest)
             {
                 Console.WriteLine("Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
                 throw new Exception("PreCycle Cleanup Exception!!!");
@@ -141,7 +141,7 @@ namespace FirstOrderMemory.BehaviourManagers
         {
             List<Neuron> neuronsFiringThisCycle = new List<Neuron>();
 
-            PreCyclePrep(!ignorePrecyclePrep);
+            PreCyclePrep(ignorePrecyclePrep);
 
             if (incomingPattern.ActiveBits.Count == 0)
             {
@@ -323,7 +323,7 @@ namespace FirstOrderMemory.BehaviourManagers
         {
             if (x == i && y == j && z == k)
             {
-                int breakpoint = 1;
+                throw new InvalidOperationException("InitDendriticConnectionForConnector : Trying to connect a Neuron to Itslef");
             }
             try
             {

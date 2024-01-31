@@ -35,7 +35,7 @@
                                     {
                                         a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numberOfRows);
                                     }
-                                    while (i != a && j != b && k != c);
+                                    while (i == a && j == b && k == c);
                                 }
 
                                 BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, a, b, c);
@@ -150,7 +150,7 @@
                                     {
                                         a = rand.Next(0, (int)fileSize); b = rand.Next(0, (int)fileSize); c = rand.Next(0, numRows);
                                     }
-                                    while (i != a && j != b && k != c);
+                                    while (i == a && j == b && k == c);
                                 }
 
                                 BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, a, b, c);

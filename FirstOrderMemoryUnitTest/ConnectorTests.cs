@@ -95,10 +95,7 @@ namespace FirstOrderMemoryUnitTest
                 Assert.AreEqual(2, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].AxonalList.Count);
                 Assert.AreEqual(2, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].AxonalList.Count);
                 Assert.AreEqual(2, bbManager.Columns[rand.Next(0, numFiles), rand.Next(0, numFiles)].Neurons[rand.Next(0, numRows)].AxonalList.Count);
-            }
-            
-            
-
+            }                        
         }
 
         [Test]
@@ -218,11 +215,11 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(incomingpattern, true, false);
 
-            postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse value2);
+            _ = postFiringNeuron.dendriticList.TryGetValue(prefiringNeuron.NeuronID.ToString(), out Synapse value2);
 
             uint strengthAfterFire = value2.GetStrength();
 
-            Assert.AreEqual(1, strengthAfterFire - strenghtBeforeFire);
+            Assert.That(strengthAfterFire - strenghtBeforeFire, Is.EqualTo(1));
 
         }
 
