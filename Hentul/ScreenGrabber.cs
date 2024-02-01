@@ -4,6 +4,7 @@ using SOMM = SecondOrderMemory.Models;
 using FOMM = FirstOrderMemory.Models;
 using System.Configuration;
 using Common;
+using SecondOrderMemory.Models;
 
 public struct POINT
 {
@@ -13,6 +14,8 @@ public struct POINT
 public class ScreenGrabber
 {
     public Color[,] ColorMap { get; private set; }
+
+    public POINT Point { get; private set; }
 
     public int range;
 
@@ -52,7 +55,64 @@ public class ScreenGrabber
     public static extern int ReleaseDC(IntPtr window, IntPtr dc);
 
 
-    public static Color GetColorAt(int x, int y)
+    internal void Grab()
+    {
+        //send Image for Processing               
+
+        Console.WriteLine("Grabbing cursor Position");
+
+        Console.CursorVisible = false;
+
+        Point = this.GetCurrentPointerPosition();
+
+        Console.CursorVisible = true;
+
+        Console.WriteLine("Grabbing Screen Pixels...");
+
+        Console.WriteLine("Bit Map Values :");
+
+        this.PrintColorMap(Point.X - range, Point.Y - range, Point.X + range, Point.Y + range);
+
+    }
+
+    internal void ProcessPixelData()
+    {
+
+        for(int i=0; i < range; i++) 
+        {
+            for(int j=0;j<range;j++)
+            {
+                if (ColorMap[0, 0].IsEmpty)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                byte A = ColorMap[i, j].A;      //Ignoring 'A' as we dont need addressable format.
+
+                byte R = ColorMap[i, j].R;
+                byte G = ColorMap[i, j].G;
+                byte B = ColorMap[i, j].B;
+
+                ByteEncoder encoder = new ByteEncoder(100, 24);
+
+                encoder.Encode(R, G, B);
+
+                SDR sdr = encoder.GetDenseSDR();
+
+                fomBBM.Fire(sdr);
+
+                SDR fomSdr = fomBBM.GetSDR();
+
+                SDR_SOM somSdr = new SDR_SOM(SOMNUMCOLUMNS, SOMCOLUMNSIZE, ConvertFomToSomPositions(fomSdr.ActiveBits), iType.SPATIAL);
+
+                somBBM.Fire(somSdr);
+            }
+        }
+    }
+
+    #region PRIVATE METHODS
+
+    private static Color GetColorAt(int x, int y)
     {
         IntPtr desk = GetDesktopWindow();
         IntPtr dc = GetWindowDC(desk);
@@ -89,51 +149,17 @@ public class ScreenGrabber
         return point;
     }
 
-    internal void Grab()
+    private List<Position_SOM> ConvertFomToSomPositions(List<Position> position)
     {
-        //send Image for Processing               
+        List<Position_SOM> toReturn = new List<Position_SOM>();
 
-        Console.WriteLine("Grabbing cursor Position");
-
-        Console.CursorVisible = false;
-
-        POINT point = this.GetCurrentPointerPosition();
-
-        Console.CursorVisible = true;
-
-        Console.WriteLine("Grabbing Screen Pixels...");
-
-        Console.WriteLine("Bit Map Values :");
-
-        this.PrintColorMap(point.X - range, point.Y - range, point.X + range, point.Y + range);
-
-    }
-
-    internal void ProcessPixelData()
-    {
-        if (ColorMap[0, 0].IsEmpty)
+        foreach( var positionItem in position)
         {
-            throw new InvalidOperationException();
+            toReturn.Add(new Position_SOM(positionItem.X, positionItem.Y));
         }
 
-        byte A = ColorMap[0, 0].A;      //Ignoring 'A' as we dont need to addressable format.
-
-
-        byte R = ColorMap[0, 0].R;
-        byte G = ColorMap[0, 0].G;
-        byte B = ColorMap[0, 0].B;
-
-        ByteEncoder encoder = new ByteEncoder(100, 24);
-
-        SDR sdr = encoder.GetDenseSDR();
-
-        fomBBM.Fire(sdr);
-
-        SDR fomSdr = fomBBM.GetSDR();
-
-        SDR somSdr = new SDR(SOMNUMCOLUMNS, SOMCOLUMNSIZE, fomSdr.ActiveBits);
-
-        //somBBM.Fire(fomSdr);
-
+        return toReturn;
     }
+
+    #endregion
 }

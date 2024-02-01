@@ -52,7 +52,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(temporalInputPattern, true);
 
-            if (normalNeuron.dendriticList.TryGetValue(temporalNeuronPosition.ToString(), out Synapse postSynapse))
+            if (normalNeuron.dendriticList.TryGetValue(temporalNeuronPosition.ToString(), value: out Synapse postSynapse))
             {
                 currentStrength = postSynapse.GetStrength();
             }
