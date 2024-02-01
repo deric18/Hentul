@@ -2,6 +2,7 @@ namespace FirstOrderMemoryUnitTest
 {
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models;
+    using Common;
 
     [TestFixture]
     public class ConnectorTests
@@ -231,12 +232,12 @@ namespace FirstOrderMemoryUnitTest
 
         private SDR GenerateNewRandomSDR(List<Position> posList)
         {
-            return new SDR(10, 10, posList);
+            return new SDR(10, 10, posList, iType.SPATIAL);
         }
 
         private SDR GenerateSDRfromPosition(Position pos)
         {
-            return new SDR(10, 10, new List<Position>() { pos });
+            return new SDR(10, 10, new List<Position>() { pos }, iType.SPATIAL);
         }
     }
 }

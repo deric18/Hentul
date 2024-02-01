@@ -89,8 +89,10 @@ C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\zh-Hans\M
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\zh-Hant\Microsoft.TestPlatform.CommunicationUtilities.resources.dll
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\zh-Hant\Microsoft.TestPlatform.CrossPlatEngine.resources.dll
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\zh-Hant\Microsoft.VisualStudio.TestPlatform.Common.resources.dll
+C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\Common.dll
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\FirstOrderMemory.dll
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\FirstOrderMemory.pdb
+C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\bin\Debug\net6.0\Common.pdb
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.csproj.AssemblyReference.cache
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.AssemblyInfoInputs.cache

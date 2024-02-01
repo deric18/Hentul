@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "aw49PXYeB4u/gWCN2XtkuCAecDcNuJrUvl/QVutlSvN42JgUcicpEuyveJDN2JtVI1hrRR4pBLGaJY4LOKG0mg==",
+  "dgSpecHash": "3A/vDBmfPHm4DGJq3y/cLoDzvzfsMTHu9S8Zr9nA12Y4/DvQjPS5WDy35ZLW+2X06F+B1L88qhOknhz8UXCl0Q==",
   "success": true,
   "projectFilePath": "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj",
   "expectedPackageFiles": [
@@ -8,8 +8,11 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
     "C:\\Users\\depint\\.nuget\\packages\\microsoft.win32.systemevents\\7.0.0\\microsoft.win32.systemevents.7.0.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",
+    "C:\\Users\\depint\\.nuget\\packages\\system.configuration.configurationmanager\\8.0.0\\system.configuration.configurationmanager.8.0.0.nupkg.sha512",
+    "C:\\Users\\depint\\.nuget\\packages\\system.diagnostics.eventlog\\8.0.0\\system.diagnostics.eventlog.8.0.0.nupkg.sha512",
     "C:\\Users\\depint\\.nuget\\packages\\system.drawing.common\\7.0.0\\system.drawing.common.7.0.0.nupkg.sha512",
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512"
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.runtime\\4.3.0\\system.runtime.4.3.0.nupkg.sha512",
+    "C:\\Users\\depint\\.nuget\\packages\\system.security.cryptography.protecteddata\\8.0.0\\system.security.cryptography.protecteddata.8.0.0.nupkg.sha512"
   ],
   "logs": []
 }

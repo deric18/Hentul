@@ -1,7 +1,8 @@
-namespace SecondORderMemoryUnitTest
+namespace SecondOrderMemoryUnitTest
 {    
     using SecondOrderMemory.BehaviourManagers;
     using SecondOrderMemory.Models;
+    using Common;
 
     [TestClass]
     public class SecondOrderMemoryTest
@@ -34,15 +35,15 @@ namespace SecondORderMemoryUnitTest
         [TestMethod]
         public void TestTemporalFiring()
         {
-            SDR temporalInputPattern = GenerateRandomSDRfromPosition(iType.TEMPORAL);
+            SDR_SOM temporalInputPattern = GenerateRandomSDRfromPosition(iType.TEMPORAL);
             
-            Position position = temporalInputPattern.ActiveBits[0];
+            Position_SOM position = temporalInputPattern.ActiveBits[0];
 
             uint previousStrength = 0, currentStrength = 0;
 
             Neuron normalNeuron = GetSpatialNeuronFromTemporalCoordinate(position);
 
-            Position temporalNeuronPosition = new Position(0, position.Y, position.X, 'T');
+            Position_SOM temporalNeuronPosition = new Position_SOM(0, position.Y, position.X, 'T');
 
             if (normalNeuron.dendriticList.TryGetValue(temporalNeuronPosition.ToString(), out Synapse preSynapse))
             {
@@ -70,16 +71,16 @@ namespace SecondORderMemoryUnitTest
         [TestMethod]
         public void TestTemporalWiring()
         {
-            SDR temporalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
-            SDR spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            SDR_SOM temporalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            SDR_SOM spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
-            Position position = spatialInputPattern.ActiveBits[0];
+            Position_SOM position = spatialInputPattern.ActiveBits[0];
 
             uint previousStrength = 0, currentStrength = 0;
             
-            Neuron normalNeuron = Position.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = BlockBehaviourManager.ConvertStringPosToNeuron(position.ToString());
 
-            Position overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
+            Position_SOM overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
             var overlapNeuron = BlockBehaviourManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
@@ -122,9 +123,9 @@ namespace SecondORderMemoryUnitTest
         [TestMethod]
         public void TestApicalFiring()
         {
-            SDR apicalInputPattern = GenerateRandomSDRfromPosition(iType.APICAL);            
+            SDR_SOM apicalInputPattern = GenerateRandomSDRfromPosition(iType.APICAL);            
 
-            Position apicalPos = apicalInputPattern.ActiveBits[0];
+            Position_SOM apicalPos = apicalInputPattern.ActiveBits[0];
 
             Neuron apicalFiredNormalNeuron = bbManager.Columns[apicalPos.X, apicalPos.Y].Neurons[apicalPos.Z];
 
@@ -135,21 +136,19 @@ namespace SecondORderMemoryUnitTest
             int voltagAfterFire = apicalFiredNormalNeuron.Voltage;
 
             Assert.IsTrue(voltagAfterFire > voltageBeforeFire);
-
-
         }
 
         [TestMethod]
         public void TestApicalWiring()
         {
-            SDR apicalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.APICAL);
-            SDR spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            SDR_SOM apicalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.APICAL);
+            SDR_SOM spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
-            Position position = spatialInputPattern.ActiveBits[0];
+            Position_SOM position = spatialInputPattern.ActiveBits[0];
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = Position.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = BlockBehaviourManager.ConvertStringPosToNeuron(position.ToString());
            
             var apicalNeuron = normalNeuron.GetMyApicalPartner();
 
@@ -179,9 +178,9 @@ namespace SecondORderMemoryUnitTest
 
         }
 
-        private Position GetSpatialAndTemporalOverlap(Position spatial, Position temporal)
+        private Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
         {
-            return new Position(spatial.X, spatial.Y, temporal.X);
+            return new Position_SOM(spatial.X, spatial.Y, temporal.X);
         }
 
         private Neuron GetSpatialNeuronFromTemporalCoordinate(Position pos)
@@ -189,55 +188,56 @@ namespace SecondORderMemoryUnitTest
             return bbManager.Columns[pos.Z, pos.Y].Neurons[pos.X];
         }
 
-        private SDR GenerateNewRandomSDR(List<Position> posList, iType inputPatternType)
+        private SDR_SOM GenerateNewRandomSDR(List<Position_SOM> posList, iType inputPatternType)
         {
-            return new SDR(10, 10, posList, inputPatternType);
+            return new SDR_SOM(10, 10, posList, inputPatternType);
         }
 
-        private SDR GenerateRandomSDRfromPosition(iType inputPatternType)
+        private SDR_SOM GenerateRandomSDRfromPosition(iType inputPatternType)
         {
             Random rand = new Random();
 
             int numPos = rand.Next(1, 10);
 
-            List<Position> posList = new List<Position>();
+            List<Position_SOM> posList = new List<Position_SOM>();
 
             for(int i=0; i < numPos; i++)
             {
-                posList.Add(new Position(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9)));
+                posList.Add(new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9)));
             }
 
-            return new SDR(10, 10, posList, inputPatternType);
+            return new SDR_SOM(10, 10, posList, inputPatternType);
         }
 
-        private SDR GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
+        private SDR_SOM GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
         {
             Random rand = new Random();
             int numPos = rand.Next(0, 10);
-            List<Position> spatialPosList = new List<Position>()
+
+            List<Position_SOM> spatialPosList = new List<Position_SOM>()
             {
-                new Position(2,4),
-                new Position(8,3),
-                new Position(7,2),
-                new Position(0,0)
+                new Position_SOM(2,4),
+                new Position_SOM(8,3),
+                new Position_SOM(7,2),
+                new Position_SOM(0,0)
             };
 
-            List<Position> temporalPosList = new List<Position>()
+            List<Position_SOM> temporalPosList = new List<Position_SOM>()
             {
-                new Position(0,4),
-                new Position(8,3),
-                new Position(7,2),
-                new Position(0,0)
+                new Position_SOM(0,4),
+                new Position_SOM(8,3),
+                new Position_SOM(7,2),
+                new Position_SOM(0,0)
             };
 
 
             if(inputPatternType == iType.TEMPORAL)
             {
-                return new SDR(10, 10, temporalPosList, inputPatternType);
+                return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
             }
             else
             {
-                 return new SDR(10, 10, spatialPosList, inputPatternType);
+                 return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
             }
         }
     }

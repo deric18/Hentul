@@ -1,4 +1,5 @@
-﻿using FirstOrderMemory.Models;
+﻿using Common;
+using FirstOrderMemory.Models;
 
 namespace FirstOrderMemory.BehaviourManagers
 {
@@ -182,7 +183,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             foreach (var item in PredictedNeuronsfromLastCycle.Keys)
             {
-                var neuronToAdd = Position.ConvertStringPosToNeuron(item);
+                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(item);
 
                 if (neuronToAdd != null)
                 {
@@ -224,7 +225,7 @@ namespace FirstOrderMemory.BehaviourManagers
                     foreach (var contributingNeuron in contributingList)
                     {
                         //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-                        correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(Position.ConvertStringPosToNeuron(contributingNeuron));
+                        correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(BlockBehaviourManager.ConvertStringPosToNeuron(contributingNeuron));
                     }
                 }
             }
@@ -270,7 +271,7 @@ namespace FirstOrderMemory.BehaviourManagers
                 posList.Add(neuron.NeuronID);
             });
 
-            Sdr = new SDR(FileSize, FileSize, posList);            
+            Sdr = new SDR(FileSize, FileSize, posList, iType.SPATIAL);            
 
             NeuronsFiringLastCycle.Clear();
 
@@ -291,8 +292,10 @@ namespace FirstOrderMemory.BehaviourManagers
                 NeuronsFiringThisCycle.Add(neuron);
         }
 
-        public static void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        public static bool InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
+            bool flag = false;
+
             if (x == i && y == j && z == k)
             {
                 throw new InvalidDataException();
@@ -303,10 +306,12 @@ namespace FirstOrderMemory.BehaviourManagers
 
                 Neuron neuron = col.Neurons[z];
 
-                neuron.InitAxonalConnectionForConnector(i, j, k);
+                flag = neuron.InitAxonalConnectionForConnector(i, j, k);
 
-                BlockBehaviourManager.IncrementAxonalConnectionCount();
-                
+                if (flag)
+                {
+                    BlockBehaviourManager.IncrementAxonalConnectionCount();
+                }                                
             }
             catch (Exception ex)
             {
@@ -316,11 +321,13 @@ namespace FirstOrderMemory.BehaviourManagers
                 int breakpoint = 1;
             }
 
-
+            return flag;
         }
 
-        public static void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        public static bool InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
+            bool flag = false;
+
             if (x == i && y == j && z == k)
             {
                 throw new InvalidOperationException("InitDendriticConnectionForConnector : Trying to connect a Neuron to Itslef");
@@ -331,9 +338,12 @@ namespace FirstOrderMemory.BehaviourManagers
 
                 Neuron neuron = col.Neurons[z];
 
-                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+                flag = neuron.InitProximalConnectionForDendriticConnection(i, j, k);
 
-                BlockBehaviourManager.IncrementProximalConnectionCount();
+                if (flag)
+                {
+                    BlockBehaviourManager.IncrementProximalConnectionCount();
+                }                
 
                 if (neuron.flag >= 4)
                 {
@@ -351,6 +361,8 @@ namespace FirstOrderMemory.BehaviourManagers
 
                 int breakpoint = 1;
             }
+
+            return flag;
         }
 
 
@@ -400,6 +412,38 @@ namespace FirstOrderMemory.BehaviourManagers
 
             return true;
 
+        }
+
+        public static Neuron ConvertStringPosToNeuron(string posString)
+        {
+            var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+
+            Neuron toReturn = null;
+
+            try
+            {
+                if (parts.Length != 3 || x > 9 || y > 9 || z > 9)
+                {
+                    int breakpoint = 1;
+                }
+
+                toReturn = BlockBehaviourManager.GetNeuronFromPosition(x, y, z);
+
+            }
+            catch (Exception e)
+            {
+                int bp = 1;
+            }
+
+            if (toReturn == null)
+            {
+                int bp1 = 1;
+            }
+
+            return toReturn;
         }
 
         public static Neuron GetNeuronFromPosition(int x, int y, int z)

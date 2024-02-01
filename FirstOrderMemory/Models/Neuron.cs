@@ -1,5 +1,5 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
-using System.Linq;
+using Common;
 
 namespace FirstOrderMemory.Models
 {
@@ -62,7 +62,7 @@ namespace FirstOrderMemory.Models
             {
                 foreach(Synapse synapse in AxonalList.Values)
                 {
-                    Position.ConvertStringPosToNeuron(synapse.TargetNeuronId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.SourceNeuronId));
+                    BlockBehaviourManager.ConvertStringPosToNeuron(synapse.TargetNeuronId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.SourceNeuronId));
                 }
 
                 CurrentState = NeuronState.FIRING;
@@ -143,10 +143,10 @@ namespace FirstOrderMemory.Models
             }
         }
 
-        public void InitProximalConnectionForDendriticConnection(int i, int j, int k)
+        public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
         {
             //Needs work
-            //Add it dictionar;
+            //Add it dictionary;
             //Add it to ConnectedNeurons
 
             string key = Position.ConvertIKJtoString(i, j, k);
@@ -154,12 +154,15 @@ namespace FirstOrderMemory.Models
             {
                 throw new InvalidOperationException("Operation Did not Succedd As Connection Already  Exists!");
             }
+
+            return true;
         }
 
-        public void InitAxonalConnectionForConnector(int i, int j, int k)
+        public bool InitAxonalConnectionForConnector(int i, int j, int k)
         {
             string key = Position.ConvertIKJtoString(i, j, k);
-            AddNewAxonalConnection(key);
+
+            return AddNewAxonalConnection(key);
         }
 
         private bool AddNewAxonalConnection(string key)
@@ -172,7 +175,7 @@ namespace FirstOrderMemory.Models
                     int bp2 = 1;
                 }
 
-                var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                 this.flag++;
 
@@ -185,7 +188,7 @@ namespace FirstOrderMemory.Models
                 {
                     AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
 
-                    var item = Position.ConvertStringPosToNeuron(key);
+                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                     return true;
                 }
@@ -202,7 +205,7 @@ namespace FirstOrderMemory.Models
 
                     AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
 
-                    var item = Position.ConvertStringPosToNeuron(key);
+                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                     return true;
                 }
@@ -226,7 +229,7 @@ namespace FirstOrderMemory.Models
                     int bp2 = 1;
                 }
 
-                var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
 
                 if (neuronToAdd.NeuronID.Equals(NeuronID))
@@ -247,7 +250,7 @@ namespace FirstOrderMemory.Models
 
                     dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PRXOMALDENDRITETONEURON));
 
-                    var item = Position.ConvertStringPosToNeuron(key);
+                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                     ConnectedNeurons.Add(item);
 
@@ -265,7 +268,7 @@ namespace FirstOrderMemory.Models
 
         public bool AddToDistalList(string key)
         {
-            var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+            var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
             if (neuronToAdd.NeuronID.Equals(NeuronID))
             {
@@ -286,7 +289,7 @@ namespace FirstOrderMemory.Models
 
                 dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITETONEURON));
 
-                var item = Position.ConvertStringPosToNeuron(key);
+                var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                 ConnectedNeurons.Add(item);
 
@@ -296,7 +299,7 @@ namespace FirstOrderMemory.Models
 
         public bool AddtoAxonalList(string key)
         {
-            var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+            var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
             if (neuronToAdd.NeuronID.Equals(NeuronID))
             {
@@ -316,7 +319,7 @@ namespace FirstOrderMemory.Models
 
                 AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
 
-                var item = Position.ConvertStringPosToNeuron(key);
+                var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                 ConnectedNeurons.Add(item);
 

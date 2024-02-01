@@ -1059,9 +1059,22 @@
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
       },
+      "Common/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/Common.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Common.dll": {}
+        }
+      },
       "SecondOrderMemory/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "Common": "1.0.0"
+        },
         "compile": {
           "bin/placeholder/SecondOrderMemory.dll": {}
         },
@@ -4367,6 +4380,11 @@
         "system.xml.xdocument.nuspec"
       ]
     },
+    "Common/1.0.0": {
+      "type": "project",
+      "path": "../Common/Common.csproj",
+      "msbuildProject": "../Common/Common.csproj"
+    },
     "SecondOrderMemory/1.0.0": {
       "type": "project",
       "path": "../SecondOrderMemory/SecondOrderMemory.csproj",
@@ -4390,9 +4408,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondORderMemoryUnitTest.csproj",
-      "projectName": "SecondORderMemoryUnitTest",
-      "projectPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondORderMemoryUnitTest.csproj",
+      "projectUniqueName": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
+      "projectName": "SecondOrderMemoryUnitTest",
+      "projectPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
       "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\obj\\",
       "projectStyle": "PackageReference",

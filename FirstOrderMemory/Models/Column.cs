@@ -1,5 +1,7 @@
 ﻿namespace FirstOrderMemory.Models
 {
+    using Common;
+
     public class Column
     {
         public List<Neuron> Neurons { get; private set; }

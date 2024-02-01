@@ -1,5 +1,6 @@
 ﻿namespace FirstOrderMemory.Models
 {
+    using Common;
     public class Segment
     {
         private const uint PRE_SYNAPTIC_STRENGTH = 1;

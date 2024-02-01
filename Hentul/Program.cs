@@ -9,3 +9,4 @@ screenGrabber.Grab();
 Console.WriteLine("Processing Pixel Data ...");
 
 screenGrabber.ProcessPixelData();
+

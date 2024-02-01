@@ -1,5 +1,5 @@
 ﻿using SecondOrderMemory.BehaviourManagers;
-using System.Linq;
+using Common;
 
 namespace SecondOrderMemory.Models
 {
@@ -28,7 +28,7 @@ namespace SecondOrderMemory.Models
         private const int AXONAL_CONNECTION = 1;
         #endregion
 
-        public Position NeuronID { get; private set; }
+        public Position_SOM NeuronID { get; private set; }
         public NeuronType nType { get; private set; }
         public Dictionary<string, char> TAContributors { get; private set; }
         public Dictionary<string, Synapse> AxonalList { get; private set; }
@@ -42,7 +42,7 @@ namespace SecondOrderMemory.Models
         private List<string>? PreCycleContributingNeurons { get; set; } = null;
         public int Voltage { get; private set; }
 
-        public Neuron(Position neuronId, NeuronType nType = NeuronType.NORMAL)
+        public Neuron(Position_SOM neuronId, NeuronType nType = NeuronType.NORMAL)
         {
             NeuronID = neuronId;
             this.nType = nType;
@@ -69,7 +69,7 @@ namespace SecondOrderMemory.Models
             {
                 foreach(Synapse synapse in AxonalList.Values)
                 {
-                    Position.ConvertStringPosToNeuron(synapse.DendronalNeuronalId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.AxonalNeuronId), synapse.cType);
+                    BlockBehaviourManager.ConvertStringPosToNeuron(synapse.DendronalNeuronalId).ProcessSpikeFromNeuron(Position_SOM.ConvertStringToPosition(synapse.AxonalNeuronId), synapse.cType);
                 }
 
                 CurrentState = NeuronState.FIRING;
@@ -84,7 +84,7 @@ namespace SecondOrderMemory.Models
             return;
         }
 
-        public void ProcessSpikeFromNeuron(Position callingNeuron, ConnectionType cType = ConnectionType.PRXOMALDENDRITETONEURON)
+        public void ProcessSpikeFromNeuron(Position_SOM callingNeuron, ConnectionType cType = ConnectionType.PRXOMALDENDRITETONEURON)
         {
             uint multiplier = 1;
 
@@ -102,7 +102,14 @@ namespace SecondOrderMemory.Models
             {
                 if(!TAContributors.TryGetValue(callingNeuron.ToString(), out char w))
                 {
-                    TAContributors.Add(callingNeuron.ToString(), 'T');
+                    if (cType.Equals(ConnectionType.TEMPRORAL))
+                    {                        
+                        TAContributors.Add(callingNeuron.ToString(), 'T');
+                    }
+                    else if(cType.Equals(ConnectionType.APICAL))
+                    {                        
+                        TAContributors.Add(callingNeuron.ToString(), 'A');
+                    }
                 }                 
                 else
                 {
@@ -158,7 +165,7 @@ namespace SecondOrderMemory.Models
 
             if (!string.IsNullOrEmpty(pos))
             {
-                return Position.ConvertStringPosToNeuron(pos);
+                return BlockBehaviourManager.ConvertStringPosToNeuron(pos);
             }
 
             throw new InvalidOperationException("Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
@@ -170,7 +177,7 @@ namespace SecondOrderMemory.Models
 
             if (!string.IsNullOrEmpty(pos))
             {
-                return Position.ConvertStringPosToNeuron(pos);
+                return BlockBehaviourManager.ConvertStringPosToNeuron(pos);
             }
 
             throw new InvalidOperationException();
@@ -212,13 +219,13 @@ namespace SecondOrderMemory.Models
             //Add it dictionar;
             //Add it to ConnectedNeurons
 
-            string key = Position.ConvertIKJtoString(i, j, k);
+            string key = Position_SOM.ConvertIKJtoString(i, j, k);
             AddNewProximalDendriticConnection(key);
         }
 
         public void InitAxonalConnectionForConnector(int i, int j, int k)
         {
-            string key = Position.ConvertIKJtoString(i, j, k);
+            string key = Position_SOM.ConvertIKJtoString(i, j, k);
             AddNewAxonalConnection(key);
         }
 
@@ -237,7 +244,7 @@ namespace SecondOrderMemory.Models
                     int bp2 = 1;
                 }
 
-                var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                 this.flag++;
 
@@ -250,7 +257,7 @@ namespace SecondOrderMemory.Models
                 {
                     AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
 
-                    var item = Position.ConvertStringPosToNeuron(key);
+                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                     return true;
                 }
@@ -267,7 +274,7 @@ namespace SecondOrderMemory.Models
 
                     AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
 
-                    var item = Position.ConvertStringPosToNeuron(key);
+                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                     return true;
                 }
@@ -291,7 +298,7 @@ namespace SecondOrderMemory.Models
                     int bp2 = 1;
                 }
 
-                var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
 
                 if (neuronToAdd.NeuronID.Equals(NeuronID))
@@ -312,7 +319,7 @@ namespace SecondOrderMemory.Models
 
                     dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PRXOMALDENDRITETONEURON));
 
-                    var item = Position.ConvertStringPosToNeuron(key);
+                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                     ConnectedNeurons.Add(item);
 
@@ -328,17 +335,17 @@ namespace SecondOrderMemory.Models
             return true;
         }
 
-        //Get Called for Dendritic End of the Neuron
+        //Gets Called for Dendritic End of the Neuron
         public bool AddToDistalList(string axonalNeuronId, ConnectionType? cType = null)
         {
 
-            if(axonalNeuronId == "2-4-0-A")
+            if(cType == ConnectionType.APICAL)
             {
                 bool breakpoint = false;
                 breakpoint = true;
             }
 
-            var neuronToAdd = Position.ConvertStringPosToNeuron(axonalNeuronId);
+            var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(axonalNeuronId);
 
             if(cType.Equals(ConnectionType.TEMPRORAL))
             {
@@ -377,7 +384,7 @@ namespace SecondOrderMemory.Models
                             dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
                         }
 
-                        var item = Position.ConvertStringPosToNeuron(axonalNeuronId);
+                        var item = BlockBehaviourManager.ConvertStringPosToNeuron(axonalNeuronId);
 
                         ConnectedNeurons.Add(item);
 
@@ -402,7 +409,7 @@ namespace SecondOrderMemory.Models
 
                 dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITETONEURON));
 
-                var item = Position.ConvertStringPosToNeuron(axonalNeuronId);
+                var item = BlockBehaviourManager.ConvertStringPosToNeuron(axonalNeuronId);
 
                 ConnectedNeurons.Add(item);
 
@@ -413,7 +420,7 @@ namespace SecondOrderMemory.Models
         //Gets called for the axonal end of the neuron
         public bool AddtoAxonalList(string key, ConnectionType connectionType)
         {
-            var neuronToAdd = Position.ConvertStringPosToNeuron(key);
+            var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
             if (neuronToAdd.NeuronID.Equals(NeuronID) && this.nType.Equals(neuronToAdd.nType))
             {
@@ -433,7 +440,7 @@ namespace SecondOrderMemory.Models
 
                 AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, AXONAL_CONNECTION, connectionType));
 
-                var item = Position.ConvertStringPosToNeuron(key);
+                var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
                 ConnectedNeurons.Add(item);
 

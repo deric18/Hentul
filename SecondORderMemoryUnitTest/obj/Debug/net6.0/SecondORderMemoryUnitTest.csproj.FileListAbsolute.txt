@@ -8,10 +8,10 @@ C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Microsof
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Microsoft.TestPlatform.AdapterUtilities.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Schema Docs\AxonalSchema.xml
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Schema Docs\ConnectorSchema.xml
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondORderMemoryUnitTest.deps.json
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondORderMemoryUnitTest.runtimeconfig.json
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondORderMemoryUnitTest.dll
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondORderMemoryUnitTest.pdb
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemoryUnitTest.deps.json
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemoryUnitTest.runtimeconfig.json
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemoryUnitTest.pdb
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Microsoft.VisualStudio.CodeCoverage.Shim.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Microsoft.TestPlatform.CoreUtilities.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
@@ -89,17 +89,19 @@ C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\zh-Hans\
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\zh-Hant\Microsoft.TestPlatform.CommunicationUtilities.resources.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\zh-Hant\Microsoft.TestPlatform.CrossPlatEngine.resources.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\zh-Hant\Microsoft.VisualStudio.TestPlatform.Common.resources.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Common.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemory.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemory.pdb
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.csproj.AssemblyReference.cache
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.AssemblyInfoInputs.cache
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.AssemblyInfo.cs
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.csproj.CoreCompileInputs.cache
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.sourcelink.json
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.csproj.CopyComplete
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.dll
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\refint\SecondORderMemoryUnitTest.dll
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.pdb
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondORderMemoryUnitTest.genruntimeconfig.cache
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\ref\SecondORderMemoryUnitTest.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Common.pdb
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.csproj.AssemblyReference.cache
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.AssemblyInfoInputs.cache
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.AssemblyInfo.cs
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.csproj.CoreCompileInputs.cache
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.sourcelink.json
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.csproj.CopyComplete
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\refint\SecondOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.pdb
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.genruntimeconfig.cache
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\ref\SecondOrderMemoryUnitTest.dll

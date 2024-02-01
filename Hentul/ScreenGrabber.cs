@@ -1,9 +1,9 @@
-﻿using FirstOrderMemory.Models;
-using SecondOrderMemory.Models;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Runtime.InteropServices;
 using SOMM = SecondOrderMemory.Models;
 using FOMM = FirstOrderMemory.Models;
+using System.Configuration;
+using Common;
 
 public struct POINT
 {
@@ -18,7 +18,11 @@ public class ScreenGrabber
 
     private FirstOrderMemory.BehaviourManagers.BlockBehaviourManager fomBBM;
 
-    private SecondOrderMemory.BehaviourManagers.BlockBehaviourManager somBBM;
+    private SecondOrderMemory.BehaviourManagers.BlockBehaviourManager somBBM;   
+    private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
+    private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
+    private readonly int SOMNUMCOLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
+    private readonly int SOMCOLUMNSIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
     public ScreenGrabber(int range)
     {
@@ -119,13 +123,17 @@ public class ScreenGrabber
         byte G = ColorMap[0, 0].G;
         byte B = ColorMap[0, 0].B;
 
-        FOMM.ByteEncoder encoder = new FOMM.ByteEncoder(100, 24);
+        ByteEncoder encoder = new ByteEncoder(100, 24);
 
-        FOMM.SDR sdr = encoder.GetDenseSDR();
+        SDR sdr = encoder.GetDenseSDR();
 
         fomBBM.Fire(sdr);
 
+        SDR fomSdr = fomBBM.GetSDR();
 
+        SDR somSdr = new SDR(SOMNUMCOLUMNS, SOMCOLUMNSIZE, fomSdr.ActiveBits);
+
+        //somBBM.Fire(fomSdr);
 
     }
 }
