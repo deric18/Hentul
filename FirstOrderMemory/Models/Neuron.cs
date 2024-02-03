@@ -150,12 +150,20 @@ namespace FirstOrderMemory.Models
             //Add it to ConnectedNeurons
 
             string key = Position.ConvertIKJtoString(i, j, k);
-            if(!AddNewProximalDendriticConnection(key))
+            var tuple = AddNewProximalDendriticConnection(key);
+            if (tuple.Item1 == false)
             {
-                throw new InvalidOperationException("Operation Did not Succedd As Connection Already  Exists!");
+                try
+                {
+                    throw new InvalidOperationException("Operation Did not Succedd As Connection Already  Exists!");
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }                
             }
 
-            return true;
+            return tuple.Item2;
         }
 
         public bool InitAxonalConnectionForConnector(int i, int j, int k)
@@ -219,11 +227,16 @@ namespace FirstOrderMemory.Models
             return true;
         }
 
-        private bool AddNewProximalDendriticConnection(string key)        
+
+        ///
+        private Tuple<bool,bool> AddNewProximalDendriticConnection(string key)        
         {
+            //case 1: true, true -> All Worked out Good
+            //case 2: true, false -> Connection ALready Exists But return false so we can retry
+            //case 3: false, false -> Invalid Connection Data Sent , Should Never Happen !!! Debug immediately
+           
             try
             {
-
                 if (key == "0-0-1")
                 {
                     int bp2 = 1;
@@ -234,16 +247,27 @@ namespace FirstOrderMemory.Models
 
                 if (neuronToAdd.NeuronID.Equals(NeuronID))
                 {
-                    throw new InvalidOperationException("Cannot connect neuron to itself");
+                    Console.WriteLine(NeuronID.ToString() + key);
+
+                    try
+                    {
+                        throw new InvalidOperationException("Cannot connect neuron to itself");
+                    }
+                    catch (Exception ex) 
+                    {                        
+                        return new Tuple<bool, bool>(false, false);
+                    }
                 }
 
                 if (dendriticList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
                 {
+                    Console.WriteLine("first: " + NeuronID.ToString() + " " + "Second : " + key);
+
                     Console.WriteLine("Connection Already Added");
 
                     synapse.IncrementStrength();
 
-                    return false;
+                    return  new Tuple<bool, bool>(true, false);
                 }
                 else
                 {
@@ -254,16 +278,17 @@ namespace FirstOrderMemory.Models
 
                     ConnectedNeurons.Add(item);
 
-                    return true;
+                    return new Tuple<bool, bool>(true, true);
                 }
             }
             catch (Exception ex)
             {
 
                 int bp = 1;
+                return new Tuple<bool, bool>(false, false);
             }
 
-            return true;
+            return new Tuple<bool, bool>(true, true);
         }
 
         public bool AddToDistalList(string key)

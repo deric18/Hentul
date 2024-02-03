@@ -5,6 +5,8 @@ namespace FirstOrderMemory.BehaviourManagers
 {
     public class BlockBehaviourManager
     {
+        public const string MemoryType = "FIRST ORDER MEMORY";
+
         public ulong CycleNum { get; private set; }
 
         private int NumColumns { get; set; }

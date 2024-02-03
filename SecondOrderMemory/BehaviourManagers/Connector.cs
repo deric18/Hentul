@@ -10,8 +10,7 @@
         public static void ReadDendriticSchema()
         {
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\SecondOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";
-            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\SecondOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";            
 
 
             if (!File.Exists(dendriteDocumentPath))
