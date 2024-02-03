@@ -2,14 +2,12 @@
 {
     using System.Xml;
 
-    public class Connector
+    public static class Connector
     {        
         private const int NUMBEROFPROXIMALDENDRITICCONNECTIONSPERNEURON = 4;
-        private const int NUMBEROFPROXIMALAXONALCONNECTIONSPERNEURON = 2;
-        public Connector() {         
-        }
+        private const int NUMBEROFPROXIMALAXONALCONNECTIONSPERNEURON = 2;       
 
-        public void ReadDendriticSchema(int fileSize, int numberOfRows)
+        public static void ReadDendriticSchema(int fileSize, int numberOfRows)
         {
                    
             Random rand = new Random();
@@ -121,7 +119,7 @@
             }
         }
 
-        public void ReadAxonalSchema(int fileSize, int numRows)
+        public static void ReadAxonalSchema(int fileSize, int numRows)
         {            
             int a, b, c;
             Random rand = new Random();
@@ -213,7 +211,7 @@
             }
         }
 
-        private Tuple<int, int, int> GetUniqueRandomNumbers(int i, int j, int k, int max1, int max2, int max3, bool checkCache = false, int cache1 =0, int cache2 = 0, int cache3 = 0)
+        private static Tuple<int, int, int> GetUniqueRandomNumbers(int i, int j, int k, int max1, int max2, int max3, bool checkCache = false, int cache1 =0, int cache2 = 0, int cache3 = 0)
         {
             int a, b, c;
             Random rand =   new Random();

@@ -2,16 +2,12 @@
 {
     using System.Xml;
 
-    public class Connector
+    public static class Connector
     {
-        private int neuronCounter;
-        public Connector()
-        {
-            neuronCounter = 0;
-        }
+        private static int neuronCounter;       
 
 
-        public void ReadDendriticSchema()
+        public static void ReadDendriticSchema()
         {
             XmlDocument document = new XmlDocument();
             string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\SecondOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";
@@ -94,7 +90,7 @@
             }
         }
 
-        public void ReadAxonalSchema()
+        public static void ReadAxonalSchema()
         {
             XmlDocument document = new XmlDocument();
             string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";

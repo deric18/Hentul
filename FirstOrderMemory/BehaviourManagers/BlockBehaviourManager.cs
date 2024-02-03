@@ -31,9 +31,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
         public uint totalProximalConnections;
 
-        public uint totalAxonalConnections;
-
-        public Connector connector { get; private set; }
+        public uint totalAxonalConnections;        
 
         private SDR Sdr { get; set; }
 
@@ -94,12 +92,10 @@ namespace FirstOrderMemory.BehaviourManagers
         }
 
         public void Init()
-        {
-            connector = new Connector();
+        {           
+            Connector.ReadDendriticSchema(FileSize, NumRows);
 
-            connector.ReadDendriticSchema(FileSize, NumRows);
-
-            connector.ReadAxonalSchema(FileSize, NumRows);
+            Connector.ReadAxonalSchema(FileSize, NumRows);
         }
 
         private void PreCyclePrep(bool isUnitTest)
