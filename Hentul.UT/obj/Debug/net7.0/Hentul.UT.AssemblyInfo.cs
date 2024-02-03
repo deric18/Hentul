@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Hentul.UT")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb76207af5d91e23026b10cbaaf2ae8e2932b375")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb0aefe9b272392d82825c12938408b2e5ef2ba9")]
 [assembly: System.Reflection.AssemblyProductAttribute("Hentul.UT")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Hentul.UT")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

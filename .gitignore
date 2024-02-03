@@ -1,3 +1,11 @@
+obj/
+bin/
+.vs/
+FirstOrderMemory/bin/Debug/
+FirstOrderMemoryUnitTest/bin/Debug/
+SecondORderMemory/bin/Debug/
+SecondORderMemoryUnitTest/bin/Debug/
+
 #OS junk files
     [Tt]humbs.db
     *.DS_Store
@@ -18,6 +26,7 @@
     *.ncb
     *.suo
     *.tlb
+	*.dll
     *.tlh
     *.bak
     *.[Cc]ache
