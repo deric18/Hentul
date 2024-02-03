@@ -22,14 +22,14 @@
                         {
                             for (int l = 0; l < NUMBEROFPROXIMALDENDRITICCONNECTIONSPERNEURON; l++)
                             {
-                                Tuple<int, int, int> pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numberOfRows);
+                                Tuple<int, int, int> pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numberOfRows, false);
 
                                 if (!BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, pos.Item1, pos.Item2, pos.Item3))
-                                {
-                                    pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numberOfRows, true, pos.Item1, pos.Item2, pos.Item3);
+                                {                                    
                                     bool flag = true;
                                     do
                                     {
+                                        pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numberOfRows, true, pos.Item1, pos.Item2, pos.Item3);
                                         flag = BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, pos.Item1, pos.Item2, pos.Item3);
                                     }
                                     while (!flag);
@@ -137,11 +137,12 @@
                                 Tuple<int, int, int> pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numRows);
 
                                 if (!BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, pos.Item1, pos.Item2, pos.Item3))
-                                {
-                                    pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numRows, true, pos.Item1, pos.Item2, pos.Item3);
+                                {                                    
                                     bool flag = true;
+
                                     do
                                     {
+                                        pos = GetUniqueRandomNumbers(i, j, k, fileSize, fileSize, numRows, true, pos.Item1, pos.Item2, pos.Item3);
                                         flag = BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, pos.Item1, pos.Item2, pos.Item3);
                                     }
                                     while (!flag);
@@ -236,6 +237,11 @@
                     }
                     while (i == a && j == b && k == c);
                 }
+            }
+            else if(checkCache && i == a && j == b && k == c)
+            {
+                Console.WriteLine("i :" + i.ToString()  + " J: " + j.ToString() + "  K:" + k.ToString() + " Cache1 : " + cache1.ToString() + " Cache2 : " + cache2.ToString() + " Cache3 : " + cache3.ToString());
+                throw new InvalidDataException("This should never happen!!!" + BlockBehaviourManager.MemoryType);
             }
 
             return new Tuple<int, int, int>(a, b, c);   
