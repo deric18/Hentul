@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemory", "..\Sec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemoryUnitTest", "..\SecondORderMemoryUnitTest\SecondOrderMemoryUnitTest.csproj", "{800DFB2C-A582-4716-8586-284C3EABC7C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\Common\Common.csproj", "{340383BA-32AD-421F-B20D-198ACBBB5C84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{340383BA-32AD-421F-B20D-198ACBBB5C84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hentul.UT", "..\Hentul.UT\Hentul.UT.csproj", "{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{340383BA-32AD-421F-B20D-198ACBBB5C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{340383BA-32AD-421F-B20D-198ACBBB5C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{340383BA-32AD-421F-B20D-198ACBBB5C84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

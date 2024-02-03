@@ -1,165 +1,187 @@
-﻿using System.Drawing;
-using System.Runtime.InteropServices;
-using SOMM = SecondOrderMemory.Models;
-using FOMM = FirstOrderMemory.Models;
-using System.Configuration;
-using Common;
-using SecondOrderMemory.Models;
-
-public struct POINT
+﻿namespace Hentul
 {
-    public int X;
-    public int Y;
-}
-public class ScreenGrabber
-{
-    public Color[,] ColorMap { get; private set; }
+    using System.Drawing;
+    using System.Runtime.InteropServices;
+    using SOMM = SecondOrderMemory.Models;
+    using FOMM = FirstOrderMemory.Models;
+    using System.Configuration;
+    using Common;
+    using SecondOrderMemory.Models;
 
-    public POINT Point { get; private set; }
-
-    public int range;
-
-    private FirstOrderMemory.BehaviourManagers.BlockBehaviourManager fomBBM;
-
-    private SecondOrderMemory.BehaviourManagers.BlockBehaviourManager somBBM;   
-    private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
-    private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
-    private readonly int SOMNUMCOLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
-    private readonly int SOMCOLUMNSIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
-
-    public ScreenGrabber(int range)
+    public struct POINT
     {
-        this.range = range;
-        this.ColorMap = new Color[range, range];
-        this.fomBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-        this.somBBM = SecondOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(10);
-        Init();
+        public int X;
+        public int Y;
     }
-
-    public void Init()
+    public class ScreenGrabber
     {
-        fomBBM.Init();
-        somBBM.Init();
-    }
+        public Color[,] ColorMap { get; private set; }
 
+         
 
-    [DllImport("user32.dll")]
-    static extern bool GetCursorPos(out POINT lpPoint);
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern IntPtr GetDesktopWindow();
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern IntPtr GetWindowDC(IntPtr window);
-    [DllImport("gdi32.dll", SetLastError = true)]
-    public static extern uint GetPixel(IntPtr dc, int x, int y);
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern int ReleaseDC(IntPtr window, IntPtr dc);
+        public POINT Point { get; private set; }
 
+        public int range;
 
-    internal void Grab()
-    {
-        //send Image for Processing               
+        private FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[,] fomBBM;
+        private SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[,] somBBM;
 
-        Console.WriteLine("Grabbing cursor Position");
+        private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
+        private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
+        private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
+        private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        Console.CursorVisible = false;
-
-        Point = this.GetCurrentPointerPosition();
-
-        Console.CursorVisible = true;
-
-        Console.WriteLine("Grabbing Screen Pixels...");
-
-        Console.WriteLine("Bit Map Values :");
-
-        this.PrintColorMap(Point.X - range, Point.Y - range, Point.X + range, Point.Y + range);
-
-    }
-
-    internal void ProcessPixelData()
-    {
-
-        for(int i=0; i < range; i++) 
+        public ScreenGrabber(int range)
         {
-            for(int j=0;j<range;j++)
+            this.range = range;
+            this.ColorMap = new Color[range, range];
+
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range, range];
+            somBBM = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[range, range];
+
+            for ( int i=0; i< range; i++)
             {
-                if (ColorMap[0, 0].IsEmpty)
+                for(int j=0; j< range; j++)
                 {
-                    throw new InvalidOperationException();
+                    fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+                    somBBM[i, j] = SecondOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(10);
+                }
+            }
+            
+            Init();
+        }        
+
+
+        [DllImport("user32.dll")]
+        static extern bool GetCursorPos(out POINT lpPoint);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetWindowDC(IntPtr window);
+        [DllImport("gdi32.dll", SetLastError = true)]
+        public static extern uint GetPixel(IntPtr dc, int x, int y);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int ReleaseDC(IntPtr window, IntPtr dc);
+
+
+        public void Grab()
+        {
+            //send Image for Processing               
+
+            Console.WriteLine("Grabbing cursor Position");
+
+            Console.CursorVisible = false;
+
+            Point = this.GetCurrentPointerPosition();
+
+            Console.CursorVisible = true;
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            Console.WriteLine("Bit Map Values :");
+
+            this.PrintColorMap(Point.X - range, Point.Y - range, Point.X + range, Point.Y + range);
+
+        }
+
+        public void ProcessPixelData()
+        {
+
+            for (int i = 0; i < range; i++)
+            {
+                for (int j = 0; j < range; j++)
+                {
+                    if (ColorMap[0, 0].IsEmpty)
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    byte A = ColorMap[i, j].A;      //Ignoring 'A' as we dont need addressable format.
+
+                    byte R = ColorMap[i, j].R;
+                    byte G = ColorMap[i, j].G;
+                    byte B = ColorMap[i, j].B;
+
+                    ByteEncoder encoder = new ByteEncoder(100, 24);
+
+                    encoder.Encode(R, G, B);
+
+                    SDR sdr = encoder.GetDenseSDR();
+
+                    fomBBM[i, j].Fire(sdr);
+
+                    SDR fomSdr = fomBBM[i, j].GetSDR();
+
+                    SDR_SOM somSdr = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(fomSdr.ActiveBits), iType.SPATIAL);
+
+                    somBBM[i, j].Fire(somSdr);
+                }
+            }
+        }
+
+        #region PRIVATE METHODS
+
+        private void Init()
+        {
+            for (int i = 0; i < range; i++)
+            {
+                for (int j = 0; j < range; j++)
+                {
+                    fomBBM[i, j].Init();
+                    somBBM[i, j].Init();
+                }
+            }
+        }
+
+        private static Color GetColorAt(int x, int y)
+        {
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+            int a = (int)GetPixel(dc, x, y);
+            ReleaseDC(desk, dc);
+            return Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
+        }
+
+        private void PrintColorMap(int x1, int y1, int x2, int y2)
+        {
+            for (int i = x1, k = 0; i < x2 && k < 10; i++, k++)
+            {
+                Console.WriteLine("Row " + i);
+
+                for (int j = y1, l = 0; j < y2 && l < 10; j++, l++)
+                {
+                    Color color = GetColorAt(i, j);
+                    this.ColorMap[k, l] = color;
+                    Console.Write(color.A + "-" + color.R + "-" + color.G + "-" + color.B + "  ");
                 }
 
-                byte A = ColorMap[i, j].A;      //Ignoring 'A' as we dont need addressable format.
-
-                byte R = ColorMap[i, j].R;
-                byte G = ColorMap[i, j].G;
-                byte B = ColorMap[i, j].B;
-
-                ByteEncoder encoder = new ByteEncoder(100, 24);
-
-                encoder.Encode(R, G, B);
-
-                SDR sdr = encoder.GetDenseSDR();
-
-                fomBBM.Fire(sdr);
-
-                SDR fomSdr = fomBBM.GetSDR();
-
-                SDR_SOM somSdr = new SDR_SOM(SOMNUMCOLUMNS, SOMCOLUMNSIZE, ConvertFomToSomPositions(fomSdr.ActiveBits), iType.SPATIAL);
-
-                somBBM.Fire(somSdr);
+                Console.WriteLine();
             }
         }
-    }
 
-    #region PRIVATE METHODS
-
-    private static Color GetColorAt(int x, int y)
-    {
-        IntPtr desk = GetDesktopWindow();
-        IntPtr dc = GetWindowDC(desk);
-        int a = (int)GetPixel(dc, x, y);
-        ReleaseDC(desk, dc);
-        return Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
-    }
-
-    private void PrintColorMap(int x1, int y1, int x2, int y2)
-    {
-        for (int i = x1, k = 0; i < x2 && k < 10; i++, k++)
+        private POINT GetCurrentPointerPosition()
         {
-            Console.WriteLine("Row " + i);
-
-            for (int j = y1, l = 0; j < y2 && l < 10; j++, l++)
+            POINT point;
+            if (GetCursorPos(out point))
             {
-                Color color = GetColorAt(i, j);
-                this.ColorMap[k, l] = color;
-                Console.Write(color.A + "-" + color.R + "-" + color.G + "-" + color.B + "  ");
+                Console.Clear();
+                Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
+            }
+            return point;
+        }
+
+        private List<Position_SOM> ConvertFomToSomPositions(List<Position> position)
+        {
+            List<Position_SOM> toReturn = new List<Position_SOM>();
+
+            foreach (var positionItem in position)
+            {
+                toReturn.Add(new Position_SOM(positionItem.X, positionItem.Y));
             }
 
-            Console.WriteLine();
-        }
-    }
-
-    private POINT GetCurrentPointerPosition()
-    {
-        POINT point;
-        if (GetCursorPos(out point))
-        {
-            Console.Clear();
-            Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
-        }
-        return point;
-    }
-
-    private List<Position_SOM> ConvertFomToSomPositions(List<Position> position)
-    {
-        List<Position_SOM> toReturn = new List<Position_SOM>();
-
-        foreach( var positionItem in position)
-        {
-            toReturn.Add(new Position_SOM(positionItem.X, positionItem.Y));
+            return toReturn;
         }
 
-        return toReturn;
+        #endregion
     }
-
-    #endregion
 }

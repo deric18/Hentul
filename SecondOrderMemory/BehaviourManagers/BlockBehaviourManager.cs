@@ -40,7 +40,6 @@ namespace SecondOrderMemory.BehaviourManagers
         private bool isTemporal;
 
         public bool IsSpatial;
-        public Connector connector { get; private set; }    
 
         private static BlockBehaviourManager _blockBehaviourManager;
 
@@ -101,12 +100,11 @@ namespace SecondOrderMemory.BehaviourManagers
         }
 
         public void Init()
-        {
-            connector = new Connector();
+        {            
 
-            connector.ReadDendriticSchema();
+            Connector.ReadDendriticSchema();
 
-            connector.ReadAxonalSchema();
+            Connector.ReadAxonalSchema();
 
             GenerateTemporalLines();
             
