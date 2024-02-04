@@ -1,9 +1,10 @@
-﻿using SecondOrderMemory.Models;
+﻿using System;
+using SecondOrderMemory.Models;
 using Common;
 
 namespace SecondOrderMemory.BehaviourManagers
 {
-    public class BlockBehaviourManager
+    public class BlockBehaviourManager 
     {
         public ulong CycleNum { get; private set; }
 
@@ -97,14 +98,14 @@ namespace SecondOrderMemory.BehaviourManagers
                     Columns[i, j] = new Column(i, j, numColumns);
                 }
             }                      
-        }
+        }        
 
-        public void Init()
-        {            
+        public void Init(int x, int y)
+        {                        
 
-            Connector.ReadDendriticSchema();
+            Connector.GetConnector().ReadDendriticSchema(x, y);
 
-            Connector.ReadAxonalSchema();
+            Connector.GetConnector().ReadAxonalSchema(x, y);
 
             GenerateTemporalLines();
             
@@ -615,6 +616,6 @@ namespace SecondOrderMemory.BehaviourManagers
         private static void IncrementAxonalConnectionCount()
         {
             BlockBehaviourManager.GetBlockBehaviourManager().totalAxonalConnections++;
-        }
+        }        
     }
 }

@@ -7,6 +7,7 @@
     using System.Configuration;
     using Common;
     using SecondOrderMemory.Models;
+    using System.Diagnostics;
 
     public struct POINT
     {
@@ -42,13 +43,14 @@
             for ( int i=0; i< range; i++)
             {
                 for(int j=0; j< range; j++)
-                {
+                {                    
                     fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
                     somBBM[i, j] = SecondOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(10);
                 }
             }
             
-            Init();
+            Init();            
+
         }        
 
 
@@ -85,8 +87,7 @@
         }
 
         public void ProcessPixelData()
-        {
-
+        {            
             for (int i = 0; i < range; i++)
             {
                 for (int j = 0; j < range; j++)
@@ -127,8 +128,19 @@
             {
                 for (int j = 0; j < range; j++)
                 {
+                    Stopwatch stopWatch = new Stopwatch();
+
+                    Console.WriteLine("Starting Initialization  I : " + i.ToString() + "  J :" + j.ToString());
+            
+                    stopWatch.Start();
+
                     fomBBM[i, j].Init();
-                    somBBM[i, j].Init();
+                    somBBM[i, j].Init(i, j);
+
+                    stopWatch.Stop();
+
+                    Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
+
                 }
             }
         }

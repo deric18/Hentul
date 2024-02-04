@@ -296,7 +296,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             if (x == i && y == j && z == k)
             {
-                throw new InvalidDataException();
+                return false;
             }
             try
             {
@@ -328,7 +328,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
             if (x == i && y == j && z == k)
             {
-                throw new InvalidOperationException("InitDendriticConnectionForConnector : Trying to connect a Neuron to Itslef");
+                return false;
             }
             try
             {

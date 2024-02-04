@@ -18,6 +18,16 @@ namespace SecondOrderMemoryUnitTest
             bbManager.Init();
         }
 
+        //[TestMethod]
+        //public void TestInstanceClone()
+        //{
+        //    var newbbManager = bbManager.Clone();
+
+        //    bbManager.Columns[0, 0].Neurons[0].flag = 1;
+
+        //    Assert.IsFalse(newbbManager.)
+        //}
+
         [TestMethod]
         public void TestTemporalLines()
         {

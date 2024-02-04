@@ -26,7 +26,6 @@ C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.GeneratedMSBuildEdit
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.AssemblyInfoInputs.cache
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.AssemblyInfo.cs
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.csproj.CoreCompileInputs.cache
-C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.sourcelink.json
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.csproj.CopyComplete
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\Hentul.dll
 C:\Users\depint\source\repos\Hentul\obj\Debug\net7.0\refint\Hentul.dll

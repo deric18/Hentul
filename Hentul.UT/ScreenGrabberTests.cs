@@ -21,7 +21,7 @@ namespace Hentul.UT
 
             //sw.Start();
 
-            sg = new ScreenGrabber(10);           
+            sg = new ScreenGrabber(1);           
 
             int a = 0;
 
