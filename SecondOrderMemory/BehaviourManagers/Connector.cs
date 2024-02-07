@@ -52,14 +52,14 @@
                     BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    Console.WriteLine("intX :" + intX.ToString() +" intY : "+ intY.ToString() + " Cache Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString() );
+                    //Console.WriteLine("intX :" + intX.ToString() +" intY : "+ intY.ToString() + " Cache Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString() );
                 }                
 
                 return;
             }
 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\SecondOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";            
+            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\SecondOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -107,7 +107,7 @@
                         int b = Convert.ToInt32(node.Attributes[1]?.Value);
                         int c = Convert.ToInt32(node.Attributes[2]?.Value);
 
-                        Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+                        //Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
                         var proximalNodes = node.ChildNodes;
 
@@ -124,6 +124,7 @@
 
                         foreach (XmlNode neuron in neuronNodes)
                         {
+                            //ProximalConnection
                             if (neuron?.Attributes?.Count != 3)
                             {
                                 throw new InvalidOperationException("Number of Attributes in Neuronal Node is not 3");
@@ -157,6 +158,12 @@
                 }
             }
         }
+
+        public void ReadDendriticSchema()
+        {
+
+        }
+
 
         public void ReadAxonalSchema(int intX, int intY)
         {

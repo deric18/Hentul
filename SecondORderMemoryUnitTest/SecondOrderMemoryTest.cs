@@ -3,6 +3,7 @@ namespace SecondOrderMemoryUnitTest
     using SecondOrderMemory.BehaviourManagers;
     using SecondOrderMemory.Models;
     using Common;
+    using NUnit.Framework;
 
     [TestClass]
     public class SecondOrderMemoryTest
@@ -15,7 +16,7 @@ namespace SecondOrderMemoryUnitTest
         {
             bbManager = BlockBehaviourManager.GetBlockBehaviourManager(sizeOfColumns);
 
-            bbManager.Init();
+            bbManager.Init(-1, -1);
         }
 
         //[TestMethod]
@@ -181,6 +182,16 @@ namespace SecondOrderMemoryUnitTest
             Assert.IsTrue(currentStrength > previousStrength);
 
             Assert.AreEqual(NeuronState.FIRING, apicalNeuron.CurrentState);
+        }
+
+        [TestMethod]
+        public void TestSOMBBMClone()
+        {
+            BlockBehaviourManager bbm2 = bbManager.CloneBBM(bbManager);
+
+            bbm2.Columns[0, 1].Neurons[5].Fire();
+
+            Assert.AreNotEqual(bbm2.Columns[0, 1].Neurons[5].CurrentState, bbManager.Columns[0, 1].Neurons[5].CurrentState);
         }
 
         public void TestTemporalAndApicalFiringAndWiring()

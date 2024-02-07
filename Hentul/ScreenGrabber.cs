@@ -16,10 +16,7 @@
     }
     public class ScreenGrabber
     {
-        public Color[,] ColorMap { get; private set; }
-
-         
-
+        public Color[,] ColorMap { get; private set; }         
         public POINT Point { get; private set; }
 
         public int range;
@@ -128,19 +125,27 @@
             {
                 for (int j = 0; j < range; j++)
                 {
-                    Stopwatch stopWatch = new Stopwatch();
 
-                    Console.WriteLine("Starting Initialization  I : " + i.ToString() + "  J :" + j.ToString());
-            
-                    stopWatch.Start();
+                    if (i == 0 && j == 0)
+                    {
+                        Stopwatch stopWatch = new Stopwatch();
 
-                    fomBBM[i, j].Init();
-                    somBBM[i, j].Init(i, j);
+                        Console.WriteLine("Starting Initialization  I : " + i.ToString() + "  J :" + j.ToString());
 
-                    stopWatch.Stop();
+                        stopWatch.Start();
 
-                    Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
+                        fomBBM[i, j].Init();
+                        somBBM[i, j].Init(i, j);
 
+                        stopWatch.Stop();
+
+                        Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
+                    }
+                    else
+                    {
+                        fomBBM[i, j].Init();
+                        somBBM[i, j] = somBBM[0, 0].CloneBBM();
+                    }
                 }
             }
         }

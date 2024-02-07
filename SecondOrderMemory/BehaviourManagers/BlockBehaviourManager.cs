@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Bond;
 using SecondOrderMemory.Models;
 using Common;
 
@@ -52,9 +52,10 @@ namespace SecondOrderMemory.BehaviourManagers
             }
 
             return BlockBehaviourManager._blockBehaviourManager;
-        }
+        }               
+        
 
-        private BlockBehaviourManager(int numColumns = 10)
+        public BlockBehaviourManager(int numColumns = 10)
         {
             this.CycleNum = 0;
 
@@ -100,7 +101,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }                      
         }        
 
-        public void Init(int x, int y)
+        public void Init(int x = -1, int y = -1)
         {                        
 
             Connector.GetConnector().ReadDendriticSchema(x, y);
@@ -111,6 +112,11 @@ namespace SecondOrderMemory.BehaviourManagers
             
             GenerateApicalLines();
 
+        }
+
+        public BlockBehaviourManager CloneBBM(BlockBehaviourManager bbm)
+        {
+            return Clone<BlockBehaviourManager>.From(bbm);
         }
 
         private void PreCyclePrep()

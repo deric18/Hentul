@@ -2,6 +2,37 @@
   "version": 3,
   "targets": {
     "net7.0": {
+      "Bond.Core.CSharp/10.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.6/Bond.Attributes.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/netstandard1.6/Bond.IO.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/netstandard1.6/Bond.Reflection.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/netstandard1.6/Bond.dll": {
+            "related": ".Attributes.pdb;.Attributes.xml;.IO.pdb;.IO.xml;.pdb;.Reflection.pdb;.Reflection.xml;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard1.6/Bond.Attributes.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/netstandard1.6/Bond.IO.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/netstandard1.6/Bond.Reflection.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/netstandard1.6/Bond.dll": {
+            "related": ".Attributes.pdb;.Attributes.xml;.IO.pdb;.IO.xml;.pdb;.Reflection.pdb;.Reflection.xml;.xml"
+          }
+        }
+      },
       "Microsoft.NETCore.Platforms/1.1.0": {
         "type": "package",
         "compile": {
@@ -181,6 +212,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
+          "Bond.Core.CSharp": "10.0.0",
           "Common": "1.0.0",
           "System.Runtime": "4.3.0"
         },
@@ -194,6 +226,75 @@
     }
   },
   "libraries": {
+    "Bond.Core.CSharp/10.0.0": {
+      "sha512": "tybkI7nGBblx/+azotfPVpHhBNW0EsU1D+JSubm4EX7K3xPau88ztkO+o6kiQ37dAKWWa1hxLU6ivQQvkE6mdw==",
+      "type": "package",
+      "path": "bond.core.csharp/10.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "bond.core.csharp.10.0.0.nupkg.sha512",
+        "bond.core.csharp.nuspec",
+        "images/bond-logo-64x64-transparent.png",
+        "lib/net45/Bond.Attributes.dll",
+        "lib/net45/Bond.Attributes.pdb",
+        "lib/net45/Bond.Attributes.xml",
+        "lib/net45/Bond.IO.dll",
+        "lib/net45/Bond.IO.pdb",
+        "lib/net45/Bond.IO.xml",
+        "lib/net45/Bond.Reflection.dll",
+        "lib/net45/Bond.Reflection.pdb",
+        "lib/net45/Bond.Reflection.xml",
+        "lib/net45/Bond.dll",
+        "lib/net45/Bond.pdb",
+        "lib/net45/Bond.xml",
+        "lib/net46/Bond.Attributes.dll",
+        "lib/net46/Bond.Attributes.pdb",
+        "lib/net46/Bond.Attributes.xml",
+        "lib/net46/Bond.IO.dll",
+        "lib/net46/Bond.IO.pdb",
+        "lib/net46/Bond.IO.xml",
+        "lib/net46/Bond.Reflection.dll",
+        "lib/net46/Bond.Reflection.pdb",
+        "lib/net46/Bond.Reflection.xml",
+        "lib/net46/Bond.dll",
+        "lib/net46/Bond.pdb",
+        "lib/net46/Bond.xml",
+        "lib/netstandard1.0/Bond.Attributes.dll",
+        "lib/netstandard1.0/Bond.Attributes.pdb",
+        "lib/netstandard1.0/Bond.Attributes.xml",
+        "lib/netstandard1.0/Bond.Reflection.dll",
+        "lib/netstandard1.0/Bond.Reflection.pdb",
+        "lib/netstandard1.0/Bond.Reflection.xml",
+        "lib/netstandard1.0/Bond.dll",
+        "lib/netstandard1.0/Bond.pdb",
+        "lib/netstandard1.0/Bond.xml",
+        "lib/netstandard1.3/Bond.Attributes.dll",
+        "lib/netstandard1.3/Bond.Attributes.pdb",
+        "lib/netstandard1.3/Bond.Attributes.xml",
+        "lib/netstandard1.3/Bond.IO.dll",
+        "lib/netstandard1.3/Bond.IO.pdb",
+        "lib/netstandard1.3/Bond.IO.xml",
+        "lib/netstandard1.3/Bond.Reflection.dll",
+        "lib/netstandard1.3/Bond.Reflection.pdb",
+        "lib/netstandard1.3/Bond.Reflection.xml",
+        "lib/netstandard1.3/Bond.dll",
+        "lib/netstandard1.3/Bond.pdb",
+        "lib/netstandard1.3/Bond.xml",
+        "lib/netstandard1.6/Bond.Attributes.dll",
+        "lib/netstandard1.6/Bond.Attributes.pdb",
+        "lib/netstandard1.6/Bond.Attributes.xml",
+        "lib/netstandard1.6/Bond.IO.dll",
+        "lib/netstandard1.6/Bond.IO.pdb",
+        "lib/netstandard1.6/Bond.IO.xml",
+        "lib/netstandard1.6/Bond.Reflection.dll",
+        "lib/netstandard1.6/Bond.Reflection.pdb",
+        "lib/netstandard1.6/Bond.Reflection.xml",
+        "lib/netstandard1.6/Bond.dll",
+        "lib/netstandard1.6/Bond.pdb",
+        "lib/netstandard1.6/Bond.xml"
+      ]
+    },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "sha512": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
       "type": "package",

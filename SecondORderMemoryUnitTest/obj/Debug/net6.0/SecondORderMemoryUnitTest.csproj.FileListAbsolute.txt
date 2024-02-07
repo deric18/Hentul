@@ -105,3 +105,7 @@ C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\refint\S
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.pdb
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.genruntimeconfig.cache
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\ref\SecondOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Bond.Attributes.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Bond.IO.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Bond.Reflection.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\Bond.dll

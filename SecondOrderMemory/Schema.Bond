@@ -1,0 +1,23 @@
+﻿namespace SecondOrderMemory
+
+struct BlockBehaviourManager
+{
+        0: ulong CycleNum;
+        1: int NumColumns;
+        2: Dictionary<string, List<string>> PredictedNeuronsForNextCycle;
+        3: Dictionary<string, List<string>> PredictedNeuronsfromLastCycle; 
+        4: List<Neuron> NeuronsFiringThisCycle;
+        5: List<Neuron> NeuronsFiringLastCycle;
+        6: List<Segment>? _predictedSegmentForThisCycle;
+        7: List<Position_SOM> ColumnsThatBurst;
+        8: List<Neuron> temporalContributors;
+        9: List<Neuron> apicalContributors;
+        10: Column[,] Columns;
+        11: Neuron[,] TemporalLineArray;
+        12: Neuron[,] ApicalLineArray;
+        13: uint totalProximalConnections;
+        14: uint totalAxonalConnections;
+        15: bool IsApical;
+        16: bool isTemporal;
+        17: bool IsSpatial;    
+}

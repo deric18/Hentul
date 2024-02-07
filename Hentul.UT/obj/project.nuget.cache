@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "XPQAYYkRtPOlAhxXYyMbn/MeaDTXUUjJY+fhX9gRhbMUpTL5WV7HZVmtKS2rXZ1qob3gu9QzLQq/PlqoJo8MJA==",
+  "dgSpecHash": "3AIo0m3slGWUqCfodODADcwhcPXmRmIuP3PZ9FH+Q7SB3uGnZrT+RjyWpHaZCBy/H7+lhu8qWvTbJMp4q+EGpQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\depint\\source\\repos\\Hentul.UT\\Hentul.UT.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\depint\\.nuget\\packages\\bond.core.csharp\\10.0.0\\bond.core.csharp.10.0.0.nupkg.sha512",
     "C:\\Users\\depint\\.nuget\\packages\\coverlet.collector\\3.1.2\\coverlet.collector.3.1.2.nupkg.sha512",
     "C:\\Users\\depint\\.nuget\\packages\\microsoft.codecoverage\\17.1.0\\microsoft.codecoverage.17.1.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.csharp\\4.0.1\\microsoft.csharp.4.0.1.nupkg.sha512",

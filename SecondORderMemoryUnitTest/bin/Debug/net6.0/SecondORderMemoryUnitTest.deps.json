@@ -19,6 +19,26 @@
           "SecondOrderMemoryUnitTest.dll": {}
         }
       },
+      "Bond.Core.CSharp/10.0.0": {
+        "runtime": {
+          "lib/netstandard1.6/Bond.Attributes.dll": {
+            "assemblyVersion": "10.0.0.100",
+            "fileVersion": "10.0.0.100"
+          },
+          "lib/netstandard1.6/Bond.IO.dll": {
+            "assemblyVersion": "10.0.0.100",
+            "fileVersion": "10.0.0.100"
+          },
+          "lib/netstandard1.6/Bond.Reflection.dll": {
+            "assemblyVersion": "10.0.0.100",
+            "fileVersion": "10.0.0.100"
+          },
+          "lib/netstandard1.6/Bond.dll": {
+            "assemblyVersion": "10.0.0.100",
+            "fileVersion": "10.0.0.100"
+          }
+        }
+      },
       "coverlet.collector/3.1.2": {},
       "Microsoft.CodeCoverage/17.1.0": {
         "runtime": {
@@ -709,6 +729,7 @@
       },
       "SecondOrderMemory/1.0.0": {
         "dependencies": {
+          "Bond.Core.CSharp": "10.0.0",
           "Common": "1.0.0",
           "System.Runtime": "4.3.0"
         },
@@ -723,6 +744,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Bond.Core.CSharp/10.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-tybkI7nGBblx/+azotfPVpHhBNW0EsU1D+JSubm4EX7K3xPau88ztkO+o6kiQ37dAKWWa1hxLU6ivQQvkE6mdw==",
+      "path": "bond.core.csharp/10.0.0",
+      "hashPath": "bond.core.csharp.10.0.0.nupkg.sha512"
     },
     "coverlet.collector/3.1.2": {
       "type": "package",

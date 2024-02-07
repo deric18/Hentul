@@ -122,3 +122,7 @@ C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\refint\Hentul.UT.dll
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.pdb
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.genruntimeconfig.cache
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\ref\Hentul.UT.dll
+C:\Users\depint\source\repos\Hentul.UT\bin\Debug\net7.0\Bond.Attributes.dll
+C:\Users\depint\source\repos\Hentul.UT\bin\Debug\net7.0\Bond.IO.dll
+C:\Users\depint\source\repos\Hentul.UT\bin\Debug\net7.0\Bond.Reflection.dll
+C:\Users\depint\source\repos\Hentul.UT\bin\Debug\net7.0\Bond.dll
