@@ -263,7 +263,7 @@ namespace SecondOrderMemory.Models
                 }
                 if (AxonalList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
                 {
-                    Console.WriteLine("Connection Already Added");
+                    Console.WriteLine("AddNewAxonalConnection : Connection Already Added");
 
                     synapse.IncrementStrength();
 
@@ -308,7 +308,7 @@ namespace SecondOrderMemory.Models
 
                 if (dendriticList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
                 {
-                    Console.WriteLine("Connection Already Added");
+                    Console.WriteLine("AddNewProximalDendriticConnection : Connection Already Added");
 
                     synapse.IncrementStrength();
 
@@ -366,7 +366,7 @@ namespace SecondOrderMemory.Models
 
                     if (dendriticList.TryGetValue(axonalNeuronId, out var synapse1))
                     {
-                        Console.WriteLine("Connection Already Added");
+                        Console.WriteLine("AddToDistalList : Connection Already Added");
 
                         //synapse1.IncrementStrength();
 
@@ -397,7 +397,7 @@ namespace SecondOrderMemory.Models
 
             if (dendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                Console.WriteLine("Connection Already Added");
+                Console.WriteLine("AddToDistalList : Connection Already Added");
 
                 synapse.IncrementStrength();
 
@@ -429,7 +429,7 @@ namespace SecondOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("Connection Already Added");
+                Console.WriteLine("AddtoAxonalList : Connection Already Added");
 
                 synapse.IncrementStrength();
 

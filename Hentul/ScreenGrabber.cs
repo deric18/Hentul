@@ -184,7 +184,7 @@
                     else
                     {
                         fomBBM[i, j].Init();
-                        somBBM[i, j].Init();
+                        somBBM[i, j].Init(i, j);
                     }
                 }
             }

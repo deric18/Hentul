@@ -52,14 +52,14 @@
                     BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    //Console.WriteLine("intX :" + intX.ToString() +" intY : "+ intY.ToString() + " Cache Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString() );
+                    Console.WriteLine("Adding connection from Cache : intX :" + intX.ToString() +" intY : "+ intY.ToString() + " Cache Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString() );
                 }                
 
                 return;
             }
 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\SecondOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";
+            string dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -107,7 +107,7 @@
                         int b = Convert.ToInt32(node.Attributes[1]?.Value);
                         int c = Convert.ToInt32(node.Attributes[2]?.Value);
 
-                        //Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+                        Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
                         var proximalNodes = node.ChildNodes;
 
@@ -136,6 +136,8 @@
 
                             //Money Shot!!!
                             BlockBehaviourManager.InitDendriticConnectionForConnector(a, b, c, e, f, g);
+
+                            Console.WriteLine(" Adding Connection from Schema : Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
                             arr[index++] = e;
                             arr[index++] = f;
@@ -188,7 +190,7 @@
                     BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    Console.WriteLine("intX :" + intX.ToString() + " intY : " + intY.ToString() + " Cache Axonal A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
+                    Console.WriteLine("Loading connection From Cache : ", i, j, k);
 
                 }
 
@@ -196,7 +198,7 @@
             }
 
             XmlDocument document = new XmlDocument();
-            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            string axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
 
             if (!File.Exists(axonalDocumentPath))
             {
@@ -249,6 +251,7 @@
                         arr[index++] = j;
                         arr[index++] = k;
 
+                        Console.WriteLine("New Connection From Schema Doc",x,y,z,i,j,k);
                     }
                     catch (Exception e)
                     {

@@ -9,6 +9,7 @@
 
         public static void ReadDendriticSchema(int fileSize, int numberOfRows)
         {
+            Console.WriteLine("First Order Memory : ReadDendricticSchema");
                    
             Random rand = new Random();
 
@@ -120,7 +121,9 @@
         }
 
         public static void ReadAxonalSchema(int fileSize, int numRows)
-        {            
+        {
+            Console.WriteLine("First Order Memory : ReadAxonalSchema");
+
             int a, b, c;
             Random rand = new Random();
 
