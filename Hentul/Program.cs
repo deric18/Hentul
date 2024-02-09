@@ -1,11 +1,10 @@
-﻿using System;
-using Hentul;
+﻿using Hentul;
 
 Console.WriteLine("Initializing ...");
 
 ScreenGrabber screenGrabber = new ScreenGrabber(4);
 
-Console.WriteLine("System Initialized Finally! Press any Key to Grab Cursor Pixels 10 X 10");
+Console.WriteLine("System Initialized Finally! Press any Key to start NEural Enginer :");
 
 Console.ReadKey();
 

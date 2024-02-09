@@ -46,7 +46,7 @@
                 }
             }
             
-            //Init();            
+            Init();            
 
         }
         
@@ -184,7 +184,7 @@
                     else
                     {
                         fomBBM[i, j].Init();
-                        //somBBM[i, j] = somBBM[0, 0].CloneBBM();
+                        somBBM[i, j].Init();
                     }
                 }
             }
