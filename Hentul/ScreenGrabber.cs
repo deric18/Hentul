@@ -132,7 +132,7 @@
         }
 
 
-        public void MoveCursor(int loop)
+        public void MoveCursor(int offset)
         {
             POINT p;
 
@@ -141,20 +141,15 @@
 
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
-
-            //while (loop > 0)
-            //{
-            p.X = p.X + 100;
-            p.Y = p.Y + 100;
+           
+            p.X = p.X + offset;
+            p.Y = p.Y + offset;
 
             ClientToScreen(dc, ref p);
             SetCursorPos(p.X, p.Y);
 
-            loop--;
-            //}
             ReleaseDC(desk, dc);
-
-            Console.ReadLine();
+           
         }
 
         #region PRIVATE METHODS

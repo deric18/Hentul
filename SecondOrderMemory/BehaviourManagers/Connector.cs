@@ -52,7 +52,7 @@
                     BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     BlockBehaviourManager.InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    Console.WriteLine("Adding connection from Cache : intX :" + intX.ToString() +" intY : "+ intY.ToString() + " Cache Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString() );
+                    Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() +" Column Y : "+ intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString() );
                 }                
 
                 return;
@@ -122,6 +122,7 @@
                         int[] arr = new int[neuronNodes.Count * 3];
                         int index = 0;
 
+                        //4 Proximal Dendronal Connections
                         foreach (XmlNode neuron in neuronNodes)
                         {
                             //ProximalConnection
@@ -137,7 +138,7 @@
                             //Money Shot!!!
                             BlockBehaviourManager.InitDendriticConnectionForConnector(a, b, c, e, f, g);
 
-                            Console.WriteLine(" Adding Connection from Schema : Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+                            Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : "+ intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
                             arr[index++] = e;
                             arr[index++] = f;
@@ -185,12 +186,13 @@
 
                     int offset = 3;
 
+                    //4 Axonaal Connections
                     BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
                     BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
                     BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     BlockBehaviourManager.InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    Console.WriteLine("Loading connection From Cache : ", i, j, k);
+                    Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " +  i + j + k);
 
                 }
 

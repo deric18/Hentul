@@ -28,6 +28,7 @@ namespace SecondOrderMemory.Models
         private const int AXONAL_CONNECTION = 1;
         #endregion
 
+        private ulong redundantCounter = 0;
         public Position_SOM NeuronID { get; private set; }
         public NeuronType nType { get; private set; }
         public Dictionary<string, char> TAContributors { get; private set; }
@@ -263,10 +264,8 @@ namespace SecondOrderMemory.Models
                 }
                 if (AxonalList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
                 {
-                    Console.WriteLine("AddNewAxonalConnection : Connection Already Added");
-
-                    synapse.IncrementStrength();
-
+                    Console.WriteLine("SOM :: AddNewAxonalConnection : Connection Already Added Counter : " , ++redundantCounter);
+                    
                     return false;
                 }
                 else
@@ -308,9 +307,9 @@ namespace SecondOrderMemory.Models
 
                 if (dendriticList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
                 {
-                    Console.WriteLine("AddNewProximalDendriticConnection : Connection Already Added");
+                    Console.WriteLine("SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
 
-                    synapse.IncrementStrength();
+                    
 
                     return false;
                 }
@@ -366,7 +365,7 @@ namespace SecondOrderMemory.Models
 
                     if (dendriticList.TryGetValue(axonalNeuronId, out var synapse1))
                     {
-                        Console.WriteLine("AddToDistalList : Connection Already Added");
+                        Console.WriteLine("SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
                         //synapse1.IncrementStrength();
 
@@ -397,7 +396,7 @@ namespace SecondOrderMemory.Models
 
             if (dendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                Console.WriteLine("AddToDistalList : Connection Already Added");
+                Console.WriteLine("SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
                 synapse.IncrementStrength();
 
@@ -429,7 +428,7 @@ namespace SecondOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("AddtoAxonalList : Connection Already Added");
+                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : ", ++redundantCounter);
 
                 synapse.IncrementStrength();
 
