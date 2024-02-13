@@ -41,12 +41,20 @@
             {
                 for(int j=0; j< range; j++)
                 {                    
-                    fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-                    somBBM[i, j] = SecondOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(10);
+                    if ( i == 0 && j == 0)
+                    {
+                        fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+                        fomBBM[i, j].Init();
+                        somBBM[i, j] = SecondOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(10);
+                        somBBM[i, j].Init();
+                    }
+                    else
+                    {
+                        fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+                        somBBM[i, j] = somBBM[0, 0].CloneBBM();
+                    }                                       
                 }
-            }
-            
-            Init();            
+            }                        
 
         }
         

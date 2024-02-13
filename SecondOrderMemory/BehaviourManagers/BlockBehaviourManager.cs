@@ -114,26 +114,26 @@ namespace SecondOrderMemory.BehaviourManagers
 
         }
 
-        public BlockBehaviourManager CloneBBM(BlockBehaviourManager bbm)
+        public BlockBehaviourManager CloneBBM()
         {
             BlockBehaviourManager toReturn;
 
-            toReturn = new BlockBehaviourManager(bbm.NumColumns);
+            toReturn = new BlockBehaviourManager(NumColumns);
 
             try
             {
-                for (int i = 0; i < bbm.NumColumns; i++)
+                for (int i = 0; i < NumColumns; i++)
                 {
-                    for (int j = 0; j < bbm.NumColumns; j++)
+                    for (int j = 0; j < NumColumns; j++)
                     {
-                        for (int k = 0; k < bbm.NumColumns; k++)
+                        for (int k = 0; k < NumColumns; k++)
                         {
                             //Proximal Dendritic Connections
                             Neuron presynapticNeuron, postSynapticNeuron;
 
-                            for(int l=0; l< bbm.Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
+                            for(int l=0; l< Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
                             {
-                                var synapse = bbm.Columns[i, j].Neurons[k].dendriticList.Values.ElementAt(l);
+                                var synapse = Columns[i, j].Neurons[k].dendriticList.Values.ElementAt(l);
 
                                 if (synapse != null)
                                 {
@@ -150,9 +150,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
                             //Axonal Connections
-                            for(int l = 0; l < bbm.Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
+                            for(int l = 0; l < Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
                             {
-                                var synapse = bbm.Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
+                                var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
 
                                 if (synapse != null)
                                 {

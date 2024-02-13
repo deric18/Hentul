@@ -178,7 +178,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestSOMBBMClone()
         {
-            BlockBehaviourManager bbm2 = bbManager.CloneBBM(bbManager);
+            BlockBehaviourManager bbm2 = bbManager.CloneBBM();
 
             bbManager.Columns[3, 3].Neurons[5].flag = 1;
 
