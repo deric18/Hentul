@@ -116,8 +116,46 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public BlockBehaviourManager CloneBBM(BlockBehaviourManager bbm)
         {
-            return Clone<BlockBehaviourManager>.From(bbm);
+            BlockBehaviourManager toReturn;
+
+            toReturn = new BlockBehaviourManager(bbm.NumColumns);
+
+            for(int i=0; i< bbm.NumColumns; i++)
+            {
+                for(int j=0; j< bbm.NumColumns; j++)
+                {
+                    for( int k =0; k<bbm.NumColumns; k++)
+                    {
+                        //Proximal Dendritic Connections
+                        Neuron presynapticNeuron, postSynapticNeuron;
+                        foreach (var synapse in bbm.Columns[i, j].Neurons[k].dendriticList.Values)
+                        {
+                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+                            toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PRXOMALDENDRITETONEURON);
+                        }
+
+
+                        //Axonal Connections
+                        foreach( var synapse in bbm.Columns[i,].Neurons[k].AxonalList.Values)
+                        {
+                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId) ;
+                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId) ;
+
+                            toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON);
+                        }
+
+                        toReturn.GenerateTemporalLines();
+
+                        toReturn.GenerateApicalLines();
+                    }
+                }
+            }
+
+            return toReturn;
         }
+
 
         private void PreCyclePrep()
         {
@@ -241,7 +279,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 foreach (var item in PredictedNeuronsfromLastCycle.Keys)
                 {
-                    var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(item);
+                    var neuronToAdd = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(item);
 
                     if (neuronToAdd != null)
                     {
@@ -283,7 +321,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         foreach (var contributingNeuron in contributingList)
                         {
                             //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-                            correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(BlockBehaviourManager.ConvertStringPosToNeuron(contributingNeuron));
+                            correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(contributingNeuron));
                         }
                     }
                 }
@@ -565,7 +603,7 @@ namespace SecondOrderMemory.BehaviourManagers
             return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);            
         }
 
-        public static Neuron GetNeuronFromPosition(char w, int x, int y, int z)
+        public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
         {
             if (w == 'N')
             {
@@ -583,7 +621,7 @@ namespace SecondOrderMemory.BehaviourManagers
             return null;
         }
 
-        public static Neuron ConvertStringPosToNeuron(string posString)
+        public Neuron ConvertStringPosToNeuron(string posString)
         {
             var parts = posString.Split('-');
             int x = Convert.ToInt32(parts[0]);
@@ -602,7 +640,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     int breakpoint = 1;
                 }
 
-                return BlockBehaviourManager.GetNeuronFromPosition(nType, x, y, z);
+                return GetNeuronFromPosition(nType, x, y, z);
 
             }
             catch (Exception e)

@@ -15,7 +15,7 @@ while (true)
 
     Console.WriteLine("Processing Pixel Data ...");
 
-    //screenGrabber.ProcessPixelData();
+    screenGrabber.ProcessPixelData();
 
     Console.WriteLine("Done Processing Pixel Data ...");
 

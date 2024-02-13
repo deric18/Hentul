@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj": {}
+    "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj": {}
   },
   "projects": {
-    "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj": {
+    "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj",
         "projectName": "Common",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\Common\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -62,14 +62,14 @@
         }
       }
     },
-    "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj": {
+    "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
         "projectName": "SecondOrderMemoryUnitTest",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -89,8 +89,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj"
+              "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj"
               }
             }
           }
@@ -146,14 +146,14 @@
         }
       }
     },
-    "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+    "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj",
         "projectName": "SecondOrderMemory",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -173,8 +173,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj"
+              "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj"
               }
             }
           }

@@ -18,16 +18,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Init(-1, -1);
         }
-
-        //[TestMethod]
-        //public void TestInstanceClone()
-        //{
-        //    var newbbManager = bbManager.Clone();
-
-        //    bbManager.Columns[0, 0].Neurons[0].flag = 1;
-
-        //    Assert.IsFalse(newbbManager.)
-        //}
+        
 
         [TestMethod]
         public void TestTemporalLines()
@@ -89,11 +80,11 @@ namespace SecondOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
             
-            Neuron normalNeuron = BlockBehaviourManager.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(position.ToString());
 
             Position_SOM overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
-            var overlapNeuron = BlockBehaviourManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
+            var overlapNeuron = BlockBehaviourManager.GetBlockBehaviourManager().GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
             var temporalNeuron = overlapNeuron.GetMyTemporalPartner();
 
@@ -159,7 +150,7 @@ namespace SecondOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = BlockBehaviourManager.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(position.ToString());
            
             var apicalNeuron = normalNeuron.GetMyApicalPartner();
 
