@@ -44,6 +44,7 @@ namespace Hentul.UT
         {
             sg = new ScreenGrabber(30);
 
+            Assert.Pass();
         }
     }
 }

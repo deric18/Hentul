@@ -16,12 +16,12 @@
 
     public class ScreenGrabber
     {
-        public Color[,] ColorMap { get; private set; }         
+        public Color[,] ColorMap { get; private set; }
         public POINT Point { get; set; }
 
         public int range;
 
-        private FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[,] fomBBM;
+        private FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM;
         private SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[,] somBBM;
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
@@ -34,50 +34,44 @@
             this.range = range;
             this.ColorMap = new Color[range, range];
 
-            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range, range];
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[3];
             somBBM = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[range, range];
 
-            for ( int i=0; i< range; i++)
-            {
-                for(int j=0; j< range; j++)
-                {                    
-                    if ( i == 0 && j == 0)
-                    {
-                        fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-                        fomBBM[i, j].Init();
-                        somBBM[i, j] = SecondOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(10);
-                        somBBM[i, j].Init();
-                    }
-                    else
-                    {
-                        fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-                        fomBBM[i, j].Init();
-                        somBBM[i, j] = somBBM[0, 0].CloneBBM();
-                    }                                       
-                }
-            }                        
 
+            fomBBM[0] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+            fomBBM[1] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+            fomBBM[2] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+
+            Init();            
         }
-        
 
+        private void Init()
+        {
+            Stopwatch stopWatch = new Stopwatch();
 
-        [DllImport("user32.dll")]
-        static extern bool GetCursorPos(out POINT lpPoint);
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr GetDesktopWindow();
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr GetWindowDC(IntPtr window);
-        [DllImport("gdi32.dll", SetLastError = true)]
-        public static extern uint GetPixel(IntPtr dc, int x, int y);
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern int ReleaseDC(IntPtr window, IntPtr dc);
-        [DllImport("User32.Dll")]
-        public static extern long SetCursorPos(int x, int y);
-        [DllImport("User32.Dll")]
-        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+            Console.WriteLine("Starting Initialization  I : " + i.ToString() + "  J :" + j.ToString());
 
+            stopWatch.Start();
 
+            fomBBM[0].Init();
+            fomBBM[1].Init();
+            fomBBM[2].Init();
+            somBBM[0, 0].Init();
 
+            stopWatch.Stop();
+
+            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
+
+            Console.WriteLine("Initing Rest of the instances : ");
+
+            for (int i = 1; i < range; i++)
+            {
+                for (int j = 1; j < range; j++)
+                {
+                    somBBM[i, j] = somBBM[0, 0].CloneBBM();
+                }
+            }
+        }
 
         public void Grab()
         {
@@ -102,12 +96,11 @@
             int x2 = Math.Abs(Point.X + range);
             int y2 = Math.Abs(Point.Y + range);
 
-            this.PrintColorMap(x1, y1, Point.X + range, Point.Y + range);
-
+            this.PrintColorMap(x1, y1, x2, y2);
         }
 
         public void ProcessPixelData()
-        {            
+        {
             for (int i = 0; i < range; i++)
             {
                 for (int j = 0; j < range; j++)
@@ -123,15 +116,29 @@
                     byte G = ColorMap[i, j].G;
                     byte B = ColorMap[i, j].B;
 
-                    ByteEncoder encoder = new ByteEncoder(100, 24);
+                    ByteEncoder[] encoder = new ByteEncoder[3];
 
-                    encoder.Encode(R, G, B);
+                    encoder[0] = new ByteEncoder(100, 8);
+                    encoder[1] = new ByteEncoder(100, 8);
+                    encoder[2] = new ByteEncoder(100, 8);
 
-                    SDR sdr = encoder.GetDenseSDR();
+                    encoder[0].Encode(R);
+                    encoder[1].Encode(G);
+                    encoder[2].Encode(B);
 
-                    fomBBM[i, j].Fire(sdr);
+                    SDR sdr1 = encoder[0].GetDenseSDR();
+                    SDR sdr2 = encoder[1].GetDenseSDR();
+                    SDR sdr3 = encoder[2].GetDenseSDR();
 
-                    SDR fomSdr = fomBBM[i, j].GetSDR();
+                    fomBBM[0].Fire(sdr1);
+                    fomBBM[1].Fire(sdr2);
+                    fomBBM[2].Fire(sdr3);
+
+                    SDR[] fomSdrArr = new SDR[3];
+
+                    fomSdrArr[0] = fomBBM[0].GetSDR();
+                    fomSdrArr[1] = fomBBM[1].GetSDR();
+                    fomSdrArr[2] = fomBBM[2].GetSDR();
 
                     SDR_SOM somSdr = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(fomSdr.ActiveBits), iType.SPATIAL);
 
@@ -140,6 +147,20 @@
             }
         }
 
+        [DllImport("user32.dll")]
+        static extern bool GetCursorPos(out POINT lpPoint);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetWindowDC(IntPtr window);
+        [DllImport("gdi32.dll", SetLastError = true)]
+        public static extern uint GetPixel(IntPtr dc, int x, int y);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int ReleaseDC(IntPtr window, IntPtr dc);
+        [DllImport("User32.Dll")]
+        public static extern long SetCursorPos(int x, int y);
+        [DllImport("User32.Dll")]
+        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
 
         public void MoveCursor(int offset)
         {
@@ -150,7 +171,7 @@
 
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
-           
+
             p.X = p.X + offset;
             p.Y = p.Y + offset;
 
@@ -158,41 +179,10 @@
             SetCursorPos(p.X, p.Y);
 
             ReleaseDC(desk, dc);
-           
+
         }
 
-        #region PRIVATE METHODS
-
-        private void Init()
-        {
-            for (int i = 0; i < range; i++)
-            {
-                for (int j = 0; j < range; j++)
-                {
-
-                    if (i == 0 && j == 0)
-                    {
-                        Stopwatch stopWatch = new Stopwatch();
-
-                        Console.WriteLine("Starting Initialization  I : " + i.ToString() + "  J :" + j.ToString());
-
-                        stopWatch.Start();
-
-                        fomBBM[i, j].Init();
-                        somBBM[i, j].Init(i, j);
-
-                        stopWatch.Stop();
-
-                        Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
-                    }
-                    else
-                    {
-                        fomBBM[i, j].Init();
-                        somBBM[i, j].Init(i, j);
-                    }
-                }
-            }
-        }
+        #region PRIVATE METHODS        
 
         private static Color GetColorAt(int x, int y)
         {
@@ -232,7 +222,7 @@
             }
             return point;
         }
-       
+
 
         private List<Position_SOM> ConvertFomToSomPositions(List<Position> position)
         {

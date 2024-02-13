@@ -83,6 +83,33 @@
 
         }
 
+
+        public void Encode(byte b)
+        {
+            if (N != 100)
+            {
+                throw new InvalidDataException("Cannot Initiate SDR with lower than 100 N for the given byte count to encode");
+            }
+
+            int offset = fileSize / 3;
+            int iterator = 1;
+            int x = 0, y = 0;
+            bool bit = false;
+
+            for (int i = 0; i < 8; i++)
+            {
+                bit = (b & (1 << b - 1)) != 0;
+
+                x = (iterator * offset);
+
+                y = i;
+
+                ActiveBits.Add(new Position(x, y));
+            }
+
+            iterator++;
+        }
+
         public SDR GetDenseSDR()
         {
             return new SDR(fileSize, fileSize, ActiveBits);
