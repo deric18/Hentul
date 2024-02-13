@@ -51,6 +51,7 @@
                     else
                     {
                         fomBBM[i, j] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+                        fomBBM[i, j].Init();
                         somBBM[i, j] = somBBM[0, 0].CloneBBM();
                     }                                       
                 }

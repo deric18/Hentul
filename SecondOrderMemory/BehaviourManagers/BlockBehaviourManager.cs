@@ -150,7 +150,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
                             //Axonal Connections
-                            for(int l = 0; l < Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
+                            for(int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
                             {
                                 var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
 
