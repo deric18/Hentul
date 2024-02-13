@@ -138,7 +138,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
                         //Axonal Connections
-                        foreach( var synapse in bbm.Columns[i,].Neurons[k].AxonalList.Values)
+                        foreach( var synapse in bbm.Columns[i,j].Neurons[k].AxonalList.Values)
                         {
                             presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId) ;
                             postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId) ;

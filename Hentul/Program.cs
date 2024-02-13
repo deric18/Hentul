@@ -2,9 +2,9 @@
 
 Console.WriteLine("Initializing ...");
 
-ScreenGrabber screenGrabber = new ScreenGrabber(4);
+ScreenGrabber screenGrabber = new ScreenGrabber(30);
 
-Console.WriteLine("System Initialized Finally! Press any Key to start NEural Enginer :");
+Console.WriteLine("System Initialized Finally! Press any Key to start Neural Engine :");
 
 Console.ReadKey();
 
@@ -21,7 +21,7 @@ while (true)
 
     Console.WriteLine("Movign Cursor");
 
-    screenGrabber.MoveCursor(100);
+    screenGrabber.MoveCursor(2);
 
-
+    Thread.Sleep(1000);
 }
