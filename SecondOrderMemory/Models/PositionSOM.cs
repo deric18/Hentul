@@ -34,7 +34,7 @@ namespace SecondOrderMemory.Models
             return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
         }
 
-        public new bool Equals(Position_SOM pos)
+        public bool Equals(Position_SOM pos)
         {
             return X == pos.X && Y == pos.Y && Z == pos.Z && W == pos.W;
         }

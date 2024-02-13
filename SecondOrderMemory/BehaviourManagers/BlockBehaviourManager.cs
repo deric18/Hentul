@@ -120,33 +120,60 @@ namespace SecondOrderMemory.BehaviourManagers
 
             toReturn = new BlockBehaviourManager(bbm.NumColumns);
 
-            for(int i=0; i< bbm.NumColumns; i++)
+            try
             {
-                for(int j=0; j< bbm.NumColumns; j++)
+                for (int i = 0; i < bbm.NumColumns; i++)
                 {
-                    for( int k =0; k<bbm.NumColumns; k++)
+                    for (int j = 0; j < bbm.NumColumns; j++)
                     {
-                        //Proximal Dendritic Connections
-                        Neuron presynapticNeuron, postSynapticNeuron;
-                        foreach (var synapse in bbm.Columns[i, j].Neurons[k].dendriticList.Values)
+                        for (int k = 0; k < bbm.NumColumns; k++)
                         {
-                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                            //Proximal Dendritic Connections
+                            Neuron presynapticNeuron, postSynapticNeuron;
 
-                            toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PRXOMALDENDRITETONEURON);
+                            for(int l=0; l< bbm.Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
+                            {
+                                var synapse = bbm.Columns[i, j].Neurons[k].dendriticList.Values.ElementAt(l);
+
+                                if (synapse != null)
+                                {
+                                    presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                                    postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+                                    toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PRXOMALDENDRITETONEURON);
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+                                }
+                            }
+
+
+                            //Axonal Connections
+                            for(int l = 0; l < bbm.Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
+                            {
+                                var synapse = bbm.Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
+
+                                if (synapse != null)
+                                {
+
+                                    presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                                    postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+                                    toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON);
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+                                }
+                            }
                         }
-
-
-                        //Axonal Connections
-                        foreach( var synapse in bbm.Columns[i,j].Neurons[k].AxonalList.Values)
-                        {
-                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId) ;
-                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId) ;
-
-                            toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON);
-                        }                        
                     }
                 }
+            }
+            catch(Exception e)
+            {
+                int bb = 1;
             }
 
             toReturn.GenerateTemporalLines();
