@@ -144,14 +144,14 @@ namespace SecondOrderMemory.BehaviourManagers
                             postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId) ;
 
                             toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON);
-                        }
-
-                        toReturn.GenerateTemporalLines();
-
-                        toReturn.GenerateApicalLines();
+                        }                        
                     }
                 }
             }
+
+            toReturn.GenerateTemporalLines();
+
+            toReturn.GenerateApicalLines();
 
             return toReturn;
         }
