@@ -44,9 +44,9 @@
             fomBBM[1] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
             fomBBM[2] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
 
-            somBBM[0, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(10);
-            somBBM[1, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(10);
-            somBBM[2, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(10);
+            somBBM[0, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
+            somBBM[1, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
+            somBBM[2, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
 
             Init();            
         }
@@ -77,9 +77,9 @@
             {
                 for (int j = 1; j < range; j++)
                 {
-                    somBBM[0, i, j] = somBBM[0, 0, 0].CloneBBM();
-                    somBBM[1, i, j] = somBBM[1, 0, 0].CloneBBM();
-                    somBBM[2, i, j] = somBBM[2, 0, 0].CloneBBM();
+                    somBBM[0, i, j] = somBBM[0, 0, 0].CloneBBM(0, 0, 0);
+                    somBBM[1, i, j] = somBBM[1, 0, 0].CloneBBM(1, 0, 0);
+                    somBBM[2, i, j] = somBBM[2, 0, 0].CloneBBM(2, 0, 0);
                 }
             }
 

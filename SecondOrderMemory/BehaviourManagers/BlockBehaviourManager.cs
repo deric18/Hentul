@@ -10,6 +10,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private int NumColumns;
 
+        private Position_SOM BlockID;
+
         public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
 
         public Dictionary<string, List<string>> PredictedNeuronsfromLastCycle { get; private set; }
@@ -45,18 +47,15 @@ namespace SecondOrderMemory.BehaviourManagers
         private static BlockBehaviourManager _blockBehaviourManager;
 
         public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 10)
-        {
-            if (BlockBehaviourManager._blockBehaviourManager == null)
-            {
-                BlockBehaviourManager._blockBehaviourManager = new BlockBehaviourManager(numColumns);
-            }
-
+        {            
             return BlockBehaviourManager._blockBehaviourManager;
         }               
         
 
-        public BlockBehaviourManager(int numColumns = 10)
+        public BlockBehaviourManager(int x, int y, int z, int numColumns = 10)
         {
+            this.BlockID = new Position_SOM(x, y, z);
+
             this.CycleNum = 0;
 
             this.NumColumns = numColumns;
@@ -114,11 +113,11 @@ namespace SecondOrderMemory.BehaviourManagers
 
         }
 
-        public BlockBehaviourManager CloneBBM()
+        public BlockBehaviourManager CloneBBM(int x, int y, int z)
         {
             BlockBehaviourManager toReturn;
 
-            toReturn = new BlockBehaviourManager(NumColumns);
+            toReturn = new BlockBehaviourManager(x,y,z,NumColumns);
 
             try
             {
@@ -632,20 +631,25 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
         {
+            Neuron toRetun = null;
+
             if (w == 'N')
             {
-                return _blockBehaviourManager.Columns[x, y].Neurons[z];
+                toRetun = _blockBehaviourManager.Columns[x, y].Neurons[z];
             }
             else if (w == 'T')
             {
-                return _blockBehaviourManager.TemporalLineArray[y, z];
+                toRetun =  _blockBehaviourManager.TemporalLineArray[y, z];
             }            
             else if(w == 'A')
             {
-                return _blockBehaviourManager.ApicalLineArray[x, y];
+                toRetun = _blockBehaviourManager.ApicalLineArray[x, y];
             }
 
-            return null;
+            if(toRetun == null)
+                throw new InvalidOperationException("Your Column structure is messed up!!!");
+
+            return toRetun; 
         }
 
         public Neuron ConvertStringPosToNeuron(string posString)
@@ -655,6 +659,7 @@ namespace SecondOrderMemory.BehaviourManagers
             int y = Convert.ToInt32(parts[1]);
             int z = Convert.ToInt32(parts[2]);
             char nType = 'N';
+
             if (parts.Length == 4)
             {
                 nType = Convert.ToChar(parts[3]);
@@ -675,7 +680,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 int bp = 1;
             }
 
-            throw new DataMisalignedException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns");
+            throw new DataMisalignedException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
 
         }
 
