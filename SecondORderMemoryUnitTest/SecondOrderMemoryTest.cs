@@ -16,9 +16,48 @@ namespace SecondOrderMemoryUnitTest
         {
             bbManager = BlockBehaviourManager.GetBlockBehaviourManager(sizeOfColumns);
 
-            bbManager.Init(-1, -1);
+            bbManager.Init(0, 0);
         }
-        
+
+
+        [TestMethod]
+        public void TestMultipleInstanceOfSOMBBM()
+        {
+            BlockBehaviourManager bbm2 = bbManager.CloneBBM(1,3,10);
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(1,3,10);           
+           
+            bbm3.Init(0, 0);
+
+            SDR_SOM randSDR = GenerateRandomSDR(iType.SPATIAL);
+            
+            bbm2.Fire(randSDR);
+
+            bbManager.Fire(randSDR);
+
+            bbm3.Fire(randSDR);
+
+            for (int i = 0; i < bbm2.NumColumns; i++)
+            {
+                Assert.IsNotNull(bbm2.TemporalLineArray[i, bbm2.NumColumns - 1]);
+            }
+
+            for (int i = 0; i < bbm2.NumColumns; i++)
+            {
+                Assert.IsNotNull(bbm2.ApicalLineArray[i, bbm2.NumColumns - 1]);
+            }
+
+            for (int i = 0; i < bbm3.NumColumns; i++)
+            {
+                Assert.IsNotNull(bbm3.TemporalLineArray[i, bbm3.NumColumns - 1]);
+            }
+
+            for (int i = 0; i < bbm3.NumColumns; i++)
+            {
+                Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.NumColumns - 1]);
+            }
+
+
+        }
 
         [TestMethod]
         public void TestTemporalLines()
@@ -37,7 +76,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalFiring()
         {
-            SDR_SOM temporalInputPattern = GenerateRandomSDRfromPosition(iType.TEMPORAL);
+            SDR_SOM temporalInputPattern = GenerateRandomSDR(iType.TEMPORAL);
             
             Position_SOM position = temporalInputPattern.ActiveBits[0];
 
@@ -125,7 +164,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestApicalFiring()
         {
-            SDR_SOM apicalInputPattern = GenerateRandomSDRfromPosition(iType.APICAL);            
+            SDR_SOM apicalInputPattern = GenerateRandomSDR(iType.APICAL);            
 
             Position_SOM apicalPos = apicalInputPattern.ActiveBits[0];
 
@@ -184,8 +223,12 @@ namespace SecondOrderMemoryUnitTest
 
 
             Assert.AreNotEqual(bbManager.Columns[3, 3].Neurons[5].flag, bbm2.Columns[3, 3].Neurons[5].flag);
+
             Assert.AreEqual(bbm2.Columns[0, 1].Neurons.Count, bbManager.Columns[0, 1].Neurons.Count);
+
             Assert.IsTrue(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner().NeuronID.Equals(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner().NeuronID));
+
+
             Assert.AreEqual(0, bbm2.Columns[3, 3].Neurons[5].flag);
         }
 
@@ -204,12 +247,12 @@ namespace SecondOrderMemoryUnitTest
             return bbManager.Columns[pos.Z, pos.Y].Neurons[pos.X];
         }
 
-        private SDR_SOM GenerateNewRandomSDR(List<Position_SOM> posList, iType inputPatternType)
+        private SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType)
         {
             return new SDR_SOM(10, 10, posList, inputPatternType);
         }
 
-        private SDR_SOM GenerateRandomSDRfromPosition(iType inputPatternType)
+        private SDR_SOM GenerateRandomSDR(iType inputPatternType)
         {
             Random rand = new Random();
 

@@ -1,14 +1,16 @@
 ﻿using Bond;
 using SecondOrderMemory.Models;
 using Common;
+using System.Xml;
 
 namespace SecondOrderMemory.BehaviourManagers
 {
+
     public class BlockBehaviourManager 
     {
         public ulong CycleNum { get; private set; }
 
-        private int NumColumns;
+        public int NumColumns { get; private set; }
 
         private Position_SOM BlockID;
 
@@ -30,9 +32,15 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Column[,] Columns { get; private set; }
 
-        public Neuron[,] TemporalLineArray { get; private set; }
+        public  Neuron[,] TemporalLineArray { get; private set; }
 
         public Neuron[,] ApicalLineArray { get; private set; }
+
+        public Dictionary<string, int[]> DendriticCache { get; private set; }
+
+        public Dictionary<string, int[]> AxonalCache { get; private set; }
+
+        private static int neuronCounter;
 
         public uint totalProximalConnections;
 
@@ -44,17 +52,22 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public bool IsSpatial;
 
-        private static BlockBehaviourManager _blockBehaviourManager;
-
-        public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 10)
-        {            
-            if(_blockBehaviourManager == null)
-            {
-                _blockBehaviourManager = new BlockBehaviourManager(0, 0, 0, numColumns);
-            }
-            return BlockBehaviourManager._blockBehaviourManager;
-        }               
-        
+        #region CONSTANTS
+        public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
+        public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
+        public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
+        private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
+        private const int TEMPORAL_CONNECTION_STRENGTH = 100;
+        private const int APICAL_CONNECTION_STRENGTH = 100;
+        private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
+        private const int APICAL_NEURONAL_FIRE_VALUE = 40;
+        private const int NMDA_NEURONAL_FIRE_VALUE = 100;
+        private const int DISTAL_CONNECTION_STRENGTH = 10;
+        private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
+        private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
+        private const int AXONAL_CONNECTION = 1;
+        #endregion
 
         public BlockBehaviourManager(int x, int y, int z, int numColumns = 10)
         {
@@ -85,6 +98,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
             ColumnsThatBurst = new List<Position_SOM>();
 
+            DendriticCache = new Dictionary<string, int[]>();
+
+            AxonalCache = new Dictionary<string, int[]>();
+
             totalProximalConnections = 0;
 
             totalAxonalConnections = 0;
@@ -94,6 +111,8 @@ namespace SecondOrderMemory.BehaviourManagers
             IsApical = false;
 
             IsSpatial = false;
+
+            neuronCounter = 0;
 
             for (int i = 0; i < numColumns; i++)
             {
@@ -107,9 +126,9 @@ namespace SecondOrderMemory.BehaviourManagers
         public void Init(int x = -1, int y = -1)
         {                        
 
-            Connector.GetConnector().ReadDendriticSchema(x, y);
+            ReadDendriticSchema(x, y);
 
-            Connector.GetConnector().ReadAxonalSchema(x, y);
+            ReadAxonalSchema(x, y);
 
             GenerateTemporalLines();
             
@@ -209,8 +228,7 @@ namespace SecondOrderMemory.BehaviourManagers
         }
 
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false)
-        {
-            List<Neuron> neuronsFiringThisCycle = new List<Neuron>();
+        {            
 
             if(!ignorePrecyclePrep)
                 PreCyclePrep();
@@ -228,21 +246,21 @@ namespace SecondOrderMemory.BehaviourManagers
 
                             if (predictedNeuronPositioons?.Count == Columns[0, 0].Neurons.Count)
                             {//burst
-                                neuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
+                                NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
                             else
                             {//selected predicted neurons
-                                neuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
+                                NeuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                             }
 
                             predictedNeuronPositioons = null;
                         }
 
-                        foreach (var neuron in neuronsFiringThisCycle)
-                        {
-                            neuron.Fire();
-                        }
+                        //foreach (var neuron in NeuronsFiringThisCycle)
+                        //{
+                        //    neuron.Fire();
+                        //}
 
                         IsSpatial = true;
 
@@ -258,7 +276,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         {
                             foreach(var temporalNeuron in temporalLineNeurons)
                             {
-                                temporalNeuron.Fire();
+                                NeuronsFiringThisCycle.Add(temporalNeuron);
 
                                 temporalContributors.Add(temporalNeuron);
                             }
@@ -274,14 +292,14 @@ namespace SecondOrderMemory.BehaviourManagers
 
                         foreach(var pos in incomingPattern.ActiveBits)
                         {
-                            apicalLineNeurons.Add(_blockBehaviourManager.ApicalLineArray[pos.X, pos.Y]);
+                            apicalLineNeurons.Add(this.ApicalLineArray[pos.X, pos.Y]);
                         }
 
                         if (ApicalLineArray != null && apicalLineNeurons.Count != 0)
                         {
                             foreach (var apicalNeuron in apicalLineNeurons)
                             {
-                                apicalNeuron.Fire();
+                                NeuronsFiringThisCycle.Add(apicalNeuron);
 
                                 apicalContributors.Add(apicalNeuron);
                             }
@@ -296,7 +314,117 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if(isTemporal == false && IsApical == false)
             PostCycleCleanup();
-        }       
+        }
+
+        private void NeuronalFire()
+        {
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                neuron.Fire();
+
+                foreach (Synapse synapse in neuron.AxonalList.Values)
+                {
+                    ProcessSpikeFromNeuron(ConvertStringPosToNeuron(synapse.AxonalNeuronId), ConvertStringPosToNeuron(synapse.DendronalNeuronalId) , synapse.cType);
+                }                
+            }
+        }
+
+        public void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PRXOMALDENDRITETONEURON)
+        {
+            uint multiplier = 1;
+
+            if (targetNeuron.NeuronID.ToString().Equals("2-4-2-N"))
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }
+
+            targetNeuron.ChangeCurrentStateTo(NeuronState.PREDICTED);
+
+            AddPredictedNeuron(targetNeuron, sourceNeuron.NeuronID.ToString());
+
+            if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
+            {
+                if (! targetNeuron.TAContributors.TryGetValue(sourceNeuron.ToString(), out char w))
+                {
+                    if (cType.Equals(ConnectionType.TEMPRORAL))
+                    {
+                        targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'T');
+                    }
+                    else if (cType.Equals(ConnectionType.APICAL))
+                    {
+                        targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'A');
+                    }
+                }
+                else
+                {
+                    bool breakpoint = false;
+                    breakpoint = true;
+                }
+            }
+
+            if (targetNeuron.dendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
+            {
+                multiplier += synapse.GetStrength();
+
+                switch (synapse.cType)
+                {
+                    case ConnectionType.DISTALDENDRITETONEURON:
+                        targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE);
+                        break;
+                    case ConnectionType.PRXOMALDENDRITETONEURON:
+                        targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE);
+                        break;
+                    case ConnectionType.TEMPRORAL:
+                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE);
+                        break;
+                    case ConnectionType.APICAL:
+                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE);
+                        break;
+                    case ConnectionType.NMDATONEURON:
+                        targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE);
+                        break;
+                }
+            }
+            else if (cType.Equals(ConnectionType.AXONTONEURON))
+            {
+                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE);
+            }
+            else
+            {
+                throw new InvalidOperationException("ProcessSpikeFormNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
+            }
+        }
+
+
+        public void StrengthenTemporalConnection(Neuron neuron)
+        {
+            PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
+        }
+
+        public void StrengthenApicalConnection(Neuron neuron)
+        {
+            PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
+        }
+
+        private void PramoteCorrectPredictionDendronal(Neuron contributingNeuron, Neuron targetNeuron)
+        {
+            if (targetNeuron.dendriticList.Count == 0)
+            {
+                throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
+            }
+
+            if (targetNeuron.dendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out Synapse synapse))
+            {
+                if (synapse == null)
+                {
+                    Console.WriteLine("PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
+                    throw new InvalidOperationException("Not Supposed to happen!");
+                }
+
+                synapse.IncrementStrength();
+            }
+        }
 
         private void Wire()
         {
@@ -309,7 +437,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 foreach (var item in PredictedNeuronsfromLastCycle.Keys)
                 {
-                    var neuronToAdd = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(item);
+                    var neuronToAdd = ConvertStringPosToNeuron(item);
 
                     if (neuronToAdd != null)
                     {
@@ -351,7 +479,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         foreach (var contributingNeuron in contributingList)
                         {
                             //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-                            correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(contributingNeuron));
+                            correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron));
                         }
                     }
                 }
@@ -415,6 +543,10 @@ namespace SecondOrderMemory.BehaviourManagers
             // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
         }
 
+       
+
+       
+
         private void PostCycleCleanup()
         {
             //clean up all the fired columns
@@ -455,12 +587,12 @@ namespace SecondOrderMemory.BehaviourManagers
                 for (int j = 0; j < NumColumns; j++)
                 {
 
-                    if (TemporalLineArray[i, j] == null)
-                        TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
+                    if (this.TemporalLineArray[i, j] == null)
+                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
 
                     for (int k = 0; k < NumColumns; k++)
                     {                        
-                        ConnectTwoNeurons(TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+                        ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                     }
                 }
             }
@@ -472,15 +604,16 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
-                    ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), NeuronType.APICAL);
+                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), NeuronType.APICAL);
 
                     for (int k = 0; k < NumColumns; k++)
                     {
-                        ConnectTwoNeurons(ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
+                        ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
                     }
                 }
             }
         }
+
         
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position_SOM> activeBits)
         {
@@ -491,7 +624,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             foreach (var position in activeBits)
             {               
-                temporalNeurons.Add(TemporalLineArray[position.Y, position.X]);             
+                temporalNeurons.Add(this.TemporalLineArray[position.Y, position.X]);             
             }
 
             return temporalNeurons;
@@ -519,11 +652,11 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public void AddNeuronToCurrentFiringCycle(Neuron neuron)
         {
-            if (NeuronsFiringThisCycle.Where(n => n.NeuronID.Equals(neuron.NeuronID)).Count() == 0)
+            if (this.NeuronsFiringThisCycle.Where(n => n.NeuronID.Equals(neuron.NeuronID)).Count() == 0)
                 NeuronsFiringThisCycle.Add(neuron);
         }
 
-        public static void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
             if (x == i && y == j && z == k)
             {
@@ -531,13 +664,13 @@ namespace SecondOrderMemory.BehaviourManagers
             }
             try
             {
-                Column col = GetBlockBehaviourManager().Columns[x, y];
+                Column col = this.Columns[x, y];
 
                 Neuron neuron = col.Neurons[z];
 
                 neuron.InitAxonalConnectionForConnector(i, j, k);
 
-                BlockBehaviourManager.IncrementAxonalConnectionCount();
+                IncrementAxonalConnectionCount();
                 
             }
             catch (Exception ex)
@@ -549,7 +682,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-        public static void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
             if (x == i && y == j && z == k)
             {
@@ -557,13 +690,13 @@ namespace SecondOrderMemory.BehaviourManagers
             }
             try
             {
-                Column col = GetBlockBehaviourManager().Columns[x, y];
+                Column col = this.Columns[x, y];
 
                 Neuron neuron = col.Neurons[z];
 
                 neuron.InitProximalConnectionForDendriticConnection(i, j, k);
 
-                BlockBehaviourManager.IncrementProximalConnectionCount();
+                IncrementProximalConnectionCount();
 
                 if (neuron.flag >= 4)
                 {
@@ -639,19 +772,22 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (w == 'N')
             {
-                toRetun = _blockBehaviourManager.Columns[x, y].Neurons[z];
+                toRetun = Columns[x, y].Neurons[z];
             }
             else if (w == 'T')
             {
-                toRetun =  _blockBehaviourManager.TemporalLineArray[y, z];
+                toRetun =  TemporalLineArray[y, z];
             }            
             else if(w == 'A')
             {
-                toRetun = _blockBehaviourManager.ApicalLineArray[x, y];
+                toRetun = ApicalLineArray[x, y];
             }
 
-            if(toRetun == null)
+            if (toRetun == null)
+            {
+                int bp = 1;
                 throw new InvalidOperationException("Your Column structure is messed up!!!");
+            }
 
             return toRetun; 
         }
@@ -684,18 +820,263 @@ namespace SecondOrderMemory.BehaviourManagers
                 int bp = 1;
             }
 
-            throw new DataMisalignedException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
+            throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
 
         }
 
-        private static void IncrementProximalConnectionCount()
+        private void IncrementProximalConnectionCount()
         {
-            BlockBehaviourManager.GetBlockBehaviourManager().totalProximalConnections++;
+            this.totalProximalConnections++;
         }
 
-        private static void IncrementAxonalConnectionCount()
+        private void IncrementAxonalConnectionCount()
         {
-            BlockBehaviourManager.GetBlockBehaviourManager().totalAxonalConnections++;
-        }        
+            this.totalAxonalConnections++;
+        }
+
+        private void ReadDendriticSchema(int intX, int intY)
+        {
+
+            if (DendriticCache.Count != 0)
+            {
+                foreach (var item in DendriticCache)
+                {
+                    var parts = item.Key.Split('-');
+
+                    if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
+                    {
+                        throw new Exception();
+                    }
+                    int i = Convert.ToInt32(parts[0]);
+                    int j = Convert.ToInt32(parts[1]);
+                    int k = Convert.ToInt32(parts[2]);
+
+                    int offset = 3;
+
+                    InitDendriticConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
+                    InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
+                    InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
+                    InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
+
+                    Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
+                }
+
+                return;
+            }
+
+            XmlDocument document = new XmlDocument();
+            string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; 
+
+
+            if (!File.Exists(dendriteDocumentPath))
+            {
+                throw new FileNotFoundException(dendriteDocumentPath);
+            }
+
+            document.Load(dendriteDocumentPath);
+
+            using (XmlNodeList columns = document.GetElementsByTagName("Column"))
+            {
+
+                var numColumns = columns.Count;
+
+                for (int i = 0; i < numColumns; i++)
+                {//Column
+                    neuronCounter = 0;
+
+                    var item = columns[i];
+
+                    int x = Convert.ToInt32(item.Attributes[0]?.Value);
+                    var y = Convert.ToInt32(item.Attributes[1]?.Value);
+
+                    //if(x == 0 && y == 1) 
+                    //{
+                    //    int breakpoint = 0;
+                    //}
+
+                    Columns[x, y].Init++;
+
+                    foreach (XmlNode node in item.ChildNodes)
+                    {   //Neuron                   
+
+                        if (node?.Attributes == null)
+                        {
+                            continue;
+                        }
+
+                        if (node.Attributes.Count != 3)
+                        {
+                            throw new InvalidOperationException("Invalid Neuron Id Supplied in Schema");
+                        }
+
+                        int a = Convert.ToInt32(node.Attributes[0]?.Value);
+                        int b = Convert.ToInt32(node.Attributes[1]?.Value);
+                        int c = Convert.ToInt32(node.Attributes[2]?.Value);
+
+                        Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+
+                        var proximalNodes = node.ChildNodes;
+
+                        var neuronNodes = proximalNodes.Item(0)
+                            .SelectNodes("Neuron");
+
+                        if (neuronNodes.Count != 4)
+                        {
+                            throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
+                        }
+
+                        int[] arr = new int[neuronNodes.Count * 3];
+                        int index = 0;
+
+                        //4 Proximal Dendronal Connections
+                        foreach (XmlNode neuron in neuronNodes)
+                        {
+                            //ProximalConnection
+                            if (neuron?.Attributes?.Count != 3)
+                            {
+                                throw new InvalidOperationException("Number of Attributes in Neuronal Node is not 3");
+                            }
+
+                            int e = Convert.ToInt32(neuron.Attributes[0].Value);
+                            int f = Convert.ToInt32(neuron.Attributes[1].Value);
+                            int g = Convert.ToInt32(neuron.Attributes[2].Value);
+
+                            //Money Shot!!!
+                            InitDendriticConnectionForConnector(a, b, c, e, f, g);
+
+                            Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+
+                            arr[index++] = e;
+                            arr[index++] = f;
+                            arr[index++] = g;
+                        }
+
+                        string key = a.ToString() + "-" + b.ToString() + "-" + c.ToString();
+
+                        if (!DendriticCache.TryGetValue(key, out var conn))
+                        {
+                            DendriticCache.Add(key, arr);
+                        }
+                        else
+                        {
+                            Console.WriteLine("AddDendriticSchema : Should not be Trying to add invalid cache entry for the same neuron");
+                        }
+
+                        neuronCounter++;
+                    }
+                }
+            }
+        }
+
+        public void ReadAxonalSchema(int intX, int intY)
+        {
+            if (AxonalCache.Count != 0)
+            {
+                foreach (var item in AxonalCache)
+                {
+                    var parts = item.Key.Split('-');
+
+                    if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
+                    {
+                        throw new Exception();
+                    }
+                    int i = Convert.ToInt32(parts[0]);
+                    int j = Convert.ToInt32(parts[1]);
+                    int k = Convert.ToInt32(parts[2]);
+
+                    int offset = 3;
+
+                    //4 Axonaal Connections
+                    InitAxonalConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
+                    InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
+                    InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
+                    InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
+
+                    Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " + i + j + k);
+
+                }
+
+                return;
+            }
+
+            XmlDocument document = new XmlDocument();
+
+            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml"; 
+
+            if (!File.Exists(axonalDocumentPath))
+            {
+                throw new FileNotFoundException(axonalDocumentPath);
+            }
+
+
+            document.Load(axonalDocumentPath);
+
+            XmlNodeList columns = document.GetElementsByTagName("axonalConnection");
+
+            for (int icount = 0; icount < columns.Count; icount++)
+            {//axonalConnection
+
+                XmlNode connection = columns[icount];
+
+                if (connection.Attributes.Count != 3)
+                {
+                    throw new InvalidDataException();
+
+                }
+
+                int x = Convert.ToInt32(connection.Attributes[0].Value);
+                int y = Convert.ToInt32(connection.Attributes[1].Value);
+                int z = Convert.ToInt32(connection.Attributes[2].Value);
+
+                Console.WriteLine("Axonal X :" + x.ToString() + " Y: " + y.ToString() + " Z :" + z.ToString());
+
+                XmlNodeList axonList = connection.ChildNodes;
+
+                int[] arr = new int[axonList.Count * 3];
+                int index = 0;
+
+                foreach (XmlNode axon in axonList)
+                {
+                    if (axon.Attributes.Count != 3)
+                    {
+                        throw new InvalidDataException();
+                    }
+
+                    try
+                    {
+                        int i = Convert.ToInt32(axon.Attributes[0].Value);
+                        int j = Convert.ToInt32(axon.Attributes[1].Value);
+                        int k = Convert.ToInt32(axon.Attributes[2].Value);
+
+                        InitAxonalConnectionForConnector(x, y, z, i, j, k);
+
+                        arr[index++] = i;
+                        arr[index++] = j;
+                        arr[index++] = k;
+
+                        Console.WriteLine("New Connection From Schema Doc", x, y, z, i, j, k);
+                    }
+                    catch (Exception e)
+                    {
+                        int bp = 1;
+                        throw new InvalidDataException("ReadAXonalSchema : Invalid Data , Tryign to add new Connections to cache");
+                    }
+
+                    neuronCounter++;
+                }
+
+                string key = x.ToString() + "-" + y.ToString() + "-" + z.ToString();
+
+                if (!AxonalCache.TryGetValue(key, out var conn))
+                {
+                    AxonalCache.Add(key, arr);
+                }
+                else
+                {
+                    Console.WriteLine("AddAxonalSchema : Should not be Trying to add invalid cache entry for the same neuron");
+                }
+            }
+        }
+
     }
 }

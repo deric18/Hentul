@@ -37,14 +37,6 @@ namespace Hentul.UT
 
 
             Assert.Pass();
-        }
-
-        //[Test]
-        //public void TestSCreenGrabberConstructor()
-        //{
-        //    sg = new ScreenGrabber(2);
-
-        //    Assert.Pass();
-        //}
+        }        
     }
 }
