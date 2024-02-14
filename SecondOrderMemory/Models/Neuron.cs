@@ -72,92 +72,7 @@ namespace SecondOrderMemory.Models
             }
 
             CurrentState = NeuronState.FIRING;
-
-            //try
-            //{
-            //    foreach (Synapse synapse in AxonalList.Values)
-            //    {
-            //        BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(synapse.DendronalNeuronalId).ProcessSpikeFromNeuron(Position_SOM.ConvertStringToPosition(synapse.AxonalNeuronId), synapse.cType);
-            //    }
-
-            //    
-
-            //    BlockBehaviourManager.GetBlockBehaviourManager().AddNeuronToCurrentFiringCycle(this);
-
-            //}
-            //catch (Exception e)
-            //{
-            //    int breakpoint = 1;
-            //}
-            //return;
         }
-
-        //public void ProcessSpikeFromNeuron(Position_SOM callingNeuron, ConnectionType cType = ConnectionType.PRXOMALDENDRITETONEURON)
-        //{
-        //    uint multiplier = 1;
-
-        //    if(NeuronID.ToString().Equals("2-4-2-N"))
-        //    {
-        //        bool breakpoint = false;
-        //        breakpoint = true;
-        //    }
-
-        //    CurrentState = NeuronState.PREDICTED;
-
-        //    BlockBehaviourManager.GetBlockBehaviourManager().AddPredictedNeuron(this, callingNeuron.ToString());
-
-        //    if(cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
-        //    {
-        //        if(!TAContributors.TryGetValue(callingNeuron.ToString(), out char w))
-        //        {
-        //            if (cType.Equals(ConnectionType.TEMPRORAL))
-        //            {                        
-        //                TAContributors.Add(callingNeuron.ToString(), 'T');
-        //            }
-        //            else if(cType.Equals(ConnectionType.APICAL))
-        //            {                        
-        //                TAContributors.Add(callingNeuron.ToString(), 'A');
-        //            }
-        //        }                 
-        //        else
-        //        {
-        //            bool breakpoint = false;
-        //            breakpoint = true;
-        //        }
-        //    }
-
-        //    if(dendriticList.TryGetValue(callingNeuron.ToString(), out var synapse))
-        //    {
-        //        multiplier += synapse.GetStrength();
-
-        //        switch (synapse.cType)
-        //        {
-        //            case ConnectionType.DISTALDENDRITETONEURON:
-        //                Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
-        //                break;
-        //            case ConnectionType.PRXOMALDENDRITETONEURON:
-        //                Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
-        //                break;
-        //            case ConnectionType.TEMPRORAL:
-        //                Voltage += TEMPORAL_NEURON_FIRE_VALUE;
-        //                break;
-        //            case ConnectionType.APICAL:
-        //                Voltage += APICAL_NEURONAL_FIRE_VALUE;
-        //                break;
-        //            case ConnectionType.NMDATONEURON:
-        //                Voltage += NMDA_NEURONAL_FIRE_VALUE;
-        //                break;
-        //        }
-        //    }
-        //    else if(cType.Equals(ConnectionType.AXONTONEURON))
-        //    {
-        //        Voltage += PROXIMAL_AXON_TO_NEURON_FIRE_VALUE;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException("ProcessSpikeFormNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
-        //    }
-        //}        
 
         public void ProcessVoltage(int voltage)
         {
@@ -190,29 +105,6 @@ namespace SecondOrderMemory.Models
 
             throw new InvalidOperationException();
         }
-
-        //Gets called when this neuron fired correctly and needs to boost the strength on the contributing neuron
-        //public void PramoteCorrectPredictionDendronal(Neuron contributingNeuron)
-        //{                        
-        //    if (dendriticList.Count == 0)
-        //    {
-        //        throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
-        //    }
-
-        //    if (dendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out Synapse synapse))
-        //    {
-        //        if (synapse == null)
-        //        {
-        //            Console.WriteLine("PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
-        //            throw new InvalidOperationException("Not Supposed to happen!");
-        //        }
-
-        //        synapse.IncrementStrength();
-        //    }
-        //}
-
-       
-
         
 
         public void InitProximalConnectionForDendriticConnection(int i, int j, int k)

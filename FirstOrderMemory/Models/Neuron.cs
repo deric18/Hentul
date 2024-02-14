@@ -298,9 +298,7 @@ namespace FirstOrderMemory.Models
 
             if (dendriticList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("FOM : AddToDistalList :: Connection Already Added");
-
-                synapse.IncrementStrength();
+                //Console.WriteLine("FOM : AddToDistalList :: Connection Already Added");                
 
                 return false;
 
@@ -329,9 +327,7 @@ namespace FirstOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("FOM :: AddtoAxonalList : Connection Already Added");
-
-                synapse.IncrementStrength();
+               //Console.WriteLine("FOM :: AddtoAxonalList : Connection Already Added");                
 
                 return false;
             }

@@ -433,6 +433,8 @@ namespace SecondOrderMemory.BehaviourManagers
                     throw new InvalidOperationException("Not Supposed to happen!");
                 }
 
+                Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
+
                 synapse.IncrementStrength();
             }
         }
@@ -459,7 +461,8 @@ namespace SecondOrderMemory.BehaviourManagers
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
 
 
-                //Total New Pattern : None of the predicted neurons Fired 
+                //Total New Pattern : None of the predicted neurons Fired                 
+
                 if (correctPredictionList.Count == 0 || ColumnsThatBurst.Count != 0)
                 {
                     //Todo:
@@ -470,7 +473,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         foreach (var axonalNeuronItem in NeuronsFiringLastCycle)
                         {
                             //Connect last cycle firing neuronal axons this cycle firing dendrites
-
+                            Console.WriteLine("SOM :: Total New Pattern , Bursting");
                             ConnectTwoNeurons(axonalNeuronItem, dendriticNeuronItem, ConnectionType.AXONTONEURON);
                         }
                     }
@@ -490,6 +493,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         foreach (var contributingNeuron in contributingList)
                         {
                             //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
                             PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
                         }
                     }
