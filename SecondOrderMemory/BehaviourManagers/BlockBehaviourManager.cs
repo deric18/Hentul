@@ -8,7 +8,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
     public class BlockBehaviourManager 
     {
-        public ulong CycleNum { get; private set; }
+        public  static ulong CycleNum { get; private set; }
 
         public int NumColumns { get; private set; }
 
@@ -73,7 +73,7 @@ namespace SecondOrderMemory.BehaviourManagers
         {
             this.BlockID = new Position_SOM(x, y, z);
 
-            this.CycleNum = 0;
+            CycleNum = 0;
 
             this.NumColumns = numColumns;
 
@@ -479,7 +479,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         foreach (var contributingNeuron in contributingList)
                         {
                             //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-                            correctlyPredictedNeuron.PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron));
+                            PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
                         }
                     }
                 }
@@ -498,7 +498,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         {
                             if (neuron.DidItContribute(temporalContributor))
                             {
-                                neuron.PramoteCorrectPredictionDendronal(temporalContributor);
+                                PramoteCorrectPredictionDendronal(temporalContributor, neuron);
                             }
                         }
                     }
@@ -517,7 +517,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     {
                         if (neuron.DidItContribute(apicalContributor))
                         {
-                            neuron.PramoteCorrectPredictionDendronal(apicalContributor);
+                            PramoteCorrectPredictionDendronal(apicalContributor, neuron);
                         }
                     }
                 }
@@ -527,7 +527,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (this.CycleNum > 3000000 && this.CycleNum % 50 == 0)
+            if (BlockBehaviourManager.CycleNum > 3000000 && BlockBehaviourManager.CycleNum % 50 == 0)
             {
                 foreach (var col in this.Columns)
                 {
@@ -763,7 +763,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 //return false;
             }
 
-            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), cType);            
+            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);            
         }
 
         public Neuron GetNeuronFromPosition(char w, int x, int y, int z)

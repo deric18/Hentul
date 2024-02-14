@@ -325,16 +325,14 @@ namespace SecondOrderMemory.Models
         }
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, ConnectionType? cType = null)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ConnectionType? cType = null)
         {
 
             if(cType == ConnectionType.APICAL)
             {
                 bool breakpoint = false;
                 breakpoint = true;
-            }
-
-            var neuronToAdd = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(axonalNeuronId);
+            }            
 
             if(cType.Equals(ConnectionType.TEMPRORAL))
             {
@@ -342,7 +340,7 @@ namespace SecondOrderMemory.Models
                 breakpoint = true;
             }
 
-            if (neuronToAdd.NeuronID.Equals(NeuronID) && this.nType.Equals(neuronToAdd.nType))
+            if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
             }
@@ -366,11 +364,11 @@ namespace SecondOrderMemory.Models
                     {
                         if (cType.Equals(ConnectionType.TEMPRORAL))
                         {
-                            dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                            dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
                         }
                         else if (cType.Equals(ConnectionType.APICAL))
                         {
-                            dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                            dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
                         }                        
 
                         return true;
@@ -392,22 +390,17 @@ namespace SecondOrderMemory.Models
             else
             {
 
-                dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITETONEURON));
-
-                var item = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(axonalNeuronId);
-
-                ConnectedNeurons.Add(item);
+                dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITETONEURON));                
 
                 return true;
             }
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, ConnectionType connectionType)
-        {
-            var neuronToAdd = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(key);
+        public bool AddtoAxonalList(string key, NeuronType ntype, ConnectionType connectionType)
+        {            
 
-            if (neuronToAdd.NeuronID.Equals(NeuronID) && this.nType.Equals(neuronToAdd.nType))
+            if (key.Equals(NeuronID) && this.nType.Equals(ntype))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
             }
@@ -423,11 +416,7 @@ namespace SecondOrderMemory.Models
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, AXONAL_CONNECTION, connectionType));
-
-                var item = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(key);
-
-                ConnectedNeurons.Add(item);
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.CycleNum, AXONAL_CONNECTION, connectionType));                
 
                 return true;
             }

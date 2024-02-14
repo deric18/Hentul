@@ -25,14 +25,14 @@ namespace SecondOrderMemory.Models
 
         public uint GetStrength()
         {
-            lastFiredCycle = BlockBehaviourManager.GetBlockBehaviourManager().CycleNum;
+            lastFiredCycle = BlockBehaviourManager.CycleNum;
             return _strength;
         }
 
         public void IncrementStrength()
         {
             this._strength += 1;
-            this.lastFiredCycle = BlockBehaviourManager.GetBlockBehaviourManager().CycleNum;
+            this.lastFiredCycle = BlockBehaviourManager.CycleNum;
         }
     }
 }

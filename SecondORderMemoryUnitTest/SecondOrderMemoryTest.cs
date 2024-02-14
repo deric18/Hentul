@@ -14,7 +14,7 @@ namespace SecondOrderMemoryUnitTest
         [TestInitialize]
         public void Setup()
         {
-            bbManager = BlockBehaviourManager.GetBlockBehaviourManager(sizeOfColumns);
+            bbManager = new BlockBehaviourManager(0, 0, 0, sizeOfColumns);
 
             bbManager.Init(0, 0);
         }
@@ -64,12 +64,12 @@ namespace SecondOrderMemoryUnitTest
         {
             Neuron  newron = bbManager.Columns[2, 4].Neurons[5];
 
-            Neuron temporalNeuron1 =  newron.GetMyTemporalPartner();
+            Neuron temporalNeuron1 = bbManager.ConvertStringPosToNeuron(newron.GetMyTemporalPartner());
             Neuron temporalNeuron2 = bbManager.Columns[5, 3].Neurons[9];
 
 
             Assert.AreEqual("0-4-5-T", temporalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("0-3-9-T", temporalNeuron2.GetMyTemporalPartner().NeuronID.ToString());
+            Assert.AreEqual("0-3-9-T", bbManager.ConvertStringPosToNeuron(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
 
         }
 
@@ -98,7 +98,7 @@ namespace SecondOrderMemoryUnitTest
                 currentStrength = postSynapse.GetStrength();
             }
 
-            var temporalNeuron = normalNeuron.GetMyTemporalPartner();
+            var temporalNeuron = bbManager.ConvertStringPosToNeuron(normalNeuron.GetMyTemporalPartner());
 
             Assert.AreEqual(temporalNeuron.NeuronID.ToString(),temporalNeuronPosition.ToString());
 
@@ -119,13 +119,13 @@ namespace SecondOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
             
-            Neuron normalNeuron = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
 
             Position_SOM overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
-            var overlapNeuron = BlockBehaviourManager.GetBlockBehaviourManager().GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
+            var overlapNeuron = bbManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
-            var temporalNeuron = overlapNeuron.GetMyTemporalPartner();
+            var temporalNeuron = bbManager.ConvertStringPosToNeuron(overlapNeuron.GetMyTemporalPartner());
 
             if (overlapNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
@@ -152,8 +152,8 @@ namespace SecondOrderMemoryUnitTest
         public void TestApicalLine()
         {
 
-            Neuron apicalNeuron1 = bbManager.Columns[2, 4].Neurons[5].GetMyApicalPartner();
-            Neuron apicalNeuron2 = bbManager.Columns[5, 3].Neurons[9].GetMyApicalPartner();
+            Neuron apicalNeuron1 = bbManager.ConvertStringPosToNeuron(bbManager.Columns[2, 4].Neurons[5].GetMyApicalPartner());
+            Neuron apicalNeuron2 = bbManager.ConvertStringPosToNeuron(bbManager.Columns[5, 3].Neurons[9].GetMyApicalPartner());
 
 
 
@@ -189,9 +189,9 @@ namespace SecondOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
            
-            var apicalNeuron = normalNeuron.GetMyApicalPartner();
+            var apicalNeuron = bbManager.ConvertStringPosToNeuron(normalNeuron.GetMyApicalPartner());
 
             if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
@@ -226,7 +226,7 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.AreEqual(bbm2.Columns[0, 1].Neurons.Count, bbManager.Columns[0, 1].Neurons.Count);
 
-            Assert.IsTrue(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner().NeuronID.Equals(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner().NeuronID));
+            Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
 
 
             Assert.AreEqual(0, bbm2.Columns[3, 3].Neurons[5].flag);
