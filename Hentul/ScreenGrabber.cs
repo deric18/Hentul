@@ -63,9 +63,9 @@
             fomBBM[1].Init();
             fomBBM[2].Init();
 
-            somBBM[0, 0, 0].Init();
-            somBBM[1, 0, 0].Init();
-            somBBM[2, 0, 0].Init();
+            somBBM[0, 0, 0].Init(0,0);
+            somBBM[1, 0, 0].Init(0,0);
+            somBBM[2, 0, 0].Init(0,0);
 
             stopWatch.Stop();
 

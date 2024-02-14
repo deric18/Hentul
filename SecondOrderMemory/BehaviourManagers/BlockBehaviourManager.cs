@@ -48,6 +48,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public static BlockBehaviourManager GetBlockBehaviourManager(int numColumns = 10)
         {            
+            if(_blockBehaviourManager == null)
+            {
+                _blockBehaviourManager = new BlockBehaviourManager(0, 0, 0, numColumns);
+            }
             return BlockBehaviourManager._blockBehaviourManager;
         }               
         
