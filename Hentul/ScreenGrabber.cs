@@ -120,7 +120,7 @@
             int x2 = Math.Abs(Point.X + range);
             int y2 = Math.Abs(Point.Y + range);
 
-            //this.PrintColorMap(x1, y1, x2, y2);
+            this.PrintColorMap(x1, y1, x2, y2);
         }
 
         public void ProcessPixelData()
@@ -242,10 +242,10 @@
                     Color color = GetColorAt(i, j);
                     this.ColorMap[k, l] = color;
 
-                    Console.Write(color.ToString());
+                    //Console.Write(color.ToString());
                 }
 
-                Console.WriteLine();
+                //Console.WriteLine();
             }
         }
 
