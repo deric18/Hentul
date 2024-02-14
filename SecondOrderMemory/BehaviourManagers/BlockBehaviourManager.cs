@@ -142,6 +142,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
             toReturn = new BlockBehaviourManager(x,y,z,NumColumns);
 
+            toReturn.GenerateTemporalLines();
+
+            toReturn.GenerateApicalLines();
+
             try
             {
                 for (int i = 0; i < NumColumns; i++)
@@ -196,11 +200,7 @@ namespace SecondOrderMemory.BehaviourManagers
             catch(Exception e)
             {
                 int bb = 1;
-            }
-
-            toReturn.GenerateTemporalLines();
-
-            toReturn.GenerateApicalLines();
+            }            
 
             return toReturn;
         }

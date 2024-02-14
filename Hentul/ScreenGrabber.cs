@@ -71,15 +71,24 @@
 
             Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
 
+            Console.ReadKey();
+
             Console.WriteLine("Initing Rest of the instances : ");
 
-            for (int i = 0; i < range; i++)
+
+            for (int i = 0; i < 3; i++)
             {
-                for (int j = 1; j < range; j++)
+                for (int j = 0; j < range; j++)
                 {
-                    somBBM[0, i, j] = somBBM[0, 0, 0].CloneBBM(0, 0, 0);
-                    somBBM[1, i, j] = somBBM[1, 0, 0].CloneBBM(1, 0, 0);
-                    somBBM[2, i, j] = somBBM[2, 0, 0].CloneBBM(2, 0, 0);
+                    for (int k = 0; k < range; k++)
+                    {
+                        if ((i!=0 || i!= 1 || i!= 2) && j != 0 && k != 0)
+                        {
+                            somBBM[0, i, j] = somBBM[0, 0, 0].CloneBBM(0, 0, 0);
+                            somBBM[1, i, j] = somBBM[1, 0, 0].CloneBBM(1, 0, 0);
+                            somBBM[2, i, j] = somBBM[2, 0, 0].CloneBBM(2, 0, 0);
+                        }
+                    }
                 }
             }
 
