@@ -688,11 +688,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj",
+      "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj",
       "projectName": "Hentul",
-      "projectPath": "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj",
+      "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj",
       "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\depint\\source\\repos\\Hentul\\obj\\",
+      "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -712,11 +712,11 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
-            "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj": {
-              "projectPath": "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj"
+            "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj": {
+              "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj"
             },
-            "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
-              "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj"
+            "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+              "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj"
             }
           }
         }
@@ -760,7 +760,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
       }
     }
   }

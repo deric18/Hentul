@@ -262,7 +262,7 @@ namespace SecondOrderMemory.Models
 
                 if (AxonalList.TryGetValue(key, out var synapse))
                 {
-                    Console.WriteLine("SOM :: AddNewAxonalConnection : Connection Already Added Counter : " + redundantCounter.ToString() , ++redundantCounter);
+                    Console.WriteLine("ERROR :: SOM :: AddNewAxonalConnection : Connection Already Added Counter : " + redundantCounter.ToString() , ++redundantCounter);
                     
                     return false;
                 }
@@ -300,7 +300,7 @@ namespace SecondOrderMemory.Models
 
                 if (dendriticList.TryGetValue(key, out var synapse))
                 {
-                    Console.WriteLine("SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
+                    Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
                     
                     return false;
                 }
@@ -354,7 +354,7 @@ namespace SecondOrderMemory.Models
 
                     if (dendriticList.TryGetValue(axonalNeuronId, out var synapse1))
                     {
-                        Console.WriteLine("SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
+                        Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
                         //synapse1.IncrementStrength();
 
@@ -381,7 +381,7 @@ namespace SecondOrderMemory.Models
 
             if (dendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                Console.WriteLine("SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
+                Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);
 
                 synapse.IncrementStrength();
 

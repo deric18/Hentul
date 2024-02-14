@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Hentul
-build_property.ProjectDir = C:\Users\depint\source\repos\Hentul\
+build_property.ProjectDir = C:\Users\depint\Desktop\Hentul\Hentul\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

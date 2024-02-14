@@ -19,7 +19,11 @@ while (true)
 
     Console.WriteLine("Done Processing Pixel Data ...");
 
-    Console.WriteLine("Movign Cursor");
+    Console.WriteLine("Pres any key for moving cursor and processing next set of pixels");
+
+    Console.ReadKey();
+
+    Console.WriteLine("Movign Cursor by 2 pixels");
 
     screenGrabber.MoveCursor(2);
 

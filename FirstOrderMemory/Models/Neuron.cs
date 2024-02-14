@@ -263,9 +263,7 @@ namespace FirstOrderMemory.Models
                 {
                     Console.WriteLine("first: " + NeuronID.ToString() + " " + "Second : " + key);
 
-                    Console.WriteLine("FOMN : AddNewProximalDendritic :: Connection Already Added");
-
-                    synapse.IncrementStrength();
+                    Console.WriteLine("FOMN : AddNewProximalDendritic :: Connection Already Added");                    
 
                     return  new Tuple<bool, bool>(true, false);
                 }
@@ -286,9 +284,7 @@ namespace FirstOrderMemory.Models
 
                 int bp = 1;
                 return new Tuple<bool, bool>(false, false);
-            }
-
-            return new Tuple<bool, bool>(true, true);
+            }            
         }
 
         public bool AddToDistalList(string key)

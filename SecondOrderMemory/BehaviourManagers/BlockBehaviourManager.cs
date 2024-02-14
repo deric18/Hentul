@@ -869,7 +869,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
+                    //Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
                 }
 
                 return;
@@ -878,7 +878,7 @@ namespace SecondOrderMemory.BehaviourManagers
             #region DEAD Code
 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; 
+            string dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; 
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -926,7 +926,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         int b = Convert.ToInt32(node.Attributes[1]?.Value);
                         int c = Convert.ToInt32(node.Attributes[2]?.Value);
 
-                        Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+                        //Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
                         var proximalNodes = node.ChildNodes;
 
@@ -957,7 +957,7 @@ namespace SecondOrderMemory.BehaviourManagers
                             //Money Shot!!!
                             InitDendriticConnectionForConnector(a, b, c, e, f, g);
 
-                            Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
+                            //Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
                             arr[index++] = e;
                             arr[index++] = f;
@@ -972,7 +972,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         }
                         else
                         {
-                            Console.WriteLine("AddDendriticSchema : Should not be Trying to add invalid cache entry for the same neuron");
+                            Console.WriteLine("ERROR :: AddDendriticSchema : Should not be Trying to add invalid cache entry for the same neuron");
                         }
 
                         neuronCounter++;
@@ -1007,7 +1007,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
                     InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " + i + j + k);
+                    //Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " + i + j + k);
 
                 }
 
@@ -1018,7 +1018,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             XmlDocument document = new XmlDocument();
 
-            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml"; 
+            string axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  
 
             if (!File.Exists(axonalDocumentPath))
             {
@@ -1045,7 +1045,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 int y = Convert.ToInt32(connection.Attributes[1].Value);
                 int z = Convert.ToInt32(connection.Attributes[2].Value);
 
-                Console.WriteLine("Axonal X :" + x.ToString() + " Y: " + y.ToString() + " Z :" + z.ToString());
+                //Console.WriteLine("Axonal X :" + x.ToString() + " Y: " + y.ToString() + " Z :" + z.ToString());
 
                 XmlNodeList axonList = connection.ChildNodes;
 
@@ -1071,7 +1071,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         arr[index++] = j;
                         arr[index++] = k;
 
-                        Console.WriteLine("New Connection From Schema Doc", x, y, z, i, j, k);
+                        //Console.WriteLine("New Connection From Schema Doc", x, y, z, i, j, k);
                     }
                     catch (Exception e)
                     {
