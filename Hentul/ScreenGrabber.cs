@@ -82,11 +82,11 @@
                 {
                     for (int k = 0; k < range; k++)
                     {
-                        if ((i!=0 || i!= 1 || i!= 2) && j != 0 && k != 0)
+                        if (!((i==0 || i== 1 || i== 2) && j == 0 && k == 0))
                         {
-                            somBBM[0, i, j] = somBBM[0, 0, 0].CloneBBM(0, 0, 0);
-                            somBBM[1, i, j] = somBBM[1, 0, 0].CloneBBM(1, 0, 0);
-                            somBBM[2, i, j] = somBBM[2, 0, 0].CloneBBM(2, 0, 0);
+                            somBBM[i, i, j] = somBBM[0, 0, 0].CloneBBM(0, 0, 0);
+                            somBBM[j, i, j] = somBBM[1, 0, 0].CloneBBM(1, 0, 0);
+                            somBBM[k, i, j] = somBBM[2, 0, 0].CloneBBM(2, 0, 0);
                         }
                     }
                 }
