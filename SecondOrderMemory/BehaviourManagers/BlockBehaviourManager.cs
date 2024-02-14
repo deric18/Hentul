@@ -142,78 +142,76 @@ namespace SecondOrderMemory.BehaviourManagers
 
             toReturn = new BlockBehaviourManager(x,y,z,NumColumns);
 
-            toReturn.GenerateTemporalLines();
-
-            toReturn.GenerateApicalLines();
-
-            try
-            {
-                for (int i = 0; i < NumColumns; i++)
-                {
-                    for (int j = 0; j < NumColumns; j++)
-                    {
-                        for (int k = 0; k < NumColumns; k++)
-                        {
-                            //Proximal Dendritic Connections
-                            Neuron presynapticNeuron, postSynapticNeuron;
-
-                            for(int l=0; l< Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
-                            {
-                                var synapse = Columns[i, j].Neurons[k].dendriticList.Values.ElementAt(l);
-
-                                if (synapse != null)
-                                {
-                                    if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
-                                    {
-                                        presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                                        postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
-
-                                        if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
-                                        {
-                                            Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-                                }
-                            }
-
-
-                            //Axonal Connections
-                            for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
-                            {
-                                var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
-
-                                if (synapse != null)
-                                {
-                                    if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
-                                    {
-                                        presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                                        postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
-
-                                        if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
-                                        {
-                                            Console.WriteLine("Could Not CLone Axonal Connection Properly!!!");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                int bb = 1;
-            }            
+            toReturn.Init();
 
             return toReturn;
+
+            //try
+            //{
+            //    for (int i = 0; i < NumColumns; i++)
+            //    {
+            //        for (int j = 0; j < NumColumns; j++)
+            //        {
+            //            for (int k = 0; k < NumColumns; k++)
+            //            {
+            //                //Proximal Dendritic Connections
+            //                Neuron presynapticNeuron, postSynapticNeuron;
+
+            //                for(int l=0; l< Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
+            //                {
+            //                    var synapse = Columns[i, j].Neurons[k].dendriticList.Values.ElementAt(l);
+
+            //                    if (synapse != null)
+            //                    {
+            //                        if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
+            //                        {
+            //                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+            //                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+            //                            if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
+            //                            {
+            //                                Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
+            //                            }
+            //                        }
+            //                    }
+            //                    else
+            //                    {
+            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+            //                    }
+            //                }
+
+
+            //                //Axonal Connections
+            //                for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
+            //                {
+            //                    var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
+
+            //                    if (synapse != null)
+            //                    {
+            //                        if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
+            //                        {
+            //                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+            //                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+            //                            if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+            //                            {
+            //                                Console.WriteLine("Could Not CLone Axonal Connection Properly!!!");
+            //                            }
+            //                        }
+            //                    }
+            //                    else
+            //                    {
+            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+
+            //toReturn.GenerateTemporalLines();
+
+            //toReturn.GenerateApicalLines();
+
         }
 
 

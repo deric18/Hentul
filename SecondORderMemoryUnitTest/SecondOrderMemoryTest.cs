@@ -84,13 +84,44 @@ namespace SecondOrderMemoryUnitTest
                     {
                         Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
 
-                        Assert.AreEqual(6, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
+                        if(clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count == 19)
+                        {
+                            int bp = 1;
+                        }
+                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
 
-                        Assert.AreEqual(6, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
+                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
 
                         Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0,5)));
 
                         Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 5)));
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestAxonalAndDendronalConnectionsOnNeurons()
+        {
+            for (int i = 0; i < bbManager.NumColumns; i++)
+            {
+                for (int j = 0; j < bbManager.NumColumns; j++)
+                {
+                    for (int k = 0; k < bbManager.NumColumns; k++)
+                    {
+                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+
+                        if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count == 3)
+                        {
+                            int bp = 1;
+                        }
+                        Assert.AreEqual(6, bbManager.Columns[i, j].Neurons[k].dendriticList.Count);
+
+                        Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
+
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0, 5)));
+
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
                     }
                 }
             }
