@@ -6,37 +6,39 @@ namespace Hentul.UT
     public class ScreenGrabberTest
     {
         ScreenGrabber sg;
+        Random rand;
 
         [SetUp]
         public void Setup()
         {
-           
-        }
+           rand = new Random();
+        }        
 
         [Test]
-        public void MemoryTest()
+        public void MultipleInstanceTest()
         {
+            int count = 3;
+            sg = new ScreenGrabber(count);
 
-            //Stopwatch sw = new Stopwatch();
+            for( int i=0; i< count; i++ ) 
+            {
+                for(int j=0;j< count; j++ )
+                {
+                    for(int k=0; k< count; k++ )
+                    {
+                        Assert.That(sg.somBBM[i, j, k].ApicalLineArray.Length, Is.EqualTo(100));
 
-            //sw.Start();
+                        Assert.AreEqual(6, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].dendriticList.Count);
 
-            sg = new ScreenGrabber(1);           
+                        Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
 
-            int a = 0;
+                        Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].dendriticList.ElementAt(k));
 
-            //sw.Stop();
+                        Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(k));
 
-            //Console.WriteLine(sw.Elapsed.ToString());
-
-            //sg.Grab();
-
-            //sg.ProcessPixelData();
-
-
-
-
-            Assert.Pass();
-        }        
+                    }                    
+                }                
+            }            
+        }
     }
 }

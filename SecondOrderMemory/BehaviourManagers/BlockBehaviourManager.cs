@@ -163,12 +163,15 @@ namespace SecondOrderMemory.BehaviourManagers
 
                                 if (synapse != null)
                                 {
-                                    presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                                    postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
-
-                                    if(!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PRXOMALDENDRITETONEURON))
+                                    if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
                                     {
-                                        Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
+                                        presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                                        postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+                                        if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
+                                        {
+                                            Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
+                                        }
                                     }
                                 }
                                 else
@@ -179,19 +182,21 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
                             //Axonal Connections
-                            for(int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
+                            for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
                             {
                                 var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
 
                                 if (synapse != null)
                                 {
-
-                                    presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                                    postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
-
-                                    if(!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+                                    if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
                                     {
-                                        Console.WriteLine("Could Not CLone Axonal Connection Properly!!!");
+                                        presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                                        postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+                                        if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+                                        {
+                                            Console.WriteLine("Could Not CLone Axonal Connection Properly!!!");
+                                        }
                                     }
                                 }
                                 else
@@ -337,7 +342,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-        public void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PRXOMALDENDRITETONEURON)
+        public void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
             uint multiplier = 1;
 
@@ -377,10 +382,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 switch (synapse.cType)
                 {
-                    case ConnectionType.DISTALDENDRITETONEURON:
+                    case ConnectionType.DISTALDENDRITICNEURON:
                         targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE);
                         break;
-                    case ConnectionType.PRXOMALDENDRITETONEURON:
+                    case ConnectionType.PROXIMALDENDRITICNEURON:
                         targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE);
                         break;
                     case ConnectionType.TEMPRORAL:
@@ -872,6 +877,8 @@ namespace SecondOrderMemory.BehaviourManagers
                 return;
             }
 
+            #region DEAD Code
+
             XmlDocument document = new XmlDocument();
             string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; 
 
@@ -974,6 +981,8 @@ namespace SecondOrderMemory.BehaviourManagers
                     }
                 }
             }
+
+            #endregion
         }
 
         public void ReadAxonalSchema(int intX, int intY)
@@ -1006,6 +1015,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 return;
             }
+
+            #region Cache : Dead Code
 
             XmlDocument document = new XmlDocument();
 
@@ -1083,6 +1094,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     Console.WriteLine("AddAxonalSchema : Should not be Trying to add invalid cache entry for the same neuron");
                 }
+                #endregion
             }
         }
 

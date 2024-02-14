@@ -23,8 +23,8 @@
 
         public int range;
 
-        private FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM;
-        private SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[,,] somBBM;
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
+        public SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[,,] somBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -71,7 +71,7 @@
 
             Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
 
-            Console.ReadKey();
+            //Console.ReadKey();
 
             Console.WriteLine("Initing Rest of the instances : ");
 

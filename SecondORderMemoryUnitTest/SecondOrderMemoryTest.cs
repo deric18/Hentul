@@ -10,6 +10,7 @@ namespace SecondOrderMemoryUnitTest
     {
         BlockBehaviourManager? bbManager;
         const int sizeOfColumns = 10;
+        Random rand1;
 
         [TestInitialize]
         public void Setup()
@@ -17,33 +18,35 @@ namespace SecondOrderMemoryUnitTest
             bbManager = new BlockBehaviourManager(0, 0, 0, sizeOfColumns);
 
             bbManager.Init(0, 0);
+
+            rand1 = new Random();
         }
 
 
         [TestMethod]
         public void TestMultipleInstanceOfSOMBBM()
         {
-            BlockBehaviourManager bbm2 = bbManager.CloneBBM(1,3,10);
+            BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1,3,10);
             BlockBehaviourManager bbm3 = new BlockBehaviourManager(1,3,10);           
            
             bbm3.Init(0, 0);
 
             SDR_SOM randSDR = GenerateRandomSDR(iType.SPATIAL);
             
-            bbm2.Fire(randSDR);
+            clonedBBM.Fire(randSDR);
 
             bbManager.Fire(randSDR);
 
             bbm3.Fire(randSDR);
 
-            for (int i = 0; i < bbm2.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.NumColumns; i++)
             {
-                Assert.IsNotNull(bbm2.TemporalLineArray[i, bbm2.NumColumns - 1]);
+                Assert.IsNotNull(clonedBBM.TemporalLineArray[i, clonedBBM.NumColumns - 1]);
             }
 
-            for (int i = 0; i < bbm2.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.NumColumns; i++)
             {
-                Assert.IsNotNull(bbm2.ApicalLineArray[i, bbm2.NumColumns - 1]);
+                Assert.IsNotNull(clonedBBM.ApicalLineArray[i, clonedBBM.NumColumns - 1]);
             }
 
             for (int i = 0; i < bbm3.NumColumns; i++)
@@ -57,6 +60,40 @@ namespace SecondOrderMemoryUnitTest
             }
 
 
+            Neuron newron = clonedBBM.Columns[2, 4].Neurons[5];
+
+            Neuron temporalNeuron1 = clonedBBM.ConvertStringPosToNeuron(newron.GetMyTemporalPartner());
+            Neuron temporalNeuron2 = clonedBBM.Columns[5, 3].Neurons[9];
+
+            Assert.AreEqual("0-4-5-T", temporalNeuron1.NeuronID.ToString());
+            Assert.AreEqual("0-3-9-T", clonedBBM.ConvertStringPosToNeuron(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
+
+            Neuron apicalNeuron1 = clonedBBM.ConvertStringPosToNeuron(clonedBBM.Columns[2, 4].Neurons[5].GetMyApicalPartner());
+            Neuron apicalNeuron2 = clonedBBM.ConvertStringPosToNeuron(clonedBBM.Columns[5, 3].Neurons[9].GetMyApicalPartner());
+
+
+            Assert.AreEqual("2-4-0-A", apicalNeuron1.NeuronID.ToString());
+            Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
+
+            //Dendrtonal & Axonal  Connections for Cloned Instance
+            for(int i=0; i<clonedBBM.NumColumns; i++)
+            {
+                for(int j=0; j<clonedBBM.NumColumns; j++) 
+                {
+                    for(int k=0; k<clonedBBM.NumColumns; k++)
+                    {
+                        Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
+
+                        Assert.AreEqual(6, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
+
+                        Assert.AreEqual(6, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
+
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0,5)));
+
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 5)));
+                    }
+                }
+            }
         }
 
         [TestMethod]

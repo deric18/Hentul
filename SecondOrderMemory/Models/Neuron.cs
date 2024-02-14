@@ -306,7 +306,7 @@ namespace SecondOrderMemory.Models
                 else
                 {
 
-                    dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PRXOMALDENDRITETONEURON));
+                    dendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON));
 
                     //var item = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(key);
 
@@ -390,7 +390,7 @@ namespace SecondOrderMemory.Models
             else
             {
 
-                dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITETONEURON));                
+                dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));                
 
                 return true;
             }
@@ -407,9 +407,7 @@ namespace SecondOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : ", ++redundantCounter);
-
-                synapse.IncrementStrength();
+                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : ", ++redundantCounter);                
 
                 return false;
             }
@@ -460,8 +458,8 @@ namespace SecondOrderMemory.Models
     public enum ConnectionType
     {
         AXONTONEURON,
-        PRXOMALDENDRITETONEURON,
-        DISTALDENDRITETONEURON,
+        PROXIMALDENDRITICNEURON,
+        DISTALDENDRITICNEURON,
         NMDATONEURON,
         TEMPRORAL,
         APICAL
