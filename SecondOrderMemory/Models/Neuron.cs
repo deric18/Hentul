@@ -259,6 +259,7 @@ namespace SecondOrderMemory.Models
 
                     return true;
                 }
+
                 if (AxonalList.TryGetValue(key, out var synapse))
                 {
                     Console.WriteLine("SOM :: AddNewAxonalConnection : Connection Already Added Counter : " + redundantCounter.ToString() , ++redundantCounter);
