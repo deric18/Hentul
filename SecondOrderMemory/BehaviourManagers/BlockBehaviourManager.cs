@@ -166,7 +166,10 @@ namespace SecondOrderMemory.BehaviourManagers
                                     presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
                                     postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
-                                    toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PRXOMALDENDRITETONEURON);
+                                    if(!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PRXOMALDENDRITETONEURON))
+                                    {
+                                        Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
+                                    }
                                 }
                                 else
                                 {
@@ -186,7 +189,10 @@ namespace SecondOrderMemory.BehaviourManagers
                                     presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
                                     postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
-                                    toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON);
+                                    if(!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+                                    {
+                                        Console.WriteLine("Could Not CLone Axonal Connection Properly!!!");
+                                    }
                                 }
                                 else
                                 {
