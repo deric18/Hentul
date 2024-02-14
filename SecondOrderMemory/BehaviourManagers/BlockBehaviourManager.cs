@@ -309,14 +309,16 @@ namespace SecondOrderMemory.BehaviourManagers
                     }
             }
 
-            if(IsSpatial == true)
+            Fire();
+
+            if (IsSpatial == true)
                 Wire();
 
             if(isTemporal == false && IsApical == false)
             PostCycleCleanup();
         }
 
-        private void NeuronalFire()
+        private void Fire()
         {
             foreach (var neuron in NeuronsFiringThisCycle)
             {
@@ -345,7 +347,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
             {
-                if (! targetNeuron.TAContributors.TryGetValue(sourceNeuron.ToString(), out char w))
+                if (! targetNeuron.TAContributors.TryGetValue(sourceNeuron.NeuronID.ToString(), out char w))
                 {
                     if (cType.Equals(ConnectionType.TEMPRORAL))
                     {
