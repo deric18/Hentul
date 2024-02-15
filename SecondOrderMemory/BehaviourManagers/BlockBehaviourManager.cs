@@ -254,22 +254,19 @@ namespace SecondOrderMemory.BehaviourManagers
                             var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
                             if (predictedNeuronPositioons?.Count == Columns[0, 0].Neurons.Count)
-                            {//burst
+                            {
+                                Console.WriteLine("New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositioons.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
                             else
-                            {//selected predicted neurons
+                            {
+                                Console.WriteLine("Known Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                             }
 
                             predictedNeuronPositioons = null;
-                        }
-
-                        //foreach (var neuron in NeuronsFiringThisCycle)
-                        //{
-                        //    neuron.Fire();
-                        //}
+                        }                     
 
                         IsSpatial = true;
 
@@ -852,34 +849,34 @@ namespace SecondOrderMemory.BehaviourManagers
         private void ReadDendriticSchema(int intX, int intY)
         {
 
-            if (DendriticCache.Count != 0)
-            {
-                foreach (var item in DendriticCache)
-                {
-                    var parts = item.Key.Split('-');
+            //if (DendriticCache.Count != 0)
+            //{
+            //    foreach (var item in DendriticCache)
+            //    {
+            //        var parts = item.Key.Split('-');
 
-                    if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
-                    {
-                        throw new Exception();
-                    }
-                    int i = Convert.ToInt32(parts[0]);
-                    int j = Convert.ToInt32(parts[1]);
-                    int k = Convert.ToInt32(parts[2]);
+            //        if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
+            //        {
+            //            throw new Exception();
+            //        }
+            //        int i = Convert.ToInt32(parts[0]);
+            //        int j = Convert.ToInt32(parts[1]);
+            //        int k = Convert.ToInt32(parts[2]);
 
-                    int offset = 3;
+            //        int offset = 3;
 
-                    InitDendriticConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
-                    InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
-                    InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
-                    InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
+            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
+            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
+            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
+            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    //Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
-                }
+            //        //Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
+            //    }
 
-                return;
-            }
+            //    return;
+            //}
 
-            #region DEAD Code
+            #region REAL Code
 
             XmlDocument document = new XmlDocument();
             string dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; 
@@ -942,8 +939,8 @@ namespace SecondOrderMemory.BehaviourManagers
                             throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
                         }
 
-                        int[] arr = new int[neuronNodes.Count * 3];
-                        int index = 0;
+                        //int[] arr = new int[neuronNodes.Count * 3];
+                        //int index = 0;
 
                         //4 Proximal Dendronal Connections
                         foreach (XmlNode neuron in neuronNodes)
@@ -963,21 +960,21 @@ namespace SecondOrderMemory.BehaviourManagers
 
                             //Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
-                            arr[index++] = e;
-                            arr[index++] = f;
-                            arr[index++] = g;
+                            //arr[index++] = e;
+                            //arr[index++] = f;
+                            //arr[index++] = g;
                         }
 
                         string key = a.ToString() + "-" + b.ToString() + "-" + c.ToString();
 
-                        if (!DendriticCache.TryGetValue(key, out var conn))
-                        {
-                            DendriticCache.Add(key, arr);
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERROR :: AddDendriticSchema : Should not be Trying to add invalid cache entry for the same neuron");
-                        }
+                        //if (!DendriticCache.TryGetValue(key, out var conn))
+                        //{
+                        //    DendriticCache.Add(key, arr);
+                        //}
+                        //else
+                        //{
+                        //    Console.WriteLine("ERROR :: AddDendriticSchema : Should not be Trying to add invalid cache entry for the same neuron");
+                        //}
 
                         neuronCounter++;
                     }
@@ -989,36 +986,36 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public void ReadAxonalSchema(int intX, int intY)
         {
-            if (AxonalCache.Count != 0)
-            {
-                foreach (var item in AxonalCache)
-                {
-                    var parts = item.Key.Split('-');
+            //if (AxonalCache.Count != 0)
+            //{
+            //    foreach (var item in AxonalCache)
+            //    {
+            //        var parts = item.Key.Split('-');
 
-                    if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
-                    {
-                        throw new Exception();
-                    }
-                    int i = Convert.ToInt32(parts[0]);
-                    int j = Convert.ToInt32(parts[1]);
-                    int k = Convert.ToInt32(parts[2]);
+            //        if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
+            //        {
+            //            throw new Exception();
+            //        }
+            //        int i = Convert.ToInt32(parts[0]);
+            //        int j = Convert.ToInt32(parts[1]);
+            //        int k = Convert.ToInt32(parts[2]);
 
-                    int offset = 3;
+            //        int offset = 3;
 
-                    //4 Axonaal Connections
-                    InitAxonalConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
-                    InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
-                    InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
-                    InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
+            //        //4 Axonaal Connections
+            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
+            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
+            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
+            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
 
-                    //Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " + i + j + k);
+            //        //Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " + i + j + k);
 
-                }
+            //    }
 
-                return;
-            }
+            //    return;
+            //}
 
-            #region Cache : Dead Code
+            #region Cache : Real Code
 
             XmlDocument document = new XmlDocument();
 
@@ -1053,8 +1050,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 XmlNodeList axonList = connection.ChildNodes;
 
-                int[] arr = new int[axonList.Count * 3];
-                int index = 0;
+                //int[] arr = new int[axonList.Count * 3];
+                //int index = 0;
 
                 foreach (XmlNode axon in axonList)
                 {
@@ -1071,9 +1068,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
                         InitAxonalConnectionForConnector(x, y, z, i, j, k);
 
-                        arr[index++] = i;
-                        arr[index++] = j;
-                        arr[index++] = k;
+                        //arr[index++] = i;
+                        //arr[index++] = j;
+                        //arr[index++] = k;
 
                         //Console.WriteLine("New Connection From Schema Doc", x, y, z, i, j, k);
                     }
@@ -1086,16 +1083,16 @@ namespace SecondOrderMemory.BehaviourManagers
                     neuronCounter++;
                 }
 
-                string key = x.ToString() + "-" + y.ToString() + "-" + z.ToString();
+                //string key = x.ToString() + "-" + y.ToString() + "-" + z.ToString();
 
-                if (!AxonalCache.TryGetValue(key, out var conn))
-                {
-                    AxonalCache.Add(key, arr);
-                }
-                else
-                {
-                    Console.WriteLine("AddAxonalSchema : Should not be Trying to add invalid cache entry for the same neuron");
-                }
+                //if (!AxonalCache.TryGetValue(key, out var conn))
+                //{
+                //    AxonalCache.Add(key, arr);
+                //}
+                //else
+                //{
+                //    Console.WriteLine("AddAxonalSchema : Should not be Trying to add invalid cache entry for the same neuron");
+                //}
                 #endregion
             }
         }

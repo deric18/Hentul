@@ -71,6 +71,8 @@ namespace SecondOrderMemory.Models
                 return;
             }
 
+            //Console.WriteLine("Neuron Fired!" + NeuronID.ToString());
+
             CurrentState = NeuronState.FIRING;
         }
 

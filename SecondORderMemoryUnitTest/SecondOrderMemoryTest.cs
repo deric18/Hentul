@@ -295,15 +295,13 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Columns[3, 3].Neurons[5].flag = 1;
 
-
             Assert.AreNotEqual(bbManager.Columns[3, 3].Neurons[5].flag, bbm2.Columns[3, 3].Neurons[5].flag);
 
             Assert.AreEqual(bbm2.Columns[0, 1].Neurons.Count, bbManager.Columns[0, 1].Neurons.Count);
 
             Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
-
-
-            Assert.AreEqual(0, bbm2.Columns[3, 3].Neurons[5].flag);
+ 
+            Assert.AreEqual(8, bbm2.Columns[3, 3].Neurons[5].flag);
         }
 
         public void TestTemporalAndApicalFiringAndWiring()

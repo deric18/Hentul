@@ -235,7 +235,7 @@
         {
             for (int i = x1, k = 0; i < x2 && k < range; i++, k++)
             {
-                Console.WriteLine("Row " + i);
+                //Console.WriteLine("Row " + i);
 
                 for (int j = y1, l = 0; j < y2 && l < range; j++, l++)
                 {
