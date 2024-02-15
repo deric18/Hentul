@@ -21,7 +21,7 @@ while (true)
 
     Console.WriteLine("Pres any key for moving cursor and processing next set of pixels");
 
-    Console.ReadKey();
+    //Console.ReadKey();
 
     Console.WriteLine("Movign Cursor by 2 pixels");
 

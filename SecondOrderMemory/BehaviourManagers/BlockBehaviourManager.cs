@@ -255,13 +255,13 @@ namespace SecondOrderMemory.BehaviourManagers
 
                             if (predictedNeuronPositioons?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                Console.WriteLine("New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositioons.Count.ToString());
+                                Console.WriteLine( "Block ID : " + BlockID.ToString() + "New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositioons.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
                             else
                             {
-                                Console.WriteLine("Known Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
+                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Known Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
                             }
 
