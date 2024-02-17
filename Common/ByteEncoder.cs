@@ -24,7 +24,7 @@ namespace Common
 
         public ByteEncoder(int n, int w)
         {
-            if (N != 100)
+            if (n != 100)
             {
                 throw new InvalidDataException("Cannot Initiate SDR with lower than 100 N for the given byte count to encode");
             }
@@ -38,6 +38,7 @@ namespace Common
             num_bits_per_bool = 4;
             grouping_by_block = false;            
             ActiveBits = new List<Position>();
+            Mappings = new Dictionary<int, int[]>();
             rand = new Random();
             ComputeMappings();
         }
@@ -74,18 +75,18 @@ namespace Common
             if (N != 100)
             {
                 throw new InvalidDataException("Cannot Initiate SDR with lower than 100 N for the given byte count to encode");
-            }            
+            }
 
-
+            bool bit = false;
             //Sparse Encoding
             for (int index = 0; index < 8; index++)
             {
-                bool bit = (b & (1 << b - 1)) != 0;
-
+                bit = (b & (1 << index)) == (1 << index);
                 if (bit)
                 {
                     SetValuesForBit(index);
                 }                
+
             }           
             //DenseEncoding
         }
