@@ -303,6 +303,7 @@ namespace SecondOrderMemoryUnitTest
  
             Assert.AreEqual(8, bbm2.Columns[3, 3].Neurons[5].flag);
         }
+       
 
         public void TestTemporalAndApicalFiringAndWiring()
         {

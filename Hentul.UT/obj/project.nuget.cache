@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "kFIOMdjK2hbljTRxDCKnLr4vD4x/zjglvvEHOKsAObVEyhQ9ANTrgbqWepY0k+Sj1malAjAhLj3JXB5urm/4aA==",
+  "dgSpecHash": "3AIo0m3slGWUqCfodODADcwhcPXmRmIuP3PZ9FH+Q7SB3uGnZrT+RjyWpHaZCBy/H7+lhu8qWvTbJMp4q+EGpQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul.UT\\Hentul.UT.csproj",
+  "projectFilePath": "C:\\Users\\depint\\source\\repos\\Hentul.UT\\Hentul.UT.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\depint\\.nuget\\packages\\bond.core.csharp\\10.0.0\\bond.core.csharp.10.0.0.nupkg.sha512",
     "C:\\Users\\depint\\.nuget\\packages\\coverlet.collector\\3.1.2\\coverlet.collector.3.1.2.nupkg.sha512",

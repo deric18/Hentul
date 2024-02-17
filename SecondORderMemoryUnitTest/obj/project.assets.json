@@ -4510,11 +4510,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
+      "projectUniqueName": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
       "projectName": "SecondOrderMemoryUnitTest",
-      "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
+      "projectPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\SecondOrderMemoryUnitTest.csproj",
       "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondORderMemoryUnitTest\\obj\\",
+      "outputPath": "C:\\Users\\depint\\source\\repos\\SecondORderMemoryUnitTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -4534,8 +4534,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj": {
-              "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj"
+            "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+              "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj"
             }
           }
         }
@@ -4587,7 +4587,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   }

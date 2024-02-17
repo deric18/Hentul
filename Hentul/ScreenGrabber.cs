@@ -107,13 +107,9 @@
 
             Point = this.GetCurrentPointerPosition();
 
-            Console.CursorVisible = true;
+            Console.CursorVisible = true;            
 
-            Console.WriteLine("Cursor Pos X : " + Point.X + " Y : " + Point.Y);
-
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            Console.WriteLine("Bit Map Values :");
+            Console.WriteLine("Grabbing Screen Pixels...");            
 
             int x1 = Point.X - range < 0 ? 0 : Point.X - range;
             int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
@@ -166,6 +162,10 @@
 
                     SDR[] fomSdrArr = new SDR[3];
 
+                    Console.WriteLine("Prepping Temporal Location SDRs for SOM");
+
+                    //SDR temporalSDR = GenerateTemporalSDR();
+
                     fomSdrArr[0] = fomBBM[0].GetSDR();
                     fomSdrArr[1] = fomBBM[1].GetSDR();
                     fomSdrArr[2] = fomBBM[2].GetSDR();
@@ -183,6 +183,12 @@
                     Console.WriteLine("Finished Second Order Memory Firings");
                 }
             }
+        }
+
+
+        public void GenerateTemporalSDR()
+        {
+            
         }
 
         [DllImport("user32.dll")]

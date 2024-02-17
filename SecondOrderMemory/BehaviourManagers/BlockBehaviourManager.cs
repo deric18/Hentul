@@ -879,7 +879,7 @@ namespace SecondOrderMemory.BehaviourManagers
             #region REAL Code
 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; 
+            string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -986,6 +986,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public void ReadAxonalSchema(int intX, int intY)
         {
+            #region Cache : Real Code
             //if (AxonalCache.Count != 0)
             //{
             //    foreach (var item in AxonalCache)
@@ -1015,11 +1016,11 @@ namespace SecondOrderMemory.BehaviourManagers
             //    return;
             //}
 
-            #region Cache : Real Code
+            #endregion
 
             XmlDocument document = new XmlDocument();
 
-            string axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  
+            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml"; //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //
 
             if (!File.Exists(axonalDocumentPath))
             {
@@ -1092,8 +1093,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 //else
                 //{
                 //    Console.WriteLine("AddAxonalSchema : Should not be Trying to add invalid cache entry for the same neuron");
-                //}
-                #endregion
+                //}               
             }
         }
 

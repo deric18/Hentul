@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\depint\\Desktop\\Hentul\\Hentul.UT\\Hentul.UT.csproj": {}
+    "C:\\Users\\depint\\source\\repos\\Hentul.UT\\Hentul.UT.csproj": {}
   },
   "projects": {
-    "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj": {
+    "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj",
         "projectName": "Common",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\Common\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -58,18 +58,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj": {
+    "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj",
         "projectName": "FirstOrderMemory",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -89,8 +89,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj"
+              "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj"
               }
             }
           }
@@ -120,18 +120,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\depint\\Desktop\\Hentul\\Hentul.UT\\Hentul.UT.csproj": {
+    "C:\\Users\\depint\\source\\repos\\Hentul.UT\\Hentul.UT.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul.UT\\Hentul.UT.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\Hentul.UT\\Hentul.UT.csproj",
         "projectName": "Hentul.UT",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul.UT\\Hentul.UT.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\Hentul.UT\\Hentul.UT.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul.UT\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\Hentul.UT\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -151,8 +151,8 @@
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj"
+              "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj"
               }
             }
           }
@@ -204,18 +204,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj": {
+    "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj",
         "projectName": "Hentul",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\Hentul.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\Hentul\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -235,11 +235,11 @@
           "net7.0": {
             "targetAlias": "net7.0",
             "projectReferences": {
-              "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\FirstOrderMemory.csproj"
+              "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\FirstOrderMemory.csproj"
               },
-              "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj"
+              "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj"
               }
             }
           }
@@ -283,18 +283,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj": {
+    "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj",
+        "projectUniqueName": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj",
         "projectName": "SecondOrderMemory",
-        "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\SecondOrderMemory.csproj",
+        "projectPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\SecondOrderMemory.csproj",
         "packagesPath": "C:\\Users\\depint\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\obj\\",
+        "outputPath": "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -314,8 +314,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj": {
-                "projectPath": "C:\\Users\\depint\\Desktop\\Hentul\\Common\\Common.csproj"
+              "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj": {
+                "projectPath": "C:\\Users\\depint\\source\\repos\\Common\\Common.csproj"
               }
             }
           }
@@ -355,7 +355,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
         }
       }
     }
