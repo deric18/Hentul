@@ -251,21 +251,21 @@ namespace SecondOrderMemory.BehaviourManagers
                     {                        
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
                         {
-                            var predictedNeuronPositioons = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
+                            var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
-                            if (predictedNeuronPositioons?.Count == Columns[0, 0].Neurons.Count)
+                            if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                Console.WriteLine( "Block ID : " + BlockID.ToString() + "New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositioons.Count.ToString());
+                                Console.WriteLine( "Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
                             else
                             {
-                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Known Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
-                                NeuronsFiringThisCycle.AddRange(predictedNeuronPositioons);
+                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Old  Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
+                                NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
                             }
 
-                            predictedNeuronPositioons = null;
+                            predictedNeuronPositions = null;
                         }                     
 
                         IsSpatial = true;

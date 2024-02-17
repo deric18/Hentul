@@ -162,10 +162,6 @@
 
                     SDR[] fomSdrArr = new SDR[3];
 
-                    Console.WriteLine("Prepping Temporal Location SDRs for SOM");
-
-                    //SDR temporalSDR = GenerateTemporalSDR();
-
                     fomSdrArr[0] = fomBBM[0].GetSDR();
                     fomSdrArr[1] = fomBBM[1].GetSDR();
                     fomSdrArr[2] = fomBBM[2].GetSDR();
@@ -173,6 +169,11 @@
                     SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr1.ActiveBits), iType.SPATIAL);
                     SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr2.ActiveBits), iType.SPATIAL);
                     SDR_SOM somSdr3 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr3.ActiveBits), iType.SPATIAL);
+
+                    Console.WriteLine("Prepping Temporal Location SDRs for SOM");
+
+                    var temporalSDR = GenerateTemporalSDR();
+
 
                     Console.WriteLine("Begining SOM Firings :");
 
@@ -186,9 +187,17 @@
         }
 
 
-        public void GenerateTemporalSDR()
+        public Tuple<SDR, SDR> GenerateTemporalSDR()
         {
-            
+            ByteEncoder encoder = new ByteEncoder(100, 8);
+
+            encoder.Encode((byte)Point.X);
+            SDR Xsdr = encoder.GetDenseSDR(iType.TEMPORAL);
+            encoder.Encode((byte)Point.Y);
+            SDR Ysdr = encoder.GetDenseSDR(iType.TEMPORAL);
+
+            return new Tuple<SDR, SDR>(Xsdr, Ysdr);
+
         }
 
         [DllImport("user32.dll")]

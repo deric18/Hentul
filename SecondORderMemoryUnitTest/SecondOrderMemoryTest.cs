@@ -133,6 +133,61 @@ namespace SecondOrderMemoryUnitTest
             }
         }
 
+        
+        public void TestFire()
+        {
+
+            //Need to do this hack : as in the first cycle there are no predicted neurons
+            //bbManager.AddtoPredictedNeuronFromLastCycleMock(neuron2, neuron1);
+        }
+
+        [TestMethod]
+        public void TestFireNWire()
+        {
+            //fire  neuron1 which has an already established connection to a known other neuron2
+            //Fire a pattern that fires the other known neuron2
+            //check if the connection b/w both is strengthened.
+
+            var neuron1 = bbManager.Columns[0, 2].Neurons[0];
+            var neuron2 = bbManager.Columns[5, 3].Neurons[0];
+
+
+            if(!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.AXONTONEURON))
+            {
+                throw new InvalidProgramException("Could Not Connect 2 Neurons");                
+            }
+
+            SDR_SOM sdr1 = GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+
+            SDR_SOM sdr2 = GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(5, 3) }, iType.SPATIAL);
+
+            if (!neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse neuron1Synapse) || (!neuron2.dendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse neuron2Synapse)))
+            {
+                throw new InvalidOperationException("Could not get relavent Synapses!");
+            }
+
+            uint neuron1StrengthPreFire = neuron1Synapse.GetStrength();
+
+            uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();                        
+
+            bbManager.Fire(sdr1, true);
+
+            bbManager.Fire(sdr2, true);
+
+            _ = neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse value1);
+
+            _ = neuron2.dendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse value2);
+
+            uint neuron1StrengthPostFire = value1.GetStrength();
+
+            uint neruon2PostFireStrentgh = value2.GetStrength();
+
+            Assert.That(neruon2PostFireStrentgh - neuron2StrengthPreFire, Is.EqualTo(1));
+
+            Assert.AreEqual(neuron1StrengthPostFire, neuron1StrengthPreFire);
+
+        }
+
         [TestMethod]
         public void TestTemporalLines()
         {
