@@ -59,7 +59,6 @@ namespace SecondOrderMemoryUnitTest
                 Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.NumColumns - 1]);
             }
 
-
             Neuron newron = clonedBBM.Columns[2, 4].Neurons[5];
 
             Neuron temporalNeuron1 = clonedBBM.ConvertStringPosToNeuron(newron.GetMyTemporalPartner());
@@ -103,7 +102,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestAxonalAndDendronalConnectionsOnNeurons()
         {
-            for (int i = 0; i < bbManager.NumColumns; i++)
+            for (int i = 0; i < bbManager?.NumColumns; i++)
             {
                 for (int j = 0; j < bbManager.NumColumns; j++)
                 {
