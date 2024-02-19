@@ -187,6 +187,11 @@ namespace SecondOrderMemoryUnitTest
 
         }
 
+        public void TestWire1()
+        {
+            //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
+        }
+
         [TestMethod]
         public void TestTemporalLines()
         {

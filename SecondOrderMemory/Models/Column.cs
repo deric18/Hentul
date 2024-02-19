@@ -1,4 +1,6 @@
-﻿namespace SecondOrderMemory.Models
+﻿using System.Collections.Generic;
+
+namespace SecondOrderMemory.Models
 {
     public class Column
     {
@@ -38,8 +40,9 @@
             if (predictedNeurons.Count() > 1 )          //Pick a winner
             {
                 //Pick the most strongly predicted neuron and then fire
-                predictedNeurons.Sort();
-                return predictedNeurons;
+
+                return PickWinner();
+                
             }
             else if (predictedNeurons.Count == 0)       //Burst
             {
@@ -54,6 +57,26 @@
             {
                 throw new Exception("This should Never Happen");
             }
+        }
+
+        private List<Neuron> PickWinner()
+        {
+            int maxVoltage = 0, maxIndex = 0;
+
+            List<Neuron> toReturn = new List<Neuron>();
+
+            for(int i = 0; i < Neurons.Count; i++)
+            {
+                if (Neurons[i].Voltage > maxVoltage)
+                {
+                    maxVoltage = Neurons[i].Voltage;
+                    maxIndex = i;
+                }
+            }
+
+            toReturn.Add(Neurons[maxIndex]);
+
+            return toReturn;
         }
 
         internal bool PreCleanupCheck()

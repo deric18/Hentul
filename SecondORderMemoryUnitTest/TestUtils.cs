@@ -68,5 +68,10 @@
                 return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
             }
         }
+
+        internal static SDR_SOM GetSDRFromPattern(char ch)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

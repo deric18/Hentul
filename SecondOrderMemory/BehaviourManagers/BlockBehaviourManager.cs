@@ -258,12 +258,15 @@ namespace SecondOrderMemory.BehaviourManagers
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
-                            else
+                            else if(predictedNeuronPositions.Count == 1)
                             {
                                 Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Old  Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
                             }
-
+                            else
+                            {
+                                Console.WriteLine("There SHould only be one winner in the Column");
+                            }
                             predictedNeuronPositions = null;
                         }                     
 

@@ -78,7 +78,7 @@ namespace SecondOrderMemory.Models
 
         public void ProcessVoltage(int voltage)
         {
-            Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
+            Voltage += voltage;
 
             CurrentState = NeuronState.PREDICTED;
 
@@ -316,16 +316,15 @@ namespace SecondOrderMemory.Models
                 return true;
             }
         }
+        public int CompareTo(Neuron? other)
+        {
+            return this.Voltage > other.Voltage ? 10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? -1 : -1;
+        }
 
         public bool Equals(Neuron? other)
         {
             return this.Voltage == other?.Voltage;
-        }
-
-        public int CompareTo(Neuron? other)
-        {
-            return this.Voltage > other.Voltage ? -10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? 10 : 11;
-        }
+        }        
 
         internal void FlushVoltage()
         {
