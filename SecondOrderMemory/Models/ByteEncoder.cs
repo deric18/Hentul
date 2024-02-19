@@ -1,7 +1,9 @@
-﻿using System.Net.Http.Headers;
-
-namespace Common
+﻿namespace SecondOrderMemory.Models
 {
+    using Common;
+
+
+    // 4+4+4 = 12
     public class ByteEncoder
     {
         private int N { get; set; }
@@ -16,7 +18,7 @@ namespace Common
 
         private Dictionary<int, int[]> Mappings { get; set; }
 
-        private List<Position> ActiveBits;
+        private List<Position_SOM> ActiveBits;
 
         private uint LastValue { get; set; }
 
@@ -33,11 +35,11 @@ namespace Common
                 throw new InvalidDataException("SDR Dimension Cannot be set to " + n);
             }
             N = n;
-            W = w;           
+            W = w;
             num_blocks_per_partition = N / W;
             num_bits_per_bool = 4;
-            grouping_by_block = false;            
-            ActiveBits = new List<Position>();
+            grouping_by_block = false;
+            ActiveBits = new List<Position_SOM>();
             Mappings = new Dictionary<int, int[]>();
             rand = new Random();
             ComputeMappings();
@@ -55,17 +57,17 @@ namespace Common
             }
             else
             {
-                Mappings.Add(0, new int[] { 5, 6, 7, 8 });
-                Mappings.Add(1, new int[] { 7, 8, 9, 10 });
-                Mappings.Add(2, new int[] { 5, 6, 7, 8 });
-                Mappings.Add(3, new int[] { 7, 8, 9, 10 });
+                Mappings.Add(0, new int[] { 4, 5, 6, 9 });
+                Mappings.Add(1, new int[] { 6, 7, 8, 9 });
+                Mappings.Add(2, new int[] { 4, 5, 6, 7 });
+                Mappings.Add(3, new int[] { 6, 7, 8, 9 });
 
-                Mappings.Add(4, new int[] { 5, 6, 7, 8 });
-                Mappings.Add(5, new int[] { 7, 8, 9, 10 });
-                Mappings.Add(6, new int[] { 5, 6, 7, 8 });
-                Mappings.Add(7, new int[] { 7, 8, 9, 10 });
-            }                        
-        }       
+                Mappings.Add(4, new int[] { 4, 5, 6, 7 });
+                Mappings.Add(5, new int[] { 6, 7, 8, 9 });
+                Mappings.Add(6, new int[] { 4, 5, 6, 7 });
+                Mappings.Add(7, new int[] { 6, 7, 8, 9 });
+            }
+        }
 
         public void Encode(byte b)
         {
@@ -82,36 +84,37 @@ namespace Common
             for (int index = 0; index < 8; index++)
             {
                 bit = (b & (1 << index)) == (1 << index);
+
                 if (bit)
                 {
                     SetValuesForBit(index);
-                }                
+                }
 
-            }           
+            }
             //DenseEncoding
         }
 
         //Gets Called for only ON Bits for the specific indexes.
         private void SetValuesForBit(int partition)
         {
-            if(Mappings.TryGetValue(partition, out int[] arr))
+            if (Mappings.TryGetValue(partition, out int[] arr))
             {
-                foreach( var item in arr)
+                foreach (var item in arr)
                 {
-                    ActiveBits.Add(new Position(partition, item));
+                    ActiveBits.Add(new Position_SOM(partition, item));
                 }
-            }            
-        }      
+            }
+        }
 
-        public SDR GetDenseSDR(iType iType = iType.SPATIAL)
+        public SDR_SOM GetDenseSDR(iType iType = iType.SPATIAL)
         {
-            return new SDR(10, 10, ActiveBits, iType);
+            return new SDR_SOM(10, 10, ActiveBits, iType);
         }
 
 
         public SDR GetSparseSDR()
         {
-            throw new NotImplementedException();
+            return new SDR_SOM(10, 10, ActiveBits);
         }
     }
 }

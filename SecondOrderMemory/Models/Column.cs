@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SecondOrderMemory.Models
+﻿namespace SecondOrderMemory.Models
 {
     public class Column
     {

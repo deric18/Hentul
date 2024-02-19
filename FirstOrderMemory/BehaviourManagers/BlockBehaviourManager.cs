@@ -269,7 +269,7 @@ namespace FirstOrderMemory.BehaviourManagers
                 posList.Add(neuron.NeuronID);
             });
 
-            Sdr = new SDR(FileSize, FileSize, posList, iType.SPATIAL);            
+            Sdr = new SDR(FileSize, FileSize, posList, iType.SPATIAL);
 
             NeuronsFiringLastCycle.Clear();
 

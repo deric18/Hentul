@@ -71,7 +71,11 @@
 
         internal static SDR_SOM GetSDRFromPattern(char ch)
         {
-            throw new NotImplementedException();
-        }
+            ByteEncoder encoder = new ByteEncoder(100, 8);
+
+            encoder.Encode((byte)ch);
+
+            return (SDR_SOM)encoder.GetSparseSDR();
+        }        
     }
 }

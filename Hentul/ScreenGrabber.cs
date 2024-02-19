@@ -191,9 +191,9 @@
         {
             ByteEncoder encoder = new ByteEncoder(100, 8);
 
-            encoder.Encode((byte)Point.X);
+            encoder.Encode((byte) Point.X);
             SDR Xsdr = encoder.GetDenseSDR(iType.TEMPORAL);
-            encoder.Encode((byte)Point.Y);
+            encoder.Encode((byte) Point.Y);
             SDR Ysdr = encoder.GetDenseSDR(iType.TEMPORAL);
 
             return new Tuple<SDR, SDR>(Xsdr, Ysdr);

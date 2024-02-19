@@ -59,13 +59,18 @@
 
             bbManager.Fire(patternA);
 
-            //Assert B is Present;
-            //Assert C is not Present
+            SDR_SOM predictedSDR;
+
+            predictedSDR = bbManager.GetPredictedSDR();
+            Assert.IsTrue(predictedSDR.IsUnionTo(patternB)); //Assert B is Present;
+
+            Assert.IsFalse(predictedSDR.IsUnionTo(patternC)); //Assert C is not Present
 
             bbManager.Fire(patternB);
 
-            //Assert C is Present;
-            //Assert A is not Present;
+            Assert.IsTrue(predictedSDR.IsUnionTo(patternC));  //Assert C is Present;
+
+            Assert.IsFalse(predictedSDR.IsUnionTo(patternA)); //Assert A is not Present;
         }
 
         

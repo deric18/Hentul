@@ -6,7 +6,7 @@ namespace SecondOrderMemory.Models
     {
         public new List<Position_SOM> ActiveBits;
 
-        public SDR_SOM(int length, int breadth, List<Position_SOM> activeBits, iType type) : base(length,breadth, type)
+        public SDR_SOM(int length, int breadth, List<Position_SOM> activeBits, iType type = iType.SPATIAL) : base(length,breadth, type)
         {
             ActiveBits = activeBits;
         }

@@ -1,6 +1,6 @@
 ﻿namespace SecondOrderMemoryUnitTest
 {
-    using Common;
+    using SecondOrderMemory.Models;
     using NUnit.Framework;
 
     [TestClass]
@@ -23,11 +23,11 @@
 
             encoder.Encode(toEncode1);
 
-            SDR result1 = encoder.GetDenseSDR();
+            SDR_SOM result1 = encoder.GetDenseSDR();
 
             encoder.Encode(toEncode2);
 
-            SDR result2 = encoder.GetDenseSDR();
+            SDR_SOM result2 = encoder.GetDenseSDR();
 
             Assert.AreEqual(result1.ActiveBits.Count, result2.ActiveBits.Count);
         }

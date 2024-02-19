@@ -5,9 +5,9 @@ using System.Xml;
 namespace SecondOrderMemory.BehaviourManagers
 {
 
-    public class BlockBehaviourManager 
+    public class BlockBehaviourManager
     {
-        public  static ulong CycleNum { get; private set; }
+        public static ulong CycleNum { get; private set; }
 
         public int NumColumns { get; private set; }
 
@@ -31,7 +31,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Column[,] Columns { get; private set; }
 
-        public  Neuron[,] TemporalLineArray { get; private set; }
+        private SDR_SOM SDR { get; set; }
+
+        public Neuron[,] TemporalLineArray { get; private set; }
 
         public Neuron[,] ApicalLineArray { get; private set; }
 
@@ -119,18 +121,18 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     Columns[i, j] = new Column(i, j, numColumns);
                 }
-            }                      
-        }        
+            }
+        }
 
         public void Init(int x = -1, int y = -1)
-        {                        
+        {
 
             ReadDendriticSchema(x, y);
 
             ReadAxonalSchema(x, y);
 
             GenerateTemporalLines();
-            
+
             GenerateApicalLines();
 
         }
@@ -139,12 +141,13 @@ namespace SecondOrderMemory.BehaviourManagers
         {
             BlockBehaviourManager toReturn;
 
-            toReturn = new BlockBehaviourManager(x,y,z,NumColumns);
+            toReturn = new BlockBehaviourManager(x, y, z, NumColumns);
 
             toReturn.Init();
 
             return toReturn;
 
+            #region Cache Code for Connector
             //try
             //{
             //    for (int i = 0; i < NumColumns; i++)
@@ -211,6 +214,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             //toReturn.GenerateApicalLines();
 
+            #endregion
         }
 
 
@@ -232,33 +236,34 @@ namespace SecondOrderMemory.BehaviourManagers
                         throw new Exception("PreCycle Cleanup Exception!!!");
                     }
                 }
+
             ColumnsThatBurst.Clear();
         }
 
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
-        {            
+        {
 
-            if(!ignorePrecyclePrep)
+            if (!ignorePrecyclePrep)
                 PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
                 return;
 
-            switch(incomingPattern.InputPatternType)
+            switch (incomingPattern.InputPatternType)
             {
                 case iType.SPATIAL:
-                    {                        
+                    {
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
                         {
                             var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                Console.WriteLine( "Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
+                                Console.WriteLine("Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
-                            else if(predictedNeuronPositions.Count == 1)
+                            else if (predictedNeuronPositions.Count == 1)
                             {
                                 Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Old  Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
@@ -268,7 +273,7 @@ namespace SecondOrderMemory.BehaviourManagers
                                 Console.WriteLine("There SHould only be one winner in the Column");
                             }
                             predictedNeuronPositions = null;
-                        }                     
+                        }
 
                         IsSpatial = true;
 
@@ -280,9 +285,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
                         List<Neuron> temporalLineNeurons = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits as List<Position_SOM>);
 
-                        if(temporalLineNeurons.Count != 0)
+                        if (temporalLineNeurons.Count != 0)
                         {
-                            foreach(var temporalNeuron in temporalLineNeurons)
+                            foreach (var temporalNeuron in temporalLineNeurons)
                             {
                                 NeuronsFiringThisCycle.Add(temporalNeuron);
 
@@ -298,7 +303,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                         List<Neuron> apicalLineNeurons = new List<Neuron>();
 
-                        foreach(var pos in incomingPattern.ActiveBits)
+                        foreach (var pos in incomingPattern.ActiveBits)
                         {
                             apicalLineNeurons.Add(this.ApicalLineArray[pos.X, pos.Y]);
                         }
@@ -322,8 +327,194 @@ namespace SecondOrderMemory.BehaviourManagers
             if (IsSpatial == true)
                 Wire();
 
-            if(isTemporal == false && IsApical == false && ignorePostCycleCleanUp == false)
+            if (isTemporal == false && IsApical == false && ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
+        }        
+
+        public void AddNeuronToCurrentFiringCycle(Neuron neuron)
+        {
+            if (this.NeuronsFiringThisCycle.Where(n => n.NeuronID.Equals(neuron.NeuronID)).Count() == 0)
+                NeuronsFiringThisCycle.Add(neuron);
+        }
+
+        public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        {
+            if (x == i && y == j && z == k)
+            {
+                throw new InvalidDataException();
+            }
+            try
+            {
+                Column col = this.Columns[x, y];
+
+                Neuron neuron = col.Neurons[z];
+
+                neuron.InitAxonalConnectionForConnector(i, j, k);
+
+                IncrementAxonalConnectionCount();
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.ToString());
+
+                int breakpoint = 1;
+            }
+        }
+
+        public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        {
+            if (x == i && y == j && z == k)
+            {
+                int breakpoint = 1;
+            }
+            try
+            {
+                Column col = this.Columns[x, y];
+
+                Neuron neuron = col.Neurons[z];
+
+                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+
+                IncrementProximalConnectionCount();
+
+                if (neuron.flag >= 4)
+                {
+                    int breakpoint2 = 1;
+                }
+                else
+                {
+                    neuron.flag++;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.ToString());
+
+                int breakpoint = 1;
+            }
+        }
+
+        public void AddPredictedNeuron(Neuron predictedNeuron, string contributingNeuron)
+        {
+            List<string> contributingList = null;
+            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+            {
+                if (contributingList != null)
+                {
+                    contributingList.Add(contributingNeuron);
+                }
+                else
+                {
+                    contributingList = new List<string>
+                    {
+                        contributingNeuron
+                    };
+                }
+            }
+            else
+            {
+                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
+            }
+        }
+
+        public void AddtoPredictedNeuronFromLastCycleMock(Neuron neuronToAdd, Neuron contributingNeuron)
+        {
+
+            PredictedNeuronsfromLastCycle.Add(neuronToAdd.NeuronID.ToString(), new List<string>() { contributingNeuron.NeuronID.ToString() });
+        }
+
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
+        {
+            if (cType == null)
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }
+
+            if (AxonalNeuron == null || DendriticNeuron == null)
+                return false;
+
+            if (AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID) && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
+            {
+                Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
+                //throw new InvalidDataException("CoonectTwoNeurons: Cannot connect Neuron to Itself!");
+                return false;
+            }
+
+            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);
+        }
+
+        public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
+        {
+            Neuron toRetun = null;
+
+            if (w == 'N')
+            {
+                toRetun = Columns[x, y].Neurons[z];
+            }
+            else if (w == 'T')
+            {
+                toRetun = TemporalLineArray[y, z];
+            }
+            else if (w == 'A')
+            {
+                toRetun = ApicalLineArray[x, y];
+            }
+
+            if (toRetun == null)
+            {
+                int bp = 1;
+                throw new InvalidOperationException("Your Column structure is messed up!!!");
+            }
+
+            return toRetun;
+        }
+
+        public Neuron ConvertStringPosToNeuron(string posString)
+        {
+            var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+            char nType = 'N';
+
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
+
+            if ( x > 9 || y > 9 || z > 9)
+            {
+                int breakpoint = 1;
+                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
+            }
+
+            return GetNeuronFromPosition(nType, x, y, z);            
+
+        }
+
+        public SDR_SOM GetPredictedSDR()
+        {
+            List<Position_SOM> ActiveBits = new List<Position_SOM>();
+
+            for (int i = 0; i < NumColumns; i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    for (int k = 0; k < NumColumns; k++)
+                    {
+                        if (Columns[i, j].Neurons[k].CurrentState == NeuronState.PREDICTED)
+                        {
+                            ActiveBits.Add(Columns[i, j].Neurons[k].NeuronID);
+                        }
+                    }
+                }
+            }
+
+            return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
         }
 
         private void Fire()
@@ -334,12 +525,12 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)
                 {
-                    ProcessSpikeFromNeuron(ConvertStringPosToNeuron(synapse.AxonalNeuronId), ConvertStringPosToNeuron(synapse.DendronalNeuronalId) , synapse.cType);
-                }                
+                    ProcessSpikeFromNeuron(ConvertStringPosToNeuron(synapse.AxonalNeuronId), ConvertStringPosToNeuron(synapse.DendronalNeuronalId), synapse.cType);
+                }
             }
         }
 
-        public void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
+        private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
             uint multiplier = 1;
 
@@ -355,7 +546,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
             {
-                if (! targetNeuron.TAContributors.TryGetValue(sourceNeuron.NeuronID.ToString(), out char w))
+                if (!targetNeuron.TAContributors.TryGetValue(sourceNeuron.NeuronID.ToString(), out char w))
                 {
                     if (cType.Equals(ConnectionType.TEMPRORAL))
                     {
@@ -407,12 +598,12 @@ namespace SecondOrderMemory.BehaviourManagers
         }
 
 
-        public void StrengthenTemporalConnection(Neuron neuron)
+        private void StrengthenTemporalConnection(Neuron neuron)
         {
             PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
         }
 
-        public void StrengthenApicalConnection(Neuron neuron)
+        private void StrengthenApicalConnection(Neuron neuron)
         {
             PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
         }
@@ -501,10 +692,10 @@ namespace SecondOrderMemory.BehaviourManagers
                 IsSpatial = false;
             }
 
-            if(isTemporal)
+            if (isTemporal)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-                foreach(var neuron in NeuronsFiringThisCycle)
+                foreach (var neuron in NeuronsFiringThisCycle)
                 {
                     if (neuron.nType.Equals(NeuronType.NORMAL))
                     {
@@ -517,11 +708,11 @@ namespace SecondOrderMemory.BehaviourManagers
                         }
                     }
                 }
-                 
+
                 isTemporal = false;
             }
 
-            if(IsApical)
+            if (IsApical)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
 
@@ -547,12 +738,12 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     col.PruneCycleRefresh();
                 }
-            }                         
+            }
         }
 
-       
 
-       
+
+
 
         private void PostCycleCleanup()
         {
@@ -578,6 +769,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 NeuronsFiringLastCycle.Add(item);
             }
 
+
             NeuronsFiringThisCycle.Clear();
 
             CycleNum++;
@@ -588,8 +780,8 @@ namespace SecondOrderMemory.BehaviourManagers
         private void GenerateTemporalLines()
         {
             // T : (x,y, z) => (0,y,x)
-       
-            for(int i=0; i<NumColumns; i++)
+
+            for (int i = 0; i < NumColumns; i++)
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
@@ -598,7 +790,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
 
                     for (int k = 0; k < NumColumns; k++)
-                    {                        
+                    {
                         ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                     }
                 }
@@ -621,17 +813,17 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-        
+
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position_SOM> activeBits)
         {
             List<Neuron> temporalNeurons = new List<Neuron>();
 
             if (activeBits.Count == 0)
-                return temporalNeurons;            
+                return temporalNeurons;
 
             foreach (var position in activeBits)
-            {               
-                temporalNeurons.Add(this.TemporalLineArray[position.Y, position.X]);             
+            {
+                temporalNeurons.Add(this.TemporalLineArray[position.Y, position.X]);
             }
 
             return temporalNeurons;
@@ -655,180 +847,6 @@ namespace SecondOrderMemory.BehaviourManagers
             }
 
             return toReturn;
-        }
-
-        public void AddNeuronToCurrentFiringCycle(Neuron neuron)
-        {
-            if (this.NeuronsFiringThisCycle.Where(n => n.NeuronID.Equals(neuron.NeuronID)).Count() == 0)
-                NeuronsFiringThisCycle.Add(neuron);
-        }
-
-        public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
-        {
-            if (x == i && y == j && z == k)
-            {
-                throw new InvalidDataException();
-            }
-            try
-            {
-                Column col = this.Columns[x, y];
-
-                Neuron neuron = col.Neurons[z];
-
-                neuron.InitAxonalConnectionForConnector(i, j, k);
-
-                IncrementAxonalConnectionCount();
-                
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.ToString());
-
-                int breakpoint = 1;
-            }
-        }
-
-        public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
-        {
-            if (x == i && y == j && z == k)
-            {
-                int breakpoint = 1;
-            }
-            try
-            {
-                Column col = this.Columns[x, y];
-
-                Neuron neuron = col.Neurons[z];
-
-                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
-
-                IncrementProximalConnectionCount();
-
-                if (neuron.flag >= 4)
-                {
-                    int breakpoint2 = 1;
-                }
-                else
-                {
-                    neuron.flag++;
-                }
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.ToString());
-
-                int breakpoint = 1;
-            }
-        }
-       
-        public void AddPredictedNeuron(Neuron predictedNeuron, string contributingNeuron)
-        {
-            List<string> contributingList = null;
-            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
-            {
-                if (contributingList != null)
-                {
-                    contributingList.Add(contributingNeuron);
-                }
-                else
-                {
-                    contributingList = new List<string>
-                    {
-                        contributingNeuron
-                    };
-                }
-            }
-            else
-            {
-                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
-            }
-        }
-
-        public void AddtoPredictedNeuronFromLastCycleMock(Neuron neuronToAdd, Neuron contributingNeuron)
-        {
-           
-            PredictedNeuronsfromLastCycle.Add(neuronToAdd.NeuronID.ToString(), new List<string>() { contributingNeuron.NeuronID.ToString()});
-        }
-
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
-        {
-            if(cType == null)
-            {
-                bool breakpoint = false;
-                breakpoint = true;
-            }
-
-            if (AxonalNeuron == null || DendriticNeuron == null)
-                return false;
-
-            if(AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID) && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
-            {
-                Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
-                throw new InvalidDataException("CoonectTwoNeurons: Cannot connect Neuron to Itself!");
-                //return false;
-            }
-
-            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);            
-        }
-
-        public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
-        {
-            Neuron toRetun = null;
-
-            if (w == 'N')
-            {
-                toRetun = Columns[x, y].Neurons[z];
-            }
-            else if (w == 'T')
-            {
-                toRetun =  TemporalLineArray[y, z];
-            }            
-            else if(w == 'A')
-            {
-                toRetun = ApicalLineArray[x, y];
-            }
-
-            if (toRetun == null)
-            {
-                int bp = 1;
-                throw new InvalidOperationException("Your Column structure is messed up!!!");
-            }
-
-            return toRetun; 
-        }
-
-        public Neuron ConvertStringPosToNeuron(string posString)
-        {
-            var parts = posString.Split('-');
-            int x = Convert.ToInt32(parts[0]);
-            int y = Convert.ToInt32(parts[1]);
-            int z = Convert.ToInt32(parts[2]);
-            char nType = 'N';
-
-            if (parts.Length == 4)
-            {
-                nType = Convert.ToChar(parts[3]);
-            }
-
-            try
-            {
-                if (parts.Length != 3 || x > 9 || y > 9 || z > 9)
-                {
-                    int breakpoint = 1;
-                }
-
-                return GetNeuronFromPosition(nType, x, y, z);
-
-            }
-            catch (Exception e)
-            {
-                int bp = 1;
-            }
-
-            throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
-
         }
 
         private void IncrementProximalConnectionCount()
