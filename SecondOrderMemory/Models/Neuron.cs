@@ -73,12 +73,14 @@ namespace SecondOrderMemory.Models
 
             //Console.WriteLine("Neuron Fired!" + NeuronID.ToString());
 
-            CurrentState = NeuronState.FIRING;
+            ChangeCurrentStateTo(NeuronState.FIRING);
         }
 
         public void ProcessVoltage(int voltage)
         {
             Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
+
+            CurrentState = NeuronState.PREDICTED;
 
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }

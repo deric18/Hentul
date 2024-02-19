@@ -1,5 +1,4 @@
-﻿using Bond;
-using SecondOrderMemory.Models;
+﻿using SecondOrderMemory.Models;
 using Common;
 using System.Xml;
 
@@ -69,7 +68,7 @@ namespace SecondOrderMemory.BehaviourManagers
         private const int AXONAL_CONNECTION = 1;
         #endregion
 
-        public BlockBehaviourManager(int x, int y, int z, int numColumns = 10)
+        public BlockBehaviourManager(int numColumns = 10, int x = 0, int y = 0, int z = 0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 
@@ -236,7 +235,7 @@ namespace SecondOrderMemory.BehaviourManagers
             ColumnsThatBurst.Clear();
         }
 
-        public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false)
+        public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {            
 
             if(!ignorePrecyclePrep)
@@ -320,8 +319,8 @@ namespace SecondOrderMemory.BehaviourManagers
             if (IsSpatial == true)
                 Wire();
 
-            if(isTemporal == false && IsApical == false)
-            PostCycleCleanup();
+            if(isTemporal == false && IsApical == false && ignorePostCycleCleanUp == false)
+                PostCycleCleanup();
         }
 
         private void Fire()
@@ -545,14 +544,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     col.PruneCycleRefresh();
                 }
-            }
-
-            if(IsSpatial == false && isTemporal == false && IsApical == false)
-            {
-                PostCycleCleanup();
-            }
-            
-            // Todo: Check if neurons that all fired together are connected to each other or not and connect them!   
+            }                         
         }
 
        

@@ -31,7 +31,7 @@ namespace SecondOrderMemoryUnitTest
            
             bbm3.Init(0, 0);
 
-            SDR_SOM randSDR = GenerateRandomSDR(iType.SPATIAL);
+            SDR_SOM randSDR = TestUtils.GenerateRandomSDR(iType.SPATIAL);
             
             clonedBBM.Fire(randSDR);
 
@@ -156,9 +156,9 @@ namespace SecondOrderMemoryUnitTest
                 throw new InvalidProgramException("Could Not Connect 2 Neurons");                
             }
 
-            SDR_SOM sdr1 = GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
 
-            SDR_SOM sdr2 = GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(5, 3) }, iType.SPATIAL);
+            SDR_SOM sdr2 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(5, 3) }, iType.SPATIAL);
 
             if (!neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse neuron1Synapse) || (!neuron2.dendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse neuron2Synapse)))
             {
@@ -204,13 +204,13 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalFiring()
         {
-            SDR_SOM temporalInputPattern = GenerateRandomSDR(iType.TEMPORAL);
+            SDR_SOM temporalInputPattern = TestUtils.GenerateRandomSDR(iType.TEMPORAL);
             
             Position_SOM position = temporalInputPattern.ActiveBits[0];
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = GetSpatialNeuronFromTemporalCoordinate(position);
+            Neuron normalNeuron = TestUtils.GetSpatialNeuronFromTemporalCoordinate(bbManager, position);
 
             Position_SOM temporalNeuronPosition = new Position_SOM(0, position.Y, position.X, 'T');
 
@@ -240,8 +240,8 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalWiring()
         {
-            SDR_SOM temporalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
-            SDR_SOM spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
             Position_SOM position = spatialInputPattern.ActiveBits[0];
 
@@ -249,7 +249,7 @@ namespace SecondOrderMemoryUnitTest
             
             Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
 
-            Position_SOM overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
+            Position_SOM overlapPos = TestUtils.GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
             var overlapNeuron = bbManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
@@ -292,7 +292,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestApicalFiring()
         {
-            SDR_SOM apicalInputPattern = GenerateRandomSDR(iType.APICAL);            
+            SDR_SOM apicalInputPattern = TestUtils.GenerateRandomSDR(iType.APICAL);            
 
             Position_SOM apicalPos = apicalInputPattern.ActiveBits[0];
 
@@ -310,8 +310,8 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestApicalWiring()
         {
-            SDR_SOM apicalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.APICAL);
-            SDR_SOM spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            SDR_SOM apicalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
+            SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
             Position_SOM position = spatialInputPattern.ActiveBits[0];
 
@@ -362,69 +362,6 @@ namespace SecondOrderMemoryUnitTest
         public void TestTemporalAndApicalFiringAndWiring()
         {
 
-        }
-
-        private Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
-        {
-            return new Position_SOM(spatial.X, spatial.Y, temporal.X);
-        }
-
-        private Neuron GetSpatialNeuronFromTemporalCoordinate(Position pos)
-        {
-            return bbManager.Columns[pos.Z, pos.Y].Neurons[pos.X];
-        }
-
-        private SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType)
-        {
-            return new SDR_SOM(10, 10, posList, inputPatternType);
-        }
-
-        private SDR_SOM GenerateRandomSDR(iType inputPatternType)
-        {
-            Random rand = new Random();
-
-            int numPos = rand.Next(1, 10);
-
-            List<Position_SOM> posList = new List<Position_SOM>();
-
-            for(int i=0; i < numPos; i++)
-            {
-                posList.Add(new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9)));
-            }
-
-            return new SDR_SOM(10, 10, posList, inputPatternType);
-        }
-
-        private SDR_SOM GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
-        {
-            Random rand = new Random();
-            int numPos = rand.Next(0, 10);
-
-            List<Position_SOM> spatialPosList = new List<Position_SOM>()
-            {
-                new Position_SOM(2,4),
-                new Position_SOM(8,3),
-                new Position_SOM(7,2),
-                new Position_SOM(0,0)
-            };
-
-            List<Position_SOM> temporalPosList = new List<Position_SOM>()
-            {
-                new Position_SOM(0,4),
-                new Position_SOM(8,3),
-                new Position_SOM(7,2),
-                new Position_SOM(0,0)
-            };
-
-
-            if(inputPatternType == iType.TEMPORAL)
-            {
-                return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
-            }
-            else
-            {
-                 return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
-            }
-        }
+        }       
     }
 }
