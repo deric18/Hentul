@@ -112,7 +112,7 @@
         }
 
 
-        public SDR GetSparseSDR()
+        public SDR_SOM GetSparseSDR()
         {
             return new SDR_SOM(10, 10, ActiveBits);
         }

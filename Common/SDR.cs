@@ -33,12 +33,16 @@
             InputPatternType = inputeType;
         }        
 
-        public bool IsUnionTo(SDR uniounTo)
+        public virtual bool IsUnionTo(SDR uniounTo)
         {
-            if (Length != uniounTo.Length || uniounTo.Breadth != uniounTo.Breadth || ActiveBits.Count > uniounTo.ActiveBits.Count)
+            if (uniounTo.ActiveBits == null)
+                throw new NullReferenceException();
+
+            if (Length != uniounTo.Length || uniounTo.Breadth != uniounTo.Breadth || ActiveBits.Count > uniounTo?.ActiveBits.Count)
                 return false;
 
             ActiveBits.OrderByDescending(x => x.X);
+
             uniounTo.ActiveBits.OrderByDescending(y => y.X);
 
             int counter = 0;
@@ -59,7 +63,7 @@
             return true;
         }
 
-        public float CompareFloat(SDR firingPattern)
+        public virtual float CompareFloat(SDR firingPattern)
         {
             // first pattern is always the firing pattern and second pattern is the predicted pattern
 
@@ -98,7 +102,7 @@
             return matchFloat;
         }
 
-        public bool Equals(SDR y)
+        public virtual bool Equals(SDR y)
         {
             if (this.Length == y.Length && this.Breadth == y.Breadth && this.ActiveBits.Count == y.ActiveBits.Count)
             {
