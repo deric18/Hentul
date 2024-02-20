@@ -728,6 +728,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
             //Prepare the predicted list for next cycle Fire 
 
+            PredictedNeuronsforThisCycle.Clear();
+
             foreach (var kvp in PredictedNeuronsForNextCycle)
             {
                 PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
