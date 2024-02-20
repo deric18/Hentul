@@ -15,7 +15,7 @@ namespace SecondOrderMemoryUnitTest
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(0, 0, 0, sizeOfColumns);
+            bbManager = new BlockBehaviourManager(sizeOfColumns);
 
             bbManager.Init(0, 0);
 
@@ -27,7 +27,7 @@ namespace SecondOrderMemoryUnitTest
         public void TestMultipleInstanceOfSOMBBM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1,3,10);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(1,3,10);           
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10,1,3,10);           
            
             bbm3.Init(0, 0);
 
@@ -87,11 +87,11 @@ namespace SecondOrderMemoryUnitTest
                         {
                             int bp = 1;
                         }
-                        Assert.AreEqual(6, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
+                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
 
                         Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
 
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0,5)));
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0,3)));
 
                         Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
                     }
@@ -124,7 +124,7 @@ namespace SecondOrderMemoryUnitTest
 
                         //Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
 
-                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0, 5)));
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0, 3)));
 
                         Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
                     }
@@ -305,7 +305,7 @@ namespace SecondOrderMemoryUnitTest
 
             int voltageBeforeFire = apicalFiredNormalNeuron.Voltage;
 
-            bbManager.Fire(apicalInputPattern, true);
+            bbManager.Fire(apicalInputPattern, true, true);
 
             int voltagAfterFire = apicalFiredNormalNeuron.Voltage;
 
@@ -315,6 +315,8 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestApicalWiring()
         {
+            //Fire an apical Neurons , Deplorize specific positions and fire those neurons via spatial firing
+
             SDR_SOM apicalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
             SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
@@ -335,7 +337,7 @@ namespace SecondOrderMemoryUnitTest
             bbManager.Fire(spatialInputPattern, true);
 
 
-            if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse postSynapse))
+            if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
                 currentStrength = postSynapse.GetStrength();
             }
@@ -360,7 +362,7 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
  
-            Assert.AreEqual(8, bbm2.Columns[3, 3].Neurons[5].flag);
+            Assert.AreEqual(6, bbm2.Columns[3, 3].Neurons[5].flag);
         }
        
 

@@ -7,6 +7,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
     public class BlockBehaviourManager
     {
+        #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
         public int NumColumns { get; private set; }
@@ -15,7 +16,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
 
-        public Dictionary<string, List<string>> PredictedNeuronsfromLastCycle { get; private set; }
+        public Dictionary<string, List<string>> PredictedNeuronsforThisCycle { get; private set; }
 
         public List<Neuron> NeuronsFiringThisCycle { get; private set; }
 
@@ -39,9 +40,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Dictionary<string, int[]> DendriticCache { get; private set; }
 
-        public Dictionary<string, int[]> AxonalCache { get; private set; }
+        public Dictionary<string, int[]> AxonalCache { get; private set; }        
 
-        private static int neuronCounter;
+        public static int neuronCounter { get; private set; }
 
         public uint totalProximalConnections;
 
@@ -52,6 +53,8 @@ namespace SecondOrderMemory.BehaviourManagers
         private bool isTemporal;
 
         public bool IsSpatial;
+
+        #endregion
 
         #region CONSTANTS
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
@@ -78,7 +81,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             this.NumColumns = numColumns;
 
-            PredictedNeuronsfromLastCycle = new Dictionary<string, List<string>>();
+            PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
 
             //_predictedSegmentForThisCycle = new List<Segment>();
             PredictedNeuronsForNextCycle = new Dictionary<string, List<string>>();
@@ -137,11 +140,71 @@ namespace SecondOrderMemory.BehaviourManagers
 
         }
 
+        public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        {
+            if (x == i && y == j && z == k)
+            {
+                throw new InvalidDataException();
+            }
+            try
+            {
+                Column col = this.Columns[x, y];
+
+                Neuron neuron = col.Neurons[z];
+
+                neuron.InitAxonalConnectionForConnector(i, j, k);
+
+                IncrementAxonalConnectionCount();
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.ToString());
+
+                int breakpoint = 1;
+            }
+        }
+
+        public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        {
+            if (x == i && y == j && z == k)
+            {
+                int breakpoint = 1;
+            }
+            try
+            {
+                Column col = this.Columns[x, y];
+
+                Neuron neuron = col.Neurons[z];
+
+                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+
+                IncrementProximalConnectionCount();
+
+                if (neuron.flag >= 4)
+                {
+                    int breakpoint2 = 1;
+                }
+                else
+                {
+                    neuron.flag++;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.ToString());
+
+                int breakpoint = 1;
+            }
+        }
+
         public BlockBehaviourManager CloneBBM(int x, int y, int z)
         {
             BlockBehaviourManager toReturn;
 
-            toReturn = new BlockBehaviourManager(x, y, z, NumColumns);
+            toReturn = new BlockBehaviourManager(NumColumns, x, y, z);
 
             toReturn.Init();
 
@@ -217,7 +280,6 @@ namespace SecondOrderMemory.BehaviourManagers
             #endregion
         }
 
-
         private void PreCyclePrep()
         {
             //Prepare all the neurons that are predicted 
@@ -239,7 +301,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             ColumnsThatBurst.Clear();
         }
-
+        
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
 
@@ -329,101 +391,20 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (isTemporal == false && IsApical == false && ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
-        }        
-
-        public void AddNeuronToCurrentFiringCycle(Neuron neuron)
-        {
-            if (this.NeuronsFiringThisCycle.Where(n => n.NeuronID.Equals(neuron.NeuronID)).Count() == 0)
-                NeuronsFiringThisCycle.Add(neuron);
-        }
-
-        public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
-        {
-            if (x == i && y == j && z == k)
-            {
-                throw new InvalidDataException();
-            }
-            try
-            {
-                Column col = this.Columns[x, y];
-
-                Neuron neuron = col.Neurons[z];
-
-                neuron.InitAxonalConnectionForConnector(i, j, k);
-
-                IncrementAxonalConnectionCount();
-
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.ToString());
-
-                int breakpoint = 1;
-            }
-        }
-
-        public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
-        {
-            if (x == i && y == j && z == k)
-            {
-                int breakpoint = 1;
-            }
-            try
-            {
-                Column col = this.Columns[x, y];
-
-                Neuron neuron = col.Neurons[z];
-
-                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
-
-                IncrementProximalConnectionCount();
-
-                if (neuron.flag >= 4)
-                {
-                    int breakpoint2 = 1;
-                }
-                else
-                {
-                    neuron.flag++;
-                }
-            }
-            catch (Exception ex)
-            {
-
-                Console.WriteLine(ex.ToString());
-
-                int breakpoint = 1;
-            }
-        }
+        }                       
 
         public void AddPredictedNeuron(Neuron predictedNeuron, string contributingNeuron)
         {
-            List<string> contributingList = null;
+            List<string> contributingList = new List<string>();
+
             if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
             {
-                if (contributingList != null)
-                {
-                    contributingList.Add(contributingNeuron);
-                }
-                else
-                {
-                    contributingList = new List<string>
-                    {
-                        contributingNeuron
-                    };
-                }
+                contributingList.Add(contributingNeuron);
             }
             else
             {
                 PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
             }
-        }
-
-        public void AddtoPredictedNeuronFromLastCycleMock(Neuron neuronToAdd, Neuron contributingNeuron)
-        {
-
-            PredictedNeuronsfromLastCycle.Add(neuronToAdd.NeuronID.ToString(), new List<string>() { contributingNeuron.NeuronID.ToString() });
         }
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
@@ -532,7 +513,6 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
-            uint multiplier = 1;
 
             if (targetNeuron.NeuronID.ToString().Equals("2-4-2-N"))
             {
@@ -566,7 +546,6 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (targetNeuron.dendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
             {
-                multiplier += synapse.GetStrength();
 
                 switch (synapse.cType)
                 {
@@ -638,7 +617,7 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
-                foreach (var item in PredictedNeuronsfromLastCycle.Keys)
+                foreach (var item in PredictedNeuronsforThisCycle.Keys)
                 {
                     var neuronToAdd = ConvertStringPosToNeuron(item);
 
@@ -649,7 +628,6 @@ namespace SecondOrderMemory.BehaviourManagers
                 };
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-
 
                 //Total New Pattern : None of the predicted neurons Fired                 
 
@@ -663,18 +641,17 @@ namespace SecondOrderMemory.BehaviourManagers
                         foreach (var axonalNeuronItem in NeuronsFiringLastCycle)
                         {
                             //Connect last cycle firing neuronal axons this cycle firing dendrites
-                            Console.WriteLine("SOM :: Total New Pattern , Bursting");
+                            Console.WriteLine("SOM :: Wire() :: ConnectTwoNeurons ");
                             ConnectTwoNeurons(axonalNeuronItem, dendriticNeuronItem, ConnectionType.AXONTONEURON);
                         }
                     }
-
                 }
 
                 //Else PramoteCorrectlyPredictedConnections
                 foreach (var correctlyPredictedNeuron in correctPredictionList)
                 {
                     List<string> contributingList;
-                    if (PredictedNeuronsfromLastCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                    if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                     {
                         if (contributingList.Count == 0)
                         {
@@ -741,10 +718,6 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-
-
-
-
         private void PostCycleCleanup()
         {
             //clean up all the fired columns
@@ -757,7 +730,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             foreach (var kvp in PredictedNeuronsForNextCycle)
             {
-                PredictedNeuronsfromLastCycle[kvp.Key] = kvp.Value;
+                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
             }
 
             PredictedNeuronsForNextCycle.Clear();
@@ -908,7 +881,9 @@ namespace SecondOrderMemory.BehaviourManagers
                 var numColumns = columns.Count;
 
                 for (int i = 0; i < numColumns; i++)
-                {//Column
+                {
+                    //Column
+
                     neuronCounter = 0;
 
                     var item = columns[i];
@@ -916,12 +891,19 @@ namespace SecondOrderMemory.BehaviourManagers
                     int x = Convert.ToInt32(item.Attributes[0]?.Value);
                     var y = Convert.ToInt32(item.Attributes[1]?.Value);
 
-                    //if(x == 0 && y == 1) 
-                    //{
-                    //    int breakpoint = 0;
-                    //}
+                    if (x == 0 && y == 1)
+                    {
+                        int breakpoint = 0;
+                    }
 
-                    Columns[x, y].Init++;
+                    try
+                    {
+                        Columns[x, y].Init++;
+                    }
+                    catch(Exception e)
+                    {
+                        int breakpoint = 1;
+                    }
 
                     foreach (XmlNode node in item.ChildNodes)
                     {   //Neuron                   
@@ -956,6 +938,8 @@ namespace SecondOrderMemory.BehaviourManagers
                         //int index = 0;
 
                         //4 Proximal Dendronal Connections
+                        int numDendriticConnectionCount = 0;
+
                         foreach (XmlNode neuron in neuronNodes)
                         {
                             //ProximalConnection
@@ -970,6 +954,11 @@ namespace SecondOrderMemory.BehaviourManagers
 
                             //Money Shot!!!
                             InitDendriticConnectionForConnector(a, b, c, e, f, g);
+
+                            numDendriticConnectionCount++;
+
+                            if(numDendriticConnectionCount == 2)
+                                break;
 
                             //Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 

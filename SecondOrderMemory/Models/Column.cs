@@ -84,12 +84,7 @@
 
         internal void PostCycleCleanup()
         {
-            var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
-            firingNeurons.ForEach((x) => {
-                x.FlushVoltage();
-
-            });
-
+            var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();          
             foreach (var neuron in Neurons)
             {
                 if (neuron.TAContributors.Count > 0)

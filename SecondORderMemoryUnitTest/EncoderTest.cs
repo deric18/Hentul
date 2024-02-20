@@ -38,11 +38,11 @@
 
             encoder.Encode(255);
 
-            var sdr = encoder.GetDenseSDR();
+            var sdr = encoder.GetSparseSDR();
 
             Assert.AreEqual( 32 , sdr.ActiveBits.Count);
-            Assert.AreEqual("0-5-0", sdr.ActiveBits[0].ToString());
-            Assert.AreEqual("7-10-0", sdr.ActiveBits[31].ToString());
+            Assert.AreEqual("0-4-0-N", sdr.ActiveBits[0].ToString());
+            Assert.AreEqual("7-9-0-N", sdr.ActiveBits[31].ToString());
 
         }
     }

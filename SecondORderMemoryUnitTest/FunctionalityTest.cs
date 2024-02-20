@@ -50,6 +50,10 @@
 
             while (repCount > 0)
             {
+                if(repCount == 5 || repCount == 29)
+                {
+                    int breakpoint = 1;
+                }
                 bbManager.Fire(patternA);
                 bbManager.Fire(patternB);
                 bbManager.Fire(patternC);

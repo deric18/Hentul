@@ -18,6 +18,7 @@ namespace SecondOrderMemory.Models
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
+        private const int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
         private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
         private const int APICAL_NEURONAL_FIRE_VALUE = 40;
         private const int NMDA_NEURONAL_FIRE_VALUE = 100;
@@ -71,7 +72,7 @@ namespace SecondOrderMemory.Models
                 return;
             }
 
-            //Console.WriteLine("Neuron Fired!" + NeuronID.ToString());
+            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE;
 
             ChangeCurrentStateTo(NeuronState.FIRING);
         }
@@ -127,7 +128,9 @@ namespace SecondOrderMemory.Models
             AddNewAxonalConnection(key);
         }
 
-        public void CleanUpContributersList()
+        public void PostCycleCleanup() => FlushVoltage();        
+
+        internal void CleanUpContributersList()
         {
             TAContributors.Clear();
         }
@@ -328,6 +331,7 @@ namespace SecondOrderMemory.Models
 
         internal void FlushVoltage()
         {
+            Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
         }
