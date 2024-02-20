@@ -71,7 +71,7 @@
 
         internal static SDR_SOM GetSDRFromPattern(char ch)
         {
-            ByteEncoder encoder = new ByteEncoder(1000, 8);
+            ByteEncoder encoder = new ByteEncoder(100, 8);
 
             encoder.Encode((byte)ch);
 
