@@ -54,6 +54,7 @@
                 {
                     int breakpoint = 1;
                 }
+
                 bbManager.Fire(patternA);
                 bbManager.Fire(patternB);
                 bbManager.Fire(patternC);

@@ -522,6 +522,10 @@ namespace SecondOrderMemory.BehaviourManagers
 
             targetNeuron.ChangeCurrentStateTo(NeuronState.PREDICTED);
 
+
+            //TODO : Need to tighten rules of Prediction for bursting columns
+            // Ideas : 
+
             AddPredictedNeuron(targetNeuron, sourceNeuron.NeuronID.ToString());
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
@@ -610,6 +614,9 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private void Wire()
         {
+            ///Case 1 : All Predicted Neurons Fire : Strengthen only the correct predictions.
+            ///Case 2 : Few Fired , Few Bursted : Strengthen the Correctly Fired Neurons , For Bursted , Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do X
+            ///Case 3 : All columns Bursted : highly likely first fire or totally new pattern coming in , If firing early cycle , then just wire minimum strength for the connections and move on , if in the middle of the cycle( atleast 10,000 cycle ) then Need to do somethign new Todo .
 
             //Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
 
@@ -617,6 +624,10 @@ namespace SecondOrderMemory.BehaviourManagers
             {
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
+
+
+
+                //Prepare Predicted List :
                 foreach (var item in PredictedNeuronsforThisCycle.Keys)
                 {
                     var neuronToAdd = ConvertStringPosToNeuron(item);
@@ -628,6 +639,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 };
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+
 
                 //Total New Pattern : None of the predicted neurons Fired                 
 
