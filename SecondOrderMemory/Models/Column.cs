@@ -59,7 +59,7 @@
 
         private List<Neuron> PickWinner()
         {
-            int maxVoltage = 0, maxIndex = 0;
+            int maxVoltage = 0, maxIndex = 0, continuousCounter = 0;
 
             List<Neuron> toReturn = new List<Neuron>();
 
@@ -69,10 +69,15 @@
                 {
                     maxVoltage = Neurons[i].Voltage;
                     maxIndex = i;
+                    if (i >= 1 && Neurons[i - 1].Voltage == Neurons[i].Voltage)
+                        continuousCounter++;
                 }
             }
 
-            toReturn.Add(Neurons[maxIndex]);
+            if (continuousCounter == Neurons.Count - 2)
+                return Neurons;
+            else
+                toReturn.Add(Neurons[maxIndex]);
 
             return toReturn;
         }

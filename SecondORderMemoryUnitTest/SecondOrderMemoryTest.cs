@@ -317,14 +317,17 @@ namespace SecondOrderMemoryUnitTest
         {
             //Fire an apical Neurons , Deplorize specific positions and fire those neurons via spatial firing
 
-            SDR_SOM apicalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
-            SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            List<Position_SOM> apicalPosList = new List<Position_SOM>()
+            {
+                new Position_SOM(2,3,4,'N')
+            };
 
-            Position_SOM position = spatialInputPattern.ActiveBits[0];
+            SDR_SOM apicalInputPattern = new SDR_SOM(10,10, apicalPosList, iType.APICAL);
+            SDR_SOM spatialInputPattern = new SDR_SOM(10, 10, apicalPosList, iType.SPATIAL);            
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(apicalPosList[0].ToString());
            
             var apicalNeuron = bbManager.ConvertStringPosToNeuron(normalNeuron.GetMyApicalPartner());
 
@@ -334,6 +337,9 @@ namespace SecondOrderMemoryUnitTest
             }
 
             bbManager.Fire(apicalInputPattern);
+
+            normalNeuron.ProcessVoltage(1);
+
             bbManager.Fire(spatialInputPattern);
 
 

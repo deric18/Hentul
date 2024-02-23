@@ -330,17 +330,24 @@ namespace SecondOrderMemory.BehaviourManagers
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 Console.WriteLine("Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
+
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
+
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
-                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Old  Pattern : Predicting Predicted Neurons Count : " + NeuronsFiringThisCycle.Count.ToString());
+
+                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
+
                             }
                             else
                             {
-                                Console.WriteLine("There SHould only be one winner in the Column");
+
+                                Console.WriteLine("There Should only be one winner in the Column");
+
                             }
                             predictedNeuronPositions = null;
                         }
@@ -397,7 +404,7 @@ namespace SecondOrderMemory.BehaviourManagers
             if (IsSpatial == true)
                 Wire();
 
-            if (ignorePostCycleCleanUp == false)
+            if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
         }                       
 
@@ -426,7 +433,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 ///Case 2 : Few Fired , Few Bursted : Strengthen the Correctly Fired Neurons , For Bursted , Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do X
                 ///Case 3 : All columns Bursted : highly likely first fire or totally new pattern coming in , If firing early cycle , then just wire minimum strength for the connections and move on , if in the middle of the cycle( atleast 10,000 cycle ) then Need to do somethign new Todo .
 
-                //Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
+                //Get intersection of neuronsFiringThisCycle and predictedNEuronsFromThisCycle as if any neurons that were predicted for this cycle actually fired then we got to strengthen those connections first
 
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
@@ -532,14 +539,13 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
                 else
                 {
-                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biyaaattttcchhhhhhhh!!!!!");
+                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biyaaattttcccchhhhhhhh!!!!!");
                 }
 
 
                 IsSpatial = false;
             }
-
-            if (isTemporal)
+            else if (isTemporal)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
                 foreach (var neuron in NeuronsFiringThisCycle)
@@ -558,8 +564,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                 isTemporal = false;
             }
-
-            if (IsApical)
+            else if (IsApical)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
 
@@ -603,7 +608,7 @@ namespace SecondOrderMemory.BehaviourManagers
             //TODO : Need to tighten rules of Prediction for bursting columns
             // Ideas : 
 
-            AddPredictedNeuron(targetNeuron, sourceNeuron.NeuronID.ToString());
+            AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron.NeuronID.ToString());
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
             {
@@ -657,7 +662,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-        public void AddPredictedNeuron(Neuron predictedNeuron, string contributingNeuron)
+        public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, string contributingNeuron)
         {
             List<string> contributingList = new List<string>();
 
@@ -802,10 +807,13 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private void PostCycleCleanup()
         {
-            //clean up all the fired columns
-            foreach (var column in Columns)
+            //clean up all the fired columns if there is no apical or temporal signal
+            if (!IsSpatial && !IsApical && !isTemporal)
             {
-                column.PostCycleCleanup();
+                foreach (var column in Columns)
+                {
+                    column.PostCycleCleanup();
+                }
             }
 
             //Prepare the predicted list for next cycle Fire 

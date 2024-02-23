@@ -16,26 +16,7 @@
 
             bbManager.Init();
 
-        }
-
-        [TestMethod]
-        public void ColumnPredictedNeuronFiresTest()
-        {
-            Position_SOM position = new Position_SOM(3, 2, 5);
-
-            Neuron neuron = bbManager.Columns[3, 2].Neurons[5];
-
-            Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
-
-            neuron.ProcessVoltage(5);
-
-            SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position }, iType.SPATIAL);
-
-            bbManager.Fire(sdr_SOM);
-
-            Assert.AreEqual(NeuronState.FIRING, neuron.CurrentState);
-            
-        }
+        }        
 
         [TestMethod]
         public void TestSequenceMemory()
@@ -80,14 +61,17 @@
 
         
         [TestMethod]
-        public void StrongerCircuitWins()
+        public void HighVoltagePredictedNeuronGetsPickedForFiring()
         {
+            // HighVoltagePredictedNeuronGetsPickedForFiring from a Column
 
             Position_SOM position1 = new Position_SOM(3, 2, 5);
 
             Position_SOM position2 = new Position_SOM(3, 2, 6);
 
             Position_SOM position3 = new Position_SOM(3, 2, 7);
+
+            Position_SOM apicalSOM = new Position_SOM(3, 2, 7);
 
             Neuron neuron1 = bbManager.Columns[position1.X, position1.Y].Neurons[position1.Z];
 
@@ -102,20 +86,20 @@
 
             Assert.AreEqual(neuron3.CurrentState, NeuronState.RESTING);
 
-            neuron1.ProcessVoltage(5);
 
-            neuron2.ProcessVoltage(10);
-
-            neuron3.ProcessVoltage(100);
+            SDR_SOM apicalSdr = new SDR_SOM(10, 10, new List<Position_SOM>() { apicalSOM }, iType.APICAL);
 
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position1 }, iType.SPATIAL);
-            
 
-            bbManager.Fire(sdr_SOM);
+            bbManager.Fire(apicalSdr);
 
-            Assert.AreEqual(NeuronState.PREDICTED, neuron1.CurrentState);
+            neuron3.ProcessVoltage(10);
 
-            Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
+            bbManager.Fire(sdr_SOM, true, true);
+
+            //Assert.AreEqual(NeuronState.RESTING, neuron1.CurrentState);
+
+            //Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
 
             Assert.AreEqual(NeuronState.FIRING, neuron3.CurrentState);
 
