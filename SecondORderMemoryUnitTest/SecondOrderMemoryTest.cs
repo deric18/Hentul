@@ -151,7 +151,7 @@ namespace SecondOrderMemoryUnitTest
             var neuron2 = bbManager.Columns[5, 3].Neurons[0];
 
 
-            if(!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.AXONTONEURON))
+            if(!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))
             {
                 throw new InvalidProgramException("Could Not Connect 2 Neurons");                
             }
@@ -169,9 +169,9 @@ namespace SecondOrderMemoryUnitTest
 
             uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();                        
 
-            bbManager.Fire(sdr1, true);
+            bbManager.Fire(sdr1);
 
-            bbManager.Fire(sdr2, true);
+            bbManager.Fire(sdr2);
 
             _ = neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse value1);
 
@@ -179,9 +179,9 @@ namespace SecondOrderMemoryUnitTest
 
             uint neuron1StrengthPostFire = value1.GetStrength();
 
-            uint neruon2PostFireStrentgh = value2.GetStrength();
+            uint neruon2PostFireStrength = value2.GetStrength();
 
-            Assert.That(neruon2PostFireStrentgh - neuron2StrengthPreFire, Is.EqualTo(1));
+            Assert.That(neruon2PostFireStrength - neuron2StrengthPreFire, Is.EqualTo(1));
 
             Assert.AreEqual(neuron1StrengthPostFire, neuron1StrengthPreFire);
 
@@ -265,8 +265,8 @@ namespace SecondOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(temporalInputPattern, true);
-            bbManager.Fire(spatialInputPattern, true);
+            bbManager.Fire(temporalInputPattern);
+            bbManager.Fire(spatialInputPattern);
 
 
             if (overlapNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
@@ -333,8 +333,8 @@ namespace SecondOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(apicalInputPattern, true);
-            bbManager.Fire(spatialInputPattern, true);
+            bbManager.Fire(apicalInputPattern);
+            bbManager.Fire(spatialInputPattern);
 
 
             if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))

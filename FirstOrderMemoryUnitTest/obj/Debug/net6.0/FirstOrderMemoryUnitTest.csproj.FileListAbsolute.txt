@@ -99,7 +99,6 @@ C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrde
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.AssemblyInfo.cs
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.csproj.CoreCompileInputs.cache
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.sourcelink.json
-C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.csproj.CopyComplete
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.dll
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\refint\FirstOrderMemoryUnitTest.dll
 C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.pdb
@@ -212,3 +211,4 @@ C:\Users\depint\Desktop\Hentul\FirstOrderMemoryUnitTest\obj\Debug\net6.0\refint\
 C:\Users\depint\Desktop\Hentul\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.pdb
 C:\Users\depint\Desktop\Hentul\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrderMemoryUnitTest.genruntimeconfig.cache
 C:\Users\depint\Desktop\Hentul\FirstOrderMemoryUnitTest\obj\Debug\net6.0\ref\FirstOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\FirstOrderMemoryUnitTest\obj\Debug\net6.0\FirstOrd.10710581.Up2Date

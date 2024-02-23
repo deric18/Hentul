@@ -305,7 +305,6 @@ namespace SecondOrderMemory.BehaviourManagers
                     }
                 }
 
-            ColumnsThatBurst.Clear();
             NumberOfColumsnThatFiredThisCycle = 0;
         }
         
@@ -398,7 +397,7 @@ namespace SecondOrderMemory.BehaviourManagers
             if (IsSpatial == true)
                 Wire();
 
-            if (isTemporal == false && IsApical == false && ignorePostCycleCleanUp == false)
+            if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
         }                       
 
@@ -419,18 +418,29 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
         private void Wire()
-        {
-            ///Case 1 : All Predicted Neurons Fire : Strengthen only the correct predictions.
-            ///Case 2 : Few Fired , Few Bursted : Strengthen the Correctly Fired Neurons , For Bursted , Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do X
-            ///Case 3 : All columns Bursted : highly likely first fire or totally new pattern coming in , If firing early cycle , then just wire minimum strength for the connections and move on , if in the middle of the cycle( atleast 10,000 cycle ) then Need to do somethign new Todo .
-
-            //Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
-
+        {           
             if (IsSpatial)
             {
+
+                ///Case 1 : All Predicted Neurons Fire : Strengthen only the correct predictions.
+                ///Case 2 : Few Fired , Few Bursted : Strengthen the Correctly Fired Neurons , For Bursted , Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do X
+                ///Case 3 : All columns Bursted : highly likely first fire or totally new pattern coming in , If firing early cycle , then just wire minimum strength for the connections and move on , if in the middle of the cycle( atleast 10,000 cycle ) then Need to do somethign new Todo .
+
+                //Get intersection of neuronsFiringThisCycle and predictedNeuronsfromLastCycleCycle
+
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();                
+                foreach (var item in PredictedNeuronsforThisCycle.Keys)
+                {
+                    var neuronToAdd = ConvertStringPosToNeuron(item);
+
+                    if (neuronToAdd != null)
+                    {
+                        predictedNeuronList.Add(neuronToAdd);
+                    }
+                };
+
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
 
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumsnThatFiredThisCycle)
                 {
@@ -460,55 +470,71 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
                 else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
                 {
-                    //Case 2 : Few Fired, Few Bursted: Strengthen the Correctly Fired Neurons :
-                    // For Correctly Predicted : Pramote Coorectly PRedicted Synapses. 
-                    // For Bursted             : Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle
+                    //Case 2 :  Few Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
+                    //          For Correctly Predicted : Pramote Coorectly PRedicted Synapses. 
+                    //          For Bursted             : Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
 
 
+                    //Boost the few correctly predicted neurons
+                    List<string> contributingList;
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        contributingList = new List<string>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                            }
+                        }
+                    }
 
 
+                    //Boost the Bursting neurons
+
+                    foreach(var position in ColumnsThatBurst)
+                    {
+                        foreach( var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        {
+                            foreach( var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
                 }
-                else
+                else if(ColumnsThatBurst.Count == NumberOfColumsnThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
                     //Case 3 : All columns Bursted: highly likely first fire or totally new pattern coming in :
                     //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
                     //         If in the middle of the cycle(atleast 10,000 cycles ) then Need to do somethign new Todo.
-                }
 
-
-
-                    //Prepare Predicted List :
-                    foreach (var item in PredictedNeuronsforThisCycle.Keys)
+                    foreach (var position in ColumnsThatBurst)
                     {
-                        var neuronToAdd = ConvertStringPosToNeuron(item);
-
-                        if (neuronToAdd != null)
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
                         {
-                            predictedNeuronList.Add(neuronToAdd);
-                        }
-                    };
-
-
-
-
-                //Total New Pattern : None of the predicted neurons Fired                 
-
-                if (correctPredictionList.Count == 0 || ColumnsThatBurst.Count != 0)
-                {
-                    //Todo:
-                    //How to wire Bursting Columns ?
-                    //Figure out what neurons fired in the last cycle and try to wire them
-                    foreach (var dendriticNeuronItem in NeuronsFiringThisCycle)
-                    {
-                        foreach (var axonalNeuronItem in NeuronsFiringLastCycle)
-                        {
-                            //Connect last cycle firing neuronal axons this cycle firing dendrites
-                            Console.WriteLine("SOM :: Wire() :: ConnectTwoNeurons ");
-                            ConnectTwoNeurons(axonalNeuronItem, dendriticNeuronItem, ConnectionType.AXONTONEURON);
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
                         }
                     }
+
                 }
-                
+                else
+                {
+                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biyaaattttcchhhhhhhh!!!!!");
+                }
+
 
                 IsSpatial = false;
             }
@@ -645,7 +671,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
+        public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
             if (cType == null)
             {
@@ -663,7 +689,12 @@ namespace SecondOrderMemory.BehaviourManagers
                 return false;
             }
 
-            return AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);
+            if(AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) &&  DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
+            { 
+                return true;
+            }
+
+            return false;
         }
 
         public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
@@ -797,6 +828,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
             NeuronsFiringThisCycle.Clear();
+            ColumnsThatBurst.Clear();
 
             CycleNum++;
             // Process Next pattern.          
@@ -817,7 +849,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                     for (int k = 0; k < NumColumns; k++)
                     {
-                        ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+                        ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                     }
                 }
             }
@@ -833,7 +865,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                     for (int k = 0; k < NumColumns; k++)
                     {
-                        ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
+                        ConnectTwoNeuronsOrIncrementStrength(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
                     }
                 }
             }

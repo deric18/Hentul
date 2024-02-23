@@ -116,7 +116,6 @@ C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.AssemblyInfoIn
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.AssemblyInfo.cs
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.csproj.CoreCompileInputs.cache
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.sourcelink.json
-C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.csproj.CopyComplete
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.dll
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\refint\Hentul.UT.dll
 C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.pdb
@@ -254,3 +253,4 @@ C:\Users\depint\Desktop\Hentul\Hentul.UT\obj\Debug\net7.0\refint\Hentul.UT.dll
 C:\Users\depint\Desktop\Hentul\Hentul.UT\obj\Debug\net7.0\Hentul.UT.pdb
 C:\Users\depint\Desktop\Hentul\Hentul.UT\obj\Debug\net7.0\Hentul.UT.genruntimeconfig.cache
 C:\Users\depint\Desktop\Hentul\Hentul.UT\obj\Debug\net7.0\ref\Hentul.UT.dll
+C:\Users\depint\source\repos\Hentul.UT\obj\Debug\net7.0\Hentul.UT.csproj.Up2Date

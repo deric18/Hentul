@@ -31,7 +31,7 @@
 
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position }, iType.SPATIAL);
 
-            bbManager.Fire(sdr_SOM, false, true );
+            bbManager.Fire(sdr_SOM);
 
             Assert.AreEqual(NeuronState.FIRING, neuron.CurrentState);
             
@@ -111,7 +111,7 @@
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position1 }, iType.SPATIAL);
             
 
-            bbManager.Fire(sdr_SOM, false, true);
+            bbManager.Fire(sdr_SOM);
 
             Assert.AreEqual(NeuronState.PREDICTED, neuron1.CurrentState);
 
