@@ -114,7 +114,7 @@
 
         public SDR_SOM GetSparseSDR()
         {
-            return new SDR_SOM(10, 10, ActiveBits);
+            return new SDR_SOM(10, 10, ActiveBits, iType.SPATIAL);
         }
     }
 }

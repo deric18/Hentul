@@ -75,7 +75,7 @@
 
             encoder.Encode((byte)ch);
 
-            return (SDR_SOM)encoder.GetSparseSDR();
+            return (SDR_SOM)encoder.GetSparseSDR();            
         }        
     }
 }

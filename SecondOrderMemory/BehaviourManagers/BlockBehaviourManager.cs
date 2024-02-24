@@ -3,6 +3,7 @@ using Common;
 using System.Xml;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using System;
 
 namespace SecondOrderMemory.BehaviourManagers
 {
@@ -57,6 +58,8 @@ namespace SecondOrderMemory.BehaviourManagers
         private bool isTemporal;
 
         public bool IsSpatial;
+
+        private bool IsBurstOnly;
 
         #endregion
 
@@ -121,6 +124,8 @@ namespace SecondOrderMemory.BehaviourManagers
             IsApical = false;
 
             IsSpatial = false;
+
+            IsBurstOnly = false;
 
             neuronCounter = 0;
 
@@ -306,11 +311,13 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
 
             NumberOfColumsnThatFiredThisCycle = 0;
+
+            IsBurstOnly = false;    
         }
         
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
-
+          
             if (!ignorePrecyclePrep)
                 PreCyclePrep();
 
@@ -334,11 +341,13 @@ namespace SecondOrderMemory.BehaviourManagers
                                 NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
 
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
+
+                                IsBurstOnly = true;
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
 
-                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + " :: Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + "Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
 
@@ -399,10 +408,13 @@ namespace SecondOrderMemory.BehaviourManagers
                     }
             }
 
-            Fire();
+            
+                Fire(IsBurstOnly);
+                if (IsSpatial == true)
+                { Wire(); }
+            
 
-            if (IsSpatial == true)
-                Wire();
+
 
             if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
@@ -410,7 +422,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         
 
-        private void Fire()
+        private void Fire(bool IsBurst = false)
         {
             foreach (var neuron in NeuronsFiringThisCycle)
             {
@@ -448,7 +460,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 };
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-
+                // ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumsnThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumsnThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
@@ -518,6 +530,46 @@ namespace SecondOrderMemory.BehaviourManagers
                             }
                         }
                     }
+                }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
+                else if(ColumnsThatBurst.Count == 0 && NumberOfColumsnThatFiredThisCycle > correctPredictionList.Count )
+                {
+                    // None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
+
+                    // Strengthen the ones which fired correctly 
+                    List<string> contributingList;
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        contributingList = new List<string>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                            }
+                        }
+                    }
+
+
+                    // The ones that fired without prediction , parse through them and strengthen
+                    foreach (var position in ColumnsThatBurst)
+                    {
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
                 }
                 else if(ColumnsThatBurst.Count == NumberOfColumsnThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
@@ -535,15 +587,14 @@ namespace SecondOrderMemory.BehaviourManagers
                             }
                         }
                     }
-
-                }
+                }                
                 else
                 {
-                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biyaaattttcccchhhhhhhh!!!!!");
+                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
 
-
                 IsSpatial = false;
+
             }
             else if (isTemporal)
             {
@@ -666,6 +717,8 @@ namespace SecondOrderMemory.BehaviourManagers
         {
             List<string> contributingList = new List<string>();
 
+            //If bursting then 
+
             if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
             {
                 contributingList.Add(contributingNeuron);
@@ -678,6 +731,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
+            // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
             if (cType == null)
             {
                 bool breakpoint = false;
@@ -834,8 +888,10 @@ namespace SecondOrderMemory.BehaviourManagers
                 NeuronsFiringLastCycle.Add(item);
             }
 
+            IsBurstOnly = false;
 
             NeuronsFiringThisCycle.Clear();
+
             ColumnsThatBurst.Clear();
 
             CycleNum++;
@@ -956,6 +1012,8 @@ namespace SecondOrderMemory.BehaviourManagers
             //}
 
             #region REAL Code
+
+            // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
             string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  

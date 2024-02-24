@@ -23,15 +23,15 @@
         {
             // Project ABC Pattern 30 times and test C is predicted after B 31st time.
 
-            SDR_SOM patternA = TestUtils.GetSDRFromPattern('A');
-            SDR_SOM patternB = TestUtils.GetSDRFromPattern('B');
-            SDR_SOM patternC = TestUtils.GetSDRFromPattern('C');
+            SDR_SOM patternA = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(0, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('A');
+            SDR_SOM patternB = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(3, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('B');
+            SDR_SOM patternC = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(5, 5, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('C');
 
-            int repCount = 30;
+            int repCount = 60;
 
             while (repCount > 0)
             {
-                if(repCount == 5 || repCount == 29)
+                if(repCount == 59)
                 {
                     int breakpoint = 1;
                 }
@@ -48,11 +48,14 @@
             SDR_SOM predictedSDR;
 
             predictedSDR = bbManager.GetPredictedSDR();
+
             Assert.IsTrue(patternB.IsUnionTo(predictedSDR)); //Assert B is Present;
 
             Assert.IsFalse(predictedSDR.IsUnionTo(patternC)); //Assert C is not Present
 
             bbManager.Fire(patternB);
+
+            predictedSDR = bbManager.GetPredictedSDR();
 
             Assert.IsTrue(predictedSDR.IsUnionTo(patternC));  //Assert C is Present;
 
@@ -102,6 +105,16 @@
             //Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
 
             Assert.AreEqual(NeuronState.FIRING, neuron3.CurrentState);
+
+        }
+
+        public void DetectorTest()
+        {
+
+        }
+
+        public void MemoryTest()
+        {
 
         }
 
