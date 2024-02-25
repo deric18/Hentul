@@ -331,7 +331,7 @@ namespace SecondOrderMemory.Models
 
         internal void FlushVoltage()
         {
-            Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
+            //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
         }

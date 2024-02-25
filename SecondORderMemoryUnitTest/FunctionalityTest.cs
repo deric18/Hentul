@@ -21,31 +21,52 @@
         [TestMethod]
         public void TestSequenceMemory()
         {
-            // Project ABC Pattern 30 times and test C is predicted after B 31st time.
+            // Project ABC Pattern 60 times and test C is predicted after B 31st time.
 
             SDR_SOM patternA = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(0, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('A');
             SDR_SOM patternB = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(3, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('B');
             SDR_SOM patternC = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(5, 5, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('C');
+            SDR_SOM predictedSDR;
 
-            int repCount = 60;
+            int repCount = 0;
 
-            while (repCount > 0)
+            while (repCount != 60)
             {
-                if(repCount == 59)
+                if(repCount == 2)
                 {
                     int breakpoint = 1;
+                    predictedSDR = bbManager.GetPredictedSDR();
                 }
 
-                bbManager.Fire(patternA);
+                if (repCount == 2)
+                {
+                    bbManager.Fire(patternA);
+                }
+                else
+                {
+                    bbManager.Fire(patternA);
+                }
+
+                if(repCount == 2)
+                {
+                    predictedSDR = bbManager.GetPredictedSDR();
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
+                }
+
                 bbManager.Fire(patternB);
+
+                if(repCount == 2)
+                {
+                    predictedSDR = bbManager.GetPredictedSDR();
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternC));
+                }
+
                 bbManager.Fire(patternC);
 
-                repCount--;
+                repCount++;
             }
 
             bbManager.Fire(patternA);
-
-            SDR_SOM predictedSDR;
 
             predictedSDR = bbManager.GetPredictedSDR();
 

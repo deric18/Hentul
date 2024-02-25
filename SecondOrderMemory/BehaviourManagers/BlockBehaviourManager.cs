@@ -334,6 +334,8 @@ namespace SecondOrderMemory.BehaviourManagers
                         {
                             var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
+                            //Need to account for a case where none of the neurons in the NeuronsPRedictedForTHisCycle were picked up But there is one neuron in the Column that is being fired which is predicted , How the fuck did this happen?
+
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 Console.WriteLine("Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
@@ -568,6 +570,16 @@ namespace SecondOrderMemory.BehaviourManagers
                             {
                                 ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
+                        }
+                    }
+
+                    // Fired But Did Not Get Predicted
+
+                    foreach( var axonalneuron in NeuronsFiringLastCycle)
+                    {
+                        foreach( var dendronalNeuron in NeuronsFiringThisCycle)
+                        {
+                            ConnectTwoNeuronsOrIncrementStrength(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
                         }
                     }
                 }
@@ -809,17 +821,13 @@ namespace SecondOrderMemory.BehaviourManagers
         {
             List<Position_SOM> ActiveBits = new List<Position_SOM>();
 
-            for (int i = 0; i < NumColumns; i++)
+            foreach( var neuronstringIDList in PredictedNeuronsforThisCycle.Values) 
             {
-                for (int j = 0; j < NumColumns; j++)
+                foreach (var neuronString in neuronstringIDList)
                 {
-                    for (int k = 0; k < NumColumns; k++)
-                    {
-                        if (Columns[i, j].Neurons[k].CurrentState == NeuronState.PREDICTED)
-                        {
-                            ActiveBits.Add(Columns[i, j].Neurons[k].NeuronID);
-                        }
-                    }
+                    var pos = Position_SOM.ConvertStringToPosition(neuronString);
+                    if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
+                        ActiveBits.Add(pos);
                 }
             }
 
