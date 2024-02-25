@@ -338,10 +338,13 @@ namespace SecondOrderMemory.Models
 
         internal void PruneCycleRefresh()
         {
+
             if (dendriticList == null || dendriticList.Count == 0)
             { return; }
 
+            //Todo: Implent Pruning
 
+            throw new NotImplementedException();
 
             foreach (var kvp in dendriticList)
             {

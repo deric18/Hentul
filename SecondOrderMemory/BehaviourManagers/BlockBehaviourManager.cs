@@ -412,11 +412,11 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
             Fire(IsBurstOnly);
+            
             if (IsSpatial == true)
-            { Wire(); }
-
-
-
+            { 
+                Wire();
+            }
 
             if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();

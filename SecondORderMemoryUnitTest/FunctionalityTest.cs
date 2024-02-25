@@ -37,28 +37,23 @@
                     int breakpoint = 1;
                     predictedSDR = bbManager.GetPredictedSDR();
                 }
+                
+                bbManager.Fire(patternA);
 
-                if (repCount == 2)
-                {
-                    bbManager.Fire(patternA);
-                }
-                else
-                {
-                    bbManager.Fire(patternA);
-                }
-
-                if(repCount == 2)
+                if(repCount > 5)
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC));
                 }
 
                 bbManager.Fire(patternB);
 
-                if(repCount == 2)
+                if(repCount > 5)
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternA));
                 }
 
                 bbManager.Fire(patternC);
