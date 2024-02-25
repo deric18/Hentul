@@ -70,7 +70,7 @@
 
             predictedSDR = bbManager.GetPredictedSDR();
 
-            Assert.IsTrue(patternB.IsUnionTo(predictedSDR)); //Assert B is Present;
+            Assert.IsTrue(predictedSDR.IsUnionTo(patternB)); //Assert B is Present;
 
             Assert.IsFalse(predictedSDR.IsUnionTo(patternC)); //Assert C is not Present
 
