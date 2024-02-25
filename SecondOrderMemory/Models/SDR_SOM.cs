@@ -11,28 +11,17 @@ namespace SecondOrderMemory.Models
             ActiveBits = activeBits;
         }
 
-        public bool IsUnionTo(SDR_SOM uniounTo)
+        public bool IsUnionTo(SDR_SOM smallerSDR)
         {
-            if (uniounTo.ActiveBits == null)
+            if (smallerSDR.ActiveBits == null)
                 throw new NullReferenceException();
 
-            if (Length != uniounTo.Length || uniounTo.Breadth != uniounTo.Breadth || ActiveBits.Count > uniounTo?.ActiveBits.Count)
+            if (Length != smallerSDR.Length || smallerSDR.Breadth != smallerSDR.Breadth || ActiveBits.Count < smallerSDR?.ActiveBits.Count)
                 return false;
 
-            ActiveBits.OrderByDescending(x => x.X);
-
-            uniounTo.ActiveBits.OrderByDescending(y => y.X);
-
-            int counter = 0;
-            foreach (var pos in ActiveBits)
+            foreach(var pos in smallerSDR.ActiveBits)
             {
-                Position uPos = uniounTo.ActiveBits[counter];
-                if ((pos.X == uPos.X && pos.Y == uPos.Y) || uPos.X < pos.X)
-                {
-                    counter++;
-                    continue;
-                }
-                else if (pos.X < uPos.X)
+                if(ActiveBits.Where( B => B.X == pos.X && B.Y == pos.Y).Count() == 0)
                 {
                     return false;
                 }

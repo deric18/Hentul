@@ -45,7 +45,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public Dictionary<string, int[]> DendriticCache { get; private set; }
 
-        public Dictionary<string, int[]> AxonalCache { get; private set; }        
+        public Dictionary<string, int[]> AxonalCache { get; private set; }
 
         public static int neuronCounter { get; private set; }
 
@@ -312,12 +312,12 @@ namespace SecondOrderMemory.BehaviourManagers
 
             NumberOfColumsnThatFiredThisCycle = 0;
 
-            IsBurstOnly = false;    
+            IsBurstOnly = false;
         }
-        
+
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
-          
+
             if (!ignorePrecyclePrep)
                 PreCyclePrep();
 
@@ -334,7 +334,7 @@ namespace SecondOrderMemory.BehaviourManagers
                         {
                             var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
-                            //Need to account for a case where none of the neurons in the NeuronsPRedictedForTHisCycle were picked up But there is one neuron in the Column that is being fired which is predicted , How the fuck did this happen?
+                            // BUG : Need to account for a case where none of the neurons in the NeuronsPRedictedForTHisCycle were picked up But there is one neuron in the Column that is being fired which is predicted , How the fuck did this happen?
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
@@ -410,19 +410,19 @@ namespace SecondOrderMemory.BehaviourManagers
                     }
             }
 
-            
-                Fire(IsBurstOnly);
-                if (IsSpatial == true)
-                { Wire(); }
-            
+
+            Fire(IsBurstOnly);
+            if (IsSpatial == true)
+            { Wire(); }
+
 
 
 
             if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
-        }                       
+        }
 
-        
+
 
         private void Fire(bool IsBurst = false)
         {
@@ -439,7 +439,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
         private void Wire()
-        {           
+        {
             if (IsSpatial)
             {
 
@@ -522,18 +522,18 @@ namespace SecondOrderMemory.BehaviourManagers
 
                     //Boost the Bursting neurons
 
-                    foreach(var position in ColumnsThatBurst)
+                    foreach (var position in ColumnsThatBurst)
                     {
-                        foreach( var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
                         {
-                            foreach( var axonalNeuron in NeuronsFiringLastCycle)
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
-                else if(ColumnsThatBurst.Count == 0 && NumberOfColumsnThatFiredThisCycle > correctPredictionList.Count )
+                else if (ColumnsThatBurst.Count == 0 && NumberOfColumsnThatFiredThisCycle > correctPredictionList.Count)
                 {
                     // None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
 
@@ -575,15 +575,15 @@ namespace SecondOrderMemory.BehaviourManagers
 
                     // Fired But Did Not Get Predicted
 
-                    foreach( var axonalneuron in NeuronsFiringLastCycle)
+                    foreach (var axonalneuron in NeuronsFiringLastCycle)
                     {
-                        foreach( var dendronalNeuron in NeuronsFiringThisCycle)
+                        foreach (var dendronalNeuron in NeuronsFiringThisCycle)
                         {
                             ConnectTwoNeuronsOrIncrementStrength(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
                         }
                     }
                 }
-                else if(ColumnsThatBurst.Count == NumberOfColumsnThatFiredThisCycle && correctPredictionList.Count == 0)
+                else if (ColumnsThatBurst.Count == NumberOfColumsnThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
                     //Case 3 : All columns Bursted: highly likely first fire or totally new pattern coming in :
                     //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
@@ -599,7 +599,7 @@ namespace SecondOrderMemory.BehaviourManagers
                             }
                         }
                     }
-                }                
+                }
                 else
                 {
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
@@ -760,8 +760,8 @@ namespace SecondOrderMemory.BehaviourManagers
                 return false;
             }
 
-            if(AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) &&  DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
-            { 
+            if (AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
+            {
                 return true;
             }
 
@@ -821,14 +821,11 @@ namespace SecondOrderMemory.BehaviourManagers
         {
             List<Position_SOM> ActiveBits = new List<Position_SOM>();
 
-            foreach( var neuronstringIDList in PredictedNeuronsforThisCycle.Values) 
+            foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
             {
-                foreach (var neuronString in neuronstringIDList)
-                {
-                    var pos = Position_SOM.ConvertStringToPosition(neuronString);
-                    if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
-                        ActiveBits.Add(pos);
-                }
+                var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
+                if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
+                    ActiveBits.Add(pos);
             }
 
             return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
@@ -865,7 +862,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
         }
 
-        
+
 
         private void PostCycleCleanup()
         {
@@ -1059,7 +1056,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     {
                         Columns[x, y].Init++;
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         int breakpoint = 1;
                     }
@@ -1116,7 +1113,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
                             numDendriticConnectionCount++;
 
-                            if(numDendriticConnectionCount == 2)
+                            if (numDendriticConnectionCount == 2)
                                 break;
 
                             //Console.WriteLine("SOM :: Adding Connection from Schema :  Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
