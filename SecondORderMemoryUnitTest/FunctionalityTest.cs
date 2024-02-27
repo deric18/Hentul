@@ -31,32 +31,48 @@
             int repCount = 0;
 
             while (repCount != 60)
-            {
-                if(repCount == 2)
-                {
-                    int breakpoint = 1;
-                    predictedSDR = bbManager.GetPredictedSDR();
-                }
+            {                              
                 
-                bbManager.Fire(patternA);
+                bbManager.Fire(patternA);       //Fire A , Predict B NOT C
 
-                if(repCount > 5)
+                if(repCount > 2)
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
+                    
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC));
                 }
 
-                bbManager.Fire(patternB);
+                bbManager.Fire(patternB);       //Fire B , Predict C NOT A
 
-                if(repCount > 5)
+
+                if (repCount > 2)
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
+
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC));
-                    Assert.IsFalse(predictedSDR.IsUnionTo(patternA));
+
+                    Console.WriteLine("REPCOUNT : " + repCount.ToString());
+
+                    bool b = predictedSDR.IsUnionTo(patternA);
+
+                    if (repCount == 8)
+                    {
+                        predictedSDR.IsUnionTo(patternA);
+                    }
+
+                    Assert.IsFalse(b);
                 }
 
-                bbManager.Fire(patternC);
+                bbManager.Fire(patternC);       //Fire C , Predict A NOT B
+
+                predictedSDR = bbManager.GetPredictedSDR();
+
+                //if (repCount > 2)
+                //{
+                //    Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
+                //    Assert.IsFalse(predictedSDR.IsUnionTo(patternC));
+                //}
 
                 repCount++;
             }

@@ -730,6 +730,10 @@ namespace SecondOrderMemory.BehaviourManagers
             List<string> contributingList = new List<string>();
 
             //If bursting then 
+            if(predictedNeuron.NeuronID.X == 0 && predictedNeuron.NeuronID.Y == 1 && predictedNeuron.NeuronID.Z == 4)
+            {
+                int breakpoint = 1;
+            }
 
             if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
             {
@@ -827,6 +831,8 @@ namespace SecondOrderMemory.BehaviourManagers
                 if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
                     ActiveBits.Add(pos);
             }
+
+            ActiveBits.Sort();
 
             return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
         }
