@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SecondOrderMemoryUnitTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e8cef8fddfe008489f5e9067175529c42322200")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+471f7ad3c5a48c887d5c260b94fb0c689835980e")]
 [assembly: System.Reflection.AssemblyProductAttribute("SecondOrderMemoryUnitTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SecondOrderMemoryUnitTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

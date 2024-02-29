@@ -1882,7 +1882,7 @@
 <Neuron x="	5	" y="	3	" z="	0	"/>
 <Neuron x="	2	" y="	6	" z="	9	"/>
 <Neuron x="	7	" y="	4	" z="	8	"/>
-<Neuron x="	0	" y="	1	" z="	7	"/>
+<Neuron x="	0	" y="	9	" z="	7	"/>
 </axonalConnection>						
 <axonalConnection  x="	3	" y="	1	" z="	4	">
 <Neuron x="	2	" y="	0	" z="	7	"/>

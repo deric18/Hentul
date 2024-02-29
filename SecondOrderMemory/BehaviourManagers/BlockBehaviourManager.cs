@@ -659,9 +659,9 @@ namespace SecondOrderMemory.BehaviourManagers
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (targetNeuron.NeuronID.ToString().Equals("2-4-2-N"))
+            if (targetNeuron.NeuronID.ToString().Equals("5-5-2-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N"))
             {
-                bool breakpoint = false;
+				bool breakpoint = false;
                 breakpoint = true;
             }
 
@@ -730,7 +730,7 @@ namespace SecondOrderMemory.BehaviourManagers
             List<string> contributingList = new List<string>();
 
             //If bursting then 
-            if(predictedNeuron.NeuronID.X == 0 && predictedNeuron.NeuronID.Y == 1 && predictedNeuron.NeuronID.Z == 4)
+            if(predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
             {
                 int breakpoint = 1;
             }
@@ -897,6 +897,20 @@ namespace SecondOrderMemory.BehaviourManagers
             foreach (var item in NeuronsFiringThisCycle)
             {
                 NeuronsFiringLastCycle.Add(item);
+            }
+
+            for(int i=0; i < NumColumns; i++)
+            {
+                for( int j = 0; j< NumColumns; j++)
+                {
+                    for(int k = 0; k < NumColumns; k++)
+                    {
+                        if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k).Any())
+                        {
+                            Columns[i, j].Neurons[k].FlushVoltage();
+                        }
+                    }
+                }
             }
 
             IsBurstOnly = false;

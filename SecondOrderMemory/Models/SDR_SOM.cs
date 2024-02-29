@@ -30,6 +30,36 @@ namespace SecondOrderMemory.Models
             return true;
         }
 
+        public bool IsUnionTo(SDR_SOM smallerSDR, List<Position_SOM> exceptionList)
+        {
+            if (smallerSDR.ActiveBits == null)
+                throw new NullReferenceException();
+
+            if (Length != smallerSDR.Length || smallerSDR.Breadth != smallerSDR.Breadth || ActiveBits.Count < smallerSDR?.ActiveBits.Count)
+                return false;
+
+            List<Position_SOM> activeBitsListWithoutExceptions = new List<Position_SOM>();
+
+            foreach(var item in ActiveBits)
+            {
+                if(!exceptionList.Where(x => x.X == item.X && x.Y == item.Y).Any())
+                {
+                    activeBitsListWithoutExceptions.Add(item);
+                }
+            }
+
+            foreach (var pos in smallerSDR.ActiveBits)
+            {
+                               
+                if (activeBitsListWithoutExceptions.Where(B => B.X == pos.X && B.Y == pos.Y).Count() == 0)       // I  CHECK THE ENTIRE COLUMN FOR THIS PATTERN
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public override float CompareFloat(SDR firingPattern)
         {
             // first pattern is always the firing pattern and second pattern is the predicted pattern

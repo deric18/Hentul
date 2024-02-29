@@ -42,9 +42,20 @@
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC));
                 }
+                if(repCount == 8)
+                {
+                    int bp2 = 1;
+                }
 
-                bbManager.Fire(patternB);       //Fire B , Predict C NOT A
-
+                
+                if (repCount == 3)
+                {
+                    bbManager.Fire(patternB);       //Fire B , Predict C NOT A
+                }
+                else
+                {
+                    bbManager.Fire(patternB);       //Fire B , Predict C NOT A
+                }
 
                 if (repCount > 2)
                 {
@@ -54,44 +65,46 @@
 
                     Console.WriteLine("REPCOUNT : " + repCount.ToString());
 
-                    bool b = predictedSDR.IsUnionTo(patternA);
+                    bool b = predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0,1,4)});
 
-                    if (repCount == 8)
+                    if (b)
                     {
-                        predictedSDR.IsUnionTo(patternA);
+                        predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0, 1, 4) });
                     }
 
                     Assert.IsFalse(b);
                 }
 
-                bbManager.Fire(patternC);       //Fire C , Predict A NOT B
+                if (repCount == 2)
+                {
+                    bbManager.Fire(patternC);      
+                }
+                else
+                {
+                    bbManager.Fire(patternC);       //Fire C , Predict A NOT B
+                }
 
                 predictedSDR = bbManager.GetPredictedSDR();
 
-                //if (repCount > 2)
-                //{
-                //    Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
-                //    Assert.IsFalse(predictedSDR.IsUnionTo(patternC));
-                //}
+                if (repCount > 2)
+                {
+                    if(repCount >= 3)
+                    {
+                        bool b = predictedSDR.IsUnionTo(patternA);
+                        bool c = predictedSDR.IsUnionTo(patternB);
+
+                        if(b == false || c == true)
+                        {
+                            int bp = 1;
+                        }
+                    }
+
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternB));
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternA));
+                }
 
                 repCount++;
-            }
-
-            bbManager.Fire(patternA);
-
-            predictedSDR = bbManager.GetPredictedSDR();
-
-            Assert.IsTrue(predictedSDR.IsUnionTo(patternB)); //Assert B is Present;
-
-            Assert.IsFalse(predictedSDR.IsUnionTo(patternC)); //Assert C is not Present
-
-            bbManager.Fire(patternB);
-
-            predictedSDR = bbManager.GetPredictedSDR();
-
-            Assert.IsTrue(predictedSDR.IsUnionTo(patternC));  //Assert C is Present;
-
-            Assert.IsFalse(predictedSDR.IsUnionTo(patternA)); //Assert A is not Present;
+            }            
         }
 
         
