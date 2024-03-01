@@ -318,7 +318,7 @@ namespace SecondOrderMemory.BehaviourManagers
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
 
-            if (!ignorePrecyclePrep)
+            if (ignorePrecyclePrep == false)
                 PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
@@ -349,7 +349,7 @@ namespace SecondOrderMemory.BehaviourManagers
                             else if (predictedNeuronPositions.Count == 1)
                             {
 
-                                Console.WriteLine("Block ID :::: " + BlockID.ToString() + "Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
 
@@ -666,11 +666,8 @@ namespace SecondOrderMemory.BehaviourManagers
             }
 
             targetNeuron.ChangeCurrentStateTo(NeuronState.PREDICTED);
-
-
-            //TODO : Need to tighten rules of Prediction for bursting columns
-            // Ideas : 
-
+           
+            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.            
             AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron.NeuronID.ToString());
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
@@ -685,6 +682,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'A');
                     }
+
                 }
                 else
                 {
@@ -693,7 +691,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
-            if (targetNeuron.dendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
+            if (targetNeuron.dendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse) || cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
             {
 
                 switch (synapse.cType)
@@ -905,7 +903,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 {
                     for(int k = 0; k < NumColumns; k++)
                     {
-                        if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k).Any())
+                        if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
                         {
                             Columns[i, j].Neurons[k].FlushVoltage();
                         }

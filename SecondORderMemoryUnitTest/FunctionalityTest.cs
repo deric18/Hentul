@@ -107,6 +107,14 @@
             }            
         }
 
+        [TestMethod]
+        public void DetectorTest1()
+        {
+            //Create a a specific pattern and check how long it takes for the network to detect it.
+
+
+        }
+
         
         [TestMethod]
         public void HighVoltagePredictedNeuronGetsPickedForFiring()
@@ -127,30 +135,27 @@
 
             Neuron neuron3 = bbManager.Columns[position3.X, position3.Y].Neurons[position3.Z];
 
-
             Assert.AreEqual(neuron1.CurrentState, NeuronState.RESTING);
 
             Assert.AreEqual(neuron2.CurrentState, NeuronState.RESTING);
 
             Assert.AreEqual(neuron3.CurrentState, NeuronState.RESTING);
 
-
             SDR_SOM apicalSdr = new SDR_SOM(10, 10, new List<Position_SOM>() { apicalSOM }, iType.APICAL);
 
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position1 }, iType.SPATIAL);
 
-            bbManager.Fire(apicalSdr);
+            bbManager.Fire(apicalSdr, false, true);
 
             neuron3.ProcessVoltage(10);
 
-            bbManager.Fire(sdr_SOM, true, true);
+            bbManager.Fire(sdr_SOM, true, false);
 
             //Assert.AreEqual(NeuronState.RESTING, neuron1.CurrentState);
 
             //Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
 
             Assert.AreEqual(NeuronState.FIRING, neuron3.CurrentState);
-
         }
 
         public void DetectorTest()

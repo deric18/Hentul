@@ -336,19 +336,17 @@ namespace SecondOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(apicalInputPattern);
+            bbManager.Fire(apicalInputPattern, false, false);
 
             normalNeuron.ProcessVoltage(1);
 
-            bbManager.Fire(spatialInputPattern);
+            bbManager.Fire(spatialInputPattern, true, false);
 
 
             if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
                 currentStrength = postSynapse.GetStrength();
-            }
-
-            Assert.AreEqual(apicalNeuron.NeuronID.ToString(), apicalNeuron.NeuronID.ToString());
+            }            
 
             Assert.IsTrue(currentStrength > previousStrength);
 
