@@ -53,6 +53,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public uint totalAxonalConnections;
 
+        private uint num_continuous_burst;
+
         private bool IsApical;
 
         private bool isTemporal;
@@ -78,6 +80,7 @@ namespace SecondOrderMemory.BehaviourManagers
         private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
+        private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
         #endregion
 
         public BlockBehaviourManager(int numColumns = 10, int x = 0, int y = 0, int z = 0)
@@ -128,6 +131,8 @@ namespace SecondOrderMemory.BehaviourManagers
             IsBurstOnly = false;
 
             neuronCounter = 0;
+
+            num_continuous_burst = 0;
 
             for (int i = 0; i < numColumns; i++)
             {
@@ -345,6 +350,7 @@ namespace SecondOrderMemory.BehaviourManagers
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
 
                                 IsBurstOnly = true;
+                                num_continuous_burst++;
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
@@ -898,15 +904,21 @@ namespace SecondOrderMemory.BehaviourManagers
                 NeuronsFiringLastCycle.Add(item);
             }
 
-            for(int i=0; i < NumColumns; i++)
+
+            //BUG : How many Burst Cycle to wait before performing a full clean ? Answer : 1
+
+            if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
             {
-                for( int j = 0; j< NumColumns; j++)
+                for (int i = 0; i < NumColumns; i++)
                 {
-                    for(int k = 0; k < NumColumns; k++)
+                    for (int j = 0; j < NumColumns; j++)
                     {
-                        if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
+                        for (int k = 0; k < NumColumns; k++)
                         {
-                            Columns[i, j].Neurons[k].FlushVoltage();
+                            if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
+                            {
+                                Columns[i, j].Neurons[k].FlushVoltage();
+                            }
                         }
                     }
                 }
