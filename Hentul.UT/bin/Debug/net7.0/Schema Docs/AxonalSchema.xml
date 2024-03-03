@@ -1256,7 +1256,7 @@
 </axonalConnection>						
 <axonalConnection  x="	2	" y="	0	" z="	9	">
 <Neuron x="	5	" y="	3	" z="	1	"/>
-<Neuron x="	0	" y="	7	" z="	3	"/>
+<Neuron x="	9	" y="	7	" z="	3	"/>
 <Neuron x="	8	" y="	3	" z="	8	"/>
 <Neuron x="	0	" y="	7	" z="	3	"/>
 </axonalConnection>						
@@ -1594,7 +1594,7 @@
 <Neuron x="	2	" y="	4	" z="	9	"/>
 <Neuron x="	4	" y="	9	" z="	6	"/>
 <Neuron x="	9	" y="	7	" z="	4	"/>
-<Neuron x="	2	" y="	4	" z="	9	"/>
+<Neuron x="	5	" y="	4	" z="	9	"/>
 </axonalConnection>						
 <axonalConnection  x="	2	" y="	6	" z="	6	">
 <Neuron x="	1	" y="	0	" z="	8	"/>
@@ -1874,15 +1874,15 @@
 </axonalConnection>						
 <axonalConnection  x="	3	" y="	1	" z="	2	">
 <Neuron x="	2	" y="	7	" z="	3	"/>
-<Neuron x="	2	" y="	9	" z="	1	"/>
-<Neuron x="	2	" y="	9	" z="	1	"/>
+<Neuron x="	7	" y="	9	" z="	1	"/>
+<Neuron x="	4	" y="	9	" z="	1	"/>
 <Neuron x="	3	" y="	9	" z="	2	"/>
 </axonalConnection>						
 <axonalConnection  x="	3	" y="	1	" z="	3	">
 <Neuron x="	5	" y="	3	" z="	0	"/>
 <Neuron x="	2	" y="	6	" z="	9	"/>
 <Neuron x="	7	" y="	4	" z="	8	"/>
-<Neuron x="	0	" y="	1	" z="	7	"/>
+<Neuron x="	0	" y="	9	" z="	7	"/>
 </axonalConnection>						
 <axonalConnection  x="	3	" y="	1	" z="	4	">
 <Neuron x="	2	" y="	0	" z="	7	"/>
@@ -3452,7 +3452,7 @@
 </axonalConnection>						
 <axonalConnection  x="	5	" y="	7	" z="	5	">
 <Neuron x="	8	" y="	1	" z="	5	"/>
-<Neuron x="	8	" y="	1	" z="	5	"/>
+<Neuron x="	2	" y="	2	" z="	5	"/>
 <Neuron x="	6	" y="	6	" z="	0	"/>
 <Neuron x="	4	" y="	1	" z="	6	"/>
 </axonalConnection>						
@@ -5344,7 +5344,7 @@
 <Neuron x="	9	" y="	1	" z="	8	"/>
 <Neuron x="	4	" y="	2	" z="	6	"/>
 <Neuron x="	7	" y="	0	" z="	9	"/>
-<Neuron x="	7	" y="	0	" z="	9	"/>
+<Neuron x="	0	" y="	5	" z="	9	"/>
 </axonalConnection>						
 <axonalConnection  x="	8	" y="	9	" z="	1	">
 <Neuron x="	7	" y="	6	" z="	0	"/>
@@ -5612,7 +5612,7 @@
 </axonalConnection>						
 <axonalConnection  x="	9	" y="	3	" z="	5	">
 <Neuron x="	5	" y="	0	" z="	1	"/>
-<Neuron x="	5	" y="	0	" z="	1	"/>
+<Neuron x="	9	" y="	2	" z="	4	"/>
 <Neuron x="	4	" y="	7	" z="	0	"/>
 <Neuron x="	2	" y="	5	" z="	1	"/>
 </axonalConnection>						

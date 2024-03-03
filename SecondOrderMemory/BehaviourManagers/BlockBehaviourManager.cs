@@ -495,6 +495,7 @@ namespace SecondOrderMemory.BehaviourManagers
                     //          For Correctly Predicted : Pramote Coorectly PRedicted Synapses. 
                     //          For Bursted             : Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
 
+                    //BUG : If the Predicted Neuron column also Burst
 
                     //Boost the few correctly predicted neurons
                     List<string> contributingList;
@@ -659,7 +660,7 @@ namespace SecondOrderMemory.BehaviourManagers
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (targetNeuron.NeuronID.ToString().Equals("5-5-2-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N"))
+            if (targetNeuron.NeuronID.ToString().Equals("5-3-0-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N"))
             {
 				bool breakpoint = false;
                 breakpoint = true;
