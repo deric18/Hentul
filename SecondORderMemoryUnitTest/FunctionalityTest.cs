@@ -108,11 +108,32 @@
         }
 
         [TestMethod]
-        public void DetectorTest1()
+        public void DetectorTheHiddenPattern1()
         {
             //Create a a specific pattern and check how long it takes for the network to detect it.
+            List<SDR_SOM> sDR_SOMs = new List<SDR_SOM>();
+            SDR_SOM predictedSDR;
+            int patternSize = 2;
+            int noiseSize = 4;
+            int cycleSize = patternSize + noiseSize;
+            int numCount = 0;
+            int learningCurveCount = 3;
 
+            sDR_SOMs.AddRange(TestUtils.GenerateNoise(noiseSize));
+            sDR_SOMs.AddRange(TestUtils.GetSpecificPattern(patternSize));
 
+            foreach(var item in sDR_SOMs) 
+            {
+                if (numCount % noiseSize == 1 && (numCount / noiseSize) > 0 &&  (numCount / cycleSize ) >= learningCurveCount)
+                {
+                    predictedSDR = bbManager.GetPredictedSDR();
+                    Assert.IsTrue(predictedSDR.IsUnionTo(sDR_SOMs[cycleSize - 1]));
+                }
+
+                bbManager.Fire(item);
+
+                numCount++;
+            }
         }
 
         

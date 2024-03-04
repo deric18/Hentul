@@ -76,6 +76,16 @@
             encoder.Encode((byte)ch);
 
             return (SDR_SOM)encoder.GetSparseSDR();            
-        }        
+        }              
+
+        internal static List<SDR_SOM> GetSpecificPattern(int patternSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static List<SDR_SOM> GenerateNoise(int noiseSize)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
