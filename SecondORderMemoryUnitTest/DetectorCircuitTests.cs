@@ -47,7 +47,7 @@
                 numCount++;
 
 
-            }
+        }
       
 
         public void DetectorTest2()
