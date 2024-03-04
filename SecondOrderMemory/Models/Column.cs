@@ -38,8 +38,9 @@
             if (predictedNeurons.Count() > 1 )          //Pick a winner
             {
                 //Pick the most strongly predicted neuron and then fire
-                predictedNeurons.Sort();
-                return predictedNeurons;
+
+                return PickWinner();
+                
             }
             else if (predictedNeurons.Count == 0)       //Burst
             {
@@ -56,6 +57,31 @@
             }
         }
 
+        private List<Neuron> PickWinner()
+        {
+            int maxVoltage = 0, maxIndex = 0, continuousCounter = 0;
+
+            List<Neuron> toReturn = new List<Neuron>();
+
+            for(int i = 0; i < Neurons.Count; i++)
+            {
+                if (Neurons[i].Voltage > maxVoltage)
+                {
+                    maxVoltage = Neurons[i].Voltage;
+                    maxIndex = i;
+                    if (i >= 1 && Neurons[i - 1].Voltage == Neurons[i].Voltage)
+                        continuousCounter++;
+                }
+            }
+
+            if (continuousCounter == Neurons.Count - 2)
+                return Neurons;
+            else
+                toReturn.Add(Neurons[maxIndex]);
+
+            return toReturn;
+        }
+
         internal bool PreCleanupCheck()
         {
             return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).Count() > 0;
@@ -64,10 +90,11 @@
         internal void PostCycleCleanup()
         {
             var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
-            firingNeurons.ForEach((x) => {
-                x.FlushVoltage();
 
-            });
+            foreach (var neuron in firingNeurons)
+            {
+                neuron.FlushVoltage();
+            }
 
             foreach (var neuron in Neurons)
             {

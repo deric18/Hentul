@@ -99,7 +99,6 @@ C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOr
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.AssemblyInfo.cs
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.csproj.CoreCompileInputs.cache
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.sourcelink.json
-C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.csproj.CopyComplete
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\refint\SecondOrderMemoryUnitTest.dll
 C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.pdb
@@ -220,3 +219,4 @@ C:\Users\depint\Desktop\Hentul\SecondORderMemoryUnitTest\obj\Debug\net6.0\refint
 C:\Users\depint\Desktop\Hentul\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.pdb
 C:\Users\depint\Desktop\Hentul\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOrderMemoryUnitTest.genruntimeconfig.cache
 C:\Users\depint\Desktop\Hentul\SecondORderMemoryUnitTest\obj\Debug\net6.0\ref\SecondOrderMemoryUnitTest.dll
+C:\Users\depint\source\repos\SecondORderMemoryUnitTest\obj\Debug\net6.0\SecondOr.B3871380.Up2Date

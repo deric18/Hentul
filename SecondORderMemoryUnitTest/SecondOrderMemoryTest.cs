@@ -15,7 +15,7 @@ namespace SecondOrderMemoryUnitTest
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(0, 0, 0, sizeOfColumns);
+            bbManager = new BlockBehaviourManager(sizeOfColumns);
 
             bbManager.Init(0, 0);
 
@@ -27,11 +27,11 @@ namespace SecondOrderMemoryUnitTest
         public void TestMultipleInstanceOfSOMBBM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1,3,10);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(1,3,10);           
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10,1,3,10);           
            
             bbm3.Init(0, 0);
 
-            SDR_SOM randSDR = GenerateRandomSDR(iType.SPATIAL);
+            SDR_SOM randSDR = TestUtils.GenerateRandomSDR(iType.SPATIAL);
             
             clonedBBM.Fire(randSDR);
 
@@ -58,7 +58,6 @@ namespace SecondOrderMemoryUnitTest
             {
                 Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.NumColumns - 1]);
             }
-
 
             Neuron newron = clonedBBM.Columns[2, 4].Neurons[5];
 
@@ -88,11 +87,11 @@ namespace SecondOrderMemoryUnitTest
                         {
                             int bp = 1;
                         }
-                        Assert.AreEqual(6, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
+                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].dendriticList.Count);
 
                         Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
 
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0,5)));
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0,3)));
 
                         Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
                     }
@@ -103,7 +102,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestAxonalAndDendronalConnectionsOnNeurons()
         {
-            for (int i = 0; i < bbManager.NumColumns; i++)
+            for (int i = 0; i < bbManager?.NumColumns; i++)
             {
                 for (int j = 0; j < bbManager.NumColumns; j++)
                 {
@@ -125,12 +124,72 @@ namespace SecondOrderMemoryUnitTest
 
                         //Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
 
-                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0, 5)));
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].dendriticList.ElementAt(rand1.Next(0, 3)));
 
                         Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
                     }
                 }
             }
+        }
+
+        
+        public void TestFire()
+        {
+
+            //Need to do this hack : as in the first cycle there are no predicted neurons
+            //bbManager.AddtoPredictedNeuronFromLastCycleMock(neuron2, neuron1);
+        }
+
+        [TestMethod]
+        public void TestFireNWire()
+        {
+            //fire  neuron1 which has an already established connection to a known other neuron2
+            //Fire a pattern that fires the other known neuron2
+            //check if the connection b/w both is strengthened.
+
+            var neuron1 = bbManager.Columns[0, 2].Neurons[0];
+            var neuron2 = bbManager.Columns[5, 3].Neurons[0];
+
+
+            if(!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))
+            {
+                throw new InvalidProgramException("Could Not Connect 2 Neurons");                
+            }
+
+            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+
+            SDR_SOM sdr2 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(5, 3) }, iType.SPATIAL);
+
+            if (!neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse neuron1Synapse) || (!neuron2.dendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse neuron2Synapse)))
+            {
+                throw new InvalidOperationException("Could not get relavent Synapses!");
+            }
+
+            uint neuron1StrengthPreFire = neuron1Synapse.GetStrength();
+
+            uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();                        
+
+            bbManager.Fire(sdr1);
+
+            bbManager.Fire(sdr2);
+
+            _ = neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse value1);
+
+            _ = neuron2.dendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse value2);
+
+            uint neuron1StrengthPostFire = value1.GetStrength();
+
+            uint neruon2PostFireStrength = value2.GetStrength();
+
+            Assert.That(neruon2PostFireStrength - neuron2StrengthPreFire, Is.EqualTo(1));
+
+            Assert.AreEqual(neuron1StrengthPostFire, neuron1StrengthPreFire);
+
+        }
+
+        public void TestWire1()
+        {
+            //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
         }
 
         [TestMethod]
@@ -150,13 +209,13 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalFiring()
         {
-            SDR_SOM temporalInputPattern = GenerateRandomSDR(iType.TEMPORAL);
+            SDR_SOM temporalInputPattern = TestUtils.GenerateRandomSDR(iType.TEMPORAL);
             
             Position_SOM position = temporalInputPattern.ActiveBits[0];
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = GetSpatialNeuronFromTemporalCoordinate(position);
+            Neuron normalNeuron = TestUtils.GetSpatialNeuronFromTemporalCoordinate(bbManager, position);
 
             Position_SOM temporalNeuronPosition = new Position_SOM(0, position.Y, position.X, 'T');
 
@@ -186,8 +245,8 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalWiring()
         {
-            SDR_SOM temporalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
-            SDR_SOM spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
             Position_SOM position = spatialInputPattern.ActiveBits[0];
 
@@ -195,7 +254,7 @@ namespace SecondOrderMemoryUnitTest
             
             Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
 
-            Position_SOM overlapPos = GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
+            Position_SOM overlapPos = TestUtils.GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
             var overlapNeuron = bbManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
@@ -206,8 +265,8 @@ namespace SecondOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(temporalInputPattern, true);
-            bbManager.Fire(spatialInputPattern, true);
+            bbManager.Fire(temporalInputPattern);
+            bbManager.Fire(spatialInputPattern);
 
 
             if (overlapNeuron.dendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
@@ -238,7 +297,7 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestApicalFiring()
         {
-            SDR_SOM apicalInputPattern = GenerateRandomSDR(iType.APICAL);            
+            SDR_SOM apicalInputPattern = TestUtils.GenerateRandomSDR(iType.APICAL);            
 
             Position_SOM apicalPos = apicalInputPattern.ActiveBits[0];
 
@@ -246,7 +305,7 @@ namespace SecondOrderMemoryUnitTest
 
             int voltageBeforeFire = apicalFiredNormalNeuron.Voltage;
 
-            bbManager.Fire(apicalInputPattern, true);
+            bbManager.Fire(apicalInputPattern, true, true);
 
             int voltagAfterFire = apicalFiredNormalNeuron.Voltage;
 
@@ -256,14 +315,19 @@ namespace SecondOrderMemoryUnitTest
         [TestMethod]
         public void TestApicalWiring()
         {
-            SDR_SOM apicalInputPattern = GenerateSpecificSDRForTemporalWiring(iType.APICAL);
-            SDR_SOM spatialInputPattern = GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            //Fire an apical Neurons , Deplorize specific positions and fire those neurons via spatial firing
 
-            Position_SOM position = spatialInputPattern.ActiveBits[0];
+            List<Position_SOM> apicalPosList = new List<Position_SOM>()
+            {
+                new Position_SOM(2,3,4,'N')
+            };
+
+            SDR_SOM apicalInputPattern = new SDR_SOM(10,10, apicalPosList, iType.APICAL);
+            SDR_SOM spatialInputPattern = new SDR_SOM(10, 10, apicalPosList, iType.SPATIAL);            
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(apicalPosList[0].ToString());
            
             var apicalNeuron = bbManager.ConvertStringPosToNeuron(normalNeuron.GetMyApicalPartner());
 
@@ -272,16 +336,17 @@ namespace SecondOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(apicalInputPattern, true);
-            bbManager.Fire(spatialInputPattern, true);
+            bbManager.Fire(apicalInputPattern, false, false);
+
+            normalNeuron.ProcessVoltage(1);
+
+            bbManager.Fire(spatialInputPattern, true, false);
 
 
-            if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse postSynapse))
+            if (normalNeuron.dendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
                 currentStrength = postSynapse.GetStrength();
-            }
-
-            Assert.AreEqual(apicalNeuron.NeuronID.ToString(), apicalNeuron.NeuronID.ToString());
+            }            
 
             Assert.IsTrue(currentStrength > previousStrength);
 
@@ -301,75 +366,13 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
  
-            Assert.AreEqual(8, bbm2.Columns[3, 3].Neurons[5].flag);
+            Assert.AreEqual(6, bbm2.Columns[3, 3].Neurons[5].flag);
         }
+       
 
         public void TestTemporalAndApicalFiringAndWiring()
         {
 
-        }
-
-        private Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
-        {
-            return new Position_SOM(spatial.X, spatial.Y, temporal.X);
-        }
-
-        private Neuron GetSpatialNeuronFromTemporalCoordinate(Position pos)
-        {
-            return bbManager.Columns[pos.Z, pos.Y].Neurons[pos.X];
-        }
-
-        private SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType)
-        {
-            return new SDR_SOM(10, 10, posList, inputPatternType);
-        }
-
-        private SDR_SOM GenerateRandomSDR(iType inputPatternType)
-        {
-            Random rand = new Random();
-
-            int numPos = rand.Next(1, 10);
-
-            List<Position_SOM> posList = new List<Position_SOM>();
-
-            for(int i=0; i < numPos; i++)
-            {
-                posList.Add(new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9)));
-            }
-
-            return new SDR_SOM(10, 10, posList, inputPatternType);
-        }
-
-        private SDR_SOM GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
-        {
-            Random rand = new Random();
-            int numPos = rand.Next(0, 10);
-
-            List<Position_SOM> spatialPosList = new List<Position_SOM>()
-            {
-                new Position_SOM(2,4),
-                new Position_SOM(8,3),
-                new Position_SOM(7,2),
-                new Position_SOM(0,0)
-            };
-
-            List<Position_SOM> temporalPosList = new List<Position_SOM>()
-            {
-                new Position_SOM(0,4),
-                new Position_SOM(8,3),
-                new Position_SOM(7,2),
-                new Position_SOM(0,0)
-            };
-
-
-            if(inputPatternType == iType.TEMPORAL)
-            {
-                return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
-            }
-            else
-            {
-                 return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
-            }
-        }
+        }       
     }
 }

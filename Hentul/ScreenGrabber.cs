@@ -107,13 +107,9 @@
 
             Point = this.GetCurrentPointerPosition();
 
-            Console.CursorVisible = true;
+            Console.CursorVisible = true;            
 
-            Console.WriteLine("Cursor Pos X : " + Point.X + " Y : " + Point.Y);
-
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            Console.WriteLine("Bit Map Values :");
+            Console.WriteLine("Grabbing Screen Pixels...");            
 
             int x1 = Point.X - range < 0 ? 0 : Point.X - range;
             int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
@@ -174,6 +170,11 @@
                     SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr2.ActiveBits), iType.SPATIAL);
                     SDR_SOM somSdr3 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr3.ActiveBits), iType.SPATIAL);
 
+                    Console.WriteLine("Prepping Temporal Location SDRs for SOM");
+
+                    var temporalSDR = GenerateTemporalSDR();
+
+
                     Console.WriteLine("Begining SOM Firings :");
 
                     somBBM[0, i, j].Fire(somSdr1);
@@ -183,6 +184,20 @@
                     Console.WriteLine("Finished Second Order Memory Firings");
                 }
             }
+        }
+
+
+        public Tuple<SDR, SDR> GenerateTemporalSDR()
+        {
+            ByteEncoder encoder = new ByteEncoder(100, 8);
+
+            encoder.Encode((byte)Point.X);
+            SDR Xsdr = encoder.GetDenseSDR(iType.TEMPORAL);
+            encoder.Encode((byte)Point.Y);
+            SDR Ysdr = encoder.GetDenseSDR(iType.TEMPORAL);
+
+            return new Tuple<SDR, SDR>(Xsdr, Ysdr);
+
         }
 
         [DllImport("user32.dll")]

@@ -1,0 +1,33 @@
+﻿Build started at 3:20 PM...
+1>------ Build started: Project: SecondOrderMemory, Configuration: Debug Any CPU ------
+1>Skipping analyzers to speed up the build. You can execute 'Build' or 'Rebuild' command to run analyzers.
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(142,25,142,28): warning CS0219: The variable 'bp2' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(176,21,176,23): warning CS0219: The variable 'bp' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(173,30,173,32): warning CS0168: The variable 'ex' is declared but never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(189,25,189,28): warning CS0219: The variable 'bp2' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(218,21,218,23): warning CS0219: The variable 'bp' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(215,30,215,32): warning CS0168: The variable 'ex' is declared but never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(230,22,230,32): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\Models\Neuron.cs(236,22,236,32): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(345,22,345,32): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(368,26,368,36): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(692,21,692,31): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(700,21,700,31): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(714,25,714,36): warning CS0219: The variable 'breakpoint2' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(726,21,726,31): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(761,16,761,29): warning CS0472: The result of the expression is always 'false' since a value of type 'ConnectionType' is never equal to 'null' of type 'ConnectionType?'
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(763,22,763,32): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(799,21,799,23): warning CS0219: The variable 'bp' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(823,25,823,35): warning CS0219: The variable 'breakpoint' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(831,21,831,23): warning CS0219: The variable 'bp' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(829,30,829,31): warning CS0168: The variable 'e' is declared but never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(1079,29,1079,31): warning CS0219: The variable 'bp' is assigned but its value is never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(1077,38,1077,39): warning CS0168: The variable 'e' is declared but never used
+1>C:\Users\depint\source\repos\SecondOrderMemory\BehaviourManagers\BlockBehaviourManager.cs(24,32,24,61): warning CS0169: The field 'BlockBehaviourManager._predictedSegmentForThisCycle' is never used
+1>SecondOrderMemory -> C:\Users\depint\source\repos\SecondOrderMemory\bin\Debug\net6.0\SecondOrderMemory.dll
+1>Done building project "SecondOrderMemory.csproj".
+2>------ Build started: Project: SecondOrderMemoryUnitTest, Configuration: Debug Any CPU ------
+2>Skipping analyzers to speed up the build. You can execute 'Build' or 'Rebuild' command to run analyzers.
+2>SecondOrderMemoryUnitTest -> C:\Users\depint\source\repos\SecondORderMemoryUnitTest\bin\Debug\net6.0\SecondOrderMemoryUnitTest.dll
+========== Build: 2 succeeded, 0 failed, 1 up-to-date, 0 skipped ==========
+========== Build completed at 3:20 PM and took 01.724 seconds ==========

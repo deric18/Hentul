@@ -18,6 +18,7 @@ namespace SecondOrderMemory.Models
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
+        private const int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
         private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
         private const int APICAL_NEURONAL_FIRE_VALUE = 40;
         private const int NMDA_NEURONAL_FIRE_VALUE = 100;
@@ -71,14 +72,16 @@ namespace SecondOrderMemory.Models
                 return;
             }
 
-            //Console.WriteLine("Neuron Fired!" + NeuronID.ToString());
+            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE;
 
-            CurrentState = NeuronState.FIRING;
+            ChangeCurrentStateTo(NeuronState.FIRING);
         }
 
         public void ProcessVoltage(int voltage)
         {
-            Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
+            Voltage += voltage;
+
+            CurrentState = NeuronState.PREDICTED;
 
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }
@@ -125,7 +128,9 @@ namespace SecondOrderMemory.Models
             AddNewAxonalConnection(key);
         }
 
-        public void CleanUpContributersList()
+        public void PostCycleCleanup() => FlushVoltage();        
+
+        internal void CleanUpContributersList()
         {
             TAContributors.Clear();
         }
@@ -250,9 +255,9 @@ namespace SecondOrderMemory.Models
                     {
                         Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
-                        //synapse1.IncrementStrength();
+                        synapse1.IncrementStrength();
 
-                        return false;
+                        return true;
 
                     }
                     else
@@ -279,12 +284,10 @@ namespace SecondOrderMemory.Models
 
                 synapse.IncrementStrength();
 
-                return false;
-
+                return true;
             }
             else
             {
-
                 dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));                
 
                 return true;
@@ -302,9 +305,11 @@ namespace SecondOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : ", ++redundantCounter);                
+                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);                
 
-                return false;
+                synapse.IncrementStrength();
+
+                return true;
             }
             else
             {
@@ -314,29 +319,32 @@ namespace SecondOrderMemory.Models
                 return true;
             }
         }
+        public int CompareTo(Neuron? other)
+        {
+            return this.Voltage > other.Voltage ? 10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? -1 : -1;
+        }
 
         public bool Equals(Neuron? other)
         {
             return this.Voltage == other?.Voltage;
-        }
-
-        public int CompareTo(Neuron? other)
-        {
-            return this.Voltage > other.Voltage ? -10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? 10 : 11;
-        }
+        }        
 
         internal void FlushVoltage()
         {
+            //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
         }
 
         internal void PruneCycleRefresh()
         {
+
             if (dendriticList == null || dendriticList.Count == 0)
             { return; }
 
+            //Todo: Implent Pruning
 
+            throw new NotImplementedException();
 
             foreach (var kvp in dendriticList)
             {

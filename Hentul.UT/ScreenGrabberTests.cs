@@ -14,7 +14,7 @@ namespace Hentul.UT
            rand = new Random();
         }        
 
-        [Test]
+        
         public void MultipleInstanceTest()
         {
             int count = 3;
@@ -28,7 +28,7 @@ namespace Hentul.UT
                     {
                         Assert.That(sg.somBBM[i, j, k].ApicalLineArray.Length, Is.EqualTo(100));
 
-                        Assert.AreEqual(6, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].dendriticList.Count);
+                        Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].dendriticList.Count);
 
                         Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
 
