@@ -13,7 +13,7 @@ namespace SecondOrderMemory.BehaviourManagers
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
-        public static int NumColumns { get; private set; }
+        public int NumColumns { get; private set; }
 
         private Position_SOM BlockID;
 
@@ -1052,7 +1052,7 @@ namespace SecondOrderMemory.BehaviourManagers
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+            string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -1209,7 +1209,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
             XmlDocument document = new XmlDocument();
 
-            string axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\source\\repos\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml"; 
+            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  
 
             if (!File.Exists(axonalDocumentPath))
             {

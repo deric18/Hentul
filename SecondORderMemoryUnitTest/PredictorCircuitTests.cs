@@ -147,12 +147,7 @@
             //Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
 
             Assert.AreEqual(NeuronState.FIRING, neuron3.CurrentState);
-        }
-
-        public void DetectorTest()
-        {
-
-        }
+        }      
 
         public void MemoryTest()
         {

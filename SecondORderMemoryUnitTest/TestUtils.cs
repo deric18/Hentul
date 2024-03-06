@@ -86,16 +86,20 @@
             List<int> Ycordinates = GenerateUnqiueRandomNumbers(noiseSize, minValue, maxValue);
             List<int> Zcordinates = GenerateUnqiueRandomNumbers(noiseSize, minValue, maxValue);
 
+            int NumColumns = 10;
 
-            SDR_SOM pattern1 = new SDR_SOM(BlockBehaviourManager.NumColumns, BlockBehaviourManager.NumColumns, new List<Position_SOM> () { new Position_SOM( 5, 5, 5) }, iType.SPATIAL);
-            SDR_SOM pattern2 = new SDR_SOM(BlockBehaviourManager.NumColumns, BlockBehaviourManager.NumColumns, new List<Position_SOM>() { new Position_SOM(7, 7, 7) }, iType.SPATIAL);
 
+            SDR_SOM pattern1 = new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM> () { new Position_SOM( 5, 5, 5) }, iType.SPATIAL);
+            SDR_SOM pattern2 = new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM>() { new Position_SOM(7, 7, 7) }, iType.SPATIAL);
 
 
             for (int i = 0; i < iterations; i++) 
             {
                     
             }
+
+
+            return toReturn;
         }      
 
         private static List<int> GenerateUnqiueRandomNumbers(int num_nums, int minValue, int maxValue)

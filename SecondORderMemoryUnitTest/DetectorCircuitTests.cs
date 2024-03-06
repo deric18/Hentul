@@ -30,8 +30,10 @@
             int cycleSize = patternSize + noiseSize;
             int numCount = 0;
             int learningCurveCount = 3;
+            int iterations = 3;
+            int minValue = 0, maxValue = 9;
             
-            sDR_SOMs.AddRange(TestUtils.GetSpecificPatternAmoungNoise(patternSize, noiseSize));
+            sDR_SOMs.AddRange(TestUtils.GetSpecificPatternAmoungNoise(iterations, patternSize, noiseSize, minValue, maxValue));
 
             foreach (var item in sDR_SOMs)
             {
