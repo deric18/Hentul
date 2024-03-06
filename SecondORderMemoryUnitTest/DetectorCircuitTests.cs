@@ -37,18 +37,19 @@
 
             foreach (var item in sDR_SOMs)
             {
-                if (numCount % noiseSize == 1 && (numCount / noiseSize) > 0 && (numCount / cycleSize) >= learningCurveCount)
-                {
-                    predictedSDR = bbManager.GetPredictedSDR();
-                    Assert.IsTrue(predictedSDR.IsUnionTo(sDR_SOMs[cycleSize - 1]));
-                }
+                if (numCount % noiseSize == 1 )                 // Only check Assert for pattern2
+                    if((numCount / noiseSize) > 0 )             // Should avoid first iteration
+                            if((numCount / cycleSize) >= learningCurveCount)        //ShouldCheckAfterLearningCurveCount 
+                            {
+                                predictedSDR = bbManager.GetPredictedSDR();
+                                Assert.IsTrue(predictedSDR.IsUnionTo(sDR_SOMs[cycleSize - 1]));
+                            }
 
                 bbManager.Fire(item);
 
                 numCount++;
-
-
             }
+            
         }
 
         public void DetectorTest2()

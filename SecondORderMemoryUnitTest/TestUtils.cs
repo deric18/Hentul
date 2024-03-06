@@ -78,6 +78,23 @@
             return (SDR_SOM)encoder.GetSparseSDR();
         }              
 
+        internal static List<SDR_SOM> GenerateFixedRandomSDR_SOMs(int iterations, int minValue, int maxValue)
+        {
+            List<SDR_SOM> toReturn = new List<SDR_SOM>();
+
+            List<int> Xcordinates = GenerateUnqiueRandomNumbers(iterations, minValue, maxValue);
+            List<int> Ycordinates = GenerateUnqiueRandomNumbers(iterations, minValue, maxValue);
+            List<int> Zcordinates = GenerateUnqiueRandomNumbers(iterations, minValue, maxValue);
+
+            for(int i = 0; i < iterations; i++)
+            {
+                toReturn.Add(new SDR_SOM(10, 10, new List<Position_SOM>() {  new Position_SOM(Xcordinates[i], Ycordinates[i], Zcordinates[i]) }));
+            }
+
+            return toReturn;
+
+        }
+
         internal static List<SDR_SOM> GetSpecificPatternAmoungNoise(int iterations, int patternSize, int noiseSize, int minValue , int maxValue)
         {
             List<SDR_SOM> toReturn = new List<SDR_SOM>();
@@ -95,7 +112,23 @@
 
             for (int i = 0; i < iterations; i++) 
             {
+                List<SDR_SOM> toAdd = new List<SDR_SOM>();
                     
+
+                for(int j = 0; j < noiseSize; j++)
+                {
+                    try
+                    {
+                        toAdd.Add(new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM>() { new Position_SOM(Xcordinates[j], Ycordinates[j], Zcordinates[j]) }));
+                    }
+                    catch(Exception e) 
+                    {
+                        int breakpoint = 1;
+                    }
+                }
+
+                toAdd.Add(pattern1);
+                toAdd.Add(pattern2);
             }
 
 
@@ -106,12 +139,28 @@
         {
             List<int> toReturn = new List<int>();
             Random rand = new Random();
+            int num = 0;
+            bool b = false; 
 
             for(int i = 0; i < num_nums; i++) 
             {
-                int num = rand.Next(minValue, maxValue);
-                if(toReturn.Contains(num))
+                num = rand.Next(minValue, maxValue);                
+
+                b = toReturn.Contains(num);
+
+                if(b == false)
                 {
+                    toReturn.Add(num);
+                }
+                else
+                {
+                    while (b == true)
+                    {
+                        num = rand.Next(minValue, maxValue);
+
+                        b = toReturn.Contains(num);
+                    }
+
                     toReturn.Add(num);
                 }
             }

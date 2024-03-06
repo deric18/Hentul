@@ -207,6 +207,29 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
+        public void TestPrunceCycleRefresh()
+        {
+            //Run cycle for 26 cycles , record distal synapse count at 25 and check if the count reduced at 26th cycle.
+
+            List<SDR_SOM> sDR_SOMs = TestUtils.GenerateFixedRandomSDR_SOMs(30, 0, 9);
+            uint dendronalconnectionsBeforePruning = 0, dendronalconnectionsAfterPruning = 0;
+
+
+            for ( int i = 0; i < sDR_SOMs.Count; i++ ) 
+            {
+
+                bbManager.Fire(sDR_SOMs[i]);
+
+                if(BlockBehaviourManager.CycleNum == 25)
+                {
+                    dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
+                }
+
+            }
+
+        }
+
+        [TestMethod]
         public void TestTemporalFiring()
         {
             SDR_SOM temporalInputPattern = TestUtils.GenerateRandomSDR(iType.TEMPORAL);

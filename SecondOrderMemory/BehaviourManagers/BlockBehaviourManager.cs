@@ -51,6 +51,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public uint totalProximalConnections;
 
+        public static uint totalDendronalConnections;
+
         public uint totalAxonalConnections;
 
         private uint num_continuous_burst;
@@ -654,7 +656,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum > 3000000 && BlockBehaviourManager.CycleNum % 50 == 0)
+            if (BlockBehaviourManager.CycleNum % 25 == 0)
             {
                 foreach (var col in this.Columns)
                 {
@@ -765,6 +767,7 @@ namespace SecondOrderMemory.BehaviourManagers
             if (AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID) && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
             {
                 Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
+                
                 //throw new InvalidDataException("CoonectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
@@ -1019,33 +1022,6 @@ namespace SecondOrderMemory.BehaviourManagers
 
         private void ReadDendriticSchema(int intX, int intY)
         {
-
-            //if (DendriticCache.Count != 0)
-            //{
-            //    foreach (var item in DendriticCache)
-            //    {
-            //        var parts = item.Key.Split('-');
-
-            //        if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
-            //        {
-            //            throw new Exception();
-            //        }
-            //        int i = Convert.ToInt32(parts[0]);
-            //        int j = Convert.ToInt32(parts[1]);
-            //        int k = Convert.ToInt32(parts[2]);
-
-            //        int offset = 3;
-
-            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
-            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
-            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
-            //        InitDendriticConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
-
-            //        //Console.WriteLine("SOM :: Adding connection from Cache : Column X :" + intX.ToString() + " Column Y : " + intY.ToString() + " Dendritic A :" + i.ToString() + " B: " + j.ToString() + " C :" + k.ToString());
-            //    }
-
-            //    return;
-            //}
 
             #region REAL Code
 
