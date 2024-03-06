@@ -75,17 +75,44 @@
 
             encoder.Encode((byte)ch);
 
-            return (SDR_SOM)encoder.GetSparseSDR();            
+            return (SDR_SOM)encoder.GetSparseSDR();
         }              
 
-        internal static List<SDR_SOM> GetSpecificPattern(int patternSize)
+        internal static List<SDR_SOM> GetSpecificPatternAmoungNoise(int iterations, int patternSize, int noiseSize, int minValue , int maxValue)
         {
-            throw new NotImplementedException();
-        }
+            List<SDR_SOM> toReturn = new List<SDR_SOM>();
 
-        internal static List<SDR_SOM> GenerateNoise(int noiseSize)
+            List<int> Xcordinates = GenerateUnqiueRandomNumbers(noiseSize, minValue, maxValue);
+            List<int> Ycordinates = GenerateUnqiueRandomNumbers(noiseSize, minValue, maxValue);
+            List<int> Zcordinates = GenerateUnqiueRandomNumbers(noiseSize, minValue, maxValue);
+
+
+            SDR_SOM pattern1 = new SDR_SOM(BlockBehaviourManager.NumColumns, BlockBehaviourManager.NumColumns, new List<Position_SOM> () { new Position_SOM( 5, 5, 5) }, iType.SPATIAL);
+            SDR_SOM pattern2 = new SDR_SOM(BlockBehaviourManager.NumColumns, BlockBehaviourManager.NumColumns, new List<Position_SOM>() { new Position_SOM(7, 7, 7) }, iType.SPATIAL);
+
+
+
+            for (int i = 0; i < iterations; i++) 
+            {
+                    
+            }
+        }      
+
+        private static List<int> GenerateUnqiueRandomNumbers(int num_nums, int minValue, int maxValue)
         {
-            throw new NotImplementedException();
+            List<int> toReturn = new List<int>();
+            Random rand = new Random();
+
+            for(int i = 0; i < num_nums; i++) 
+            {
+                int num = rand.Next(minValue, maxValue);
+                if(toReturn.Contains(num))
+                {
+                    toReturn.Add(num);
+                }
+            }
+
+            return toReturn;
         }
     }
 }

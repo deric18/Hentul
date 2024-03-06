@@ -106,15 +106,6 @@
                 repCount++;
             }            
         }
-
-        [TestMethod]
-        public void DetectorTest1()
-        {
-            //Create a a specific pattern and check how long it takes for the network to detect it.
-
-
-        }
-
         
         [TestMethod]
         public void HighVoltagePredictedNeuronGetsPickedForFiring()
