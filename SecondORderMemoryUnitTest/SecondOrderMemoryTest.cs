@@ -225,7 +225,14 @@ namespace SecondOrderMemoryUnitTest
                     dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
                 }
 
+                if(BlockBehaviourManager.CycleNum == 26)
+                {
+                    dendronalconnectionsAfterPruning = BlockBehaviourManager.totalDendronalConnections;
+                }
+
             }
+
+            Assert.IsTrue(dendronalconnectionsBeforePruning > dendronalconnectionsAfterPruning);
 
         }
 
