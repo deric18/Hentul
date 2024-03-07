@@ -27,7 +27,7 @@ namespace SecondOrderMemory.Models
         private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
-        private const uint PRUNE_THRESHOLD = 30;
+        private const uint PRUNE_THRESHOLD = 25;
         #endregion
 
         private ulong redundantCounter = 0;
@@ -293,7 +293,10 @@ namespace SecondOrderMemory.Models
 
                 Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
-                BlockBehaviourManager.totalDendronalConnections++;
+                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
+                {
+                    BlockBehaviourManager.totalDendronalConnections++;
+                }
 
                 return true;
             }
@@ -347,31 +350,34 @@ namespace SecondOrderMemory.Models
             if (dendriticList == null || dendriticList.Count == 0)
             { return; }
 
-            //Todo: Implent Pruning           
-
             List<string> removeList = null;
 
-            foreach (var item in dendriticList)
+            var distalDendriticList = dendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON));
+
+            if (distalDendriticList.Count() != 0)
             {
-                
-                if((BlockBehaviourManager.CycleNum - item.Value.lastFiredCycle) > PRUNE_THRESHOLD)
+                foreach (var item in dendriticList)
                 {
-                    if(removeList == null)
+
+                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && (BlockBehaviourManager.CycleNum - item.Value.lastFiredCycle) > PRUNE_THRESHOLD)
                     {
-                        removeList = new List<string>();
+                        if (removeList == null)
+                        {
+                            removeList = new List<string>();
+                        }
+
+                        removeList.Add(item.Key);
                     }
+                }
 
-                    removeList.Add(item.Key);   
-                }                
-            }
-
-            if(removeList.Count > 0)
-            {
-                for( int i = 0; i< removeList.Count; i++)
+                if (removeList?.Count > 0)
                 {
-                    dendriticList.Remove(removeList[i]);
+                    for (int i = 0; i < removeList.Count; i++)
+                    {
+                        dendriticList.Remove(removeList[i]);
 
-                    BlockBehaviourManager.totalDendronalConnections--;
+                        BlockBehaviourManager.totalDendronalConnections--;
+                    }
                 }
             }
         }

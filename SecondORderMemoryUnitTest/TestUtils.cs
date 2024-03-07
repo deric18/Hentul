@@ -82,13 +82,22 @@
         {
             List<SDR_SOM> toReturn = new List<SDR_SOM>();
 
-            List<int> Xcordinates = GenerateUnqiueRandomNumbers(iterations, minValue, maxValue);
-            List<int> Ycordinates = GenerateUnqiueRandomNumbers(iterations, minValue, maxValue);
-            List<int> Zcordinates = GenerateUnqiueRandomNumbers(iterations, minValue, maxValue);
+            int subIterations = 4;
 
-            for(int i = 0; i < iterations; i++)
+            List<int> Xcordinates = GenerateUnqiueRandomNumbers(subIterations, minValue, maxValue);
+            List<int> Ycordinates = GenerateUnqiueRandomNumbers(subIterations, minValue, maxValue);
+            List<int> Zcordinates = GenerateUnqiueRandomNumbers(subIterations, minValue, maxValue);
+            int i = 0, j = 0;
+
+            while(i < iterations)
             {
-                toReturn.Add(new SDR_SOM(10, 10, new List<Position_SOM>() {  new Position_SOM(Xcordinates[i], Ycordinates[i], Zcordinates[i]) }));
+                while (j < subIterations)
+                {
+                    toReturn.Add(new SDR_SOM(10, 10, new List<Position_SOM>() { new Position_SOM(Xcordinates[j], Ycordinates[j], Zcordinates[j]) }));
+                    i++;
+                    j++;
+                }
+                j = 0;
             }
 
             return toReturn;
@@ -142,7 +151,7 @@
             int num = 0;
             bool b = false; 
 
-            for(int i = 0; i < num_nums; i++) 
+            while(toReturn.Count <= num_nums) 
             {
                 num = rand.Next(minValue, maxValue);                
 

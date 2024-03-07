@@ -93,6 +93,8 @@ namespace SecondOrderMemory.BehaviourManagers
 
             CycleNum = 0;
 
+            totalDendronalConnections = 0;
+
             this.NumColumns = numColumns;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
@@ -652,17 +654,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
 
                 IsApical = false;
-            }
-
-
-            //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum % 25 == 0)
-            {
-                foreach (var col in this.Columns)
-                {
-                    col.PruneCycleRefresh();
-                }
-            }
+            }           
         }
 
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
@@ -907,6 +899,14 @@ namespace SecondOrderMemory.BehaviourManagers
                 NeuronsFiringLastCycle.Add(item);
             }
 
+            //Every 50 Cycles Prune unused and under Firing Connections
+            if (BlockBehaviourManager.CycleNum >= 25 && BlockBehaviourManager.CycleNum % 25 == 0)
+            {
+                foreach (var col in this.Columns)
+                {
+                    col.PruneCycleRefresh();
+                }
+            }
 
             //BUG : How many Burst Cycle to wait before performing a full clean ? Answer : 1
 
@@ -1028,7 +1028,17 @@ namespace SecondOrderMemory.BehaviourManagers
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"; //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml"
+            bool devbox = true;
+            string dendriteDocumentPath;
+
+            if (devbox)
+            {
+                dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+            }
+            else
+            {
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+            }
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -1184,8 +1194,17 @@ namespace SecondOrderMemory.BehaviourManagers
             #endregion
 
             XmlDocument document = new XmlDocument();
+            bool devbox = true;
+            string axonalDocumentPath;
 
-            string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  //"C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";  
+            if (devbox)
+            {
+                axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            }
+            else
+            {
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            }
 
             if (!File.Exists(axonalDocumentPath))
             {
