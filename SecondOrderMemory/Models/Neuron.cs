@@ -16,14 +16,11 @@ namespace SecondOrderMemory.Models
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
-        private const int TEMPORAL_CONNECTION_STRENGTH = 100;
-        private const int APICAL_CONNECTION_STRENGTH = 100;
+        private const int INITIAL_SYNAPTIC_CONNECTION_STRENGTH = 1;        
         private const int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
         private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
         private const int APICAL_NEURONAL_FIRE_VALUE = 40;
-        private const int NMDA_NEURONAL_FIRE_VALUE = 100;
-        private const int DISTAL_CONNECTION_STRENGTH = 10;
+        private const int NMDA_NEURONAL_FIRE_VALUE = 100;        
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
@@ -216,7 +213,7 @@ namespace SecondOrderMemory.Models
                 else
                 {
 
-                    ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
+                    ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
 
                     
 
@@ -272,11 +269,11 @@ namespace SecondOrderMemory.Models
                     {
                         if (cType.Equals(ConnectionType.TEMPRORAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
                         }
                         else if (cType.Equals(ConnectionType.APICAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
                         }                        
 
                         return true;
@@ -290,13 +287,13 @@ namespace SecondOrderMemory.Models
             {
                 Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);
 
-                synapse.IncrementHitCount();
+                //synapse.IncrementHitCount();
 
                 return true;
             }
             else
             {
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
                 Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
@@ -322,7 +319,7 @@ namespace SecondOrderMemory.Models
             {
                 Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);
 
-                synapse.IncrementHitCount();
+                //synapse.IncrementHitCount();
 
                 return true;
             }

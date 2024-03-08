@@ -24,7 +24,7 @@ namespace SecondOrderMemoryUnitTest
 
 
         [TestMethod]
-        public void TestMultipleInstanceOfSOMBBM()
+        public void TestMultipleInstanceOfSOMBBMUT()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
             BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 1, 3, 10);
@@ -83,16 +83,15 @@ namespace SecondOrderMemoryUnitTest
                     {
                         Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
 
-                        if (clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count == 19)
+                        if (clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count == 4)
                         {
                             int bp = 1;
                         }
-                        Assert.AreEqual(2, clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
 
+
+                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
                         Assert.AreEqual(2, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
-
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 2)));
-
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 4)));
                         Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 2)));
                     }
                 }
@@ -100,7 +99,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestAxonalAndDendronalConnectionsOnNeurons()
+        public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
         {
             for (int i = 0; i < bbManager?.NumColumns; i++)
             {
@@ -141,7 +140,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestFireNWire()
+        public void TestFireNWireUT()
         {
             //fire  neuron1 which has an already established connection to a known other neuron2
             //Fire a pattern that fires the other known neuron2
@@ -170,7 +169,7 @@ namespace SecondOrderMemoryUnitTest
 
             uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();
 
-            for (int i = 0; i <= plasticityCount; i++)
+            for (int i = 0; i < 5; i++)
             {
                 bbManager.Fire(sdr1);
 
@@ -191,7 +190,7 @@ namespace SecondOrderMemoryUnitTest
 
         }
 
-        public void TestWire1()
+        public void TestWire1UT()
         {
             //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
         }
@@ -211,7 +210,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestDistalDendronalConnectionsShouldNotBeLimited()
+        public void TestDistalDendronalConnectionsShouldNotBeLimitedUT()
         {
             //BUG : Why doe DitalDendriticCount never exceed more than 400
             // Create a new Dendronal Connection make sure it is a new Dendronal Connection , 
@@ -234,7 +233,7 @@ namespace SecondOrderMemoryUnitTest
             Assert.Fail();
         }
 
-        public void TestDistalDendriticConnectionBecomesActiveAfter4Firings()
+        public void TestDistalDendriticConnectionBecomesActiveAfter4FiringsUT()
         {
             UInt16 numRepeats = BlockBehaviourManager.DISTALNEUROPLASTICITY;
 
@@ -268,7 +267,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [Test, Ignore("Why do you need areason ?")]
-        public void TestPruneCycleRefresh()
+        public void TestPruneCycleRefreshUT()
         {
             //Run cycle for 26 cycles , record distal synapse count at 25 and check if the count reduced at 26th cycle.
 
@@ -299,7 +298,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestTemporalFiring()
+        public void TestTemporalFiringUT()
         {
             SDR_SOM temporalInputPattern = TestUtils.GenerateRandomSDR(iType.TEMPORAL);
 
@@ -327,7 +326,7 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuronPosition.ToString());
 
-            Assert.AreEqual((uint)100, previousStrength);
+            Assert.AreEqual(1, previousStrength);
 
             Assert.AreEqual(currentStrength, previousStrength);
 
@@ -335,7 +334,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestTemporalWiring()
+        public void TestTemporalWiringUT()
         {
             SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
@@ -374,7 +373,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestApicalLine()
+        public void TestApicalLineUT()
         {
 
             Neuron apicalNeuron1 = bbManager.ConvertStringPosToNeuron(bbManager.Columns[2, 4].Neurons[5].GetMyApicalPartner());
@@ -387,7 +386,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestApicalFiring()
+        public void TestApicalFiringUT()
         {
             SDR_SOM apicalInputPattern = TestUtils.GenerateRandomSDR(iType.APICAL);
 
@@ -405,7 +404,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestApicalWiring()
+        public void TestApicalWiringUT()
         {
             //Fire an apical Neurons , Deplorize specific positions and fire those neurons via spatial firing
 
@@ -446,7 +445,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestSOMBBMClone()
+        public void TestSOMBBMCloneUT()
         {
             BlockBehaviourManager bbm2 = bbManager.CloneBBM(0, 0, 0);
 
@@ -458,11 +457,11 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
 
-            Assert.AreEqual(6, bbm2.Columns[3, 3].Neurons[5].flag);
+            Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[5].flag);
         }
 
 
-        public void TestMemoryProblemsInThisTest()
+        public void TestMemoryProblemsInThisTestUT()
         {
             Position_SOM psom = new Position_SOM(5, 5, 5);
             Neuron neuron = new Neuron(psom, NeuronType.NORMAL);
@@ -475,7 +474,7 @@ namespace SecondOrderMemoryUnitTest
 
         }
 
-        public void TestTemporalAndApicalFiringAndWiring()
+        public void TestTemporalAndApicalFiringAndWiringUT()
         {
 
         }

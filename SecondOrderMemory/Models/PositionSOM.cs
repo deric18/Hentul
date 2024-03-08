@@ -25,7 +25,7 @@ namespace SecondOrderMemory.Models
         public static string ConvertIKJtoString(int i, int j, int k, char w = 'N')
         {
             if (w == 'N')
-                return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
+                return i.ToString() + "-" + j.ToString() + "-" + k.ToString() + '-' + 'N';
             else if (w == 'T')
                 return i.ToString() + "-" + j.ToString() + "-" + k.ToString() + "-" + w;
             else if (w == 'A')

@@ -19,10 +19,11 @@
         }
 
         [TestMethod]
-        public void DetectorTest1()
+        public void DetectorTestCT()
         {
             //Create a a specific pattern and check how long it takes for the network to detect it.
             //Create a a specific pattern and check how long it takes for the network to detect it.
+
             List<SDR_SOM> sDR_SOMs = new List<SDR_SOM>();
             SDR_SOM predictedSDR;
             int patternSize = 2;

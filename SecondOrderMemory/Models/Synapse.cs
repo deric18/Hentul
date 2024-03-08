@@ -50,14 +50,21 @@ namespace SecondOrderMemory.Models
 
         public void IncrementHitCount()
         {
-            if(PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
+
+            if (DendronalNeuronalId.ToString().Equals("5-3-0-N") && AxonalNeuronId.ToString().Equals("0-2-0-N"))
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }
+
+            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
             {
                 if(IsActive == false) 
                     IsActive = true;
 
                 FiringHitCount++;
 
-                this._strength += 1;
+                _strength++;
                 this.lastFiredCycle = BlockBehaviourManager.CycleNum;
             }
             else

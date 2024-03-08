@@ -71,7 +71,7 @@ namespace SecondOrderMemory.BehaviourManagers
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        public static UInt16 DISTALNEUROPLASTICITY = 4;
+        public static UInt16 DISTALNEUROPLASTICITY = 5;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
@@ -419,7 +419,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
 
 
-            Fire(IsBurstOnly);
+            Fire();
 
             if (IsSpatial == true)
             {
@@ -432,7 +432,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
 
-        private void Fire(bool IsBurst = false)
+        private void Fire()
         {
             foreach (var neuron in NeuronsFiringThisCycle)
             {
@@ -690,7 +690,6 @@ namespace SecondOrderMemory.BehaviourManagers
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'A');
                         targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE);
                     }
-
                 }
                 else
                 {
@@ -700,7 +699,7 @@ namespace SecondOrderMemory.BehaviourManagers
             }
             else if (targetNeuron.ProximoDistalDendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
             {
-                if (synapse.IsActive)
+                if (synapse.IsActive)       //Process Voltage only if the synapse is active otherwise Increment HitCount.
                 {
                     switch (synapse.cType)
                     {
@@ -715,10 +714,10 @@ namespace SecondOrderMemory.BehaviourManagers
                             break;
                     }
                 }
-                else
-                {
-                    synapse.IncrementHitCount();
-                }               
+                //else
+                //{
+                //    synapse.IncrementHitCount();
+                //}               
             }
             else if (cType.Equals(ConnectionType.AXONTONEURON))
             {
@@ -1034,7 +1033,7 @@ namespace SecondOrderMemory.BehaviourManagers
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
-            bool devbox = false;
+            bool devbox = true;
             string dendriteDocumentPath;
 
             if (devbox)
@@ -1183,7 +1182,7 @@ namespace SecondOrderMemory.BehaviourManagers
             #endregion
 
             XmlDocument document = new XmlDocument();
-            bool devbox = false;
+            bool devbox = true;
             string axonalDocumentPath;
 
             if (devbox)
