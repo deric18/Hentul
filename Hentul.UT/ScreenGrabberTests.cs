@@ -28,11 +28,11 @@ namespace Hentul.UT
                     {
                         Assert.That(sg.somBBM[i, j, k].ApicalLineArray.Length, Is.EqualTo(100));
 
-                        Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].dendriticList.Count);
+                        Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.Count);
 
                         Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
 
-                        Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].dendriticList.ElementAt(k));
+                        Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.ElementAt(k));
 
                         Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(k));
 

@@ -12,6 +12,7 @@ namespace SecondOrderMemory.Models
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
         #region FLAGS
+
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
@@ -28,16 +29,26 @@ namespace SecondOrderMemory.Models
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
         private const uint PRUNE_THRESHOLD = 25;
+        private const uint DISTALNEURONPLASTICITY = 5;
+
         #endregion
 
         private ulong redundantCounter = 0;
+
         public Position_SOM NeuronID { get; private set; }
+
         public NeuronType nType { get; private set; }
+
         public Dictionary<string, char> TAContributors { get; private set; }
+
         public Dictionary<string, Synapse> AxonalList { get; private set; }
-        public Dictionary<string, Synapse> dendriticList { get; private set; }
+
+        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }        
+
         public List<Neuron> ConnectedNeurons { get; private set; }
+
         public List<Segment>? Segments { get; private set; } = null;
+
         public NeuronState CurrentState { get; private set; }
 
         public int flag { get; set; }
@@ -51,7 +62,7 @@ namespace SecondOrderMemory.Models
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();
             ConnectedNeurons = new List<Neuron>();
-            dendriticList = new Dictionary<string, Synapse>();
+            ProximoDistalDendriticList = new Dictionary<string, Synapse>();
             AxonalList = new Dictionary<string, Synapse>();
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
@@ -90,7 +101,7 @@ namespace SecondOrderMemory.Models
 
         public string GetMyTemporalPartner()
         {
-            string pos = dendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.AxonalNeuronId;
+            string pos = ProximoDistalDendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.AxonalNeuronId;
 
             if (!string.IsNullOrEmpty(pos))
             {
@@ -102,7 +113,7 @@ namespace SecondOrderMemory.Models
 
         public string GetMyApicalPartner()
         {
-            string pos = dendriticList.Values?.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.AxonalNeuronId;
+            string pos = ProximoDistalDendriticList.Values?.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.AxonalNeuronId;
 
             if (!string.IsNullOrEmpty(pos))
             {
@@ -114,11 +125,7 @@ namespace SecondOrderMemory.Models
         
 
         public void InitProximalConnectionForDendriticConnection(int i, int j, int k)
-        {
-            //Needs work
-            //Add it dictionar;
-            //Add it to ConnectedNeurons
-
+        {                        
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
             AddNewProximalDendriticConnection(key);
         }
@@ -155,7 +162,7 @@ namespace SecondOrderMemory.Models
 
                 if(AxonalList == null || AxonalList.Count == 0)
                 {
-                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));                    
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));                    
 
                     return true;
                 }
@@ -169,7 +176,7 @@ namespace SecondOrderMemory.Models
                 else
                 {
 
-                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));                    
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));                    
 
                     return true;
                 }
@@ -198,20 +205,20 @@ namespace SecondOrderMemory.Models
                     throw new InvalidOperationException("Canot connect neuron to itself");
                 }
 
-                if (dendriticList.TryGetValue(key, out var synapse))
+                if (ProximoDistalDendriticList.TryGetValue(key, out var synapse))
                 {
                     Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
                     
+                    //Do Nothing;
+
                     return false;
                 }
                 else
                 {
 
-                    dendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON));
+                    ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
 
-                    //var item = BlockBehaviourManager.GetBlockBehaviourManager().ConvertStringPosToNeuron(key);
-
-                    //ConnectedNeurons.Add(item);
+                    
 
                     return true;
                 }
@@ -252,11 +259,11 @@ namespace SecondOrderMemory.Models
                 if(cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
                 {
 
-                    if (dendriticList.TryGetValue(axonalNeuronId, out var synapse1))
+                    if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
                     {
                         Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
-                        synapse1.IncrementStrength();
+                        synapse1.IncrementHitCount();
 
                         return true;
 
@@ -265,11 +272,11 @@ namespace SecondOrderMemory.Models
                     {
                         if (cType.Equals(ConnectionType.TEMPRORAL))
                         {
-                            dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, TEMPORAL_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
                         }
                         else if (cType.Equals(ConnectionType.APICAL))
                         {
-                            dendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, APICAL_CONNECTION_STRENGTH, ConnectionType.APICAL));
                         }                        
 
                         return true;
@@ -279,17 +286,17 @@ namespace SecondOrderMemory.Models
             }
                         
 
-            if (dendriticList.TryGetValue(axonalNeuronId, out var synapse))
+            if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
                 Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);
 
-                synapse.IncrementStrength();
+                synapse.IncrementHitCount();
 
                 return true;
             }
             else
             {
-                dendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(NeuronID.ToString(), axonalNeuronId, BlockBehaviourManager.CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
                 Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
@@ -313,9 +320,9 @@ namespace SecondOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);                
+                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);
 
-                synapse.IncrementStrength();
+                synapse.IncrementHitCount();
 
                 return true;
             }
@@ -347,16 +354,16 @@ namespace SecondOrderMemory.Models
         internal void PruneCycleRefresh()
         {
 
-            if (dendriticList == null || dendriticList.Count == 0)
+            if (ProximoDistalDendriticList == null || ProximoDistalDendriticList.Count == 0)
             { return; }
 
             List<string> removeList = null;
 
-            var distalDendriticList = dendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON));
+            var distalDendriticList = ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON));
 
             if (distalDendriticList.Count() != 0)
             {
-                foreach (var item in dendriticList)
+                foreach (var item in ProximoDistalDendriticList)
                 {
 
                     if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && (BlockBehaviourManager.CycleNum - item.Value.lastFiredCycle) > PRUNE_THRESHOLD)
@@ -374,7 +381,7 @@ namespace SecondOrderMemory.Models
                 {
                     for (int i = 0; i < removeList.Count; i++)
                     {
-                        dendriticList.Remove(removeList[i]);
+                        ProximoDistalDendriticList.Remove(removeList[i]);
 
                         BlockBehaviourManager.totalDendronalConnections--;
                     }
