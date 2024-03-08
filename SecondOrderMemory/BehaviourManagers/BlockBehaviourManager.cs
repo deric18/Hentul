@@ -603,6 +603,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
 
                     //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
+                    //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
                     //BUG 2: TotalNumberOfDistalConnections always get limited to 400
 
                     foreach (var position in ColumnsThatBurst)
@@ -913,7 +914,7 @@ namespace SecondOrderMemory.BehaviourManagers
                 }
             }
 
-            //BUG : How many Burst Cycle to wait before performing a full clean ? Answer : 1
+            //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
 
             if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
             {

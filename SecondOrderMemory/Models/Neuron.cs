@@ -285,9 +285,7 @@ namespace SecondOrderMemory.Models
 
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);
-
-                //synapse.IncrementHitCount();
+                Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);                
 
                 return true;
             }
@@ -296,7 +294,7 @@ namespace SecondOrderMemory.Models
                 ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
                 Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
-
+                
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
                     BlockBehaviourManager.totalDendronalConnections++;
@@ -348,7 +346,7 @@ namespace SecondOrderMemory.Models
             CurrentState = NeuronState.RESTING;
         }
 
-        internal void PruneCycleRefresh()
+        internal void Prune()
         {
 
             if (ProximoDistalDendriticList == null || ProximoDistalDendriticList.Count == 0)
@@ -363,7 +361,7 @@ namespace SecondOrderMemory.Models
                 foreach (var item in ProximoDistalDendriticList)
                 {
 
-                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && (BlockBehaviourManager.CycleNum - item.Value.lastFiredCycle) > PRUNE_THRESHOLD)
+                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ( (BlockBehaviourManager.CycleNum - Math.Max(item.Value.lastFiredCycle, item.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
                     {
                         if (removeList == null)
                         {
