@@ -87,13 +87,13 @@ namespace SecondOrderMemoryUnitTest
                         {
                             int bp = 1;
                         }
-                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
+                        Assert.AreEqual(2, clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
 
-                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
+                        Assert.AreEqual(2, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
 
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 3)));
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 2)));
 
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
+                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 2)));
                     }
                 }
             }
@@ -124,9 +124,9 @@ namespace SecondOrderMemoryUnitTest
 
                         //Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
 
-                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 3)));
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 2)));
 
-                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 3)));
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 2)));
                     }
                 }
             }
@@ -150,6 +150,7 @@ namespace SecondOrderMemoryUnitTest
             var neuron1 = bbManager.Columns[0, 2].Neurons[0];
             var neuron2 = bbManager.Columns[5, 3].Neurons[0];
 
+            UInt16 plasticityCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
 
             if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))
             {
@@ -169,9 +170,12 @@ namespace SecondOrderMemoryUnitTest
 
             uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();
 
-            bbManager.Fire(sdr1);
+            for (int i = 0; i <= plasticityCount; i++)
+            {
+                bbManager.Fire(sdr1);
 
-            bbManager.Fire(sdr2);
+                bbManager.Fire(sdr2);
+            }
 
             _ = neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse value1);
 
@@ -232,15 +236,33 @@ namespace SecondOrderMemoryUnitTest
 
         public void TestDistalDendriticConnectionBecomesActiveAfter4Firings()
         {
+            UInt16 numRepeats = BlockBehaviourManager.DISTALNEUROPLASTICITY;
+
+            Position_SOM pos1 = TestUtils.GenerateRandomPosition(1);
+            Position_SOM pos2 = TestUtils.GenerateRandomPosition(1);
+
+            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { pos1 }, iType.SPATIAL);            
+
+            Neuron neuron1 = bbManager.Columns[pos1.X , pos1.Y].Neurons[pos1.Z];
+            Neuron neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
+
+            bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON);
+
+
+            for( int i = 0; i < numRepeats; i++)
+            {
+                bbManager.Fire(sdr1);
+
+                Assert.AreNotEqual(neuron2.CurrentState, NeuronState.FIRING);
+            }
+
+            bbManager.Fire(sdr1);
+
+            Assert.AreEqual(neuron2.CurrentState, NeuronState.FIRING);
 
         }
 
-        public void TestInActiveDendritesDontConductVoltage()
-        {
-
-        }
-
-        public void TestTotalNoCapOnTotalNumberOfDendriticConnections()
+        public void TestNoCapOnTotalNumberOfDendriticConnections()
         {
 
         }

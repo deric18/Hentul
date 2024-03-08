@@ -21,6 +21,13 @@
             return new SDR_SOM(10, 10, posList, inputPatternType);
         }
 
+        internal static Position_SOM GenerateRandomPosition(int posCount)
+        {
+            Random rand = new Random();
+
+            return new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9));
+        }
+
         internal static SDR_SOM GenerateRandomSDR(iType inputPatternType)
         {
             Random rand = new Random();

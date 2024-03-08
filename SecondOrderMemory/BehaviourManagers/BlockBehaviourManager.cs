@@ -71,7 +71,7 @@ namespace SecondOrderMemory.BehaviourManagers
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        internal static UInt16 DISTALNEUROPLASTICITY = 4;
+        public static UInt16 DISTALNEUROPLASTICITY = 4;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
@@ -1034,7 +1034,7 @@ namespace SecondOrderMemory.BehaviourManagers
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
-            bool devbox = true;
+            bool devbox = false;
             string dendriteDocumentPath;
 
             if (devbox)
@@ -1183,7 +1183,7 @@ namespace SecondOrderMemory.BehaviourManagers
             #endregion
 
             XmlDocument document = new XmlDocument();
-            bool devbox = true;
+            bool devbox = false;
             string axonalDocumentPath;
 
             if (devbox)
