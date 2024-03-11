@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FirstOrderMemory\ZeroOrderMemory.csproj" />
-    <ProjectReference Include="..\SecondOrderMemory\FirstOrderMemory.csproj" />
+    <ProjectReference Include="..\ZeroOrderMemory\ZeroOrderMemory.csproj" />
+    <ProjectReference Include="..\FirstOrderMemory\FirstOrderMemory.csproj" />
   </ItemGroup>
 
 </Project>
