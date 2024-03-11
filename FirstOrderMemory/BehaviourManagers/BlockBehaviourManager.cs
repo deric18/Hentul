@@ -326,7 +326,7 @@ namespace FirstOrderMemory.BehaviourManagers
 
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
-            // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column.
+            // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
 
             if (ignorePrecyclePrep == false)
                 PreCyclePrep();

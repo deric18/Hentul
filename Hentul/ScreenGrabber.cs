@@ -31,6 +31,8 @@
 
         public ScreenGrabber(int range)
         {
+            //Todo : Project shape data of the input image to one region and project colour data of the image to another region.
+
             this.range = range;
             this.ColorMap = new Color[range, range];
 
