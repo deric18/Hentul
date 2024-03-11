@@ -1,12 +1,8 @@
-﻿using FirstOrderMemory.Models;
-using Common;
-using System.Xml;
-using System.Security.Cryptography;
-using System.Collections.Generic;
-using System;
-
-namespace FirstOrderMemory.BehaviourManagers
+﻿namespace FirstOrderMemory.BehaviourManagers
 {
+    using FirstOrderMemory.Models;
+    using Common;
+    using System.Xml;
 
     public class BlockBehaviourManager
     {
@@ -86,6 +82,8 @@ namespace FirstOrderMemory.BehaviourManagers
         private const int AXONAL_CONNECTION = 1;
         private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
         #endregion
+
+        #region CONSTRUCTORS & INITIALIZATIONS 
 
         public BlockBehaviourManager(int numColumns = 10, int x = 0, int y = 0, int z = 0)
         {
@@ -300,6 +298,9 @@ namespace FirstOrderMemory.BehaviourManagers
             #endregion
         }
 
+        #endregion
+
+        #region PUBLIC METHODS 
         private void PreCyclePrep()
         {
             //Prepare all the neurons that are predicted 
@@ -842,6 +843,10 @@ namespace FirstOrderMemory.BehaviourManagers
             return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
         }
 
+        #endregion
+
+        #region PRIVATE METHODS
+
         private void StrengthenTemporalConnection(Neuron neuron)
         {
             PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
@@ -1263,6 +1268,8 @@ namespace FirstOrderMemory.BehaviourManagers
                 }
             }
         }
+
+        #endregion
 
     }
 }
