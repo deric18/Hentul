@@ -29,10 +29,10 @@
     *.pyc
     *.xml
     ipch/
-    FirstOrderMemory/obj/
-	FirstOrderMemory/bin/
-    FirstOrderMemory/[Bb]in
-    FirstOrderMemory/[Dd]ebug*/
+    ZeroOrderMemory/obj/
+	ZeroOrderMemory/bin/
+    ZeroOrderMemory/[Bb]in
+    ZeroOrderMemory/[Dd]ebug*/
     [Rr]elease*/
     Ankh.NoLoad
     

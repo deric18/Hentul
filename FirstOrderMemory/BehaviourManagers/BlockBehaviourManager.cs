@@ -1,7 +1,7 @@
 ﻿using Common;
-using FirstOrderMemory.Models;
+using ZeroOrderMemory.Models;
 
-namespace FirstOrderMemory.BehaviourManagers
+namespace ZeroOrderMemory.BehaviourManagers
 {
     public class BlockBehaviourManager
     {

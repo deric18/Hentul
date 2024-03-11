@@ -1,6 +1,6 @@
-﻿using SecondOrderMemory.BehaviourManagers;
+﻿using FirstOrderMemory.BehaviourManagers;
 
-namespace SecondOrderMemory.Models
+namespace FirstOrderMemory.Models
 {
     public class Synapse
     {

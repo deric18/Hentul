@@ -1,8 +1,8 @@
-﻿namespace SecondOrderMemoryUnitTest
+﻿namespace FirstOrderMemoryUnitTest
 {
     using Common;
-    using SecondOrderMemory.BehaviourManagers;
-    using SecondOrderMemory.Models;
+    using FirstOrderMemory.BehaviourManagers;
+    using FirstOrderMemory.Models;
 
     [TestClass]
     public class DetectorCircuitTest        

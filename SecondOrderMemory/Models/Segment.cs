@@ -1,4 +1,4 @@
-﻿namespace SecondOrderMemory.Models
+﻿namespace FirstOrderMemory.Models
 {
     public class Segment
     {

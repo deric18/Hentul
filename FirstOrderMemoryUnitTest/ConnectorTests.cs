@@ -1,7 +1,7 @@
-namespace FirstOrderMemoryUnitTest
+namespace ZeroOrderMemoryUnitTest
 {
-    using FirstOrderMemory.BehaviourManagers;
-    using FirstOrderMemory.Models;
+    using ZeroOrderMemory.BehaviourManagers;
+    using ZeroOrderMemory.Models;
     using Common;
 
     [TestFixture]

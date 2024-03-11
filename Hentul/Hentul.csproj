@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FirstOrderMemory\FirstOrderMemory.csproj" />
-    <ProjectReference Include="..\SecondOrderMemory\SecondOrderMemory.csproj" />
+    <ProjectReference Include="..\FirstOrderMemory\ZeroOrderMemory.csproj" />
+    <ProjectReference Include="..\SecondOrderMemory\FirstOrderMemory.csproj" />
   </ItemGroup>
 
 </Project>

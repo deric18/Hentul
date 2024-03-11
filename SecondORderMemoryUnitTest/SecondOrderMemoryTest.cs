@@ -1,12 +1,12 @@
-namespace SecondOrderMemoryUnitTest
+namespace FirstOrderMemoryUnitTest
 {
-    using SecondOrderMemory.BehaviourManagers;
-    using SecondOrderMemory.Models;
+    using FirstOrderMemory.BehaviourManagers;
+    using FirstOrderMemory.Models;
     using Common;
     using NUnit.Framework;
 
     [TestClass]
-    public class SecondOrderMemoryTest
+    public class FirstOrderMemoryTest
     {
         BlockBehaviourManager? bbManager;
         const int sizeOfColumns = 10;
@@ -24,7 +24,7 @@ namespace SecondOrderMemoryUnitTest
 
 
         [TestMethod]
-        public void TestMultipleInstanceOfSOMBBMUT()
+        public void TestMultipleInstanceOfSOM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
             BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 1, 3, 10);
@@ -69,7 +69,6 @@ namespace SecondOrderMemoryUnitTest
 
             Neuron apicalNeuron1 = clonedBBM.ConvertStringPosToNeuron(clonedBBM.Columns[2, 4].Neurons[5].GetMyApicalPartner());
             Neuron apicalNeuron2 = clonedBBM.ConvertStringPosToNeuron(clonedBBM.Columns[5, 3].Neurons[9].GetMyApicalPartner());
-
 
             Assert.AreEqual("2-4-0-A", apicalNeuron1.NeuronID.ToString());
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
@@ -209,7 +208,7 @@ namespace SecondOrderMemoryUnitTest
 
         }
 
-        [TestMethod]
+        [Test]
         public void TestDistalDendronalConnectionsShouldNotBeLimitedUT()
         {
             //BUG : Why doe DitalDendriticCount never exceed more than 400
@@ -266,7 +265,7 @@ namespace SecondOrderMemoryUnitTest
 
         }
 
-        [TestMethod, Ignore("Ignore it!")]
+        [Test]
         public void TestPruneCycleRefresh()
         {
             //Run cycle for 26 cycles , record distal synapse count at 25 and check if the count reduced at 26th cycle.
@@ -297,7 +296,7 @@ namespace SecondOrderMemoryUnitTest
                         int breakpoint = 0;
                     }
 
-                    //Assert.IsTrue(dendronalconnectionsBeforePruning > dendronalconnectionsAfterPruning);
+                    Assert.IsTrue(dendronalconnectionsBeforePruning > dendronalconnectionsAfterPruning);
                 }
             }
         }

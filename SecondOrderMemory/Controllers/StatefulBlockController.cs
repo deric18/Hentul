@@ -1,4 +1,4 @@
-﻿namespace SecondOrderMemory
+﻿namespace FirstOrderMemory
 {
     public class StatefulBlockController
     {

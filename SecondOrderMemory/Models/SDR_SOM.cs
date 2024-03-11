@@ -1,6 +1,6 @@
 ﻿using Common;
 
-namespace SecondOrderMemory.Models
+namespace FirstOrderMemory.Models
 {
     public class SDR_SOM : SDR
     {

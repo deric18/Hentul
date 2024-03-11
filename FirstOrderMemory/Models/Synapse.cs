@@ -1,6 +1,6 @@
-﻿using FirstOrderMemory.BehaviourManagers;
+﻿using ZeroOrderMemory.BehaviourManagers;
 
-namespace FirstOrderMemory.Models
+namespace ZeroOrderMemory.Models
 {
     public class Synapse
     {

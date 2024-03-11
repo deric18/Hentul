@@ -4,7 +4,7 @@
     using System.Runtime.InteropServices;
     using System.Configuration;
     using Common;
-    using SecondOrderMemory.Models;
+    using FirstOrderMemory.Models;
     using System.Diagnostics;
 
     public struct POINT
@@ -12,7 +12,6 @@
         public int X;
         public int Y;
     }
-
 
     public class ScreenGrabber
     {
@@ -23,8 +22,8 @@
 
         public int range;
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
-        public SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[,,] somBBM { get; private set; }
+        public ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[,,] somBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -36,17 +35,18 @@
             this.range = range;
             this.ColorMap = new Color[range, range];
 
-            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
-            somBBM = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst, range, range];
+            fomBBM = new ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
+            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst, range, range];
 
 
-            fomBBM[0] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-            fomBBM[1] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-            fomBBM[2] = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+            fomBBM[0] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+            fomBBM[1] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+            fomBBM[2] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
 
-            somBBM[0, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
-            somBBM[1, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
-            somBBM[2, 0, 0] = new SecondOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
+
+            somBBM[0, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
+            somBBM[1, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
+            somBBM[2, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
 
             Init();            
         }

@@ -1,7 +1,7 @@
-﻿using FirstOrderMemory.BehaviourManagers;
+﻿using ZeroOrderMemory.BehaviourManagers;
 using Common;
 
-namespace FirstOrderMemory.Models
+namespace ZeroOrderMemory.Models
 {
 
     /// <summary>

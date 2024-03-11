@@ -1,8 +1,8 @@
-﻿namespace SecondOrderMemoryUnitTest
+﻿namespace FirstOrderMemoryUnitTest
 {
     using Common;
-    using SecondOrderMemory.Models;
-    using SecondOrderMemory.BehaviourManagers;
+    using FirstOrderMemory.Models;
+    using FirstOrderMemory.BehaviourManagers;
 
     internal static class TestUtils
     {

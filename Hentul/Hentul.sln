@@ -5,17 +5,17 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hentul", "Hentul.csproj", "{B281292A-6869-4959-9AD2-C4DAF51295EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemory", "..\FirstOrderMemory\FirstOrderMemory.csproj", "{344E73DF-B17A-4033-BCF2-5347385A6707}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroOrderMemory", "..\FirstOrderMemory\ZeroOrderMemory.csproj", "{344E73DF-B17A-4033-BCF2-5347385A6707}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemoryUnitTest", "..\FirstOrderMemoryUnitTest\FirstOrderMemoryUnitTest.csproj", "{38ECDCB2-F5A2-4D24-8863-F23B6AD18392}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroOrderMemoryUnitTest", "..\FirstOrderMemoryUnitTest\ZeroOrderMemoryUnitTest.csproj", "{38ECDCB2-F5A2-4D24-8863-F23B6AD18392}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemory", "..\SecondOrderMemory\SecondOrderMemory.csproj", "{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemory", "..\SecondOrderMemory\FirstOrderMemory.csproj", "{F63BBBE7-6D3D-49F8-B189-28E9CDD2AA6A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemoryUnitTest", "..\SecondORderMemoryUnitTest\SecondOrderMemoryUnitTest.csproj", "{800DFB2C-A582-4716-8586-284C3EABC7C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemoryUnitTest", "..\SecondORderMemoryUnitTest\FirstOrderMemoryUnitTest.csproj", "{800DFB2C-A582-4716-8586-284C3EABC7C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{340383BA-32AD-421F-B20D-198ACBBB5C84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hentul.UT", "..\Hentul.UT\Hentul.UT.csproj", "{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hentul.UT", "..\Hentul.UT\Hentul.UT.csproj", "{42A6AB52-A825-4A80-8BB6-6A49E469F2FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

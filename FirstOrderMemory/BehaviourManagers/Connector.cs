@@ -1,4 +1,4 @@
-﻿namespace FirstOrderMemory.BehaviourManagers
+﻿namespace ZeroOrderMemory.BehaviourManagers
 {
     using System.Xml;
 
@@ -43,7 +43,7 @@
             else
             { 
             XmlDocument document = new XmlDocument();
-            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\FirstOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";           
+            string dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\ZeroOrderMemory\\\\Schema Docs\\\\ConnectorSchema.xml";           
 
 
             if (!File.Exists(dendriteDocumentPath))
@@ -160,7 +160,7 @@
             {
 
                 XmlDocument document = new XmlDocument();
-                string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+                string axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\ZeroOrderMemory\\Schema Docs\\AxonalSchema.xml";
 
                 if (!File.Exists(axonalDocumentPath))
                 {

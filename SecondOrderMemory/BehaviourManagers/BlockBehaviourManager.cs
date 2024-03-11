@@ -1,11 +1,11 @@
-﻿using SecondOrderMemory.Models;
+﻿using FirstOrderMemory.Models;
 using Common;
 using System.Xml;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System;
 
-namespace SecondOrderMemory.BehaviourManagers
+namespace FirstOrderMemory.BehaviourManagers
 {
 
     public class BlockBehaviourManager
@@ -24,6 +24,7 @@ namespace SecondOrderMemory.BehaviourManagers
         public List<Neuron> NeuronsFiringThisCycle { get; private set; }
 
         public List<Neuron> NeuronsFiringLastCycle { get; private set; }
+
 
         private List<Segment>? _predictedSegmentForThisCycle;
 
@@ -1039,11 +1040,11 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (devbox)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
             }
             else
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
             }
 
 
@@ -1188,11 +1189,11 @@ namespace SecondOrderMemory.BehaviourManagers
 
             if (devbox)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
+                axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
             }
             else
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\AxonalSchema.xml";
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
             }
 
             if (!File.Exists(axonalDocumentPath))

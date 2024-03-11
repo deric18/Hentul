@@ -1,6 +1,6 @@
-﻿namespace SecondOrderMemoryUnitTest
+﻿namespace FirstOrderMemoryUnitTest
 {
-    using SecondOrderMemory.Models;
+    using FirstOrderMemory.Models;
     using NUnit.Framework;
 
     [TestClass]
