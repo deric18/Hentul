@@ -1,7 +1,7 @@
-﻿using ZeroOrderMemory.BehaviourManagers;
+﻿using FirstOrderMemory.BehaviourManagers;
 using Common;
 
-namespace ZeroOrderMemory.Models
+namespace FirstOrderMemory.Models
 {
 
     /// <summary>
@@ -12,23 +12,40 @@ namespace ZeroOrderMemory.Models
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
         #region FLAGS
+
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
-        private const int DISTAL_CONNECTION_STRENGTH = 10;
+        private const int INITIAL_SYNAPTIC_CONNECTION_STRENGTH = 1;        
+        private const int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
+        private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
+        private const int APICAL_NEURONAL_FIRE_VALUE = 40;
+        private const int NMDA_NEURONAL_FIRE_VALUE = 100;        
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
+        private const uint PRUNE_THRESHOLD = 25;
+        private const uint DISTALNEURONPLASTICITY = 5;
+
         #endregion
 
-        public Position NeuronID { get; private set; }
+        private ulong redundantCounter = 0;
+
+        public Position_SOM NeuronID { get; private set; }
+
+        public NeuronType nType { get; private set; }
+
+        public Dictionary<string, char> TAContributors { get; private set; }
 
         public Dictionary<string, Synapse> AxonalList { get; private set; }
-        public Dictionary<string, Synapse> dendriticList { get; private set; }
+
+        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }        
 
         public List<Neuron> ConnectedNeurons { get; private set; }
+
         public List<Segment>? Segments { get; private set; } = null;
+
         public NeuronState CurrentState { get; private set; }
 
         public int flag { get; set; }
@@ -36,16 +53,23 @@ namespace ZeroOrderMemory.Models
         private List<string>? PreCycleContributingNeurons { get; set; } = null;
         public int Voltage { get; private set; }
 
-        public Neuron(Position neuronId)
+        public Neuron(Position_SOM neuronId, NeuronType nType = NeuronType.NORMAL)
         {
             NeuronID = neuronId;
+            this.nType = nType;
+            TAContributors = new Dictionary<string, char>();
             ConnectedNeurons = new List<Neuron>();
-            dendriticList = new Dictionary<string, Synapse>();
+            ProximoDistalDendriticList = new Dictionary<string, Synapse>();
             AxonalList = new Dictionary<string, Synapse>();
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
             flag = 0;
-        }        
+        }
+
+        public void ChangeCurrentStateTo(NeuronState state)
+        {
+            CurrentState = state;
+        }
 
         public void Fire()
         {
@@ -54,123 +78,66 @@ namespace ZeroOrderMemory.Models
             if (AxonalList == null || AxonalList?.Count == 0)
             {
                 Console.WriteLine("No Neurons are Connected to this Neuron : " + NeuronID.ToString());
-
-                throw new InvalidOperationException("Neuron Does not have any Axonal Connections to Fire!!!");
+                return;
             }
 
-            try
-            {
-                foreach(Synapse synapse in AxonalList.Values)
-                {
-                    BlockBehaviourManager.ConvertStringPosToNeuron(synapse.TargetNeuronId).ProcessSpikeFromNeuron(Position.ConvertStringToPosition(synapse.SourceNeuronId));
-                }
+            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE;
 
-                CurrentState = NeuronState.FIRING;
-
-                BlockBehaviourManager.GetBlockBehaviourManager().AddNeuronToCurrentFiringCycle(this);
-
-            }
-            catch (Exception e)
-            {
-                int breakpoint = 1;
-            }
-            return;
+            ChangeCurrentStateTo(NeuronState.FIRING);
         }
 
-        public void ProcessSpikeFromNeuron(Position callingNeuron)
+        public void ProcessVoltage(int voltage)
         {
-            //TODO : 
-            //Need to account for proximal spike vs distal spike vs NMDA Distal Spike Types.
+            Voltage += voltage;
 
-            uint multiplier = 1;
             CurrentState = NeuronState.PREDICTED;
-            BlockBehaviourManager.GetBlockBehaviourManager().AddPredictedNeuron(this, callingNeuron.ToString());
-            if(dendriticList.TryGetValue(callingNeuron.ToString(), out var synapse))
-            {
-                multiplier += synapse.GetStrength();
-            }
-
-            Voltage += PROXIMAL_VOLTAGE_SPIKE_VALUE;
-        }
-
-        public void ProcessSpikeFromSegment(Position callingSegment, DistalSegmentSpikeType spikeType)
-        {
-            Voltage += DISTAL_VOLTAGE_SPIKE_VALUE;
 
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }
 
 
-        //Gets called when this neuron contributed to the firing neuron making a correct prediction
-        //public void PramoteCorrectPredictionAxonal(Neuron correctlyPredictedNeuron)
-        //{
-        //    TOTALNUMBEROFCORRECTPREDICTIONS++;           
+        public string GetMyTemporalPartner()
+        {
+            string pos = ProximoDistalDendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.AxonalNeuronId;
 
-        //    if (AxonalList.Count == 0)
-        //    {
-        //        throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
-        //    }
+            if (!string.IsNullOrEmpty(pos))
+            {
+                return pos;
+            }
 
-        //    if (AxonalList.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out Synapse synapse))
-        //    {
-        //        if(synapse == null)
-        //        {
-        //            Console.WriteLine("PramoteCorrectPredictionAxonal: Trying to increment strength on a synapse object that was null!!!");
-        //            throw new InvalidOperationException("Not Supposed to happen!");
-        //        }
+            throw new InvalidOperationException("Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
+        }       
 
-        //        synapse.IncrementStrength();
-        //    }
-        //}
+        public string GetMyApicalPartner()
+        {
+            string pos = ProximoDistalDendriticList.Values?.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.AxonalNeuronId;
 
-        //Gets called when this neuron fired correctly and needs to boost the strength on the contributing neuron
-        public void PramoteCorrectPredictionDendronal(Neuron contributingNeuron)
+            if (!string.IsNullOrEmpty(pos))
+            {
+                return pos;
+            }
+
+            throw new InvalidOperationException();
+        }
+        
+
+        public void InitProximalConnectionForDendriticConnection(int i, int j, int k)
         {                        
-            if (dendriticList.Count == 0)
-            {
-                throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
-            }
-
-            if (dendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out Synapse synapse))
-            {
-                if (synapse == null)
-                {
-                    Console.WriteLine("PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
-                    throw new InvalidOperationException("Not Supposed to happen!");
-                }
-
-                synapse.IncrementStrength();
-            }
+            string key = Position_SOM.ConvertIKJtoString(i, j, k);
+            AddNewProximalDendriticConnection(key);
         }
 
-        public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
+        public void InitAxonalConnectionForConnector(int i, int j, int k)
         {
-            //Needs work
-            //Add it dictionary;
-            //Add it to ConnectedNeurons
-
-            string key = Position.ConvertIKJtoString(i, j, k);
-            var tuple = AddNewProximalDendriticConnection(key);
-            if (tuple.Item1 == false)
-            {
-                try
-                {
-                    throw new InvalidOperationException("Operation Did not Succedd As Connection Already  Exists!");
-                }
-                catch (Exception e)
-                {
-                    return false;
-                }                
-            }
-
-            return tuple.Item2;
+            string key = Position_SOM.ConvertIKJtoString(i, j, k);
+            AddNewAxonalConnection(key);
         }
 
-        public bool InitAxonalConnectionForConnector(int i, int j, int k)
-        {
-            string key = Position.ConvertIKJtoString(i, j, k);
+        public void PostCycleCleanup() => FlushVoltage();        
 
-            return AddNewAxonalConnection(key);
+        internal void CleanUpContributersList()
+        {
+            TAContributors.Clear();
         }
 
         private bool AddNewAxonalConnection(string key)
@@ -181,39 +148,32 @@ namespace ZeroOrderMemory.Models
                 if (key == "0-0-1")
                 {
                     int bp2 = 1;
-                }
-
-                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
+                }                
 
                 this.flag++;
 
-                if (neuronToAdd.NeuronID.Equals(NeuronID))
+                if (key.Equals(NeuronID))
                 {
                     throw new InvalidOperationException("Canot connect neuron to itself");
                 }
 
                 if(AxonalList == null || AxonalList.Count == 0)
                 {
-                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
-
-                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));                    
 
                     return true;
                 }
-                if (AxonalList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
+
+                if (AxonalList.TryGetValue(key, out var synapse))
                 {
-                    Console.WriteLine("FOM : AddNewAxonalConnection : Connection Already Added");
-
-                    synapse.IncrementStrength();
-
+                    Console.WriteLine("ERROR :: SOM :: AddNewAxonalConnection : Connection Already Added Counter : " + redundantCounter.ToString() , ++redundantCounter);
+                    
                     return false;
                 }
                 else
                 {
 
-                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
-
-                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));                    
 
                     return true;
                 }
@@ -227,158 +187,223 @@ namespace ZeroOrderMemory.Models
             return true;
         }
 
-
-        ///
-        private Tuple<bool,bool> AddNewProximalDendriticConnection(string key)        
+        private bool AddNewProximalDendriticConnection(string key)        
         {
-            //case 1: true, true -> All Worked out Good
-            //case 2: true, false -> Connection ALready Exists But return false so we can retry
-            //case 3: false, false -> Invalid Connection Data Sent , Should Never Happen !!! Debug immediately
-           
             try
             {
+
                 if (key == "0-0-1")
                 {
                     int bp2 = 1;
+                }                
+
+                if (key.Equals(NeuronID))
+                {
+                    throw new InvalidOperationException("Canot connect neuron to itself");
                 }
 
-                var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
-
-
-                if (neuronToAdd.NeuronID.Equals(NeuronID))
+                if (ProximoDistalDendriticList.TryGetValue(key, out var synapse))
                 {
-                    Console.WriteLine(NeuronID.ToString() + key);
+                    Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
+                    
+                    //Do Nothing;
 
-                    try
-                    {
-                        throw new InvalidOperationException("Cannot connect neuron to itself");
-                    }
-                    catch (Exception ex) 
-                    {                        
-                        return new Tuple<bool, bool>(false, false);
-                    }
-                }
-
-                if (dendriticList.TryGetValue(neuronToAdd.NeuronID.ToString(), out var synapse))
-                {
-                    Console.WriteLine("first: " + NeuronID.ToString() + " " + "Second : " + key);
-
-                    Console.WriteLine("FOMN : AddNewProximalDendritic :: Connection Already Added");                    
-
-                    return  new Tuple<bool, bool>(true, false);
+                    return false;
                 }
                 else
                 {
 
-                    dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, 0, PROXIMAL_CONNECTION_STRENGTH, ConnectionType.PRXOMALDENDRITETONEURON));
+                    ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
 
-                    var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
+                    
 
-                    ConnectedNeurons.Add(item);
-
-                    return new Tuple<bool, bool>(true, true);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
 
                 int bp = 1;
-                return new Tuple<bool, bool>(false, false);
-            }            
+            }
+
+            return true;
         }
 
-        public bool AddToDistalList(string key)
+        //Gets Called for Dendritic End of the Neuron
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ConnectionType? cType = null)
         {
-            var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
 
-            if (neuronToAdd.NeuronID.Equals(NeuronID))
+            if(cType == ConnectionType.APICAL)
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }            
+
+            if(cType.Equals(ConnectionType.TEMPRORAL))
+            {
+                bool breakpoint = false;
+                breakpoint = true;
+            }
+
+            if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
             }
 
-            if (dendriticList.TryGetValue(key, out var synapse))
+            //Only for Temporal and Apical Connections
+            if (cType != null)
             {
-                //Console.WriteLine("FOM : AddToDistalList :: Connection Already Added");                
+                if(cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
+                {
 
-                return false;
+                    if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
+                    {
+                        Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
+                        synapse1.IncrementHitCount();
+
+                        return true;
+
+                    }
+                    else
+                    {
+                        if (cType.Equals(ConnectionType.TEMPRORAL))
+                        {
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                        }
+                        else if (cType.Equals(ConnectionType.APICAL))
+                        {
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                        }                        
+
+                        return true;
+                    }
+                }
+                
+            }
+                        
+
+            if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
+            {
+                Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);                
+
+                return true;
             }
             else
             {
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
-                dendriticList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, DISTAL_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITETONEURON));
-
-                var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
-
-                ConnectedNeurons.Add(item);
+                Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
+                
+                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
+                {
+                    BlockBehaviourManager.totalDendronalConnections++;
+                }
 
                 return true;
             }
         }
 
-        public bool AddtoAxonalList(string key)
-        {
-            var neuronToAdd = BlockBehaviourManager.ConvertStringPosToNeuron(key);
+        //Gets called for the axonal end of the neuron
+        public bool AddtoAxonalList(string key, NeuronType ntype, ConnectionType connectionType)
+        {            
 
-            if (neuronToAdd.NeuronID.Equals(NeuronID))
+            if (key.Equals(NeuronID) && this.nType.Equals(ntype))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
             }
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-               //Console.WriteLine("FOM :: AddtoAxonalList : Connection Already Added");                
+                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);
 
-                return false;
+                //synapse.IncrementHitCount();
+
+                return true;
             }
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.GetBlockBehaviourManager().CycleNum, AXONAL_CONNECTION, ConnectionType.AXONTONEURON));
-
-                var item = BlockBehaviourManager.ConvertStringPosToNeuron(key);
-
-                ConnectedNeurons.Add(item);
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.CycleNum, AXONAL_CONNECTION, connectionType));                
 
                 return true;
             }
+        }
+        public int CompareTo(Neuron? other)
+        {
+            return this.Voltage > other.Voltage ? 10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? -1 : -1;
         }
 
         public bool Equals(Neuron? other)
         {
             return this.Voltage == other?.Voltage;
-        }
-
-        public int CompareTo(Neuron? other)
-        {
-            return this.Voltage > other.Voltage ? -10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? 10 : 11;
-        }
+        }        
 
         internal void FlushVoltage()
         {
+            //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
         }
 
-        internal void PruneCycleRefresh()
+        internal void Prune()
         {
-            if (dendriticList == null || dendriticList.Count == 0)
+
+            if (ProximoDistalDendriticList == null || ProximoDistalDendriticList.Count == 0)
             { return; }
 
+            List<string> removeList = null;
 
+            var distalDendriticList = ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON));
 
-            foreach (var kvp in dendriticList)
+            if (distalDendriticList.Count() != 0)
             {
-                // var neuron = 
+                foreach (var item in ProximoDistalDendriticList)
+                {
+
+                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ( (BlockBehaviourManager.CycleNum - Math.Max(item.Value.lastFiredCycle, item.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
+                    {
+                        if (removeList == null)
+                        {
+                            removeList = new List<string>();
+                        }
+
+                        removeList.Add(item.Key);
+                    }
+                }
+
+                if (removeList?.Count > 0)
+                {
+                    for (int i = 0; i < removeList.Count; i++)
+                    {
+                        ProximoDistalDendriticList.Remove(removeList[i]);
+
+                        BlockBehaviourManager.totalDendronalConnections--;
+                    }
+                }
             }
+        }
+
+        internal bool DidItContribute(Neuron temporalContributor)
+        {
+            return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
     }
 
     public enum ConnectionType
     {
         AXONTONEURON,
-        PRXOMALDENDRITETONEURON,
-        DISTALDENDRITETONEURON,
-        NMDATONEURON
+        PROXIMALDENDRITICNEURON,
+        DISTALDENDRITICNEURON,
+        NMDATONEURON,
+        TEMPRORAL,
+        APICAL
+    }
+
+    public enum NeuronType
+    {
+        APICAL,
+        TEMPORAL,
+        NORMAL
     }
 }

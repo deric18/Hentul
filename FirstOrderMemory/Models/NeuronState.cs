@@ -1,4 +1,4 @@
-﻿namespace ZeroOrderMemory.Models
+﻿namespace FirstOrderMemory.Models
 {
     public enum NeuronState
     {

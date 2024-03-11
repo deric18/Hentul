@@ -1,13 +1,14 @@
-﻿namespace FirstOrderMemory.Models
+﻿namespace ZeroOrderMemory.Models
 {
+    using Common;
     public class Segment
     {
         private const uint PRE_SYNAPTIC_STRENGTH = 1;
         private const uint MAX_POST_SYNAPTIC_STRENGTH = 10;
-        public Position_SOM NeuronId { get; private set; }
+        public Position NeuronId { get; private set; }
         public Dictionary<string, uint>? ConnectedNeurons { get; private set; } = null;
 
-        public Segment(Position_SOM NeuronID)
+        public Segment(Position NeuronID)
         {
             NeuronId = NeuronID;
         }
@@ -39,7 +40,7 @@
 
         public void Grow()
         {
-            throw new NotImplementedException();    
+
         }
 
     }

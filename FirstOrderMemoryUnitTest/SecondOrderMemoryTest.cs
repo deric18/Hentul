@@ -82,11 +82,10 @@ namespace FirstOrderMemoryUnitTest
                     {
                         Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
 
-                        if (clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count == 4)
+                        if (clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count == 1)
                         {
                             int bp = 1;
                         }
-
 
                         Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
                         Assert.AreEqual(2, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);

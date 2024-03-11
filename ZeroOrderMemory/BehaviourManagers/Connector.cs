@@ -187,6 +187,11 @@
                     int y = Convert.ToInt32(connection.Attributes[1].Value);
                     int z = Convert.ToInt32(connection.Attributes[2].Value);
 
+                    if(x == 5 && y == 7 && z ==5)
+                    {
+                        int breakpoint = 1;
+                    }
+
                     XmlNodeList axonList = connection.ChildNodes;
 
                     foreach (XmlNode axon in axonList)
@@ -208,7 +213,6 @@
                         catch (Exception e)
                         {
                             int bp = 1;
-
                         }
                     }
                 }
