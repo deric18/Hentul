@@ -151,7 +151,6 @@ namespace FirstOrderMemory.BehaviourManagers
 
         public void Init(int x = -1, int y = -1)
         {
-
             ReadDendriticSchema(x, y);
 
             ReadAxonalSchema(x, y);
@@ -159,7 +158,6 @@ namespace FirstOrderMemory.BehaviourManagers
             GenerateTemporalLines();
 
             GenerateApicalLines();
-
         }
 
         public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)

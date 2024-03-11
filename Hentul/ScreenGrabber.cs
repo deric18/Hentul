@@ -34,9 +34,11 @@
             this.range = range;
             this.ColorMap = new Color[range, range];
 
-            somBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
-            somBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
-            somBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
+            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range];
+
+            somBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1, 0, 0);
+            somBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2, 0, 0);
+            somBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3, 0, 0);
 
             Init();
         }
