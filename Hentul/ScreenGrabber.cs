@@ -22,8 +22,7 @@
 
         public int range;
 
-        public ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[,,] somBBM { get; private set; }
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] somBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -35,21 +34,33 @@
             this.range = range;
             this.ColorMap = new Color[range, range];
 
-            fomBBM = new ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
-            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst, range, range];
+            somBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
+            somBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
+            somBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
 
-
-            fomBBM[0] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-            fomBBM[1] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-            fomBBM[2] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-
-
-            somBBM[0, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
-            somBBM[1, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
-            somBBM[2, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
-
-            Init();            
+            Init();
         }
+
+        //public ScreenGrabber(int range, bool DontUse)
+        //{
+        //    this.range = range;
+        //    this.ColorMap = new Color[range, range];
+
+        //    fomBBM = new ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
+        //    somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
+
+
+        //    fomBBM[0] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+        //    fomBBM[1] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+        //    fomBBM[2] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
+
+
+        //    somBBM[0, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
+        //    somBBM[1, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
+        //    somBBM[2, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
+
+        //    Init();            
+        //}
 
         private void Init()
         {
@@ -59,13 +70,9 @@
 
             stopWatch.Start();
 
-            fomBBM[0].Init();
-            fomBBM[1].Init();
-            fomBBM[2].Init();
-
-            somBBM[0, 0, 0].Init(0,0);
-            somBBM[1, 0, 0].Init(0,0);
-            somBBM[2, 0, 0].Init(0,0);
+            somBBM[0].Init(0, 0);
+            somBBM[1].Init(1, 0);
+            somBBM[2].Init(2, 0);
 
             stopWatch.Stop();
 
@@ -78,20 +85,12 @@
 
             for (int i = 0; i < 3; i++)
             {
-                for (int j = 0; j < range; j++)
-                {
-                    for (int k = 0; k < range; k++)
-                    {
-                        if (!((i==0 || i== 1 || i== 2) && j == 0 && k == 0))
-                        {
-                            somBBM[i, j, k] = somBBM[0, 0, 0].CloneBBM(0, 0, 0);
-                            somBBM[i, j, k] = somBBM[1, 0, 0].CloneBBM(1, 0, 0);
-                            somBBM[i, j, k] = somBBM[2, 0, 0].CloneBBM(2, 0, 0);
-                        }
+                somBBM[i] = somBBM[0].CloneBBM(0, 0, 0);
+                somBBM[i] = somBBM[1].CloneBBM(1, 0, 0);
+                somBBM[i] = somBBM[2].CloneBBM(2, 0, 0);
 
-                        Console.WriteLine("Finished Initting Instance Number I : " + i.ToString() + " J: " + j.ToString() + " K: " + k.ToString());
-                    }
-                }
+
+                Console.WriteLine("Finished Initting Instance Number I : " + i.ToString());
             }
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
@@ -107,9 +106,9 @@
 
             Point = this.GetCurrentPointerPosition();
 
-            Console.CursorVisible = true;            
+            Console.CursorVisible = true;
 
-            Console.WriteLine("Grabbing Screen Pixels...");            
+            Console.WriteLine("Grabbing Screen Pixels...");
 
             int x1 = Point.X - range < 0 ? 0 : Point.X - range;
             int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
@@ -128,7 +127,7 @@
                     if (ColorMap[0, 0].IsEmpty)
                     {
                         throw new InvalidOperationException();
-                    }                    
+                    }
 
                     byte R = ColorMap[i, j].R;
                     byte G = ColorMap[i, j].G;
@@ -148,39 +147,34 @@
 
                     Console.WriteLine("Finsihed Encoding!!!");
 
-                    SDR sdr1 = encoder[0].GetDenseSDR();
-                    SDR sdr2 = encoder[1].GetDenseSDR();
-                    SDR sdr3 = encoder[2].GetDenseSDR();
+                    SDR_SOM sdr1 = encoder[0].GetDenseSDR();
+                    SDR_SOM sdr2 = encoder[1].GetDenseSDR();
+                    SDR_SOM sdr3 = encoder[2].GetDenseSDR();
 
                     Console.WriteLine("Begining First Order Memory Firings");
 
-                    fomBBM[0].Fire(sdr1);
-                    fomBBM[1].Fire(sdr2);
-                    fomBBM[2].Fire(sdr3);
+                    somBBM[0].Fire(sdr1);
+                    somBBM[1].Fire(sdr2);
+                    somBBM[2].Fire(sdr3);
 
                     Console.WriteLine("Finsihed First Order Memory Firings");
 
-                    SDR[] fomSdrArr = new SDR[3];
+                    SDR_SOM[] somSdrArr = new SDR_SOM[3];
 
-                    fomSdrArr[0] = fomBBM[0].GetSDR();
-                    fomSdrArr[1] = fomBBM[1].GetSDR();
-                    fomSdrArr[2] = fomBBM[2].GetSDR();
+                    somSdrArr[0] = somBBM[0].GetPredictedSDR();
+                    somSdrArr[1] = somBBM[1].GetPredictedSDR();
+                    somSdrArr[2] = somBBM[2].GetPredictedSDR();
 
-                    SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr1.ActiveBits), iType.SPATIAL);
-                    SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr2.ActiveBits), iType.SPATIAL);
-                    SDR_SOM somSdr3 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, ConvertFomToSomPositions(sdr3.ActiveBits), iType.SPATIAL);
+                    SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr1.ActiveBits, iType.SPATIAL);
+                    SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr2.ActiveBits, iType.SPATIAL);
+                    SDR_SOM somSdr3 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr3.ActiveBits, iType.SPATIAL);
 
                     Console.WriteLine("Prepping Temporal Location SDRs for SOM");
 
                     var temporalSDR = GenerateTemporalSDR();
 
-
                     Console.WriteLine("Begining SOM Firings :");
-
-                    somBBM[0, i, j].Fire(somSdr1);
-                    somBBM[1, i, j].Fire(somSdr2);
-                    somBBM[2, i, j].Fire(somSdr2);
-
+                    
                     Console.WriteLine("Finished Second Order Memory Firings");
                 }
             }

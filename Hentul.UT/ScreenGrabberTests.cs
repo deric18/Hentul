@@ -11,7 +11,7 @@ namespace Hentul.UT
         [SetUp]
         public void Setup()
         {
-           rand = new Random();
+            rand = new Random();
         }
 
         [Test]
@@ -21,25 +21,20 @@ namespace Hentul.UT
 
             sg = new ScreenGrabber(count);
 
-            for( int i=0; i< count; i++ )
+            for (int i = 0; i < count; i++)
             {
-                for(int j=0;j< count; j++ )
-                {
-                    for(int k=0; k< count; k++ )
-                    {
-                        Assert.That(sg.somBBM[i, j, k].ApicalLineArray.Length, Is.EqualTo(100));
 
-                        Assert.AreEqual(4, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.Count);
+                Assert.That(sg.somBBM[i].ApicalLineArray.Length, Is.EqualTo(100));
 
-                        Assert.AreEqual(2, sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
+                Assert.AreEqual(4, sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.Count);
 
-                        Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.ElementAt(k));
+                Assert.AreEqual(2, sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
 
-                        Assert.IsNotNull(sg.somBBM[i, j, k].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(k));
+                Assert.IsNotNull(sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.ElementAt(k));
 
-                    }
-                }                
-            }            
+                Assert.IsNotNull(sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(k));
+
+            }
         }
     }
 }
