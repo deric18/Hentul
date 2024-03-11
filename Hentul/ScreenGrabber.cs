@@ -78,20 +78,7 @@
 
             Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
 
-            //Console.ReadKey();
-
-            Console.WriteLine("Initing Rest of the instances : ");
-
-
-            for (int i = 0; i < 3; i++)
-            {
-                somBBM[i] = somBBM[0].CloneBBM(0, 0, 0);
-                somBBM[i] = somBBM[1].CloneBBM(1, 0, 0);
-                somBBM[i] = somBBM[2].CloneBBM(2, 0, 0);
-
-
-                Console.WriteLine("Finished Initting Instance Number I : " + i.ToString());
-            }
+            //Console.ReadKey();           
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
         }
