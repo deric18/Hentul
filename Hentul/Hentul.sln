@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemoryUnitTest", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOrderMemory", "..\FirstOrderMemory\FirstOrderMemory.csproj", "{B5E49C86-627C-4E8F-B987-73287925B722}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemory", "..\SecondOrderMemory\SecondOrderMemory.csproj", "{CF24668E-CC27-49B7-96F1-26F4B4143234}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{B5E49C86-627C-4E8F-B987-73287925B722}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5E49C86-627C-4E8F-B987-73287925B722}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5E49C86-627C-4E8F-B987-73287925B722}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF24668E-CC27-49B7-96F1-26F4B4143234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF24668E-CC27-49B7-96F1-26F4B4143234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF24668E-CC27-49B7-96F1-26F4B4143234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF24668E-CC27-49B7-96F1-26F4B4143234}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
