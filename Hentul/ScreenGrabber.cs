@@ -25,6 +25,8 @@
 
         public int NumBuckets { get; private set; }
 
+        public int BuketColRowLength { get; private set; }
+
         public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] somBBM { get; private set; }
@@ -36,11 +38,18 @@
 
         public ScreenGrabber(int numPixels)
         {
-            //Todo : Project shape data of the input image to one region and project colour data of the image to another region.
+            //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
             NumPixels = numPixels;
 
-            NumBuckets = ((NumPixels * NumPixels) / ByteSize);            
+            BuketColRowLength = 5;
+
+            if (NumPixels % BuketColRowLength == 0)
+            {
+                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ NumPixels.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
+            }
+
+            NumBuckets = ((NumPixels * NumPixels) /  ( BuketColRowLength * BuketColRowLength ));           
 
             BucketToData = new Dictionary<int, List<Position_SOM>>();
 
@@ -224,7 +233,7 @@
         private void ProcessColorMap(int x1, int y1, int x2, int y2)
         {
 
-            int bucket = 0;
+            int bucket = 0;            
 
             for (int i = x1, k = 0; i < x2 && k < NumPixels; i++, k++)
             {
@@ -235,24 +244,24 @@
                     Color color = GetColorAt(i, j);
 
                     if(color.A > 0.5)
-                    {
-                       // bucket = 
-                    }                    
+                    {                         
+                        bucket = ( ( j ) / BuketColRowLength);
 
-                    
+                        Position_SOM newPosition = new Position_SOM(i, j);
+
+                        if(BucketToData.TryGetValue(bucket, out var data))
+                        {
+                            data.Add(newPosition);
+                        }
+                        else
+                        {
+                            BucketToData.Add(bucket, new List<Position_SOM> () { newPosition });
+                        }
+                    }
                     //Console.Write(color.ToString());
                 }
-
                 //Console.WriteLine();
             }
-        }
-
-        private int ComputeBucket(int rowIndex, int columnIndex)
-        {
-
-
-
-            return 1;
         }
 
         private void PopulateDataBytes(bool[,] barr)
