@@ -180,7 +180,7 @@ namespace FirstOrderMemory.Models
             }
             catch (Exception ex)
             {
-
+                throw;
                 int bp = 1;
             }
 
@@ -222,7 +222,7 @@ namespace FirstOrderMemory.Models
             }
             catch (Exception ex)
             {
-
+                throw;
                 int bp = 1;
             }
 

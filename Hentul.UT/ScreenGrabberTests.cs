@@ -1,7 +1,8 @@
 namespace Hentul.UT
 {
     using Hentul;
-    
+    using Moq;
+
     public class ScreenGrabberTest
     {
         ScreenGrabber sg;
@@ -14,9 +15,9 @@ namespace Hentul.UT
         }
 
         [Test]
-        public void MultipleInstanceTest()
+        public void MultipleInstanceTestFOM()
         {
-            int count = 3;
+            int count = 50;
 
             sg = new ScreenGrabber(count);           
 
@@ -147,30 +148,10 @@ namespace Hentul.UT
                 { 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 },
             };
 
-            int[,] newints = new int[100,100];
+           
 
-            int BucketSize = 20;
-            int BuketColRowLength = 5;            
-
-            for (int i = 0; i < 100; i++)
-            {
-                for (int j = 0; j < 100; j++)
-                {
-                    newints[i, j] = i + j;
-                }
-            }
-
-            int[,] BukcetPartions = new int[100,100];
-
-            for (int i = 0; i < 100; i++)
-            {
-                for (int j = 0; j < 100; j++)
-                {                    
-                    BukcetPartions[i, j] = (((j) / BuketColRowLength)); //+ ( Math. ( i + j ) / BucketSize ) );
-                }
-            }
-
-            int breakpoint = 1;
+            Mock<ScreenGrabber> mock = new Mock<ScreenGrabber> ();
+            
 
         }
     }

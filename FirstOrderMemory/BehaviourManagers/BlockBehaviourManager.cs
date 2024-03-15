@@ -142,7 +142,7 @@
             {
                 for (int j = 0; j < numColumns; j++)
                 {
-                    Columns[i, j] = new Column(i, j, 4);
+                    Columns[i, j] = new Column(i, j, numColumns);
                 }
             }
         }
@@ -180,7 +180,7 @@
 
                 Console.WriteLine(ex.ToString());
 
-                int breakpoint = 1;
+                throw;                
             }
         }
 
@@ -213,6 +213,8 @@
             {
 
                 Console.WriteLine(ex.ToString());
+
+                throw;
 
                 int breakpoint = 1;
             }
@@ -1085,6 +1087,7 @@
                     }
                     catch (Exception e)
                     {
+                        throw;
                         int breakpoint = 1;
                     }
 

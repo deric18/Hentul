@@ -49,8 +49,8 @@
                 bbManager.Fire(item);
 
                 numCount++;
-            }
-            
+            }            
+
         }
 
         public void DetectorTest2()

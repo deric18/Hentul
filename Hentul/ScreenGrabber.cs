@@ -44,7 +44,7 @@
 
             BuketColRowLength = 5;
 
-            if (NumPixels % BuketColRowLength == 0)
+            if ( ((float)( NumPixels * NumPixels ) / ( BuketColRowLength * BuketColRowLength ) % 1 )!= 0)
             {
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ NumPixels.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
             }
@@ -61,38 +61,17 @@
             }
 
             Init();
-        }
-
-        //public ScreenGrabber(int range, bool DontUse)
-        //{
-        //    this.range = range;
-        //    this.ColorMap = new Color[range, range];
-
-        //    fomBBM = new ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
-        //    somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[PixelConst];
-
-
-        //    fomBBM[0] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-        //    fomBBM[1] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-        //    fomBBM[2] = ZeroOrderMemory.BehaviourManagers.BlockBehaviourManager.GetBlockBehaviourManager(100, 1);
-
-
-        //    somBBM[0, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(0, 0, 0, 10);
-        //    somBBM[1, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(1, 0, 0, 10);
-        //    somBBM[2, 0, 0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(2, 0, 0, 10);
-
-        //    Init();            
-        //}
+        }       
 
         private void Init()
         {
             Stopwatch stopWatch = new Stopwatch();
 
-            Console.WriteLine("Starting Initialization  of SOM objects : ");
+            Console.WriteLine("Starting Initialization  of FOM objects : ");
 
             stopWatch.Start();
 
-            for (int i = 0; i < NumPixels * NumPixels; i++)
+            for (int i = 0; i < NumBuckets; i++)
             {
                 fomBBM[i].Init(i);                
             }
@@ -103,14 +82,13 @@
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
 
-            //Console.ReadKey();                       
+            Console.WriteLine("Total Pixels being collected for a range of " + NumPixels.ToString() + " \nTotal Number of Pixels :", (NumPixels * NumPixels * 4).ToString(), "\nTotal BBMs Created :", NumBuckets.ToString());
+            
         }
 
         public void Grab()
         {
-            //send Image for Processing               
-
-            Console.WriteLine("Grabbing cursor Position");
+            //send Image for Processing                           
 
             Console.CursorVisible = false;
 
@@ -128,31 +106,66 @@
             this.ProcessColorMap(x1, y1, x2, y2);
         }
 
+        public void ProcessColorMap(int x1, int y1, int x2, int y2)
+        {
+
+            int bucket = 0;
+
+            for (int i = x1, k = 0; i < x2 && k < NumPixels; i++, k++)
+            {
+                //Console.WriteLine("Row " + i);
+
+                for (int j = y1, l = 0; j < y2 && l < NumPixels; j++, l++)
+                {
+                    Color color = GetColorAt(i, j);
+
+                    if (color.A > 0.5)
+                    {
+                        bucket = ((j) / BuketColRowLength);
+
+                        Position_SOM newPosition = new Position_SOM(i, j);
+
+                        if (BucketToData.TryGetValue(bucket, out var data))
+                        {
+                            data.Add(newPosition);
+                        }
+                        else
+                        {
+                            BucketToData.Add(bucket, new List<Position_SOM>() { newPosition });
+                        }
+                    }
+
+                    //Console.Write(color.ToString());
+                }
+                //Console.WriteLine();
+            }
+        }
+
         public void ProcessPixelData()
         {
             //Need to bucketize the screen space to buckets as per bucket size.
             //Lock Buckets to there own Location Coordinates
             //Triage and trigger each bucket to its own Block with its Location Coordinates. 
 
-            SDR_SOM spatialPattern, temporalPattern;
+            SDR_SOM spatialPattern, temporalPattern;            
 
             foreach(var kvp in BucketToData)
             {
                 spatialPattern = new SDR_SOM(10, 10, kvp.Value, iType.SPATIAL);
 
-                //Todo : Generate Location Coordinates through grid cell based on Pixel location
+                temporalPattern = new SDR_SOM(10, 10, new List<Position_SOM>() { kvp.Value[0] }, iType.TEMPORAL);
+
+                //Todo: Generate Location Coordinates through grid cell based on Pixel location
                 //temporalPattern
 
+                fomBBM[kvp.Key].Fire(temporalPattern);
+
                 fomBBM[kvp.Key].Fire(spatialPattern);
-            }
-
-            //for( int i = 0; i < NumBuckets; i++)
-            //{
                 
-            //}
-
+            }
         }
 
+      
 
         public Tuple<SDR, SDR> GenerateTemporalSDR()
         {
@@ -204,48 +217,14 @@
 
         #region PRIVATE METHODS        
 
-        private static Color GetColorAt(int x, int y)
+        public static Color GetColorAt(int x, int y)
         {
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
             int a = (int)GetPixel(dc, x, y);
             ReleaseDC(desk, dc);
             return Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
-        }
-
-        private void ProcessColorMap(int x1, int y1, int x2, int y2)
-        {
-
-            int bucket = 0;            
-
-            for (int i = x1, k = 0; i < x2 && k < NumPixels; i++, k++)
-            {
-                //Console.WriteLine("Row " + i);
-
-                for (int j = y1, l = 0; j < y2 && l < NumPixels; j++, l++)
-                {
-                    Color color = GetColorAt(i, j);
-
-                    if(color.A > 0.5)
-                    {                         
-                        bucket = ( ( j ) / BuketColRowLength);
-
-                        Position_SOM newPosition = new Position_SOM(i, j);
-
-                        if(BucketToData.TryGetValue(bucket, out var data))
-                        {
-                            data.Add(newPosition);
-                        }
-                        else
-                        {
-                            BucketToData.Add(bucket, new List<Position_SOM> () { newPosition });
-                        }
-                    }
-                    //Console.Write(color.ToString());
-                }
-                //Console.WriteLine();
-            }
-        }
+        }       
 
         private void PopulateDataBytes(bool[,] barr)
         {
@@ -256,9 +235,9 @@
                 throw new InvalidOperationException("Bool Array Value should always be equal to byte Size for conversion, Check you SHitty Code! DumbFuck!!!!");
             }
 
-            for (int i = 0; i < barr.GetUpperBound(1); i++)
+            for (int i = 0; i < barr.GetUpperBound(0); i++)
             {
-                for (int j = 0; j < barr.GetUpperBound(2); j++)
+                for (int j = 0; j < barr.GetUpperBound(1); j++)
                 {
                     if (barr[i, j])
                     {

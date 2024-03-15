@@ -2,7 +2,7 @@
 
 Console.WriteLine("Initializing ...");
 
-ScreenGrabber screenGrabber = new ScreenGrabber(10);
+ScreenGrabber screenGrabber = new ScreenGrabber(100);
 
 Console.WriteLine("System Initialized Finally! Press any Key to start Neural Engine :");
 
