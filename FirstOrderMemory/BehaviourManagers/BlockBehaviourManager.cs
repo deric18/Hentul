@@ -142,7 +142,7 @@
             {
                 for (int j = 0; j < numColumns; j++)
                 {
-                    Columns[i, j] = new Column(i, j, numColumns);
+                    Columns[i, j] = new Column(i, j, 4);
                 }
             }
         }

@@ -7,25 +7,15 @@
     using FirstOrderMemory.Models;
     using System.Diagnostics;
 
-    public struct POINT
-    {
-        public int X;
-        public int Y;
-    }
 
-    public class ScreenGrabber
+    public class ScreenGrabberForColor
     {
-        public bool[,] bitMap { get; private set; }
-        
+        public Color[,] ColorMap { get; private set; }
         public POINT Point { get; set; }
 
-        private const int ByteSize = 8;
+        private const int PixelConst = 3;
 
-        public int NumPixels { get; private set; }
-
-        public int NumBuckets { get; private set; }
-
-        public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
+        public int range;
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] somBBM { get; private set; }
 
@@ -34,22 +24,18 @@
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        public ScreenGrabber(int numPixels)
+        public ScreenGrabberForColor(int range)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.
 
-            NumPixels = numPixels;
+            this.range = range;
+            this.ColorMap = new Color[range, range];
 
-            NumBuckets = ((NumPixels * NumPixels) / ByteSize);            
+            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range];
 
-            BucketToData = new Dictionary<int, List<Position_SOM>>();
-
-            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumPixels];
-
-            for(int i = 0; i < NumPixels * NumPixels; i++)
-            {
-                somBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, i, 0, 0);
-            }
+            somBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1, 0, 0);
+            somBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2, 0, 0);
+            somBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3, 0, 0);
 
             Init();
         }
@@ -79,22 +65,21 @@
         {
             Stopwatch stopWatch = new Stopwatch();
 
-            Console.WriteLine("Starting Initialization  of SOM objects : ");
+            Console.WriteLine("Starting Initialization  of 3 FOM and SOM objects for 1 Pixel R G B Values : ");
 
             stopWatch.Start();
 
-            for (int i = 0; i < NumPixels * NumPixels; i++)
-            {
-                somBBM[i].Init(i);                
-            }
+            somBBM[0].Init(0, 0);
+            somBBM[1].Init(1, 0);
+            somBBM[2].Init(2, 0);
 
             stopWatch.Stop();
 
             Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
 
-            Console.WriteLine("Finished Initting of all Instances, System Ready!");
+            //Console.ReadKey();           
 
-            //Console.ReadKey();                       
+            Console.WriteLine("Finished Initting of all Instances, System Ready!");
         }
 
         public void Grab()
@@ -111,51 +96,71 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - NumPixels < 0 ? 0 : Point.X - NumPixels;
-            int y1 = Point.Y - NumPixels < 0 ? 0 : Point.Y - NumPixels;
-            int x2 = Math.Abs(Point.X + NumPixels);
-            int y2 = Math.Abs(Point.Y + NumPixels);
+            int x1 = Point.X - range < 0 ? 0 : Point.X - range;
+            int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
+            int x2 = Math.Abs(Point.X + range);
+            int y2 = Math.Abs(Point.Y + range);
 
-            this.ProcessColorMap(x1, y1, x2, y2);
+            this.PrintColorMap(x1, y1, x2, y2);
         }
 
         public void ProcessPixelData()
         {
-            //Need to bucketize the screen space to buckets as per bucket size.
-            //Lock Buckets to there own Location Coordinates
-            //Triage and trigger each bucket to its own Block with its Location Coordinates. 
-
-            for (int i = 0; i < NumPixels; i++)
+            for (int i = 0; i < range; i++)
             {
-                for (int j = 0; j < NumPixels; j++)
-                {                                                            
+                for (int j = 0; j < range; j++)
+                {
+                    if (ColorMap[0, 0].IsEmpty)
+                    {
+                        throw new InvalidOperationException();
+                    }
 
-                    ByteEncoder encoder = new ByteEncoder(100, 8);                                        
+                    byte R = ColorMap[i, j].R;
+                    byte G = ColorMap[i, j].G;
+                    byte B = ColorMap[i, j].B;
+
+                    ByteEncoder[] encoder = new ByteEncoder[3];
+
+                    encoder[0] = new ByteEncoder(100, 8);
+                    encoder[1] = new ByteEncoder(100, 8);
+                    encoder[2] = new ByteEncoder(100, 8);
 
                     Console.WriteLine("Begining Encoding");
-                                       
+
+                    encoder[0].Encode(R);
+                    encoder[1].Encode(G);
+                    encoder[2].Encode(B);
+
                     Console.WriteLine("Finsihed Encoding!!!");
 
-                    SDR_SOM sdr1 = encoder.GetSparseSDR();
+                    SDR_SOM sdr1 = encoder[0].GetDenseSDR();
+                    SDR_SOM sdr2 = encoder[1].GetDenseSDR();
+                    SDR_SOM sdr3 = encoder[2].GetDenseSDR();
 
                     Console.WriteLine("Begining First Order Memory Firings");
 
-                    somBBM[0].Fire(sdr1);                    
+                    somBBM[0].Fire(sdr1);
+                    somBBM[1].Fire(sdr2);
+                    somBBM[2].Fire(sdr3);
 
                     Console.WriteLine("Finsihed First Order Memory Firings");
 
-                    SDR_SOM somSdrArr = new SDR_SOM(10, 10, new List<Position_SOM>() { });
+                    SDR_SOM[] somSdrArr = new SDR_SOM[3];
 
-                    somSdrArr = somBBM[ 0].GetPredictedSDR();                    
+                    somSdrArr[0] = somBBM[0].GetPredictedSDR();
+                    somSdrArr[1] = somBBM[1].GetPredictedSDR();
+                    somSdrArr[2] = somBBM[2].GetPredictedSDR();
 
                     SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr1.ActiveBits, iType.SPATIAL);
-                    
+                    SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr2.ActiveBits, iType.SPATIAL);
+                    SDR_SOM somSdr3 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr3.ActiveBits, iType.SPATIAL);
+
                     Console.WriteLine("Prepping Temporal Location SDRs for SOM");
 
                     var temporalSDR = GenerateTemporalSDR();
 
                     Console.WriteLine("Begining SOM Firings :");
-                    
+
                     Console.WriteLine("Finished Second Order Memory Firings");
                 }
             }
@@ -221,66 +226,21 @@
             return Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
         }
 
-        private void ProcessColorMap(int x1, int y1, int x2, int y2)
+        private void PrintColorMap(int x1, int y1, int x2, int y2)
         {
-
-            int bucket = 0;
-
-            for (int i = x1, k = 0; i < x2 && k < NumPixels; i++, k++)
+            for (int i = x1, k = 0; i < x2 && k < range; i++, k++)
             {
                 //Console.WriteLine("Row " + i);
 
-                for (int j = y1, l = 0; j < y2 && l < NumPixels; j++, l++)
+                for (int j = y1, l = 0; j < y2 && l < range; j++, l++)
                 {
                     Color color = GetColorAt(i, j);
+                    this.ColorMap[k, l] = color;
 
-                    if(color.A > 0.5)
-                    {
-                       // bucket = 
-                    }                    
-
-                    
                     //Console.Write(color.ToString());
                 }
 
                 //Console.WriteLine();
-            }
-        }
-
-        private int ComputeBucket(int rowIndex, int columnIndex)
-        {
-
-
-
-            return 1;
-        }
-
-        private void PopulateDataBytes(bool[,] barr)
-        {
-            string toReturn = String.Empty;
-
-            if (barr.GetUpperBound(2) != 8)
-            {
-                throw new InvalidOperationException("Bool Array Value should always be equal to byte Size for conversion, Check you SHitty Code! DumbFuck!!!!");
-            }
-
-            for (int i = 0; i < barr.GetUpperBound(1); i++)
-            {
-                for (int j = 0; j < barr.GetUpperBound(2); j++)
-                {
-                    if (barr[i, j])
-                    {
-                        toReturn.Append('1');
-                    }
-                    else
-                    {
-                        toReturn.Append('0');
-                    }
-
-                }
-
-                //Data[i] = Byte.Parse(toReturn);
-                toReturn = string.Empty;
             }
         }
 
