@@ -23,15 +23,15 @@ namespace Hentul.UT
             for (int i = 0; i < count; i++)
             {
 
-                Assert.That(sg.somBBM[i].ApicalLineArray.Length, Is.EqualTo(100));
+                Assert.That(sg.fomBBM[i].ApicalLineArray.Length, Is.EqualTo(100));
 
-                Assert.AreEqual(4, sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.Count);
+                Assert.AreEqual(4, sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.Count);
 
-                Assert.AreEqual(2, sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
+                Assert.AreEqual(2, sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
 
-                Assert.IsNotNull(sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.ElementAt(rand.Next(0, 4)));
+                Assert.IsNotNull(sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.ElementAt(rand.Next(0, 4)));
 
-                Assert.IsNotNull(sg.somBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(rand.Next(0, 2)));
+                Assert.IsNotNull(sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(rand.Next(0, 2)));
 
             }
         }

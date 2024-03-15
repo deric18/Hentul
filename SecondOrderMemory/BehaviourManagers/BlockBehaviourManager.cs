@@ -325,6 +325,14 @@
             IsBurstOnly = false;
         }
 
+
+        #region FIRE -> WIRE -> CLEANUP -> REPEAT
+
+
+
+        //Has Decision Been Made , Any Particular Train Spiking Neurons detected yet ?
+        //Goal of this layer is to be on the lookout for temporal and spatial pattern till we generate a Spike Train Neuon thats pretty sure it has detected something.
+
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
@@ -643,6 +651,8 @@
                 IsApical = false;
             }
         }
+
+        #endregion
 
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {

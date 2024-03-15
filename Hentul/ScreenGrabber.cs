@@ -29,7 +29,7 @@
 
         public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] somBBM { get; private set; }
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -49,15 +49,15 @@
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ NumPixels.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
             }
 
-            NumBuckets = ((NumPixels * NumPixels) /  ( BuketColRowLength * BuketColRowLength ));           
+            NumBuckets = ( NumPixels * NumPixels ) /  ( BuketColRowLength * BuketColRowLength );           
 
             BucketToData = new Dictionary<int, List<Position_SOM>>();
 
-            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumPixels];
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBuckets];
 
-            for(int i = 0; i < NumPixels * NumPixels; i++)
+            for(int i = 0; i < NumBuckets; i++)
             {
-                somBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, i, 0, 0);
+                fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, i, 0, 0);
             }
 
             Init();
@@ -94,7 +94,7 @@
 
             for (int i = 0; i < NumPixels * NumPixels; i++)
             {
-                somBBM[i].Init(i);                
+                fomBBM[i].Init(i);                
             }
 
             stopWatch.Stop();
@@ -134,40 +134,23 @@
             //Lock Buckets to there own Location Coordinates
             //Triage and trigger each bucket to its own Block with its Location Coordinates. 
 
-            for (int i = 0; i < NumPixels; i++)
+            SDR_SOM spatialPattern, temporalPattern;
+
+            foreach(var kvp in BucketToData)
             {
-                for (int j = 0; j < NumPixels; j++)
-                {                                                            
+                spatialPattern = new SDR_SOM(10, 10, kvp.Value, iType.SPATIAL);
 
-                    ByteEncoder encoder = new ByteEncoder(100, 8);                                        
+                //Todo : Generate Location Coordinates through grid cell based on Pixel location
+                //temporalPattern
 
-                    Console.WriteLine("Begining Encoding");
-                                       
-                    Console.WriteLine("Finsihed Encoding!!!");
-
-                    SDR_SOM sdr1 = encoder.GetSparseSDR();
-
-                    Console.WriteLine("Begining First Order Memory Firings");
-
-                    somBBM[0].Fire(sdr1);                    
-
-                    Console.WriteLine("Finsihed First Order Memory Firings");
-
-                    SDR_SOM somSdrArr = new SDR_SOM(10, 10, new List<Position_SOM>() { });
-
-                    somSdrArr = somBBM[ 0].GetPredictedSDR();                    
-
-                    SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr1.ActiveBits, iType.SPATIAL);
-                    
-                    Console.WriteLine("Prepping Temporal Location SDRs for SOM");
-
-                    var temporalSDR = GenerateTemporalSDR();
-
-                    Console.WriteLine("Begining SOM Firings :");
-                    
-                    Console.WriteLine("Finished Second Order Memory Firings");
-                }
+                fomBBM[kvp.Key].Fire(spatialPattern);
             }
+
+            //for( int i = 0; i < NumBuckets; i++)
+            //{
+                
+            //}
+
         }
 
 
