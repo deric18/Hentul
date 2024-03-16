@@ -21,11 +21,13 @@
 
         private const int ByteSize = 8;
 
-        public int NumPixels { get; private set; }
+        public int Range { get; private set; }
 
         public int NumBuckets { get; private set; }
 
         public int BuketColRowLength { get; private set; }
+        
+        public Dictionary<int, Position_SOM> TemporalPositionsForBuckets { get; private set; }
 
         public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
 
@@ -36,26 +38,28 @@
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        public ScreenGrabber(int numPixels)
+        public ScreenGrabber(int range )
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
-            NumPixels = numPixels;
+            Range = range;
 
             BuketColRowLength = 5;
 
-            if ( ((float)( NumPixels * NumPixels ) / ( BuketColRowLength * BuketColRowLength ) % 1 )!= 0)
+            if ( ((float)( Range * Range ) / ( BuketColRowLength * BuketColRowLength ) % 1 )!= 0)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ NumPixels.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
+                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ Range.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
             }
 
-            NumBuckets = ( NumPixels * NumPixels ) /  ( BuketColRowLength * BuketColRowLength );           
+            NumBuckets = ( Range * Range ) /  ( BuketColRowLength * BuketColRowLength );
 
             BucketToData = new Dictionary<int, List<Position_SOM>>();
 
             fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBuckets];
 
-            for(int i = 0; i < NumBuckets; i++)
+            TemporalPositionsForBuckets = new Dictionary<int, Position_SOM>();
+
+            for (int i = 0; i < NumBuckets; i++)
             {
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, i, 0, 0);
             }
@@ -82,7 +86,7 @@
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
 
-            Console.WriteLine("Total Pixels being collected for a range of " + NumPixels.ToString() + " \nTotal Number of Pixels :", (NumPixels * NumPixels * 4).ToString(), "\nTotal BBMs Created :", NumBuckets.ToString());
+            Console.WriteLine("Total Pixels being collected for a range of " + Range.ToString() + " \nTotal Number of Pixels :" + (Range * Range * 4).ToString() + "\nTotal BBMs Created :" + NumBuckets.ToString());
             
         }
 
@@ -98,10 +102,10 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - NumPixels < 0 ? 0 : Point.X - NumPixels;
-            int y1 = Point.Y - NumPixels < 0 ? 0 : Point.Y - NumPixels;
-            int x2 = Math.Abs(Point.X + NumPixels);
-            int y2 = Math.Abs(Point.Y + NumPixels);
+            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
+            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
+            int x2 = Math.Abs(Point.X + Range);
+            int y2 = Math.Abs(Point.Y + Range);
 
             this.ProcessColorMap(x1, y1, x2, y2);
         }
@@ -111,19 +115,21 @@
 
             int bucket = 0;
 
-            for (int i = x1, k = 0; i < x2 && k < NumPixels; i++, k++)
-            {
-                //Console.WriteLine("Row " + i);
+            //ProcessTemporalCoordinates(x1, y1, x2, y2);
 
-                for (int j = y1, l = 0; j < y2 && l < NumPixels; j++, l++)
+            for (int i = x1, k = 0; i < x2 && k < 2 * Range; i++, k++)
+            {
+                Console.WriteLine("Row " + i);
+
+                for (int j = y1, l = 0; j < y2 && l < 2 * Range; j++, l++)
                 {
                     Color color = GetColorAt(i, j);
 
-                    if (color.A > 0.5)
+                    if (color.R == 0 || color.G == 0 || color.B == 0)
                     {
-                        bucket = ((j) / BuketColRowLength);
+                        bucket = ((j - y1) / BuketColRowLength);
 
-                        Position_SOM newPosition = new Position_SOM(i, j);
+                        Position_SOM newPosition = new Position_SOM(k, l);
 
                         if (BucketToData.TryGetValue(bucket, out var data))
                         {
@@ -135,9 +141,9 @@
                         }
                     }
 
-                    //Console.Write(color.ToString());
+                    Console.Write("R: " + color.R.ToString() + "G: " + color.G + "B: " + color.B + " A: " + color.A + " || ");
                 }
-                //Console.WriteLine();
+                Console.WriteLine();
             }
         }
 
@@ -153,6 +159,8 @@
             {
                 spatialPattern = new SDR_SOM(10, 10, kvp.Value, iType.SPATIAL);
 
+
+                //Todo: Fix Temporal Input Mapping , Temporal Line Arrays do not work the same as mosue corodinates on the screen
                 temporalPattern = new SDR_SOM(10, 10, new List<Position_SOM>() { kvp.Value[0] }, iType.TEMPORAL);
 
                 //Todo: Generate Location Coordinates through grid cell based on Pixel location
