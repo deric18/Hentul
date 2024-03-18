@@ -1040,7 +1040,7 @@
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
-            bool devbox = true;
+            bool devbox = false;
             string dendriteDocumentPath;
 
             if (devbox)
@@ -1190,7 +1190,7 @@
             #endregion
 
             XmlDocument document = new XmlDocument();
-            bool devbox = true;
+            bool devbox = false;
             string axonalDocumentPath;
 
             if (devbox)

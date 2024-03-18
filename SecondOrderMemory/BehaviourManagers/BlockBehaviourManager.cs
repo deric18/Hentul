@@ -21,7 +21,6 @@
 
         public List<Neuron> NeuronsFiringLastCycle { get; private set; }
 
-
         private List<Segment>? _predictedSegmentForThisCycle;
 
         public List<Position_SOM> ColumnsThatBurst { get; private set; }
@@ -32,13 +31,13 @@
 
         private List<Neuron> apicalContributors { get; set; }
 
-        public Column[,] Columns { get; private set; }
-
-        private SDR_SOM SDR { get; set; }
+        public Column[,] Columns { get; private set; }        
 
         public Neuron[,] TemporalLineArray { get; private set; }
 
         public Neuron[,] ApicalLineArray { get; private set; }
+
+        public List<Neuron> SpikeTrainList { get; private set; }
 
         //public Dictionary<string, int[]> DendriticCache { get; private set; }
 
@@ -117,6 +116,8 @@
             Columns = new Column[numColumns, numColumns];
 
             ColumnsThatBurst = new List<Position_SOM>();
+
+            SpikeTrainList = new List<Neuron>();
 
             //DendriticCache = new Dictionary<string, int[]>();
 
@@ -417,9 +418,22 @@
 
             if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
+
+            if(AnyUpdates())
+            {
+                DoSomething();
+            }
         }
 
+        private void DoSomething()
+        {
+            throw new NotImplementedException();
+        }
 
+        private bool AnyUpdates()
+        {
+            throw new NotImplementedException();
+        }
 
         private void Fire()
         {
@@ -718,6 +732,11 @@
             else
             {
                 throw new InvalidOperationException("ProcessSpikeFormNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
+            }
+
+            if(targetNeuron.CurrentState.Equals(NeuronState.NUTS_MODE))
+            {
+                
             }
         }
 

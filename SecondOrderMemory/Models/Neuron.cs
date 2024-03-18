@@ -90,11 +90,38 @@ namespace SecondOrderMemory.Models
         {
             Voltage += voltage;
 
-            CurrentState = NeuronState.PREDICTED;
+            SetState();
 
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }
 
+        private void SetState()
+        {
+            if(Voltage > (int)NeuronState.NUTS_MODE)
+            {
+                CurrentState = NeuronState.NUTS_MODE;
+            }
+            else if(Voltage > (int)NeuronState.SPIKING)
+            {
+                CurrentState = NeuronState.SPIKING;
+            }
+            else if(Voltage > (int)NeuronState.FIRING)
+            {
+                CurrentState = NeuronState.FIRING;
+            }
+            else if(Voltage > (int)NeuronState.PREDICTED)
+            {
+                CurrentState = NeuronState.PREDICTED;
+            }
+            else if(Voltage >= (int)NeuronState.RESTING)
+            {
+                CurrentState = NeuronState.RESTING;
+            }
+            else
+            {
+                throw new InvalidOperationException("Voltage has to be Positive Number");
+            }
+        }
 
         public string GetMyTemporalPartner()
         {

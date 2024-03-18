@@ -36,9 +36,8 @@ namespace Hentul.UT
 
             }
         }
-
-        [Test]
-        public void TestMatrixMul()
+        
+        public void TestCodeChange()
         {
             int[,] ints =
             {

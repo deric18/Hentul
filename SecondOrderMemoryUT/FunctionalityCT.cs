@@ -1,15 +1,8 @@
-using SecondOrderMemory.BehaviourManagers;
-
-namespace SecondOrderMemoryUT
-{    
-    public class SecondOrderMemoryTests
+﻿namespace SecondOrderMemoryUT
+{
+    
+    public class FunctionalityCT
     {
-        [SetUp]
-        public void Setup()
-        {
-            BlockBehaviourManager bbManager = new BlockBehaviourManager(10);
-        }
-
         [Test]
         public void PerformCorrectUnionOnPreviouslyLearnedSDRs()
         {
