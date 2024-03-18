@@ -210,7 +210,7 @@ namespace FirstOrderMemoryUnitTest
         [Test]
         public void TestDistalDendronalConnectionsShouldNotBeLimitedUT()
         {
-            //BUG : Why doe DitalDendriticCount never exceed more than 400
+            // Todo: BUG : Why doe DitalDendriticCount never exceed more than 400
             // Create a new Dendronal Connection make sure it is a new Dendronal Connection , 
 
             List<SDR_SOM> sDR_SOMs = TestUtils.GenerateFixedRandomSDR_SOMs(8, 0, 9);

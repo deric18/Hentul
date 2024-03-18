@@ -402,6 +402,29 @@
 
                         break;
                     }
+                case iType.APICAL:
+                    {
+                        IsApical = true;
+
+                        List<Neuron> apicalLineNeurons = new List<Neuron>();
+
+                        foreach (var pos in incomingPattern.ActiveBits)
+                        {
+                            apicalLineNeurons.Add(this.ApicalLineArray[pos.X, pos.Y]);
+                        }
+
+                        if (ApicalLineArray != null && apicalLineNeurons.Count != 0)
+                        {
+                            foreach (var apicalNeuron in apicalLineNeurons)
+                            {
+                                NeuronsFiringThisCycle.Add(apicalNeuron);
+
+                                apicalContributors.Add(apicalNeuron);
+                            }
+                        }
+
+                        break;
+                    }
                 default:
                     {
                         throw new InvalidOperationException("Invalid Input Pattern Type");
@@ -419,7 +442,7 @@
             if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
 
-            if(AnyUpdates())
+            if (SpikeTrainList.Any())
             {
                 DoSomething();
             }
@@ -427,13 +450,16 @@
 
         private void DoSomething()
         {
-            throw new NotImplementedException();
-        }
+            //Reach out to other connect blocks laterally inform them i have identified a very specific pattern and am pretty confident about it.
 
-        private bool AnyUpdates()
-        {
+            /* 
+             * Implementation :
+                1. Compute the SDR.
+                2. Send it as a temporal pattern to nearby connected regions.
+
+            */
             throw new NotImplementedException();
-        }
+        }        
 
         private void Fire()
         {
@@ -1048,7 +1074,7 @@
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
-            bool devbox = true;
+            bool devbox = false;
             string dendriteDocumentPath;
 
             if (devbox)
@@ -1197,7 +1223,7 @@
             #endregion
 
             XmlDocument document = new XmlDocument();
-            bool devbox = true;
+            bool devbox = false;
             string axonalDocumentPath;
 
             if (devbox)

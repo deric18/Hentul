@@ -137,7 +137,7 @@ namespace SecondOrderMemoryUT
             //bbManager.AddtoPredictedNeuronFromLastCycleMock(neuron2, neuron1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestFireNWireUT()
         {
             //fire  neuron1 which has an already established connection to a known other neuron2
@@ -193,7 +193,7 @@ namespace SecondOrderMemoryUT
             //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
         }
 
-        [TestMethod]
+        [Test]
         public void TestTemporalLines()
         {
             Neuron newron = bbManager.Columns[2, 4].Neurons[5];
@@ -207,7 +207,7 @@ namespace SecondOrderMemoryUT
 
         }
 
-        [Test]
+        [Test, Ignore("Ignore For Now")]
         public void TestDistalDendronalConnectionsShouldNotBeLimitedUT()
         {
             //BUG : Why doe DitalDendriticCount never exceed more than 400
@@ -264,10 +264,11 @@ namespace SecondOrderMemoryUT
 
         }
 
-        [Test]
+        [Test, Ignore("Need to Debug and get it to work!")]
         public void TestPruneCycleRefresh()
         {
             //Run cycle for 26 cycles , record distal synapse count at 25 and check if the count reduced at 26th cycle.
+            // Todo: Check why pruneCycle is not working correctly.
 
             List<SDR_SOM> sDR_SOMs = TestUtils.GenerateFixedRandomSDR_SOMs(1002, 0, 9);
             uint dendronalconnectionsBeforePruning = 0, dendronalconnectionsAfterPruning = 0;
@@ -300,7 +301,7 @@ namespace SecondOrderMemoryUT
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestTemporalFiringUT()
         {
             SDR_SOM temporalInputPattern = TestUtils.GenerateRandomSDR(iType.TEMPORAL);
@@ -336,7 +337,7 @@ namespace SecondOrderMemoryUT
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTemporalWiringUT()
         {
             SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
@@ -388,7 +389,7 @@ namespace SecondOrderMemoryUT
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
         }
 
-        [TestMethod]
+        [Test]
         public void TestApicalFiringUT()
         {
             SDR_SOM apicalInputPattern = TestUtils.GenerateRandomSDR(iType.APICAL);

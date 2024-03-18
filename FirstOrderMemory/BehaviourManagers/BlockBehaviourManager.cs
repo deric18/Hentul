@@ -418,6 +418,10 @@
 
                         break;
                     }
+                default:
+                    {
+                        throw new InvalidOperationException("Invalid Input Pattern Type");
+                    }
             }
 
 
@@ -879,8 +883,6 @@
                 synapse.IncrementHitCount();
             }
         }
-
-
 
         private void PostCycleCleanup()
         {
