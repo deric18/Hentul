@@ -17,7 +17,7 @@
 
         public int range;
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] somBBM { get; private set; }
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -31,11 +31,11 @@
             this.range = range;
             this.ColorMap = new Color[range, range];
 
-            somBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range];
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range];
 
-            somBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1, 0, 0);
-            somBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2, 0, 0);
-            somBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3, 0, 0);
+            fomBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1, 0, 0);
+            fomBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2, 0, 0);
+            fomBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3, 0, 0);
 
             Init();
         }
@@ -69,9 +69,9 @@
 
             stopWatch.Start();
 
-            somBBM[0].Init(0, 0);
-            somBBM[1].Init(1, 0);
-            somBBM[2].Init(2, 0);
+            fomBBM[0].Init(0, 0);
+            fomBBM[1].Init(1, 0);
+            fomBBM[2].Init(2, 0);
 
             stopWatch.Stop();
 
@@ -139,17 +139,17 @@
 
                     Console.WriteLine("Begining First Order Memory Firings");
 
-                    somBBM[0].Fire(sdr1);
-                    somBBM[1].Fire(sdr2);
-                    somBBM[2].Fire(sdr3);
+                    fomBBM[0].Fire(sdr1);
+                    fomBBM[1].Fire(sdr2);
+                    fomBBM[2].Fire(sdr3);
 
                     Console.WriteLine("Finsihed First Order Memory Firings");
 
                     SDR_SOM[] somSdrArr = new SDR_SOM[3];
 
-                    somSdrArr[0] = somBBM[0].GetPredictedSDR();
-                    somSdrArr[1] = somBBM[1].GetPredictedSDR();
-                    somSdrArr[2] = somBBM[2].GetPredictedSDR();
+                    somSdrArr[0] = fomBBM[0].GetPredictedSDR();
+                    somSdrArr[1] = fomBBM[1].GetPredictedSDR();
+                    somSdrArr[2] = fomBBM[2].GetPredictedSDR();
 
                     SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr1.ActiveBits, iType.SPATIAL);
                     SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr2.ActiveBits, iType.SPATIAL);

@@ -11,6 +11,8 @@
 
         public int NumColumns { get; private set; }
 
+        public int Z { get; private set; }
+
         private Position_SOM BlockID;
 
         public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
@@ -85,7 +87,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int x = 0, int y = 0, int z = 0)
+        public BlockBehaviourManager(int numColumns = 10, int Z = 10,  int x = 0, int y = 0, int z = 0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 
@@ -96,6 +98,8 @@
             totalDendronalConnections = 0;
 
             this.NumColumns = numColumns;
+
+            this.Z = Z;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
 
@@ -142,7 +146,7 @@
             {
                 for (int j = 0; j < numColumns; j++)
                 {
-                    Columns[i, j] = new Column(i, j, numColumns);
+                    Columns[i, j] = new Column(i, j, Z);
                 }
             }
         }
@@ -186,7 +190,7 @@
 
         public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
-            if (x == i && y == j && z == k)
+            if (x == i && y == j && z == k || (z > Z))
             {
                 int breakpoint = 1;
             }
@@ -222,80 +226,86 @@
 
         public BlockBehaviourManager CloneBBM(int x, int y, int z)
         {
-            BlockBehaviourManager toReturn;
+            BlockBehaviourManager blockBehaviourManager;
 
-            toReturn = new BlockBehaviourManager(NumColumns, x, y, z);
+            blockBehaviourManager = new BlockBehaviourManager(NumColumns, Z, x, y, z);
 
-            toReturn.Init();
+            blockBehaviourManager.Init();
 
-            return toReturn;
+            return blockBehaviourManager;
 
             #region Cache Code for Connector
-            //try
-            //{
-            //    for (int i = 0; i < NumColumns; i++)
-            //    {
-            //        for (int j = 0; j < NumColumns; j++)
-            //        {
-            //            for (int k = 0; k < NumColumns; k++)
-            //            {
-            //                //Proximal Dendritic Connections
-            //                Neuron presynapticNeuron, postSynapticNeuron;
 
-            //                for(int l=0; l< Columns[i, j].Neurons[k].dendriticList.Values.Count; l++)
-            //                {
-            //                    var synapse = Columns[i, j].Neurons[k].dendriticList.Values.ElementAt(l);
+            try
+            {
+                for (int i = 0; i < blockBehaviourManager.NumColumns; i++)
+                {
+                    for (int j = 0; j < blockBehaviourManager.NumColumns; j++)
+                    {
+                        for (int k = 0; k < blockBehaviourManager.Columns[0, 0].Neurons.Count; k++)
+                        {
+                            //Proximal Dendritic Connections
+                            Neuron presynapticNeuron, postSynapticNeuron;
 
-            //                    if (synapse != null)
-            //                    {
-            //                        if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
-            //                        {
-            //                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-            //                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                            for (int l = 0; l < Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.Count; l++)
+                            {
+                                var synapse = Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.ElementAt(l);
 
-            //                            if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
-            //                            {
-            //                                Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
-            //                            }
-            //                        }
-            //                    }
-            //                    else
-            //                    {
-            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-            //                    }
-            //                }
+                                if (synapse != null)
+                                {
+                                    if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
+                                    {
+                                        presynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                                        postSynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+
+                                        if (!blockBehaviourManager.ConnectTwoNeuronsOrIncrementStrength(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
+                                        {
+                                            Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+                                }
+                            }
 
 
-            //                //Axonal Connections
-            //                for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
-            //                {
-            //                    var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
+                            //Axonal Connections
+                            for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
+                            {
+                                var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
 
-            //                    if (synapse != null)
-            //                    {
-            //                        if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
-            //                        {
-            //                            presynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-            //                            postSynapticNeuron = toReturn.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                                if (synapse != null)
+                                {
+                                    if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
+                                    {
+                                        presynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
+                                        postSynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
-            //                            if (!toReturn.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
-            //                            {
-            //                                Console.WriteLine("Could Not CLone Axonal Connection Properly!!!");
-            //                            }
-            //                        }
-            //                    }
-            //                    else
-            //                    {
-            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
+                                        if (!blockBehaviourManager.ConnectTwoNeuronsOrIncrementStrength(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+                                        {
+                                            Console.WriteLine("Could Not Clone Axonal Connection Properly!!!");
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+                                }
+                            }
+                        }
+                    }
+                }
 
-            //toReturn.GenerateTemporalLines();
+                blockBehaviourManager.GenerateTemporalLines();
 
-            //toReturn.GenerateApicalLines();
+                blockBehaviourManager.GenerateApicalLines();                
+            }
+            catch(Exception e)
+            {
+                throw;
+            }
 
             #endregion
         }
@@ -1039,7 +1049,7 @@
 
             #region REAL Code
 
-            // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
+            // Todo: Extend Support for Columns Length unique from Number of Rows and Columns.
 
             XmlDocument document = new XmlDocument();
             bool devbox = false;
@@ -1053,7 +1063,6 @@
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
             }
-
 
             if (!File.Exists(dendriteDocumentPath))
             {

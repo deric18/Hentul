@@ -10,12 +10,13 @@ namespace FirstOrderMemoryUnitTest
     {
         BlockBehaviourManager? bbManager;
         const int sizeOfColumns = 10;
+        int Z = 10;
         Random rand1;
 
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(sizeOfColumns);
+            bbManager = new BlockBehaviourManager(sizeOfColumns, Z);
 
             bbManager.Init(0, 0);
 
@@ -27,7 +28,7 @@ namespace FirstOrderMemoryUnitTest
         public void TestMultipleInstanceOfSOM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 1, 3, 10);
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10, 1, 3, 10);
 
             bbm3.Init(0, 0);
 

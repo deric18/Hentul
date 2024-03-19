@@ -6,6 +6,27 @@
 
     public class BlockBehaviourManager
     {
+
+        #region CONSTANTS
+        public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
+        public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
+        public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
+        public static UInt16 DISTALNEUROPLASTICITY = 5;
+        private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
+        private const int TEMPORAL_CONNECTION_STRENGTH = 100;
+        private const int APICAL_CONNECTION_STRENGTH = 100;
+        private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
+        private const int APICAL_NEURONAL_FIRE_VALUE = 40;
+        private const int NMDA_NEURONAL_FIRE_VALUE = 100;
+        private const int DISTAL_CONNECTION_STRENGTH = 10;
+        private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
+        private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
+        private const int AXONAL_CONNECTION = 1;
+        private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
+        #endregion
+
+
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
@@ -61,26 +82,7 @@
 
         private bool IsBurstOnly;
 
-        #endregion
-
-        #region CONSTANTS
-        public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
-        public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
-        public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        public static UInt16 DISTALNEUROPLASTICITY = 5;
-        private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
-        private const int TEMPORAL_CONNECTION_STRENGTH = 100;
-        private const int APICAL_CONNECTION_STRENGTH = 100;
-        private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
-        private const int APICAL_NEURONAL_FIRE_VALUE = 40;
-        private const int NMDA_NEURONAL_FIRE_VALUE = 100;
-        private const int DISTAL_CONNECTION_STRENGTH = 10;
-        private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
-        private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
-        private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
-        private const int AXONAL_CONNECTION = 1;
-        private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
-        #endregion
+        #endregion      
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
@@ -328,8 +330,6 @@
 
 
         #region FIRE -> WIRE -> CLEANUP -> REPEAT
-
-
 
         //Has Decision Been Made , Any Particular Train Spiking Neurons detected yet ?
         //Goal of this layer is to be on the lookout for temporal and spatial pattern till we generate a Spike Train Neuon thats pretty sure it has detected something.

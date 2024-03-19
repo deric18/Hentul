@@ -8,11 +8,13 @@
     public class PredictorTests
     {
         BlockBehaviourManager bbManager;
+        int Numcolmns = 10;
+        int Z = 10;
 
         [TestInitialize]
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(10);
+            bbManager = new BlockBehaviourManager(Numcolmns, Z);
 
             bbManager.Init();
 

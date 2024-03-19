@@ -31,6 +31,8 @@
 
         public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
 
+        int NumColumns, Z;
+
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
@@ -38,7 +40,7 @@
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        public ScreenGrabber(int range )
+        public ScreenGrabber(int range)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
@@ -59,9 +61,13 @@
 
             TemporalPositionsForBuckets = new Dictionary<int, Position_SOM>();
 
+            NumColumns = 10;
+
+            Z = 10;
+
             for (int i = 0; i < NumBuckets; i++)
             {
-                fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, i, 0, 0);
+                fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z, i, 0, 0);
             }
 
             Init();

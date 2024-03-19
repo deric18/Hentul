@@ -8,11 +8,13 @@
     public class DetectorCircuitTest        
     {
         BlockBehaviourManager bbManager;
+        int NumColumns = 10;
+        int Z = 10;
 
         [TestInitialize]
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(10);
+            bbManager = new BlockBehaviourManager(NumColumns, Z);
 
             bbManager.Init();
 
