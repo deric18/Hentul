@@ -5,6 +5,8 @@
         public List<BlockBehaviourManager> Blocks { get; private set; }
 
         public const int NumColumns = 10;
+
+        public const int NumRows = 10;
         public SOMBlockManager(int numBlocks) 
         {
             if(numBlocks <= 0) 
@@ -19,7 +21,7 @@
             for( int i = 0; i < numBlocks; i++ )
             {
             
-                bbm  = new BlockBehaviourManager(NumColumns, i);
+                bbm  = new BlockBehaviourManager(NumColumns, NumRows, i);
                 bbm.Init();
                 Blocks.Add(bbm);
             }

@@ -32,6 +32,8 @@
 
         public int NumColumns { get; private set; }
 
+        public int NumRows { get; private set;  } 
+
         private Position_SOM BlockID;
 
         public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
@@ -86,7 +88,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int x = 0, int y = 0, int z = 0)
+        public BlockBehaviourManager(int numColumns = 10, int numRows = 10, int x = 0, int y = 0, int z = 0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 
@@ -97,6 +99,8 @@
             totalDendronalConnections = 0;
 
             this.NumColumns = numColumns;
+
+            this.NumRows = numRows;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
 
@@ -145,7 +149,7 @@
             {
                 for (int j = 0; j < numColumns; j++)
                 {
-                    Columns[i, j] = new Column(i, j, numColumns);
+                    Columns[i, j] = new Column(i, j, numRows);
                 }
             }
         }
@@ -189,7 +193,7 @@
 
         public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
-            if (x == i && y == j && z == k)
+            if (x == i && y == j && z == k || (z > NumRows))
             {
                 int breakpoint = 1;
             }
@@ -225,7 +229,7 @@
         {
             BlockBehaviourManager toReturn;
 
-            toReturn = new BlockBehaviourManager(NumColumns, x, y, z);
+            toReturn = new BlockBehaviourManager(NumColumns, NumRows, x, y, z);
 
             toReturn.Init();
 
@@ -818,6 +822,11 @@
         {
             Neuron toRetun = null;
 
+            if(z >= this.NumRows)
+            {
+                int breakpoint = 1;
+            }
+
             if (w == 'N')
             {
                 toRetun = Columns[x, y].Neurons[z];
@@ -988,35 +997,50 @@
         {
             // T : (x,y, z) => (0,y,x)
 
-            for (int i = 0; i < NumColumns; i++)
+            try
             {
-                for (int j = 0; j < NumColumns; j++)
+
+                for (int i = 0; i < NumColumns; i++)
                 {
-
-                    if (this.TemporalLineArray[i, j] == null)
-                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
-
-                    for (int k = 0; k < NumColumns; k++)
+                    for (int j = 0; j < NumColumns; j++)
                     {
-                        ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+
+                        if (this.TemporalLineArray[i, j] == null)
+                            this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
+
+                        for (int k = 0; k < NumColumns; k++)
+                        {
+                            ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+                        }
                     }
                 }
+            }
+            catch(Exception e)
+            {
+                int breakpoint = 1;
             }
         }
 
         private void GenerateApicalLines()
         {
-            for (int i = 0; i < NumColumns; i++)
+            try
             {
-                for (int j = 0; j < NumColumns; j++)
+                for (int i = 0; i < NumColumns; i++)
                 {
-                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), NeuronType.APICAL);
-
-                    for (int k = 0; k < NumColumns; k++)
+                    for (int j = 0; j < NumColumns; j++)
                     {
-                        ConnectTwoNeuronsOrIncrementStrength(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
+                        this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), NeuronType.APICAL);
+
+                        for (int k = 0; k < NumColumns; k++)
+                        {
+                            ConnectTwoNeuronsOrIncrementStrength(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
+                        }
                     }
                 }
+            }
+            catch(Exception e)
+            {
+                int breakpoint = 1;
             }
         }
 
@@ -1074,7 +1098,9 @@
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
             XmlDocument document = new XmlDocument();
+
             bool devbox = false;
+
             string dendriteDocumentPath;
 
             if (devbox)

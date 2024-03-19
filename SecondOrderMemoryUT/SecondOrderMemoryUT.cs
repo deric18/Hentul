@@ -7,13 +7,14 @@ namespace SecondOrderMemoryUT
     public class SecondOrderMemoryTests
     {
         int sizeOfColumns = 10;
+        int sizeOfRows = 10;
         BlockBehaviourManager bbManager;
         Random rand1;
 
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(sizeOfColumns);
+            bbManager = new BlockBehaviourManager(sizeOfColumns, sizeOfRows);
 
             bbManager.Init(0, 0);
 
@@ -27,7 +28,7 @@ namespace SecondOrderMemoryUT
         public void TestMultipleInstanceOfSOM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 1, 3, 10);
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10, 1, 3, 10);
 
             bbm3.Init(0, 0);
 
