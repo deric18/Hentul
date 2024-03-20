@@ -346,7 +346,7 @@
                 PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
-                return;
+                return null;
 
             NumberOfColumsnThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
