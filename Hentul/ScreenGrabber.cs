@@ -6,6 +6,7 @@
     using Common;
     using FirstOrderMemory.Models;
     using System.Diagnostics;
+    using SecondOrderMemory.BehaviourManagers;
 
     public struct POINT
     {
@@ -34,6 +35,8 @@
         int NumColumns, Z;
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
+
+        public SOMBlockManager somBlock { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -71,6 +74,8 @@
             }
 
             Init();
+
+            somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);           
         }       
 
         private void Init()

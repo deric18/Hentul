@@ -336,9 +336,9 @@
         #region FIRE -> WIRE -> CLEANUP -> REPEAT
 
         //Has Decision Been Made , Any Particular Train Spiking Neurons detected yet ?
-        //Goal of this layer is to be on the lookout for temporal and spatial pattern till we generate a Spike Train Neuon thats pretty sure it has detected something.
+        //Goal of this layer is to be on the lookout for temporal and spatial pattern till we generate a Spike Train indicating thats pretty sure it has detected something.
 
-        public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
+        public SDR_SOM Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
 
@@ -448,22 +448,11 @@
 
             if (SpikeTrainList.Any())
             {
-                DoSomething();
+                return GetPredictedSDR();
             }
-        }
 
-        private void DoSomething()
-        {
-            //Reach out to other connect blocks laterally inform them i have identified a very specific pattern and am pretty confident about it.
-
-            /* 
-             * Implementation :
-                1. Compute the SDR.
-                2. Send it as a temporal pattern to nearby connected regions.
-
-            */
-            throw new NotImplementedException();
-        }        
+            return null;
+        }       
 
         private void Fire()
         {
