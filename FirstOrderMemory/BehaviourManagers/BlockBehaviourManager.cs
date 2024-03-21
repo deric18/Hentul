@@ -998,7 +998,6 @@
             }
         }
 
-
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position_SOM> activeBits)
         {
             List<Neuron> temporalNeurons = new List<Neuron>();
