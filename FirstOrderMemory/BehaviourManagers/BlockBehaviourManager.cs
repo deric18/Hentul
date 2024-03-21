@@ -9,6 +9,8 @@
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
+        public const bool devbox = true;
+
         public int NumColumns { get; private set; }
 
         public int Z { get; private set; }
@@ -1050,8 +1052,8 @@
 
             // Todo: Extend Support for Columns Length unique from Number of Rows and Columns.
 
-            XmlDocument document = new XmlDocument();
-            bool devbox = false;
+            XmlDocument document = new XmlDocument();            
+
             string dendriteDocumentPath;
 
             if (devbox)
@@ -1199,8 +1201,7 @@
 
             #endregion
 
-            XmlDocument document = new XmlDocument();
-            bool devbox = false;
+            XmlDocument document = new XmlDocument();            
             string axonalDocumentPath;
 
             if (devbox)

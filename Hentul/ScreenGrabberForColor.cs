@@ -133,9 +133,9 @@
 
                     Console.WriteLine("Finsihed Encoding!!!");
 
-                    SDR_SOM sdr1 = encoder[0].GetDenseSDR();
-                    SDR_SOM sdr2 = encoder[1].GetDenseSDR();
-                    SDR_SOM sdr3 = encoder[2].GetDenseSDR();
+                    SDR_SOM sdr1 = encoder[0].GetSparseSDR();
+                    SDR_SOM sdr2 = encoder[1].GetSparseSDR();
+                    SDR_SOM sdr3 = encoder[2].GetSparseSDR();
 
                     Console.WriteLine("Begining First Order Memory Firings");
 
@@ -172,9 +172,9 @@
             ByteEncoder encoder = new ByteEncoder(100, 8);
 
             encoder.Encode((byte)Point.X);
-            SDR Xsdr = encoder.GetDenseSDR(iType.TEMPORAL);
+            SDR Xsdr = encoder.GetSparseSDR(iType.TEMPORAL);
             encoder.Encode((byte)Point.Y);
-            SDR Ysdr = encoder.GetDenseSDR(iType.TEMPORAL);
+            SDR Ysdr = encoder.GetSparseSDR(iType.TEMPORAL);
 
             return new Tuple<SDR, SDR>(Xsdr, Ysdr);
 

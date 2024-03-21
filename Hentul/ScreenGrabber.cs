@@ -7,6 +7,7 @@
     using FirstOrderMemory.Models;
     using System.Diagnostics;
     using SecondOrderMemory.BehaviourManagers;
+    using System.Collections.Generic;
 
     public struct POINT
     {
@@ -126,13 +127,15 @@
 
             int bucket = 0;
 
+            int doubleRage = 2 * Range;
+
             //ProcessTemporalCoordinates(x1, y1, x2, y2);
 
-            for (int i = x1, k = 0; i < x2 && k < 2 * Range; i++, k++)
+            for (int i = x1, k = 0; i < x2 && k < doubleRage; i++, k++)
             {
                 Console.WriteLine("Row " + i);
 
-                for (int j = y1, l = 0; j < y2 && l < 2 * Range; j++, l++)
+                for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
                 {
                     Color color = GetColorAt(i, j);
 
@@ -141,6 +144,8 @@
                         bucket = ((j - y1) / BuketColRowLength);
 
                         Position_SOM newPosition = new Position_SOM(k, l);
+
+                        //If Bit is pure BLACK , then add it the  bucket it belongs to as an activePosition.
 
                         if (BucketToData.TryGetValue(bucket, out var data))
                         {
@@ -160,42 +165,39 @@
 
         public void ProcessPixelData()
         {
-            //Need to bucketize the screen space to buckets as per bucket size.
-            //Lock Buckets to there own Location Coordinates
-            //Triage and trigger each bucket to its own Block with its Location Coordinates. 
+            //Input : range = 50 , Input SDR size = 10,000
 
             SDR_SOM spatialPattern, temporalPattern;            
 
-            foreach(var kvp in BucketToData)
+            foreach(var bucket in BucketToData)
             {
-                spatialPattern = new SDR_SOM(10, 10, kvp.Value, iType.SPATIAL);
-
+               
+                spatialPattern = GetSpatialPatternForBucket(bucket);
 
                 //Todo: Fix Temporal Input Mapping , Temporal Line Arrays do not work the same as mosue corodinates on the screen
-                temporalPattern = new SDR_SOM(10, 10, new List<Position_SOM>() { kvp.Value[0] }, iType.TEMPORAL);
+                temporalPattern = GenerateTemporalSDR();
 
                 //Todo: Generate Location Coordinates through grid cell based on Pixel location
                 //temporalPattern
 
-                fomBBM[kvp.Key].Fire(temporalPattern);
+                fomBBM[bucket.Key].Fire(temporalPattern);
 
-                fomBBM[kvp.Key].Fire(spatialPattern);
+                fomBBM[bucket.Key].Fire(spatialPattern);
                 
             }
         }
 
-      
+        private SDR_SOM GetSpatialPatternForBucket(KeyValuePair<int, List<Position_SOM>> bucket) =>        
+                new SDR_SOM(NumColumns, Z, bucket.Value, iType.SPATIAL);            
+        
 
-        public Tuple<SDR, SDR> GenerateTemporalSDR()
+        public SDR_SOM GenerateTemporalSDR()
         {
-            ByteEncoder encoder = new ByteEncoder(100, 8);
+            //Todo: Temporal Logic , Properly encode both location coorodinates using Location Based Scalar Encoder
 
-            encoder.Encode((byte)Point.X);
-            SDR Xsdr = encoder.GetDenseSDR(iType.TEMPORAL);
-            encoder.Encode((byte)Point.Y);
-            SDR Ysdr = encoder.GetDenseSDR(iType.TEMPORAL);
+            LocationScalarEncoder encoder = new LocationScalarEncoder(100, 24);
 
-            return new Tuple<SDR, SDR>(Xsdr, Ysdr);
+            return encoder.Encode(Point.X, Point.Y);            
 
         }
 

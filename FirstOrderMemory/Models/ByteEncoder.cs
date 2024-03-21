@@ -106,11 +106,13 @@
             }
         }
 
-        public SDR_SOM GetDenseSDR(iType iType = iType.SPATIAL)
+
+        //Todo: Write logic for Dense SDR.
+        public SDR_SOM GetSparseSDR(iType iType = iType.SPATIAL)
         {
             return new SDR_SOM(10, 10, ActiveBits, iType);
         }
-
+        
 
         public SDR_SOM GetSparseSDR()
         {

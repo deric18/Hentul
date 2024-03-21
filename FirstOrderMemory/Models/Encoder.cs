@@ -1,6 +1,6 @@
 ﻿namespace FirstOrderMemory.Models
 {    
-    internal class Encoder
+    public class Encoder
     {
         private int N { get; set; }
 

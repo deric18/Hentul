@@ -84,6 +84,8 @@
 
         private bool IsBurstOnly;
 
+        private const bool devbox = true;
+
         #endregion      
 
         #region CONSTRUCTORS & INITIALIZATIONS 
@@ -1086,9 +1088,7 @@
 
             // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
 
-            XmlDocument document = new XmlDocument();
-
-            bool devbox = false;
+            XmlDocument document = new XmlDocument();            
 
             string dendriteDocumentPath;
 
@@ -1237,8 +1237,7 @@
 
             #endregion
 
-            XmlDocument document = new XmlDocument();
-            bool devbox = false;
+            XmlDocument document = new XmlDocument();            
             string axonalDocumentPath;
 
             if (devbox)

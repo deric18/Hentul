@@ -23,11 +23,11 @@
 
             encoder.Encode(toEncode1);
 
-            SDR_SOM result1 = encoder.GetDenseSDR();
+            SDR_SOM result1 = encoder.GetSparseSDR();
 
             encoder.Encode(toEncode2);
 
-            SDR_SOM result2 = encoder.GetDenseSDR();
+            SDR_SOM result2 = encoder.GetSparseSDR();
 
             Assert.AreEqual(result1.ActiveBits.Count, result2.ActiveBits.Count);
         }
