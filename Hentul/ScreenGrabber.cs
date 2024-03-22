@@ -33,6 +33,8 @@
 
         public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
 
+        public bool IsMock { get; private set; }
+
         int NumColumns, Z;
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
@@ -44,7 +46,7 @@
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        public ScreenGrabber(int range)
+        public ScreenGrabber(int range, bool isMock = false)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
@@ -52,12 +54,12 @@
 
             BuketColRowLength = 5;
 
-            if ( ((float)( Range * Range ) / ( BuketColRowLength * BuketColRowLength ) % 1 )!= 0)
+            if ( ((float)( (2*Range) * (2* Range) ) / ( BuketColRowLength * BuketColRowLength ) % 1 ) != 0)
             {
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ Range.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
             }
 
-            NumBuckets = ( Range * Range ) /  ( BuketColRowLength * BuketColRowLength );
+            NumBuckets = ( (2 * Range) * (2 * Range) ) / (BuketColRowLength * BuketColRowLength);
 
             BucketToData = new Dictionary<int, List<Position_SOM>>();
 
@@ -66,6 +68,8 @@
             TemporalPositionsForBuckets = new Dictionary<int, Position_SOM>();
 
             NumColumns = 10;
+
+            IsMock = isMock;
 
             Z = 10;
 
@@ -122,8 +126,30 @@
             this.ProcessColorMap(x1, y1, x2, y2);
         }
 
+        public Tuple<int, int, int, int> Grab1()
+        {
+            //send Image for Processing                           
+
+            Console.CursorVisible = false;
+
+            Point = this.GetCurrentPointerPosition();
+
+            Console.CursorVisible = true;
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
+            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
+            int x2 = Math.Abs(Point.X + Range);
+            int y2 = Math.Abs(Point.Y + Range);
+
+            return new Tuple<int, int, int, int>(x1, y1, x2, y2);
+            //this.ProcessColorMap(x1, y1, x2, y2);
+        }
+
         public void ProcessColorMap(int x1, int y1, int x2, int y2)
         {
+            //One bucket will consist of 25 pixels.
 
             int bucket = 0;
 
@@ -136,8 +162,9 @@
                 Console.WriteLine("Row " + i);
 
                 for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
-                {
-                    Color color = GetColorAt(i, j);
+                {   
+                    
+                    Color color = IsMock ? Color.Black : GetColorAt(i, j);
 
                     if (color.R == 0 || color.G == 0 || color.B == 0)
                     {
@@ -159,13 +186,16 @@
 
                     Console.Write("R: " + color.R.ToString() + "G: " + color.G + "B: " + color.B + " A: " + color.A + " || ");
                 }
-                Console.WriteLine();
+
+                Console.WriteLine("");
             }
+
+            Console.WriteLine("Done Processing Colour Map");
         }
 
         public void ProcessPixelData()
         {
-            //Input : range = 50 , Input SDR size = 10,000
+            //Input : range = 25 , Total Number Of Pixels = 2500 , Input SDR size = 100
 
             SDR_SOM spatialPattern, temporalPattern;            
 
@@ -173,31 +203,27 @@
             {
                
                 spatialPattern = GetSpatialPatternForBucket(bucket);
-
-                //Todo: Fix Temporal Input Mapping , Temporal Line Arrays do not work the same as mosue corodinates on the screen
-                temporalPattern = GenerateTemporalSDR();
-
-                //Todo: Generate Location Coordinates through grid cell based on Pixel location
-                //temporalPattern
+                
+                temporalPattern = GenerateTemporalSDR(bucket.Key);                
 
                 fomBBM[bucket.Key].Fire(temporalPattern);
 
-                fomBBM[bucket.Key].Fire(spatialPattern);
-                
+                fomBBM[bucket.Key].Fire(spatialPattern);                
             }
+
         }
 
         private SDR_SOM GetSpatialPatternForBucket(KeyValuePair<int, List<Position_SOM>> bucket) =>        
                 new SDR_SOM(NumColumns, Z, bucket.Value, iType.SPATIAL);            
         
 
-        public SDR_SOM GenerateTemporalSDR()
+        public SDR_SOM GenerateTemporalSDR(int bucket)
         {
             //Todo: Temporal Logic , Properly encode both location coorodinates using Location Based Scalar Encoder
 
-            LocationScalarEncoder encoder = new LocationScalarEncoder(100, 24);
+            LocationScalarEncoder encoder = new LocationScalarEncoder(100, 10);
 
-            return encoder.Encode(Point.X, Point.Y);            
+            return encoder.Encode(bucket);            
 
         }
 
@@ -228,6 +254,26 @@
 
             p.X = p.X + offset;
             p.Y = p.Y + offset;
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+
+        }
+
+        public void MoveCursor(int x1, int y1)
+        {
+            POINT p;
+
+            p.X = this.Point.X;
+            p.Y = this.Point.Y;
+
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            p.X = x1;
+            p.Y = y1;
 
             ClientToScreen(dc, ref p);
             SetCursorPos(p.X, p.Y);

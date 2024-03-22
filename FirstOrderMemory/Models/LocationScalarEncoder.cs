@@ -10,7 +10,7 @@ namespace FirstOrderMemory.Models
         /// </summary>
         public int NumBukets { get; private set; }            
         
-        public Dictionary<int , List<int>> Mappings { get; private set; }
+        public Dictionary<int , int[]> Mappings { get; private set; }
 
         public LocationScalarEncoder(int n, int w) : base(n, w)
         {
@@ -21,7 +21,7 @@ namespace FirstOrderMemory.Models
             }
 
             NumBukets = n / w;
-            Mappings = new Dictionary<int, List<int>>();
+            Mappings = new Dictionary<int, int[]>();
             ComputeMappins();
 
         }
@@ -29,24 +29,39 @@ namespace FirstOrderMemory.Models
         private void ComputeMappins()
         {
             //Custom Mappings for Locaation Based Co-ordiantes
-
-            Mappings.Add(0, new List<int>() { 0, 1 });
-            Mappings.Add(0, new List<int>() { 0, 1 });
-
-
+            Mappings.Add(0, new int[] { 1, 2, 3, 4 });            
+            Mappings.Add(1, new int[] { 5, 6, 7, 8 });
+            Mappings.Add(2, new int[] { 1, 2, 3, 4 });
+            Mappings.Add(3, new int[] { 5, 6, 7, 8 });
+            Mappings.Add(4, new int[] { 1, 2, 3, 4 });
+            Mappings.Add(5, new int[] { 5, 6, 7, 8 });
+            Mappings.Add(6, new int[] { 1, 2, 3, 4 });
+            Mappings.Add(7, new int[] { 5, 6, 7, 8 });
+            Mappings.Add(8, new int[] { 1, 2, 3, 4 });
+            Mappings.Add(9, new int[] { 5, 6, 7, 8 });
         }
 
-        public SDR_SOM Encode(int x, int y)
+        public SDR_SOM Encode(int bucket)
         {
-            if( ( x < 0 || x > 999 ) && ( y < 0 || y > 99 ))
+            if( 0  >  bucket && bucket >= 10)
             {
-                throw new ArgumentOutOfRangeException("x & y is not within the range : X : " + x.ToString() + " Y : " + y.ToString());
+                throw new ArgumentOutOfRangeException("Encoder:: Bucket is not within range : " + bucket.ToString());
             }
 
-            
+            if(!Mappings.TryGetValue(bucket, out var mappings))
+            {
+                throw new ArgumentOutOfRangeException("Encoder:: Encoder could not find the coorect bucket, Invalid Bucket Allocation!");
+            }
+
+            List<Position_SOM> activePositons = new List<Position_SOM>();
 
 
-            return new SDR_SOM(10, 10, new List<Position_SOM> { }, iType.TEMPORAL);
+            foreach( var mapping in mappings) 
+            {
+                activePositons.Add(new Position_SOM(bucket % 2 == 0 ? bucket + 1 : bucket, mapping)); 
+            }
+                       
+            return new SDR_SOM(10, 10, activePositons, iType.TEMPORAL);
         }
         
         private List<Position_SOM> ExtractAndAddPositions(int number)

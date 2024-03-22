@@ -7,19 +7,19 @@ namespace Hentul.UT
     {
         ScreenGrabber sg;
         Random rand;
-
+        int count = 25;
+        
         [SetUp]
         public void Setup()
         {
-            rand = new Random();
+            rand = new Random();            
         }
 
         [Test]
         public void MultipleInstanceTestFOM()
         {
-            int count = 50;
 
-            sg = new ScreenGrabber(count);           
+            sg = new ScreenGrabber(count);
 
             for (int i = 0; i < count; i++)
             {
@@ -35,8 +35,32 @@ namespace Hentul.UT
                 Assert.IsNotNull(sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(rand.Next(0, 2)));
 
             }
+
         }
+
         
+
+        [Test]
+        public void TestNumberOfPixelsPerBBM()
+        {
+            sg = new ScreenGrabber(count, true);
+
+            sg.ProcessColorMap(2000, 400, 2050, 450);
+            //Assert.AreEqual( 10, sg.NumBuckets);
+
+            Assert.AreEqual(10, sg.BucketToData.Count);
+        }
+
+        [Test]
+        public void TestthrowInvalidrange()
+        {
+
+
+            var ex = Assert.Throws<InvalidDataException>(() => new ScreenGrabber(33));
+
+            Assert.AreEqual(ex.Message, "Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + 33.ToString() + "  NumPixelsPerBucket" + 5.ToString());
+        }
+
         public void TestCodeChange()
         {
             int[,] ints =
