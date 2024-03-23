@@ -62,7 +62,7 @@
 
             if ((float)(((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength)) % 1) != 0)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BuketRowLength * BucketColLength).ToString());
+                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
 
             NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
