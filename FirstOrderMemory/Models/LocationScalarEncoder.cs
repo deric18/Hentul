@@ -1,4 +1,5 @@
 ﻿using Common;
+using System.Collections.Concurrent;
 
 namespace FirstOrderMemory.Models
 {
@@ -50,7 +51,7 @@ namespace FirstOrderMemory.Models
 
             if(!Mappings.TryGetValue(bucket, out var mappings))
             {
-                throw new ArgumentOutOfRangeException("Encoder:: Encoder could not find the coorect bucket, Invalid Bucket Allocation!");
+                throw new ArgumentOutOfRangeException("Encoder:: Encoder could not find the correct bucket, Invalid Bucket Allocation!");
             }
 
             List<Position_SOM> activePositons = new List<Position_SOM>();
@@ -58,6 +59,10 @@ namespace FirstOrderMemory.Models
 
             foreach( var mapping in mappings) 
             {
+                if (bucket >= 10 || mapping > 10)
+                {
+                    throw new InvalidDataException("Encode :: Active Bits should never corss more than column length and breadth");
+                }
                 activePositons.Add(new Position_SOM(bucket % 2 == 0 ? bucket + 1 : bucket, mapping)); 
             }
                        

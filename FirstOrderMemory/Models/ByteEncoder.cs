@@ -101,6 +101,11 @@
             {
                 foreach (var item in arr)
                 {
+                    if(partition > 10 || item > 10)
+                    {
+                        throw new InvalidDataException("SetValueForBit :: Active Bits should never corss more than column length and breadth");
+                    }
+
                     ActiveBits.Add(new Position_SOM(partition, item));
                 }
             }

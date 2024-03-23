@@ -54,12 +54,12 @@
 
             BuketColRowLength = 5;
 
-            if ( ((float)( (2*Range) * (2* Range) ) / ( BuketColRowLength * BuketColRowLength ) % 1 ) != 0)
+            if ( ((float)( (Range) * ( Range) ) / ( BuketColRowLength * BuketColRowLength ) % 1 ) != 0)
             {
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ Range.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
             }
 
-            NumBuckets = ( (2 * Range) * (2 * Range) ) / (BuketColRowLength * BuketColRowLength);
+            NumBuckets = ( (Range) * (Range) ) / (BuketColRowLength * BuketColRowLength);
 
             BucketToData = new Dictionary<int, List<Position_SOM>>();
 
@@ -169,6 +169,11 @@
                     if (color.R == 0 || color.G == 0 || color.B == 0)
                     {
                         bucket = ((j - y1) / BuketColRowLength);
+
+                        if( k > 9 || l > 9)
+                        {
+                            int breakpoint = 1;
+                        }
 
                         Position_SOM newPosition = new Position_SOM(k, l);
 
