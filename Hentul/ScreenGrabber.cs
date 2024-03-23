@@ -18,7 +18,7 @@
     public class ScreenGrabber
     {
         public bool[,] bitMap { get; private set; }
-        
+
         public POINT Point { get; set; }
 
         private const int ByteSize = 8;
@@ -27,11 +27,15 @@
 
         public int NumBuckets { get; private set; }
 
-        public int BuketColRowLength { get; private set; }
-        
+        public int BucketRowLength { get; private set; }
+
+        public int BucketColLength { get; private set; }
+
+        public const int Sparsity = 10;
+
         public Dictionary<int, Position_SOM> TemporalPositionsForBuckets { get; private set; }
 
-        public Dictionary<int, List<Position_SOM>>  BucketToData { get; private set; }
+        public Dictionary<int, List<Position_SOM>> BucketToData { get; private set; }
 
         public bool IsMock { get; private set; }
 
@@ -52,14 +56,16 @@
 
             Range = range;
 
-            BuketColRowLength = 5;
+            BucketRowLength = 5;
 
-            if ( ((float)( (Range) * ( Range) ) / ( BuketColRowLength * BuketColRowLength ) % 1 ) != 0)
+            BucketColLength = 2;
+
+            if ((float)(((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength)) % 1) != 0)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : "+ Range.ToString() + "  NumPixelsPerBucket" +  BuketColRowLength.ToString());
+                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BuketRowLength * BucketColLength).ToString());
             }
 
-            NumBuckets = ( (Range) * (Range) ) / (BuketColRowLength * BuketColRowLength);
+            NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
 
             BucketToData = new Dictionary<int, List<Position_SOM>>();
 
@@ -80,8 +86,8 @@
 
             Init();
 
-            somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);           
-        }       
+            somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);
+        }
 
         private void Init()
         {
@@ -93,7 +99,7 @@
 
             for (int i = 0; i < NumBuckets; i++)
             {
-                fomBBM[i].Init(i);                
+                fomBBM[i].Init(i);
             }
 
             stopWatch.Stop();
@@ -103,7 +109,7 @@
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
 
             Console.WriteLine("Total Pixels being collected for a range of " + Range.ToString() + " \nTotal Number of Pixels :" + (Range * Range * 4).ToString() + "\nTotal BBMs Created :" + NumBuckets.ToString());
-            
+
         }
 
         public void Grab()
@@ -157,25 +163,28 @@
 
             //ProcessTemporalCoordinates(x1, y1, x2, y2);
 
-            for (int i = x1, k = 0; i < x2 && k < doubleRage; i++, k++)
+            for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
             {
-                Console.WriteLine("Row " + i);
 
-                for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
-                {   
-                    
+                Console.WriteLine("Row " + j.ToString());
+
+                for (int i = x1, k = 0; i < x2 && k < doubleRage; i++, k++)
+                {
+
                     Color color = IsMock ? Color.Black : GetColorAt(i, j);
 
                     if (color.R == 0 || color.G == 0 || color.B == 0)
                     {
-                        bucket = ((j - y1) / BuketColRowLength);
+                        bucket = j / BucketRowLength + (i / BucketColLength) * BucketColLength * 10;
 
-                        if( k > 9 || l > 9)
+                        
+
+                        Position_SOM newPosition = new Position_SOM((k % BucketRowLength), (l % BucketColLength));
+
+                        if (k % BucketRowLength > 9 || l  % BucketRowLength > 9)
                         {
-                            int breakpoint = 1;
+                            throw new InvalidDataException("ProcessColorMap :: Completely B.S Logic!  Fix your fucking EQUATIONSSSSSS !!!! ");
                         }
-
-                        Position_SOM newPosition = new Position_SOM(k, l);
 
                         //If Bit is pure BLACK , then add it the  bucket it belongs to as an activePosition.
 
@@ -202,25 +211,25 @@
         {
             //Input : range = 25 , Total Number Of Pixels = 2500 , Input SDR size = 100
 
-            SDR_SOM spatialPattern, temporalPattern;            
+            SDR_SOM spatialPattern, temporalPattern;
 
-            foreach(var bucket in BucketToData)
+            foreach (var bucket in BucketToData)
             {
-               
+
                 spatialPattern = GetSpatialPatternForBucket(bucket);
-                
-                temporalPattern = GenerateTemporalSDR(bucket.Key);                
+
+                temporalPattern = GenerateTemporalSDR(bucket.Key);
 
                 fomBBM[bucket.Key].Fire(temporalPattern);
 
-                fomBBM[bucket.Key].Fire(spatialPattern);                
+                fomBBM[bucket.Key].Fire(spatialPattern);
             }
 
         }
 
-        private SDR_SOM GetSpatialPatternForBucket(KeyValuePair<int, List<Position_SOM>> bucket) =>        
-                new SDR_SOM(NumColumns, Z, bucket.Value, iType.SPATIAL);            
-        
+        private SDR_SOM GetSpatialPatternForBucket(KeyValuePair<int, List<Position_SOM>> bucket) =>
+                new SDR_SOM(NumColumns, Z, bucket.Value, iType.SPATIAL);
+
 
         public SDR_SOM GenerateTemporalSDR(int bucket)
         {
@@ -228,7 +237,7 @@
 
             LocationScalarEncoder encoder = new LocationScalarEncoder(100, 10);
 
-            return encoder.Encode(bucket);            
+            return encoder.Encode(bucket);
 
         }
 
@@ -296,7 +305,7 @@
             int a = (int)GetPixel(dc, x, y);
             ReleaseDC(desk, dc);
             return Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
-        }       
+        }
 
         private void PopulateDataBytes(bool[,] barr)
         {
