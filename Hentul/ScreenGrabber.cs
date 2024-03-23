@@ -59,8 +59,15 @@
             BucketRowLength = 5;
 
             BucketColLength = 2;
+            double numerator = (2 * Range) * (2 * Range);
 
-            if ((float)(((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength)) % 1) != 0)
+            double denominator = (BucketRowLength * BucketColLength);
+
+            double value = ( numerator / denominator );
+
+            bool b = value % 1 != 0;
+
+            if ( value % 1 != 0)
             {
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }

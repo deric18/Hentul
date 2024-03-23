@@ -49,7 +49,7 @@ namespace Hentul.UT
             sg.ProcessColorMap(2000, 400, 2050, 450);
             //Assert.AreEqual( 10, sg.NumBuckets);
 
-            Assert.AreEqual(10, sg.BucketToData.Count);
+            Assert.AreEqual(250, sg.BucketToData.Count);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace Hentul.UT
 
             var ex = Assert.Throws<InvalidDataException>(() => new ScreenGrabber(33));
 
-            Assert.AreEqual(ex.Message, "Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + 33.ToString() + "  NumPixelsPerBucket" + 5.ToString());
+            Assert.AreEqual(ex.Message, "Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + 33.ToString() + "  NumPixelsPerBucket" + 10.ToString());
         }
 
         //[Test]
