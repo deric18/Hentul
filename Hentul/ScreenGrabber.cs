@@ -182,10 +182,8 @@
 
                     if (color.R == 0 || color.G == 0 || color.B == 0)
                     {
-                        bucket = j / BucketRowLength + (i / BucketColLength) * BucketColLength * 10;
-
+                        bucket = l / BucketRowLength + (k / BucketColLength) * BucketColLength * 10;                        
                         
-
                         Position_SOM newPosition = new Position_SOM((k % BucketRowLength), (l % BucketColLength));
 
                         if (k % BucketRowLength > 9 || l  % BucketRowLength > 9)
