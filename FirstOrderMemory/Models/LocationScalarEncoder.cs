@@ -1,5 +1,4 @@
 ﻿using Common;
-using System.Collections.Concurrent;
 
 namespace FirstOrderMemory.Models
 {
@@ -42,31 +41,43 @@ namespace FirstOrderMemory.Models
             Mappings.Add(9, new int[] { 5, 6, 7, 8 });
         }
 
-        public SDR_SOM Encode(int bucket)
-        {
-            if( 0  >  bucket && bucket >= 10)
-            {
-                throw new ArgumentOutOfRangeException("Encoder:: Bucket is not within range : " + bucket.ToString());
-            }
+        //public SDR_SOM Encode(int bucket)
+        //{
+        //    if( 0  >  bucket && bucket >= 10)
+        //    {
+        //        throw new ArgumentOutOfRangeException("Encoder:: Bucket is not within range : " + bucket.ToString());
+        //    }
 
-            if(!Mappings.TryGetValue(bucket, out var mappings))
-            {
-                throw new ArgumentOutOfRangeException("Encoder:: Encoder could not find the correct bucket, Invalid Bucket Allocation!");
-            }
+        //    if(!Mappings.TryGetValue(bucket, out var mappings))
+        //    {
+        //        throw new ArgumentOutOfRangeException("Encoder:: Encoder could not find the correct bucket, Invalid Bucket Allocation!");
+        //    }
 
-            List<Position_SOM> activePositons = new List<Position_SOM>();
+        //    List<Position_SOM> activePositons = new List<Position_SOM>();
 
 
-            foreach( var mapping in mappings) 
-            {
-                if (bucket >= 10 || mapping > 10)
-                {
-                    throw new InvalidDataException("Encode :: Active Bits should never corss more than column length and breadth");
-                }
-                activePositons.Add(new Position_SOM(bucket % 2 == 0 ? bucket + 1 : bucket, mapping)); 
-            }
+        //    foreach( var mapping in mappings) 
+        //    {
+        //        if (bucket >= 10 || mapping > 10)
+        //        {
+        //            throw new InvalidDataException("Encode :: Active Bits should never corss more than column length and breadth");
+        //        }
+        //        activePositons.Add(new Position_SOM(bucket % 2 == 0 ? bucket + 1 : bucket, mapping)); 
+        //    }
                        
-            return new SDR_SOM(10, 10, activePositons, iType.TEMPORAL);
+        //    return new SDR_SOM(10, 10, activePositons, iType.TEMPORAL);
+        //}
+
+        public SDR_SOM Encode( int x, int y)
+        {
+            //Takes in a BBM Coordinate spanned across 10 bits in the pixel data, and creates one unique SDR_SOM pattern to be fed in a temporal pattern.
+            // Todo: Need a fancy encyrption function that takes in 2 integers , x and y and spits a unique list of active positions in a bounded range 
+
+            SDR_SOM toReturn = new SDR_SOM();
+
+
+
+            return toReturn;
         }
         
         private List<Position_SOM> ExtractAndAddPositions(int number)
@@ -81,8 +92,6 @@ namespace FirstOrderMemory.Models
             while (numbercopy > 0)
             {
                 tens = numbercopy % 10;
-
-
 
                 numbercopy = numbercopy / 10;
 
