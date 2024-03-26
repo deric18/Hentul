@@ -1,4 +1,5 @@
 ﻿using Common;
+using System;
 
 namespace FirstOrderMemory.Models
 {
@@ -102,13 +103,21 @@ namespace FirstOrderMemory.Models
             int numbercopy = number;
             int digit = 0;
             int iterator = 0;
+            int digitOffset = 0;
 
 
-            while (numbercopy > 0)
+            while (numbercopy > 0 && iterator < 4)
             {
                 digit = numbercopy % 10;
+
+                digitOffset = ComputeDigitOffset(numberPosition, iterator);
+
+                if(digitOffset == int.MaxValue)
+                {
+                    throw new ArgumentException("Invalid Operation");
+                }
                 
-                Positions.AddRange(GetPositionsFromDigit((char)digit, iterator + offset));
+                Positions.AddRange(GetPositionsFromDigit((char)digit, offset));
 
                 numbercopy = numbercopy / 10;
 
@@ -116,6 +125,54 @@ namespace FirstOrderMemory.Models
             }
 
             return Positions;
+        }
+
+        private int ComputeDigitOffset(int coordinate, int iterator)
+        {
+            if(coordinate == 1)
+            {
+                if (iterator == 0)
+                {
+                    return 0;
+                }
+                else if (iterator == 1)
+                {
+                    return 16;
+                }
+                else if (iterator == 2)
+                {
+                    return 20;
+                }
+                else if( iterator == 3)
+                { 
+                    return 36;
+                }
+            }
+            else if(coordinate == 2)
+            {
+                if (iterator == 0)
+                {
+                    return 60;
+                }
+                else if (iterator == 1)
+                {
+                    return 76;
+                }
+                else if (iterator == 2)
+                {
+                    return 80;
+                }
+                else if( iterator == 3)
+                {
+                    return 96;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("ComputeDigitOffset ::  Coordinate Number should never be anything other than 1 or 2!");
+            }
+
+            return int.MaxValue;
         }
 
         private List<Position_SOM> GetPositionsFromDigit(char digit, int offset)
@@ -133,29 +190,94 @@ namespace FirstOrderMemory.Models
                 case '0':       //0 0 0 0
                     break;
                 case '1':       //0 0 0 1
-                    Positions.Add()
-                    break;
+                    {
+                        Tuple<int,int> tuple = ExtractXnY(offset + 3);
+                        Positions.Add(new Position_SOM(tuple.Item1, tuple.Item2));
+                        break;
+                    }
                 case '2':       //0 0 1 0
-                    break;
+                    {
+                        Tuple<int, int> tuple = ExtractXnY(offset + 2);
+                        Positions.Add(new Position_SOM(tuple.Item1, tuple.Item2));
+                        break;
+                    }                    
                 case '3':       //0 0 1 1
-                    break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 2);
+                        Tuple<int, int> tuple2 = ExtractXnY(offset + 3);
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));
+                        Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
+                        break;
+                    }
                 case '4':       //0 1 0 0
-                    break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 1);                        
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));                        
+                        break;
+                    }
                 case '5':       //0 1 0 1
-                    break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 1);
+                        Tuple<int, int> tuple2 = ExtractXnY(offset + 3);
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));
+                        Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
+                        break;
+                    }
                 case '6':       //0 1 1 0
-                    break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 1);
+                        Tuple<int, int> tuple2 = ExtractXnY(offset + 2);
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));
+                        Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
+                        break;
+                    }
                 case '7':       //0 1 1 1
-                    break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 1);
+                        Tuple<int, int> tuple2 = ExtractXnY(offset + 2);
+                        Tuple<int, int> tuple3 = ExtractXnY(offset + 3);
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));
+                        Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
+                        Positions.Add(new Position_SOM(tuple3.Item1, tuple3.Item2));
+                        break;
+                    }
                 case '8':       //1 0 0 0
-                    break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 0);                        
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));                        
+                        break;
+                    }
                 case '9':       //1 0 0 1
-                    break;
-                default: break;
+                    {
+                        Tuple<int, int> tuple1 = ExtractXnY(offset + 0);
+                        Tuple<int, int> tuple2 = ExtractXnY(offset + 3);
+                        Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));
+                        Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
+                        break;
+                    }
+                default: 
+                    {
+                        throw new InvalidDataException("GetPositionsFromDigit :: Invalid Digit Extracted , Digit should always fall in the range of 0 - 9");
+                    }
             }
 
             return Positions;
         }
 
+
+        private Tuple<int,int> ExtractXnY(int number)
+        {
+            int Y = number % 10;
+            number = number / 10;
+            int X = number % 10;
+            number = number / 10;
+            if(number != 0)
+            {
+                Console.WriteLine("ExtractXnY :: number should be 0");
+            }
+
+            return new Tuple<int, int>(X, Y);
+            
+        }
     }
 }
