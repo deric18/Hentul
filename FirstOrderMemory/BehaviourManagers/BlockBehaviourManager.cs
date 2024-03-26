@@ -1007,17 +1007,10 @@
 
         public void AddNeuronListToNeuronsFiringThisCycleList(List<Neuron> neuronToAddList)
         {
-            List<Neuron> intersectionList = NeuronsFiringThisCycle.Intersect(neuronToAddList).ToList<Neuron>();
-
-            if(intersectionList.Any())
+            foreach(var neuronToAdd in neuronToAddList)
             {
-                foreach( var neuronToRemove in intersectionList )
-                {
-                    neuronToAddList.Remove(neuronToRemove);
-                }
-            }
-
-            NeuronsFiringThisCycle.AddRange(neuronToAddList);
+                AddNeuronToNeuronsFiringThisCycleList(neuronToAdd);
+            }            
         }
 
         private void AddNeuronToNeuronsFiringThisCycleList(Neuron neuronToAdd)

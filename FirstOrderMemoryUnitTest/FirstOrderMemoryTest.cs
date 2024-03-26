@@ -183,6 +183,8 @@ namespace FirstOrderMemoryUnitTest
             }
 
             Assert.AreEqual(1, counter);
+
+            TestInternalStructureAfterOperation();
         }
 
         [TestMethod]
@@ -509,6 +511,24 @@ namespace FirstOrderMemoryUnitTest
             Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
 
             Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[5].flag);
+        }
+
+
+        public void TestInternalStructureAfterOperation()
+        {
+            for(int i=0; i<10; i++)
+            {
+                for(int j=0; j<10; j++)
+                {
+                    Assert.AreEqual(bbManager.Columns[i, j].Neurons.Count, 10);
+
+                    Assert.AreEqual(bbManager.TemporalLineArray[i, j].AxonalList.Count, 10);
+
+                    Assert.AreEqual(bbManager.ApicalLineArray[i, j].AxonalList.Count, 10);
+                }
+            }
+
+            
         }
 
 
