@@ -172,10 +172,12 @@
 
             //ProcessTemporalCoordinates(x1, y1, x2, y2);
 
+            Console.WriteLine("Getting Screen Pixels and Processing them : ");
+
             for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
             {
 
-                Console.WriteLine("Row " + j.ToString());
+                //Console.WriteLine("Row " + j.ToString());
 
                 for (int i = x1, k = 0; i < x2 && k < doubleRage; i++, k++)
                 {
@@ -205,10 +207,10 @@
                         }
                     }
 
-                    Console.Write("R: " + color.R.ToString() + "G: " + color.G + "B: " + color.B + " A: " + color.A + " || ");
+                    //Console.Write("R: " + color.R.ToString() + "G: " + color.G + "B: " + color.B + " A: " + color.A + " || ");
                 }
 
-                Console.WriteLine("");
+                //Console.WriteLine("");
             }
 
             Console.WriteLine("Done Processing Colour Map");
