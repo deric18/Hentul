@@ -117,7 +117,7 @@ namespace FirstOrderMemory.Models
                     throw new ArgumentException("Invalid Operation");
                 }
                 
-                Positions.AddRange(GetPositionsFromDigit((char)digit, offset));
+                Positions.AddRange(GetPositionsFromDigit(digit, offset));
 
                 numbercopy = numbercopy / 10;
 
@@ -125,57 +125,9 @@ namespace FirstOrderMemory.Models
             }
 
             return Positions;
-        }
+        }        
 
-        private int ComputeDigitOffset(int coordinate, int iterator)
-        {
-            if(coordinate == 1)
-            {
-                if (iterator == 0)
-                {
-                    return 0;
-                }
-                else if (iterator == 1)
-                {
-                    return 16;
-                }
-                else if (iterator == 2)
-                {
-                    return 20;
-                }
-                else if( iterator == 3)
-                { 
-                    return 36;
-                }
-            }
-            else if(coordinate == 2)
-            {
-                if (iterator == 0)
-                {
-                    return 60;
-                }
-                else if (iterator == 1)
-                {
-                    return 76;
-                }
-                else if (iterator == 2)
-                {
-                    return 80;
-                }
-                else if( iterator == 3)
-                {
-                    return 96;
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("ComputeDigitOffset ::  Coordinate Number should never be anything other than 1 or 2!");
-            }
-
-            return int.MaxValue;
-        }
-
-        private List<Position_SOM> GetPositionsFromDigit(char digit, int offset)
+        private List<Position_SOM> GetPositionsFromDigit(int digit, int offset)
         {
 
             if (digit > 9)
@@ -187,21 +139,21 @@ namespace FirstOrderMemory.Models
 
             switch(digit)
             {
-                case '0':       //0 0 0 0
+                case 0:       //0 0 0 0
                     break;
-                case '1':       //0 0 0 1
+                case 1:       //0 0 0 1
                     {
                         Tuple<int,int> tuple = ExtractXnY(offset + 3);
                         Positions.Add(new Position_SOM(tuple.Item1, tuple.Item2));
                         break;
                     }
-                case '2':       //0 0 1 0
+                case 2:       //0 0 1 0
                     {
                         Tuple<int, int> tuple = ExtractXnY(offset + 2);
                         Positions.Add(new Position_SOM(tuple.Item1, tuple.Item2));
                         break;
                     }                    
-                case '3':       //0 0 1 1
+                case 3:       //0 0 1 1
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 2);
                         Tuple<int, int> tuple2 = ExtractXnY(offset + 3);
@@ -209,13 +161,13 @@ namespace FirstOrderMemory.Models
                         Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
                         break;
                     }
-                case '4':       //0 1 0 0
+                case 4:       //0 1 0 0
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 1);                        
                         Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));                        
                         break;
                     }
-                case '5':       //0 1 0 1
+                case 5:       //0 1 0 1
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 1);
                         Tuple<int, int> tuple2 = ExtractXnY(offset + 3);
@@ -223,7 +175,7 @@ namespace FirstOrderMemory.Models
                         Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
                         break;
                     }
-                case '6':       //0 1 1 0
+                case 6:       //0 1 1 0
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 1);
                         Tuple<int, int> tuple2 = ExtractXnY(offset + 2);
@@ -231,7 +183,7 @@ namespace FirstOrderMemory.Models
                         Positions.Add(new Position_SOM(tuple2.Item1, tuple2.Item2));
                         break;
                     }
-                case '7':       //0 1 1 1
+                case 7:       //0 1 1 1
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 1);
                         Tuple<int, int> tuple2 = ExtractXnY(offset + 2);
@@ -241,13 +193,13 @@ namespace FirstOrderMemory.Models
                         Positions.Add(new Position_SOM(tuple3.Item1, tuple3.Item2));
                         break;
                     }
-                case '8':       //1 0 0 0
+                case 8:       //1 0 0 0
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 0);                        
                         Positions.Add(new Position_SOM(tuple1.Item1, tuple1.Item2));                        
                         break;
                     }
-                case '9':       //1 0 0 1
+                case 9:       //1 0 0 1
                     {
                         Tuple<int, int> tuple1 = ExtractXnY(offset + 0);
                         Tuple<int, int> tuple2 = ExtractXnY(offset + 3);
@@ -261,7 +213,61 @@ namespace FirstOrderMemory.Models
                     }
             }
 
+
+            if(digit.Equals(1))
+            {
+                int breakpoint = 1;
+            }
+
             return Positions;
+        }
+
+        private int ComputeDigitOffset(int coordinate, int iterator)
+        {
+            if (coordinate == 1)
+            {
+                if (iterator == 0)
+                {
+                    return 0;
+                }
+                else if (iterator == 1)
+                {
+                    return 16;
+                }
+                else if (iterator == 2)
+                {
+                    return 20;
+                }
+                else if (iterator == 3)
+                {
+                    return 36;
+                }
+            }
+            else if (coordinate == 2)
+            {
+                if (iterator == 0)
+                {
+                    return 60;
+                }
+                else if (iterator == 1)
+                {
+                    return 76;
+                }
+                else if (iterator == 2)
+                {
+                    return 80;
+                }
+                else if (iterator == 3)
+                {
+                    return 96;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("ComputeDigitOffset ::  Coordinate Number should never be anything other than 1 or 2!");
+            }
+
+            return int.MaxValue;
         }
 
 

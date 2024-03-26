@@ -220,6 +220,8 @@
 
             SDR_SOM spatialPattern, temporalPattern;
 
+            int index = 0;
+
             foreach (var bucket in BucketToData)
             {
 
@@ -227,9 +229,11 @@
 
                 temporalPattern = GenerateTemporalSDR(bucket.Value.X, bucket.Value.Y);
 
-                fomBBM[bucket.Key].Fire(temporalPattern);
+                fomBBM[index].Fire(temporalPattern);
 
-                fomBBM[bucket.Key].Fire(spatialPattern);
+                fomBBM[index].Fire(spatialPattern);
+
+                ++index;
             }
 
         }
