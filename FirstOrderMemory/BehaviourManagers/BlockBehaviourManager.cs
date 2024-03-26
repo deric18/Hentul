@@ -369,7 +369,7 @@
                             {
                                 Console.WriteLine("Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
 
-                                NeuronsFiringThisCycle.AddRange(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
+                                AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
 
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
 
@@ -380,7 +380,7 @@
                             {
                                 Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
-                                NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
+                                AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
                             }
                             else
                             {
@@ -405,7 +405,7 @@
                         {
                             foreach (var temporalNeuron in temporalLineNeurons)
                             {
-                                NeuronsFiringThisCycle.Add(temporalNeuron);
+                                AddNeuronToNeuronsFiringThisCycleList(temporalNeuron);
 
                                 temporalContributors.Add(temporalNeuron);
                             }
@@ -428,7 +428,7 @@
                         {
                             foreach (var apicalNeuron in apicalLineNeurons)
                             {
-                                NeuronsFiringThisCycle.Add(apicalNeuron);
+                                AddNeuronToNeuronsFiringThisCycleList(apicalNeuron);
 
                                 apicalContributors.Add(apicalNeuron);
                             }
@@ -940,9 +940,10 @@
 
             NeuronsFiringLastCycle.Clear();
 
-            foreach (var item in NeuronsFiringThisCycle)
+            foreach (var neuron in NeuronsFiringThisCycle)
             {
-                NeuronsFiringLastCycle.Add(item);
+                if(neuron.nType.Equals(NeuronType.NORMAL))
+                    NeuronsFiringLastCycle.Add(neuron);
             }
 
             //Every 50 Cycles Prune unused and under Firing Connections
@@ -1002,6 +1003,34 @@
                     }
                 }
             }
+        }
+
+        public void AddNeuronListToNeuronsFiringThisCycleList(List<Neuron> neuronToAddList)
+        {
+            List<Neuron> intersectionList = NeuronsFiringThisCycle.Intersect(neuronToAddList).ToList<Neuron>();
+
+            if(intersectionList.Any())
+            {
+                foreach( var neuronToRemove in intersectionList )
+                {
+                    neuronToAddList.Remove(neuronToRemove);
+                }
+            }
+
+            NeuronsFiringThisCycle.AddRange(neuronToAddList);
+        }
+
+        private void AddNeuronToNeuronsFiringThisCycleList(Neuron neuronToAdd)
+        {
+            foreach(var neuron in NeuronsFiringThisCycle)
+            {
+                if(neuron.NeuronID.Equals(neuronToAdd.NeuronID))
+                {
+                    return;
+                }
+            }
+
+            NeuronsFiringThisCycle.Add(neuronToAdd);
         }
 
         private void GenerateApicalLines()

@@ -156,6 +156,36 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [TestMethod]
+        public void TestAddNeuronListToNeuronsFiringThisCycleList()
+        {
+            var list1 = bbManager.Columns[0, 2].Neurons;
+
+            var list2 = new List<Neuron>()
+            {
+                bbManager.Columns[0,2].Neurons[3],
+                bbManager.Columns[0,2].Neurons[2],
+                bbManager.Columns[0,2].Neurons[9],
+                bbManager.Columns[0,2].Neurons[8]
+            };
+            
+            bbManager.AddNeuronListToNeuronsFiringThisCycleList(list1);
+
+            bbManager.AddNeuronListToNeuronsFiringThisCycleList(list2);
+
+            int counter = 0;
+
+            foreach(var neuron in bbManager.NeuronsFiringThisCycle)
+            {
+                if (neuron.NeuronID.Equals(bbManager.Columns[0, 2].Neurons[3].NeuronID))
+                {
+                    counter++;
+                }
+            }
+
+            Assert.AreEqual(1, counter);
+        }
+
+        [TestMethod]
         public void TestFireNWireUT()
         {
             //fire  neuron1 which has an already established connection to a known other neuron2
