@@ -5,8 +5,8 @@ namespace FirstOrderMemory.Models
     public class LocationScalarEncoder : Encoder
     {
         /// <summary>
-        /// There are 2 co-ordinates X & Y , each coordinate has fixed range of 0 - 999 and each coordinate gets 50 bits each to represent it.
-        /// X gets 3 numbers 0 - 9 and each number has 8 pixels which will be mapped to 16 pixels and so on for all the numbers.
+        /// There are 2 co-ordinates X & Y , each coordinate has fixed range of 0 - 9999 and each coordinate gets 16 bits each to represent it. So total of 32 bits assigned for both coordiantes with a sepparation of 3 between each 
+        /// X gets 4 numbers 0 - 9 and each number has 4 pixels which will be mapped to 16 pixels and so on for all the numbers.
         /// </summary>
         public int NumBukets { get; private set; }            
         
@@ -15,18 +15,18 @@ namespace FirstOrderMemory.Models
         public LocationScalarEncoder(int n, int w) : base(n, w)
         {
 
-            if( n != 100 & w != 24)
+            if( n != 100 & w != 32)
             {
                 throw new ArgumentException("ScalarEncoder currently does not support any other configuration for n & w other than 100 & 8 correspondingly!");
             }
 
             NumBukets = n / w;
             Mappings = new Dictionary<int, int[]>();
-            ComputeMappins();
+            
 
         }
 
-        private void ComputeMappins()
+        private void ComputeMappings()
         {
             //Custom Mappings for Locaation Based Co-ordiantes
             Mappings.Add(0, new int[] { 1, 2, 3, 4 });            
@@ -68,36 +68,91 @@ namespace FirstOrderMemory.Models
         //    return new SDR_SOM(10, 10, activePositons, iType.TEMPORAL);
         //}
 
+
+        //Get Dense Representation
+
+
         public SDR_SOM Encode( int x, int y)
         {
             //Takes in a BBM Coordinate spanned across 10 bits in the pixel data, and creates one unique SDR_SOM pattern to be fed in a temporal pattern.
             // Todo: Need a fancy encyrption function that takes in 2 integers , x and y and spits a unique list of active positions in a bounded range 
+            List<Position_SOM> activePositions = new List<Position_SOM>();
 
-            SDR_SOM toReturn = new SDR_SOM();
+            activePositions.AddRange(GetActivePositionFromScalar(x, 1));
+            activePositions.AddRange(GetActivePositionFromScalar(y, 2));
 
+            return new SDR_SOM(10, 10, activePositions, iType.TEMPORAL);
+        }
+
+        private List<Position_SOM> GetActivePositionFromScalar(int number, int numberPosition)
+        {
+            List<Position_SOM> toReturn = new List<Position_SOM>();
+
+            toReturn.AddRange(ExtractAndAddPositions(number, numberPosition));
 
 
             return toReturn;
         }
         
-        private List<Position_SOM> ExtractAndAddPositions(int number)
+        private List<Position_SOM> ExtractAndAddPositions(int number, int numberPosition)
         {
             List<Position_SOM> Positions = new List<Position_SOM>();
 
+            int offset = numberPosition == 1 ? 0 : 58;
             int numbercopy = number;
-            int tens = 0;
-            int iteration = 0;
+            int digit = 0;
+            int iterator = 0;
 
 
             while (numbercopy > 0)
             {
-                tens = numbercopy % 10;
+                digit = numbercopy % 10;
+                
+                Positions.AddRange(GetPositionsFromDigit((char)digit, iterator + offset));
 
                 numbercopy = numbercopy / 10;
 
-                iteration++;
+                iterator++;
             }
 
+            return Positions;
+        }
+
+        private List<Position_SOM> GetPositionsFromDigit(char digit, int offset)
+        {
+
+            if (digit > 9)
+            {
+                throw new ArgumentOutOfRangeException("Entire universe will be commanded to revolve around you , you have amanged to do the impossible in math , Thios can never happen !! you cannot exceed a modulo operator to above 9");
+            }
+
+            List<Position_SOM> Positions = new List<Position_SOM>();
+
+            switch(digit)
+            {
+                case '0':       //0 0 0 0
+                    break;
+                case '1':       //0 0 0 1
+                    Positions.Add()
+                    break;
+                case '2':       //0 0 1 0
+                    break;
+                case '3':       //0 0 1 1
+                    break;
+                case '4':       //0 1 0 0
+                    break;
+                case '5':       //0 1 0 1
+                    break;
+                case '6':       //0 1 1 0
+                    break;
+                case '7':       //0 1 1 1
+                    break;
+                case '8':       //1 0 0 0
+                    break;
+                case '9':       //1 0 0 1
+                    break;
+                default: break;
+            }
 
             return Positions;
         }

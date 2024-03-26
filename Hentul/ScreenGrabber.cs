@@ -8,6 +8,7 @@
     using System.Diagnostics;
     using SecondOrderMemory.BehaviourManagers;
     using System.Collections.Generic;
+    using Hentul.UT;
 
     public struct POINT
     {
@@ -35,7 +36,7 @@
 
         public Dictionary<int, Position_SOM> TemporalPositionsForBuckets { get; private set; }
 
-        public Dictionary<int, List<Position_SOM>> BucketToData { get; private set; }
+        public Dictionary<int, LocationNPositions> BucketToData { get; private set; }
 
         public bool IsMock { get; private set; }
 
@@ -59,6 +60,7 @@
             BucketRowLength = 5;
 
             BucketColLength = 2;
+
             double numerator = (2 * Range) * (2 * Range);
 
             double denominator = (BucketRowLength * BucketColLength);
@@ -74,7 +76,7 @@
 
             NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
 
-            BucketToData = new Dictionary<int, List<Position_SOM>>();
+            BucketToData = new Dictionary<int, LocationNPositions>();
 
             fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBuckets];
 
@@ -93,7 +95,7 @@
 
             Init();
 
-            somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);
+            somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);            
         }
 
         private void Init()
@@ -195,11 +197,11 @@
 
                         if (BucketToData.TryGetValue(bucket, out var data))
                         {
-                            data.Add(newPosition);
+                            data.AddNewPostion(newPosition);
                         }
                         else
                         {
-                            BucketToData.Add(bucket, new List<Position_SOM>() { newPosition });
+                            BucketToData.Add(bucket,  new  LocationNPositions(new List<Position_SOM> { newPosition }, i , j));
                         }
                     }
 
@@ -221,9 +223,9 @@
             foreach (var bucket in BucketToData)
             {
 
-                spatialPattern = GetSpatialPatternForBucket(bucket);
+                spatialPattern = GetSpatialPatternForBucket(bucket.Value.Positions);
 
-                temporalPattern = GenerateTemporalSDR(bucket.Key);
+                temporalPattern = GenerateTemporalSDR(bucket.Value.X, bucket.Value.Y);
 
                 fomBBM[bucket.Key].Fire(temporalPattern);
 
@@ -232,17 +234,18 @@
 
         }
 
-        private SDR_SOM GetSpatialPatternForBucket(KeyValuePair<int, List<Position_SOM>> bucket) =>
-                new SDR_SOM(NumColumns, Z, bucket.Value, iType.SPATIAL);
+        private SDR_SOM GetSpatialPatternForBucket(List<Position_SOM> positions) =>
+                new SDR_SOM(NumColumns, Z, positions, iType.SPATIAL);
 
 
-        public SDR_SOM GenerateTemporalSDR(int bucket)
+        public SDR_SOM GenerateTemporalSDR(int x, int y)
         {
-            //Todo: Temporal Logic , Properly encode both location coorodinates using Location Based Scalar Encoder
+            
 
-            LocationScalarEncoder encoder = new LocationScalarEncoder(100, 10);
+            LocationScalarEncoder encoder = new LocationScalarEncoder(100, 32);
 
-            return encoder.Encode(bucket);
+            //Todo : buckett is not the correct parameter for encoding here.
+            return encoder.Encode(x, y);
 
         }
 
