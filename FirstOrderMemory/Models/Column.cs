@@ -84,7 +84,13 @@
 
         internal bool PreCleanupCheck()
         {
-            return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).Count() > 0;
+            if(Neurons.Any(x => x.CurrentState == NeuronState.FIRING))
+            {
+                int breakpoint = 1;
+                return true;
+            }
+
+            return false;
         }
 
         internal void PostCycleCleanup()

@@ -95,7 +95,7 @@
 
             Init();
 
-            somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);            
+            //somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);            
         }
 
         private void Init()
@@ -117,7 +117,7 @@
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
 
-            Console.WriteLine("Total Pixels being collected for a range of " + Range.ToString() + " \nTotal Number of Pixels :" + (Range * Range * 4).ToString() + "\nTotal BBMs Created :" + NumBuckets.ToString());
+            Console.WriteLine("Total Pixels being collected for a range of " + Range.ToString() + " \nTotal Number of Pixels :" + (Range * Range * 4).ToString() + "\nTotal First Order BBMs Created :" + NumBuckets.ToString());
 
         }
 
@@ -172,7 +172,7 @@
 
             //ProcessTemporalCoordinates(x1, y1, x2, y2);
 
-            Console.WriteLine("Getting Screen Pixels and Processing them : ");
+            Console.WriteLine("Getting Screen Pixels : ");
 
             for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
             {
@@ -213,7 +213,7 @@
                 //Console.WriteLine("");
             }
 
-            Console.WriteLine("Done Processing Colour Map");
+            Console.WriteLine("Done Collecting Screen Pixels");
         }
 
         public void ProcessPixelData()
@@ -223,6 +223,8 @@
             SDR_SOM spatialPattern, temporalPattern;
 
             int index = 0;
+
+            Console.WriteLine("Processing Pixel Data :");
 
             foreach (var bucket in BucketToData)
             {
@@ -237,6 +239,8 @@
 
                 ++index;
             }
+
+            Console.WriteLine("Done Processing Pixel Data");
 
         }
 

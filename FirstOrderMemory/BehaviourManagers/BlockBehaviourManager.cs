@@ -30,7 +30,7 @@
 
         public List<Position_SOM> ColumnsThatBurst { get; private set; }
 
-        private int NumberOfColumsnThatFiredThisCycle { get; set; }
+        private int NumberOfColumnsThatFiredThisCycle { get; set; }
 
         private List<Neuron> temporalContributors { get; set; }
 
@@ -66,6 +66,8 @@
 
         private bool IsBurstOnly;
 
+        private BlockCycle CurrentCycleState { get; set; }
+
         #endregion
 
         #region CONSTANTS
@@ -93,7 +95,7 @@
         {
             this.BlockID = new Position_SOM(x, y, z);
 
-            this.NumberOfColumsnThatFiredThisCycle = 0;
+            this.NumberOfColumnsThatFiredThisCycle = 0;
 
             CycleNum = 0;
 
@@ -102,6 +104,8 @@
             this.NumColumns = numColumns;
 
             this.Z = Z;
+
+            this.CurrentCycleState = BlockCycle.DEPOLARIZATION;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
 
@@ -155,6 +159,8 @@
 
         public void Init(int x = -1, int y = -1)
         {
+            CurrentCycleState = BlockCycle.INITIALIZATION;
+
             ReadDendriticSchema(x, y);
 
             ReadAxonalSchema(x, y);
@@ -334,7 +340,7 @@
                     }
                 }
 
-            NumberOfColumsnThatFiredThisCycle = 0;
+            NumberOfColumnsThatFiredThisCycle = 0;
 
             IsBurstOnly = false;
         }
@@ -343,13 +349,13 @@
         {
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
 
-            if (ignorePrecyclePrep == false)
+            if (ignorePrecyclePrep == false && CurrentCycleState.Equals(BlockCycle.CLEANUP))
                 PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
                 return;
 
-            NumberOfColumsnThatFiredThisCycle = incomingPattern.ActiveBits.Count;
+            NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
             switch (incomingPattern.InputPatternType)
             {
@@ -444,7 +450,7 @@
                 Wire();
             }
 
-            if ((IsSpatial == false && IsApical == false) || ignorePostCycleCleanUp == false)
+            if ((isTemporal == false && IsApical == false) || ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
         }
 
@@ -476,6 +482,8 @@
 
                 //Get intersection of neuronsFiringThisCycle and predictedNEuronsFromThisCycle as if any neurons that were predicted for this cycle actually fired then we got to strengthen those connections first
 
+                CurrentCycleState = BlockCycle.FIRING;
+
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
                 foreach (var item in PredictedNeuronsforThisCycle.Keys)
@@ -490,7 +498,7 @@
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
                 // ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumsnThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
-                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumsnThatFiredThisCycle)
+                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
 
@@ -558,12 +566,11 @@
                         }
                     }
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
-                else if (ColumnsThatBurst.Count == 0 && NumberOfColumsnThatFiredThisCycle > correctPredictionList.Count)
+                else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
                 {
 
 
                     // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
-
 
 
                     // Strengthen the ones which fired correctly 
@@ -611,7 +618,7 @@
                         }
                     }
                 }
-                else if (ColumnsThatBurst.Count == NumberOfColumsnThatFiredThisCycle && correctPredictionList.Count == 0)
+                else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
                     //Case 3 : All columns Bursted: highly likely first fire or totally new pattern coming in :
                     //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
@@ -645,6 +652,7 @@
             }
             else if (isTemporal)
             {
+                CurrentCycleState = BlockCycle.DEPOLARIZATION;
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
                 foreach (var neuron in NeuronsFiringThisCycle)
                 {
@@ -665,6 +673,8 @@
             else if (IsApical)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+
+                CurrentCycleState = BlockCycle.DEPOLARIZATION;
 
                 foreach (var neuron in NeuronsFiringThisCycle)
                 {
@@ -780,7 +790,9 @@
             if (AxonalNeuron == null || DendriticNeuron == null)
                 return false;
 
-            if (((AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y) || AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID)) && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
+            if (((AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y) ||            // No Same Column Connections 
+                AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                                         // No Selfing
+                && AxonalNeuron.nType.Equals(DendriticNeuron.nType))                                                                            // 
             {
                 Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
 
@@ -906,6 +918,9 @@
                     column.PostCycleCleanup();
                 }
             }
+
+            if (IsSpatial && !IsApical && !isTemporal)
+                CurrentCycleState = BlockCycle.CLEANUP;
 
             //Prepare the predicted list for next cycle Fire 
 
@@ -1285,5 +1300,13 @@
 
         #endregion
 
+
+       internal enum BlockCycle
+        { 
+            INITIALIZATION,
+            DEPOLARIZATION,
+            FIRING,
+            CLEANUP
+        }
     }
 }
