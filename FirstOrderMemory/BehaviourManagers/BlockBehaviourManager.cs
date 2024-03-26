@@ -790,9 +790,14 @@
             if (AxonalNeuron == null || DendriticNeuron == null)
                 return false;
 
+            if(CurrentCycleState != BlockCycle.INITIALIZATION &&  ( AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))        // Post Init Temporal / Apical Neurons should not connect with anybody else.
+            {                
+                throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temproal Neurons cannot connect to Normal Neurons Post Init!");
+            }
+
             if (((AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y) ||            // No Same Column Connections 
-                AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                                         // No Selfing
-                && AxonalNeuron.nType.Equals(DendriticNeuron.nType))                                                                            // 
+                AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID)) &&                                                                      // No Selfing
+                AxonalNeuron.nType.Equals(DendriticNeuron.nType))                                                                               // Prevents a lot of False Positives from Throwing Error.
             {
                 Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
 

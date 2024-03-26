@@ -105,7 +105,7 @@ namespace FirstOrderMemory.Models
                 return pos;
             }
 
-            throw new InvalidOperationException("Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
+            throw new InvalidOperationException("GetMyTemproalPartner :: Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
         }       
 
         public string GetMyApicalPartner()

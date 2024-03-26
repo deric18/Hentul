@@ -130,6 +130,23 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
+        [TestMethod]
+        public void TestConnectTwoNeuronsOrIncrementStrengthAfterInitialzationShouldFail()
+        {
+            //Connect 2 random neuron distally and check if the connection exists!
+
+            var axonalTemporalNeuron = bbManager.Columns[0, 2].Neurons[0].GetMyTemporalPartner();
+            var dendriticNeuron = bbManager.Columns[5, 3].Neurons[0];
+
+            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+
+            bbManager.Fire(sdr1);
+
+            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeuronsOrIncrementStrength(bbManager.ConvertStringPosToNeuron(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
+
+            Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temproal Neurons cannot connect to Normal Neurons Post Init!");
+
+        }
 
         public void TestFire()
         {
