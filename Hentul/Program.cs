@@ -8,9 +8,7 @@ Console.WriteLine("System Initialized Finally! Press any Key to start Neural Eng
 
 Console.ReadKey();
 
-
-
-//int x1 = vals.Item1, y1 = vals.Item2, x2 = vals.Item3, y2 = vals.Item4;
+screenGrabber.SetMousetotartingPoint();
 
 while (true)
 {
@@ -23,15 +21,16 @@ while (true)
 
     Console.WriteLine("Done Processing Pixel Data ...");
 
-    Console.WriteLine("Pres any key for moving cursor and processing next set of pixels");
+    //Console.WriteLine("Pres any key for moving cursor and processing next set of pixels");
 
     //Console.ReadKey();
 
     Console.WriteLine("Movign Cursor by 2 pixels");
-
-
+    
     // Todo: Put logic for moving cursor within a range of the defined image size.
-    screenGrabber.MoveCursor(1);
+    screenGrabber.MoveCursor();
+
+
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);

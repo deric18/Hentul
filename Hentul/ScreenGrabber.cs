@@ -32,6 +32,15 @@
 
         public int BucketColLength { get; private set; }
 
+        private Tuple<int, int> LeftUpper;
+        private Tuple<int, int> RightUpper;
+        private Tuple<int, int> LeftBottom;
+        private Tuple<int, int> RightBottom;
+        private Tuple<int, int> CenterCenter;
+        private int RangeIterator;
+        private int Offset;
+        private string CurrentDirection = string.Empty;
+
         public const int Sparsity = 10;
 
         public Dictionary<int, Position_SOM> TemporalPositionsForBuckets { get; private set; }
@@ -73,6 +82,15 @@
             {
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
+
+            LeftUpper = new Tuple<int, int>(3572, 415);
+            RightUpper = new Tuple<int, int>(4116, 415);
+            LeftBottom = new Tuple<int, int>(3572, 958);
+            RightBottom = new Tuple<int, int>(4116, 958);
+            CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
+            CurrentDirection = "RIGHT";
+            Offset = 2;
+            RangeIterator = 0;
 
             NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
 
@@ -276,18 +294,14 @@
         [DllImport("User32.Dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
 
-        public void MoveCursor(int offset)
+        public void MoveCursorToSpecificPosition(int x, int y)
         {
-            POINT p;
-
-            p.X = this.Point.X;
-            p.Y = this.Point.Y;
-
+            POINT p;         
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
 
-            p.X = p.X + offset;
-            p.Y = p.Y + offset;
+            p.X = x;
+            p.Y = y;
 
             ClientToScreen(dc, ref p);
             SetCursorPos(p.X, p.Y);
@@ -296,27 +310,102 @@
 
         }
 
-        public void MoveCursor(int x1, int y1)
+        public void MoveCursor()
         {
             POINT p;
-
-            p.X = this.Point.X;
-            p.Y = this.Point.Y;
 
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
 
-            p.X = x1;
-            p.Y = y1;
+            p = GetNextCursorPosition();
 
             ClientToScreen(dc, ref p);
             SetCursorPos(p.X, p.Y);
 
             ReleaseDC(desk, dc);
 
+        }
+
+        public void SetMousetotartingPoint()
+        {
+            MoveCursorToSpecificPosition(LeftUpper.Item1, LeftUpper.Item2);
         }
 
         #region PRIVATE METHODS        
+
+        private POINT GetNextCursorPosition()
+        {
+            POINT toReturn = Point;
+
+            if(Point.X == CenterCenter.Item1 && Point.Y == CenterCenter.Item2 )
+            {
+                Console.WriteLine("Reached the Center of Image ! ReStarting the system to the begining of the image");
+
+                toReturn.X = LeftUpper.Item1;
+                toReturn.Y = LeftUpper.Item2;
+
+                return toReturn;
+            }
+
+            switch(CurrentDirection.ToUpper())
+            {
+                case "RIGHT":
+                    {
+                        if(toReturn.X == ( RightUpper.Item1 - RangeIterator * Range) && toReturn.Y == ( RightUpper.Item2 - RangeIterator * Range) )
+                        {
+                            CurrentDirection = "DOWN";                            
+                        }
+                        else
+                        {
+                            toReturn.Y = toReturn.Y + Offset;
+                        }
+                        break;
+                    }
+                case "DOWN":
+                    {
+                        if ( toReturn.X == ( RightBottom.Item1 - RangeIterator * Range) &&  toReturn.Y == ( RightBottom.Item2 - RangeIterator * Range) )
+                        {
+                            CurrentDirection = "LEFT";
+                        }
+                        else
+                        {
+                            toReturn.X =  toReturn.X + Offset;
+                        }
+                        break;
+                    }
+                case "LEFT":
+                    {
+                        if ( toReturn.X == ( LeftBottom.Item1 - RangeIterator * Range) &&  toReturn.Y ==  ( LeftBottom.Item2 - RangeIterator * Range) )
+                        {
+                            CurrentDirection = "UP";
+                            RangeIterator++;
+                        }
+                        else
+                        {
+                            toReturn.Y = toReturn.Y - Offset;
+                        }
+                        break;
+                    }
+                case "UP":
+                    {
+                        if (toReturn.X == ( LeftUpper.Item1 - RangeIterator * Range) && toReturn.Y == ( LeftUpper.Item2 - RangeIterator * Range) )
+                        {
+                            CurrentDirection = "RIGHT";
+                        }
+                        else
+                        {
+                            toReturn.X = toReturn.X - Offset;
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException("Should Nto Happen!");                        
+                    }
+            }
+
+            return toReturn;
+        }
 
         public static Color GetColorAt(int x, int y)
         {

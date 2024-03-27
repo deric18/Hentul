@@ -363,11 +363,7 @@
                     {                        
 
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
-                        {
-                            //Debug code
-
-                            
-
+                        {                            
                             var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
 
                             if (incomingPattern.ActiveBits[i].X == 0 && incomingPattern.ActiveBits[i].Y == 4 && incomingPattern.ActiveBits.Count == 2 && predictedNeuronPositions.Count != 10)
