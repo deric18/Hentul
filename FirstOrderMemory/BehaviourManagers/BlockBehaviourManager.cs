@@ -360,14 +360,24 @@
             switch (incomingPattern.InputPatternType)
             {
                 case iType.SPATIAL:
-                    {
+                    {                        
+
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
                         {
+                            //Debug code
+
+                            
+
                             var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
+
+                            if (incomingPattern.ActiveBits[i].X == 0 && incomingPattern.ActiveBits[i].Y == 4 && incomingPattern.ActiveBits.Count == 2 && predictedNeuronPositions.Count != 10)
+                            {
+                                int breakpoint = 0;
+                            }
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                Console.WriteLine("Block ID : " + BlockID.ToString() + " New Pattern Coming in ... Bursting New Neuronal Firings Count : " + predictedNeuronPositions.Count.ToString());
+                                Console.WriteLine("Block ID : " + BlockID.ToString() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y );
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
 
@@ -386,6 +396,8 @@
                             {
 
                                 Console.WriteLine("There Should only be one winner in the Column");
+
+                                throw new InvalidOperationException("Fire :: This should not happen ! Bug in PickAwinner or Bursting Logic!!!");
 
                             }
                             predictedNeuronPositions = null;
@@ -440,8 +452,7 @@
                     {
                         throw new InvalidOperationException("Invalid Input Pattern Type");
                     }
-            }
-
+            }                        
 
             Fire();
 
@@ -496,7 +507,8 @@
                     }
                 };
 
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();                              
+
                 // ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumsnThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
                 {
@@ -642,8 +654,17 @@
                         }
                     }
                 }
-                else
+                else if(ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
+                    //Bug : Somehow the all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
+
+                    Console.WriteLine("WARNING !    WARNING !   WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !");
+                    Console.WriteLine("CASE 4 happened Again");
+
+                    //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
+                }
+                else
+                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysiss on how something can fire without bursting which was not predicted.
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
 

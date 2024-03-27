@@ -17,7 +17,10 @@
 
         public void AddNewPostion(Position_SOM pos)
         {
-            Positions.Add(pos);
+            if(!Positions.Any(x => x.X == pos.X && x.Y == pos.Y)) 
+            {
+                Positions.Add(pos);
+            }            
         }
 
         public void SetCoordinates(int x, int y)

@@ -188,7 +188,9 @@
                     {
                         bucket = l / BucketRowLength + (k / BucketColLength) * BucketColLength * 10;                        
                         
-                        Position_SOM newPosition = new Position_SOM((k % BucketRowLength), (l % BucketColLength));
+                        Position_SOM newPosition = new Position_SOM((k % BucketColLength), (l % BucketRowLength));
+
+                        //BUG: Need to put checks so we dont add same position twice in the same Bucket.
 
                         if (k % BucketRowLength > 9 || l  % BucketRowLength > 9)
                         {
