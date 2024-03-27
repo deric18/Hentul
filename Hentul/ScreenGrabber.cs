@@ -89,7 +89,7 @@
             RightBottom = new Tuple<int, int>(4116, 958);
             CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
             CurrentDirection = "RIGHT";
-            Offset = 2;
+            Offset = range;
             RangeIterator = 0;
 
             NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
@@ -140,8 +140,11 @@
         }
 
         public void Grab()
-        {
-            //send Image for Processing                           
+        {            
+
+            Stopwatch stopWatch = new Stopwatch();
+
+            stopWatch.Start();
 
             Console.CursorVisible = false;
 
@@ -157,6 +160,10 @@
             int y2 = Math.Abs(Point.Y + Range);
 
             this.ProcessColorMap(x1, y1, x2, y2);
+
+            stopWatch.Stop();
+
+            Console.WriteLine("Finished Getting Pixels Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());            
         }
 
         public Tuple<int, int, int, int> Grab1()
@@ -351,50 +358,50 @@
             {
                 case "RIGHT":
                     {
-                        if(toReturn.X == ( RightUpper.Item1 - RangeIterator * Range) && toReturn.Y == ( RightUpper.Item2 - RangeIterator * Range) )
+                        if( toReturn.X >= ( RightUpper.Item1 - RangeIterator * Range) )
                         {
                             CurrentDirection = "DOWN";                            
                         }
                         else
                         {
-                            toReturn.Y = toReturn.Y + Offset;
+                            toReturn.X = toReturn.X + Offset;
                         }
                         break;
                     }
                 case "DOWN":
                     {
-                        if ( toReturn.X == ( RightBottom.Item1 - RangeIterator * Range) &&  toReturn.Y == ( RightBottom.Item2 - RangeIterator * Range) )
+                        if ( toReturn.Y >= ( RightBottom.Item2 - RangeIterator * Range) )
                         {
                             CurrentDirection = "LEFT";
                         }
                         else
                         {
-                            toReturn.X =  toReturn.X + Offset;
+                            toReturn.Y =  toReturn.Y + Offset;
                         }
                         break;
                     }
                 case "LEFT":
                     {
-                        if ( toReturn.X == ( LeftBottom.Item1 - RangeIterator * Range) &&  toReturn.Y ==  ( LeftBottom.Item2 - RangeIterator * Range) )
+                        if ( toReturn.X <= ( LeftBottom.Item1 - RangeIterator * Range) )
                         {
                             CurrentDirection = "UP";
                             RangeIterator++;
                         }
                         else
                         {
-                            toReturn.Y = toReturn.Y - Offset;
+                            toReturn.X = toReturn.X - Offset;
                         }
                         break;
                     }
                 case "UP":
                     {
-                        if (toReturn.X == ( LeftUpper.Item1 - RangeIterator * Range) && toReturn.Y == ( LeftUpper.Item2 - RangeIterator * Range) )
+                        if (toReturn.Y <= ( LeftUpper.Item2 - RangeIterator * Range) )
                         {
                             CurrentDirection = "RIGHT";
                         }
                         else
                         {
-                            toReturn.X = toReturn.X - Offset;
+                            toReturn.Y = toReturn.Y + Offset;
                         }
                         break;
                     }

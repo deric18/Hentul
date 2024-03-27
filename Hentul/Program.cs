@@ -6,7 +6,7 @@ ScreenGrabber screenGrabber = new ScreenGrabber(25);
 
 Console.WriteLine("System Initialized Finally! Press any Key to start Neural Engine :");
 
-Console.ReadKey();
+//Console.ReadKey();
 
 screenGrabber.SetMousetotartingPoint();
 
@@ -25,12 +25,11 @@ while (true)
 
     //Console.ReadKey();
 
-    Console.WriteLine("Movign Cursor by 2 pixels");
-    
-    // Todo: Put logic for moving cursor within a range of the defined image size.
+    Console.WriteLine("Movign Cursor by 25 pixels");
+        
     screenGrabber.MoveCursor();
 
-
+    Thread.Sleep(2000);
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);
