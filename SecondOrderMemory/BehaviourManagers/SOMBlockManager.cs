@@ -42,5 +42,17 @@ namespace SecondOrderMemory.BehaviourManagers
         {
             Blocks[blockNumber].Fire(som_sdr);
         }
+
+        private void EstablishCurrentState()
+        {
+            //Check if there is consensus amoung all the blocks either by unioun and Intersection and update CurrentState Enum 
+
+            //Question : what if there is dissonance amoung the blocks ?
+
+
+
+
+
+        }
     }
 }
