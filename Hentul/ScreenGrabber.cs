@@ -354,7 +354,7 @@
                 toReturn = Point;
             }
 
-            if(toReturn.X == CenterCenter.Item1 && toReturn.Y == CenterCenter.Item2 )
+            if( ( toReturn.X <= CenterCenter.Item1 - 25 && toReturn.X >= CenterCenter.Item1 + 25 ) && ( toReturn.Y >= CenterCenter.Item2 - 25  && toReturn.Y <= CenterCenter.Item2 + 25))
             {
                 Console.WriteLine("Reached the Center of Image ! ReStarting the system to the begining of the image");
 
@@ -411,11 +411,11 @@
                     }
                 case "UP":
                     {
-                        if (toReturn.Y <= ( LeftUpper.Item2 - RangeIterator * Range) )
+                        if (toReturn.Y <= ( LeftUpper.Item2 + RangeIterator * Range) )
                         {
                             CurrentDirection = "RIGHT";
-                            toReturn.X = LeftUpper.Item1 - RangeIterator * Range;
-                            toReturn.X = LeftUpper.Item2;
+                            toReturn.X = LeftUpper.Item1 + RangeIterator * Range;
+                            toReturn.Y = LeftUpper.Item2 + RangeIterator * Range;
                         }
                         else
                         {
@@ -425,7 +425,7 @@
                     }
                 default:
                     {
-                        throw new InvalidOperationException("Should Nto Happen!");                        
+                        throw new InvalidOperationException("Should Not Happen!");                        
                     }
             }
 

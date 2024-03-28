@@ -29,7 +29,7 @@ while (true)
         
     screenGrabber.MoveCursor();
 
-    Thread.Sleep(3000);
+    Thread.Sleep(5000);
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);

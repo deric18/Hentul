@@ -44,16 +44,16 @@ namespace Hentul.UT
         {
             sg = new ScreenGrabber(count);
 
-            int iterations = 25;
+            int iterations = 21;
 
             int range = count;
 
             POINT p;
 
             int i = 1;
-
             p.X = 3572;
-            p.Y = 415;
+            p.Y = 415;            
+            
 
             while (sg.CurrentDirection == "RIGHT")
             {
@@ -115,6 +115,9 @@ namespace Hentul.UT
                 }
                 i++;
             }
+
+            Assert.AreEqual(3597, p.X);
+            Assert.AreEqual(440, p.Y);
         }
 
         [Test]
