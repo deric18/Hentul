@@ -39,7 +39,7 @@
         private Tuple<int, int> CenterCenter;
         private int RangeIterator;
         private int Offset;
-        private string CurrentDirection = string.Empty;
+        public string CurrentDirection = string.Empty;
 
         public const int Sparsity = 10;
 
@@ -325,6 +325,7 @@
             IntPtr dc = GetWindowDC(desk);
 
             p = GetNextCursorPosition();
+            Point = p;
 
             ClientToScreen(dc, ref p);
             SetCursorPos(p.X, p.Y);
@@ -340,11 +341,20 @@
 
         #region PRIVATE METHODS        
 
-        private POINT GetNextCursorPosition()
+        public POINT GetNextCursorPosition(bool isMock = false, int x = 0, int y = 0)
         {
-            POINT toReturn = Point;
+            POINT toReturn;
 
-            if(Point.X == CenterCenter.Item1 && Point.Y == CenterCenter.Item2 )
+            if(isMock)
+            {
+                toReturn.X = x; toReturn.Y = y; 
+            }
+            else
+            {
+                toReturn = Point;
+            }
+
+            if(toReturn.X == CenterCenter.Item1 && toReturn.Y == CenterCenter.Item2 )
             {
                 Console.WriteLine("Reached the Center of Image ! ReStarting the system to the begining of the image");
 
@@ -358,9 +368,11 @@
             {
                 case "RIGHT":
                     {
-                        if( toReturn.X >= ( RightUpper.Item1 - RangeIterator * Range) )
+                        if( toReturn.X >= ( RightUpper.Item1 + RangeIterator * Range) )
                         {
-                            CurrentDirection = "DOWN";                            
+                            CurrentDirection = "DOWN";             
+                            toReturn.X = RightUpper.Item1;
+                            toReturn.Y = RightUpper.Item2;
                         }
                         else
                         {
@@ -370,9 +382,11 @@
                     }
                 case "DOWN":
                     {
-                        if ( toReturn.Y >= ( RightBottom.Item2 - RangeIterator * Range) )
+                        if ( toReturn.Y >= ( RightBottom.Item2 + RangeIterator * Range) )
                         {
                             CurrentDirection = "LEFT";
+                            toReturn.X = RightBottom.Item1;
+                            toReturn.Y = RightBottom.Item2;
                         }
                         else
                         {
@@ -385,6 +399,8 @@
                         if ( toReturn.X <= ( LeftBottom.Item1 - RangeIterator * Range) )
                         {
                             CurrentDirection = "UP";
+                            toReturn.X = LeftBottom.Item1;
+                            toReturn.Y = LeftBottom.Item2;
                             RangeIterator++;
                         }
                         else
@@ -398,10 +414,12 @@
                         if (toReturn.Y <= ( LeftUpper.Item2 - RangeIterator * Range) )
                         {
                             CurrentDirection = "RIGHT";
+                            toReturn.X = LeftUpper.Item1 - RangeIterator * Range;
+                            toReturn.X = LeftUpper.Item2;
                         }
                         else
                         {
-                            toReturn.Y = toReturn.Y + Offset;
+                            toReturn.Y = toReturn.Y - Offset;
                         }
                         break;
                     }

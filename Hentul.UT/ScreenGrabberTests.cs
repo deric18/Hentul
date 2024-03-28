@@ -9,11 +9,11 @@ namespace Hentul.UT
         ScreenGrabber sg;
         Random rand;
         int count = 25;
-        
+
         [SetUp]
         public void Setup()
         {
-            rand = new Random();            
+            rand = new Random();
         }
 
         [Test]
@@ -39,7 +39,83 @@ namespace Hentul.UT
 
         }
 
-        
+        [Test]
+        public void TestGetNextCursorPosition()
+        {
+            sg = new ScreenGrabber(count);
+
+            int iterations = 25;
+
+            int range = count;
+
+            POINT p;
+
+            int i = 1;
+
+            p.X = 3572;
+            p.Y = 415;
+
+            while (sg.CurrentDirection == "RIGHT")
+            {
+                p = sg.GetNextCursorPosition(true, p.X, p.Y);
+
+                if (sg.CurrentDirection == "DOWN")
+                    break;
+
+                if (p.X != 3572 + (i * 25))
+                {
+                    Assert.Fail();
+                }
+                i++;
+            }
+
+            i = 1;
+
+            while (sg.CurrentDirection == "DOWN")
+            {
+                p = sg.GetNextCursorPosition(true, p.X, p.Y);
+
+                if (sg.CurrentDirection == "LEFT")
+                    break;
+
+                if (p.Y != 415 + (i * 25))
+                {
+                    Assert.Fail();
+                }
+                i++;
+            }
+
+            i = 1;
+            while (sg.CurrentDirection == "LEFT")
+            {
+                p = sg.GetNextCursorPosition(true, p.X, p.Y);
+
+                if (sg.CurrentDirection == "UP")
+                    break;
+
+                if (p.X != 4116 - (i * 25))
+                {
+                    Assert.Fail();
+                }
+                i++;
+            }
+
+            i = 1;
+
+            while (sg.CurrentDirection == "UP")
+            {
+                p = sg.GetNextCursorPosition(true, p.X, p.Y);
+
+                if (sg.CurrentDirection == "RIGHT")
+                    break;
+
+                if (p.Y != 958 - (i * 25))
+                {
+                    Assert.Fail();
+                }
+                i++;
+            }
+        }
 
         [Test]
         public void TestNumberOfPixelsPerBBM()
@@ -68,7 +144,7 @@ namespace Hentul.UT
         //    var ex = Assert.That
         //}
 
-        [Test, Ignore("Only for debugging logic")]  
+        [Test, Ignore("Only for debugging logic")]
         public void TestCodeChange()
         {
             int[,] ints =
@@ -174,7 +250,7 @@ namespace Hentul.UT
                 { 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 },
                 { 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 },
                 { 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 },
-                { 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 },                
+                { 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0,1,2,3,4,5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 },
             };
 
             int BucketRowLength = 5, BucketColLength = 2;
@@ -184,12 +260,12 @@ namespace Hentul.UT
 
             int[,] bucketIndexes = new int[100, 100];
 
-            for ( int i = 0; i < 100; i++ )
+            for (int i = 0; i < 100; i++)
             {
-                for( int j = 0; j < 100; j++ )
+                for (int j = 0; j < 100; j++)
                 {
-                    bucket = j / BucketRowLength +  ( i / BucketColLength ) * BucketColLength * 10;
-                    
+                    bucket = j / BucketRowLength + (i / BucketColLength) * BucketColLength * 10;
+
                     bucketIndexes[i, j] = bucket;
                 }
             }
