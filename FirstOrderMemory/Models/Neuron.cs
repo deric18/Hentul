@@ -40,9 +40,7 @@ namespace FirstOrderMemory.Models
 
         public Dictionary<string, Synapse> AxonalList { get; private set; }
 
-        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }        
-
-        public List<Neuron> ConnectedNeurons { get; private set; }
+        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }                
 
         public List<Segment>? Segments { get; private set; } = null;
 
@@ -56,8 +54,7 @@ namespace FirstOrderMemory.Models
         {
             NeuronID = neuronId;
             this.nType = nType;
-            TAContributors = new Dictionary<string, char>();
-            ConnectedNeurons = new List<Neuron>();
+            TAContributors = new Dictionary<string, char>();            
             ProximoDistalDendriticList = new Dictionary<string, Synapse>();
             AxonalList = new Dictionary<string, Synapse>();
             CurrentState = NeuronState.RESTING;

@@ -18,6 +18,8 @@
 
     public class ScreenGrabber
     {
+        private const int TOTALPARSEITERATIONS = 5;
+
         public bool[,] bitMap { get; private set; }
 
         public POINT Point { get; set; }
@@ -31,6 +33,8 @@
         public int BucketRowLength { get; private set; }
 
         public int BucketColLength { get; private set; }
+
+        private int Iterations;
 
         private Tuple<int, int> LeftUpper;
         private Tuple<int, int> RightUpper;
@@ -70,6 +74,8 @@
 
             BucketColLength = 2;
 
+            Iterations = 0;
+
             double numerator = (2 * Range) * (2 * Range);
 
             double denominator = (BucketRowLength * BucketColLength);
@@ -91,7 +97,7 @@
             CurrentDirection = "RIGHT";
             Offset = range;
             RangeIterator = 0;
-
+            
             NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
 
             BucketToData = new Dictionary<int, LocationNPositions>();
@@ -360,6 +366,24 @@
             if( ( toReturn.X <= CenterCenter.Item1 - 25 && toReturn.X >= CenterCenter.Item1 + 25 ) && ( toReturn.Y >= CenterCenter.Item2 - 25  && toReturn.Y <= CenterCenter.Item2 + 25))
             {
                 Console.WriteLine("Reached the Center of Image ! ReStarting the system to the begining of the image");
+
+                if(Iterations == TOTALPARSEITERATIONS)
+                {
+                    // Start BackUp
+
+                    foreach( var bbm in fomBBM)
+                    {
+                        bbm.BackUp(bbm.BlockID.X.ToString() + ".xml");
+                    }
+
+                    Console.WriteLine("System has Finished Parsing the Image & Backed Up ! Take a Bow!!! You achieved something great today!!!! ");
+
+                    Console.Read();
+                }
+                else
+                {
+                    Iterations++;
+                }
 
                 toReturn.X = LeftUpper.Item1;
                 toReturn.Y = LeftUpper.Item2;

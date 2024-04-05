@@ -15,7 +15,7 @@
 
         public int Z { get; private set; }
 
-        private Position_SOM BlockID;
+        public Position_SOM BlockID;
 
         public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
 
@@ -71,6 +71,8 @@
         public bool IsSpatial;
 
         private bool IsBurstOnly;
+
+        private const string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
         private BlockCycle CurrentCycleState { get; set; }
 
@@ -338,12 +340,50 @@
 
         #region BACKUP & RESTORE
 
-        public void BackUp()
+        public void BackUp(string filename)
         {
+            var xmlDocument = new XmlDocument();
 
+            xmlDocument.LoadXml("<Connections></Connections>");
+            
+
+            foreach(var column in Columns)
+            {
+                foreach(var neuron in column.Neurons)
+                {
+                    var distalList = neuron.ProximoDistalDendriticList.Where( conList => conList.Value.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) ).ToList();
+
+                    if(distalList.Count > 0 )
+                    {
+                        foreach (var distalSynapse in distalList)
+                        { 
+                            
+                            var distalNode = xmlDocument.CreateNode( XmlNodeType.Element, "DistalDendriticConnection", string.Empty);
+                            
+                            var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
+                            blockIdElement.InnerText = BlockID.X.ToString();
+
+                            var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
+
+                            sourceNeuronElement.InnerText = distalSynapse.Value.AxonalNeuronId.ToString(); 
+
+                            var targetNeuronElement = xmlDocument.CreateNode(XmlNodeType.Element, "TargetNeuronID", string.Empty);
+                            targetNeuronElement.InnerText = distalSynapse.Value.DendronalNeuronalId.ToString();
+                            
+                            distalNode.AppendChild(sourceNeuronElement);
+                            distalNode.AppendChild(targetNeuronElement);
+
+                            xmlDocument?.DocumentElement?.AppendChild(distalNode);
+                        }
+                        
+                    }
+                }
+            }
+
+            xmlDocument.Save(backupDirectory + filename);
         }
 
-        public void RetoreFromBackUp()
+        public void RetoreFromBackUp(string filename)
         {
 
         }

@@ -498,6 +498,21 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [TestMethod]
+        public void TesstBackUpAndRestore()
+        {
+            Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[5];
+            Neuron dendronalNeuronID = bbManager.Columns[1, 5].Neurons[8];
+
+            bbManager.ConnectTwoNeuronsOrIncrementStrength(axonalNeuronID, dendronalNeuronID, ConnectionType.DISTALDENDRITICNEURON);
+
+            bbManager.BackUp("1.xml");
+
+            bbManager.RetoreFromBackUp("1.xml");
+
+            Assert.DoesNotThrow(() => new Exception());
+        }
+
+        [TestMethod]
         public void TestSOMBBMCloneUT()
         {
             BlockBehaviourManager bbm2 = bbManager.CloneBBM(0, 0, 0);
@@ -529,8 +544,7 @@ namespace FirstOrderMemoryUnitTest
             }
 
             
-        }
-
+        }        
 
         public void TestMemoryProblemsInThisTestUT()
         {

@@ -20,4 +20,8 @@
     <ProjectReference Include="..\FirstOrderMemory\FirstOrderMemory.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="BackUp\" />
+  </ItemGroup>
+
 </Project>
