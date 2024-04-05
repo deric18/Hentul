@@ -48,11 +48,17 @@
 
         //public Dictionary<string, int[]> AxonalCache { get; private set; }
 
-        public static int axonCounter { get; private set; }
+        public int axonCounter { get; private set; }
 
         public uint totalProximalConnections;
 
         public static uint totalDendronalConnections;
+
+        public uint TotalDistalDendriticConnections;
+
+        public uint TotalBurstFire;
+
+        public uint TotalPredictionFires;
 
         public uint totalAxonalConnections;
 
@@ -91,7 +97,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int Z = 10,  int x = 0, int y = 0, int z = 0)
+        public BlockBehaviourManager(int numColumns = 10, int Z = 10, int x = 0, int y = 0, int z = 0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 
@@ -192,7 +198,7 @@
 
                 Console.WriteLine(ex.ToString());
 
-                throw;                
+                throw;
             }
         }
 
@@ -308,9 +314,9 @@
 
                 blockBehaviourManager.GenerateTemporalLines();
 
-                blockBehaviourManager.GenerateApicalLines();                
+                blockBehaviourManager.GenerateApicalLines();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw;
             }
@@ -318,9 +324,34 @@
             #endregion
         }
 
+        public void IncrementDistalDendronalConnection()
+        {
+            TotalDistalDendriticConnections++;
+        }
+
+        public void DecrementDistalDendronalConnection()
+        {
+            TotalDistalDendriticConnections--;
+        }
+
+        #endregion
+
+        #region BACKUP & RESTORE
+
+        public void BackUp()
+        {
+
+        }
+
+        public void RetoreFromBackUp()
+        {
+
+        }
+
         #endregion
 
         #region PUBLIC METHODS 
+
         private void PreCyclePrep()
         {
             //Prepare all the neurons that are predicted 
@@ -380,13 +411,18 @@
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
 
                                 IsBurstOnly = true;
+
                                 num_continuous_burst++;
+
+                                TotalBurstFire++;
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
-                                Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                //Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
+
+                                TotalPredictionFires++;
                             }
                             else
                             {
@@ -461,7 +497,18 @@
                 PostCycleCleanup();
         }
 
-
+        public void PrintBlockStats()
+        {
+            if (TotalDistalDendriticConnections > 0 || TotalBurstFire > 0 || TotalPredictionFires > 0)
+                Console.WriteLine("Block ID : " + BlockID.ToString());
+            if (TotalDistalDendriticConnections > 0)
+                Console.WriteLine("Total DISTAL Dendronal Connections : " + TotalDistalDendriticConnections.ToString());
+            if(TotalBurstFire > 0)
+                Console.WriteLine("Total BURST FIRE COUNT : " + TotalBurstFire.ToString());
+            if (TotalPredictionFires > 0)
+                Console.WriteLine("Total CORRECT PREDICTIONS : " + TotalPredictionFires.ToString());
+            
+        }
 
         private void Fire()
         {
@@ -824,6 +871,10 @@
 
             if (AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
             {
+                if(cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
+                {
+                    TotalDistalDendriticConnections++;
+                }
                 return true;
             }
 
@@ -872,6 +923,7 @@
             if (x > 9 || y > 9 || z > 9)
             {
                 int breakpoint = 1;
+
                 throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
             }
 
@@ -964,12 +1016,15 @@
             }
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 25 && BlockBehaviourManager.CycleNum % 25 == 0)
+            if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
             {
                 foreach (var col in this.Columns)
                 {
                     col.PruneCycleRefresh();
                 }
+
+                TotalBurstFire = 0;
+                TotalPredictionFires = 0;
             }
 
             //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1

@@ -49,8 +49,7 @@ namespace FirstOrderMemory.Models
         public NeuronState CurrentState { get; private set; }
 
         public int flag { get; set; }
-
-        private List<string>? PreCycleContributingNeurons { get; set; } = null;
+        
         public int Voltage { get; private set; }
 
         public Neuron(Position_SOM neuronId, NeuronType nType = NeuronType.NORMAL)
@@ -214,9 +213,7 @@ namespace FirstOrderMemory.Models
                 {
 
                     ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
-
                     
-
                     return true;
                 }
             }
@@ -298,6 +295,7 @@ namespace FirstOrderMemory.Models
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
                     BlockBehaviourManager.totalDendronalConnections++;
+                    
                 }
 
                 return true;

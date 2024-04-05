@@ -83,10 +83,10 @@
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
 
-            LeftUpper = new Tuple<int, int>(3572, 415);
-            RightUpper = new Tuple<int, int>(4116, 415);
-            LeftBottom = new Tuple<int, int>(3572, 958);
-            RightBottom = new Tuple<int, int>(4116, 958);
+            LeftUpper = new Tuple<int, int>(1007, 412);
+            RightUpper = new Tuple<int, int>(1550, 412);
+            LeftBottom = new Tuple<int, int>(1567, 972);
+            RightBottom = new Tuple<int, int>(1567, 972);
             CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
             CurrentDirection = "RIGHT";
             Offset = range;
@@ -213,16 +213,12 @@
                     {
                         bucket = l / BucketRowLength + (k / BucketColLength) * BucketColLength * 10;                        
                         
-                        Position_SOM newPosition = new Position_SOM((k % BucketColLength), (l % BucketRowLength));
-
-                        //BUG: Need to put checks so we dont add same position twice in the same Bucket.
+                        Position_SOM newPosition = new Position_SOM((k % BucketColLength), (l % BucketRowLength));                        
 
                         if (k % BucketRowLength > 9 || l  % BucketRowLength > 9)
                         {
                             throw new InvalidDataException("ProcessColorMap :: Completely B.S Logic!  Fix your fucking EQUATIONSSSSSS !!!! ");
-                        }
-
-                        //If Bit is pure BLACK , then add it the  bucket it belongs to as an activePosition.
+                        }                        
 
                         if (BucketToData.TryGetValue(bucket, out var data))
                         {
@@ -271,6 +267,14 @@
 
         }
 
+        public void PrintBlockVital()
+        {
+            foreach( var fom in fomBBM)
+            {
+                fom.PrintBlockStats();
+            }
+        }
+
         private SDR_SOM GetSpatialPatternForBucket(List<Position_SOM> positions) =>
                 new SDR_SOM(NumColumns, Z, positions, iType.SPATIAL);
 
@@ -278,7 +282,6 @@
         public SDR_SOM GenerateTemporalSDR(int x, int y)
         {
             
-
             LocationScalarEncoder encoder = new LocationScalarEncoder(100, 32);
 
             //Todo : buckett is not the correct parameter for encoding here.

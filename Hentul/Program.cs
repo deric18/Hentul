@@ -13,23 +13,21 @@ screenGrabber.SetMousetotartingPoint();
 while (true)
 {
 
-    screenGrabber.Grab();
+    screenGrabber.Grab();    
 
-    Console.WriteLine("Processing Pixel Data ...");
-
-    screenGrabber.ProcessPixelData();
-
-    Console.WriteLine("Done Processing Pixel Data ...");
+    screenGrabber.ProcessPixelData();    
 
     //Console.WriteLine("Pres any key for moving cursor and processing next set of pixels");
 
     //Console.ReadKey();
 
+    screenGrabber.PrintBlockVital();
+
     Console.WriteLine("Movign Cursor by 25 pixels");
         
     screenGrabber.MoveCursor();
 
-    Thread.Sleep(5000);
+    Thread.Sleep(8000);
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);
