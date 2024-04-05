@@ -51,8 +51,8 @@ namespace Hentul.UT
             POINT p;
 
             int i = 1;
-            p.X = 3572;
-            p.Y = 415;            
+            p.X = sg.LeftUpper.Item1;
+            p.Y = sg.LeftUpper.Item2;
             
 
             while (sg.CurrentDirection == "RIGHT")
@@ -62,7 +62,7 @@ namespace Hentul.UT
                 if (sg.CurrentDirection == "DOWN")
                     break;
 
-                if (p.X != 3572 + (i * 25))
+                if (p.X != sg.LeftUpper.Item1 + (i * 25))
                 {
                     Assert.Fail();
                 }
@@ -78,7 +78,7 @@ namespace Hentul.UT
                 if (sg.CurrentDirection == "LEFT")
                     break;
 
-                if (p.Y != 415 + (i * 25))
+                if (p.Y != sg.LeftUpper.Item2 + (i * 25))
                 {
                     Assert.Fail();
                 }
@@ -93,7 +93,7 @@ namespace Hentul.UT
                 if (sg.CurrentDirection == "UP")
                     break;
 
-                if (p.X != 4116 - (i * 25))
+                if (p.X != sg.RightBottom.Item1 - (i * 25))
                 {
                     Assert.Fail();
                 }
@@ -107,17 +107,20 @@ namespace Hentul.UT
                 p = sg.GetNextCursorPosition(true, p.X, p.Y);
 
                 if (sg.CurrentDirection == "RIGHT")
+                {
+                    p = sg.GetNextCursorPosition(true, p.X, p.Y);
                     break;
+                }
 
-                if (p.Y != 958 - (i * 25))
+                if (p.Y != sg.LeftBottom.Item2 - (i * 25))
                 {
                     Assert.Fail();
                 }
                 i++;
             }
 
-            Assert.AreEqual(3597, p.X);
-            Assert.AreEqual(440, p.Y);
+            Assert.AreEqual(sg.LeftUpper.Item1 + 2 * range, p.X);
+            Assert.AreEqual(sg.LeftUpper.Item2 + range, p.Y);
         }
 
         [Test]

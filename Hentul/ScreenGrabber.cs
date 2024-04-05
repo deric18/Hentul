@@ -36,11 +36,11 @@
 
         private int Iterations;
 
-        private Tuple<int, int> LeftUpper;
-        private Tuple<int, int> RightUpper;
-        private Tuple<int, int> LeftBottom;
-        private Tuple<int, int> RightBottom;
-        private Tuple<int, int> CenterCenter;
+        public Tuple<int, int> LeftUpper { get; private set; }
+        public Tuple<int, int> RightUpper { get; private set; }
+        public Tuple<int, int> LeftBottom { get; private set; }
+        public Tuple<int, int> RightBottom { get; private set; }
+        public Tuple<int, int> CenterCenter { get; private set; }
         private int RangeIterator;
         private int Offset;
         public string CurrentDirection = string.Empty;
@@ -91,8 +91,8 @@
 
             LeftUpper = new Tuple<int, int>(1007, 412);
             RightUpper = new Tuple<int, int>(1550, 412);
-            LeftBottom = new Tuple<int, int>(1567, 972);
-            RightBottom = new Tuple<int, int>(1567, 972);
+            LeftBottom = new Tuple<int, int>(1007, 972);
+            RightBottom = new Tuple<int, int>(1550, 972);
             CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
             CurrentDirection = "RIGHT";
             Offset = range;
@@ -423,7 +423,7 @@
                     }
                 case "LEFT":
                     {
-                        if ( toReturn.X <= ( LeftBottom.Item1 - RangeIterator * Range) )
+                        if ( toReturn.X <= ( LeftBottom.Item1 + RangeIterator * Range) )
                         {
                             CurrentDirection = "UP";
                             toReturn.X = LeftBottom.Item1;
