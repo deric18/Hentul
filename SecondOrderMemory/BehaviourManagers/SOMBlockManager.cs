@@ -5,7 +5,7 @@ namespace SecondOrderMemory.BehaviourManagers
 {
     public class SOMBlockManager
     {
-        public List<BlockBehaviourManager> Blocks { get; private set; }
+        public List<SBBManager> Blocks { get; private set; }
 
         public int NumColumns = 10;
 
@@ -26,13 +26,13 @@ namespace SecondOrderMemory.BehaviourManagers
 
             NumRows = numRows;
 
-            Blocks = new List<BlockBehaviourManager>();
+            Blocks = new List<SBBManager>();
             
-            BlockBehaviourManager bbm;
+            SBBManager bbm;
 
             for( int i = 0; i < numBlocks; i++ )
             {            
-                bbm  = new BlockBehaviourManager(NumColumns, NumRows, i);
+                bbm  = new SBBManager(NumColumns, NumRows, i);
                 bbm.Init();
                 Blocks.Add(bbm);
             }
@@ -53,7 +53,7 @@ namespace SecondOrderMemory.BehaviourManagers
             // Build the SOM Layer first to see how it works the nfrom the data we can build the logic for higher predictive feedback Layers.
 
 
-            //AlgorithM : 
+            //Algorithm : 
 
             //Step 1: Keep checking with all the layers for Confident Classification
             //Step 2: If one of the blocks return abck with a Confident Classification -> cross check this classification with all the other layers , if all of them agree Classify the input to corresponding Object.

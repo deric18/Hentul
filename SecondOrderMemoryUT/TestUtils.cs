@@ -11,7 +11,7 @@
             return new Position_SOM(spatial.X, spatial.Y, temporal.X);
         }
 
-        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position pos)
+        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(SBBManager bbManager, Position pos)
         {
             return bbManager.Columns[pos.Z, pos.Y].Neurons[pos.X];
         }

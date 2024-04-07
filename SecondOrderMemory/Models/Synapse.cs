@@ -32,7 +32,7 @@ namespace SecondOrderMemory.Models
             if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
             {
                 IsActive = true;
-                PredictiveHitCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
+                PredictiveHitCount = SBBManager.DISTALNEUROPLASTICITY;
                 FiringHitCount = 0;
             }
             else
@@ -57,7 +57,7 @@ namespace SecondOrderMemory.Models
                 breakpoint = true;
             }
 
-            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
+            if (PredictiveHitCount >= SBBManager.DISTALNEUROPLASTICITY) 
             {
                 if(IsActive == false) 
                     IsActive = true;
@@ -65,13 +65,13 @@ namespace SecondOrderMemory.Models
                 FiringHitCount++;
 
                 _strength++;
-                this.lastFiredCycle = BlockBehaviourManager.CycleNum;
+                this.lastFiredCycle = SBBManager.CycleNum;
             }
             else
             {
                 PredictiveHitCount++;
 
-                this.lastPredictedCycle = BlockBehaviourManager.CycleNum;
+                this.lastPredictedCycle = SBBManager.CycleNum;
             }
         }
     }

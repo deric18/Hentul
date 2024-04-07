@@ -4,7 +4,7 @@
     using Common;
     using System.Xml;
 
-    public class BlockBehaviourManager
+    public class SBBManager
     {
 
         #region CONSTANTS
@@ -28,6 +28,7 @@
 
 
         #region VARIABLES
+
         public static ulong CycleNum { get; private set; }
 
         public int NumColumns { get; private set; }
@@ -90,7 +91,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int numRows = 10, int x = 0, int y = 0, int z = 0)
+        public SBBManager(int numColumns = 10, int numRows = 10, int x = 0, int y = 0, int z = 0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 
@@ -227,11 +228,11 @@
             }
         }
 
-        public BlockBehaviourManager CloneBBM(int x, int y, int z)
+        public SBBManager CloneBBM(int x, int y, int z)
         {
-            BlockBehaviourManager toReturn;
+            SBBManager toReturn;
 
-            toReturn = new BlockBehaviourManager(NumColumns, NumRows, x, y, z);
+            toReturn = new SBBManager(NumColumns, NumRows, x, y, z);
 
             toReturn.Init();
 
@@ -946,7 +947,7 @@
             }
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 25 && BlockBehaviourManager.CycleNum % 25 == 0)
+            if (SBBManager.CycleNum >= 25 && SBBManager.CycleNum % 25 == 0)
             {
                 foreach (var col in this.Columns)
                 {

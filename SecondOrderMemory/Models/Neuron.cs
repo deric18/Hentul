@@ -296,11 +296,11 @@ namespace SecondOrderMemory.Models
                     {
                         if (cType.Equals(ConnectionType.TEMPRORAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), SBBManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
                         }
                         else if (cType.Equals(ConnectionType.APICAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), SBBManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
                         }                        
 
                         return true;
@@ -318,13 +318,13 @@ namespace SecondOrderMemory.Models
             }
             else
             {
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), SBBManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
                 Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
-                    BlockBehaviourManager.totalDendronalConnections++;
+                    SBBManager.totalDendronalConnections++;
                 }
 
                 return true;
@@ -351,7 +351,7 @@ namespace SecondOrderMemory.Models
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.CycleNum, AXONAL_CONNECTION, connectionType));                
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, SBBManager.CycleNum, AXONAL_CONNECTION, connectionType));                
 
                 return true;
             }
@@ -388,7 +388,7 @@ namespace SecondOrderMemory.Models
                 foreach (var item in ProximoDistalDendriticList)
                 {
 
-                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ( (BlockBehaviourManager.CycleNum - Math.Max(item.Value.lastFiredCycle, item.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
+                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ( (SBBManager.CycleNum - Math.Max(item.Value.lastFiredCycle, item.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
                     {
                         if (removeList == null)
                         {
@@ -405,7 +405,7 @@ namespace SecondOrderMemory.Models
                     {
                         ProximoDistalDendriticList.Remove(removeList[i]);
 
-                        BlockBehaviourManager.totalDendronalConnections--;
+                        SBBManager.totalDendronalConnections--;
                     }
                 }
             }
