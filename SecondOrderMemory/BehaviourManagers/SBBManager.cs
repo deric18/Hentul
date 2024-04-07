@@ -63,6 +63,12 @@
 
         public List<Neuron> SpikeTrainList { get; private set; }
 
+        public uint TotalDistalDendriticConnections;
+
+        public uint TotalBurstFire;
+
+        public uint TotalPredictionFires;
+
         //public Dictionary<string, int[]> DendriticCache { get; private set; }
 
         //public Dictionary<string, int[]> AxonalCache { get; private set; }
@@ -308,6 +314,16 @@
             #endregion
         }
 
+        public void IncrementDistalDendronalConnection()
+        {
+            TotalDistalDendriticConnections++;
+        }
+
+        public void DecrementDistalDendronalConnection()
+        {
+            TotalDistalDendriticConnections--;
+        }
+
         #endregion
 
         #region PUBLIC METHODS 
@@ -370,13 +386,18 @@
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
 
                                 IsBurstOnly = true;
+                                
                                 num_continuous_burst++;
+
+                                TotalBurstFire++;
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
                                 Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 NeuronsFiringThisCycle.AddRange(predictedNeuronPositions);
+
+                                TotalPredictionFires++;
                             }
                             else
                             {
@@ -688,6 +709,19 @@
             }
         }
 
+        public void PrintBlockStats()
+        {
+            if (TotalDistalDendriticConnections > 0 || TotalBurstFire > 0 || TotalPredictionFires > 0)
+                Console.WriteLine("Block ID : " + BlockID.ToString());
+            if (TotalDistalDendriticConnections > 0)
+                Console.WriteLine("Total DISTAL Dendronal Connections : " + TotalDistalDendriticConnections.ToString());
+            if (TotalBurstFire > 0)
+                Console.WriteLine("Total BURST FIRE COUNT : " + TotalBurstFire.ToString());
+            if (TotalPredictionFires > 0)
+                Console.WriteLine("Total CORRECT PREDICTIONS : " + TotalPredictionFires.ToString());
+
+        }
+
         #endregion
 
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
@@ -783,8 +817,7 @@
         }
 
         public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
-        {
-            // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
+        {            
             if (cType == null)
             {
                 bool breakpoint = false;
@@ -804,6 +837,11 @@
 
             if (AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
             {
+                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
+                {
+                    TotalDistalDendriticConnections++;
+                }
+
                 return true;
             }
 
@@ -1085,9 +1123,7 @@
         private void ReadDendriticSchema(int intX, int intY)
         {
 
-            #region REAL Code
-
-            // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
+            #region REAL Code            
 
             XmlDocument document = new XmlDocument();            
 

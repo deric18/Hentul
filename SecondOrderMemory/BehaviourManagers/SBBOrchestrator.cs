@@ -3,7 +3,7 @@ using SecondOrderMemory.Models;
 
 namespace SecondOrderMemory.BehaviourManagers
 {
-    public class SOMBlockManager
+    public class SBBOrchestrator
     {
         public List<SBBManager> Blocks { get; private set; }
 
@@ -13,7 +13,7 @@ namespace SecondOrderMemory.BehaviourManagers
 
         public int NumBlocks;
 
-        public SOMBlockManager(int numBlocks, int numColumns, int numRows) 
+        public SBBOrchestrator(int numBlocks, int numColumns, int numRows) 
         {
             if(numBlocks <= 0 || NumRows <= 0 || NumColumns <= 0) 
             {

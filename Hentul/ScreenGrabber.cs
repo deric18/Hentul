@@ -57,7 +57,7 @@
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
 
-        public SOMBlockManager somBlock { get; private set; }
+        public SBBOrchestrator somBlock { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
