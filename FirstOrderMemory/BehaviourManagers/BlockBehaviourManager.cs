@@ -101,6 +101,11 @@
 
         public BlockBehaviourManager(int numColumns = 10, int Z = 10, int x = 0, int y = 0, int z = 0)
         {
+            if(numColumns != Z)
+            {
+                throw new InvalidOperationException("CONSTRUCTOR :: numColumns should be equal to Z");
+            }
+
             this.BlockID = new Position_SOM(x, y, z);
 
             this.NumberOfColumnsThatFiredThisCycle = 0;

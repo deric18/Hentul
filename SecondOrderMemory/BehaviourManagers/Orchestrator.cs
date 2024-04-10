@@ -3,6 +3,10 @@ using SecondOrderMemory.Models;
 
 namespace SecondOrderMemory.BehaviourManagers
 {
+    /// <summary>
+    /// 1.
+    /// 2.Maintain a precidence list of the top Blocks that are performing mappings based on total actiivty.
+    /// </summary>
     public class SBBOrchestrator
     {
         public List<SBBManager> Blocks { get; private set; }
