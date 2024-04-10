@@ -6,7 +6,7 @@ namespace SecondOrderMemoryUT
 {    
     public class SecondOrderMemoryTests
     {
-        int sizeOfColumns = 10;
+        int sizeOfColumns = 100;
         int sizeOfRows = 10;
         SBBManager bbManager;
         Random rand1;

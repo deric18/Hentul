@@ -97,7 +97,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public SBBManager(int numColumns = 10, int numRows = 10, int x = 0, int y = 0, int z = 0)
+        public SBBManager(int numColumns = 100, int numRows = 10, int x = 0, int y = 0, int z = 0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 

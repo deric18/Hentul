@@ -4,7 +4,7 @@ using SecondOrderMemory.Models;
 namespace SecondOrderMemory.BehaviourManagers
 {
     /// <summary>
-    /// 1.
+    /// 1.Track Inpout SDR ingestion into correct regions of the SBB Blocks.
     /// 2.Maintain a precidence list of the top Blocks that are performing mappings based on total actiivty.
     /// </summary>
     public class SBBOrchestrator
@@ -65,11 +65,6 @@ namespace SecondOrderMemory.BehaviourManagers
             //Step 4: If 1 Block votes for one object and the rest of the blocks vote for another object, Needs Investigation Step 6.
             //Step 5: All the Blocks are still Confused , Keep repeating Step 1.
             //Step 6: Investigate Dissonance in the network!
-
-
-
-
-
 
         }
     }
