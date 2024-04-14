@@ -8,6 +8,7 @@
     {
 
         #region CONSTANTS
+
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
@@ -22,8 +23,8 @@
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
-        private const int AXONAL_CONNECTION = 1;
         private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
+
         #endregion
 
 
@@ -31,9 +32,11 @@
 
         public static ulong CycleNum { get; private set; }
 
-        public int NumColumns { get; private set; }
+        public int NumColumnsX { get; private set; }
 
-        public int NumRows { get; private set;  } 
+        public int NumColumnsY { get; private set; }
+
+        public int NumRowsZ { get; private set;  } 
 
         private Position_SOM BlockID;
 
@@ -93,11 +96,13 @@
 
         private const bool devbox = true;
 
+        private const int BlockOffset = 10;
+
         #endregion      
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public SBBManager(int numColumns = 100, int numRows = 10, int x = 0, int y = 0, int z = 0)
+        public SBBManager(int numColumnsX = 100, int  numColumnsY= 10, int numRowsZ = 10, int x=0, int y=0, int z=0)
         {
             this.BlockID = new Position_SOM(x, y, z);
 
@@ -107,9 +112,11 @@
 
             totalDendronalConnections = 0;
 
-            this.NumColumns = numColumns;
+            this.NumColumnsX = numColumnsX;
 
-            this.NumRows = numRows;
+            this.NumColumnsY = numColumnsY;
+
+            this.NumRowsZ = numRowsZ;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
 
@@ -124,11 +131,11 @@
 
             apicalContributors = new List<Neuron>();
 
-            TemporalLineArray = new Neuron[numColumns, numColumns];
+            TemporalLineArray = new Neuron[NumColumnsY, NumRowsZ];
 
-            ApicalLineArray = new Neuron[numColumns, numColumns];
+            ApicalLineArray = new Neuron[NumColumnsX, NumColumnsY];
 
-            Columns = new Column[numColumns, numColumns];
+            Columns = new Column[NumColumnsX, NumColumnsY];
 
             ColumnsThatBurst = new List<Position_SOM>();
 
@@ -154,11 +161,12 @@
 
             num_continuous_burst = 0;
 
-            for (int i = 0; i < numColumns; i++)
+            for (int i = 0; i < NumColumnsX; i++)
             {
-                for (int j = 0; j < numColumns; j++)
+                for (int j = 0; j < NumColumnsY; j++)
                 {
-                    Columns[i, j] = new Column(i, j, numRows);
+
+                    Columns[i, j] = new Column(i, j, NumRowsZ);
                 }
             }
         }
@@ -202,9 +210,10 @@
 
         public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
-            if (x == i && y == j && z == k || (z > NumRows))
+            if (x == i && y == j && z == k || (z > NumRowsZ))
             {
                 int breakpoint = 1;
+                throw new InvalidDataException("InitDendriticConnectionForConnector :: Invalid Dendritic Schema ");
             }
             try
             {
@@ -238,7 +247,7 @@
         {
             SBBManager toReturn;
 
-            toReturn = new SBBManager(NumColumns, NumRows, x, y, z);
+            toReturn = new SBBManager(NumColumns, NumColumns, NumRows);
 
             toReturn.Init();
 
@@ -869,6 +878,7 @@
 
         #region PRIVATE METHODS
 
+        //Todo
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
@@ -973,7 +983,7 @@
         }
 
 
-
+        //Todo
         private void PostCycleCleanup()
         {
             //clean up all the fired columns if there is no apical or temporal signal
@@ -1042,7 +1052,7 @@
         }
 
 
-        private void GenerateTemporalLines()
+        private void GenerateTemporalLines()        //Todo
         {
             // T : (x,y, z) => (0,y,x)
 
@@ -1068,7 +1078,7 @@
             {
                 int breakpoint = 1;
             }
-        }
+        }   
 
         private void GenerateApicalLines()
         {
@@ -1094,6 +1104,7 @@
         }
 
 
+        //Todo
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position_SOM> activeBits)
         {
             List<Neuron> temporalNeurons = new List<Neuron>();
@@ -1139,6 +1150,7 @@
             this.totalAxonalConnections++;
         }
 
+        //Todo
         private void ReadDendriticSchema(int intX, int intY)
         {
 
@@ -1150,11 +1162,11 @@
 
             if (devbox)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\SecondOrderMemory\\Schema Docs\\DendriticSchema.xml";
             }
             else
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\DendriticSchema.xml";
             }
 
 
@@ -1259,6 +1271,7 @@
             #endregion
         }
 
+        //Todo
         public void ReadAxonalSchema(int intX, int intY)
         {
             #region Cache : Cache Code

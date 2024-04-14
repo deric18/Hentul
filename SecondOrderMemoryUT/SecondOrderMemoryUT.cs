@@ -20,15 +20,13 @@ namespace SecondOrderMemoryUT
 
             rand1 = new Random();
         }
-
                 
-
 
         [Test]
         public void TestMultipleInstanceOfSOM()
         {
             SBBManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
-            SBBManager bbm3 = new SBBManager(10, 10, 1, 3, 10);
+            SBBManager bbm3 = new SBBManager(10, 10, 10);
 
             bbm3.Init(0, 0);
 

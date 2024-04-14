@@ -9,6 +9,7 @@
     using SecondOrderMemory.BehaviourManagers;
     using System.Collections.Generic;
     using Hentul.UT;
+    using System.Diagnostics.Eventing.Reader;
 
     public struct POINT
     {
@@ -26,8 +27,12 @@
 
         private const int ByteSize = 8;
 
-        public int Range { get; private set; }
+        public int NumPixelsToProcess { get; private set; }
 
+
+        /// <summary>
+        /// NumBuckets is the total number of FOM Blocks that will be created and it will include 
+        /// </summary>
         public int NumBuckets { get; private set; }
 
         public int BucketRowLength { get; private set; }
@@ -41,6 +46,7 @@
         public Tuple<int, int> LeftBottom { get; private set; }
         public Tuple<int, int> RightBottom { get; private set; }
         public Tuple<int, int> CenterCenter { get; private set; }
+
         private int RangeIterator;
         private int Offset;
         public string CurrentDirection = string.Empty;
@@ -57,6 +63,8 @@
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
 
+        public SBBOrchestrator SBBOrchestrator { get; private set; }
+
         public SBBOrchestrator somBlock { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
@@ -68,7 +76,7 @@
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
-            Range = range;
+            NumPixelsToProcess = range;
 
             BucketRowLength = 5;
 
@@ -76,7 +84,7 @@
 
             Iterations = 0;
 
-            double numerator = (2 * Range) * (2 * Range);
+            double numerator = (2 * NumPixelsToProcess) * (2 * NumPixelsToProcess);
 
             double denominator = (BucketRowLength * BucketColLength);
 
@@ -86,19 +94,23 @@
 
             if ( value % 1 != 0)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + Range.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
+                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcess.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
 
             LeftUpper = new Tuple<int, int>(1007, 412);
             RightUpper = new Tuple<int, int>(1550, 412);
             LeftBottom = new Tuple<int, int>(1007, 972);
             RightBottom = new Tuple<int, int>(1550, 972);
+
             CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
+
             CurrentDirection = "RIGHT";
+
             Offset = range;
+
             RangeIterator = 0;
             
-            NumBuckets = ((2 * Range) * (2 * Range) / (BucketRowLength * BucketColLength));
+            NumBuckets = ((2 * NumPixelsToProcess) * (2 * NumPixelsToProcess) / (BucketRowLength * BucketColLength));
 
             BucketToData = new Dictionary<int, LocationNPositions>();
 
@@ -111,6 +123,8 @@
             IsMock = isMock;
 
             Z = 10;
+
+            SBBOrchestrator = new SBBOrchestrator(NumBuckets, NumColumns, Z);
 
             for (int i = 0; i < NumBuckets; i++)
             {
@@ -141,7 +155,7 @@
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
 
-            Console.WriteLine("Total Pixels being collected for a range of " + Range.ToString() + " \nTotal Number of Pixels :" + (Range * Range * 4).ToString() + "\nTotal First Order BBMs Created :" + NumBuckets.ToString());
+            Console.WriteLine("Total Pixels being collected for a range of " + NumPixelsToProcess.ToString() + " \nTotal Number of Pixels :" + (NumPixelsToProcess * NumPixelsToProcess * 4).ToString() + "\nTotal First Order BBMs Created :" + NumBuckets.ToString());
 
         }
 
@@ -160,10 +174,10 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
-            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
-            int x2 = Math.Abs(Point.X + Range);
-            int y2 = Math.Abs(Point.Y + Range);
+            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
+            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
+            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
+            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
 
             this.ProcessColorMap(x1, y1, x2, y2);
 
@@ -184,49 +198,60 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
-            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
-            int x2 = Math.Abs(Point.X + Range);
-            int y2 = Math.Abs(Point.Y + Range);
+            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
+            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
+            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
+            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
 
             return new Tuple<int, int, int, int>(x1, y1, x2, y2);
             //this.ProcessColorMap(x1, y1, x2, y2);
         }
 
+
+        /// <summary>
+        /// We do not take in integers as input to Block Managers , we take in bool's , if its positive we take in the value ,if its negative we move on.
+        /// we divide up the entire one screenshot 25 * 25  = 625 pixels 
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        /// <exception cref="InvalidDataException"></exception>
         public void ProcessColorMap(int x1, int y1, int x2, int y2)
         {
-            //One bucket will consist of 25 pixels.
+            //Total Screen Size = 50 * 50 = 2500 pixels.
+            //Num Pixels / BBM = 10 pixels / BBM.
+            //Num BBMs Required = 250.
+            //Num Buckets = 250.
+            //1 BBM takes in BucketRowwLength * BucketColLEngth i.e 5 * 2 = 10 pixels each.
 
             int bucket = 0;
 
-            int doubleRage = 2 * Range;
-
-            //ProcessTemporalCoordinates(x1, y1, x2, y2);
+            int doubleRange = 2 * NumPixelsToProcess;
 
             Console.WriteLine("Getting Screen Pixels : ");
 
-            for (int j = y1, l = 0; j < y2 && l < doubleRage; j++, l++)
+            for (int j = y1, l = 0; j < y2 && l < doubleRange; j++, l++)
             {
-
                 //Console.WriteLine("Row " + j.ToString());
 
-                for (int i = x1, k = 0; i < x2 && k < doubleRage; i++, k++)
+                for (int i = x1, k = 0; i < x2 && k < doubleRange; i++, k++)
                 {
 
                     Color color = IsMock ? Color.Black : GetColorAt(i, j);
 
-                    if (color.R == 0 || color.G == 0 || color.B == 0)
+                    if (color.R <= 0.2 && color.G <= 0.2 && color.B <= 0.2)
                     {
-                        bucket = l / BucketRowLength + (k / BucketColLength) * BucketColLength * 10;                        
-                        
-                        Position_SOM newPosition = new Position_SOM((k % BucketColLength), (l % BucketRowLength));                        
+                        bucket = l / BucketRowLength + (k / BucketColLength) * BucketColLength * 10;            // This automatically sorts out the pixel locations that are active into there respective buckets. [Check out the Unit Test for mroe info]
 
-                        if (k % BucketRowLength > 9 || l  % BucketRowLength > 9)
+                        Position_SOM newPosition = new Position_SOM((k % BucketColLength), (l % BucketRowLength));
+
+                        if ( ( k % BucketRowLength > 9 ) || ( l  % BucketRowLength > 9) )
                         {
                             throw new InvalidDataException("ProcessColorMap :: Completely B.S Logic!  Fix your fucking EQUATIONSSSSSS !!!! ");
                         }                        
 
-                        if (BucketToData.TryGetValue(bucket, out var data))
+                        if (BucketToData.TryGetValue(bucket, out var data) )
                         {
                             data.AddNewPostion(newPosition);
                         }
@@ -395,7 +420,7 @@
             {
                 case "RIGHT":
                     {
-                        if( toReturn.X >= ( RightUpper.Item1 + RangeIterator * Range) )
+                        if( toReturn.X >= ( RightUpper.Item1 + RangeIterator * NumPixelsToProcess) )
                         {
                             CurrentDirection = "DOWN";             
                             toReturn.X = RightUpper.Item1;
@@ -409,7 +434,7 @@
                     }
                 case "DOWN":
                     {
-                        if ( toReturn.Y >= ( RightBottom.Item2 + RangeIterator * Range) )
+                        if ( toReturn.Y >= ( RightBottom.Item2 + RangeIterator * NumPixelsToProcess) )
                         {
                             CurrentDirection = "LEFT";
                             toReturn.X = RightBottom.Item1;
@@ -423,7 +448,7 @@
                     }
                 case "LEFT":
                     {
-                        if ( toReturn.X <= ( LeftBottom.Item1 + RangeIterator * Range) )
+                        if ( toReturn.X <= ( LeftBottom.Item1 + RangeIterator * NumPixelsToProcess) )
                         {
                             CurrentDirection = "UP";
                             toReturn.X = LeftBottom.Item1;
@@ -438,11 +463,11 @@
                     }
                 case "UP":
                     {
-                        if (toReturn.Y <= ( LeftUpper.Item2 + RangeIterator * Range) )
+                        if (toReturn.Y <= ( LeftUpper.Item2 + RangeIterator * NumPixelsToProcess) )
                         {
                             CurrentDirection = "RIGHT";
-                            toReturn.X = LeftUpper.Item1 + RangeIterator * Range;
-                            toReturn.Y = LeftUpper.Item2 + RangeIterator * Range;
+                            toReturn.X = LeftUpper.Item1 + RangeIterator * NumPixelsToProcess;
+                            toReturn.Y = LeftUpper.Item2 + RangeIterator * NumPixelsToProcess;
                         }
                         else
                         {

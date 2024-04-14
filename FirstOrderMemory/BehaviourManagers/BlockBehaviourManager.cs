@@ -95,6 +95,8 @@
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
         private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
+
+
         #endregion
 
         #region CONSTRUCTORS & INITIALIZATIONS 

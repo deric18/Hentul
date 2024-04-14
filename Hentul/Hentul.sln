@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemory", "..\Sec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SecondOrderMemoryUT", "..\SecondOrderMemoryUT\SecondOrderMemoryUT.csproj", "{1EFAC694-7DF1-4C95-BE5E-15C590423781}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExperimentalConsole", "..\ExperimentalConsole\ExperimentalConsole.csproj", "{F00598AC-D2A7-4DFE-9A17-499343802602}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExperimentalConsole", "..\ExperimentalConsole\ExperimentalConsole.csproj", "{F00598AC-D2A7-4DFE-9A17-499343802602}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaGenerator", "..\SchemaGenerator\SchemaGenerator.csproj", "{34EF70C0-1FC9-44F0-9FF1-69A82336F9B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{F00598AC-D2A7-4DFE-9A17-499343802602}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F00598AC-D2A7-4DFE-9A17-499343802602}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F00598AC-D2A7-4DFE-9A17-499343802602}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34EF70C0-1FC9-44F0-9FF1-69A82336F9B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34EF70C0-1FC9-44F0-9FF1-69A82336F9B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34EF70C0-1FC9-44F0-9FF1-69A82336F9B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34EF70C0-1FC9-44F0-9FF1-69A82336F9B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

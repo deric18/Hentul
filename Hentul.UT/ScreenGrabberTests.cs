@@ -16,6 +16,15 @@ namespace Hentul.UT
             rand = new Random();
         }
 
+
+        [Test]
+        public void TestProcessColorMap()
+        {
+            sg.ProcessColorMap(10, 10, 20, 20);
+
+            Assert.AreEqual(10, sg.BucketToData.Count);
+        }
+
         [Test]
         public void MultipleInstanceTestFOM()
         {
@@ -142,6 +151,11 @@ namespace Hentul.UT
             var ex = Assert.Throws<InvalidDataException>(() => new ScreenGrabber(33));
 
             Assert.AreEqual(ex.Message, "Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + 33.ToString() + "  NumPixelsPerBucket" + 10.ToString());
+        }
+
+
+        public void TestProcessPixelData()
+        {
         }
 
         //[Test]

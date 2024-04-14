@@ -9,43 +9,38 @@ namespace SecondOrderMemory.BehaviourManagers
     /// </summary>
     public class SBBOrchestrator
     {
-        public List<SBBManager> Blocks { get; private set; }
+        public SBBManager Blocks { get; private set; }
 
-        public int NumColumns = 10;
+        public int NumColumnsPerBlock { get; private set; }
 
-        public int NumRows = 10;
+        public int NumRowsPerColumn { get; private set; }
 
-        public int NumBlocks;
+        public int NumBlocks { get; private set; }
 
-        public SBBOrchestrator(int numBlocks, int numColumns, int numRows) 
+        public SBBOrchestrator(int numBlocks, int numColumnsPerBlock, int numRowsPerColumn) 
         {
-            if(numBlocks <= 0 || NumRows <= 0 || NumColumns <= 0) 
+            if(numBlocks <= 0 || NumRowsPerColumn <= 0 || NumColumnsPerBlock <= 0) 
             {
                 throw new InvalidDataException("SOMBLCOKMANAGER :: NumBlocks Should be more than Zero");
             }
 
             NumBlocks = numBlocks;
 
-            NumColumns = numColumns;
+            NumColumnsPerBlock = numColumnsPerBlock;
 
-            NumRows = numRows;
+            NumRowsPerColumn = numRowsPerColumn;
 
-            Blocks = new List<SBBManager>();
+            Blocks = new SBBManager();
             
-            SBBManager bbm;
+            
 
-            for( int i = 0; i < numBlocks; i++ )
-            {            
-                bbm  = new SBBManager(NumColumns, NumRows, i);
-                bbm.Init();
-                Blocks.Add(bbm);
-            }
+            
         }
 
-        public void Fire(int blockNumber, SDR_SOM som_sdr)
-        {
-            Blocks[blockNumber].Fire(som_sdr);
-        }
+        //public void Fire(int blockNumber, SDR_SOM som_sdr)
+        //{
+        //    Blocks[blockNumber].Fire(som_sdr);
+        //}
 
         private void EstablishCurrentState()
         {
