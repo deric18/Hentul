@@ -38,24 +38,24 @@ namespace SecondOrderMemoryUT
 
             bbm3.Fire(randSDR);
 
-            for (int i = 0; i < clonedBBM.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.NumColumnsY; i++)
             {
-                Assert.IsNotNull(clonedBBM.TemporalLineArray[i, clonedBBM.NumColumns - 1]);
+                Assert.IsNotNull(clonedBBM.TemporalLineArray[i, clonedBBM.NumColumnsY - 1]);
             }
 
-            for (int i = 0; i < clonedBBM.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.NumColumnsX; i++)
             {
-                Assert.IsNotNull(clonedBBM.ApicalLineArray[i, clonedBBM.NumColumns - 1]);
+                Assert.IsNotNull(clonedBBM.ApicalLineArray[i, clonedBBM.NumColumnsX - 1]);
             }
 
-            for (int i = 0; i < bbm3.NumColumns; i++)
+            for (int i = 0; i < bbm3.NumColumnsX; i++)
             {
-                Assert.IsNotNull(bbm3.TemporalLineArray[i, bbm3.NumColumns - 1]);
+                Assert.IsNotNull(bbm3.TemporalLineArray[i, bbm3.NumColumnsX - 1]);
             }
 
-            for (int i = 0; i < bbm3.NumColumns; i++)
+            for (int i = 0; i < bbm3.NumColumnsX; i++)
             {
-                Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.NumColumns - 1]);
+                Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.NumColumnsX - 1]);
             }
 
             Neuron newron = clonedBBM.Columns[2, 4].Neurons[5];
@@ -73,11 +73,11 @@ namespace SecondOrderMemoryUT
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
 
             //Dendrtonal & Axonal  Connections for Cloned Instance
-            for (int i = 0; i < clonedBBM.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.NumColumnsX; i++)
             {
-                for (int j = 0; j < clonedBBM.NumColumns; j++)
+                for (int j = 0; j < clonedBBM.NumColumnsY; j++)
                 {
-                    for (int k = 0; k < clonedBBM.NumColumns; k++)
+                    for (int k = 0; k < clonedBBM.NumRowsZ; k++)
                     {
                         Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
 
@@ -98,11 +98,11 @@ namespace SecondOrderMemoryUT
         [Test]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
         {
-            for (int i = 0; i < bbManager?.NumColumns; i++)
+            for (int i = 0; i < bbManager?.NumColumnsX; i++)
             {
-                for (int j = 0; j < bbManager.NumColumns; j++)
+                for (int j = 0; j < bbManager.NumColumnsY; j++)
                 {
-                    for (int k = 0; k < bbManager.NumColumns; k++)
+                    for (int k = 0; k < bbManager.NumRowsZ; k++)
                     {
                         Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
 

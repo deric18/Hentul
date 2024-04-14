@@ -247,7 +247,7 @@
         {
             SBBManager toReturn;
 
-            toReturn = new SBBManager(NumColumns, NumColumns, NumRows);
+            toReturn = new SBBManager(NumColumnsX, NumColumnsY, NumRowsZ);
 
             toReturn.Init();
 
@@ -348,8 +348,8 @@
                 throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
-            for (int i = 0; i < NumColumns; i++)
-                for (int j = 0; j < NumColumns; j++)
+            for (int i = 0; i < NumColumnsX; i++)
+                for (int j = 0; j < NumColumnsY; j++)
                 {
                     if (Columns[i, j].PreCleanupCheck())
                     {
@@ -731,7 +731,7 @@
         {
             Neuron toRetun = null;
 
-            if (z >= this.NumRows)
+            if (z >= this.NumRowsZ)
             {
                 int breakpoint = 1;
             }
@@ -826,7 +826,7 @@
 
             ActiveBits.Sort();
 
-            return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
+            return new SDR_SOM(NumColumnsX, NumColumnsY, ActiveBits, iType.SPATIAL);
         }
 
         public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, string contributingNeuron)
@@ -1026,11 +1026,11 @@
 
             if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
             {
-                for (int i = 0; i < NumColumns; i++)
+                for (int i = 0; i < NumColumnsX; i++)
                 {
-                    for (int j = 0; j < NumColumns; j++)
+                    for (int j = 0; j < NumColumnsY; j++)
                     {
-                        for (int k = 0; k < NumColumns; k++)
+                        for (int k = 0; k < NumRowsZ; k++)
                         {
                             if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
                             {
@@ -1059,15 +1059,15 @@
             try
             {
 
-                for (int i = 0; i < NumColumns; i++)
+                for (int i = 0; i < NumColumnsX; i++)
                 {
-                    for (int j = 0; j < NumColumns; j++)
+                    for (int j = 0; j < NumColumnsY; j++)
                     {
 
                         if (this.TemporalLineArray[i, j] == null)
                             this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
 
-                        for (int k = 0; k < NumColumns; k++)
+                        for (int k = 0; k < NumRowsZ; k++)
                         {
                             ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                         }
@@ -1084,13 +1084,13 @@
         {
             try
             {
-                for (int i = 0; i < NumColumns; i++)
+                for (int i = 0; i < NumColumnsX; i++)
                 {
-                    for (int j = 0; j < NumColumns; j++)
+                    for (int j = 0; j < NumColumnsY; j++)
                     {
                         this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), NeuronType.APICAL);
 
-                        for (int k = 0; k < NumColumns; k++)
+                        for (int k = 0; k < NumRowsZ; k++)
                         {
                             ConnectTwoNeuronsOrIncrementStrength(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
                         }
@@ -1131,7 +1131,7 @@
 
             foreach (var position in positionLists)
             {
-                for (int i = 0; i < this.NumColumns; i++)
+                for (int i = 0; i < this.NumColumnsX; i++)
                 {
                     toReturn.Add(this.Columns[i, position.Y].Neurons[position.X]);
                 }
