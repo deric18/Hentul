@@ -2,9 +2,7 @@
 
 using SchemaGenerator;
 
-
 Console.WriteLine("Generting Schemas :");
-
 
 SchemaGenerator.SchemaGenerator sg = new SchemaGenerator.SchemaGenerator(100, 10, 10, 2);
 
@@ -22,6 +20,8 @@ Console.WriteLine("Press any key to generate Axonal Schema!");
 
 Console.ReadKey();
 
+Console.WriteLine("Generating Axonal Schema :");
+
 sg.GenerateAxonalSchema();
 
-Console.WriteLine("Generating Axonal Schema :");
+Console.WriteLine("Done!.");

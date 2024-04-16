@@ -9,7 +9,7 @@
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
-        public const bool devbox = true;
+        public const bool devbox = false;
 
         public int NumColumns { get; private set; }
 
@@ -72,7 +72,7 @@
 
         private bool IsBurstOnly;
 
-        private const string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
+        private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
         private BlockCycle CurrentCycleState { get; set; }
 
@@ -353,6 +353,12 @@
 
             xmlDocument.LoadXml("<Connections></Connections>");
             
+            if(!devbox)
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp";
+
+                filename = "\\DendriticSchema.xml";
+            }
 
             foreach(var column in Columns)
             {
@@ -387,7 +393,7 @@
                 }
             }
 
-            xmlDocument.Save(backupDirectory + filename);
+            xmlDocument?.Save(backupDirectory + filename);
         }
 
         public void RetoreFromBackUp(string filename)

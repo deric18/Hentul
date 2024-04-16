@@ -94,7 +94,7 @@
 
         private bool IsBurstOnly;
 
-        private const bool devbox = true;
+        private const bool devbox = false;
 
         private const int BlockOffset = 10;
 
@@ -1168,7 +1168,6 @@
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\DendriticSchema.xml";
             }
-
 
             if (!File.Exists(dendriteDocumentPath))
             {
