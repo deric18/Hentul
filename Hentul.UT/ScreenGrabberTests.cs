@@ -20,6 +20,8 @@ namespace Hentul.UT
         [Test]
         public void TestProcessColorMap()
         {
+            sg = new ScreenGrabber(count, true);
+
             sg.ProcessColorMap(10, 10, 20, 20);
 
             Assert.AreEqual(10, sg.BucketToData.Count);

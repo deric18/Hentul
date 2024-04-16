@@ -250,7 +250,7 @@
             }
         }
 
-        public SBBManager CloneBBM(int x, int y, int z)
+        public SBBManager CloneBBM()
         {
             SBBManager toReturn;
 

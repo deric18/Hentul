@@ -25,8 +25,8 @@ namespace SecondOrderMemoryUT
         [Test]
         public void TestMultipleInstanceOfSOM()
         {
-            SBBManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
-            SBBManager bbm3 = new SBBManager(10, 10, 10);
+            SBBManager clonedBBM = bbManager.CloneBBM();
+            SBBManager bbm3 = new SBBManager(100, 10, 10);
 
             bbm3.Init(0, 0);
 
@@ -104,7 +104,7 @@ namespace SecondOrderMemoryUT
                 {
                     for (int k = 0; k < bbManager.NumRowsZ; k++)
                     {
-                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(1000));
 
                         if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count != 4)
                         {
@@ -153,9 +153,9 @@ namespace SecondOrderMemoryUT
                 throw new InvalidProgramException("TestFireNWireUT :: Could Not Connect 2 Neurons");
             }
 
-            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(78, 2) }, iType.SPATIAL);
 
-            SDR_SOM sdr2 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(5, 3) }, iType.SPATIAL);
+            SDR_SOM sdr2 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(55, 3) }, iType.SPATIAL);
 
             if (!neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse neuron1Synapse) || (!neuron2.ProximoDistalDendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse neuron2Synapse)))
             {

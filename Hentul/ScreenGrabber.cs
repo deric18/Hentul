@@ -61,9 +61,7 @@
 
         int NumColumns, Z;
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
-
-        public SBBOrchestrator SBBOrchestrator { get; private set; }
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }        
 
         public SBBOrchestrator somBlock { get; private set; }
 
@@ -122,9 +120,7 @@
 
             IsMock = isMock;
 
-            Z = 10;
-
-            SBBOrchestrator = new SBBOrchestrator(NumBuckets, NumColumns, Z);
+            Z = 10;            
 
             for (int i = 0; i < NumBuckets; i++)
             {
