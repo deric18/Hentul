@@ -143,14 +143,14 @@ namespace SecondOrderMemoryUT
             //Fire a pattern that fires the other known neuron2
             //check if the connection b/w both is strengthened.
 
-            var neuron1 = bbManager.Columns[0, 2].Neurons[0];
-            var neuron2 = bbManager.Columns[5, 3].Neurons[0];
+            var neuron1 = bbManager.Columns[78, 2].Neurons[0];
+            var neuron2 = bbManager.Columns[55, 3].Neurons[0];
 
             UInt16 plasticityCount = SBBManager.DISTALNEUROPLASTICITY;
 
             if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))
             {
-                throw new InvalidProgramException("Could Not Connect 2 Neurons");
+                throw new InvalidProgramException("TestFireNWireUT :: Could Not Connect 2 Neurons");
             }
 
             SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);

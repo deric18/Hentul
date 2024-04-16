@@ -148,16 +148,18 @@ namespace SecondOrderMemory.Models
         }
         
 
-        public void InitProximalConnectionForDendriticConnection(int i, int j, int k)
+        public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
         {                        
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
-            AddNewProximalDendriticConnection(key);
+            
+            return AddNewProximalDendriticConnection(key);            
         }
 
-        public void InitAxonalConnectionForConnector(int i, int j, int k)
+        public bool InitAxonalConnectionForConnector(int i, int j, int k)
         {
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
-            AddNewAxonalConnection(key);
+
+            return AddNewAxonalConnection(key);            
         }
 
         public void PostCycleCleanup() => FlushVoltage();        
@@ -239,11 +241,8 @@ namespace SecondOrderMemory.Models
                 }
                 else
                 {
-
                     ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
-
                     
-
                     return true;
                 }
             }

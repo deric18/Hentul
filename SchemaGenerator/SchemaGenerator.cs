@@ -43,7 +43,8 @@ namespace SchemaGenerator
                     for (int k = 0; k < numZ; k++)      //Proximal Connection Per Neuron Level
                     {
                         
-                        var proximalNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);                       
+                        var proximalNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
+                        int cache = int.MaxValue;
 
                         proximalNode?.SetAttribute("X", i.ToString());
                         proximalNode?.SetAttribute("Y", j.ToString());
@@ -54,6 +55,12 @@ namespace SchemaGenerator
                             var neuronNode = xmlDocument?.CreateElement("Connection", string.Empty);
 
                             int x = GetRandomNumberExcept(0, numX, i);
+
+                            while (x == cache || x == i)
+                            {
+                                x = GetRandomNumberExcept(0, numX, i);
+                            }
+
                             int y = GetRandomNumberExcept(0, numY, j);
                             int z = GetRandomNumberExcept(0, numZ, k);
 
@@ -62,6 +69,8 @@ namespace SchemaGenerator
                             neuronNode?.SetAttribute("Z", z.ToString());
 
                             proximalNode.AppendChild(neuronNode);
+
+                            cache = l;
                         }
                          
                         sourceNeuronElement?.AppendChild(proximalNode);                        
@@ -92,21 +101,30 @@ namespace SchemaGenerator
                     axonalConnectionNode.SetAttribute("Y", j.ToString());
 
                     for (int k = 0; k < numZ; k++)      //Proximal Connection Per Neuron Level
-                    {                                                
+                    {
+                        int cache = int.MaxValue;
 
                         for (int l = 0; l < numL; l++)   //Connections to other Neurons except Source Neuron
                         {
                             var proximalConnection = xmlDocument.CreateElement("Neuron", string.Empty);
 
                             int x = GetRandomNumberExcept(0, numX, i);
-                            int y = GetRandomNumberExcept(0, numX, i);
-                            int z = GetRandomNumberExcept(0, numX, i);
+
+                            while (x == cache || x == i)
+                            {
+                                x = GetRandomNumberExcept(0, numX, i);
+                            }
+
+                            int y = GetRandomNumberExcept(0, numY, j);
+                            int z = GetRandomNumberExcept(0, numZ, k);
 
                             proximalConnection.SetAttribute("X", x.ToString());
                             proximalConnection.SetAttribute("Y", y.ToString());
                             proximalConnection.SetAttribute("Z", z.ToString());
 
                             axonalConnectionNode.AppendChild(proximalConnection);
+
+                            cache = x;
                         }                        
                     }
 
@@ -119,7 +137,7 @@ namespace SchemaGenerator
 
         private int GetARandomNumberBetweenTwoSets(int min1, int max1, int min2, int max2)
         {
-            return rand.Next(min1, max1) + rand.Next(min2, max2) % 2 == 0 ? rand.Next(min1) : rand.Next(min2, max2);
+            return (max1 - min1) > (max2 - min2) ? rand.Next(min1, max1) : rand.Next(min2, max2);
         }
 
         private int GetRandomNumberExcept(int min, int max, int except)
@@ -128,19 +146,13 @@ namespace SchemaGenerator
             {
                 return rand.Next(min, max);
             }
-
-            if (except == min)
+            else if (except == min)
                 return rand.Next(min + 1, max);
             else if (except == max)
                 return rand.Next(min, max - 1);
             else
-            {
-                if (except - 1 == min)
-                    return max;
-                else if (except + 1 == max)
-                    return min;
-                else
-                    return GetARandomNumberBetweenTwoSets(min, except - 1, except + 1, max);
+            {               
+                return GetARandomNumberBetweenTwoSets(min, except - 1, except + 1, max);
             }
         }
     }

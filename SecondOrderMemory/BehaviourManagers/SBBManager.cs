@@ -119,8 +119,7 @@
             this.NumRowsZ = numRowsZ;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
-
-            //_predictedSegmentForThisCycle = new List<Segment>();
+            
             PredictedNeuronsForNextCycle = new Dictionary<string, List<string>>();
 
             NeuronsFiringThisCycle = new List<Neuron>();
@@ -165,7 +164,6 @@
             {
                 for (int j = 0; j < NumColumnsY; j++)
                 {
-
                     Columns[i, j] = new Column(i, j, NumRowsZ);
                 }
             }
@@ -184,9 +182,10 @@
 
         public void InitAxonalConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
-            if (x == i && y == j && z == k)
+            if ((x == i && y == j && z == k) || (x > NumColumnsX || i > NumColumnsX || y > NumColumnsY || j > NumColumnsY || z > NumRowsZ || k > NumRowsZ) )
             {
-                throw new InvalidDataException();
+                int breakpoint = 1;
+                throw new InvalidDataException("InitAxonalConnectionForConnector :: Invalid Schema ! One or more Parameters have incorrect connection data!");
             }
             try
             {
@@ -194,7 +193,11 @@
 
                 Neuron neuron = col.Neurons[z];
 
-                neuron.InitAxonalConnectionForConnector(i, j, k);
+                if(!neuron.InitAxonalConnectionForConnector(i, j, k) || neuron.AxonalList.Count > 2)
+                {
+                    int bp = 1;
+                    throw new InvalidOperationException("InitAxonalConnectionForConnector :: Invalid Schema ");
+                }
 
                 IncrementAxonalConnectionCount();
 
@@ -210,7 +213,7 @@
 
         public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
-            if (x == i && y == j && z == k || (z > NumRowsZ))
+            if (x == i && y == j && z == k || (x > NumColumnsX || i > NumColumnsX || y > NumColumnsY || j > NumColumnsY || z > NumRowsZ || k > NumRowsZ))
             {
                 int breakpoint = 1;
                 throw new InvalidDataException("InitDendriticConnectionForConnector :: Invalid Dendritic Schema ");
@@ -221,7 +224,11 @@
 
                 Neuron neuron = col.Neurons[z];
 
-                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+                if(neuron.InitProximalConnectionForDendriticConnection(i, j, k) == false || neuron.ProximoDistalDendriticList.Count > 2)
+                {
+                    int bp = 1;
+                    throw new InvalidOperationException(" InitDendriticConnectionForConnector :: Invalid Schema ");
+                }
 
                 IncrementProximalConnectionCount();
 
@@ -371,7 +378,7 @@
                 PreCyclePrep();
 
             if (incomingPattern.ActiveBits.Count == 0)
-                return null;
+                return new SDR_SOM(0,0, new List<Position_SOM>(), iType.SPATIAL);
 
             NumberOfColumsnThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -468,6 +475,7 @@
 
             FireLocal();
 
+
             if (IsSpatial == true)
             {
                 Wire();
@@ -481,6 +489,8 @@
                 return GetPredictedSDR();
             }
 
+
+            //Todo : Return consensus SDR_SOM
             return null;
         }       
 
@@ -729,7 +739,7 @@
 
         public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
         {
-            Neuron toRetun = null;
+            Neuron toReturn = null;
 
             if (z >= this.NumRowsZ)
             {
@@ -738,24 +748,24 @@
 
             if (w == 'N')
             {
-                toRetun = Columns[x, y].Neurons[z];
+                toReturn = Columns[x, y].Neurons[z];
             }
             else if (w == 'T')
             {
-                toRetun = TemporalLineArray[y, z];
+                toReturn = TemporalLineArray[y, z];
             }
             else if (w == 'A')
             {
-                toRetun = ApicalLineArray[x, y];
+                toReturn = ApicalLineArray[x, y];
             }
 
-            if (toRetun == null)
+            if (toReturn == null)
             {
                 int bp = 1;
                 throw new InvalidOperationException("Your Column structure is messed up!!!");
             }
 
-            return toRetun;
+            return toReturn;
         }
 
         public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
@@ -803,10 +813,10 @@
                 nType = Convert.ToChar(parts[3]);
             }
 
-            if (x > 9 || y > 9 || z > 9)
+            if (x > 99 || y > 9 || z > 9)
             {
                 int breakpoint = 1;
-                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
+                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns  posString :  " + posString);
             }
 
             return GetNeuronFromPosition(nType, x, y, z);
@@ -1058,7 +1068,6 @@
 
             try
             {
-
                 for (int i = 0; i < NumColumnsX; i++)
                 {
                     for (int j = 0; j < NumColumnsY; j++)
@@ -1190,7 +1199,7 @@
                     var item = columns[i];
 
                     int x = Convert.ToInt32(item.Attributes[0]?.Value);
-                    var y = Convert.ToInt32(item.Attributes[1]?.Value);
+                    int y = Convert.ToInt32(item.Attributes[1]?.Value);
 
                     if (x == 0 && y == 1)
                     {
@@ -1225,20 +1234,17 @@
 
                         //Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
 
-                        var proximalNodes = node.ChildNodes;
+                        var connectionNodes = node.ChildNodes;                       
 
-                        var neuronNodes = proximalNodes.Item(0)
-                            .SelectNodes("Connection");
-
-                        if (neuronNodes.Count != 2)
+                        if (connectionNodes.Count != 2)
                         {
-                            throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
+                            throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + " " + b.ToString() + ""  + c.ToString());
                         }
 
                         //4 -> 2 Proximal Dendronal Connections
                         int numDendriticConnectionCount = 0;
 
-                        foreach (XmlNode neuron in neuronNodes)
+                        foreach (XmlNode neuron in connectionNodes)
                         {
                             //ProximalConnection
                             if (neuron?.Attributes?.Count != 3)
@@ -1252,11 +1258,8 @@
 
                             //Money Shot!!!
                             InitDendriticConnectionForConnector(a, b, c, e, f, g);
-
+                            
                             numDendriticConnectionCount++;
-
-                            if (numDendriticConnectionCount == 2)
-                                break;
 
                         }
 
@@ -1322,26 +1325,23 @@
                 throw new FileNotFoundException(axonalDocumentPath);
             }
 
-
             document.Load(axonalDocumentPath);
 
-            XmlNodeList columns = document.GetElementsByTagName("axonalConnection");
+            XmlNodeList columns = document.GetElementsByTagName("AxonalConnection");
 
             for (int icount = 0; icount < columns.Count; icount++)
             {//axonalConnection
 
                 XmlNode connection = columns[icount];
 
-                if (connection.Attributes.Count != 3)
+                if (connection?.Attributes?.Count != 2)
                 {
-                    throw new InvalidDataException();
-
+                    throw new InvalidDataException("ReadAxonalSchema :: There should be atleast 2 attributes on an AxonalConnection Node in the schema");
                 }
 
                 int x = Convert.ToInt32(connection.Attributes[0].Value);
                 int y = Convert.ToInt32(connection.Attributes[1].Value);
-                int z = Convert.ToInt32(connection.Attributes[2].Value);
-
+                int z = 0;
                 //Console.WriteLine("Axonal X :" + x.ToString() + " Y: " + y.ToString() + " Z :" + z.ToString());
 
                 XmlNodeList axonList = connection.ChildNodes;
@@ -1349,37 +1349,35 @@
                 //4 -> 2 Proximal Dendronal Connections
                 int numAxonalConnectionCount = 0;
 
-                foreach (XmlNode axon in axonList)
+                foreach (XmlNode neuron in axonList)
                 {
-                    if (axon.Attributes.Count != 3)
+                    if (neuron.Attributes.Count != 3)
                     {
-                        throw new InvalidDataException();
+                        throw new InvalidDataException("ReadAxonalSchema :: There should be atleast 3 attributes on an Neuronal Node in the schema");
                     }
 
                     try
                     {
-                        int i = Convert.ToInt32(axon.Attributes[0].Value);
-                        int j = Convert.ToInt32(axon.Attributes[1].Value);
-                        int k = Convert.ToInt32(axon.Attributes[2].Value);
-
-                        if (x == 5 && y == 7 && z == 5)
-                        {
-                            int breakpoint = 1;
-                        }
-
-                        InitAxonalConnectionForConnector(x, y, z, i, j, k);
-
-                        numAxonalConnectionCount++;
+                        int i = Convert.ToInt32(neuron.Attributes[0].Value);
+                        int j = Convert.ToInt32(neuron.Attributes[1].Value);
+                        int k = Convert.ToInt32(neuron.Attributes[2].Value);
 
                         if (numAxonalConnectionCount == 2)
-                            break;
+                        {
+                            z++;
+                            numAxonalConnectionCount = 1;
+                        }
+                        else
+                            numAxonalConnectionCount++;
 
+                        InitAxonalConnectionForConnector(x, y, z, i, j, k);
+                        
                         //Console.WriteLine("New Connection From Schema Doc", x, y, z, i, j, k);
                     }
                     catch (Exception e)
                     {
                         int bp = 1;
-                        throw new InvalidDataException("ReadAXonalSchema : Invalid Data , Tryign to add new Connections to cache");
+                        throw new InvalidDataException("ReadAxonalSchema : Invalid Data , Trying to add new Connections to cache");
                     }
 
                     axonCounter++;
