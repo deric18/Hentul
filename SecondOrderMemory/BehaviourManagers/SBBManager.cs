@@ -1176,7 +1176,7 @@
 
             document.Load(dendriteDocumentPath);
 
-            using (XmlNodeList columns = document.GetElementsByTagName("Column"))
+            using (XmlNodeList columns = document.GetElementsByTagName("Neuron"))
             {
 
                 var numColumns = columns.Count;
@@ -1228,9 +1228,9 @@
                         var proximalNodes = node.ChildNodes;
 
                         var neuronNodes = proximalNodes.Item(0)
-                            .SelectNodes("Neuron");
+                            .SelectNodes("Connection");
 
-                        if (neuronNodes.Count != 4)
+                        if (neuronNodes.Count != 2)
                         {
                             throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
                         }
