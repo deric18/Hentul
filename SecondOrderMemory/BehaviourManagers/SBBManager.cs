@@ -903,6 +903,7 @@
             //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.  
             AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron.NeuronID.ToString());
 
+
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
             {
                 if (!targetNeuron.TAContributors.TryGetValue(sourceNeuron.NeuronID.ToString(), out char w))

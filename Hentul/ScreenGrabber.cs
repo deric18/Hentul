@@ -63,7 +63,7 @@
 
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }        
 
-        public SBBOrchestrator somBlock { get; private set; }
+        public SBBManager somBlock { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -129,7 +129,7 @@
 
             Init();
 
-            //somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);            
+            //somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);
         }
 
         private void Init()

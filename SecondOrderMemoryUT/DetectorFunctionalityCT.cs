@@ -1,7 +1,7 @@
 ﻿namespace SecondOrderMemoryUT
 {
     
-    public class FunctionalityCT
+    public class DetectorFunctionalityCT
     {
         [Test, Ignore("Not Implemented Yet!")]
         public void PerformCorrectUnionOnPreviouslyLearnedSDRs()

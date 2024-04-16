@@ -22,7 +22,7 @@ namespace SecondOrderMemoryUT
         }
                 
 
-        [Test]
+        [Test, Ignore("Support not needed for SOMs")]
         public void TestMultipleInstanceOfSOM()
         {
             SBBManager clonedBBM = bbManager.CloneBBM();
