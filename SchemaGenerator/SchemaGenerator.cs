@@ -16,12 +16,12 @@ namespace SchemaGenerator
         int numL = 0;
         Random rand;
 
-        public SchemaGenerator(int x, int y, int z, int numConns)
+        public SchemaGenerator(int x = 250, int y = 10, int z = 10, int numConns = 2)
         {
-            this.numX = 100;
-            this.numY = 10;
-            this.numZ = 10;
-            this.numL = 2;
+            this.numX = x;
+            this.numY = y;
+            this.numZ = z;
+            this.numL = numConns;
             rand = new Random();
         }
         

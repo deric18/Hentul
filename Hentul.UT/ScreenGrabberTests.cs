@@ -73,6 +73,11 @@ namespace Hentul.UT
                 if (sg.CurrentDirection == "DOWN")
                     break;
 
+                if(p.X < sg.LeftUpper.Item1-1 || p.Y < sg.LeftUpper.Item2-1 || p.X > sg.RightBottom.Item1 + range + 1  || p.Y > sg.RightBottom.Item2 + range + 1)
+                {
+                    Assert.Fail();
+                }
+
                 if (p.X != sg.LeftUpper.Item1 + (i * 25))
                 {
                     Assert.Fail();
@@ -93,6 +98,11 @@ namespace Hentul.UT
                 {
                     Assert.Fail();
                 }
+
+                if (p.X < sg.LeftUpper.Item1 - 1 || p.Y < sg.LeftUpper.Item2 - 1 || p.X > sg.RightBottom.Item1 + range + 1 || p.Y > sg.RightBottom.Item2 +  range + 1)
+                {
+                    Assert.Fail();
+                }
                 i++;
             }
 
@@ -108,6 +118,12 @@ namespace Hentul.UT
                 {
                     Assert.Fail();
                 }
+
+                if (p.X < sg.LeftUpper.Item1 - range - 1 || p.Y < sg.LeftUpper.Item2 - range - 1 || p.X > sg.RightBottom.Item1  || p.Y > sg.RightBottom.Item2)
+                {
+                    Assert.Fail();
+                }
+
                 i++;
             }
 
@@ -127,7 +143,17 @@ namespace Hentul.UT
                 {
                     Assert.Fail();
                 }
+
+                if (p.X < sg.LeftUpper.Item1 - range - 1 || p.Y < sg.LeftUpper.Item2 || p.X > sg.RightBottom.Item1 || p.Y > sg.RightBottom.Item2 )
+                {
+                    Assert.Fail();
+                }
                 i++;
+            }
+
+            if (p.X < sg.LeftUpper.Item1 || p.Y < sg.LeftUpper.Item2 || p.X > sg.RightBottom.Item1 || p.Y > sg.RightBottom.Item2)
+            {
+                Assert.Fail();
             }
 
             Assert.AreEqual(sg.LeftUpper.Item1 + 2 * range, p.X);

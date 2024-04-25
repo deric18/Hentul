@@ -4,6 +4,11 @@
     using Common;
     using System.Xml;
 
+    //Todo : 
+    /// <summary>
+    /// How does Supervised learning take place when an object is being learnt how should SOM layer neurons connect to higher order memory neurons
+    /// </summary>
+
     public class SBBManager
     {
 
@@ -27,8 +32,9 @@
 
         #endregion
 
-
         #region VARIABLES
+
+        public ManagerMode Mode { get; private set; }
 
         public static ulong CycleNum { get; private set; }
 
@@ -105,6 +111,8 @@
         public SBBManager(int numColumnsX = 100, int  numColumnsY= 10, int numRowsZ = 10, int x=0, int y=0, int z=0)
         {
             this.BlockID = new Position_SOM(x, y, z);
+
+            this.Mode = ManagerMode.TRAINING;
 
             this.NumberOfColumsnThatFiredThisCycle = 0;
 
@@ -993,8 +1001,6 @@
             }
         }
 
-
-        //Todo
         private void PostCycleCleanup()
         {
             //clean up all the fired columns if there is no apical or temporal signal
@@ -1062,8 +1068,7 @@
             // Process Next pattern.          
         }
 
-
-        private void GenerateTemporalLines()        //Todo
+        private void GenerateTemporalLines()       
         {
             // T : (x,y, z) => (0,y,x)
 
@@ -1113,8 +1118,6 @@
             }
         }
 
-
-        //Todo
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position_SOM> activeBits)
         {
             List<Neuron> temporalNeurons = new List<Neuron>();
@@ -1160,7 +1163,6 @@
             this.totalAxonalConnections++;
         }
 
-        //Todo
         private void ReadDendriticSchema(int intX, int intY)
         {
 
@@ -1274,7 +1276,6 @@
             #endregion
         }
 
-        //Todo
         public void ReadAxonalSchema(int intX, int intY)
         {
             #region Cache : Cache Code
@@ -1388,5 +1389,11 @@
 
         #endregion
 
+    }
+
+    public enum ManagerMode
+    {
+        TRAINING,
+        PREDICTING
     }
 }
