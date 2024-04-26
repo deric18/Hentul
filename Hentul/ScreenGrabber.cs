@@ -384,12 +384,12 @@
                 toReturn = Point;
             }
 
-            if (toReturn.X < LeftUpper.Item1 - Offset - 1 || toReturn.Y < LeftUpper.Item2 || toReturn.X > RightBottom.Item1 || toReturn.Y > RightBottom.Item2)
+            if (toReturn.X < LeftUpper.Item1 - Offset - 1 || toReturn.Y < LeftUpper.Item2 - Offset - 1 || toReturn.X > RightBottom.Item1 + Offset + 1|| toReturn.Y > RightBottom.Item2 + Offset + 1)
             {
                 int breakpoint = 1;
             }
 
-                if ( ( toReturn.X <= CenterCenter.Item1 - 25 && toReturn.X >= CenterCenter.Item1 + 25 ) && ( toReturn.Y >= CenterCenter.Item2 - 25  && toReturn.Y <= CenterCenter.Item2 + 25))
+            if ( ( toReturn.X <= CenterCenter.Item1 - 25 && toReturn.X >= CenterCenter.Item1 + 25 ) && ( toReturn.Y >= CenterCenter.Item2 - 25  && toReturn.Y <= CenterCenter.Item2 + 25))
             {
                 Console.WriteLine("Reached the Center of Image ! ReStarting the system to the begining of the image");
 
