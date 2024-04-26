@@ -355,6 +355,7 @@
             IntPtr dc = GetWindowDC(desk);
 
             p = GetNextCursorPosition();
+
             Point = p;
 
             ClientToScreen(dc, ref p);
@@ -381,7 +382,7 @@
             }
             else
             {
-                toReturn = Point;
+                toReturn = GetCurrentPointerPosition();
             }
 
             if (toReturn.X < LeftUpper.Item1 - Offset - 1 || toReturn.Y < LeftUpper.Item2 - Offset - 1 || toReturn.X > RightBottom.Item1 + Offset + 1|| toReturn.Y > RightBottom.Item2 + Offset + 1)
