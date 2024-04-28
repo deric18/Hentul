@@ -78,7 +78,7 @@
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
-            NumPixelsToProcess = range;
+            NumPixelsToProcess = range * 2;
 
             BucketRowLength = 5;
 
