@@ -65,6 +65,10 @@
 
         public SBBManager somBlock { get; private set; }
 
+        private bool devbox = true;
+
+        Bitmap bmp;
+
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
@@ -129,6 +133,8 @@
 
             Init();
 
+            LoadImage();
+
             //somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);
         }
 
@@ -155,9 +161,28 @@
 
         }
 
-        public void Grab()
-        {            
+        private void LoadImage()
+        {           
 
+            if (devbox)
+                bmp = new Bitmap(@"C:\Users\depint\Desktop\Hentul\Images");
+            else
+                bmp = new Bitmap(@"C:\Users\depint\Desktop\Hentul\Images");
+
+            if(bmp == null)
+            {
+                throw new InvalidCastException("Couldn't find image");
+            }            
+        }
+
+        private Color GetColorAt(int x, int y)
+        {
+            return bmp.GetPixel(x, y);
+        }
+
+
+        public void Grab()
+        {
             Stopwatch stopWatch = new Stopwatch();
 
             stopWatch.Start();
@@ -175,35 +200,19 @@
             int x2 = Math.Abs(Point.X + NumPixelsToProcess);
             int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
 
-            this.ProcessColorMap(x1, y1, x2, y2);
-
+            for(int i = x1; i < x2; i++)
+            {
+                for(int j = y1; j < y2; j++)
+                {
+                    ProcessColorMap(i, j, x2, y2);
+                }
+            }
+            
             stopWatch.Stop();
 
-            Console.WriteLine("Finished Getting Pixels Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());            
+            Console.WriteLine("Finished Getting Pixels Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
         }
-
-        public Tuple<int, int, int, int> Grab1()
-        {
-            //send Image for Processing                           
-
-            Console.CursorVisible = false;
-
-            Point = this.GetCurrentPointerPosition();
-
-            Console.CursorVisible = true;
-
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
-            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
-            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
-            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
-
-            return new Tuple<int, int, int, int>(x1, y1, x2, y2);
-            //this.ProcessColorMap(x1, y1, x2, y2);
-        }
-
-
+       
         /// <summary>
         /// We do not take in integers as input to Block Managers , we take in bool's , if its positive we take in the value ,if its negative we move on.
         /// we divide up the entire one screenshot 25 * 25  = 625 pixels 
@@ -302,6 +311,56 @@
             }
         }
 
+        #region UnUsed Code
+        public void Grab2()
+        {
+
+            Stopwatch stopWatch = new Stopwatch();
+
+            stopWatch.Start();
+
+            Console.CursorVisible = false;
+
+            Point = this.GetCurrentPointerPosition();
+
+            Console.CursorVisible = true;
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
+            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
+            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
+            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
+
+            this.ProcessColorMap(x1, y1, x2, y2);
+
+            stopWatch.Stop();
+
+            Console.WriteLine("Finished Getting Pixels Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
+        }
+
+        public Tuple<int, int, int, int> Grab1()
+        {
+            //send Image for Processing                           
+
+            Console.CursorVisible = false;
+
+            Point = this.GetCurrentPointerPosition();
+
+            Console.CursorVisible = true;
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
+            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
+            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
+            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
+
+            return new Tuple<int, int, int, int>(x1, y1, x2, y2);
+            //this.ProcessColorMap(x1, y1, x2, y2);
+        }
+
+
         private SDR_SOM GetSpatialPatternForBucket(List<Position_SOM> positions) =>
                 new SDR_SOM(NumColumns, Z, positions, iType.SPATIAL);
 
@@ -382,10 +441,10 @@
             }
             else
             {
-                toReturn = GetCurrentPointerPosition();
+                toReturn = Point;              
             }
 
-            if (toReturn.X < LeftUpper.Item1 - Offset - 1 || toReturn.Y < LeftUpper.Item2 - Offset - 1 || toReturn.X > RightBottom.Item1 + Offset + 1|| toReturn.Y > RightBottom.Item2 + Offset + 1)
+            if (toReturn.X < LeftUpper.Item1 - Offset - 1 || toReturn.Y < LeftUpper.Item2 - Offset - 1 || toReturn.X > RightBottom.Item1 + Offset + 1 || toReturn.Y > RightBottom.Item2 + Offset + 1)
             {
                 int breakpoint = 1;
             }
@@ -425,7 +484,7 @@
                         if( toReturn.X >= ( RightUpper.Item1 + RangeIterator * NumPixelsToProcess) )
                         {
                             CurrentDirection = "DOWN";             
-                            toReturn.X = RightUpper.Item1;
+                            toReturn.X = RightUpper.Item1 - RangeIterator * NumPixelsToProcess;
                             toReturn.Y = RightUpper.Item2;
                         }
                         else
@@ -440,7 +499,7 @@
                         {
                             CurrentDirection = "LEFT";
                             toReturn.X = RightBottom.Item1;
-                            toReturn.Y = RightBottom.Item2;
+                            toReturn.Y = RightBottom.Item2 - RangeIterator * NumPixelsToProcess;
                         }
                         else
                         {
@@ -453,7 +512,7 @@
                         if ( toReturn.X <= ( LeftBottom.Item1 + RangeIterator * NumPixelsToProcess) )
                         {
                             CurrentDirection = "UP";
-                            toReturn.X = LeftBottom.Item1;
+                            toReturn.X = LeftBottom.Item1 + RangeIterator * NumPixelsToProcess; ;
                             toReturn.Y = LeftBottom.Item2;
                             RangeIterator++;
                         }
@@ -483,10 +542,12 @@
                     }
             }
 
-            return toReturn;
-        }
+            Point = toReturn;
 
-        public static Color GetColorAt(int x, int y)
+            return toReturn;
+        }       
+
+        public static Color GetColorAt1(int x, int y)
         {
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
@@ -548,6 +609,8 @@
 
             return toReturn;
         }
+
+        #endregion
 
         #endregion
     }
