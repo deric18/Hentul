@@ -65,7 +65,7 @@
 
         public SBBManager somBlock { get; private set; }
 
-        private bool devbox = true;
+        private bool devbox = false;
 
         Bitmap bmp;
 
@@ -131,7 +131,7 @@
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z, i, 0, 0);
             }
 
-            Init();
+            //Init();
 
             LoadImage();
 
@@ -167,7 +167,7 @@
             if (devbox)
                 bmp = new Bitmap(@"C:\Users\depint\Desktop\Hentul\Images");
             else
-                bmp = new Bitmap(@"C:\Users\depint\Desktop\Hentul\Images");
+                bmp = new Bitmap(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
 
             if(bmp == null)
             {
@@ -189,25 +189,27 @@
 
             Console.CursorVisible = false;
 
-            Point = this.GetCurrentPointerPosition();
+            int height = bmp.Height;
+            int width = bmp.Width;
 
-            Console.CursorVisible = true;
+            int blockLength = Math.Min(height, width);
 
-            Console.WriteLine("Grabbing Screen Pixels...");
+            int TotalNumOfPixelsToProcess = blockLength * blockLength;
 
-            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
-            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
-            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
-            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
+            int iteratorBlockSize = 2 * NumPixelsToProcess;
 
-            for(int i = x1; i < x2; i++)
+            int totalIterationsNeeded = TotalNumOfPixelsToProcess / iteratorBlockSize;
+
+            for(int i= 0,x1 = 0,y1 = 0, x2 = NumPixelsToProcess, y2 = NumPixelsToProcess; i < totalIterationsNeeded; i++)
             {
-                for(int j = y1; j < y2; j++)
-                {
-                    ProcessColorMap(i, j, x2, y2);
-                }
+               // Need to create that snake pattern for scoping pixels to FOM layer.
+
+
+ 
             }
-            
+
+
+
             stopWatch.Stop();
 
             Console.WriteLine("Finished Getting Pixels Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
