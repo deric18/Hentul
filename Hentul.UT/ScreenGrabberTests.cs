@@ -58,7 +58,7 @@ namespace Hentul.UT
             Tuple<int, int, int, int> tuple;
             int i = 0, iterator = 0;
 
-            while (i < 6)
+            while (iterator < 6)
             {
 
                 while (sg.CurrentDirection == "RIGHT")
@@ -76,6 +76,11 @@ namespace Hentul.UT
                     Console.WriteLine(sg.CurrentDirection);
 
                     i++;
+
+                    x1 = tuple.Item1;
+                    y1 = tuple.Item2;
+                    x2 = tuple.Item3;
+                    y2 = tuple.Item4;
                 }
 
                 i = 1;
@@ -92,6 +97,10 @@ namespace Hentul.UT
                         Assert.Fail();
                     }
 
+                    x1 = tuple.Item1;
+                    y1 = tuple.Item2;
+                    x2 = tuple.Item3;
+                    y2 = tuple.Item4;
 
                     i++;
                 }
@@ -109,6 +118,11 @@ namespace Hentul.UT
                         Assert.Fail();
                     }
 
+                    x1 = tuple.Item1;
+                    y1 = tuple.Item2;
+                    x2 = tuple.Item3;
+                    y2 = tuple.Item4;
+
                     i++;
                 }
 
@@ -125,6 +139,11 @@ namespace Hentul.UT
                     {
                         Assert.Fail();
                     }
+
+                    x1 = tuple.Item1;
+                    y1 = tuple.Item2;
+                    x2 = tuple.Item3;
+                    y2 = tuple.Item4;
 
                     i++;
                 }
