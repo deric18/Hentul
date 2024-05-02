@@ -9,7 +9,7 @@
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
-        public const bool devbox = true;
+        public const bool devbox = false;
 
         public int NumColumns { get; private set; }
 

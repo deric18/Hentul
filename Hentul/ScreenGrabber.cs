@@ -10,6 +10,7 @@
     using System.Collections.Generic;
     using Hentul.UT;
     using System.Diagnostics.Eventing.Reader;
+    using System.Numerics;
 
     public struct POINT
     {
@@ -39,7 +40,7 @@
 
         public int BucketColLength { get; private set; }
 
-        private int Iterations;
+        public  int Iterations;
 
         public Tuple<int, int> LeftUpper { get; private set; }
         public Tuple<int, int> RightUpper { get; private set; }
@@ -47,9 +48,7 @@
         public Tuple<int, int> RightBottom { get; private set; }
         public Tuple<int, int> CenterCenter { get; private set; }
 
-        private int RangeIterator;
-        private int Offset;
-        public string CurrentDirection = string.Empty;
+        private int RangeIterator;        
 
         public const int Sparsity = 10;
 
@@ -66,6 +65,14 @@
         public SBBManager somBlock { get; private set; }
 
         private bool devbox = false;
+
+        public int Offset;
+        public string CurrentDirection = string.Empty;
+        public int x1bound;
+        public int y1bound;
+        public int x2Bound;
+        public int y2Bound;
+        public int RounRobinIteration;        
 
         Bitmap bmp;
 
@@ -108,7 +115,7 @@
 
             CurrentDirection = "RIGHT";
 
-            Offset = range;
+            Offset = range * 2;
 
             RangeIterator = 0;
             
@@ -130,6 +137,12 @@
             {
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z, i, 0, 0);
             }
+
+            x1bound = 51;
+            x2Bound = 551;
+            y1bound = 99;
+            y2Bound = 549;            
+            RounRobinIteration = 0;
 
             //Init();
 
@@ -180,6 +193,85 @@
             return bmp.GetPixel(x, y);
         }
 
+        public Tuple<int,int,int,int> GetNextCoordinates(int x1, int y1, int x2, int y2)
+        {
+            Tuple<int, int, int, int> retVal = null;
+
+            if(RounRobinIteration >= 6)
+            {
+                BackUp();
+            }
+
+            switch(CurrentDirection.ToUpper())
+            {
+                case "RIGHT":
+                    {
+                        if(x2 < x2Bound)
+                        {
+                            retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
+                        }
+                        else
+                        {
+                            CurrentDirection = "DOWN";
+                            x2Bound -= Offset;
+                        }
+                        break;
+                    }
+                case "DOWN":
+                    {
+                        if(y2 < y2Bound)
+                        {
+                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
+                        }
+                        else
+                        {
+                            CurrentDirection = "LEFT";
+                            y2Bound -= Offset;
+                        }
+                        break;
+                    }
+                case "LEFT":
+                    {
+                        if(x1 > x1bound)
+                        {
+                            retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
+                        }
+                        else
+                        {
+                            CurrentDirection = "UP";
+                            x1bound += Offset;
+                        }
+                        break;
+                    }
+                case "UP":
+                    {
+                        if(y1 > y1bound)
+                        {
+                            retVal = new Tuple<int, int, int, int>(x1 - Offset, y1- Offset, x2 - Offset, y2 - Offset);
+                        }
+                        else
+                        {
+                            CurrentDirection = "RIGHT";
+                            y1bound += Offset;
+                            RounRobinIteration++;
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException("GEtNExtCooridnate :: Direction shouldnt be anything other than above 4 values");                        
+                    }
+            }
+
+            return retVal;
+
+        }
+
+        private void BackUp()
+        {
+            throw new NotImplementedException();
+            //Back Up all the FOM's
+        }
 
         public void Grab()
         {
@@ -189,10 +281,15 @@
 
             Console.CursorVisible = false;
 
-            int height = bmp.Height;
-            int width = bmp.Width;
+            int height = bmp.Height; //605
+            int width = bmp.Width;  //579
 
-            int blockLength = Math.Min(height, width);
+            int blockLength = 600; //harcoding it to 600 , so we have a good factor of 50 for easy processing.
+
+            if(blockLength % 50 != 0 )
+            {
+                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
+            }
 
             int TotalNumOfPixelsToProcess = blockLength * blockLength;
 
@@ -202,8 +299,12 @@
 
             for(int i= 0,x1 = 0,y1 = 0, x2 = NumPixelsToProcess, y2 = NumPixelsToProcess; i < totalIterationsNeeded; i++)
             {
-               // Need to create that snake pattern for scoping pixels to FOM layer.
+                // Need to create that snake pattern for scoping pixels to FOM layer.
 
+                Tuple<int, int, int, int> tuple = GetNextCoordinates(x1, y1, x2, y2);
+
+
+                
 
  
             }

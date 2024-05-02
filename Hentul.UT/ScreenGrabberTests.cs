@@ -51,6 +51,90 @@ namespace Hentul.UT
         }
 
         [Test]
+        public void TestGetNextCoordinates()
+        {
+            sg = new ScreenGrabber(count);
+            int x1 = 0, x2 = 50, y1 = 0, y2 = 50;
+            Tuple<int, int, int, int> tuple;
+            int i = 0, iterator = 0;
+
+            while (i < 6)
+            {
+
+                while (sg.CurrentDirection == "RIGHT")
+                {
+                    tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
+
+                    if (sg.CurrentDirection == "DOWN")
+                        break;
+
+                    if (tuple.Item3 > sg.x2Bound + sg.Offset )
+                    {
+                        Assert.Fail();
+                    }
+
+                    Console.WriteLine(sg.CurrentDirection);
+
+                    i++;
+                }
+
+                i = 1;
+
+                while (sg.CurrentDirection == "DOWN")
+                {
+                    tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
+
+                    if (sg.CurrentDirection == "DOWN")
+                        break;
+
+                    if (tuple.Item4 > sg.y2Bound + sg.Offset)
+                    {
+                        Assert.Fail();
+                    }
+
+
+                    i++;
+                }
+
+                i = 1;
+                while (sg.CurrentDirection == "LEFT")
+                {
+                    tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
+
+                    if (sg.CurrentDirection == "DOWN")
+                        break;
+
+                    if (tuple.Item1 < sg.x1bound - sg.Offset)
+                    {
+                        Assert.Fail();
+                    }
+
+                    i++;
+                }
+
+                i = 1;
+
+                while (sg.CurrentDirection == "UP")
+                {
+                    tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
+
+                    if (sg.CurrentDirection == "DOWN")
+                        break;
+
+                    if (tuple.Item2 < sg.y1bound - sg.Offset)
+                    {
+                        Assert.Fail();
+                    }
+
+                    i++;
+                }
+
+                iterator++;
+            }
+
+        }
+
+        [Test, Ignore("this is only for physical cursor movement!")]
         public void TestGetNextCursorPosition()
         {
             sg = new ScreenGrabber(count);
