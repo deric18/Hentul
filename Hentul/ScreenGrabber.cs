@@ -46,7 +46,7 @@
         public Tuple<int, int> RightUpper { get; private set; }
         public Tuple<int, int> LeftBottom { get; private set; }
         public Tuple<int, int> RightBottom { get; private set; }
-        public Tuple<int, int> CenterCenter { get; private set; }
+        public Tuple<int, int> CenterCenter { get; private set; }                
 
         private int RangeIterator;        
 
@@ -60,7 +60,7 @@
 
         int NumColumns, Z;
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }        
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
 
         public SBBManager somBlock { get; private set; }
 
@@ -72,7 +72,9 @@
         public int y1bound;
         public int x2Bound;
         public int y2Bound;
-        public int RounRobinIteration;        
+        public int RounRobinIteration;
+        KeyValuePair<string, string> currentImage;
+        Dictionary<string, string> ImageList;
 
         Bitmap bmp;
 
@@ -142,13 +144,54 @@
             x2Bound = 551;
             y1bound = 99;
             y2Bound = 549;            
-            RounRobinIteration = 0;
+            RounRobinIteration = 0;                   
 
-            //Init();
+            Init();
+
+            ImageList = AddAllTheFruits();
+
+            SwitchImage();
 
             LoadImage();
 
             //somBlock = new SOMBlockManager(NumBuckets, NumColumns, Z);
+
+             
+        }
+
+        private Dictionary<string, string> AddAllTheFruits()
+        {
+            //0 -> devbox
+            //1 -> Lappy            
+
+            var dict = new Dictionary<string, string>();
+
+
+            switch(devbox)
+            {
+                case false:
+                    {
+                        dict.Add(@"Apple", @"C:\Users\depint\source\repos\Hentul\Images\apple.png");
+                        dict.Add(@"Orange", @"C:\Users\depint\source\repos\Hentul\Images\orange.png");
+                        dict.Add(@"bannana", @"C:\Users\depint\source\repos\Hentul\Images\bannana.png");
+                        dict.Add(@"grapes", @"C:\\Users\\depint\\source\\repos\\Hentul\\Images\\grapes.png");
+                        dict.Add(@"jackfruit", @"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");                                                                
+                       
+                        break;
+                    }
+                case true:
+                    {
+                        dict.Add(@"Apple", @"C:\Users\depint\Desktop\Hentul\Images\apple.png");
+                        dict.Add(@"Orange", @"C:\Users\depint\Desktop\Hentul\Images\orange.png");
+                        dict.Add(@"bannana", @"C:\Users\depint\Desktop\Hentul\Images\bannana.png");
+                        dict.Add(@"grapes", @"C:\Users\depint\Desktop\Hentul\Images\grapes.png");
+                        dict.Add(@"jackfruit", @"C:\Users\depint\Desktop\Hentul\Images\jackfruit.png");
+
+                        break;
+                    }
+            }
+
+            return dict;
         }
 
         private void Init()
@@ -174,13 +217,49 @@
 
         }
 
-        private void LoadImage()
-        {           
+        public void SwitchImage()
+        {
+            int index = 0, i = 0;
 
-            if (devbox)
-                bmp = new Bitmap(@"C:\Users\depint\Desktop\Hentul\Images");
-            else
-                bmp = new Bitmap(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
+            if(string.IsNullOrEmpty(currentImage.Key))
+            {
+                currentImage = ImageList.ElementAt(index);
+                return;
+            }
+
+            foreach(var kvp in ImageList)
+            {
+                if(kvp.Key == currentImage.Key)
+                {
+                    index =  i;
+                    break;
+                }
+                i++;
+            }
+
+            if(index == ImageList.Count - 1)
+            {
+                Console.WriteLine("Done Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
+                Console.Read();
+
+                //BackUp all the FOM's and SOM's and Close the Program!!! 
+
+                //Then lets think about what to do next?
+            }
+
+
+            currentImage = ImageList.ElementAt(++index);            
+        }
+
+        private void LoadImage()
+        {
+
+            if(currentImage.Key == null)
+            {
+                throw new InvalidDataException("LoadImage :: currentImage is null");
+            }
+            
+            bmp = new Bitmap(currentImage.Value);
 
             if(bmp == null)
             {
@@ -190,6 +269,9 @@
 
         private Color GetColorAt(int x, int y)
         {
+            if (x > 600 || y > 600 || x < 0 || y < 0)
+             return Color.White;
+
             return bmp.GetPixel(x, y);
         }
 
@@ -277,9 +359,7 @@
         {
             Stopwatch stopWatch = new Stopwatch();
 
-            stopWatch.Start();
-
-            Console.CursorVisible = false;
+            stopWatch.Start();            
 
             int height = bmp.Height; //605
             int width = bmp.Width;  //579
@@ -303,29 +383,23 @@
 
                 Tuple<int, int, int, int> tuple = GetNextCoordinates(x1, y1, x2, y2);
 
-
-                
-
+                PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);                
  
-            }
-
-
-
-            stopWatch.Stop();
+            }            
 
             Console.WriteLine("Finished Getting Pixels Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
         }
        
         /// <summary>
         /// We do not take in integers as input to Block Managers , we take in bool's , if its positive we take in the value ,if its negative we move on.
-        /// we divide up the entire one screenshot 25 * 25  = 625 pixels 
+        /// we divide up the entire one screenshot 50 * 50  = 2500 pixels 
         /// </summary>
         /// <param name="x1"></param>
         /// <param name="y1"></param>
         /// <param name="x2"></param>
         /// <param name="y2"></param>
         /// <exception cref="InvalidDataException"></exception>
-        public void ProcessColorMap(int x1, int y1, int x2, int y2)
+        public void PreparePixelData(int x1, int y1, int x2, int y2)
         {
             //Total Screen Size = 50 * 50 = 2500 pixels.
             //Num Pixels / BBM = 10 pixels / BBM.
@@ -368,11 +442,8 @@
                             BucketToData.Add(bucket,  new  LocationNPositions(new List<Position_SOM> { newPosition }, i , j));
                         }
                     }
-
-                    //Console.Write("R: " + color.R.ToString() + "G: " + color.G + "B: " + color.B + " A: " + color.A + " || ");
                 }
-
-                //Console.WriteLine("");
+                
             }
 
             Console.WriteLine("Done Collecting Screen Pixels");
@@ -435,7 +506,7 @@
             int x2 = Math.Abs(Point.X + NumPixelsToProcess);
             int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
 
-            this.ProcessColorMap(x1, y1, x2, y2);
+            this.PreparePixelData(x1, y1, x2, y2);
 
             stopWatch.Stop();
 

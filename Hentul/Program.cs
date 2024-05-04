@@ -23,9 +23,9 @@ while (true)
 
     screenGrabber.PrintBlockVital();
 
-    Console.WriteLine("Movign Cursor by 25 pixels");
+    Console.WriteLine("Switching to Next Image");
         
-    screenGrabber.MoveCursor();
+    screenGrabber.SwitchImage();
 
     Thread.Sleep(8000);
 

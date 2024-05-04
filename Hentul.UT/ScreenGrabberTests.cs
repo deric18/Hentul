@@ -22,7 +22,7 @@ namespace Hentul.UT
         {
             sg = new ScreenGrabber(count, true);
 
-            sg.ProcessColorMap(10, 10, 20, 20);
+            sg.PreparePixelData(10, 10, 20, 20);
 
             Assert.AreEqual(10, sg.BucketToData.Count);
         }
@@ -268,7 +268,7 @@ namespace Hentul.UT
         {
             sg = new ScreenGrabber(count, true);
 
-            sg.ProcessColorMap(2000, 400, 2050, 450);
+            sg.PreparePixelData(2000, 400, 2050, 450);
             //Assert.AreEqual( 10, sg.NumBuckets);
 
             Assert.AreEqual(250, sg.BucketToData.Count);
