@@ -2,6 +2,7 @@ namespace Hentul.UT
 {
     using Hentul;
     using Moq;
+    using System.Drawing;
     using System.Net.Sockets;
 
     public class ScreenGrabberTest
@@ -48,6 +49,68 @@ namespace Hentul.UT
 
             }
 
+        }
+
+        [Test]
+        public void TestPreparePixelData()
+        {
+            sg = new ScreenGrabber(count);
+
+
+            Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
+
+            int blockLength = 600;
+
+            int TotalNumOfPixelsToProcess = blockLength * blockLength;
+
+            int iteratorBlockSize = 2 * count;
+
+            int totalIterationsNeeded = TotalNumOfPixelsToProcess / iteratorBlockSize;
+
+            for (int i = 0; i < totalIterationsNeeded; i++)
+            {
+
+                sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                if (tuple.Item1 < 0)
+                    break;
+            }
+        }
+
+        [Test]
+        public void TestGetColorAt()
+        {
+            sg = new ScreenGrabber(count);
+            int whiteCount = 0;
+            int PrettyCloseToWhite = 0;
+            int blackCount = 0;
+            int everythinginBetween = 0;
+
+            for(int i = 0; i < 600; i ++)
+            {
+                for (int j = 0; j < 600; j++)
+                {
+                    var color = sg.GetColorAt(i, j);
+
+                    if (color == Color.White)
+                        whiteCount++;
+                    else if (color.R < 150 && color.G < 150 && color.B < 150)
+                        blackCount++;
+                    else if (color.R > 200 && color.G > 200 && color.B > 200)
+                        PrettyCloseToWhite++;                    
+                    else
+                        everythinginBetween++;
+                }
+            }
+
+            int breakpoint = 0;
+
+            Assert.AreEqual(whiteCount, 12600);
+            Assert.AreEqual(PrettyCloseToWhite, 292241);
+            Assert.AreEqual(blackCount, 42332);
+            Assert.AreEqual(everythinginBetween, 12827);
         }
 
         [Test]

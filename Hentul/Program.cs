@@ -6,6 +6,10 @@ ScreenGrabber screenGrabber = new ScreenGrabber(25);
 
 Console.WriteLine("System Initialized Finally! Press any Key to start Neural Engine :");
 
+int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
+Tuple<int, int, int, int> tuple;
+
 //Console.ReadKey();
 
 screenGrabber.SetMousetotartingPoint();
@@ -25,9 +29,10 @@ while (true)
 
     Console.WriteLine("Switching to Next Image");
         
-    screenGrabber.SwitchImage();
+    //screenGrabber.SwitchImage();
 
     Thread.Sleep(8000);
+     
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);
