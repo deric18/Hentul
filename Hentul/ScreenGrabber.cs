@@ -70,14 +70,14 @@
 
         public SBBManager somBlock { get; private set; }
 
-        private bool devbox = true;
+        private bool devbox = false;
 
         public int Offset;
         public string CurrentDirection = string.Empty;
-        public int x1bound;
-        public int y1bound;
-        public int x2Bound;
-        public int y2Bound;
+        public int leftBound;
+        public int upperBound;
+        public int rightBound;
+        public int lowerBound;
         public int RounRobinIteration;
         KeyValuePair<string, string> currentImage;
         Dictionary<string, string> ImageList;
@@ -145,11 +145,11 @@
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z, i, 0, 0);
             }
 
-            x1bound = 51;
-            x2Bound = 551;
-            y1bound = 99;
-            y2Bound = 549;            
-            RounRobinIteration = 0;                   
+            leftBound = 51;
+            rightBound = 551;
+            upperBound = 99;
+            lowerBound = 51;            
+            RounRobinIteration = 0;
 
             Init();
 
@@ -159,9 +159,7 @@
 
             LoadImage();
 
-            somBlock = new SBBManager();
-
-             
+            somBlock = new SBBManager();             
         }
 
         private Dictionary<string, string> AddAllTheFruits()
@@ -232,13 +230,13 @@
         {
             int index = 0, i = 0;
 
-            if(string.IsNullOrEmpty(currentImage.Key))
+            if(string.IsNullOrEmpty(currentImage.Key))      //if currentImage is not in list , load the first image in the list and return
             {
                 currentImage = ImageList.ElementAt(index);
                 return;
             }
 
-            foreach(var kvp in ImageList)
+            foreach(var kvp in ImageList)                   // if current image is in list then siwthc to the next image
             {
                 if(kvp.Key == currentImage.Key)
                 {
@@ -248,7 +246,7 @@
                 i++;
             }
 
-            if(index == ImageList.Count - 1)
+            if(index == ImageList.Count - 1)                //if we have reached the end of the list then stop processing and take a bow!
             {
                 Console.WriteLine("Done Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
                 Console.Read();
@@ -261,7 +259,9 @@
             }
 
 
-            currentImage = ImageList.ElementAt(++index);            
+            currentImage = ImageList.ElementAt(++index);    //Load next in the list
+
+            ResetOffsets();
         }
 
         private void LoadImage()
@@ -280,6 +280,15 @@
             }            
         }
 
+        private void ResetOffsets()
+        {
+            leftBound = 51;
+            rightBound = 551;
+            upperBound = 99;
+            lowerBound = 51;
+            RounRobinIteration = 0;
+        }
+
         public Color GetColorAt(int x, int y)
         {
             if (x > 578 || y >= 600 || x < 0 || y < 0)
@@ -294,7 +303,7 @@
 
             if(RounRobinIteration >= 6)
             {
-                BackUp();
+                //BackUp();
 
                 return new Tuple<int, int, int, int>(-1, -1, -1, -1);
             }
@@ -303,60 +312,68 @@
             {
                 case "RIGHT":
                     {
-                        if(x2 < x2Bound)
+                        if(x2 < rightBound)
                         {
                             retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
                         }
                         else
                         {
-                            CurrentDirection = "DOWN";
-                            x2Bound -= Offset;
+                            CurrentDirection = "UP";
+
+                            //retVal = new Tuple<int, int, int, int>(rightBound, RounRobinIteration * Offset, rightBound - 1 + Offset, 2);
+                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
+                            //retVal.Item2 = RounRobinIteration * Offset;
+                            rightBound -= Offset;
+
                         }
                         break;
                     }
                 case "DOWN":
                     {
-                        if(y2 < y2Bound)
+                        if(y1 < lowerBound)
                         {
-                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
+                            retVal = new Tuple<int, int, int, int>(x1, y1 - Offset, x2, y2 - Offset);
                         }
                         else
                         {
-                            CurrentDirection = "LEFT";
-                            y2Bound -= Offset;
+                            CurrentDirection = "RIGHT";
+                            lowerBound += Offset;
+                            retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
+                            RounRobinIteration++;
                         }
                         break;
                     }
                 case "LEFT":
                     {
-                        if(x1 > x1bound)
+                        if(x1 > leftBound)
                         {
                             retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
                         }
                         else
                         {
-                            CurrentDirection = "UP";
-                            x1bound += Offset;
+                            CurrentDirection = "DOWN";
+                            leftBound += Offset;
+                            retVal = new Tuple<int,int,int,int>(x1, y1 - Offset, x2, y2 - Offset);
                         }
                         break;
                     }
                 case "UP":
                     {
-                        if(y1 > y1bound)
+                        if(y2 < upperBound)
                         {
-                            retVal = new Tuple<int, int, int, int>(x1 - Offset, y1- Offset, x2 - Offset, y2 - Offset);
+                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);                            
                         }
                         else
                         {
-                            CurrentDirection = "RIGHT";
-                            y1bound += Offset;
-                            RounRobinIteration++;
+                            CurrentDirection = "LEFT";
+                            upperBound -= Offset;
+                            retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
                         }
                         break;
                     }
                 default:
                     {
-                        throw new InvalidOperationException("GEtNExtCooridnate :: Direction shouldnt be anything other than above 4 values");                        
+                        throw new InvalidOperationException("GetNextCooridnate :: Direction shouldnt be anything other than above 4 values");                        
                     }
             }
 

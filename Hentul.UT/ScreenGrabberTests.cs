@@ -70,12 +70,20 @@ namespace Hentul.UT
             for (int i = 0; i < totalIterationsNeeded; i++)
             {
 
+                if(i == 11)
+                {
+                    int breakpoint = 1;
+                }
+
                 sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
                 tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
-                if (tuple.Item1 < 0)
-                    break;
+                if (tuple == null)
+                {
+                    if (tuple.Item1 < 0)
+                        break;
+                }
             }
         }
 
@@ -131,7 +139,7 @@ namespace Hentul.UT
                     if (sg.CurrentDirection == "DOWN")
                         break;
 
-                    if (tuple.Item3 > sg.x2Bound + sg.Offset )
+                    if (tuple.Item3 > sg.rightBound + sg.Offset )
                     {
                         Assert.Fail();
                     }
@@ -155,7 +163,7 @@ namespace Hentul.UT
                     if (sg.CurrentDirection == "DOWN")
                         break;
 
-                    if (tuple.Item4 > sg.y2Bound + sg.Offset)
+                    if (tuple.Item4 > sg.lowerBound + sg.Offset)
                     {
                         Assert.Fail();
                     }
@@ -176,7 +184,7 @@ namespace Hentul.UT
                     if (sg.CurrentDirection == "DOWN")
                         break;
 
-                    if (tuple.Item1 < sg.x1bound - sg.Offset)
+                    if (tuple.Item1 < sg.leftBound - sg.Offset)
                     {
                         Assert.Fail();
                     }
@@ -198,7 +206,7 @@ namespace Hentul.UT
                     if (sg.CurrentDirection == "DOWN")
                         break;
 
-                    if (tuple.Item2 < sg.y1bound - sg.Offset)
+                    if (tuple.Item2 < sg.upperBound - sg.Offset)
                     {
                         Assert.Fail();
                     }
