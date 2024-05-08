@@ -136,7 +136,7 @@ namespace Hentul.UT
                 {
                     tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
 
-                    if (sg.CurrentDirection == "DOWN")
+                    if (sg.CurrentDirection == "UP")
                         break;
 
                     if (tuple.Item3 > sg.rightBound + sg.Offset )
@@ -156,14 +156,14 @@ namespace Hentul.UT
 
                 i = 1;
 
-                while (sg.CurrentDirection == "DOWN")
+                while (sg.CurrentDirection == "UP")
                 {
                     tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
 
-                    if (sg.CurrentDirection == "DOWN")
+                    if (sg.CurrentDirection == "LEFT")
                         break;
 
-                    if (tuple.Item4 > sg.lowerBound + sg.Offset)
+                    if (tuple.Item4 > sg.upperBound + sg.Offset)
                     {
                         Assert.Fail();
                     }
@@ -177,6 +177,7 @@ namespace Hentul.UT
                 }
 
                 i = 1;
+
                 while (sg.CurrentDirection == "LEFT")
                 {
                     tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
@@ -197,16 +198,17 @@ namespace Hentul.UT
                     i++;
                 }
 
+
                 i = 1;
 
-                while (sg.CurrentDirection == "UP")
+                while (sg.CurrentDirection == "DOWN")
                 {
                     tuple = sg.GetNextCoordinates(x1, y1, x2, y2);
 
-                    if (sg.CurrentDirection == "DOWN")
+                    if (sg.CurrentDirection == "RIGHT")
                         break;
 
-                    if (tuple.Item2 < sg.upperBound - sg.Offset)
+                    if (tuple.Item1 < sg.lowerBound - sg.Offset)
                     {
                         Assert.Fail();
                     }
@@ -218,7 +220,7 @@ namespace Hentul.UT
 
                     i++;
                 }
-
+                                
                 iterator++;
             }
 

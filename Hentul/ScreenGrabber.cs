@@ -147,7 +147,7 @@
 
             leftBound = 51;
             rightBound = 551;
-            upperBound = 99;
+            upperBound = 551;
             lowerBound = 51;            
             RounRobinIteration = 0;
 
@@ -284,7 +284,7 @@
         {
             leftBound = 51;
             rightBound = 551;
-            upperBound = 99;
+            upperBound = 551;
             lowerBound = 51;
             RounRobinIteration = 0;
         }
@@ -378,7 +378,6 @@
             }
 
             return retVal;
-
         }        
 
         public void Grab()          //We process one image at once.
