@@ -259,7 +259,7 @@
             }
 
 
-            currentImage = ImageList.ElementAt(++index);    //Load next in the list
+            currentImage = ImageList.ElementAt(i);    //Load next in the list
 
             ResetOffsets();
         }
@@ -269,7 +269,7 @@
 
             if(currentImage.Key == null)
             {
-                throw new InvalidDataException("LoadImage :: currentImage is null");
+                currentImage = ImageList.ElementAt(0);
             }
             
             bmp = new Bitmap(currentImage.Value);

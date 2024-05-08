@@ -332,19 +332,24 @@ namespace Hentul.UT
                 Assert.Fail();
             }
 
-            Assert.AreEqual(sg.LeftUpper.Item1 + 2 * range, p.X);
-            Assert.AreEqual(sg.LeftUpper.Item2 + range, p.Y);
+            Assert.That(p.X, Is.EqualTo(sg.LeftUpper.Item1 + 2 * range));
+            Assert.That(p.Y, Is.EqualTo(sg.LeftUpper.Item2 + range));
         }
 
         [Test]
-        public void TestNumberOfPixelsPerBBM()
+        public void TestPrepearePixelDataCT()
         {
             sg = new ScreenGrabber(count, true);
+            Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
 
-            sg.PreparePixelData(2000, 400, 2050, 450);
-            //Assert.AreEqual( 10, sg.NumBuckets);
+            while (sg.RounRobinIteration < 6)
+            {
+                sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
-            Assert.AreEqual(250, sg.BucketToData.Count);
+                tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+            }            
+
+            Assert.That(sg.BucketToData.Count, Is.EqualTo(250));
         }
 
         [Test]
