@@ -524,6 +524,11 @@
 
         }
 
+        public void CleanPixelData()
+        {
+            BucketToData.Clear();
+        }
+
         public void PrintBlockVital()
         {
             foreach( var fom in fomBBM)

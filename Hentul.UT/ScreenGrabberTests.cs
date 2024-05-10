@@ -21,9 +21,32 @@ namespace Hentul.UT
         [Test]
         public void TestProcessColorMap()
         {
-            sg = new ScreenGrabber(count, true);
+            sg = new ScreenGrabber(count);
 
-            sg.PreparePixelData(10, 10, 20, 20);
+            Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
+
+            int blockLength = 600;
+
+            int TotalNumOfPixelsToProcess = blockLength * blockLength;
+
+            int iteratorBlockSize = 2 * count;
+
+            int totalIterationsNeeded = TotalNumOfPixelsToProcess / iteratorBlockSize;
+
+            for (int i = 0; i < totalIterationsNeeded; i++)
+            {               
+                sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                sg.ProcessPixelData();
+
+                tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                if (tuple == null)
+                {
+                    if (tuple?.Item1 < 0)
+                        break;
+                }
+            }
 
             Assert.AreEqual(10, sg.BucketToData.Count);
         }
@@ -69,12 +92,7 @@ namespace Hentul.UT
 
             for (int i = 0; i < totalIterationsNeeded; i++)
             {
-
-                if(i == 11)
-                {
-                    int breakpoint = 1;
-                }
-
+               
                 sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
                 tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
