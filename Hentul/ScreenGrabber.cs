@@ -70,7 +70,7 @@
 
         public SBBManager somBlock { get; private set; }
 
-        private bool devbox = false;
+        private bool devbox = true;
 
         public int Offset;
         public string CurrentDirection = string.Empty;
@@ -226,14 +226,14 @@
 
         }
 
-        public void SwitchImage()
+        public bool SwitchImage()
         {
             int index = 0, i = 0;
 
             if(string.IsNullOrEmpty(currentImage.Key))      //if currentImage is not in list , load the first image in the list and return
             {
                 currentImage = ImageList.ElementAt(index);
-                return;
+                return true;
             }
 
             foreach(var kvp in ImageList)                   // if current image is in list then siwthc to the next image
@@ -248,8 +248,7 @@
 
             if(index == ImageList.Count - 1)                //if we have reached the end of the list then stop processing and take a bow!
             {
-                Console.WriteLine("Done Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
-                Console.Read();
+                return false;
 
                 //BackUp all the FOM's and SOM's and Close the Program!!! 
 
@@ -262,6 +261,8 @@
             currentImage = ImageList.ElementAt(i);    //Load next in the list
 
             ResetOffsets();
+
+            return true;
         }
 
         private void LoadImage()
@@ -380,32 +381,32 @@
             return retVal;
         }        
 
-        public void Grab()          //We process one image at once.
+        public void GrabNProcess()          //We process one image at once.
         {
             Stopwatch stopWatch = new Stopwatch();
 
-            stopWatch.Start();            
+            stopWatch.Start();
 
             int height = bmp.Height; //605
             int width = bmp.Width;  //579            
             
-
             int blockLength = 600; //harcoding it to 600 , so we have a good factor of 50 for easy processing.
-
 
             if (Math.Min(height, width) < blockLength)
             {
                 int breakpoint = 1;
             }
 
-            if (blockLength % 50 != 0 )            
+            if (blockLength % 50 != 0 )
                 throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");            
 
             int TotalNumOfPixelsoProcess = blockLength * blockLength;
 
             int iteratorBlockSize = 2 * NumPixelsToProcess;
 
-            int totalIterationsNeeded = TotalNumOfPixelsoProcess / iteratorBlockSize;
+            int TotalPixelsCoveredInIterator = iteratorBlockSize * iteratorBlockSize;
+
+            int totalIterationsNeeded = TotalNumOfPixelsoProcess / TotalPixelsCoveredInIterator;
 
             Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
 
@@ -417,14 +418,25 @@
                 tuple = GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
                 if (tuple.Item1 < 0)                                    
-                    break;                
+                    break;
+
+                ProcessPixelData();
+
+                Thread.Sleep(2000);
+
+                PrintBlockVital();
+
+                CleanPixelData();
+
+                Thread.Sleep(2000);
+
             }            
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
         }
-       
+        
         /// <summary>
         /// We do not take in integers as input to Block Managers , we take in bool's , if its positive we take in the value ,if its negative we move on.
         /// we divide up the entire one screenshot 50 * 50  = 2500 pixels 
@@ -521,7 +533,6 @@
             }
 
             Console.WriteLine("Done Processing Pixel Data");
-
         }
 
         public void CleanPixelData()

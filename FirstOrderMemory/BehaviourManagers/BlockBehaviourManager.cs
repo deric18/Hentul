@@ -9,7 +9,7 @@
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
-        public const bool devbox = false;
+        public const bool devbox = true;
 
         public int NumColumns { get; private set; }
 
@@ -553,9 +553,9 @@
         public void PrintBlockStats()
         {
             if (TotalDistalDendriticConnections > 0 || TotalBurstFire > 0 || TotalPredictionFires > 0)
-                Console.WriteLine("Block ID : " + BlockID.ToString());
-            if (TotalDistalDendriticConnections > 0)
-                Console.WriteLine("Total DISTAL Dendronal Connections : " + TotalDistalDendriticConnections.ToString());
+                Console.WriteLine(@"---------------------------------------Block ID : " + BlockID.ToString() +"------------------------------------------------ ");
+            //if (TotalDistalDendriticConnections > 0)
+              //  Console.WriteLine("Total DISTAL Dendronal Connections : " + TotalDistalDendriticConnections.ToString());
             if(TotalBurstFire > 0)
                 Console.WriteLine("Total BURST FIRE COUNT : " + TotalBurstFire.ToString());
             if (TotalPredictionFires > 0)
@@ -568,6 +568,9 @@
             foreach (var neuron in NeuronsFiringThisCycle)
             {
                 //check if the synapse is active only then fire
+
+                Console.WriteLine(" Firing Neuron : " + neuron.NeuronID.ToString());
+
                 neuron.Fire();
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)

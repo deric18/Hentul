@@ -17,22 +17,16 @@ screenGrabber.SetMousetotartingPoint();
 while (true)
 {
 
-    screenGrabber.Grab();    
-
-    screenGrabber.ProcessPixelData();    
-
-    //Console.WriteLine("Pres any key for moving cursor and processing next set of pixels");
-
-    //Console.ReadKey();
-
-    screenGrabber.PrintBlockVital();
+    screenGrabber.GrabNProcess();                
 
     Console.WriteLine("Switching to Next Image");
         
-    //screenGrabber.SwitchImage();
+    if(screenGrabber.SwitchImage() == false)
+    {
+        Console.WriteLine("Done Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
 
-    Thread.Sleep(8000);
-     
+        Console.Read();
+    }         
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);

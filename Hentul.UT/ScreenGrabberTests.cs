@@ -34,7 +34,7 @@ namespace Hentul.UT
             int totalIterationsNeeded = TotalNumOfPixelsToProcess / iteratorBlockSize;
 
             for (int i = 0; i < totalIterationsNeeded; i++)
-            {               
+            {
                 sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
                 sg.ProcessPixelData();
@@ -46,9 +46,11 @@ namespace Hentul.UT
                     if (tuple?.Item1 < 0)
                         break;
                 }
+
+                sg.CleanPixelData();
             }
 
-            Assert.AreEqual(10, sg.BucketToData.Count);
+            Assert.That(sg.BucketToData.Count, Is.EqualTo(10));
         }
 
         [Test]
