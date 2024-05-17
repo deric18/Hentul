@@ -457,7 +457,7 @@
                 for (int i = x1, k = 0; i < x2 && k < doubleRange; i++, k++)
                 {
 
-                    Color color =  GetColorAt(i, j);
+                    Color color = GetColorAt(i, j);
 
                     if (color.R < 200 || color.G < 200 || color.B < 200)
                     {
@@ -467,25 +467,25 @@
 
                         Position_SOM newPosition = new Position_SOM((k % BucketColLength), (l % BucketRowLength));
 
-                        if ( ( k % BucketRowLength > 9 ) || ( l  % BucketRowLength > 9) )
+                        if ((k % BucketRowLength > 9) || (l % BucketRowLength > 9))
                         {
                             throw new InvalidDataException("ProcessColorMap :: Completely B.S Logic! Fix your fucking EQUATIONSSSSSS !!!! ");
-                        }                        
+                        }
 
-                        if ( BucketToData.TryGetValue(bucket, out var data) )
+                        if (BucketToData.TryGetValue(bucket, out var data))
                         {
                             data.AddNewPostion(newPosition);
                         }
                         else
                         {
-                            BucketToData.Add(bucket,  new  LocationNPositions(new List<Position_SOM> { newPosition }, i , j));
-                        }                        
+                            BucketToData.Add(bucket, new LocationNPositions(new List<Position_SOM> { newPosition }, i, j));
+                        }
                     }
                     else
                     {
                         notBlackCount++;
                     }
-                }                
+                }
             }
 
             if(blackCount == 0)

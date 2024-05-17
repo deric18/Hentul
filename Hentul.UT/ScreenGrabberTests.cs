@@ -17,7 +17,6 @@ namespace Hentul.UT
             rand = new Random();
         }
 
-
         [Test]
         public void TestProcessColorMap()
         {
