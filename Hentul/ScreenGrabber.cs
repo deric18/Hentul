@@ -70,7 +70,7 @@
 
         public SBBManager somBlock { get; private set; }
 
-        private bool devbox = true;
+        private bool devbox = false;
 
         public int Offset;
         public string CurrentDirection = string.Empty;
@@ -542,7 +542,8 @@
 
         public void PrintBlockVital()
         {
-            foreach( var fom in fomBBM)
+            Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
+            foreach ( var fom in fomBBM)
             {
                 fom.PrintBlockStats();
             }

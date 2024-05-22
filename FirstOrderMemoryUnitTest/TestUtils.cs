@@ -28,6 +28,37 @@
             return new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9));
         }
 
+
+        internal static SDR_SOM GenerateTemporalSDRforDepolarization()
+        {
+            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType.TEMPORAL);            
+        }
+
+
+        internal static SDR_SOM GenerateApicalSDRForDepolarization()
+        {
+            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType.APICAL);            
+        }
+
+
+        internal static SDR_SOM GenerateSpatialSDRFromApicalPositiions(SDR_SOM apicalsdr)
+        {
+            return  new SDR_SOM(10, 10, apicalsdr.ActiveBits, iType.SPATIAL);            
+        }
+
+        internal static List<Position_SOM> GeneratePositionsForPredictiveTest1()
+        {
+            List<Position_SOM> positions = new List<Position_SOM>();
+
+            positions.Add(new Position_SOM(3, 2, 1));
+            positions.Add(new Position_SOM(5, 5, 5));
+            positions.Add(new Position_SOM(7,8,2)); 
+            positions.Add(new Position_SOM(8,3,2));
+
+            return positions;
+
+        }
+
         internal static SDR_SOM GenerateRandomSDR(iType inputPatternType)
         {
             Random rand = new Random();

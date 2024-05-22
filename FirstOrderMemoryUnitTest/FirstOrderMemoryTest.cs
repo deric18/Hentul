@@ -498,7 +498,30 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TesstBackUpAndRestore()
+        public void TestTemporalnApicalnSpatialFire()
+        {
+
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+
+
+            bbManager.Fire(temporalSdr, false, true);      //Deplarize temporal
+
+            bbManager.Fire(apicalSdr, true, true);        //Depolarize apical
+
+            bbManager.Fire(spatialSdr, true, true);       //Fire spatial
+
+
+            var firingSdr = bbManager.GetAllFiringNeuronsThisCycle();
+            
+
+            Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr));
+
+        }
+
+        [TestMethod]
+        public void TestBackUpAndRestore()
         {
             Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[5];
             Neuron dendronalNeuronID = bbManager.Columns[1, 5].Neurons[8];

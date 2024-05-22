@@ -9,7 +9,7 @@
         #region VARIABLES
         public static ulong CycleNum { get; private set; }
 
-        public const bool devbox = true;
+        public const bool devbox = false;
 
         public int NumColumns { get; private set; }
 
@@ -429,6 +429,13 @@
             IsBurstOnly = false;
         }
 
+        /// <summary>
+        /// Processes the Incoming Input Pattern
+        /// </summary>
+        /// <param name="incomingPattern"> Pattern to Process</param>
+        /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
+        /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
+        /// <exception cref="InvalidOperationException"></exception>
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
@@ -553,14 +560,9 @@
         public void PrintBlockStats()
         {
             if (TotalDistalDendriticConnections > 0 || TotalBurstFire > 0 || TotalPredictionFires > 0)
-                Console.WriteLine(@"---------------------------------------Block ID : " + BlockID.ToString() +"------------------------------------------------ ");
-            //if (TotalDistalDendriticConnections > 0)
-              //  Console.WriteLine("Total DISTAL Dendronal Connections : " + TotalDistalDendriticConnections.ToString());
-            if(TotalBurstFire > 0)
-                Console.WriteLine("Total BURST FIRE COUNT : " + TotalBurstFire.ToString());
-            if (TotalPredictionFires > 0)
-                Console.WriteLine("Total CORRECT PREDICTIONS : " + TotalPredictionFires.ToString());
-            
+            {                
+                    Console.WriteLine("   " + BlockID.ToString() + "               " + TotalBurstFire.ToString() + "                   " + TotalPredictionFires.ToString());
+            }
         }
 
         private void Fire()
@@ -629,7 +631,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -659,7 +661,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -702,7 +704,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -782,7 +784,7 @@
                         {
                             if (neuron.DidItContribute(temporalContributor))
                             {
-                                PramoteCorrectPredictionDendronal(temporalContributor, neuron);
+                                PramoteCorrectlyPredictionDendronal(temporalContributor, neuron);
                             }
                         }
                     }
@@ -802,7 +804,7 @@
                     {
                         if (neuron.DidItContribute(apicalContributor))
                         {
-                            PramoteCorrectPredictionDendronal(apicalContributor, neuron);
+                            PramoteCorrectlyPredictionDendronal(apicalContributor, neuron);
                         }
                     }
                 }
@@ -994,6 +996,7 @@
             foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
             {
                 var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
+
                 if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
                     ActiveBits.Add(pos);
             }
@@ -1003,21 +1006,30 @@
             return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
         }
 
+        public SDR_SOM GetAllFiringNeuronsThisCycle()
+        {
+            List<Position_SOM> activeBits = new List<Position_SOM>();            
+
+            NeuronsFiringThisCycle.ForEach(n => { if(n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+
+            return new SDR_SOM(NumColumns, NumColumns, activeBits, iType.SPATIAL);
+        }
+
         #endregion
 
         #region PRIVATE METHODS
 
         private void StrengthenTemporalConnection(Neuron neuron)
         {
-            PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
+            PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
         }
 
         private void StrengthenApicalConnection(Neuron neuron)
         {
-            PramoteCorrectPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
+            PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
         }
 
-        private void PramoteCorrectPredictionDendronal(Neuron contributingNeuron, Neuron targetNeuron)
+        private void PramoteCorrectlyPredictionDendronal(Neuron contributingNeuron, Neuron targetNeuron)
         {
             if (targetNeuron.ProximoDistalDendriticList.Count == 0)
             {
@@ -1111,7 +1123,6 @@
             CycleNum++;
             // Process Next pattern.          
         }
-
 
         private void GenerateTemporalLines()
         {

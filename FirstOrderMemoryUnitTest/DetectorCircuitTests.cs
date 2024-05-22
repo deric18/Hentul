@@ -53,9 +53,10 @@
                 numCount++;
             }            
 
-        }
+        }        
 
-        public void DetectorTest2()
+
+        public void TestTemporalNApicalWire()
         {
 
         }
