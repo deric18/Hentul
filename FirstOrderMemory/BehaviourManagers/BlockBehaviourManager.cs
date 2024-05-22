@@ -559,9 +559,9 @@
 
         public void PrintBlockStats()
         {
-            if (TotalDistalDendriticConnections > 0 || TotalBurstFire > 0 || TotalPredictionFires > 0)
+            if (TotalBurstFire > 0 || TotalPredictionFires > 0)
             {                
-                    Console.WriteLine("   " + BlockID.ToString() + "               " + TotalBurstFire.ToString() + "                   " + TotalPredictionFires.ToString());
+                    Console.WriteLine("  " + BlockID.ToString() + "          W:" + TotalBurstFire.ToString() + "             C:" + TotalPredictionFires.ToString());
             }
         }
 

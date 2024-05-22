@@ -11,6 +11,12 @@ namespace FirstOrderMemory.Models
             ActiveBits = activeBits;
         }
 
+
+        public void Sort()
+        {
+            ActiveBits.Sort();
+        }
+
         public bool IsUnionTo(SDR_SOM smallerSDR)
         {
             if (smallerSDR.ActiveBits == null)
@@ -21,7 +27,7 @@ namespace FirstOrderMemory.Models
 
             foreach(var pos in smallerSDR.ActiveBits)
             {
-                if(ActiveBits.Where( B => B.X == pos.X && B.Y == pos.Y).Count() == 0)
+                if(ActiveBits.Where( B => B.X == pos.X && B.Y == pos.Y && B.Z == pos.Z).Count() == 0)
                 {
                     return false;
                 }

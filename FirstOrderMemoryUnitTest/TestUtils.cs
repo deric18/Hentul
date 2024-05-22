@@ -41,9 +41,23 @@
         }
 
 
-        internal static SDR_SOM GenerateSpatialSDRFromApicalPositiions(SDR_SOM apicalsdr)
+        internal static SDR_SOM GetSpatialAndTemporalOverlapSDR(SDR_SOM apicalSdr, SDR_SOM temporalSdr)
         {
-            return  new SDR_SOM(10, 10, apicalsdr.ActiveBits, iType.SPATIAL);            
+            if (apicalSdr.ActiveBits.Count != temporalSdr.ActiveBits.Count)
+                throw new InvalidOperationException("Count do not Match!!!");
+
+            apicalSdr.Sort();
+            temporalSdr.Sort();
+
+            List<Position_SOM> activeBits = new List<Position_SOM>();
+
+            for(int i = 0; i < temporalSdr.ActiveBits.Count; i++)
+            {
+                activeBits.Add(GetSpatialAndTemporalOverlap(temporalSdr.ActiveBits[i], apicalSdr.ActiveBits[i]));
+            }
+
+            return new SDR_SOM(apicalSdr.Length, apicalSdr.Breadth, activeBits);
+
         }
 
         internal static List<Position_SOM> GeneratePositionsForPredictiveTest1()
@@ -213,6 +227,6 @@
             }
 
             return toReturn;
-        }
+        }        
     }
 }

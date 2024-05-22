@@ -486,7 +486,6 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(spatialInputPattern, true, false);
 
-
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
                 currentStrength = postSynapse.GetStrength();
@@ -500,10 +499,10 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalnApicalnSpatialFire()
         {
-
+            //Todo: verify firing and spatial SDR's are both are the same on the z coordiante as well.
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
-            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            var spatialSdr = TestUtils.GetSpatialAndTemporalOverlapSDR(apicalSdr, temporalSdr);
 
 
             bbManager.Fire(temporalSdr, false, true);      //Deplarize temporal
@@ -512,13 +511,23 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(spatialSdr, true, true);       //Fire spatial
 
-
             var firingSdr = bbManager.GetAllFiringNeuronsThisCycle();
             
-
             Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr));
-
         }
+
+
+        public void TestStateManagementPositiveTest()
+        {
+            //Check if temporal fires and spatial fires , temporal is not cleaned up
+        }
+
+
+        public void TestStateManagementNegativeTest()
+        {
+            //Check if temporal fires , apical fires then spatial fires , everything is cleaned up
+        }
+
 
         [TestMethod]
         public void TestBackUpAndRestore()

@@ -390,7 +390,7 @@
             int height = bmp.Height; //605
             int width = bmp.Width;  //579            
             
-            int blockLength = 600; //harcoding it to 600 , so we have a good factor of 50 for easy processing.
+            int blockLength = 600; //hardcoding it to 600 , so we have a good factor of 50 for easy processing.
 
             if (Math.Min(height, width) < blockLength)
             {
@@ -429,7 +429,6 @@
                 CleanPixelData();
 
                 Thread.Sleep(2000);
-
             }            
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
@@ -542,7 +541,8 @@
 
         public void PrintBlockVital()
         {
-            Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
+            //Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
+
             foreach ( var fom in fomBBM)
             {
                 fom.PrintBlockStats();
