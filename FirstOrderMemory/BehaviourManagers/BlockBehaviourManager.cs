@@ -60,6 +60,8 @@
 
         public uint TotalPredictionFires;
 
+        public int PerCycleFireSparsityPercentage;
+
         public uint totalAxonalConnections;
 
         private uint num_continuous_burst;
@@ -446,7 +448,7 @@
             if (incomingPattern.ActiveBits.Count == 0)
                 return;
 
-            NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
+            NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;            
 
             switch (incomingPattern.InputPatternType)
             {
@@ -559,14 +561,19 @@
 
         public void PrintBlockStats()
         {
+            // Print sparsity of the block.
+            // print warning when all the bits of the neuron fired. with more than 8% sparsity
             if (TotalBurstFire > 0 || TotalPredictionFires > 0)
             {                
-                    Console.WriteLine("  " + BlockID.ToString() + "          W:" + TotalBurstFire.ToString() + "             C:" + TotalPredictionFires.ToString());
+                    Console.WriteLine("  " + BlockID.ToString() + "          W:" + TotalBurstFire.ToString() + "             C:" + TotalPredictionFires.ToString() + "     Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
             }
         }
 
         private void Fire()
         {
+            PerCycleFireSparsityPercentage = ( NeuronsFiringThisCycle.Count / (NumColumns * NumColumns * Z) ) * 100;
+
+
             foreach (var neuron in NeuronsFiringThisCycle)
             {
                 //check if the synapse is active only then fire

@@ -245,6 +245,17 @@ namespace Hentul.UT
 
         }
 
+
+        [Test]
+        public void TestImagePixelCoverage()
+        {
+            bool[,] image = new bool[600, 600];
+
+
+
+
+        }
+
         [Test, Ignore("this is only for physical cursor movement!")]
         public void TestGetNextCursorPosition()
         {
