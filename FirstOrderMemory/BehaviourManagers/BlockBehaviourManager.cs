@@ -76,7 +76,7 @@
 
         private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
-        private BlockCycle CurrentCycleState { get; set; }
+        public BlockCycle CurrentCycleState { get; private set; }
 
         #endregion
 
@@ -442,6 +442,7 @@
         {
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
 
+            //BUG: Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             if (ignorePrecyclePrep == false && CurrentCycleState.Equals(BlockCycle.CLEANUP))
                 PreCyclePrep();
 
@@ -555,8 +556,11 @@
                 Wire();
             }
 
-            if ((isTemporal == false && IsApical == false) || ignorePostCycleCleanUp == false)
+            if (IsSpatial == true && ignorePostCycleCleanUp == false && CurrentCycleState == BlockCycle.CLEANUP)
                 PostCycleCleanup();
+
+            if(isTemporal == true || IsApical == true)           
+                PrepForSpatialFeedFarwardPattern();            
         }
 
         public void PrintBlockStats()
@@ -599,7 +603,7 @@
                 ///Case 2 : Few Fired , Few Bursted : Strengthen the Correctly Fired Neurons , For Bursted , Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do X
                 ///Case 3 : All columns Bursted : highly likely first fire or totally new pattern coming in , If firing early cycle , then just wire minimum strength for the connections and move on , if in the middle of the cycle( atleast 10,000 cycle ) then Need to do somethign new Todo .
 
-                //Get intersection of neuronsFiringThisCycle and predictedNEuronsFromThisCycle as if any neurons that were predicted for this cycle actually fired then we got to strengthen those connections first
+                //Get intersection of neuronsFiringThisCycle and predictedNeuronsFromThisCycle as if any neurons that were predicted for this cycle actually fired then we got to strengthen those connections first
 
                 CurrentCycleState = BlockCycle.FIRING;
 
@@ -776,8 +780,6 @@
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
 
-                IsSpatial = false;
-
             }
             else if (isTemporal)
             {
@@ -796,8 +798,6 @@
                         }
                     }
                 }
-
-                isTemporal = false;
             }
             else if (IsApical)
             {
@@ -815,23 +815,20 @@
                         }
                     }
                 }
-
-                IsApical = false;
             }
         }
 
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (targetNeuron.NeuronID.ToString().Equals("5-3-0-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N") || targetNeuron.NeuronID.ToString().Equals("5-5-2-N"))
+            if (sourceNeuron.NeuronID.ToString().Equals("2-3-0-A"))
             {
                 bool breakpoint = false;
-                breakpoint = true;
             }
 
             targetNeuron.ChangeCurrentStateTo(NeuronState.PREDICTED);
 
-            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.  
+            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.            
             AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron.NeuronID.ToString());
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
@@ -909,7 +906,7 @@
 
         public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
-            // Todo: Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
+            // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
             if (cType == null)
             {
                 bool breakpoint = false;
@@ -946,27 +943,28 @@
             return false;
         }
 
+        public Neuron GetNeuronFromPosition(Position_SOM pos)
+            => Columns[pos.X, pos.Y].Neurons[pos.Z];
+
         public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
         {
             Neuron toRetun = null;
 
-            if (w == 'N')
+            if (w == 'N' || w == 'n')
             {
                 toRetun = Columns[x, y].Neurons[z];
             }
-            else if (w == 'T')
+            else if (w == 'T' || w == 't')
             {
                 toRetun = TemporalLineArray[y, z];
             }
-            else if (w == 'A')
+            else if (w == 'A' || w == 'a')
             {
                 toRetun = ApicalLineArray[x, y];
             }
-
-            if (toRetun == null)
-            {
-                int bp = 1;
-                throw new InvalidOperationException("Your Column structure is messed up!!!");
+            else 
+            {                
+                throw new InvalidOperationException(" GetNeuronFromPosition :: Your Column structure is messed up!!!");
             }
 
             return toRetun;
@@ -1073,22 +1071,7 @@
 
             //Prepare the predicted list for next cycle Fire 
 
-            PredictedNeuronsforThisCycle.Clear();
-
-            foreach (var kvp in PredictedNeuronsForNextCycle)
-            {
-                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
-            }
-
-            PredictedNeuronsForNextCycle.Clear();
-
-            NeuronsFiringLastCycle.Clear();
-
-            foreach (var neuron in NeuronsFiringThisCycle)
-            {
-                if(neuron.nType.Equals(NeuronType.NORMAL))
-                    NeuronsFiringLastCycle.Add(neuron);
-            }
+            
 
             //Every 50 Cycles Prune unused and under Firing Connections
             if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
@@ -1129,6 +1112,27 @@
 
             CycleNum++;
             // Process Next pattern.          
+        }
+
+
+        private void PrepForSpatialFeedFarwardPattern()
+        {
+            PredictedNeuronsforThisCycle.Clear();
+
+            foreach (var kvp in PredictedNeuronsForNextCycle)
+            {
+                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
+            }
+
+            PredictedNeuronsForNextCycle.Clear();
+
+            NeuronsFiringLastCycle.Clear();
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                if (neuron.nType.Equals(NeuronType.NORMAL))
+                    NeuronsFiringLastCycle.Add(neuron);
+            }
         }
 
         private void GenerateTemporalLines()
@@ -1474,7 +1478,7 @@
         #endregion
 
 
-       internal enum BlockCycle
+       public enum BlockCycle
         { 
             INITIALIZATION,
             DEPOLARIZATION,

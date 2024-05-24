@@ -480,11 +480,11 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(apicalInputPattern, false, false);
+            bbManager.Fire(apicalInputPattern);
 
             normalNeuron.ProcessVoltage(1);
 
-            bbManager.Fire(spatialInputPattern, true, false);
+            bbManager.Fire(spatialInputPattern);
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
@@ -498,8 +498,7 @@ namespace FirstOrderMemoryUnitTest
 
         [TestMethod]
         public void TestTemporalnApicalnSpatialFire()
-        {
-            //Todo: verify firing and spatial SDR's are both are the same on the z coordiante as well.
+        {            
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
             var spatialSdr = TestUtils.GetSpatialAndTemporalOverlapSDR(apicalSdr, temporalSdr);
@@ -517,17 +516,39 @@ namespace FirstOrderMemoryUnitTest
         }
 
 
+        /// <summary>
+        /// After Temporal Fire , and Apical Fire and Spatail Fire, deploraized neuron should be cleaned up after Spatial Fire.
+        /// </summary>
+        [TestMethod]
         public void TestStateManagementPositiveTest()
-        {
-            //Check if temporal fires and spatial fires , temporal is not cleaned up
+		{                        
+            List<Position_SOM> posList = new List<Position_SOM>()
+            {
+                new Position_SOM(5,5,5)
+            };
+
+            SDR_SOM dummyTemporalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.TEMPORAL);
+            SDR_SOM dummyApicalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.APICAL);
+            SDR_SOM dummySpatialSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.SPATIAL);
+
+            bbManager.Fire(dummyTemporalSdr);
+
+            Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 5).Voltage > 0);
+
+            bbManager.Fire(dummyApicalSdr);
+
+            Assert.IsTrue(bbManager.GetNeuronFromPosition('n',5, 5, 9).Voltage > 0);
+
+            bbManager.Fire(dummySpatialSdr);
+
+            var state = bbManager.GetNeuronFromPosition('n', 5, 5, 5).CurrentState;
+
+            Assert.IsTrue(state.Equals(NeuronState.FIRING));
+
+            Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 5).Voltage == 0);
+
+            Assert.IsTrue(bbManager.GetNeuronFromPosition('n', 5, 1, 5).Voltage == 0);
         }
-
-
-        public void TestStateManagementNegativeTest()
-        {
-            //Check if temporal fires , apical fires then spatial fires , everything is cleaned up
-        }
-
 
         [TestMethod]
         public void TestBackUpAndRestore()
