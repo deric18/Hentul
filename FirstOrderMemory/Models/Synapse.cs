@@ -63,8 +63,8 @@ namespace FirstOrderMemory.Models
                     IsActive = true;
 
                 FiringHitCount++;
-
                 _strength++;
+
                 this.lastFiredCycle = BlockBehaviourManager.CycleNum;
             }
             else

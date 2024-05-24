@@ -195,11 +195,9 @@ namespace FirstOrderMemoryUnitTest
             //check if the connection b/w both is strengthened.
 
             var neuron1 = bbManager.Columns[0, 2].Neurons[0];
-            var neuron2 = bbManager.Columns[5, 3].Neurons[0];
+            var neuron2 = bbManager.Columns[5, 3].Neurons[0];            
 
-            UInt16 plasticityCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
-
-            if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))
+            if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))     //Connect the two neurons
             {
                 throw new InvalidProgramException("Could Not Connect 2 Neurons");
             }

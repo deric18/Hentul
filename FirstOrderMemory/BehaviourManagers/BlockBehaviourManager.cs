@@ -556,27 +556,90 @@
                 Wire();
             }
 
+            PrepNetworkForNextCycle();
+
             if (IsSpatial == true && ignorePostCycleCleanUp == false && CurrentCycleState == BlockCycle.CLEANUP)
-                PostCycleCleanup();
-
-            if(isTemporal == true || IsApical == true)           
-                PrepForSpatialFeedFarwardPattern();            
+                PostCycleCleanup();                       
         }
-
-        public void PrintBlockStats()
+        private void PostCycleCleanup()
         {
-            // Print sparsity of the block.
-            // print warning when all the bits of the neuron fired. with more than 8% sparsity
-            if (TotalBurstFire > 0 || TotalPredictionFires > 0)
-            {                
-                    Console.WriteLine("  " + BlockID.ToString() + "          W:" + TotalBurstFire.ToString() + "             C:" + TotalPredictionFires.ToString() + "     Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
+            //clean up all the fired columns if there is no apical or temporal signal
+            if (!IsSpatial && !IsApical && !isTemporal)
+            {
+                foreach (var column in Columns)
+                {
+                    column.PostCycleCleanup();
+                }
             }
+
+            if (IsSpatial && !IsApical && !isTemporal)
+                CurrentCycleState = BlockCycle.CLEANUP;
+
+            //Every 50 Cycles Prune unused and under Firing Connections
+            if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
+            {
+                foreach (var col in this.Columns)
+                {
+                    col.PruneCycleRefresh();
+                }
+
+                TotalBurstFire = 0;
+                TotalPredictionFires = 0;
+            }
+
+            //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
+
+            if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
+            {
+                for (int i = 0; i < NumColumns; i++)
+                {
+                    for (int j = 0; j < NumColumns; j++)
+                    {
+                        for (int k = 0; k < NumColumns; k++)
+                        {
+                            if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
+                            {
+                                Columns[i, j].Neurons[k].FlushVoltage();
+                            }
+                        }
+                    }
+                }
+            }
+
+            IsBurstOnly = false;           
+
+            CycleNum++;
+            // Process Next pattern.          
         }
+
+        private void PrepNetworkForNextCycle()
+        {
+
+            NeuronsFiringLastCycle.Clear();
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                if (neuron.nType.Equals(NeuronType.NORMAL))
+                    NeuronsFiringLastCycle.Add(neuron);
+            }
+
+            PredictedNeuronsforThisCycle.Clear();
+
+            foreach (var kvp in PredictedNeuronsForNextCycle)
+            {
+                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
+            }
+
+            PredictedNeuronsForNextCycle.Clear();
+
+            NeuronsFiringThisCycle.Clear();
+
+            ColumnsThatBurst.Clear();
+        }      
 
         private void Fire()
         {
             PerCycleFireSparsityPercentage = ( NeuronsFiringThisCycle.Count / (NumColumns * NumColumns * Z) ) * 100;
-
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
@@ -592,7 +655,6 @@
                 }
             }
         }
-
 
         private void Wire()
         {
@@ -776,7 +838,7 @@
                     //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
                 }
                 else
-                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysiss on how something can fire without bursting which was not predicted.
+                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
 
@@ -872,7 +934,7 @@
                 //else
                 //{
                 //    synapse.IncrementHitCount();
-                //}               
+                //}
             }
             else if (cType.Equals(ConnectionType.AXONTONEURON))
             {
@@ -880,7 +942,7 @@
             }
             else
             {
-                throw new InvalidOperationException("ProcessSpikeFormNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
+                throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
         }
 
@@ -927,16 +989,18 @@
             {
                 Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
 
-                //throw new InvalidDataException("CoonectTwoNeurons: Cannot connect Neuron to Itself!");
+                //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
 
             if (AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
             {
+
                 if(cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
                     TotalDistalDendriticConnections++;
                 }
+
                 return true;
             }
 
@@ -1045,93 +1109,23 @@
             {
                 if (synapse == null)
                 {
-                    Console.WriteLine("PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
+                    Console.WriteLine(" ERROR :: PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
                     throw new InvalidOperationException("Not Supposed to happen!");
                 }
 
-                Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
+                //Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
 
                 synapse.IncrementHitCount();
             }
-        }
+        }       
 
-        private void PostCycleCleanup()
+        public void PrintBlockStats()
         {
-            //clean up all the fired columns if there is no apical or temporal signal
-            if (!IsSpatial && !IsApical && !isTemporal)
+            // Print sparsity of the block.
+            // print warning when all the bits of the neuron fired. with more than 8% sparsity
+            if (TotalBurstFire > 0 || TotalPredictionFires > 0)
             {
-                foreach (var column in Columns)
-                {
-                    column.PostCycleCleanup();
-                }
-            }
-
-            if (IsSpatial && !IsApical && !isTemporal)
-                CurrentCycleState = BlockCycle.CLEANUP;
-
-            //Prepare the predicted list for next cycle Fire 
-
-            
-
-            //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
-            {
-                foreach (var col in this.Columns)
-                {
-                    col.PruneCycleRefresh();
-                }
-
-                TotalBurstFire = 0;
-                TotalPredictionFires = 0;
-            }
-
-            //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
-
-            if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
-            {
-                for (int i = 0; i < NumColumns; i++)
-                {
-                    for (int j = 0; j < NumColumns; j++)
-                    {
-                        for (int k = 0; k < NumColumns; k++)
-                        {
-                            if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
-                            {
-                                Columns[i, j].Neurons[k].FlushVoltage();
-                            }
-                        }
-                    }
-                }
-            }
-
-            IsBurstOnly = false;
-
-            NeuronsFiringThisCycle.Clear();
-
-            ColumnsThatBurst.Clear();
-
-            CycleNum++;
-            // Process Next pattern.          
-        }
-
-
-        private void PrepForSpatialFeedFarwardPattern()
-        {
-            PredictedNeuronsforThisCycle.Clear();
-
-            foreach (var kvp in PredictedNeuronsForNextCycle)
-            {
-                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
-            }
-
-            PredictedNeuronsForNextCycle.Clear();
-
-            NeuronsFiringLastCycle.Clear();
-
-            foreach (var neuron in NeuronsFiringThisCycle)
-            {
-                if (neuron.nType.Equals(NeuronType.NORMAL))
-                    NeuronsFiringLastCycle.Add(neuron);
+                Console.WriteLine("  " + BlockID.ToString() + "          W:" + TotalBurstFire.ToString() + "             C:" + TotalPredictionFires.ToString() + "     Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
             }
         }
 

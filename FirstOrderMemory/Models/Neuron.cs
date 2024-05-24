@@ -73,7 +73,7 @@ namespace FirstOrderMemory.Models
 
             if (AxonalList == null || AxonalList?.Count == 0)
             {
-                Console.WriteLine("No Neurons are Connected to this Neuron : " + NeuronID.ToString());
+                Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
                 return;
             }
 
@@ -287,7 +287,14 @@ namespace FirstOrderMemory.Models
             {
                 ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
-                Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
+                //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
+
+                if(ProximoDistalDendriticList.Count > 50)
+                {
+                    Console.WriteLine(" WARNING :: Neuron :" + NeuronID.ToString() + " has reached more than 50 Distal Dendritic Connections");
+
+                    Thread.Sleep(4000);
+                }
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
@@ -310,7 +317,7 @@ namespace FirstOrderMemory.Models
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);
+                //Console.WriteLine("SOM :: AddtoAxonalList : Connection Already Added Counter : Will Strethen Synapse", ++redundantCounter);
 
                 //synapse.IncrementHitCount();
 
