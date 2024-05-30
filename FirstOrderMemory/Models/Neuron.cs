@@ -298,8 +298,7 @@ namespace FirstOrderMemory.Models
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
-                    BlockBehaviourManager.totalDendronalConnections++;
-                    
+                    BlockBehaviourManager.totalDendronalConnections++;                    
                 }
 
                 return true;

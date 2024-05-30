@@ -215,7 +215,7 @@ namespace FirstOrderMemoryUnitTest
 
             uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
             {
                 bbManager.Fire(sdr1);
 
@@ -230,7 +230,7 @@ namespace FirstOrderMemoryUnitTest
 
             uint neruon2PostFireStrength = value2.GetStrength();
 
-            Assert.That(neruon2PostFireStrength - neuron2StrengthPreFire, Is.EqualTo(1));
+            Assert.AreEqual(1, neruon2PostFireStrength - neuron2StrengthPreFire);
 
             Assert.AreEqual(neuron1StrengthPostFire, neuron1StrengthPreFire);
 
@@ -279,32 +279,47 @@ namespace FirstOrderMemoryUnitTest
             Assert.Fail();
         }
 
-        public void TestDistalDendriticConnectionBecomesActiveAfter4FiringsUT()
+        [TestMethod]
+        public void TestDistalDendriticConnectionBecomesActiveAfter5FiringsUT()
         {
-            UInt16 numRepeats = BlockBehaviourManager.DISTALNEUROPLASTICITY;
 
-            Position_SOM pos1 = TestUtils.GenerateRandomPosition(1);
-            Position_SOM pos2 = TestUtils.GenerateRandomPosition(1);
+            Position_SOM pos1 = new Position_SOM(0, 2, 0, 'N');
+            Position_SOM pos2 = new Position_SOM(5, 3, 0, 'N');
 
-            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { pos1 }, iType.SPATIAL);            
+            SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { pos1 }, iType.SPATIAL);
+            SDR_SOM sdr2 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { pos2 }, iType.SPATIAL);
 
             Neuron neuron1 = bbManager.Columns[pos1.X , pos1.Y].Neurons[pos1.Z];
             Neuron neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
 
-            bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON);
-
-
-            for( int i = 0; i < numRepeats; i++)
+            if(!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))
             {
+                throw new Exception("Could Not connect two neurons!");
+            }
+
+            for( int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
+            {
+                Console.WriteLine("repcount : " + i.ToString());
+
                 bbManager.Fire(sdr1);
 
-                Assert.AreNotEqual(neuron2.CurrentState, NeuronState.FIRING);
+                Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
+            }
+
+            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
+            {
+                Console.WriteLine("repcount : " + i.ToString());
+
+                bbManager.Fire(sdr1);
+
+                bbManager.Fire(sdr2);
+
+                Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
 
             bbManager.Fire(sdr1);
 
-            Assert.AreEqual(neuron2.CurrentState, NeuronState.FIRING);
-
+            Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
         }
 
         public void TestNoCapOnTotalNumberOfDendriticConnections()
@@ -312,7 +327,7 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [Test]
+        [TestMethod]
         public void TestPruneCycleRefresh()
         {
             //Run cycle for 26 cycles , record distal synapse count at 25 and check if the count reduced at 26th cycle.
@@ -510,9 +525,9 @@ namespace FirstOrderMemoryUnitTest
 
             var firingSdr = bbManager.GetAllFiringNeuronsThisCycle();
             
-            Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr));
+            Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr, true));
         }
-
+       
 
         /// <summary>
         /// After Temporal Fire , and Apical Fire and Spatail Fire, deploraized neuron should be cleaned up after Spatial Fire.

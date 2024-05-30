@@ -21,7 +21,7 @@
             return new SDR_SOM(10, 10, posList, inputPatternType);
         }
 
-        internal static Position_SOM GenerateRandomPosition(int posCount)
+        internal static Position_SOM GenerateRandomPosition()
         {
             Random rand = new Random();
 

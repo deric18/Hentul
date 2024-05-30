@@ -45,5 +45,11 @@
             Assert.AreEqual("7-9-0-N", sdr.ActiveBits[31].ToString());
 
         }
+
+        [TestMethod]
+        public void TestEncoderSparsity()
+        {
+
+        }
     }
 }

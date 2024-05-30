@@ -31,24 +31,22 @@
             SDR_SOM predictedSDR;
 
             int repCount = 0;
+            int wirecount = 1;
 
             while (repCount != 60)
-            {                              
-                
+            {
+                Console.WriteLine("REPCOUNT : " + repCount.ToString());
+
                 bbManager.Fire(patternA);       //Fire A , Predict B NOT C
 
-                if(repCount > 2)
+                if(repCount > wirecount)
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
                     
-                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB));
-                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC));
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true));
                 }
-                if(repCount == 8)
-                {
-                    int bp2 = 1;
-                }
-
+               
                 
                 if (repCount == 3)
                 {
@@ -56,16 +54,14 @@
                 }
                 else
                 {
-                    bbManager.Fire(patternB);       //Fire B , Predict C NOT A
+                    bbManager.Fire(patternB);       
                 }
 
-                if (repCount > 2)
+                if (repCount > wirecount)
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
 
-                    Assert.IsTrue(predictedSDR.IsUnionTo(patternC));
-
-                    Console.WriteLine("REPCOUNT : " + repCount.ToString());
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));                    
 
                     bool b = predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0,1,4)});
 
@@ -77,7 +73,7 @@
                     Assert.IsFalse(b);
                 }
 
-                if (repCount == 2)
+                if (repCount < wirecount)
                 {
                     bbManager.Fire(patternC);      
                 }
@@ -88,12 +84,12 @@
 
                 predictedSDR = bbManager.GetPredictedSDR();
 
-                if (repCount > 2)
+                if (repCount > wirecount)
                 {
                     if(repCount >= 3)
                     {
-                        bool b = predictedSDR.IsUnionTo(patternA);
-                        bool c = predictedSDR.IsUnionTo(patternB);
+                        bool b = predictedSDR.IsUnionTo(patternA, true);
+                        bool c = predictedSDR.IsUnionTo(patternB, true);
 
                         if(b == false || c == true)
                         {
@@ -101,13 +97,13 @@
                         }
                     }
 
-                    Assert.IsFalse(predictedSDR.IsUnionTo(patternB));
-                    Assert.IsTrue(predictedSDR.IsUnionTo(patternA));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternB, true));
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternA, true));
                 }
 
                 repCount++;
             }            
-        }
+        }       
         
         [TestMethod]
         public void HighVoltagePredictedNeuronGetsPickedForFiringCT()
