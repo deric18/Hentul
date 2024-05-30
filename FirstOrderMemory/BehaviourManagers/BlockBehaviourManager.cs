@@ -564,12 +564,9 @@
         private void PostCycleCleanup()
         {
             //clean up all the fired columns if there is no apical or temporal signal
-            if (!IsSpatial && !IsApical && !isTemporal)
+            if (IsSpatial && !IsApical && !isTemporal)
             {
-                foreach (var column in Columns)
-                {
-                    column.PostCycleCleanup();
-                }
+                //Todo : Need Selective CleanUP Logic , Should never perform Full Clean up
             }
 
             if (IsSpatial && !IsApical && !isTemporal)
@@ -635,6 +632,10 @@
             NeuronsFiringThisCycle.Clear();
 
             ColumnsThatBurst.Clear();
+
+            //Determine if PostCycleCleanup should be performed!
+            
+
         }
 
         private void Fire()

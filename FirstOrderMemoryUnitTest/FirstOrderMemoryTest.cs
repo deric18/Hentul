@@ -540,19 +540,19 @@ namespace FirstOrderMemoryUnitTest
                 new Position_SOM(5,5,5)
             };
 
-            SDR_SOM dummyTemporalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.TEMPORAL);
-            SDR_SOM dummyApicalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.APICAL);
-            SDR_SOM dummySpatialSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.SPATIAL);
+            SDR_SOM TemporalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.TEMPORAL);
+            SDR_SOM ApicalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.APICAL);
+            SDR_SOM SpatialSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.SPATIAL);
 
-            bbManager.Fire(dummyTemporalSdr);
+            bbManager.Fire(TemporalSdr);
 
             Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 5).Voltage > 0);
 
-            bbManager.Fire(dummyApicalSdr);
+            bbManager.Fire(ApicalSdr);
 
             Assert.IsTrue(bbManager.GetNeuronFromPosition('n',5, 5, 9).Voltage > 0);
 
-            bbManager.Fire(dummySpatialSdr);
+            bbManager.Fire(SpatialSdr);
 
             var state = bbManager.GetNeuronFromPosition('n', 5, 5, 5).CurrentState;
 
