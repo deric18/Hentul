@@ -134,11 +134,13 @@
 
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position1 }, iType.SPATIAL);
 
-            bbManager.Fire(apicalSdr, false, true);
+            bbManager.Fire(apicalSdr);
 
             neuron3.ProcessVoltage(10);
 
-            bbManager.Fire(sdr_SOM, true, false);
+            Assert.AreEqual(neuron3.Voltage, 50);
+
+            bbManager.Fire(sdr_SOM);
 
             //Assert.AreEqual(NeuronState.RESTING, neuron1.CurrentState);
 
@@ -154,7 +156,7 @@
 
         public void FirAndWireWorksTest()
         {
-            // Todo: Check if neurons that all fired together are connected to each other or not and connect them!  
+            // Todo: Check if neurons that all fired together are connected to each other or not
         }        
     }
 }
