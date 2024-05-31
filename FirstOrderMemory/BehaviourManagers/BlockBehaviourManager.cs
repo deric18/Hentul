@@ -411,11 +411,7 @@
         #region FIRE & WIRE
 
         private void PreCyclePrep()
-        {
-            NeuronsFiringThisCycle.Clear();
-
-            ColumnsThatBurst.Clear();
-
+        {           
             //Prepare all the neurons that are predicted 
             if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
             {
@@ -592,7 +588,8 @@
 
             PrepNetworkForNextCycle();
 
-            PostCycleCleanup();
+            if(ignorePostCycleCleanUp == false)
+                PostCycleCleanup();
             
         }
 
@@ -601,7 +598,6 @@
             //Todo : Need Selective Clean Up Logic , Should never perform Full Clean up.
 
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
-
             if (PreviousBlockCycle.Equals(BlockCycle.DEPOLARIZATION) && CurrentCycleState.Equals(BlockCycle.FIRING))
             {
                 if(TemporalCycleCache.Count == 1)
@@ -675,10 +671,9 @@
                 PreviousBlockCycle = BlockCycle.DEDEPLOARIZED;
             }
 
+
             //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up.
-
             //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
-
             if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
             {
                 for (int i = 0; i < NumColumns; i++)
@@ -695,6 +690,12 @@
                     }
                 }
             }
+
+
+            //Case 3: If NeuronFiringThicCycle has any Temporal / APical Firing Neurons they should be cleaned up [Thougt : The neurons have already fired and Wired , Keepign them in the list will only conplicate next cycle process            
+            NeuronsFiringThisCycle.Clear();
+            ColumnsThatBurst.Clear();
+
 
             //Every 50 Cycles Prune unused and under Firing Connections
             if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
@@ -732,8 +733,7 @@
                 PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
             }
 
-            PredictedNeuronsForNextCycle.Clear();                                    
-
+            PredictedNeuronsForNextCycle.Clear();
         }
 
         private void Fire()
@@ -824,7 +824,7 @@
                         //if correctlyPredictedNeuron is also present in ColumnsThatBurst then remove it from the list ColumnsThatBurst , leads to double Wiring!!!
                         int index = CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
 
-                        if (index >= 0)
+                        if (index != -1 && index < ColumnsThatBurst.Count)
                         {
                             ColumnsThatBurst.RemoveAt(index);
                         }
@@ -1054,8 +1054,7 @@
                 }
                 else
                 {
-                    bool breakpoint = false;
-                    breakpoint = true;
+                    Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Apical / Temporal Line Array should be connected in both wyas to there respective Temporal / Apical Neuronal PArtners");
                 }
             }
             else if (targetNeuron.ProximoDistalDendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))

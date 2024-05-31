@@ -138,15 +138,17 @@ namespace FirstOrderMemoryUnitTest
 
             var pos = apicalSdr.ActiveBits[0];
 
-            var spatialSdr = new SDR_SOM(10, 10, new List<Position_SOM> { pos }, iType.APICAL);
+            var spatialSdr = new SDR_SOM(10, 10, new List<Position_SOM> { pos }, iType.SPATIAL);
 
             bbManager.Fire(apicalSdr);
 
             bbManager.Columns[pos.X, pos.Y].Neurons[5].ProcessVoltage(7);
 
-            bbManager.Fire(spatialSdr);
+            bbManager.Fire(spatialSdr,false, true);
 
             var firingNeuronList = bbManager.GetAllFiringNeuronsThisCycle();
+
+            Assert.AreEqual(1, firingNeuronList.ActiveBits.Count);
 
             Assert.IsTrue(firingNeuronList.ActiveBits[0].X == pos.X && firingNeuronList.ActiveBits[0].Y == pos.Y && firingNeuronList.ActiveBits[0].Z == 5);
         }
