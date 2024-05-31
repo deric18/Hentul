@@ -130,6 +130,27 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
+
+        [TestMethod]
+        public void TestMaxVoltageDeplorizedNeuronAlwaysGetPicked()
+        {
+            var apicalSdr = TestUtils.GenerateApicalSDRForDepolarization();
+
+            var pos = apicalSdr.ActiveBits[0];
+
+            var spatialSdr = new SDR_SOM(10, 10, new List<Position_SOM> { pos }, iType.APICAL);
+
+            bbManager.Fire(apicalSdr);
+
+            bbManager.Columns[pos.X, pos.Y].Neurons[5].ProcessVoltage(7);
+
+            bbManager.Fire(spatialSdr);
+
+            var firingNeuronList = bbManager.GetAllFiringNeuronsThisCycle();
+
+            Assert.IsTrue(firingNeuronList.ActiveBits[0].X == pos.X && firingNeuronList.ActiveBits[0].Y == pos.Y && firingNeuronList.ActiveBits[0].Z == 5);
+        }
+
         [TestMethod]
         public void TestConnectTwoNeuronsOrIncrementStrengthAfterInitialzationShouldFail()
         {
@@ -399,9 +420,13 @@ namespace FirstOrderMemoryUnitTest
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
         }
 
+
+
         [TestMethod]
         public void TestTemporalWiringUT()
         {
+            // Fire Temporal Pattern then Fire Spatial Pattern and see if the temporal wiring took place.
+
             SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
@@ -424,7 +449,6 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(temporalInputPattern);
             bbManager.Fire(spatialInputPattern);
-
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
@@ -561,6 +585,30 @@ namespace FirstOrderMemoryUnitTest
             Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 5).Voltage == 0);
 
             Assert.IsTrue(bbManager.GetNeuronFromPosition('n', 5, 1, 5).Voltage == 0);
+        }
+
+        [TestMethod]
+        public void TestPostCycleFireCleanUp1()
+        {
+            //After Temporal , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
+        }
+
+        [TestMethod]
+        public void TestPostCycleFireCleanUp2()
+        {
+            //After Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
+        }
+
+        [TestMethod]
+        public void TestPostCycleFireCleanUp3()
+        {
+            //After Temporal && Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
+        }
+
+        [TestMethod]
+        public void TestPostCycleFireCleanUp4()
+        {
+            //After Burst , Make sure all the bursted neurons and there connected neurons are cleaned up
         }
 
         [TestMethod]

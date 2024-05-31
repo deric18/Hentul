@@ -40,6 +40,10 @@
 
         private SDR_SOM SDR { get; set; }
 
+        private Dictionary<ulong, List<Position_SOM>> TemporalCycleCache { get; set; }
+
+        private Dictionary<ulong, List<Position_SOM>> ApicalCycleCache { get; set; }
+
         public Neuron[,] TemporalLineArray { get; private set; }
 
         public Neuron[,] ApicalLineArray { get; private set; }
@@ -66,11 +70,15 @@
 
         private uint num_continuous_burst;
 
-        private bool IsApical;
+        private bool IsPreviousApicalOrTemporal;
 
-        private bool isTemporal;
+        private bool IsPreviousSpatial;
 
-        public bool IsSpatial;
+        private bool IsCurrentApical;
+
+        private bool IsCurrentTemporal;
+
+        public bool IsCurrentSpatial;
 
         private bool IsBurstOnly;
 
@@ -149,15 +157,23 @@
 
             //AxonalCache = new Dictionary<string, int[]>();
 
+            TemporalCycleCache = new Dictionary<ulong, List<Position_SOM>>();
+
+            ApicalCycleCache = new Dictionary<ulong, List<Position_SOM>>();
+
             totalProximalConnections = 0;
 
             totalAxonalConnections = 0;
 
-            isTemporal = false;
+            IsPreviousApicalOrTemporal = false;
 
-            IsApical = false;
+            IsPreviousSpatial = false;
 
-            IsSpatial = false;
+            IsCurrentTemporal = false;
+
+            IsCurrentApical = false;
+
+            IsCurrentSpatial = false;
 
             IsBurstOnly = false;
 
@@ -405,7 +421,7 @@
 
         #endregion
 
-        #region PUBLIC METHODS 
+        #region FIRE & WIRE
 
         private void PreCyclePrep()
         {
@@ -448,6 +464,28 @@
 
             if (incomingPattern.ActiveBits.Count == 0)
                 return;
+
+            if(incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
+            {
+                if(TemporalCycleCache.Count != 0)
+                {
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item!");
+                }
+
+                
+                TemporalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
+            }
+
+            if(incomingPattern.InputPatternType.Equals(iType.APICAL))
+            {
+                if (ApicalCycleCache.Count != 0)
+                {
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!");
+                }
+
+
+                ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
+            }
 
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -498,13 +536,13 @@
                             predictedNeuronPositions = null;
                         }
 
-                        IsSpatial = true;
+                        IsCurrentSpatial = true;
 
                         break;
                     }
                 case iType.TEMPORAL:
                     {
-                        isTemporal = true;
+                        IsCurrentTemporal = true;
 
                         List<Neuron> temporalLineNeurons = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits as List<Position_SOM>);
 
@@ -522,7 +560,7 @@
                     }
                 case iType.APICAL:
                     {
-                        IsApical = true;
+                        IsCurrentApical = true;
 
                         List<Neuron> apicalLineNeurons = new List<Neuron>();
 
@@ -551,38 +589,49 @@
 
             Fire();
 
-            if (IsSpatial == true)
+            if (IsCurrentSpatial == true)
             {
                 Wire();
             }
 
             PrepNetworkForNextCycle();
 
-            if (IsSpatial == true && ignorePostCycleCleanUp == false && CurrentCycleState == BlockCycle.CLEANUP)
-                PostCycleCleanup();
+            PostCycleCleanup();
         }
+
         private void PostCycleCleanup()
         {
-            //clean up all the fired columns if there is no apical or temporal signal
-            if (IsSpatial && !IsApical && !isTemporal)
-            {
-                //Todo : Need Selective CleanUP Logic , Should never perform Full Clean up
-            }
+            //Todo : Need Selective Clean Up Logic , Should never perform Full Clean up.
 
-            if (IsSpatial && !IsApical && !isTemporal)
-                CurrentCycleState = BlockCycle.CLEANUP;
+            //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
 
-            //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
+            if (IsPreviousApicalOrTemporal && IsCurrentSpatial)
             {
-                foreach (var col in this.Columns)
+                if(TemporalCycleCache.Count == 1)
                 {
-                    col.PruneCycleRefresh();
+                    foreach(var kvp in TemporalCycleCache)
+                    {
+                        if(CycleNum - kvp.Key > 3)
+                        {
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!");
+                        }
+
+                        foreach(var pos in kvp.Value)
+                        {
+                            
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1");
+                    throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
 
-                TotalBurstFire = 0;
-                TotalPredictionFires = 0;
+
             }
+
+            //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up.
 
             //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
 
@@ -601,6 +650,18 @@
                         }
                     }
                 }
+            }
+
+            //Every 50 Cycles Prune unused and under Firing Connections
+            if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
+            {
+                foreach (var col in this.Columns)
+                {
+                    col.PruneCycleRefresh();
+                }
+
+                TotalBurstFire = 0;
+                TotalPredictionFires = 0;
             }
 
             IsBurstOnly = false;
@@ -634,7 +695,11 @@
             ColumnsThatBurst.Clear();
 
             //Determine if PostCycleCleanup should be performed!
-            
+
+            if (IsPreviousApicalOrTemporal && IsCurrentSpatial)
+            {
+                //Need a process to only clean up previous apical and temporal firings
+            }
 
         }
 
@@ -659,7 +724,7 @@
 
         private void Wire()
         {
-            if (IsSpatial)
+            if (IsCurrentSpatial)
             {
 
                 ///Case 1 : All Predicted Neurons Fire : Strengthen only the correct predictions.
@@ -862,7 +927,7 @@
                 }
 
             }
-            else if (isTemporal)
+            else if (IsCurrentTemporal)
             {
                 CurrentCycleState = BlockCycle.DEPOLARIZATION;
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
@@ -880,7 +945,7 @@
                     }
                 }
             }
-            else if (IsApical)
+            else if (IsCurrentApical)
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
 
@@ -909,7 +974,7 @@
             {
                 if (x.X == neuronID.X && x.Y == neuronID.Y && x.Z == neuronID.Z && x.W == neuronID.W)
                 {
-                    index = i; 
+                    index = i;
                     break;
                 }
                 i++;
