@@ -25,7 +25,6 @@
 
         public List<Neuron> NeuronsFiringLastCycle { get; private set; }
 
-
         private List<Segment>? _predictedSegmentForThisCycle;
 
         public List<Position_SOM> ColumnsThatBurst { get; private set; }
@@ -435,6 +434,7 @@
             NumberOfColumnsThatFiredThisCycle = 0;
 
             IsBurstOnly = false;
+            
         }
 
         /// <summary>
@@ -452,20 +452,17 @@
             if (ignorePrecyclePrep == false)
                 PreCyclePrep();
 
-            if (incomingPattern.ActiveBits.Count == 0)
-                return;
-
-            if(incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
+            if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
             {
-                if(TemporalCycleCache.Count != 0)
+                if (TemporalCycleCache.Count != 0)
                 {
                     Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item!");
                 }
-                
-                TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates2(incomingPattern.ActiveBits));
+
+                TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
             }
 
-            if(incomingPattern.InputPatternType.Equals(iType.APICAL))
+            if (incomingPattern.InputPatternType.Equals(iType.APICAL))
             {
                 if (ApicalCycleCache.Count != 0)
                 {
@@ -474,6 +471,9 @@
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
             }
+
+            if (incomingPattern.ActiveBits.Count == 0)
+                return;            
 
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -611,9 +611,13 @@
 
                         foreach(var pos in kvp.Value)
                         {
+                            if(pos.X == 4 && pos.Y == 2)
+                            {
+                                int breakpoint = 0;
+                            }
                             foreach(var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
                             {
-                                if(synapse.DendronalNeuronalId != null && !CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
+                                if(synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
                                 {
                                     var neuronToCleanUp = ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
@@ -647,13 +651,17 @@
                         {
                             foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
                             {
-                                if (synapse.DendronalNeuronalId != null && CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
+                                if (synapse.DendronalNeuronalId != null && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
                                 {
                                     var neuronToCleanUp = ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
                                     if (neuronToCleanUp.Voltage != 0)
                                     {
                                         neuronToCleanUp.FlushVoltage();
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! ");
                                     }
                                 }
                             }
@@ -672,8 +680,7 @@
             }
 
 
-            //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up.
-            //Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
+            //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up. Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
             if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
             {
                 for (int i = 0; i < NumColumns; i++)
@@ -822,7 +829,7 @@
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
                         //if correctlyPredictedNeuron is also present in ColumnsThatBurst then remove it from the list ColumnsThatBurst , leads to double Wiring!!!
-                        int index = CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
+                        int index = BBMUtils.CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
 
                         if (index != -1 && index < ColumnsThatBurst.Count)
                         {
@@ -993,39 +1000,7 @@
                 }
             }
         }
-
-        private int CheckIfPositionListHasThisPosition(List<Position_SOM> columnsThatBurst, Position_SOM neuronID)
-        {
-            var index = -1;
-
-            int i = 0;
-
-            foreach (var x in columnsThatBurst)
-            {
-                if (x.X == neuronID.X && x.Y == neuronID.Y && x.Z == neuronID.Z && x.W == neuronID.W)
-                {
-                    index = i;
-                    break;
-                }
-                i++;
-            }
-
-            return index;
-        }
-
-        private bool CheckNeuronListHasThisNeuron(List<Neuron> neurlonList, string neuronID)
-        {
-            foreach(var neuronitem in neurlonList)
-            {
-                if(neuronitem.NeuronID.ToString().Equals(neuronID))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
+                
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
@@ -1054,7 +1029,12 @@
                 }
                 else
                 {
-                    Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Apical / Temporal Line Array should be connected in both wyas to there respective Temporal / Apical Neuronal PArtners");
+                    if (cType.Equals(ConnectionType.TEMPRORAL))
+                        Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Temporal Line Array should be connected in both ways to there respective Temporal / Apical Neuronal Partners");
+                    else if (cType.Equals(ConnectionType.APICAL))
+                        Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Apical Line Array should be connected in both ways to there respective Temporal / Apical Neuronal Partners");
+                    else
+                        throw new InvalidOperationException("Invalid Connections");
                 }
             }
             else if (targetNeuron.ProximoDistalDendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
@@ -1158,26 +1138,26 @@
 
         public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
         {
-            Neuron toRetun = null;
+            Neuron toReturn = null;
 
             if (w == 'N' || w == 'n')
             {
-                toRetun = Columns[x, y].Neurons[z];
+                toReturn = Columns[x, y].Neurons[z];
             }
             else if (w == 'T' || w == 't')
             {
-                toRetun = TemporalLineArray[y, z];
+                toReturn = TemporalLineArray[y, z];
             }
             else if (w == 'A' || w == 'a')
             {
-                toRetun = ApicalLineArray[x, y];
+                toReturn = ApicalLineArray[x, y];
             }
             else
             {
                 throw new InvalidOperationException(" GetNeuronFromPosition :: Your Column structure is messed up!!!");
             }
 
-            return toRetun;
+            return toReturn;
         }
 
         public Neuron ConvertStringPosToNeuron(string posString)
@@ -1345,9 +1325,10 @@
             }
 
             return temporalNeurons;
-        }
 
-        private List<Position_SOM> TransformTemporalCoordinatesToSpatialCoordinates2(List<Position_SOM> activeBits)
+        }        
+
+        private List<Position_SOM> TransformTemporalCoordinatesToSpatialCoordinates1(List<Position_SOM> activeBits)
         {
             List<Position_SOM> temporalNeurons = new List<Position_SOM>();
 
@@ -1362,7 +1343,37 @@
             return temporalNeurons;
         }
 
-        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates3(List<Position_SOM> positionLists)
+        private List<Position_SOM> TransformTemporalCoordinatesToSpatialCoordinates2(List<Position_SOM> activeBits)
+        {
+            List<Position_SOM> temporalNeuronsPositions = new List<Position_SOM>();
+
+            if (activeBits.Count == 0)
+                return temporalNeuronsPositions;
+
+            foreach (var position in activeBits)
+            {
+                temporalNeuronsPositions.Add(this.TemporalLineArray[position.Y, position.X].NeuronID);
+            }
+
+            return temporalNeuronsPositions;
+        }
+
+        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates3(List<Position_SOM> activeBits)
+        {
+            List<Neuron> temporalNeurons = new List<Neuron>();
+
+            if (activeBits.Count == 0)
+                return temporalNeurons;
+
+            foreach (var position in activeBits)
+            {
+                temporalNeurons.Add(this.TemporalLineArray[position.Y, position.X]);
+            }
+
+            return temporalNeurons;
+        }               
+
+        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates4(List<Position_SOM> positionLists)
         {
             List<Neuron> toReturn = new List<Neuron>();
 

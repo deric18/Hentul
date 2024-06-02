@@ -91,6 +91,10 @@
 
         internal static SDR_SOM GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
         {
+
+            //For Overlapping Temporal and Spatial Patterns , All that has to be done is to match the y-Coordiante.
+
+
             Random rand = new Random();
             int numPos = rand.Next(0, 10);
 
@@ -104,7 +108,7 @@
 
             List<Position_SOM> temporalPosList = new List<Position_SOM>()
             {
-                new Position_SOM(0,4),
+                new Position_SOM(2,4),
                 new Position_SOM(8,3),
                 new Position_SOM(7,2),
                 new Position_SOM(0,0)
