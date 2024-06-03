@@ -670,7 +670,51 @@ namespace FirstOrderMemoryUnitTest
         public void TestPostCycleCleanupTemporalandApical()
         {
             //After Temporal && Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
-            Assert.Fail();
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
+            var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+
+            bbManager.Fire(temporalSdr);
+
+            var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+            Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.NumColumns, predictedNeurons.Count);
+
+            bbManager.Fire(apicalSdr);
+
+            predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.NumColumns, predictedNeurons.Count);
+
+            bbManager.Fire(spatialSdr);
+
+            Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
+
+            foreach (var pos in temporalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)
+                {
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            foreach (var pos in apicalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            foreach (var pos in spatialSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
         }
 
         [TestMethod]
