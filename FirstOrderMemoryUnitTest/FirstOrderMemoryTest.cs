@@ -134,7 +134,7 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestMaxVoltageDeplorizedNeuronAlwaysGetPicked()
         {
-            var apicalSdr = TestUtils.GenerateApicalSDRForDepolarization();
+            var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization();
 
             var pos = apicalSdr.ActiveBits[0];
 
@@ -634,7 +634,36 @@ namespace FirstOrderMemoryUnitTest
         {
             //After Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
 
-            Assert.Fail();
+            var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
+            var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+
+            bbManager.Fire(apicalSdr);
+
+            var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.NumColumns, predictedNeurons.Count);
+
+            bbManager.Fire(spatialSdr);
+
+            Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
+
+            foreach (var pos in apicalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            foreach (var pos in spatialSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
         }
 
         [TestMethod]
@@ -648,7 +677,22 @@ namespace FirstOrderMemoryUnitTest
         public void TestPostCycleCleanUpBurst()
         {
             //After Burst , Make sure all the bursted neurons and there connected neurons are cleaned up
-            Assert.Fail();
+
+            var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+
+            bbManager.Fire(spatialSdr);     //Burst
+
+            Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
+
+            foreach (var pos in spatialSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(NeuronState.RESTING, neuron.CurrentState);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
         }
 
         [TestMethod]

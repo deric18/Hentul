@@ -35,9 +35,9 @@
         }
 
 
-        internal static SDR_SOM GenerateApicalSDRForDepolarization()
+        internal static SDR_SOM GenerateApicalOrSpatialSDRForDepolarization(iType iType = iType.APICAL)
         {
-            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType.APICAL);            
+            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType);            
         }
 
 
@@ -66,8 +66,8 @@
 
             positions.Add(new Position_SOM(3, 2, 1));
             positions.Add(new Position_SOM(5, 5, 5));
-            positions.Add(new Position_SOM(7,8,2)); 
-            positions.Add(new Position_SOM(8,3,2));
+            positions.Add(new Position_SOM(7, 8, 2)); 
+            positions.Add(new Position_SOM(8, 3, 2));
 
             return positions;
 
@@ -93,7 +93,6 @@
         {
 
             //For Overlapping Temporal and Spatial Patterns , All that has to be done is to match the y-Coordiante.
-
 
             Random rand = new Random();
             int numPos = rand.Next(0, 10);

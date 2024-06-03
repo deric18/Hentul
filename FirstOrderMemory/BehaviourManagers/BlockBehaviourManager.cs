@@ -43,13 +43,11 @@
 
         private Dictionary<ulong, List<Position_SOM>> ApicalCycleCache { get; set; }
 
+        private Dictionary<ulong, List<Position_SOM>> BurstCache { get; set; }
+
         public Neuron[,] TemporalLineArray { get; private set; }
 
         public Neuron[,] ApicalLineArray { get; private set; }
-
-        //public Dictionary<string, int[]> DendriticCache { get; private set; }
-
-        //public Dictionary<string, int[]> AxonalCache { get; private set; }
 
         public int axonCounter { get; private set; }
 
@@ -67,7 +65,7 @@
 
         public uint totalAxonalConnections;
 
-        private uint num_continuous_burst;        
+        private uint num_continuous_burst;
 
         private bool IsBurstOnly;
 
@@ -160,10 +158,12 @@
 
             ApicalCycleCache = new Dictionary<ulong, List<Position_SOM>>();
 
+            BurstCache = new Dictionary<ulong, List<Position_SOM>>();
+
             totalProximalConnections = 0;
 
             totalAxonalConnections = 0;
-            
+
             axonCounter = 0;
 
             num_continuous_burst = 0;
@@ -178,7 +178,7 @@
         }
 
         public void Init(int x = -1, int y = -1)
-        {            
+        {
 
             ReadDendriticSchema(x, y);
 
@@ -410,13 +410,13 @@
         #region FIRE & WIRE
 
         private void PreCyclePrep()
-        {           
+        {
             //Prepare all the neurons that are predicted 
             if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
             {
                 Console.WriteLine("Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
                 throw new Exception("PreCycle Cleanup Exception!!!");
-            }            
+            }
 
             if (CurrentCycleState.Equals(BlockCycle.CLEANUP))
             {
@@ -434,7 +434,7 @@
             NumberOfColumnsThatFiredThisCycle = 0;
 
             IsBurstOnly = false;
-            
+
         }
 
         /// <summary>
@@ -473,7 +473,7 @@
             }
 
             if (incomingPattern.ActiveBits.Count == 0)
-                return;            
+                return;
 
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -495,7 +495,7 @@
                             {
                                 Console.WriteLine("Block ID : " + BlockID.ToString() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
-                                AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
+                                AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
 
                                 ColumnsThatBurst.Add(incomingPattern.ActiveBits[i]);
 
@@ -579,6 +579,13 @@
                     }
             }
 
+            if (IsBurstOnly)
+                BurstCache.Add(CycleNum, incomingPattern.ActiveBits);
+            else
+            {
+                Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle");
+            }
+
             Fire();
 
             if (CurrentCycleState == BlockCycle.FIRING || IsCurrentApical || IsCurrentTemporal)
@@ -588,9 +595,9 @@
 
             PrepNetworkForNextCycle();
 
-            if(ignorePostCycleCleanUp == false)
+            if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
-            
+
         }
 
         private void PostCycleCleanup()
@@ -600,28 +607,28 @@
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
             if (PreviousBlockCycle.Equals(BlockCycle.DEPOLARIZATION) && CurrentCycleState.Equals(BlockCycle.FIRING))
             {
-                if(TemporalCycleCache.Count == 1)
+                if (TemporalCycleCache.Count == 1)
                 {
-                    foreach(var kvp in TemporalCycleCache)
+                    foreach (var kvp in TemporalCycleCache)
                     {
-                        if(CycleNum - kvp.Key > 3)
+                        if (CycleNum - kvp.Key > 3)
                         {
                             Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!");
                         }
 
-                        foreach(var pos in kvp.Value)
+                        foreach (var pos in kvp.Value)
                         {
-                            if(pos.X == 4 && pos.Y == 2)
+                            if (pos.X == 4 && pos.Y == 2)
                             {
                                 int breakpoint = 0;
                             }
-                            foreach(var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
+                            foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
                             {
-                                if(synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
+                                if (synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
                                 {
                                     var neuronToCleanUp = ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
-                                    if(neuronToCleanUp.Voltage!=0)
+                                    if (neuronToCleanUp.Voltage != 0)
                                     {
                                         neuronToCleanUp.FlushVoltage();
                                     }
@@ -630,7 +637,7 @@
                         }
                     }
 
-                    TemporalCycleCache.Clear();                    
+                    TemporalCycleCache.Clear();
                 }
                 else if (TemporalCycleCache.Count > 1)
                 {
@@ -651,7 +658,7 @@
                         {
                             foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
                             {
-                                if (synapse.DendronalNeuronalId != null && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
+                                if (synapse.DendronalNeuronalId != null) // && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
                                 {
                                     var neuronToCleanUp = ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
 
@@ -666,36 +673,49 @@
                                 }
                             }
                         }
-                    }       
-                    
+                    }
+
                     ApicalCycleCache.Clear();
                 }
-                else if(ApicalCycleCache.Count > 1)
+                else if (ApicalCycleCache.Count > 1)
                 {
                     Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1");
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
 
-                PreviousBlockCycle = BlockCycle.DEDEPLOARIZED;
+                PreviousBlockCycle = BlockCycle.POLOARIZED;
             }
 
 
             //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up. Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
-            if (num_continuous_burst > TOTAL_ALLOWED_BURST_PER_CLEANUP)
+            if (ColumnsThatBurst.Count != 0)
             {
-                for (int i = 0; i < NumColumns; i++)
+                foreach (var kvp in BurstCache)
                 {
-                    for (int j = 0; j < NumColumns; j++)
+                    if (CycleNum - kvp.Key > 3)
                     {
-                        for (int k = 0; k < NumColumns; k++)
+                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!");
+                    }
+
+                    foreach (var pos in kvp.Value)
+                    {
+                        for (int i = 0; i < NumColumns; i++)
                         {
-                            if (!NeuronsFiringLastCycle.Where(x => x.NeuronID.X == i && x.NeuronID.Y == j && x.NeuronID.Z == k && x.nType == NeuronType.NORMAL).Any())
+                            var neuronToCleanUp = Columns[pos.X, pos.Y].Neurons[i];
+
+                            if (neuronToCleanUp.Voltage != 0)
                             {
-                                Columns[i, j].Neurons[k].FlushVoltage();
+                                neuronToCleanUp.FlushVoltage();
+                            }
+                            else
+                            {
+                                Console.WriteLine("WARNING :: PostCycleCleanUp ::: CASE 3 [Burwst Clean up] :::: Tried to clean up a neuron which was not depolarized!!!");
                             }
                         }
                     }
                 }
+
+                BurstCache.Clear();
             }
 
 
@@ -1000,7 +1020,7 @@
                 }
             }
         }
-                
+
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
@@ -1326,7 +1346,7 @@
 
             return temporalNeurons;
 
-        }        
+        }
 
         private List<Position_SOM> TransformTemporalCoordinatesToSpatialCoordinates1(List<Position_SOM> activeBits)
         {
@@ -1371,7 +1391,7 @@
             }
 
             return temporalNeurons;
-        }               
+        }
 
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates4(List<Position_SOM> positionLists)
         {
@@ -1648,7 +1668,7 @@
         {
             INITIALIZATION,
             DEPOLARIZATION,
-            DEDEPLOARIZED,
+            POLOARIZED,
             FIRING,
             CLEANUP
         }
