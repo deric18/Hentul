@@ -290,7 +290,7 @@ namespace FirstOrderMemory.Models
 
                 //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
-                if(ProximoDistalDendriticList.Count > 50)
+                if(ProximoDistalDendriticList.Count > 100)
                 {
                     Console.WriteLine(" WARNING :: Neuron :" + NeuronID.ToString() + " has reached more than 50 Distal Dendritic Connections");
 

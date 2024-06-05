@@ -349,12 +349,14 @@ namespace FirstOrderMemoryUnitTest
             Assert.IsTrue(BBMUtils.CheckNeuronListHasThisNeuron(bbManager.NeuronsFiringLastCycle, neuron2));            
         }
 
+
         public void TestNoCapOnTotalNumberOfDendriticConnections()
         {
 
         }
 
-        [TestMethod]
+
+        [Test, Ignore("Not Yet Implemented!!!")]
         public void TestPruneCycleRefresh()
         {
             //Run cycle for 26 cycles , record distal synapse count at 25 and check if the count reduced at 26th cycle.

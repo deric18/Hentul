@@ -1050,12 +1050,19 @@
                 }
                 else
                 {
-                    if (cType.Equals(ConnectionType.TEMPRORAL))
-                        Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Temporal Line Array should be connected in both ways to there respective Temporal / Apical Neuronal Partners");
-                    else if (cType.Equals(ConnectionType.APICAL))
-                        Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Apical Line Array should be connected in both ways to there respective Temporal / Apical Neuronal Partners");
-                    else
-                        throw new InvalidOperationException("Invalid Connections");
+                    if (cType.Equals(ConnectionType.TEMPRORAL))                                            
+                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE);                    
+                    else if (cType.Equals(ConnectionType.APICAL))                    
+                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE);
+
+                    #region Removed Code [Potential Bug OR Feature
+                    //if (cType.Equals(ConnectionType.TEMPRORAL))
+                    //    Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Temporal Line Array should be connected in both ways to there respective Temporal / Apical Neuronal Partners");
+                    //else if (cType.Equals(ConnectionType.APICAL))
+                    //    Console.WriteLine("ERROR :: ProcessSpikeFromNeuron :::: Apical Line Array should be connected in both ways to there respective Temporal / Apical Neuronal Partners");
+                    //else
+                    //    throw new InvalidOperationException("Invalid Connections");
+                    #endregion
                 }
             }
             else if (targetNeuron.ProximoDistalDendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
@@ -1147,12 +1154,36 @@
             if (IsAxonalConnectionSuccesful && IsDendronalConnectionSuccesful)
             {
 
-                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
+                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
                 {
                     TotalDistalDendriticConnections++;
                 }
 
                 return true;
+            }
+            else
+            {
+                //Connection Already Exists Just Need to Strengthen it
+
+                if(AxonalNeuron.AxonalList.TryGetValue(DendriticNeuron.NeuronID.ToString(), out Synapse synapse1))
+                {
+                    synapse1.IncrementHitCount();
+                }
+                else
+                {
+                    Console.WriteLine("EXCEPTION : ConnectTwoNeuronsOrIncrementStrength :: Trying to incremetn hit count on a synapse that does not exist");
+                    throw new InvalidOperationException("Trying to incremetn hit count on a synapse that does not exist");
+                }
+
+                if (DendriticNeuron.AxonalList.TryGetValue(AxonalNeuron.NeuronID.ToString(), out Synapse synapse2))
+                {
+                    synapse2.IncrementHitCount();
+                }
+                else
+                {
+                    Console.WriteLine("EXCEPTION : ConnectTwoNeuronsOrIncrementStrength :: Trying to incremetn hit count on a synapse that does not exist");
+                    throw new InvalidOperationException("Trying to incremetn hit count on a synapse that does not exist");
+                }
             }
 
             return false;
