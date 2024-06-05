@@ -307,7 +307,7 @@ namespace FirstOrderMemoryUnitTest
         {
 
             Position_SOM pos1 = new Position_SOM(0, 2, 0, 'N');
-            Position_SOM pos2 = new Position_SOM(5, 3, 0, 'N');
+            Position_SOM pos2 = new Position_SOM(5, 3, 3, 'N');
 
             SDR_SOM sdr1 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { pos1 }, iType.SPATIAL);
             SDR_SOM sdr2 = TestUtils.GenerateRandomSDRFromPosition(new List<Position_SOM>() { pos2 }, iType.SPATIAL);
@@ -329,11 +329,13 @@ namespace FirstOrderMemoryUnitTest
                 Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
+            for (int i = 0; i <= BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
             {
                 Console.WriteLine("repcount : " + i.ToString());
 
                 bbManager.Fire(sdr1);
+
+                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30);
 
                 bbManager.Fire(sdr2);
 
@@ -342,7 +344,9 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(sdr1);
 
-            Assert.IsTrue(BBMUtils.CheckNeuronListHasThisNeuron(bbManager.NeuronsFiringLastCycle, neuron2));
+            bbManager.Fire(sdr2);            
+
+            Assert.IsTrue(BBMUtils.CheckNeuronListHasThisNeuron(bbManager.NeuronsFiringLastCycle, neuron2));            
         }
 
         public void TestNoCapOnTotalNumberOfDendriticConnections()

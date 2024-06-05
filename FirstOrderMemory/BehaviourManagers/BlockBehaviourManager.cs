@@ -17,9 +17,9 @@
 
         public Position_SOM BlockID;
 
-        public Dictionary<string, List<string>> PredictedNeuronsForNextCycle { get; private set; }
+        public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
 
-        public Dictionary<string, List<string>> PredictedNeuronsforThisCycle { get; private set; }
+        public Dictionary<string, List<Neuron>> PredictedNeuronsforThisCycle { get; private set; }
 
         public List<Neuron> NeuronsFiringThisCycle { get; private set; }
 
@@ -129,10 +129,10 @@
 
             IsCurrentApical = false;
 
-            PredictedNeuronsforThisCycle = new Dictionary<string, List<string>>();
+            PredictedNeuronsforThisCycle = new Dictionary<string, List<Neuron>>();
 
             //_predictedSegmentForThisCycle = new List<Segment>();
-            PredictedNeuronsForNextCycle = new Dictionary<string, List<string>>();
+            PredictedNeuronsForNextCycle = new Dictionary<string, List<Neuron>>();
 
             NeuronsFiringThisCycle = new List<Neuron>();
 
@@ -815,10 +815,10 @@
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
 
-                    List<string> contributingList;
+                    List<Neuron> contributingList;
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
-                        contributingList = new List<string>();
+                        contributingList = new List<Neuron>();
 
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                         {
@@ -831,7 +831,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictionDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -845,7 +845,7 @@
 
 
                     //Boost the few correctly predicted neurons
-                    List<string> contributingList;
+                    List<Neuron> contributingList;
 
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
@@ -857,7 +857,7 @@
                             ColumnsThatBurst.RemoveAt(index);
                         }
 
-                        contributingList = new List<string>();
+                        contributingList = new List<Neuron>();
 
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                         {
@@ -870,7 +870,7 @@
                             {
                                 //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictionDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -899,11 +899,11 @@
                 {
                     // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
                     // Strengthen the ones which fired correctly 
-                    List<string> contributingList;
+                    List<Neuron> contributingList;
 
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
-                        contributingList = new List<string>();
+                        contributingList = new List<Neuron>();
 
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                         {
@@ -916,7 +916,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(contributingNeuron), correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictionDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -1031,7 +1031,7 @@
             }
 
             //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.            
-            AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron.NeuronID.ToString());
+            AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron);
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
             {
@@ -1091,9 +1091,9 @@
             }
         }
 
-        public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, string contributingNeuron)
+        public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
         {
-            List<string> contributingList = new List<string>();
+            List<Neuron> contributingList = new List<Neuron>();
 
             //If bursting then 
             if (predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
@@ -1102,12 +1102,12 @@
             }
 
             if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
-            {
+            {                
                 contributingList.Add(contributingNeuron);
             }
             else
             {
-                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<string>() { contributingNeuron });
+                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
             }
         }
 

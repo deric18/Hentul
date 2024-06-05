@@ -29,18 +29,8 @@
             return index;
         }
 
-        public static bool CheckNeuronListHasThisNeuron(List<Neuron> neurlonList, Neuron neuron)
-        {
-            foreach (var neuronitem in neurlonList)
-            {
-                if (neuronitem.NeuronID.ToString().Equals(neuron.NeuronID))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron) =>
+            neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
 
     }
 }
