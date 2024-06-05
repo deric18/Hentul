@@ -29,11 +29,11 @@
             return index;
         }
 
-        public static bool CheckNeuronListHasThisNeuron(List<Neuron> neurlonList, string neuronID)
+        public static bool CheckNeuronListHasThisNeuron(List<Neuron> neurlonList, Neuron neuron)
         {
             foreach (var neuronitem in neurlonList)
             {
-                if (neuronitem.NeuronID.ToString().Equals(neuronID))
+                if (neuronitem.NeuronID.ToString().Equals(neuron.NeuronID))
                 {
                     return true;
                 }

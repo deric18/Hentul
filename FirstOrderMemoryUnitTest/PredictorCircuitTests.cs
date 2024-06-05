@@ -31,7 +31,7 @@
             SDR_SOM predictedSDR;
 
             int repCount = 0;
-            int wirecount = 1;
+            int wirecount = 10;
 
             while (repCount != 60)
             {
@@ -48,13 +48,13 @@
                 }
                
                 
-                if (repCount == 3)
+                if (repCount == 1)
                 {
                     bbManager.Fire(patternB);       //Fire B , Predict C NOT A
                 }
                 else
                 {
-                    bbManager.Fire(patternB);       
+                    bbManager.Fire(patternB);
                 }
 
                 if (repCount > wirecount)
@@ -116,7 +116,7 @@
 
             Position_SOM position3 = new Position_SOM(3, 2, 7);
 
-            Position_SOM apicalSOM = new Position_SOM(3, 2, 7);
+            Position_SOM higherVoltagePos= new Position_SOM(3, 2, 7);
 
             Neuron neuron1 = bbManager.Columns[position1.X, position1.Y].Neurons[position1.Z];
 
@@ -130,7 +130,7 @@
 
             Assert.AreEqual(neuron3.CurrentState, NeuronState.RESTING);
 
-            SDR_SOM apicalSdr = new SDR_SOM(10, 10, new List<Position_SOM>() { apicalSOM }, iType.APICAL);
+            SDR_SOM apicalSdr = new SDR_SOM(10, 10, new List<Position_SOM>() { higherVoltagePos }, iType.APICAL);
 
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position1 }, iType.SPATIAL);
 
@@ -142,11 +142,13 @@
 
             bbManager.Fire(sdr_SOM);
 
+            var firingNeuron = bbManager.NeuronsFiringLastCycle[0];
+
             //Assert.AreEqual(NeuronState.RESTING, neuron1.CurrentState);
 
             //Assert.AreEqual(NeuronState.PREDICTED, neuron2.CurrentState);
 
-            Assert.AreEqual(NeuronState.FIRING, neuron3.CurrentState);
+            Assert.AreEqual(neuron3.NeuronID, firingNeuron.NeuronID);
         }      
 
         public void MemoryTest()

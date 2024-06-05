@@ -340,7 +340,9 @@ namespace FirstOrderMemoryUnitTest
                 Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
 
-            Assert.AreEqual(NeuronState.FIRING, neuron2.CurrentState);
+            bbManager.Fire(sdr1);
+
+            Assert.IsTrue(BBMUtils.CheckNeuronListHasThisNeuron(bbManager.NeuronsFiringLastCycle, neuron2));
         }
 
         public void TestNoCapOnTotalNumberOfDendriticConnections()

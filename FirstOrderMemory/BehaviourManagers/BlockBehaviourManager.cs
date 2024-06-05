@@ -580,11 +580,12 @@
             }
 
             if (IsBurstOnly)
-                BurstCache.Add(CycleNum, incomingPattern.ActiveBits);
-            else
             {
-                Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle");
-            }
+                if (BurstCache.Count == 0)
+                    BurstCache.Add(CycleNum, incomingPattern.ActiveBits);
+                else               
+                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle");                
+            }            
 
             Fire();
 
@@ -688,7 +689,7 @@
 
 
             //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up. Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
-            if (ColumnsThatBurst.Count != 0)
+            if (IsBurstOnly)
             {
                 foreach (var kvp in BurstCache)
                 {
@@ -725,7 +726,7 @@
 
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 50 && BlockBehaviourManager.CycleNum % 50 == 0)
+            if (BlockBehaviourManager.CycleNum >= 1000 && BlockBehaviourManager.CycleNum % 50 == 0)
             {
                 foreach (var col in this.Columns)
                 {
@@ -1024,7 +1025,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (sourceNeuron.NeuronID.ToString().Equals("0-2-0-N"))
+            if (sourceNeuron.NeuronID.ToString().Equals("0-1-4-N") && targetNeuron.NeuronID.ToString().Equals("3-1-1-N"))
             {
                 bool breakpoint = false;
             }
@@ -1085,6 +1086,7 @@
             }
             else
             {
+                Console.WriteLine("ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
         }
@@ -1112,10 +1114,13 @@
         public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
             // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
-            if (cType == null)
+            if (cType == ConnectionType.DISTALDENDRITICNEURON)
             {
-                bool breakpoint = false;
-                breakpoint = true;
+                if(DendriticNeuron.NeuronID.X == 3 && DendriticNeuron.NeuronID.Y == 1 && DendriticNeuron.NeuronID.Z == 1 && AxonalNeuron.NeuronID.X == 0 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
+                {
+                    bool breakpoint = false;
+                    breakpoint = true;
+                }
             }
 
             if (AxonalNeuron == null || DendriticNeuron == null)
@@ -1136,7 +1141,10 @@
                 return false;
             }
 
-            if (AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType) && DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType))
+            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType);
+            bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);
+
+            if (IsAxonalConnectionSuccesful && IsDendronalConnectionSuccesful)
             {
 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
@@ -1662,7 +1670,6 @@
         }
 
         #endregion
-
 
         public enum BlockCycle
         {

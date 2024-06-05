@@ -27,6 +27,7 @@ namespace FirstOrderMemory.Models
         private const int AXONAL_CONNECTION = 1;
         private const uint PRUNE_THRESHOLD = 25;
         private const uint DISTALNEURONPLASTICITY = 5;
+        private const uint PRUNESTRENGTH = 1;
 
         #endregion
 
@@ -302,7 +303,7 @@ namespace FirstOrderMemory.Models
                 }
 
                 return true;
-            }
+            }            
         }
 
         //Gets called for the axonal end of the neuron
@@ -350,12 +351,17 @@ namespace FirstOrderMemory.Models
         internal void Prune()
         {
 
+            if(NeuronID.ToString().Equals("3-1-1-N"))
+            {
+                int bp = 1;
+            }
+
             if (ProximoDistalDendriticList == null || ProximoDistalDendriticList.Count == 0)
             { return; }
 
             List<string> removeList = null;
 
-            var distalDendriticList = ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON));
+            var distalDendriticList = ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.GetStrength() <= PRUNESTRENGTH && x.PredictiveHitCount != 5);
 
             if (distalDendriticList.Count() != 0)
             {
