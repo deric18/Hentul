@@ -167,7 +167,7 @@ namespace FirstOrderMemoryUnitTest
 
             InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeuronsOrIncrementStrength(bbManager.ConvertStringPosToNeuron(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
 
-            Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temproal Neurons cannot connect to Normal Neurons Post Init!");
+            Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
 
         }
 

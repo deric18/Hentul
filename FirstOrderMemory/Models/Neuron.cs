@@ -280,9 +280,9 @@ namespace FirstOrderMemory.Models
 
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added to Counter : ", ++redundantCounter);                
+                synapse.IncrementHitCount();
 
-                return true;
+                return false;
             }
             else
             {

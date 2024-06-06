@@ -174,11 +174,11 @@
             {
                 case false:
                     {
-                        dict.Add(@"Apple", @"C:\Users\depint\source\repos\Hentul\Images\apple.png");
+                        dict.Add(@"Apple", @"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
                         dict.Add(@"ananas", @"C:\Users\depint\source\repos\Hentul\Images\Ananas.png");
                         dict.Add(@"Orange", @"C:\Users\depint\source\repos\Hentul\Images\orange.png");
                         dict.Add(@"bannana", @"C:\Users\depint\source\repos\Hentul\Images\bannana.png");
-                        dict.Add(@"grapes", @"C:\\Users\\depint\\source\\repos\\Hentul\\Images\\grapes.png");
+                        dict.Add(@"grapes", @"C:\Users\\depint\source\repos\Hentul\Images\grapes.png");
                         dict.Add(@"jackfruit", @"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");
                         dict.Add(@"watermelon", @"C:\Users\depint\source\repos\Hentul\Images\watermelon.png");
 

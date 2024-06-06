@@ -1135,7 +1135,7 @@
 
             if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))        // Post Init Temporal / Apical Neurons should not connect with anybody else.
             {
-                throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temproal Neurons cannot connect to Normal Neurons Post Init!");
+                throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
             }
 
             if (((AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y) ||            // No Same Column Connections 
@@ -1163,27 +1163,7 @@
             }
             else
             {
-                //Connection Already Exists Just Need to Strengthen it
-
-                if(AxonalNeuron.AxonalList.TryGetValue(DendriticNeuron.NeuronID.ToString(), out Synapse synapse1))
-                {
-                    synapse1.IncrementHitCount();
-                }
-                else
-                {
-                    Console.WriteLine("EXCEPTION : ConnectTwoNeuronsOrIncrementStrength :: Trying to incremetn hit count on a synapse that does not exist");
-                    throw new InvalidOperationException("Trying to incremetn hit count on a synapse that does not exist");
-                }
-
-                if (DendriticNeuron.AxonalList.TryGetValue(AxonalNeuron.NeuronID.ToString(), out Synapse synapse2))
-                {
-                    synapse2.IncrementHitCount();
-                }
-                else
-                {
-                    Console.WriteLine("EXCEPTION : ConnectTwoNeuronsOrIncrementStrength :: Trying to incremetn hit count on a synapse that does not exist");
-                    throw new InvalidOperationException("Trying to incremetn hit count on a synapse that does not exist");
-                }
+                Console.WriteLine("INFO :: Connection Already Exists So Just Strengthened it");                
             }
 
             return false;
