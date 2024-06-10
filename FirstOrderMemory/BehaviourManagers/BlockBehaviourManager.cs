@@ -77,6 +77,8 @@
         public bool IsCurrentTemporal { get; private set; }
         public bool IsCurrentApical { get; private set; }
 
+        public bool LogMode { get; private set; }
+
         #endregion
 
         #region CONSTANTS
@@ -167,6 +169,8 @@
             axonCounter = 0;
 
             num_continuous_burst = 0;
+
+            LogMode = false;
 
             for (int i = 0; i < numColumns; i++)
             {
@@ -493,7 +497,8 @@
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                Console.WriteLine("Block ID : " + BlockID.ToString() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                if(LogMode)
+                                    Console.WriteLine("INFO :: Block ID : " + BlockID.X.ToString() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
 
@@ -507,7 +512,8 @@
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
-                                //Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                if(LogMode)
+                                    Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
 
@@ -643,6 +649,7 @@
                 else if (TemporalCycleCache.Count > 1)
                 {
                     Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1");
+
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
 
@@ -710,7 +717,7 @@
                             }
                             else
                             {
-                                Console.WriteLine("WARNING :: PostCycleCleanUp ::: CASE 3 [Burwst Clean up] :::: Tried to clean up a neuron which was not depolarized!!!");
+                                //Console.WriteLine("WARNING :: PostCycleCleanUp ::: CASE 3 [Burwst Clean up] :::: Tried to clean up a neuron which was not depolarized!!!");
                             }
                         }
                     }
@@ -745,6 +752,7 @@
 
         private void PrepNetworkForNextCycle()
         {
+            PerCycleFireSparsityPercentage = ( NeuronsFiringThisCycle.Count * 100 / (NumColumns * NumColumns * Z) );
 
             NeuronsFiringLastCycle.Clear();
 
@@ -765,8 +773,7 @@
         }
 
         private void Fire()
-        {
-            PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count / (NumColumns * NumColumns * Z)) * 100;
+        {            
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
@@ -831,7 +838,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictionDendronal(contributingNeuron, correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -839,8 +846,8 @@
                 else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
                 {
                     //Case 2 :  Few Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
-                    //          For Correctly Predicted : Pramote Coorectly PRedicted Synapses. 
-                    //          For Bursted             : Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
+                    //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
+                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
 
 
 
@@ -870,7 +877,7 @@
                             {
                                 //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictionDendronal(contributingNeuron, correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -916,7 +923,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictionDendronal(contributingNeuron, correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
@@ -952,8 +959,6 @@
                     //         If in the middle of the cycle(atleast 10,000 cycles ) then Need to do somethign new Todo.
 
 
-
-
                     //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
                     //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
                     //BUG 2: TotalNumberOfDistalConnections always get limited to 400
@@ -971,7 +976,53 @@
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
+
+                    //Case 4 : Some Columns Bursted and Some of the Columns Fired.
+                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
+                    //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
                     //Bug : Somehow the all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
+
+
+                    List<Neuron> burstList = new List<Neuron>();
+
+                    foreach(var item in ColumnsThatBurst)
+                    {
+                        burstList.AddRange(Columns[item.X, item.Y].Neurons);
+                    }
+
+                    //Throw if any of the neurons that fired last cycle even though connected did not deploarize
+                    if(CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
+                    {
+                        Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together");                        
+                    }
+
+                    //Boost All the Bursting Neurons
+                    foreach (var position in ColumnsThatBurst)
+                    {
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
+
+                    //Boost the Non Bursting Neurons
+
+                    var firingNeurons = AntiUniounWithNeuronsFiringThisCycle(burstList);
+
+                    if(firingNeurons.Count != 0)
+                    {
+                        foreach (var dendriticNeuron in firingNeurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
+
 
                     Console.WriteLine("WARNING !    WARNING !   WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !");
                     Console.WriteLine("CASE 4 happened Again");
@@ -997,7 +1048,7 @@
                         {
                             if (neuron.DidItContribute(temporalContributor))
                             {
-                                PramoteCorrectlyPredictionDendronal(temporalContributor, neuron);
+                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron);
                             }
                         }
                     }
@@ -1015,7 +1066,7 @@
                     {
                         if (neuron.DidItContribute(apicalContributor))
                         {
-                            PramoteCorrectlyPredictionDendronal(apicalContributor, neuron);
+                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron);
                         }
                     }
                 }
@@ -1142,7 +1193,7 @@
                 AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID)) &&                                                                      // No Selfing
                 AxonalNeuron.nType.Equals(DendriticNeuron.nType))                                                                               // Prevents a lot of False Positives from Throwing Error.
             {
-                Console.WriteLine("ConnectTwoNeurons : Cannot Connect Neuron to itself!");
+                Console.WriteLine("Error : ConnectTwoNeurons :: Cannot Connect Neuron to itself!");
 
                 //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
@@ -1163,7 +1214,7 @@
             }
             else
             {
-                Console.WriteLine("INFO :: Connection Already Exists So Just Strengthened it");                
+                //Console.WriteLine("INFO :: Connection Already Exists So Just Strengthened it");                
             }
 
             return false;
@@ -1253,17 +1304,32 @@
 
         #region PRIVATE METHODS
 
+        private List<Neuron> AntiUniounWithNeuronsFiringThisCycle(List<Neuron> burstList)
+        {
+            var firingList = new List<Neuron>();
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                if(!burstList.Any(item => item.NeuronID.X == neuron.NeuronID.X && item.NeuronID.Y == neuron.NeuronID.Y && item.NeuronID.Z == neuron.NeuronID.Z))
+                {
+                    firingList.Add(neuron);
+                }
+            }
+
+            return firingList;
+        }
+
         private void StrengthenTemporalConnection(Neuron neuron)
         {
-            PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
+            PramoteCorrectlyPredictedDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
         }
 
         private void StrengthenApicalConnection(Neuron neuron)
         {
-            PramoteCorrectlyPredictionDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
+            PramoteCorrectlyPredictedDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
         }
 
-        private void PramoteCorrectlyPredictionDendronal(Neuron contributingNeuron, Neuron targetNeuron)
+        private void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron)
         {
             if (targetNeuron.ProximoDistalDendriticList.Count == 0)
             {
@@ -1274,7 +1340,7 @@
             {
                 if (synapse == null)
                 {
-                    Console.WriteLine(" ERROR :: PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
+                    Console.WriteLine("ERROR :: PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
                     throw new InvalidOperationException("Not Supposed to happen!");
                 }
 
@@ -1284,13 +1350,31 @@
             }
         }
 
+        private bool CheckIfNeuronGetsAnyContributionsLastCycle(List<Neuron> neruonList)
+        {
+            foreach (var neuron in neruonList)
+            {
+                foreach (var neuronKey in neuron.ProximoDistalDendriticList.Keys)
+                {
+                    var distallyConnectedNeuron = ConvertStringPosToNeuron(neuronKey);
+
+                    if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringLastCycle, distallyConnectedNeuron))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public void PrintBlockStats()
         {
             // Print sparsity of the block.
             // print warning when all the bits of the neuron fired. with more than 8% sparsity
-            if (TotalBurstFire > 0 || TotalPredictionFires > 0)
+            if (LogMode && ( TotalBurstFire > 0 || TotalPredictionFires > 0 ) && PerCycleFireSparsityPercentage > 0)
             {
-                Console.WriteLine("  " + BlockID.ToString() + "          W:" + TotalBurstFire.ToString() + "             C:" + TotalPredictionFires.ToString() + "     Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
+                Console.WriteLine(BlockID.ToString() + " Loses:" + TotalBurstFire.ToString() + " Wins:" + TotalPredictionFires.ToString() + "  Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
             }
         }
 

@@ -6,8 +6,11 @@ namespace FirstOrderMemory.Models
     public class LocationScalarEncoder : Encoder
     {
         /// <summary>
-        /// There are 2 co-ordinates X & Y , each coordinate has fixed range of 0 - 9999 and each coordinate gets 16 bits each to represent it. So total of 32 bits assigned for both coordiantes with a sepparation of 3 between each 
+        /// There are 2 co-ordinates X & Y , each coordinate has fixed range of 0 - 9999 and each coordinate gets 16 bits each to represent it. So total of 32 bits assigned for both coordiantes with a sepparation of 3 bits between each byte
         /// X gets 4 numbers 0 - 9 and each number has 4 pixels which will be mapped to 16 pixels and so on for all the numbers.
+        /// x : 16
+        /// y : 16
+        /// T : 32
         /// </summary>
         public int NumBukets { get; private set; }            
         

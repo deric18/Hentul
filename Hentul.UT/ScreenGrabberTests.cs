@@ -52,6 +52,15 @@ namespace Hentul.UT
             Assert.That(sg.BucketToData.Count, Is.EqualTo(10));
         }
 
+
+        [Test]
+        public void TestOneFullCycle()
+        {
+            sg = new ScreenGrabber(25);
+
+
+        }
+
         [Test]
         public void MultipleInstanceTestFOM()
         {
@@ -90,20 +99,35 @@ namespace Hentul.UT
             int iteratorBlockSize = 2 * count;
 
             int totalIterationsNeeded = TotalNumOfPixelsToProcess / iteratorBlockSize;
+            int i = 0;
 
-            for (int i = 0; i < totalIterationsNeeded; i++)
+            foreach(var image in sg.ImageList)
             {
-               
-                sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
-
-                tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
-
-                if (tuple == null)
+                for (i = 0; i < totalIterationsNeeded; i++)
                 {
+
+                    sg.PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                    tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
                     if (tuple.Item1 < 0)
-                        break;
+                    {
+                        if (i < totalIterationsNeeded - 10)
+                        {
+                            //throw new InvalidOperationException("Process Breaking before covering the entire image");
+                            break;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
+
+                Assert.IsTrue(i >= totalIterationsNeeded - 10);
             }
+
+            
         }
 
         [Test]
@@ -141,7 +165,7 @@ namespace Hentul.UT
         }
 
         [Test]
-        public void TestGetNextCoordinates()
+        public void TestGetNextCoordinates1()
         {
             sg = new ScreenGrabber(count);
             int x1 = 0, x2 = 50, y1 = 0, y2 = 50;
@@ -242,6 +266,20 @@ namespace Hentul.UT
                                 
                 iterator++;
             }
+
+        }
+
+        [Test]
+        public void TestGetNextCoordiantes2()
+        {
+            // Create a 2D bool array.
+            // Get Coordinates from method being tested and mark them 'true' in the array.
+            // Verify the array does not have any 'true' values in it.
+
+            bool[,] bools = new bool[2500, 2500];
+
+
+
 
         }
 
@@ -364,6 +402,71 @@ namespace Hentul.UT
 
             Assert.That(p.X, Is.EqualTo(sg.LeftUpper.Item1 + 2 * range));
             Assert.That(p.Y, Is.EqualTo(sg.LeftUpper.Item2 + range));
+        }
+
+        [Test]
+        public void TestImageSizeforAllLoadedImages()
+        {
+            sg = new ScreenGrabber(count, true, false);
+
+            int image1height = sg.bmp.Size.Height;
+            int image1Width = sg.bmp.Size.Width;
+
+            Assert.AreEqual(607, sg.bmp.Size.Height);
+            Assert.AreEqual(579, sg.bmp.Size.Width);
+
+            Assert.AreEqual(true, sg.SwitchImage());
+
+            sg.LoadImage();
+
+            Assert.AreEqual(1410, sg.bmp.Size.Height);
+            Assert.AreEqual(1369, sg.bmp.Size.Width);
+
+            int image2height = sg.bmp.Size.Height;
+            int image2width = sg.bmp.Size.Width;
+
+            Assert.AreEqual(true, sg.SwitchImage());
+            sg.LoadImage();
+
+            Assert.AreEqual(1440, sg.bmp.Size.Height);
+            Assert.AreEqual(1435, sg.bmp.Size.Width);
+
+            int image3height = sg.bmp.Size.Height;
+            int image3width = sg.bmp.Size.Width;
+
+            Assert.AreEqual(true, sg.SwitchImage());
+            sg.LoadImage();
+
+            Assert.AreEqual(1713, sg.bmp.Size.Height);
+            Assert.AreEqual(1920, sg.bmp.Size.Width);
+
+            int image4height = sg.bmp.Size.Height;
+            int image4width = sg.bmp.Size.Width;
+
+            Assert.AreEqual(true, sg.SwitchImage());
+            sg.LoadImage();
+
+            Assert.AreEqual(1413, sg.bmp.Size.Height);
+            Assert.AreEqual(1380, sg.bmp.Size.Width);
+
+            int image5height = sg.bmp.Size.Height;
+            int image5width = sg.bmp.Size.Width;
+
+            Assert.AreEqual(true, sg.SwitchImage());
+            sg.LoadImage();
+
+            Assert.AreEqual(1522, sg.bmp.Size.Height);
+            Assert.AreEqual(2560, sg.bmp.Size.Width);
+
+            int image6height = sg.bmp.Size.Height;
+            int image6width = sg.bmp.Size.Width;
+
+            Assert.AreEqual(true, sg.SwitchImage());
+            sg.LoadImage();
+
+            Assert.AreEqual(2000, sg.bmp.Size.Height);
+            Assert.AreEqual(2000, sg.bmp.Size.Width);
+            
         }
 
         [Test]

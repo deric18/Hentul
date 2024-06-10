@@ -30,6 +30,8 @@
 
         public int NumPixelsToProcess { get; private set; }
 
+        private bool LogMode { get; set; }
+
 
         /// <summary>
         /// NumBuckets is the total number of FOM Blocks that will be created and it will include 
@@ -40,17 +42,17 @@
 
         public int BucketColLength { get; private set; }
 
-        public  int Iterations;
+        public int Iterations;
 
         public Tuple<int, int> LeftUpper { get; private set; }
         public Tuple<int, int> RightUpper { get; private set; }
         public Tuple<int, int> LeftBottom { get; private set; }
         public Tuple<int, int> RightBottom { get; private set; }
-        public Tuple<int, int> CenterCenter { get; private set; }                
+        public Tuple<int, int> CenterCenter { get; private set; }
 
-        private int RangeIterator;        
+        private int RangeIterator;
 
-        public const int MaxSparsity = 10;        
+        public const int MaxSparsity = 10;
 
         /// <summary>
         /// This is the Golden Gooe of the whole Program ! 
@@ -79,18 +81,20 @@
         public int rightBound;
         public int lowerBound;
         public int RounRobinIteration;
-        KeyValuePair<string, string> currentImage;
-        Dictionary<string, string> ImageList;
+
+        public int ImageIndex { get; private set; }
+        public List<string> ImageList { get; private set; }
+
         public int blackPixelCount = 0;
 
-        Bitmap bmp;
+        public Bitmap bmp;
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        public ScreenGrabber(int range, bool isMock = false)
+        public ScreenGrabber(int range, bool isMock = false, bool ShouldInit = true)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
@@ -102,15 +106,17 @@
 
             Iterations = 0;
 
+            LogMode = false;
+
             double numerator = (2 * NumPixelsToProcess) * (2 * NumPixelsToProcess);
 
             double denominator = (BucketRowLength * BucketColLength);
 
-            double value = ( numerator / denominator );
+            double value = (numerator / denominator);
 
             bool b = value % 1 != 0;
 
-            if ( value % 1 != 0)
+            if (value % 1 != 0)
             {
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcess.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
@@ -127,18 +133,18 @@
             Offset = range * 2;
 
             RangeIterator = 0;
-            
-            NumBuckets = ((2 * NumPixelsToProcess) * (2 * NumPixelsToProcess) / (BucketRowLength * BucketColLength));
+
+            NumBuckets = (int)value;
 
             BucketToData = new Dictionary<int, LocationNPositions>();
 
-            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBuckets];            
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBuckets];
 
             NumColumns = 10;
 
             IsMock = isMock;
 
-            Z = 10;            
+            Z = 10;
 
             for (int i = 0; i < NumBuckets; i++)
             {
@@ -148,55 +154,34 @@
             leftBound = 51;
             rightBound = 551;
             upperBound = 551;
-            lowerBound = 51;            
+            lowerBound = 51;
             RounRobinIteration = 0;
 
-            Init();
+            if (ShouldInit)
+                Init();
 
+            ImageIndex = 0;
             ImageList = AddAllTheFruits();
-
-            SwitchImage();
 
             LoadImage();
 
-            somBlock = new SBBManager();             
+            somBlock = new SBBManager();
         }
 
-        private Dictionary<string, string> AddAllTheFruits()
+        private List<string> AddAllTheFruits()
         {
             //0 -> devbox
             //1 -> Lappy            
 
-            var dict = new Dictionary<string, string>();
+            var dict = new List<string>();
 
-
-            switch(devbox)
-            {
-                case false:
-                    {
-                        dict.Add(@"Apple", @"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
-                        dict.Add(@"ananas", @"C:\Users\depint\source\repos\Hentul\Images\Ananas.png");
-                        dict.Add(@"Orange", @"C:\Users\depint\source\repos\Hentul\Images\orange.png");
-                        dict.Add(@"bannana", @"C:\Users\depint\source\repos\Hentul\Images\bannana.png");
-                        dict.Add(@"grapes", @"C:\Users\\depint\source\repos\Hentul\Images\grapes.png");
-                        dict.Add(@"jackfruit", @"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");
-                        dict.Add(@"watermelon", @"C:\Users\depint\source\repos\Hentul\Images\watermelon.png");
-
-                        break;
-                    }
-                case true:
-                    {
-                        dict.Add(@"Apple", @"C:\Users\depint\Desktop\Hentul\Images\apple.png");
-                        dict.Add(@"Ananas", @"C:\Users\depint\Desktop\Hentul\Images\Ananas.png");
-                        dict.Add(@"Orange", @"C:\Users\depint\Desktop\Hentul\Images\orange.png");
-                        dict.Add(@"bannana", @"C:\Users\depint\Desktop\Hentul\Images\bannana.png");
-                        dict.Add(@"grapes", @"C:\Users\depint\Desktop\Hentul\Images\grapes.png");
-                        dict.Add(@"jackfruit", @"C:\Users\depint\Desktop\Hentul\Images\jackfruit.png");
-                        dict.Add(@"watermelon", @"C:\Users\depint\Desktop\Hentul\Images\watermelon.png");
-
-                        break;
-                    }
-            }
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Ananas.png");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\orange.png");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\bannana.jpg");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\grapes.png");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\watermelon.png");
 
             return dict;
         }
@@ -222,63 +207,31 @@
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!");
 
-            Console.WriteLine("Total Pixels being collected for a range of " + NumPixelsToProcess.ToString() + " \nTotal Number of Pixels :" + (NumPixelsToProcess * NumPixelsToProcess * 4).ToString() + "\nTotal First Order BBMs Created :" + NumBuckets.ToString());
+            Console.WriteLine("Range" + NumPixelsToProcess.ToString());
+            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcess * NumPixelsToProcess * 4).ToString());
+            Console.WriteLine("Total First Order BBMs Created :" + NumBuckets.ToString());
 
         }
 
         public bool SwitchImage()
         {
-            int index = 0, i = 0;
+            ImageIndex++;
 
-            if(string.IsNullOrEmpty(currentImage.Key))      //if currentImage is not in list , load the first image in the list and return
-            {
-                currentImage = ImageList.ElementAt(index);
-                return true;
-            }
-
-            foreach(var kvp in ImageList)                   // if current image is in list then siwthc to the next image
-            {
-                if(kvp.Key == currentImage.Key)
-                {
-                    index =  i;
-                    break;
-                }
-                i++;
-            }
-
-            if(index == ImageList.Count - 1)                //if we have reached the end of the list then stop processing and take a bow!
-            {
+            if (ImageIndex == ImageList.Count)
                 return false;
-
-                //BackUp all the FOM's and SOM's and Close the Program!!! 
-
-                //Then lets think about what to do next?
-
-                int breakpoint = 1;
-            }
-
-
-            currentImage = ImageList.ElementAt(i);    //Load next in the list
-
-            ResetOffsets();
 
             return true;
         }
 
-        private void LoadImage()
+        public void LoadImage()
         {
 
-            if(currentImage.Key == null)
-            {
-                currentImage = ImageList.ElementAt(0);
-            }
-            
-            bmp = new Bitmap(currentImage.Value);
+            bmp = new Bitmap(ImageList[ImageIndex]);
 
-            if(bmp == null)
+            if (bmp == null)
             {
                 throw new InvalidCastException("Couldn't find image");
-            }            
+            }
         }
 
         private void ResetOffsets()
@@ -293,34 +246,37 @@
         public Color GetColorAt(int x, int y)
         {
             if (x > 578 || y >= 600 || x < 0 || y < 0)
-             return Color.White;
+                return Color.White;
 
             return bmp.GetPixel(x, y);
         }
 
-        public Tuple<int,int,int,int> GetNextCoordinates(int x1, int y1, int x2, int y2)
+        public Tuple<int, int, int, int> GetNextCoordinates(int x1, int y1, int x2, int y2)
         {
             Tuple<int, int, int, int> retVal = null;
 
-            if(RounRobinIteration >= 6)
+            if (RounRobinIteration >= 6)
             {
-                //BackUp();
+                // Todo: Implement BackUp();
+
+                Console.WriteLine("Completed 6 Iterations of the Image !!! Swithcing to next image in queue!");
 
                 return new Tuple<int, int, int, int>(-1, -1, -1, -1);
             }
 
-            switch(CurrentDirection.ToUpper())
+            switch (CurrentDirection.ToUpper())
             {
                 case "RIGHT":
                     {
-                        if(x2 < rightBound)
+                        if (x2 < rightBound)
                         {
                             retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
                         }
                         else
-                        {
+                        {                            
                             CurrentDirection = "UP";
-
+                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
+                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
                             //retVal = new Tuple<int, int, int, int>(rightBound, RounRobinIteration * Offset, rightBound - 1 + Offset, 2);
                             retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
                             //retVal.Item2 = RounRobinIteration * Offset;
@@ -331,13 +287,15 @@
                     }
                 case "DOWN":
                     {
-                        if(y1 < lowerBound)
+                        if (y1 < lowerBound)
                         {
                             retVal = new Tuple<int, int, int, int>(x1, y1 - Offset, x2, y2 - Offset);
                         }
                         else
                         {
                             CurrentDirection = "RIGHT";
+                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
+                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
                             lowerBound += Offset;
                             retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
                             RounRobinIteration++;
@@ -346,27 +304,31 @@
                     }
                 case "LEFT":
                     {
-                        if(x1 > leftBound)
+                        if (x1 > leftBound)
                         {
                             retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
                         }
                         else
                         {
                             CurrentDirection = "DOWN";
+                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
+                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
                             leftBound += Offset;
-                            retVal = new Tuple<int,int,int,int>(x1, y1 - Offset, x2, y2 - Offset);
+                            retVal = new Tuple<int, int, int, int>(x1, y1 - Offset, x2, y2 - Offset);
                         }
                         break;
                     }
                 case "UP":
                     {
-                        if(y2 < upperBound)
+                        if (y2 < upperBound)
                         {
-                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);                            
+                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
                         }
                         else
                         {
                             CurrentDirection = "LEFT";
+                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
+                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
                             upperBound -= Offset;
                             retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
                         }
@@ -374,12 +336,12 @@
                     }
                 default:
                     {
-                        throw new InvalidOperationException("GetNextCooridnate :: Direction shouldnt be anything other than above 4 values");                        
+                        throw new InvalidOperationException("GetNextCooridnate :: Direction shouldnt be anything other than above 4 values");
                     }
             }
 
             return retVal;
-        }        
+        }
 
         public void GrabNProcess()          //We process one image at once.
         {
@@ -387,38 +349,43 @@
 
             stopWatch.Start();
 
-            int height = bmp.Height; //605
-            int width = bmp.Width;  //579            
-            
-            int blockLength = 600; //hardcoding it to 600 , so we have a good factor of 50 for easy processing.
+            //int height = bmp.Height; //605
+            //int width = bmp.Width;  //579            
 
-            if (Math.Min(height, width) < blockLength)
-            {
-                int breakpoint = 1;
-            }
+            double blockLength = GetBlockLength(bmp.Height, bmp.Width);                      
 
-            if (blockLength % 50 != 0 )
-                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");            
+            if (blockLength % 50 != 0)
+                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");                
 
-            int TotalNumOfPixelsoProcess = blockLength * blockLength;
+            int iteratorBlockSize = 2 * NumPixelsToProcess;            
 
-            int iteratorBlockSize = 2 * NumPixelsToProcess;
+            int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
 
-            int TotalPixelsCoveredInIterator = iteratorBlockSize * iteratorBlockSize;
+            int TotalPixelsCoveredPerIteration = iteratorBlockSize * iteratorBlockSize;
 
-            int totalIterationsNeeded = TotalNumOfPixelsoProcess / TotalPixelsCoveredInIterator;
+            double totalIterationsNeeded = blockLength / TotalPixelsCoveredPerIteration;
 
             Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
 
-            for (int i= 0; i < totalIterationsNeeded; i++)
-            {                
+            for (int i = 0; i < totalIterationsNeeded; i++)
+            {
+                Console.WriteLine("Parsing completion : " + (int) (i * 100 / totalIterationsNeeded) + "%");
 
                 PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
                 tuple = GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
 
-                if (tuple.Item1 < 0)                                    
-                    break;
+                if (tuple.Item1 < 0)
+                {
+                    if (i < totalIterationsNeeded - 10)
+                    {
+                        throw new InvalidOperationException("Process Breaking before covering the entire image");
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
 
                 ProcessPixelData();
 
@@ -429,13 +396,42 @@
                 CleanPixelData();
 
                 Thread.Sleep(2000);
-            }            
+            }
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
         }
-        
+
+        private double GetBlockLength(int height, int width)
+        {
+            double minBlockLength = Math.Min(height, width);
+
+            minBlockLength = Math.Pow(minBlockLength, 2);
+
+            if(minBlockLength % 50 == 0)
+            {
+                return minBlockLength;
+            }
+
+            double nextMinBlockLength = minBlockLength;
+
+            double halfOfBlockLength = minBlockLength / 2;
+
+            while (nextMinBlockLength % 50 != 0)
+            {
+                nextMinBlockLength--;
+
+                if(nextMinBlockLength < halfOfBlockLength)
+                {
+                    Console.WriteLine(" GetBlockLength () :: Unable to find the proper lower Bound");
+                }
+
+            }
+
+            return nextMinBlockLength;
+        }
+
         /// <summary>
         /// We do not take in integers as input to Block Managers , we take in bool's , if its positive we take in the value ,if its negative we move on.
         /// we divide up the entire one screenshot 50 * 50  = 2500 pixels 
@@ -459,7 +455,8 @@
 
             int doubleRange = 2 * NumPixelsToProcess;
 
-            Console.WriteLine("Getting Screen Pixels : ");
+            if(LogMode) 
+                Console.WriteLine("Getting Screen Pixels : ");
 
             for (int j = y1, l = 0; j < y2 && l < doubleRange; j++, l++)
             {
@@ -499,12 +496,12 @@
                 }
             }
 
-            if(blackCount == 0)
+            if (blackCount == 0)
             {
                 blackPixelCount++;
             }
-
-            Console.WriteLine("Done Collecting Screen Pixels");
+            if (LogMode)
+                Console.WriteLine("Done Collecting Screen Pixels");
         }
 
         public void ProcessPixelData()
@@ -515,12 +512,13 @@
 
             int index = 0;
 
-            Console.WriteLine("Processing Pixel Data :");
+            if (LogMode)
+                Console.WriteLine("Processing Pixel Data :");
 
             foreach (var bucket in BucketToData)
             {
 
-                spatialPattern = GetSpatialPatternForBucket(bucket.Value.Positions);            
+                spatialPattern = GetSpatialPatternForBucket(bucket.Value.Positions);
 
                 temporalPattern = GenerateTemporalSDR(bucket.Value.X, bucket.Value.Y);
 
@@ -531,7 +529,8 @@
                 ++index;
             }
 
-            Console.WriteLine("Done Processing Pixel Data");
+            if (LogMode)
+                Console.WriteLine("Done Processing Pixel Data");
         }
 
         public void CleanPixelData()
@@ -543,7 +542,7 @@
         {
             //Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
 
-            foreach ( var fom in fomBBM)
+            foreach (var fom in fomBBM)
             {
                 fom.PrintBlockStats();
             }
@@ -609,7 +608,7 @@
 
         public SDR_SOM GenerateTemporalSDR(int x, int y)
         {
-            
+
             LocationScalarEncoder encoder = new LocationScalarEncoder(100, 32);
 
             //Todo : buckett is not the correct parameter for encoding here.
@@ -634,7 +633,7 @@
 
         public void MoveCursorToSpecificPosition(int x, int y)
         {
-            POINT p;         
+            POINT p;
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
 
@@ -677,13 +676,13 @@
         {
             POINT toReturn;
 
-            if(isMock)
+            if (isMock)
             {
-                toReturn.X = x; toReturn.Y = y; 
+                toReturn.X = x; toReturn.Y = y;
             }
             else
             {
-                toReturn = Point;              
+                toReturn = Point;
             }
 
             if (toReturn.X < LeftUpper.Item1 - Offset - 1 || toReturn.Y < LeftUpper.Item2 - Offset - 1 || toReturn.X > RightBottom.Item1 + Offset + 1 || toReturn.Y > RightBottom.Item2 + Offset + 1)
@@ -691,15 +690,15 @@
                 int breakpoint = 1;
             }
 
-            if ( ( toReturn.X <= CenterCenter.Item1 - 25 && toReturn.X >= CenterCenter.Item1 + 25 ) && ( toReturn.Y >= CenterCenter.Item2 - 25  && toReturn.Y <= CenterCenter.Item2 + 25))
+            if ((toReturn.X <= CenterCenter.Item1 - 25 && toReturn.X >= CenterCenter.Item1 + 25) && (toReturn.Y >= CenterCenter.Item2 - 25 && toReturn.Y <= CenterCenter.Item2 + 25))
             {
                 Console.WriteLine("Reached the Center of Image ! ReStarting the system to the begining of the image");
 
-                if(Iterations == TOTALPARSEITERATIONS)
+                if (Iterations == TOTALPARSEITERATIONS)
                 {
                     // Start BackUp
 
-                    foreach( var bbm in fomBBM)
+                    foreach (var bbm in fomBBM)
                     {
                         bbm.BackUp(bbm.BlockID.X.ToString() + ".xml");
                     }
@@ -719,13 +718,13 @@
                 return toReturn;
             }
 
-            switch(CurrentDirection.ToUpper())
+            switch (CurrentDirection.ToUpper())
             {
                 case "RIGHT":
                     {
-                        if( toReturn.X >= ( RightUpper.Item1 + RangeIterator * NumPixelsToProcess) )
+                        if (toReturn.X >= (RightUpper.Item1 + RangeIterator * NumPixelsToProcess))
                         {
-                            CurrentDirection = "DOWN";             
+                            CurrentDirection = "DOWN";
                             toReturn.X = RightUpper.Item1 - RangeIterator * NumPixelsToProcess;
                             toReturn.Y = RightUpper.Item2;
                         }
@@ -737,7 +736,7 @@
                     }
                 case "DOWN":
                     {
-                        if ( toReturn.Y >= ( RightBottom.Item2 + RangeIterator * NumPixelsToProcess) )
+                        if (toReturn.Y >= (RightBottom.Item2 + RangeIterator * NumPixelsToProcess))
                         {
                             CurrentDirection = "LEFT";
                             toReturn.X = RightBottom.Item1;
@@ -745,13 +744,13 @@
                         }
                         else
                         {
-                            toReturn.Y =  toReturn.Y + Offset;
+                            toReturn.Y = toReturn.Y + Offset;
                         }
                         break;
                     }
                 case "LEFT":
                     {
-                        if ( toReturn.X <= ( LeftBottom.Item1 + RangeIterator * NumPixelsToProcess) )
+                        if (toReturn.X <= (LeftBottom.Item1 + RangeIterator * NumPixelsToProcess))
                         {
                             CurrentDirection = "UP";
                             toReturn.X = LeftBottom.Item1 + RangeIterator * NumPixelsToProcess; ;
@@ -766,7 +765,7 @@
                     }
                 case "UP":
                     {
-                        if (toReturn.Y <= ( LeftUpper.Item2 + RangeIterator * NumPixelsToProcess) )
+                        if (toReturn.Y <= (LeftUpper.Item2 + RangeIterator * NumPixelsToProcess))
                         {
                             CurrentDirection = "RIGHT";
                             toReturn.X = LeftUpper.Item1 + RangeIterator * NumPixelsToProcess;
@@ -780,14 +779,14 @@
                     }
                 default:
                     {
-                        throw new InvalidOperationException("Should Not Happen!");                        
+                        throw new InvalidOperationException("Should Not Happen!");
                     }
             }
 
             Point = toReturn;
 
             return toReturn;
-        }       
+        }
 
         public static Color GetColorAt1(int x, int y)
         {
