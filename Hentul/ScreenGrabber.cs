@@ -190,7 +190,7 @@
         {
             Stopwatch stopWatch = new Stopwatch();
 
-            Console.WriteLine("Starting Initialization  of FOM objects : ");
+            Console.WriteLine("Starting Initialization  of FOM objects : \n");
 
             stopWatch.Start();
 
@@ -203,13 +203,13 @@
 
             stopWatch.Stop();
 
-            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString());
+            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");
 
-            Console.WriteLine("Finished Initting of all Instances, System Ready!");
+            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
 
-            Console.WriteLine("Range" + NumPixelsToProcess.ToString());
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcess * NumPixelsToProcess * 4).ToString());
-            Console.WriteLine("Total First Order BBMs Created :" + NumBuckets.ToString());
+            Console.WriteLine("Range" + NumPixelsToProcess.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcess * NumPixelsToProcess * 4).ToString() + "\n");
+            Console.WriteLine("Total First Order BBMs Created :" + NumBuckets.ToString() + "\n");
 
         }
 

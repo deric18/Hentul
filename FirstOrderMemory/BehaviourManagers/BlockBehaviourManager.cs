@@ -1021,11 +1021,7 @@
                                 ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
-                    }
-
-
-                    Console.WriteLine("WARNING !    WARNING !   WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !  WARNING !    WARNING !");
-                    Console.WriteLine("CASE 4 happened Again");
+                    }                    
 
                     //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
                 }
