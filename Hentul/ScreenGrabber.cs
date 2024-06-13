@@ -28,7 +28,7 @@
 
         private const int ByteSize = 8;
 
-        public int NumPixelsToProcess { get; private set; }
+        public int NumPixelsToProcessPerBlock { get; private set; }
 
         private bool LogMode { get; set; }
 
@@ -94,11 +94,11 @@
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
-        public ScreenGrabber(int range, bool isMock = false, bool ShouldInit = true)
+        public ScreenGrabber(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
 
-            NumPixelsToProcess = range;
+            NumPixelsToProcessPerBlock = range;
 
             BucketRowLength = 5;
 
@@ -108,7 +108,7 @@
 
             LogMode = false;
 
-            double numerator = (2 * NumPixelsToProcess) * (2 * NumPixelsToProcess);
+            double numerator = (2 * NumPixelsToProcessPerBlock) * (2 * NumPixelsToProcessPerBlock);
 
             double denominator = (BucketRowLength * BucketColLength);
 
@@ -118,7 +118,7 @@
 
             if (value % 1 != 0)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcess.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
+                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcessPerBlock.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
 
             LeftUpper = new Tuple<int, int>(1007, 412);
@@ -159,8 +159,8 @@
 
             if (ShouldInit)
                 Init();
-
-            ImageIndex = 0;
+                        
+            ImageIndex = mockImageIndex;
             ImageList = AddAllTheFruits();
 
             LoadImage();
@@ -169,10 +169,7 @@
         }
 
         private List<string> AddAllTheFruits()
-        {
-            //0 -> devbox
-            //1 -> Lappy            
-
+        {                               
             var dict = new List<string>();
 
             dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
@@ -182,6 +179,7 @@
             dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\grapes.png");
             dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");
             dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\watermelon.png");
+            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\white.png");
 
             return dict;
         }
@@ -207,8 +205,8 @@
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
 
-            Console.WriteLine("Range" + NumPixelsToProcess.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcess * NumPixelsToProcess * 4).ToString() + "\n");
+            Console.WriteLine("Range" + NumPixelsToProcessPerBlock.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created :" + NumBuckets.ToString() + "\n");
 
         }
@@ -350,73 +348,83 @@
             stopWatch.Start();
 
             //int height = bmp.Height; //605
-            //int width = bmp.Width;  //579            
+            //int width = bmp.Width;  //579                        
 
-            double blockLength = GetBlockLength(bmp.Height, bmp.Width);                      
-
-            if (blockLength % 50 != 0)
-                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");                
-
-            int iteratorBlockSize = 2 * NumPixelsToProcess;            
-
+            double TotalNumberOfPixelsToProcess = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height, bmp.Width);                           
+            int blockLength = 2 * NumPixelsToProcessPerBlock;                                    
+            int TotalPixelsCoveredPerIteration = blockLength * blockLength;
             int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
+            double totalIterationsNeeded = TotalNumberOfPixelsToProcess / TotalPixelsCoveredPerIteration;
 
-            int TotalPixelsCoveredPerIteration = iteratorBlockSize * iteratorBlockSize;
-
-            double totalIterationsNeeded = blockLength / TotalPixelsCoveredPerIteration;
-
-            Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
-
-            for (int i = 0; i < totalIterationsNeeded; i++)
+            for (int index = 0; index < totalIterationsNeeded; index++)
             {
-                Console.WriteLine("Parsing completion : " + (int) (i * 100 / totalIterationsNeeded) + "%");
 
-                PreparePixelData(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
-
-                tuple = GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
-
-                if (tuple.Item1 < 0)
+                for (int i = 0; i < blockLength; i++)
                 {
-                    if (i < totalIterationsNeeded - 10)
+                    for (int j = 0; j < blockLength; j++)
                     {
-                        throw new InvalidOperationException("Process Breaking before covering the entire image");
+
                     }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                ProcessPixelData();
-
-                Thread.Sleep(2000);
-
-                PrintBlockVital();
-
-                CleanPixelData();
-
-                Thread.Sleep(2000);
+                }                
             }
+
+
+            Console.WriteLine("Parsing completion : " + (int)(i * 100 / totalIterationsNeeded) + "%");
+
+            //PreparePixelData();
+
+            //tuple = GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+            //if (tuple.Item1 < 0)
+            //{
+            //    if (i < totalIterationsNeeded - 10)
+            //    {
+            //        throw new InvalidOperationException("Process Breaking before covering the entire image");
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+
+            //if (IsMock == false)
+            //    ProcessPixelData();
+
+            //Thread.Sleep(2000);
+
+            //PrintBlockVital();
+
+            //CleanPixelData();
+
+            //Thread.Sleep(2000);
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
         }
 
-        private double GetBlockLength(int height, int width)
+        private void SetUpperNRightBounds(int width, int height, int blockLength)
         {
-            double minBlockLength = Math.Min(height, width);
-
-            minBlockLength = Math.Pow(minBlockLength, 2);
-
-            if(minBlockLength % 50 == 0)
+            if(width > ( rightBound + 50 ) || height > ( upperBound + 50) )
             {
-                return minBlockLength;
+                int bp = 1;
+            }
+        }
+
+        private double GetRoundedTotalNumberOfPixelsToProcess(int height, int width)
+        {
+            double roundedTotalNumberOfPixelsModuled = Math.Min(height, width);
+
+            roundedTotalNumberOfPixelsModuled = Math.Pow(roundedTotalNumberOfPixelsModuled, 2);
+
+            if(roundedTotalNumberOfPixelsModuled % 50 == 0)
+            {
+                return roundedTotalNumberOfPixelsModuled;
             }
 
-            double nextMinBlockLength = minBlockLength;
+            double nextMinBlockLength = roundedTotalNumberOfPixelsModuled;
 
-            double halfOfBlockLength = minBlockLength / 2;
+            double halfOfBlockLength = roundedTotalNumberOfPixelsModuled / 2;
 
             while (nextMinBlockLength % 50 != 0)
             {
@@ -428,6 +436,9 @@
                 }
 
             }
+
+            if (nextMinBlockLength % 50 != 0)
+                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
 
             return nextMinBlockLength;
         }
@@ -453,7 +464,7 @@
             int notBlackCount = 0;
             int blackCount = 0;
 
-            int doubleRange = 2 * NumPixelsToProcess;
+            int doubleRange = 2 * NumPixelsToProcessPerBlock;
 
             if(LogMode) 
                 Console.WriteLine("Getting Screen Pixels : ");
@@ -496,8 +507,9 @@
                 }
             }
 
-            if (blackCount == 0)
-            {
+            if (blackCount == 1)
+            {   
+                //Happens only for Mock Test Image
                 blackPixelCount++;
             }
             if (LogMode)
@@ -570,10 +582,10 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
-            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
-            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
-            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
+            int x1 = Point.X - NumPixelsToProcessPerBlock < 0 ? 0 : Point.X - NumPixelsToProcessPerBlock;
+            int y1 = Point.Y - NumPixelsToProcessPerBlock < 0 ? 0 : Point.Y - NumPixelsToProcessPerBlock;
+            int x2 = Math.Abs(Point.X + NumPixelsToProcessPerBlock);
+            int y2 = Math.Abs(Point.Y + NumPixelsToProcessPerBlock);
 
             this.PreparePixelData(x1, y1, x2, y2);
 
@@ -594,10 +606,10 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - NumPixelsToProcess < 0 ? 0 : Point.X - NumPixelsToProcess;
-            int y1 = Point.Y - NumPixelsToProcess < 0 ? 0 : Point.Y - NumPixelsToProcess;
-            int x2 = Math.Abs(Point.X + NumPixelsToProcess);
-            int y2 = Math.Abs(Point.Y + NumPixelsToProcess);
+            int x1 = Point.X - NumPixelsToProcessPerBlock < 0 ? 0 : Point.X - NumPixelsToProcessPerBlock;
+            int y1 = Point.Y - NumPixelsToProcessPerBlock < 0 ? 0 : Point.Y - NumPixelsToProcessPerBlock;
+            int x2 = Math.Abs(Point.X + NumPixelsToProcessPerBlock);
+            int y2 = Math.Abs(Point.Y + NumPixelsToProcessPerBlock);
 
             return new Tuple<int, int, int, int>(x1, y1, x2, y2);
             //this.ProcessColorMap(x1, y1, x2, y2);
@@ -722,10 +734,10 @@
             {
                 case "RIGHT":
                     {
-                        if (toReturn.X >= (RightUpper.Item1 + RangeIterator * NumPixelsToProcess))
+                        if (toReturn.X >= (RightUpper.Item1 + RangeIterator * NumPixelsToProcessPerBlock))
                         {
                             CurrentDirection = "DOWN";
-                            toReturn.X = RightUpper.Item1 - RangeIterator * NumPixelsToProcess;
+                            toReturn.X = RightUpper.Item1 - RangeIterator * NumPixelsToProcessPerBlock;
                             toReturn.Y = RightUpper.Item2;
                         }
                         else
@@ -736,11 +748,11 @@
                     }
                 case "DOWN":
                     {
-                        if (toReturn.Y >= (RightBottom.Item2 + RangeIterator * NumPixelsToProcess))
+                        if (toReturn.Y >= (RightBottom.Item2 + RangeIterator * NumPixelsToProcessPerBlock))
                         {
                             CurrentDirection = "LEFT";
                             toReturn.X = RightBottom.Item1;
-                            toReturn.Y = RightBottom.Item2 - RangeIterator * NumPixelsToProcess;
+                            toReturn.Y = RightBottom.Item2 - RangeIterator * NumPixelsToProcessPerBlock;
                         }
                         else
                         {
@@ -750,10 +762,10 @@
                     }
                 case "LEFT":
                     {
-                        if (toReturn.X <= (LeftBottom.Item1 + RangeIterator * NumPixelsToProcess))
+                        if (toReturn.X <= (LeftBottom.Item1 + RangeIterator * NumPixelsToProcessPerBlock))
                         {
                             CurrentDirection = "UP";
-                            toReturn.X = LeftBottom.Item1 + RangeIterator * NumPixelsToProcess; ;
+                            toReturn.X = LeftBottom.Item1 + RangeIterator * NumPixelsToProcessPerBlock; ;
                             toReturn.Y = LeftBottom.Item2;
                             RangeIterator++;
                         }
@@ -765,11 +777,11 @@
                     }
                 case "UP":
                     {
-                        if (toReturn.Y <= (LeftUpper.Item2 + RangeIterator * NumPixelsToProcess))
+                        if (toReturn.Y <= (LeftUpper.Item2 + RangeIterator * NumPixelsToProcessPerBlock))
                         {
                             CurrentDirection = "RIGHT";
-                            toReturn.X = LeftUpper.Item1 + RangeIterator * NumPixelsToProcess;
-                            toReturn.Y = LeftUpper.Item2 + RangeIterator * NumPixelsToProcess;
+                            toReturn.X = LeftUpper.Item1 + RangeIterator * NumPixelsToProcessPerBlock;
+                            toReturn.Y = LeftUpper.Item2 + RangeIterator * NumPixelsToProcessPerBlock;
                         }
                         else
                         {

@@ -259,10 +259,44 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
+
+        [TestMethod]
         public void TestWire1UT()
         {
+            //Case 1: All Predicted Neurons Fired without anyone Bursting.
             //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
+
+
         }
+
+        [TestMethod]
+        public void TestWire2UT() 
+        {
+            //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
+            //All Burswting neurons should create one new dendronal connection with previously fired neurons and the correctly fired neuron should be strengthed decently.
+        }
+
+        [TestMethod]
+        public void TestWire3UT() 
+        {
+            // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
+        }
+
+        [TestMethod]
+        public void TestWire4UT() 
+        {
+            //Case 4 : All columns Bursted:
+            //Every Neuron that fired in the previous Cycle should now have one new connection with every burst cell
+
+        }
+
+        [TestMethod]
+        public void TestWire5UT() 
+        {
+            //Case 5 : Some Columns Bursted and Some of the Columns Fired.
+            // Every cell bursted should have new dendronal connection with neurons firing last cycle and same with the ones that fired , if it doesnt already have one.
+        }
+
 
         [TestMethod]
         public void TestTemporalLines()

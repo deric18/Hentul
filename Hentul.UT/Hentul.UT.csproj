@@ -21,4 +21,8 @@
     <ProjectReference Include="..\Hentul\Hentul.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestDocs\" />
+  </ItemGroup>
+
 </Project>

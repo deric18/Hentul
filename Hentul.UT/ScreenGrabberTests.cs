@@ -4,12 +4,15 @@ namespace Hentul.UT
     using Moq;
     using System.Drawing;
     using System.Net.Sockets;
+    using System.Numerics;
+    using System.Text;
 
     public class ScreenGrabberTest
     {
         ScreenGrabber sg;
         Random rand;
         int count = 25;
+        bool[,] image = new bool[600, 600];
 
         [SetUp]
         public void Setup()
@@ -56,9 +59,23 @@ namespace Hentul.UT
         [Test]
         public void TestOneFullCycle()
         {
-            sg = new ScreenGrabber(25);
+            //Extract 2500 Pixels
+            //Create Spatial & Temporal SDRs
+            //Fire
+
+            sg = new ScreenGrabber(25, true, false, 7);
+
+            sg.GrabNProcess();
 
 
+        }
+
+        [Test]
+        public void CompareImagePixelDatatoSDR()
+        {
+            //Extract Pixel Data from Image
+            //Create SDR
+            //Compare Pixel Value with SDR Values.
         }
 
         [Test]
@@ -125,9 +142,7 @@ namespace Hentul.UT
                 }
 
                 Assert.IsTrue(i >= totalIterationsNeeded - 10);
-            }
-
-            
+            }            
         }
 
         [Test]
@@ -272,12 +287,31 @@ namespace Hentul.UT
         [Test]
         public void TestGetNextCoordiantes2()
         {
-            // Create a 2D bool array.
-            // Get Coordinates from method being tested and mark them 'true' in the array.
-            // Verify the array does not have any 'true' values in it.
-
+            // Create a 2D bool array.            
             bool[,] bools = new bool[2500, 2500];
 
+
+            // Get Coordinates from method being tested and mark them 'true' in the array.
+
+            Tuple<int, int, int, int> tuple = sg.GetNextCoordinates(0, 0, 0, 0);
+            int i = 0, totalIterations = 120;
+
+            while(i < totalIterations)
+            {
+
+                for (int j = 0; j < totalIterations; j++)
+                {
+                }
+
+                tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                
+
+            }
+
+
+
+            // Verify the array does not have any 'true' values in it.
 
 
 
@@ -286,12 +320,74 @@ namespace Hentul.UT
 
         [Test]
         public void TestImagePixelCoverage()
+        {            
+            string filepath = @"C:\Users\depint\source\repos\Hentul\Hentul.UT\TestDocs\errorsIndexes.txt";
+
+            int doubleRange = 2 * count;
+
+            //Load some dummy black and white image worth 600 * 600 pixels
+            sg = new ScreenGrabber(25, true, false, 7);
+
+            //Run GetNextCoordinates on it and mark all the pixels in the bool array to true
+            Tuple<int, int, int, int> tuple = new Tuple<int, int, int, int>(0, 0, 50, 50);
+
+            int expected = (600 * 600) / 2500;
+
+            int actual = 0;
+            int errorCount = 0;
+
+            while(tuple.Item1 != -1)
+            {
+                errorCount += SetBoolToFalse(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, doubleRange);
+
+                tuple = sg.GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+
+                errorCount += SetBoolToFalse(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, doubleRange);
+
+                actual++;
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i1 = 0; i1 < 600; i1++)
+            {
+                for (int k1 = 0; k1 < 600; k1++)
+                {
+                    if (image[i1,k1] == false)
+                        sb.Append("(" + i1.ToString() +  "," + k1.ToString()+ "), ");
+                }
+                sb.AppendLine("-");
+            }
+
+            File.WriteAllText(filepath, sb.ToString());
+
+           //Assert.AreEqual(0, errorCount);
+
+            Assert.AreEqual(expected, actual);
+            
+
+            //Assert all values in the array are true.
+
+
+        }
+
+        private int SetBoolToFalse(int x1, int y1, int x2, int y2, int doubleRange)
         {
-            bool[,] image = new bool[600, 600];
+            int errorCount = 0;
 
+            for (int j = y1, l = 0; j < y2 && l < doubleRange; j++, l++)
+            {
+                //Console.WriteLine("Row " + j.ToString());
 
+                for (int i = x1, k = 0; i < x2 && k < doubleRange; i++, k++)
+                {
+                    if (image[l, k] == true)
+                        errorCount++;
+                    image[l, k] = true;
+                }
+            }
 
-
+            return errorCount;
         }
 
         [Test, Ignore("this is only for physical cursor movement!")]

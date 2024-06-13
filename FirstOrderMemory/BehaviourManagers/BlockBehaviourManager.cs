@@ -793,13 +793,7 @@
         private void Wire()
         {
             if (CurrentCycleState.Equals(BlockCycle.FIRING))
-            {
-
-                ///Case 1 : All Predicted Neurons Fire : Strengthen only the correct predictions.
-                ///Case 2 : Few Fired , Few Bursted : Strengthen the Correctly Fired Neurons , For Bursted , Analyse did anybody contribut to the column and dint burst ? if nobody contributed then do X
-                ///Case 3 : All columns Bursted : highly likely first fire or totally new pattern coming in , If firing early cycle , then just wire minimum strength for the connections and move on , if in the middle of the cycle( atleast 10,000 cycle ) then Need to do somethign new Todo .
-
-                //Get intersection of neuronsFiringThisCycle and predictedNeuronsFromThisCycle as if any neurons that were predicted for this cycle actually fired then we got to strengthen those connections first
+            {                                
 
                 CurrentCycleState = BlockCycle.FIRING;
 
@@ -845,10 +839,9 @@
                 }
                 else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
                 {
-                    //Case 2 :  Few Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
+                    //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
                     //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
                     //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
-
 
 
                     //Boost the few correctly predicted neurons
@@ -954,7 +947,7 @@
                 }
                 else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
-                    //Case 3 : All columns Bursted: highly likely first fire or totally new pattern coming in :
+                    //Case 4 : All columns Bursted: highly likely first fire or totally new pattern coming in :
                     //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
                     //         If in the middle of the cycle(atleast 10,000 cycles ) then Need to do somethign new Todo.
 
@@ -977,7 +970,7 @@
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
 
-                    //Case 4 : Some Columns Bursted and Some of the Columns Fired.
+                    //Case 5 : Some Columns Bursted and Some of the Columns Fired.
                     //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
                     //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
                     //Bug : Somehow the all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
