@@ -50,6 +50,31 @@
         public Tuple<int, int> RightBottom { get; private set; }
         public Tuple<int, int> CenterCenter { get; private set; }
 
+        //Mappings holds all the FOM Block ID -> pixel 
+        private static Dictionary<int, Tuple<int, int>> Mappings = new Dictionary<int, Tuple<int, int>>()
+        {
+            {0, new Tuple<int, int>(0,0) },
+            {0, new Tuple<int, int>(0,1) },
+            {0, new Tuple<int, int>(1,0) },
+            {0, new Tuple<int, int>(1,1) },
+            {1, new Tuple<int, int>(0,2) },
+            {1, new Tuple<int, int>(0,3) },
+            {1, new Tuple<int, int>(1,2) },
+            {1, new Tuple<int, int>(1,3) },
+            {2, new Tuple<int, int>(0,4) },
+            {2, new Tuple<int, int>(0,5) },
+            {2, new Tuple<int, int>(1,4) },
+            {2, new Tuple<int, int>(1,5) },
+            {3, new Tuple<int, int>(0,6) },
+            {3, new Tuple<int, int>(0,7) },
+            {3, new Tuple<int, int>(1,6) },
+            {3, new Tuple<int, int>(1,7) },
+            {4, new Tuple<int, int>(0,8) },
+            {4, new Tuple<int, int>(0,9) },
+            {4, new Tuple<int, int>(1,8) },
+            {4, new Tuple<int, int>(1,9) },
+        };
+
         private int RangeIterator;
 
         public const int MaxSparsity = 10;
@@ -96,7 +121,7 @@
 
         public ScreenGrabber(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
-            //Todo : Project shape data of the input image to one region and project colour data of the image to another region.            
+            //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
 
             NumPixelsToProcessPerBlock = range;
 
@@ -247,7 +272,7 @@
                 return Color.White;
 
             return bmp.GetPixel(x, y);
-        }
+        }       
 
         public Tuple<int, int, int, int> GetNextCoordinates(int x1, int y1, int x2, int y2)
         {
@@ -355,52 +380,54 @@
             int TotalPixelsCoveredPerIteration = blockLength * blockLength;
             int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
             double totalIterationsNeeded = TotalNumberOfPixelsToProcess / TotalPixelsCoveredPerIteration;
+            List<Position_SOM> position_SOMs = new List<Position_SOM>();
 
-            for (int index = 0; index < totalIterationsNeeded; index++)
-            {
-
+            for (int blockid = 0; blockid < totalIterationsNeeded; blockid++)
+            {                
                 for (int i = 0; i < blockLength; i++)
                 {
                     for (int j = 0; j < blockLength; j++)
                     {
+                        Console.WriteLine("Parsing completion : " + (int)(i * 100 / totalIterationsNeeded) + "%");
+                        
+                        //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
 
+                        bool isBlack = CheckifpixelisBlack(i, j);
+
+                        if (isBlack)
+                        {
+                            position_SOMs.Add(new Position_SOM(i, j));
+                        }                                                
                     }
-                }                
+                }
+
+                //Once one single block Positions are computed create the Spatial SDR and process the involved FOM
+
+                /* Questions :
+                 * 1. How many Pixels should one FOM Block process?
+                 * 2. 
+                 */
+
+                position_SOMs.Clear();
             }
-
-
-            Console.WriteLine("Parsing completion : " + (int)(i * 100 / totalIterationsNeeded) + "%");
-
-            //PreparePixelData();
-
-            //tuple = GetNextCoordinates(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
-
-            //if (tuple.Item1 < 0)
-            //{
-            //    if (i < totalIterationsNeeded - 10)
-            //    {
-            //        throw new InvalidOperationException("Process Breaking before covering the entire image");
-            //    }
-            //    else
-            //    {
-            //        break;
-            //    }
-            //}
-
-            //if (IsMock == false)
-            //    ProcessPixelData();
-
+         
             //Thread.Sleep(2000);
 
-            //PrintBlockVital();
-
-            //CleanPixelData();
-
-            //Thread.Sleep(2000);
+            //PrintBlockVital();            
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
+        }
+
+        public bool CheckifpixelisBlack(int x, int y)
+        {
+            if (x > bmp.Width || y > bmp.Height)
+                return false;
+
+            var color = bmp.GetPixel(x, y);
+
+            return (color.R < 200 && color.G < 200 && color.B < 200);
         }
 
         private void SetUpperNRightBounds(int width, int height, int blockLength)
@@ -410,6 +437,8 @@
                 int bp = 1;
             }
         }
+
+
 
         private double GetRoundedTotalNumberOfPixelsToProcess(int height, int width)
         {
@@ -514,6 +543,7 @@
             }
             if (LogMode)
                 Console.WriteLine("Done Collecting Screen Pixels");
+
         }
 
         public void ProcessPixelData()

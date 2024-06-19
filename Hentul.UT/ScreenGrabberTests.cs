@@ -602,7 +602,7 @@ namespace Hentul.UT
         //    var ex = Assert.That
         //}
 
-        [Test, Ignore("Only for debugging logic")]
+        [Test]
         public void TestCodeChange()
         {
             int[,] ints =
