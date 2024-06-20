@@ -255,16 +255,7 @@
             {
                 throw new InvalidCastException("Couldn't find image");
             }
-        }
-
-        private void ResetOffsets()
-        {
-            leftBound = 51;
-            rightBound = 551;
-            upperBound = 551;
-            lowerBound = 51;
-            RounRobinIteration = 0;
-        }
+        }       
 
         public Color GetColorAt(int x, int y)
         {
@@ -392,28 +383,25 @@
                         
                         //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
 
-                        bool isBlack = CheckifpixelisBlack(i, j);
+                        bool isBlack = CheckifpixelisBlack(i + Offset * blockid, j + Offset * blockid);
 
                         if (isBlack)
                         {
-                            position_SOMs.Add(new Position_SOM(i, j));
+                            position_SOMs.Add(new Position_SOM(i + Offset * blockid, j + Offset * blockid));
                         }                                                
                     }
                 }
 
-                //Once one single block Positions are computed create the Spatial SDR and process the involved FOM
-
-                /* Questions :
-                 * 1. How many Pixels should one FOM Block process?
-                 * 2. 
-                 */
+                fomBBM[blockid].Fire(new SDR_SOM(10, 10, position_SOMs, iType.SPATIAL));
 
                 position_SOMs.Clear();
-            }
-         
-            //Thread.Sleep(2000);
 
-            //PrintBlockVital();            
+                Thread.Sleep(2000);
+
+                PrintBlockVital();            
+            }
+
+
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
@@ -428,16 +416,7 @@
             var color = bmp.GetPixel(x, y);
 
             return (color.R < 200 && color.G < 200 && color.B < 200);
-        }
-
-        private void SetUpperNRightBounds(int width, int height, int blockLength)
-        {
-            if(width > ( rightBound + 50 ) || height > ( upperBound + 50) )
-            {
-                int bp = 1;
-            }
-        }
-
+        }      
 
 
         private double GetRoundedTotalNumberOfPixelsToProcess(int height, int width)
@@ -481,6 +460,39 @@
         /// <param name="x2"></param>
         /// <param name="y2"></param>
         /// <exception cref="InvalidDataException"></exception>
+      
+        public void CleanPixelData()
+        {
+            BucketToData.Clear();
+        }
+
+        public void PrintBlockVital()
+        {
+            //Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
+
+            foreach (var fom in fomBBM)
+            {
+                fom.PrintBlockStats();
+            }
+        }
+
+        private void BackUp()
+        {
+            throw new NotImplementedException();
+            //Back Up all the FOM's
+        }
+
+        #region UnUsed Code
+
+        private void ResetOffsets()
+        {
+            leftBound = 51;
+            rightBound = 551;
+            upperBound = 551;
+            lowerBound = 51;
+            RounRobinIteration = 0;
+        }
+
         public void PreparePixelData(int x1, int y1, int x2, int y2)
         {
             //Total Screen Size = 50 * 50 = 2500 pixels.
@@ -495,7 +507,7 @@
 
             int doubleRange = 2 * NumPixelsToProcessPerBlock;
 
-            if(LogMode) 
+            if (LogMode)
                 Console.WriteLine("Getting Screen Pixels : ");
 
             for (int j = y1, l = 0; j < y2 && l < doubleRange; j++, l++)
@@ -537,7 +549,7 @@
             }
 
             if (blackCount == 1)
-            {   
+            {
                 //Happens only for Mock Test Image
                 blackPixelCount++;
             }
@@ -575,28 +587,6 @@
                 Console.WriteLine("Done Processing Pixel Data");
         }
 
-        public void CleanPixelData()
-        {
-            BucketToData.Clear();
-        }
-
-        public void PrintBlockVital()
-        {
-            //Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
-
-            foreach (var fom in fomBBM)
-            {
-                fom.PrintBlockStats();
-            }
-        }
-
-        private void BackUp()
-        {
-            throw new NotImplementedException();
-            //Back Up all the FOM's
-        }
-
-        #region UnUsed Code
         public void Grab2()
         {
 

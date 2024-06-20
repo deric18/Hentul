@@ -23,7 +23,7 @@ while (true)
         
     if(screenGrabber.SwitchImage() == false)
     {
-        Console.WriteLine("Done Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
+        Console.WriteLine("Finished Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
 
         Console.Read();
     }         
