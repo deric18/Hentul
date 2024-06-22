@@ -20,94 +20,27 @@
 
     public class ScreenGrabber
     {
-        private const int TOTALPARSEITERATIONS = 5;
-
-        public bool[,] bitMap { get; private set; }
-
-        public POINT Point { get; set; }
-
-        private const int ByteSize = 8;
-
         public int NumPixelsToProcessPerBlock { get; private set; }
 
+        public int numPixelsProcessedPerBBM;
+
+        public int NumBBMNeeded { get; private set; }
+
         private bool LogMode { get; set; }
-
-
-        /// <summary>
-        /// NumBuckets is the total number of FOM Blocks that will be created and it will include 
-        /// </summary>
-        public int NumBuckets { get; private set; }
-
-        public int BucketRowLength { get; private set; }
-
-        public int BucketColLength { get; private set; }
-
-        public int Iterations;
-
-        public Tuple<int, int> LeftUpper { get; private set; }
-        public Tuple<int, int> RightUpper { get; private set; }
-        public Tuple<int, int> LeftBottom { get; private set; }
-        public Tuple<int, int> RightBottom { get; private set; }
-        public Tuple<int, int> CenterCenter { get; private set; }
-
-        //Mappings holds all the FOM Block ID -> pixel 
-        private static Dictionary<int, Tuple<int, int>> Mappings = new Dictionary<int, Tuple<int, int>>()
-        {
-            {0, new Tuple<int, int>(0,0) },
-            {0, new Tuple<int, int>(0,1) },
-            {0, new Tuple<int, int>(1,0) },
-            {0, new Tuple<int, int>(1,1) },
-            {1, new Tuple<int, int>(0,2) },
-            {1, new Tuple<int, int>(0,3) },
-            {1, new Tuple<int, int>(1,2) },
-            {1, new Tuple<int, int>(1,3) },
-            {2, new Tuple<int, int>(0,4) },
-            {2, new Tuple<int, int>(0,5) },
-            {2, new Tuple<int, int>(1,4) },
-            {2, new Tuple<int, int>(1,5) },
-            {3, new Tuple<int, int>(0,6) },
-            {3, new Tuple<int, int>(0,7) },
-            {3, new Tuple<int, int>(1,6) },
-            {3, new Tuple<int, int>(1,7) },
-            {4, new Tuple<int, int>(0,8) },
-            {4, new Tuple<int, int>(0,9) },
-            {4, new Tuple<int, int>(1,8) },
-            {4, new Tuple<int, int>(1,9) },
-        };
-
-        private int RangeIterator;
-
-        public const int MaxSparsity = 10;
-
-        /// <summary>
-        /// This is the Golden Gooe of the whole Program ! 
-        /// Key -> A unique location number generate based on value of x & y
-        /// x -> x cooridante of the pixel
-        /// y -> y coordinate of the pixel
-        /// 
-        /// 
-        /// </summary>
-        public Dictionary<int, LocationNPositions> BucketToData { get; private set; }
 
         public bool IsMock { get; private set; }
 
         int NumColumns, Z;
 
+        public Dictionary<int, List<Position_SOM>> Buckets;
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
-
-        public SBBManager somBlock { get; private set; }
 
         private bool devbox = false;
 
         public int Offset;
-        public string CurrentDirection = string.Empty;
-        public int leftBound;
-        public int upperBound;
-        public int rightBound;
-        public int lowerBound;
-        public int RounRobinIteration;
 
         public int ImageIndex { get; private set; }
+
         public List<string> ImageList { get; private set; }
 
         public int blackPixelCount = 0;
@@ -119,23 +52,45 @@
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
+        #region Unused Variables
+
+        public POINT Point { get; set; }
+        public int BucketRowLength { get; private set; }
+        public int BucketColLength { get; private set; }
+        public int Iterations;
+        public Tuple<int, int> LeftUpper { get; private set; }
+        public Tuple<int, int> RightUpper { get; private set; }
+        public Tuple<int, int> LeftBottom { get; private set; }
+        public Tuple<int, int> RightBottom { get; private set; }
+        public Tuple<int, int> CenterCenter { get; private set; }
+        private int RangeIterator;
+        public const int MaxSparsity = 10;
+        public Dictionary<int, LocationNPositions> BucketToData { get; private set; }
+        public string CurrentDirection = string.Empty;
+        public int leftBound;
+        public int upperBound;
+        public int rightBound;
+        public int lowerBound;
+        public int RounRobinIteration;
+
+
+        #endregion
+
         public ScreenGrabber(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
 
             NumPixelsToProcessPerBlock = range;
 
-            BucketRowLength = 5;
+            numPixelsProcessedPerBBM = 20;
 
-            BucketColLength = 2;
 
-            Iterations = 0;
 
             LogMode = false;
 
             double numerator = (2 * NumPixelsToProcessPerBlock) * (2 * NumPixelsToProcessPerBlock);
 
-            double denominator = (BucketRowLength * BucketColLength);
+            double denominator = numPixelsProcessedPerBBM;
 
             double value = (numerator / denominator);
 
@@ -146,24 +101,11 @@
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcessPerBlock.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
 
-            LeftUpper = new Tuple<int, int>(1007, 412);
-            RightUpper = new Tuple<int, int>(1550, 412);
-            LeftBottom = new Tuple<int, int>(1007, 972);
-            RightBottom = new Tuple<int, int>(1550, 972);
-
-            CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
-
-            CurrentDirection = "RIGHT";
-
             Offset = range * 2;
 
-            RangeIterator = 0;
+            NumBBMNeeded = (int)value;
 
-            NumBuckets = (int)value;
-
-            BucketToData = new Dictionary<int, LocationNPositions>();
-
-            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBuckets];
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBBMNeeded];
 
             NumColumns = 10;
 
@@ -171,30 +113,39 @@
 
             Z = 10;
 
-            for (int i = 0; i < NumBuckets; i++)
+            for (int i = 0; i < NumBBMNeeded; i++)
             {
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z, i, 0, 0);
             }
 
+            #region Unused Variables
+            CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
+            CurrentDirection = "RIGHT";
+            Iterations = 0;
+            LeftUpper = new Tuple<int, int>(1007, 412);
+            RightUpper = new Tuple<int, int>(1550, 412);
+            LeftBottom = new Tuple<int, int>(1007, 972);
+            RightBottom = new Tuple<int, int>(1550, 972);
+            BucketToData = new Dictionary<int, LocationNPositions>();
+            RangeIterator = 0;
             leftBound = 51;
             rightBound = 551;
             upperBound = 551;
             lowerBound = 51;
             RounRobinIteration = 0;
+            #endregion
 
             if (ShouldInit)
                 Init();
-                        
+
             ImageIndex = mockImageIndex;
             ImageList = AddAllTheFruits();
 
             LoadImage();
-
-            somBlock = new SBBManager();
         }
 
         private List<string> AddAllTheFruits()
-        {                               
+        {
             var dict = new List<string>();
 
             dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
@@ -217,7 +168,7 @@
 
             stopWatch.Start();
 
-            for (int i = 0; i < NumBuckets; i++)
+            for (int i = 0; i < NumBBMNeeded; i++)
             {
                 fomBBM[i].Init(i);
             }
@@ -232,7 +183,7 @@
 
             Console.WriteLine("Range" + NumPixelsToProcessPerBlock.ToString() + "\n");
             Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
-            Console.WriteLine("Total First Order BBMs Created :" + NumBuckets.ToString() + "\n");
+            Console.WriteLine("Total First Order BBMs Created :" + NumBBMNeeded.ToString() + "\n");
 
         }
 
@@ -255,7 +206,147 @@
             {
                 throw new InvalidCastException("Couldn't find image");
             }
-        }       
+        }
+
+        public void GrabNProcess()          //We process one image at once.
+        {
+            Stopwatch stopWatch = new Stopwatch();
+
+            stopWatch.Start();
+
+            double TotalNumberOfPixelsToProcess = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height, bmp.Width);
+            int blockLength = 2 * NumPixelsToProcessPerBlock;  // 50                                   
+            int TotalPixelsCoveredPerIteration = blockLength * blockLength; //2500
+            int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
+            double num_blocks_per_bmp = TotalNumberOfPixelsToProcess / TotalPixelsCoveredPerIteration;
+            int num_bbm_per_block = 125;
+            int num_bbm_per_unit = 5;
+            int unit_width = 5, unit_height = 5;
+
+            for (int blockid = 0; blockid < num_blocks_per_bmp; blockid++)
+            {
+                Console.WriteLine("Parsing completion : " + (int)((blockid * 100) / num_blocks_per_bmp) + "%");
+
+                for (int unitId = 0; unitId < num_bbm_per_block; unitId++)
+                {
+                    for (int bbmId = 0; bbmId < num_bbm_per_unit; bbmId++)
+                    {
+                        for (int i = 0, j = 0; i < unit_width && j < unit_height; i++, j++)
+                        {
+                            //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
+
+                            bool isBlack = CheckifpixelisBlack(i + Offset * blockid, j + Offset * blockid);
+
+                            if (isBlack)
+                            {
+                                int bucketId = GetBucketIdFromPosition(i + Offset * blockid, j + Offset * blockid);
+
+                                if (bucketId < 0)
+                                {
+                                    throw new InvalidOperationException("Could not Correctly Compute the correct BBM to process the pixels width!");
+                                }
+
+                                if (Buckets.TryGetValue(bucketId, out var bucketPositions))
+                                {
+                                    bucketPositions.Add(new Position_SOM(i + Offset * blockid, j + Offset * blockid));
+                                }
+                                else
+                                {
+                                    Buckets.Add(bucketId, new List<Position_SOM>() { new Position_SOM(i + Offset * blockid, j + Offset * blockid) });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (IsMock == false)
+                {
+                    foreach (var item in Buckets)
+                    {
+                        fomBBM[item.Key].Fire(new SDR_SOM(10, 10, item.Value, iType.SPATIAL));
+                    }
+                }
+
+                Thread.Sleep(2000);
+
+                PrintBlockVital();
+            }
+
+            Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
+
+            Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
+        }
+
+        private int GetBucketIdFromPosition(int i, int j)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CheckifpixelisBlack(int x, int y)
+        {
+            if (x >= bmp.Width || y >= bmp.Height)
+                return false;
+
+            var color = bmp.GetPixel(x, y);
+
+            return (color.R < 200 && color.G < 200 && color.B < 200);
+        }
+
+
+        private double GetRoundedTotalNumberOfPixelsToProcess(int height, int width)
+        {
+            double roundedTotalNumberOfPixelsModuled = Math.Min(height, width);
+
+            roundedTotalNumberOfPixelsModuled = Math.Pow(roundedTotalNumberOfPixelsModuled, 2);
+
+            if (roundedTotalNumberOfPixelsModuled % 50 == 0)
+            {
+                return roundedTotalNumberOfPixelsModuled;
+            }
+
+            double nextMinBlockLength = roundedTotalNumberOfPixelsModuled;
+
+            double halfOfBlockLength = roundedTotalNumberOfPixelsModuled / 2;
+
+            while (nextMinBlockLength % 50 != 0)
+            {
+                nextMinBlockLength--;
+
+                if (nextMinBlockLength < halfOfBlockLength)
+                {
+                    Console.WriteLine(" GetBlockLength () :: Unable to find the proper lower Bound");
+                }
+
+            }
+
+            if (nextMinBlockLength % 50 != 0)
+                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
+
+            return nextMinBlockLength;
+        }
+
+        public void CleanPixelData()
+        {
+            BucketToData.Clear();
+        }
+
+        public void PrintBlockVital()
+        {
+            //Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
+
+            foreach (var fom in fomBBM)
+            {
+                fom.PrintBlockStats();
+            }
+        }
+
+        private void BackUp()
+        {
+            throw new NotImplementedException();
+            //Back Up all the FOM's
+        }
+
+        #region UnUsed Code
 
         public Color GetColorAt(int x, int y)
         {
@@ -263,7 +354,7 @@
                 return Color.White;
 
             return bmp.GetPixel(x, y);
-        }       
+        }
 
         public Tuple<int, int, int, int> GetNextCoordinates(int x1, int y1, int x2, int y2)
         {
@@ -287,7 +378,7 @@
                             retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
                         }
                         else
-                        {                            
+                        {
                             CurrentDirection = "UP";
                             Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
                             Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
@@ -356,133 +447,6 @@
 
             return retVal;
         }
-
-        public void GrabNProcess()          //We process one image at once.
-        {
-            Stopwatch stopWatch = new Stopwatch();
-
-            stopWatch.Start();
-
-            //int height = bmp.Height; //605
-            //int width = bmp.Width;  //579                        
-
-            double TotalNumberOfPixelsToProcess = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height, bmp.Width);                           
-            int blockLength = 2 * NumPixelsToProcessPerBlock;                                    
-            int TotalPixelsCoveredPerIteration = blockLength * blockLength;
-            int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
-            double totalIterationsNeeded = TotalNumberOfPixelsToProcess / TotalPixelsCoveredPerIteration;
-            List<Position_SOM> position_SOMs = new List<Position_SOM>();
-
-            for (int blockid = 0; blockid < totalIterationsNeeded; blockid++)
-            {                
-                for (int i = 0; i < blockLength; i++)
-                {
-                    for (int j = 0; j < blockLength; j++)
-                    {
-                        Console.WriteLine("Parsing completion : " + (int)(i * 100 / totalIterationsNeeded) + "%");
-                        
-                        //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
-
-                        bool isBlack = CheckifpixelisBlack(i + Offset * blockid, j + Offset * blockid);
-
-                        if (isBlack)
-                        {
-                            position_SOMs.Add(new Position_SOM(i + Offset * blockid, j + Offset * blockid));
-                        }                                                
-                    }
-                }
-
-                fomBBM[blockid].Fire(new SDR_SOM(10, 10, position_SOMs, iType.SPATIAL));
-
-                position_SOMs.Clear();
-
-                Thread.Sleep(2000);
-
-                PrintBlockVital();            
-            }
-
-
-
-            Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
-
-            Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
-        }
-
-        public bool CheckifpixelisBlack(int x, int y)
-        {
-            if (x > bmp.Width || y > bmp.Height)
-                return false;
-
-            var color = bmp.GetPixel(x, y);
-
-            return (color.R < 200 && color.G < 200 && color.B < 200);
-        }      
-
-
-        private double GetRoundedTotalNumberOfPixelsToProcess(int height, int width)
-        {
-            double roundedTotalNumberOfPixelsModuled = Math.Min(height, width);
-
-            roundedTotalNumberOfPixelsModuled = Math.Pow(roundedTotalNumberOfPixelsModuled, 2);
-
-            if(roundedTotalNumberOfPixelsModuled % 50 == 0)
-            {
-                return roundedTotalNumberOfPixelsModuled;
-            }
-
-            double nextMinBlockLength = roundedTotalNumberOfPixelsModuled;
-
-            double halfOfBlockLength = roundedTotalNumberOfPixelsModuled / 2;
-
-            while (nextMinBlockLength % 50 != 0)
-            {
-                nextMinBlockLength--;
-
-                if(nextMinBlockLength < halfOfBlockLength)
-                {
-                    Console.WriteLine(" GetBlockLength () :: Unable to find the proper lower Bound");
-                }
-
-            }
-
-            if (nextMinBlockLength % 50 != 0)
-                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
-
-            return nextMinBlockLength;
-        }
-
-        /// <summary>
-        /// We do not take in integers as input to Block Managers , we take in bool's , if its positive we take in the value ,if its negative we move on.
-        /// we divide up the entire one screenshot 50 * 50  = 2500 pixels 
-        /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="y1"></param>
-        /// <param name="x2"></param>
-        /// <param name="y2"></param>
-        /// <exception cref="InvalidDataException"></exception>
-      
-        public void CleanPixelData()
-        {
-            BucketToData.Clear();
-        }
-
-        public void PrintBlockVital()
-        {
-            //Console.WriteLine(@"----Block ID ------------Total # Bursts---------------------Total # Correct Predictions------------------- ");
-
-            foreach (var fom in fomBBM)
-            {
-                fom.PrintBlockStats();
-            }
-        }
-
-        private void BackUp()
-        {
-            throw new NotImplementedException();
-            //Back Up all the FOM's
-        }
-
-        #region UnUsed Code
 
         private void ResetOffsets()
         {
