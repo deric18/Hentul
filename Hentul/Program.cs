@@ -12,7 +12,6 @@ Tuple<int, int, int, int> tuple;
 
 //Console.ReadKey();
 
-screenGrabber.SetMousetotartingPoint();
 
 while (true)
 {

@@ -37,7 +37,9 @@
 
         private bool devbox = false;
 
-        public int Offset;
+        public int BlockOffset;
+
+        public int UnitOffset;
 
         public int ImageIndex { get; private set; }
 
@@ -101,7 +103,9 @@
                 throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcessPerBlock.ToString() + "  NumPixelsPerBucket" + (BucketRowLength * BucketColLength).ToString());
             }
 
-            Offset = range * 2;
+            BlockOffset = range * 2;
+
+            UnitOffset = 10;
 
             NumBBMNeeded = (int)value;
 
@@ -119,20 +123,20 @@
             }
 
             #region Unused Variables
-            CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
-            CurrentDirection = "RIGHT";
-            Iterations = 0;
-            LeftUpper = new Tuple<int, int>(1007, 412);
-            RightUpper = new Tuple<int, int>(1550, 412);
-            LeftBottom = new Tuple<int, int>(1007, 972);
-            RightBottom = new Tuple<int, int>(1550, 972);
-            BucketToData = new Dictionary<int, LocationNPositions>();
-            RangeIterator = 0;
-            leftBound = 51;
-            rightBound = 551;
-            upperBound = 551;
-            lowerBound = 51;
-            RounRobinIteration = 0;
+            //CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
+            //CurrentDirection = "RIGHT";
+            //Iterations = 0;
+            //LeftUpper = new Tuple<int, int>(1007, 412);
+            //RightUpper = new Tuple<int, int>(1550, 412);
+            //LeftBottom = new Tuple<int, int>(1007, 972);
+            //RightBottom = new Tuple<int, int>(1550, 972);
+            //BucketToData = new Dictionary<int, LocationNPositions>();
+            //RangeIterator = 0;
+            //leftBound = 51;
+            //rightBound = 551;
+            //upperBound = 551;
+            //lowerBound = 51;
+            //RounRobinIteration = 0;
             #endregion
 
             if (ShouldInit)
@@ -214,14 +218,14 @@
 
             stopWatch.Start();
 
-            double TotalNumberOfPixelsToProcess = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height, bmp.Width);
+            double TotalNumberOfPixelsToProcess = GetRoundedTotalNumberOfPixelsToProcess();
             int blockLength = 2 * NumPixelsToProcessPerBlock;  // 50                                   
             int TotalPixelsCoveredPerIteration = blockLength * blockLength; //2500
             int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
             double num_blocks_per_bmp = TotalNumberOfPixelsToProcess / TotalPixelsCoveredPerIteration;
             int num_bbm_per_block = 125;
             int num_bbm_per_unit = 5;
-            int unit_width = 5, unit_height = 5;
+            int bbm_width = 10, bbm_height = 2;
 
             for (int blockid = 0; blockid < num_blocks_per_bmp; blockid++)
             {
@@ -231,28 +235,34 @@
                 {
                     for (int bbmId = 0; bbmId < num_bbm_per_unit; bbmId++)
                     {
-                        for (int i = 0, j = 0; i < unit_width && j < unit_height; i++, j++)
+                        for (int i = 0; i < bbm_width; i++)
                         {
-                            //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
-
-                            bool isBlack = CheckifpixelisBlack(i + Offset * blockid, j + Offset * blockid);
-
-                            if (isBlack)
+                            for (int j = 0; j < bbm_height; j++)
                             {
-                                int bucketId = GetBucketIdFromPosition(i + Offset * blockid, j + Offset * blockid);
+                                int x = blockid * BlockOffset + bbmId + i;
+                                int y = blockid * BlockOffset + bbmId + j;
 
-                                if (bucketId < 0)
-                                {
-                                    throw new InvalidOperationException("Could not Correctly Compute the correct BBM to process the pixels width!");
-                                }
+                                //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
 
-                                if (Buckets.TryGetValue(bucketId, out var bucketPositions))
+                                bool isBlack = CheckifpixelisBlack(x, y);
+
+                                if (isBlack)
                                 {
-                                    bucketPositions.Add(new Position_SOM(i + Offset * blockid, j + Offset * blockid));
-                                }
-                                else
-                                {
-                                    Buckets.Add(bucketId, new List<Position_SOM>() { new Position_SOM(i + Offset * blockid, j + Offset * blockid) });
+                                    int bucketId = GetBucketIdFromPosition(i + BlockOffset * blockid, j + BlockOffset * blockid);
+
+                                    if (bucketId < 0)
+                                    {
+                                        throw new InvalidOperationException("Could not Correctly Compute the correct BBM to process the pixels width!");
+                                    }
+
+                                    if (Buckets.TryGetValue(bucketId, out var bucketPositions))
+                                    {
+                                        bucketPositions.Add(new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid));
+                                    }
+                                    else
+                                    {
+                                        Buckets.Add(bucketId, new List<Position_SOM>() { new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid) });
+                                    }
                                 }
                             }
                         }
@@ -293,13 +303,9 @@
         }
 
 
-        private double GetRoundedTotalNumberOfPixelsToProcess(int height, int width)
-        {
-            double roundedTotalNumberOfPixelsModuled = Math.Min(height, width);
-
-            roundedTotalNumberOfPixelsModuled = Math.Pow(roundedTotalNumberOfPixelsModuled, 2);
-
-            if (roundedTotalNumberOfPixelsModuled % 50 == 0)
+        public double GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
+        {                     
+            if (numberOfPixels_Index % BlockOffset == 0)
             {
                 return roundedTotalNumberOfPixelsModuled;
             }
@@ -347,6 +353,7 @@
         }
 
         #region UnUsed Code
+        /*
 
         public Color GetColorAt(int x, int y)
         {
@@ -845,10 +852,9 @@
             }
 
             return toReturn;
-        }
+        }*/
 
         #endregion
-
-        #endregion
+        
     }
 }

@@ -1,7 +1,7 @@
 namespace Hentul.UT
 {
-    using Hentul;    
-    using System.Drawing;    
+    using Hentul;
+    using System.Drawing;
     using System.Text;
 
     public class ScreenGrabberTest
@@ -16,7 +16,7 @@ namespace Hentul.UT
         {
             rand = new Random();
         }
-       
+
         [Test]
         public void TestOneFullCycle()
         {
@@ -193,37 +193,77 @@ namespace Hentul.UT
         }
 
         [Test]
-        public void TestGetColorAt()
+        public void TestForLogicEdgeCase1()
         {
-            sg = new ScreenGrabber(count);
-            int whiteCount = 0;
-            int PrettyCloseToWhite = 0;
-            int blackCount = 0;
-            int everythinginBetween = 0;
+            ScreenGrabber sg = new ScreenGrabber(count, true, false, 7);
+            int minsize = Math.Min(sg.bmp.Width, sg.bmp.Height);
+            bool[,] booleans = new bool[sg.bmp.Width, sg.bmp.Height];
 
-            for (int i = 0; i < 600; i++)
+            int TotalNumberOfPixelsToProcess_X = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
+            int TotalNumberOfPixelsToProcess_Y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
+
+            int TotalPixelsCoveredPerIteration = sg.BlockOffset * sg.BlockOffset; //2500
+
+            int num_blocks_per_bmp_x = (int)(sg.bmp.Width / sg.BlockOffset);
+            int num_blocks_per_bmp_y = (int)(sg.bmp.Height/ sg.BlockOffset);
+
+            int num_unit_per_block_x = 5;
+            int num_unit_per_block_y = 5;
+            int num_bbm_per_unit_x = 10;
+            int num_bbm_per_unit_y = 2;
+            int num_pixels_per_bbm_x = 10;
+            int num_pixels_per_bbm_y = 2;
+            int numPixelsPerBlock = 2500;
+            int acutaltotalPixelsinImage = sg.bmp.Width * sg.bmp.Height;       //1550 , 1000
+
+
+            for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
             {
-                for (int j = 0; j < 600; j++)
-                {
-                    var color = sg.GetColorAt(i, j);
+                for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
+                {                                    
+                    for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+                    {
+                        for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
+                        {                            
+                            for (int bbmId_y = 0; bbmId_y < num_bbm_per_unit_y - 1; bbmId_y++)
+                            {
+                                for (int bbmId_x = 0; bbmId_x < num_bbm_per_unit_x; bbmId_x++)
+                                {
+                                    for (int j = 0; j < num_pixels_per_bbm_y; j++)
+                                    {
+                                        for (int i = 0; i < num_pixels_per_bbm_x; i++)
+                                        {
+                                            int x = blockid_x * sg.BlockOffset + unitId_x * sg.UnitOffset + bbmId_x * num_bbm_per_unit_x + i;
+                                            int y = blockid_y * sg.BlockOffset + unitId_y * sg.UnitOffset + bbmId_y * num_bbm_per_unit_y + j;
 
-                    if (color == Color.White)
-                        whiteCount++;
-                    else if (color.R < 150 && color.G < 150 && color.B < 150)
-                        blackCount++;
-                    else if (color.R > 200 && color.G > 200 && color.B > 200)
-                        PrettyCloseToWhite++;
-                    else
-                        everythinginBetween++;
+                                            if (x > sg.bmp.Width || y > sg.bmp.Height)
+                                            {
+                                                int breakpoint = 1;
+                                            }
+
+                                            booleans[x, y] = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            int breakpoint = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                for (int j = 0; j < 1000; j++)
+                {
+                    if (booleans[i, j] == false)
+                    {
+                        Console.WriteLine(i.ToString() + " " + j.ToString());
+                        Assert.Fail();
+                    }
+                }
+            }
 
-            Assert.AreEqual(whiteCount, 12600);
-            Assert.AreEqual(PrettyCloseToWhite, 292241);
-            Assert.AreEqual(blackCount, 42332);
-            Assert.AreEqual(everythinginBetween, 12827);
+
         }
 
         [Test]
@@ -293,7 +333,7 @@ namespace Hentul.UT
 
         [Test]
         public void TestImagePixelCoverage()
-        {            
+        {
             string filepath = @"C:\Users\depint\source\repos\Hentul\Hentul.UT\TestDocs\errorsIndexes.txt";
 
             int doubleRange = 2 * count;
@@ -314,8 +354,8 @@ namespace Hentul.UT
             {
                 for (int k1 = 0; k1 < 600; k1++)
                 {
-                    if (image[i1,k1] == false)
-                        sb.Append("(" + i1.ToString() +  "," + k1.ToString()+ "), ");
+                    if (image[i1, k1] == false)
+                        sb.Append("(" + i1.ToString() + "," + k1.ToString() + "), ");
                 }
                 sb.AppendLine("-");
             }
@@ -329,6 +369,43 @@ namespace Hentul.UT
             //Assert all values in the array are true.
         }
 
+
+        /*
+         * 
+         * 
+         * [Test, Ignore("Not in Use")]
+        public void TestGetColorAt()
+        {
+            sg = new ScreenGrabber(count);
+            int whiteCount = 0;
+            int PrettyCloseToWhite = 0;
+            int blackCount = 0;
+            int everythinginBetween = 0;
+
+            for (int i = 0; i < 600; i++)
+            {
+                for (int j = 0; j < 600; j++)
+                {
+                    var color = sg.GetColorAt(i, j);
+
+                    if (color == Color.White)
+                        whiteCount++;
+                    else if (color.R < 150 && color.G < 150 && color.B < 150)
+                        blackCount++;
+                    else if (color.R > 200 && color.G > 200 && color.B > 200)
+                        PrettyCloseToWhite++;
+                    else
+                        everythinginBetween++;
+                }
+            }
+
+            int breakpoint = 0;
+
+            Assert.AreEqual(whiteCount, 12600);
+            Assert.AreEqual(PrettyCloseToWhite, 292241);
+            Assert.AreEqual(blackCount, 42332);
+            Assert.AreEqual(everythinginBetween, 12827);
+        }
         [Test, Ignore("Not in Use")]
         public void TestProcessColorMap()
         {
@@ -659,5 +736,6 @@ namespace Hentul.UT
 
             return errorCount;
         }
+        */
     }
 }
