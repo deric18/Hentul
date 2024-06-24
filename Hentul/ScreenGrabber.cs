@@ -218,69 +218,81 @@
 
             stopWatch.Start();
 
-            double TotalNumberOfPixelsToProcess = GetRoundedTotalNumberOfPixelsToProcess();
-            int blockLength = 2 * NumPixelsToProcessPerBlock;  // 50                                   
-            int TotalPixelsCoveredPerIteration = blockLength * blockLength; //2500
-            int acutaltotalPixelsinImage = bmp.Size.Width * bmp.Size.Height;
-            double num_blocks_per_bmp = TotalNumberOfPixelsToProcess / TotalPixelsCoveredPerIteration;
-            int num_bbm_per_block = 125;
-            int num_bbm_per_unit = 5;
-            int bbm_width = 10, bbm_height = 2;
+            int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
+            int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
 
-            for (int blockid = 0; blockid < num_blocks_per_bmp; blockid++)
+            int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
+
+            int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
+            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
+
+            int num_unit_per_block_x = 5;
+            int num_unit_per_block_y = 5;
+            int num_bbm_per_unit_x = 5;
+            int num_bbm_per_unit_y = 2;
+            int num_pixels_per_bbm_x = 10;
+            int num_pixels_per_bbm_y = 10;
+
+            for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
             {
-                Console.WriteLine("Parsing completion : " + (int)((blockid * 100) / num_blocks_per_bmp) + "%");
-
-                for (int unitId = 0; unitId < num_bbm_per_block; unitId++)
+                for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
                 {
-                    for (int bbmId = 0; bbmId < num_bbm_per_unit; bbmId++)
+                    for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
                     {
-                        for (int i = 0; i < bbm_width; i++)
+                        for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                         {
-                            for (int j = 0; j < bbm_height; j++)
+                            for (int bbmId_y = 0; bbmId_y < num_bbm_per_unit_y; bbmId_y++)
                             {
-                                int x = blockid * BlockOffset + bbmId + i;
-                                int y = blockid * BlockOffset + bbmId + j;
-
-                                //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)
-
-                                bool isBlack = CheckifpixelisBlack(x, y);
-
-                                if (isBlack)
+                                for (int bbmId_x = 0; bbmId_x < num_bbm_per_unit_x; bbmId_x++)
                                 {
-                                    int bucketId = GetBucketIdFromPosition(i + BlockOffset * blockid, j + BlockOffset * blockid);
+                                    for (int j = 0; j < num_pixels_per_bbm_y; j++)
+                                    {
+                                        for (int i = 0; i < num_pixels_per_bbm_x; i++)
+                                        {
+                                            int x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+                                            int y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
 
-                                    if (bucketId < 0)
-                                    {
-                                        throw new InvalidOperationException("Could not Correctly Compute the correct BBM to process the pixels width!");
-                                    }
+                                            //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)                                            
 
-                                    if (Buckets.TryGetValue(bucketId, out var bucketPositions))
-                                    {
-                                        bucketPositions.Add(new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid));
-                                    }
-                                    else
-                                    {
-                                        Buckets.Add(bucketId, new List<Position_SOM>() { new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid) });
+                                            if (CheckifpixelisBlack(x, y))
+                                            {
+                                                int bucketId = GetBucketIdFromPosition(i + BlockOffset * blockid, j + BlockOffset * blockid);
+
+                                                if (bucketId < 0)
+                                                {
+                                                    throw new InvalidOperationException("Could not Correctly Compute the correct BBM to process the pixels width!");
+                                                }
+
+                                                if (Buckets.TryGetValue(bucketId, out var bucketPositions))
+                                                {
+                                                    bucketPositions.Add(new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid));
+                                                }
+                                                else
+                                                {
+                                                    Buckets.Add(bucketId, new List<Position_SOM>() { new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid) });
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-
-                if (IsMock == false)
-                {
-                    foreach (var item in Buckets)
-                    {
-                        fomBBM[item.Key].Fire(new SDR_SOM(10, 10, item.Value, iType.SPATIAL));
-                    }
-                }
-
-                Thread.Sleep(2000);
-
-                PrintBlockVital();
             }
+
+
+            if (IsMock == false)
+            {
+                foreach (var item in Buckets)
+                {
+                    fomBBM[item.Key].Fire(new SDR_SOM(10, 10, item.Value, iType.SPATIAL));
+                }
+            }
+
+            Thread.Sleep(2000);
+
+            PrintBlockVital();
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
@@ -303,32 +315,32 @@
         }
 
 
-        public double GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        {                     
+        public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
+        {
             if (numberOfPixels_Index % BlockOffset == 0)
             {
-                return roundedTotalNumberOfPixelsModuled;
+                return numberOfPixels_Index;
             }
 
-            double nextMinBlockLength = roundedTotalNumberOfPixelsModuled;
+            int nextMinNumberOfPixels = numberOfPixels_Index;
 
-            double halfOfBlockLength = roundedTotalNumberOfPixelsModuled / 2;
+            int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
 
-            while (nextMinBlockLength % 50 != 0)
+            while (nextMinNumberOfPixels % 50 != 0)
             {
-                nextMinBlockLength--;
+                nextMinNumberOfPixels--;
 
-                if (nextMinBlockLength < halfOfBlockLength)
+                if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
                 {
-                    Console.WriteLine(" GetBlockLength () :: Unable to find the proper lower Bound");
+                    Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
                 }
 
             }
 
-            if (nextMinBlockLength % 50 != 0)
+            if (nextMinNumberOfPixels % 50 != 0)
                 throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
 
-            return nextMinBlockLength;
+            return nextMinNumberOfPixels;
         }
 
         public void CleanPixelData()
@@ -855,6 +867,6 @@
         }*/
 
         #endregion
-        
+
     }
 }

@@ -196,26 +196,25 @@ namespace Hentul.UT
         public void TestForLogicEdgeCase1()
         {
             ScreenGrabber sg = new ScreenGrabber(count, true, false, 7);
-            int minsize = Math.Min(sg.bmp.Width, sg.bmp.Height);
-            bool[,] booleans = new bool[sg.bmp.Width, sg.bmp.Height];
+            
+            
 
             int TotalNumberOfPixelsToProcess_X = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
 
             int TotalPixelsCoveredPerIteration = sg.BlockOffset * sg.BlockOffset; //2500
 
-            int num_blocks_per_bmp_x = (int)(sg.bmp.Width / sg.BlockOffset);
-            int num_blocks_per_bmp_y = (int)(sg.bmp.Height/ sg.BlockOffset);
+            bool[,] booleans = new bool[TotalNumberOfPixelsToProcess_X, TotalNumberOfPixelsToProcess_Y];
+
+            int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / sg.BlockOffset);
+            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / sg.BlockOffset);
 
             int num_unit_per_block_x = 5;
             int num_unit_per_block_y = 5;
-            int num_bbm_per_unit_x = 10;
+            int num_bbm_per_unit_x = 5;
             int num_bbm_per_unit_y = 2;
             int num_pixels_per_bbm_x = 10;
-            int num_pixels_per_bbm_y = 2;
-            int numPixelsPerBlock = 2500;
-            int acutaltotalPixelsinImage = sg.bmp.Width * sg.bmp.Height;       //1550 , 1000
-
+            int num_pixels_per_bbm_y = 10;                        
 
             for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
             {
@@ -225,7 +224,7 @@ namespace Hentul.UT
                     {
                         for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                         {                            
-                            for (int bbmId_y = 0; bbmId_y < num_bbm_per_unit_y - 1; bbmId_y++)
+                            for (int bbmId_y = 0; bbmId_y < num_bbm_per_unit_y; bbmId_y++)
                             {
                                 for (int bbmId_x = 0; bbmId_x < num_bbm_per_unit_x; bbmId_x++)
                                 {
@@ -233,8 +232,8 @@ namespace Hentul.UT
                                     {
                                         for (int i = 0; i < num_pixels_per_bbm_x; i++)
                                         {
-                                            int x = blockid_x * sg.BlockOffset + unitId_x * sg.UnitOffset + bbmId_x * num_bbm_per_unit_x + i;
-                                            int y = blockid_y * sg.BlockOffset + unitId_y * sg.UnitOffset + bbmId_y * num_bbm_per_unit_y + j;
+                                            int x = blockid_x * sg.BlockOffset + unitId_x * sg.UnitOffset + i;
+                                            int y = blockid_y * sg.BlockOffset + unitId_y * sg.UnitOffset + j;
 
                                             if (x > sg.bmp.Width || y > sg.bmp.Height)
                                             {
@@ -251,9 +250,9 @@ namespace Hentul.UT
                 }
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < TotalNumberOfPixelsToProcess_X; i++)
             {
-                for (int j = 0; j < 1000; j++)
+                for (int j = 0; j < TotalNumberOfPixelsToProcess_Y; j++)
                 {
                     if (booleans[i, j] == false)
                     {
@@ -262,8 +261,6 @@ namespace Hentul.UT
                     }
                 }
             }
-
-
         }
 
         [Test]
