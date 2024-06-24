@@ -245,6 +245,9 @@
                             {
                                 for (int bbmId_x = 0; bbmId_x < num_bbm_per_unit_x; bbmId_x++)
                                 {
+                                    
+                                    List<Position_SOM> bbmPositions = new List<Position_SOM> ();
+
                                     for (int j = 0; j < num_pixels_per_bbm_y; j++)
                                     {
                                         for (int i = 0; i < num_pixels_per_bbm_x; i++)
@@ -252,28 +255,18 @@
                                             int x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
                                             int y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
 
-                                            //if the pixel is Black then record the pixel location  :  CheckifpixelisBlack(i, j)                                            
+                                            //if the pixel is Black then tag the pixel location
 
                                             if (CheckifpixelisBlack(x, y))
                                             {
-                                                int bucketId = GetBucketIdFromPosition(i + BlockOffset * blockid, j + BlockOffset * blockid);
-
-                                                if (bucketId < 0)
-                                                {
-                                                    throw new InvalidOperationException("Could not Correctly Compute the correct BBM to process the pixels width!");
-                                                }
-
-                                                if (Buckets.TryGetValue(bucketId, out var bucketPositions))
-                                                {
-                                                    bucketPositions.Add(new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid));
-                                                }
-                                                else
-                                                {
-                                                    Buckets.Add(bucketId, new List<Position_SOM>() { new Position_SOM(i + BlockOffset * blockid, j + BlockOffset * blockid) });
-                                                }
+                                                bbmPositions.Add(new Position_SOM(x,y));
                                             }
                                         }
                                     }
+
+                                    //Process the tagged pixel for the FOM BBM
+
+                                    fomBBM[bbmId_x + bbmId_y].Fire(new SDR_SOM(10, 10, bbmPositions, iType.SPATIAL));
                                 }
                             }
                         }
