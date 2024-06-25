@@ -16,6 +16,16 @@
         }
 
         [TestMethod]
+        public void TestBoolEncoderKeyConflict()
+        {
+            BoolEncoder be = new BoolEncoder(100, 20);
+
+            be.SetEncoderValues(18);
+
+            Assert.Throws<InvalidOperationException>(() => be.SetEncoderValues(18));
+        }
+
+        [TestMethod]
         public void TestByteEncoder1()
         {
             byte toEncode1 = (byte)1;

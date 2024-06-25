@@ -265,20 +265,14 @@
                                             if (CheckifPixelisBlack(x, y))
                                             {
                                                 // Need to encode Position Coordinates
-
-                                                boolEncoder.Encode();
-
-
-                                                bbmPositions.Add(new Position_SOM(x,y));
-
-
+                                                boolEncoder.SetEncoderValues(x+y);                                                
                                             }
                                         }
                                     }
 
                                     //Process the tagged pixel for the FOM BBM
 
-                                    fomBBM[bbmId_x + bbmId_y].Fire(new SDR_SOM(10, 10, bbmPositions, iType.SPATIAL));
+                                    fomBBM[bbmId_x + bbmId_y].Fire(boolEncoder.Encode(iType.SPATIAL));
                                 }
                             }
                         }

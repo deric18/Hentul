@@ -1,8 +1,9 @@
 ﻿using Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FirstOrderMemory.Models
 {
-    public class Position_SOM : Position, IComparable
+    public class Position_SOM : Position, IComparable, IEqualityComparer<Position_SOM>
     {
         public char W { get; private set; }
 
@@ -56,6 +57,19 @@ namespace FirstOrderMemory.Models
                     return 0;
             }
             return 0;
+        }
+
+        public bool Equals(Position_SOM? x, Position_SOM? y)
+        {
+            if (x == null || y == null)
+                return false;
+
+            return x.W == y.W && x.X == y.X && x.Y == y.Y && x.Z == y.Z;
+        }
+
+        public int GetHashCode([DisallowNull] Position_SOM obj)
+        {
+            return obj.W + obj.X + obj.Y + obj.Z;
         }
     }
 }

@@ -132,7 +132,7 @@
             encoder.Encode((byte)ch);
 
             return (SDR_SOM)encoder.GetSparseSDR();
-        }              
+        }                     
 
         internal static List<SDR_SOM> GenerateFixedRandomSDR_SOMs(int iterations, int minValue, int maxValue)
         {
