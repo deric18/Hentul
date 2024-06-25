@@ -14,6 +14,7 @@ namespace FirstOrderMemory.Models.Encoders
 
         public BoolEncoder(int n, int w) : base(n,w)
         {
+            _positions = new List<Position_SOM>();
             Mappings = new Dictionary<int, Position_SOM>()
             {
                 { 0, new Position_SOM(0,1)   },
@@ -40,12 +41,7 @@ namespace FirstOrderMemory.Models.Encoders
         }
 
         public void SetEncoderValues(int position)
-        {
-            if (_positions == null)
-            {
-                _positions = new List<Position_SOM>();
-            }
-
+        {            
             if (_positions.Count > W)
             {
                 Console.WriteLine("EXCEPTION : List of ON bits cannot exceed than W per BBM");
@@ -56,7 +52,8 @@ namespace FirstOrderMemory.Models.Encoders
 
             if(!Mappings.TryGetValue(position, out var mapping))
             {
-                Console.WriteLine("Encoder() :: Invalid Mapping : Mapping Does not exist for the Encoder ! Error in Screen Grabber Logic Likely ! check for loop logic");
+                Console.WriteLine("Encoder() :: Invalid Mapping : Mapping Does not exist for the Encoder for : " + position + " !");
+                Console.WriteLine("Error in Screen Grabber Logic Likely ! check for loop logic ");
                 throw new InvalidOperationException("Invalid Mapping : Invalid Mapping : Mapping Does not exist for the Encoder ! Error in Screen Grabber Logic Likely ! check for loop logic");
             }
 
