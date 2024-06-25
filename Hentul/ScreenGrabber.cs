@@ -11,6 +11,8 @@
     using Hentul.UT;
     using System.Diagnostics.Eventing.Reader;
     using System.Numerics;
+    using System.Drawing.Imaging;
+    using FirstOrderMemory.Models.Encoders;
 
     public struct POINT
     {
@@ -214,6 +216,8 @@
 
         public void GrabNProcess()          //We process one image at once.
         {
+            //Todo : Pixel combination should not be serial , it shoudl be randomly distributed through out the unit
+
             Stopwatch stopWatch = new Stopwatch();
 
             stopWatch.Start();
@@ -247,6 +251,7 @@
                                 {
                                     
                                     List<Position_SOM> bbmPositions = new List<Position_SOM> ();
+                                    BoolEncoder boolEncoder = new BoolEncoder(100, 20);
 
                                     for (int j = 0; j < num_pixels_per_bbm_y; j++)
                                     {
@@ -257,9 +262,16 @@
 
                                             //if the pixel is Black then tag the pixel location
 
-                                            if (CheckifpixelisBlack(x, y))
+                                            if (CheckifPixelisBlack(x, y))
                                             {
+                                                // Need to encode Position Coordinates
+
+                                                boolEncoder.Encode();
+
+
                                                 bbmPositions.Add(new Position_SOM(x,y));
+
+
                                             }
                                         }
                                     }
@@ -272,16 +284,7 @@
                         }
                     }
                 }
-            }
-
-
-            if (IsMock == false)
-            {
-                foreach (var item in Buckets)
-                {
-                    fomBBM[item.Key].Fire(new SDR_SOM(10, 10, item.Value, iType.SPATIAL));
-                }
-            }
+            }            
 
             Thread.Sleep(2000);
 
@@ -297,7 +300,7 @@
             throw new NotImplementedException();
         }
 
-        public bool CheckifpixelisBlack(int x, int y)
+        public bool CheckifPixelisBlack(int x, int y)
         {
             if (x >= bmp.Width || y >= bmp.Height)
                 return false;

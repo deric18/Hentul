@@ -3,6 +3,7 @@
     using Common;
     using FirstOrderMemory.Models;
     using FirstOrderMemory.BehaviourManagers;
+    using FirstOrderMemory.Models.Encoders;
 
     internal static class TestUtils
     {

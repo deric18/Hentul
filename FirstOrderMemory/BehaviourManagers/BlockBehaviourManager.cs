@@ -455,30 +455,9 @@
             //BUG: Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             if (ignorePrecyclePrep == false)
                 PreCyclePrep();
-
-            if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
-            {
-                if (TemporalCycleCache.Count != 0)
-                {
-                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item!");
-                }
-
-                TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
-            }
-
-            if (incomingPattern.InputPatternType.Equals(iType.APICAL))
-            {
-                if (ApicalCycleCache.Count != 0)
-                {
-                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!");
-                }
-
-                ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
-            }
-
-            if (incomingPattern.ActiveBits.Count == 0)
-                return;
-
+            
+            ValidateInput(incomingPattern);
+            
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
             switch (incomingPattern.InputPatternType)
@@ -605,6 +584,42 @@
             if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
 
+        }
+
+        private void ValidateInput(SDR_SOM incomingPattern)
+        {
+            if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
+            {
+                if (TemporalCycleCache.Count != 0)
+                {
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item!");
+                }
+
+                TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
+            }
+
+            if (incomingPattern.InputPatternType.Equals(iType.APICAL))
+            {
+                if (ApicalCycleCache.Count != 0)
+                {
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!");
+                }
+
+                ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
+            }
+
+            if (incomingPattern.ActiveBits.Count == 0)
+                return;
+
+            foreach( var pos in incomingPattern.ActiveBits)
+            {
+                if(pos.X > NumColumns || pos.Y > NumColumns || pos.Z > Z)
+                {
+                    Console.WriteLine("EXCEPTION :: Incoming pattern is not encoded in the correct format");
+
+                    throw new InvalidDataException("Incoming SDR is not encoded correctly");
+                }
+            }
         }
 
         private void PostCycleCleanup()

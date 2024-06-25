@@ -1,4 +1,5 @@
 ﻿using Common;
+using FirstOrderMemory.Models.Encoders;
 using System;
 
 namespace FirstOrderMemory.Models

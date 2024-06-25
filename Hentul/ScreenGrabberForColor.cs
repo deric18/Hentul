@@ -6,7 +6,7 @@
     using Common;
     using FirstOrderMemory.Models;
     using System.Diagnostics;
-
+    using FirstOrderMemory.Models.Encoders;
 
     public class ScreenGrabberForColor
     {

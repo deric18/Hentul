@@ -1,4 +1,4 @@
-﻿namespace FirstOrderMemory.Models
+﻿namespace FirstOrderMemory.Models.Encoders
 {
     using Common;
 
@@ -83,7 +83,7 @@
             //Sparse Encoding
             for (int index = 0; index < 8; index++)
             {
-                bit = (b & (1 << index)) == (1 << index);
+                bit = (b & 1 << index) == 1 << index;
 
                 if (bit)
                 {
@@ -101,7 +101,7 @@
             {
                 foreach (var item in arr)
                 {
-                    if(partition > 10 || item > 10)
+                    if (partition > 10 || item > 10)
                     {
                         throw new InvalidDataException("SetValueForBit :: Active Bits should never corss more than column length and breadth");
                     }
@@ -117,7 +117,7 @@
         {
             return new SDR_SOM(10, 10, ActiveBits, iType);
         }
-        
+
 
         public SDR_SOM GetSparseSDR()
         {

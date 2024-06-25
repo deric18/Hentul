@@ -9,6 +9,7 @@ namespace Hentul.UT
         ScreenGrabber sg;
         Random rand;
         int count = 25;
+
         bool[,] image = new bool[600, 600];
 
         [SetUp]
@@ -62,7 +63,7 @@ namespace Hentul.UT
 
         }
 
-        [Test]
+        [Test, Ignore("Used as Needed ! Not an actual Test!")]
         public void TestCodeChange()
         {
             int[,] ints =
