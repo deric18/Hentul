@@ -17,26 +17,26 @@ namespace FirstOrderMemory.Models.Encoders
             _positions = new List<Position_SOM>();
             Mappings = new Dictionary<int, Position_SOM>()
             {
-                { 0, new Position_SOM(0,1)   },
-                { 1, new Position_SOM(0,1)   },
-                {  2, new Position_SOM(0,1)  },
-                {  3, new Position_SOM(0,1)  },
-                {  4, new Position_SOM(0,1)  },
-                {  5, new Position_SOM(0,1)  },
-                {  6, new Position_SOM(0,1)  },
-                {  7, new Position_SOM(0,1)  },
-                {  8, new Position_SOM(0,1)  },
-                {  9, new Position_SOM(0,1)  },
-                {  10, new Position_SOM(0,1) },
-                {  11, new Position_SOM(0,1) },
-                {  12, new Position_SOM(0,1) },
-                {  13, new Position_SOM(0,1) },
-                {  14, new Position_SOM(0,1) },
-                {  15, new Position_SOM(0,1) },
-                {  16, new Position_SOM(0,1) },
-                {  17, new Position_SOM(0,1) },
-                {  18, new Position_SOM(0,1) },
-                {  19, new Position_SOM(0,1) }
+                { 0,  new Position_SOM  (1,1)   },
+                { 1,  new Position_SOM  (0,3)   },
+                {  2, new Position_SOM  (1,5)  },
+                {  3, new Position_SOM  (0,8)  },
+                {  4, new Position_SOM  (3,1)  },
+                {  5, new Position_SOM  (2,3)  },
+                {  6, new Position_SOM  (3,5)  },
+                {  7, new Position_SOM  (2,8)  },
+                {  8, new Position_SOM  (5,1)  },
+                {  9, new Position_SOM  (4,3)  },
+                {  10, new Position_SOM (5,5) },
+                {  11, new Position_SOM (4,8) },
+                {  12, new Position_SOM (7,1) },
+                {  13, new Position_SOM (6,3) },
+                {  14, new Position_SOM (7,5) },
+                {  15, new Position_SOM (6,8) },
+                {  16, new Position_SOM (9,1) },
+                {  17, new Position_SOM (8,3) },
+                {  18, new Position_SOM (9,5) },
+                {  19, new Position_SOM (8,8) }
             };
         }
 
@@ -52,7 +52,7 @@ namespace FirstOrderMemory.Models.Encoders
 
             if(!Mappings.TryGetValue(position, out var mapping))
             {
-                Console.WriteLine("Encoder() :: Invalid Mapping : Mapping Does not exist for the Encoder for : " + position + " !");
+                Console.WriteLine("Encoder() :: Invalid Mapping : Mapping Does not exist for Number for : " + position + " !");
                 Console.WriteLine("Error in Screen Grabber Logic Likely ! check for loop logic ");
                 throw new InvalidOperationException("Invalid Mapping : Invalid Mapping : Mapping Does not exist for the Encoder ! Error in Screen Grabber Logic Likely ! check for loop logic");
             }

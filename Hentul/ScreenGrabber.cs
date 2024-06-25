@@ -264,8 +264,9 @@
 
                                             if (CheckifPixelisBlack(x, y))
                                             {
+                                                
                                                 // Need to encode Position Coordinates
-                                                boolEncoder.SetEncoderValues(x+y);                                                
+                                                boolEncoder.SetEncoderValues(i+j);                                                
                                             }
                                         }
                                     }
