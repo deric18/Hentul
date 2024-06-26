@@ -15,7 +15,7 @@
 
         public int Z { get; private set; }
 
-        public string BlockID;
+        public Position_SOM BlockID;
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
 
@@ -104,14 +104,14 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int Z = 10, int x = 0)
+        public BlockBehaviourManager(int numColumns = 10, int Z = 10, int BlockId = 0, int UnitId = 0, int BbmId = 0)
         {
             if (numColumns != Z)
             {
                 throw new InvalidOperationException("CONSTRUCTOR :: numColumns should be equal to Z");
             }
 
-            this.BlockID = "Block ID : " + x.ToString();
+            this.BlockID = new Position_SOM(BlockId, UnitId, BbmId);
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
 
@@ -382,7 +382,7 @@
                             var distalNode = xmlDocument.CreateNode(XmlNodeType.Element, "DistalDendriticConnection", string.Empty);
 
                             var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
-                            blockIdElement.InnerText = BlockID;
+                            blockIdElement.InnerText = BlockID.X.ToString() + BlockID.Y.ToString() + BlockID.Z.ToString();
 
                             var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
 

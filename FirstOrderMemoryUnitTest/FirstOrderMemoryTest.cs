@@ -833,7 +833,7 @@ namespace FirstOrderMemoryUnitTest
         public void TestMemoryProblemsInThisTestUT()
         {
             Position_SOM psom = new Position_SOM(5, 5, 5);
-            Neuron neuron = new Neuron(psom, "Block ID : 1", NeuronType.NORMAL);
+            Neuron neuron = new Neuron(psom, new Position_SOM(0,0,0), NeuronType.NORMAL);
 
             //Now check memory usage.
 

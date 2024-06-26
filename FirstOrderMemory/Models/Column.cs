@@ -7,7 +7,7 @@
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons, string BlockId) 
+        public Column(int x, int y, int numberOfNeurons, Position_SOM BlockId) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
