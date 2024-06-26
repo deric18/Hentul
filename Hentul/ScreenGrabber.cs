@@ -206,7 +206,7 @@
 
         public void LoadImage()
         {
-            Console.WriteLine("Loading Image" + ImageList[ImageIndex].ToString().Split(new char[1] { '\\' })[7]);
+            Console.WriteLine("Loading Image : "  + ImageList[ImageIndex].ToString().Split(new char[1] { '\\' })[7]);
 
             bmp = new Bitmap(ImageList[ImageIndex]);
 
@@ -261,14 +261,20 @@
 
                                     //if the pixel is Black then tag the pixel location
 
+                                    if(blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
+                                    {
+                                        int bp = 1;
+                                    }
+
                                     if (CheckifPixelisBlack(pixel_x, pixel_y))
                                     {
                                         // Need to encode Position Coordinates
-                                        boolEncoder.SetEncoderValues(i + j);
+                                        // i = 7 && j = 4
+                                        boolEncoder.SetEncoderValues((j % 2).ToString()  + "-" + i.ToString());
                                     }                                    
                                 }
 
-                                if (j % 2 == 0)
+                                if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
                                 {
                                     if (boolEncoder.HasValues())
                                         fomBBM[bbmId].Fire(boolEncoder.Encode(iType.SPATIAL));

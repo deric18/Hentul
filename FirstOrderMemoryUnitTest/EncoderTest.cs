@@ -20,9 +20,9 @@
         {
             BoolEncoder be = new BoolEncoder(100, 20);
 
-            be.SetEncoderValues(18);
+            be.SetEncoderValues("1-8");
 
-            Assert.Throws<InvalidOperationException>(() => be.SetEncoderValues(18));
+            Assert.Throws<InvalidOperationException>(() => be.SetEncoderValues("1-8"));
         }
 
         [TestMethod]
