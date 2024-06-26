@@ -65,7 +65,8 @@ namespace FirstOrderMemory.Models.Encoders
 
             _positions.Add(mapping);
         }
-        
+
+        public bool HasValues() => (_positions.Count != 0); 
 
         //Takes in location coordinates of the bit that was turned on and Integrates it into a Location SDR for BBM's to process.
         public SDR_SOM Encode(iType iType)
@@ -74,6 +75,7 @@ namespace FirstOrderMemory.Models.Encoders
                 Console.WriteLine("WARNING! :: BoolEncoder : Creating an empty SDR");
 
             double sqrt = Math.Sqrt(N);
+
             if (sqrt % 1 != 0.0)            
                 Console.WriteLine("WARNING :: Encode :: Encoder size is not perfect Sqaure! It Should always be a perfect Square!!!");
 
@@ -84,7 +86,7 @@ namespace FirstOrderMemory.Models.Encoders
 
         public void ClearEncoderValues()
         {
-            
+            _positions.Clear();
         }
     }
 }

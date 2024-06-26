@@ -1,7 +1,10 @@
 namespace Hentul.UT
 {
+    using Common;
+    using FirstOrderMemory.Models.Encoders;
     using Hentul;
     using System.Drawing;
+    using System.Reflection.Metadata.Ecma335;
     using System.Text;
 
     public class ScreenGrabberTest
@@ -197,8 +200,8 @@ namespace Hentul.UT
         public void TestForLogicEdgeCase1()
         {
             ScreenGrabber sg = new ScreenGrabber(count, true, false, 7);
-            
-            
+
+
 
             int TotalNumberOfPixelsToProcess_X = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
@@ -215,41 +218,47 @@ namespace Hentul.UT
             int num_bbm_per_unit_x = 5;
             int num_bbm_per_unit_y = 2;
             int num_pixels_per_bbm_x = 10;
-            int num_pixels_per_bbm_y = 10;                        
+            int num_pixels_per_bbm_y = 10;
+
+            List<int> bbmIDRecords = new List<int>();
 
             for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
             {
                 for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-                {                                    
+                {
+                    int bbmId = 0;
+
                     for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-                    {
+                    {                        
                         for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                         {                            
-                            for (int bbmId_y = 0; bbmId_y < num_bbm_per_unit_y; bbmId_y++)
+                            for (int j = 0; j < num_pixels_per_bbm_y; j++)
                             {
-                                for (int bbmId_x = 0; bbmId_x < num_bbm_per_unit_x; bbmId_x++)
+                                for (int i = 0; i < num_pixels_per_bbm_x; i++)
                                 {
-                                    for (int j = 0; j < num_pixels_per_bbm_y; j++)
-                                    {
-                                        for (int i = 0; i < num_pixels_per_bbm_x; i++)
-                                        {
-                                            int x = blockid_x * sg.BlockOffset + unitId_x * sg.UnitOffset + i;
-                                            int y = blockid_y * sg.BlockOffset + unitId_y * sg.UnitOffset + j;
+                                    int x = blockid_x * sg.BlockOffset + unitId_x * sg.UnitOffset + i;
+                                    int y = blockid_y * sg.BlockOffset + unitId_y * sg.UnitOffset + j;
 
-                                            if (x > sg.bmp.Width || y > sg.bmp.Height)
-                                            {
-                                                int breakpoint = 1;
-                                            }
+                                    //if (x > sg.bmp.Width || y > sg.bmp.Height)
+                                    //{
+                                    //    int breakpoint = 1;
+                                    //}
 
-                                            booleans[x, y] = true;
-                                        }
-                                    }
+                                    booleans[x, y] = true;                                    
                                 }
-                            }
-                        }
+
+                                if (j % 2 == 0)
+                                {
+                                    bbmId++;
+                                }
+                            }                            
+                        }                        
                     }
+
+                    Assert.AreEqual(125, bbmId);
                 }
             }
+            
 
             for (int i = 0; i < TotalNumberOfPixelsToProcess_X; i++)
             {
@@ -261,7 +270,7 @@ namespace Hentul.UT
                         Assert.Fail();
                     }
                 }
-            } 
+            }
         }
 
         [Test]

@@ -2,7 +2,7 @@
 {
     using FirstOrderMemory.Models;
     using Common;
-    using System.Xml;
+    using System.Xml;    
 
     public class BlockBehaviourManager
     {
@@ -1148,7 +1148,7 @@
             }
             else
             {
-                Console.WriteLine("ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
+                Console.WriteLine("ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
         }
@@ -1187,21 +1187,23 @@
 
             if (AxonalNeuron == null || DendriticNeuron == null)
                 return false;
-
-            if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))        // Post Init Temporal / Apical Neurons should not connect with anybody else.
-            {
+            else if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
+            {       // Post Init Temporal / Apical Neurons should not connect with anybody else.
                 throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
             }
-
-            if (((AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y) ||            // No Same Column Connections 
-                AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID)) &&                                                                      // No Selfing
-                AxonalNeuron.nType.Equals(DendriticNeuron.nType))                                                                               // Prevents a lot of False Positives from Throwing Error.
+            else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))  
             {
-                Console.WriteLine("Error : ConnectTwoNeurons :: Cannot Connect Neuron to itself!");
-
-                //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
+                Console.WriteLine("Error : ConnectTwoNeurons :: Cannot Connect Neuron to itself!");     // No Same Column Connections 
+                    //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
+            else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
+            {
+                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING]");
+                return false;
+            }            
+
+
 
             bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType);
             bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);

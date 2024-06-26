@@ -88,8 +88,6 @@
 
             numPixelsProcessedPerBBM = 20;
 
-
-
             LogMode = false;
 
             double numerator = (2 * NumPixelsToProcessPerBlock) * (2 * NumPixelsToProcessPerBlock);
@@ -143,8 +141,11 @@
 
             if (ShouldInit)
                 Init();
+            if (isMock)
+                ImageIndex = mockImageIndex;
+            else
+                ImageIndex = 0;
 
-            ImageIndex = mockImageIndex;
             ImageList = AddAllTheFruits();
 
             LoadImage();
@@ -205,6 +206,7 @@
 
         public void LoadImage()
         {
+            Console.WriteLine("Loading Image" + ImageList[ImageIndex].ToString().Split(new char[1] { '\\' })[7]);
 
             bmp = new Bitmap(ImageList[ImageIndex]);
 
@@ -241,53 +243,51 @@
             {
                 for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
                 {
+                    int bbmId = 0;
+
                     for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
                     {
                         for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                        {
-                            for (int bbmId_y = 0; bbmId_y < num_bbm_per_unit_y; bbmId_y++)
+                        {                            
+                            List<Position_SOM> bbmPositions = new List<Position_SOM>();
+                            BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+
+                            for (int j = 0; j < num_pixels_per_bbm_y; j++)
                             {
-                                for (int bbmId_x = 0; bbmId_x < num_bbm_per_unit_x; bbmId_x++)
+                                for (int i = 0; i < num_pixels_per_bbm_x; i++)
                                 {
-                                    
-                                    List<Position_SOM> bbmPositions = new List<Position_SOM> ();
-                                    BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+                                    int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+                                    int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
 
-                                    for (int j = 0; j < num_pixels_per_bbm_y; j++)
+                                    //if the pixel is Black then tag the pixel location
+
+                                    if (CheckifPixelisBlack(pixel_x, pixel_y))
                                     {
-                                        for (int i = 0; i < num_pixels_per_bbm_x; i++)
-                                        {
-                                            int x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                            int y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-                                            //if the pixel is Black then tag the pixel location
-
-                                            if (CheckifPixelisBlack(x, y))
-                                            {
-                                                
-                                                // Need to encode Position Coordinates
-                                                boolEncoder.SetEncoderValues(i+j);                                                
-                                            }
-                                        }
-                                    }
-
-                                    //Process the tagged pixel for the FOM BBM
-
-                                    fomBBM[bbmId_x + bbmId_y].Fire(boolEncoder.Encode(iType.SPATIAL));
+                                        // Need to encode Position Coordinates
+                                        boolEncoder.SetEncoderValues(i + j);
+                                    }                                    
                                 }
-                            }
+
+                                if (j % 2 == 0)
+                                {
+                                    if (boolEncoder.HasValues())
+                                        fomBBM[bbmId].Fire(boolEncoder.Encode(iType.SPATIAL));
+
+                                    boolEncoder.ClearEncoderValues();
+                                }
+                            }                            
                         }
                     }
                 }
             }            
-
-            Thread.Sleep(2000);
 
             PrintBlockVital();
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
+
+            Thread.Sleep(5000);
         }
 
         private int GetBucketIdFromPosition(int i, int j)
@@ -349,10 +349,12 @@
             }
         }
 
-        private void BackUp()
+        public void BackUp()
         {
-            throw new NotImplementedException();
-            //Back Up all the FOM's
+            for (int i = 0; i < fomBBM.Length; i++)
+            {
+                fomBBM[i].BackUp(i.ToString());
+            }
         }
 
         #region UnUsed Code

@@ -17,15 +17,19 @@ while (true)
 {
 
     screenGrabber.GrabNProcess();                
-
+                
     Console.WriteLine("Switching to Next Image");
-        
-    if(screenGrabber.SwitchImage() == false)
-    {
-        Console.WriteLine("Finished Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
 
-        Console.Read();
-    }         
+    if (screenGrabber.SwitchImage() == false)
+    {
+        break;
+    }
+
+    Console.WriteLine("Press any key to load next image");
+
+    Console.ReadKey();
+
+    screenGrabber.LoadImage();    
 
     #region Experimental Code
     //screenGrabber.MoveCursor(x1, y1);
@@ -54,3 +58,10 @@ while (true)
 
     #endregion
 }
+
+
+Console.WriteLine("Finished Processing all the Images!!!! Take a fucking bow Man!!! Proud of you, You deserve a break!!!!!!!!");
+
+screenGrabber.BackUp();
+
+Console.Read();
