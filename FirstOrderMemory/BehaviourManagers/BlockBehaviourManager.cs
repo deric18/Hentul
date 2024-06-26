@@ -15,7 +15,7 @@
 
         public int Z { get; private set; }
 
-        public Position_SOM BlockID;
+        public string BlockID;
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
 
@@ -104,14 +104,14 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int Z = 10, int x = 0, int y = 0, int z = 0)
+        public BlockBehaviourManager(int numColumns = 10, int Z = 10, int x = 0)
         {
             if (numColumns != Z)
             {
                 throw new InvalidOperationException("CONSTRUCTOR :: numColumns should be equal to Z");
             }
 
-            this.BlockID = new Position_SOM(x, y, z);
+            this.BlockID = "Block ID : " + x.ToString();
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
 
@@ -255,11 +255,11 @@
             }
         }
 
-        public BlockBehaviourManager CloneBBM(int x, int y, int z)
+        public BlockBehaviourManager CloneBBM(int x)
         {
             BlockBehaviourManager blockBehaviourManager;
 
-            blockBehaviourManager = new BlockBehaviourManager(NumColumns, Z, x, y, z);
+            blockBehaviourManager = new BlockBehaviourManager(NumColumns, Z, x);
 
             blockBehaviourManager.Init();
 
@@ -382,7 +382,7 @@
                             var distalNode = xmlDocument.CreateNode(XmlNodeType.Element, "DistalDendriticConnection", string.Empty);
 
                             var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
-                            blockIdElement.InnerText = BlockID.X.ToString();
+                            blockIdElement.InnerText = BlockID;
 
                             var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
 
@@ -477,7 +477,7 @@
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 if(LogMode)
-                                    Console.WriteLine("INFO :: Block ID : " + BlockID.X.ToString() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    Console.WriteLine("INFO :: Block ID : " + BlockID + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
 
@@ -492,7 +492,7 @@
                             else if (predictedNeuronPositions.Count == 1)
                             {
                                 if(LogMode)
-                                    Console.WriteLine("Block ID : " + BlockID.ToString() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                    Console.WriteLine("Block ID : " + BlockID + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
 
@@ -568,8 +568,8 @@
             {
                 if (BurstCache.Count == 0)
                     BurstCache.Add(CycleNum, incomingPattern.ActiveBits);
-                else               
-                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle");                
+                else
+                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + BlockID);                
             }            
 
             Fire();
@@ -592,7 +592,7 @@
             {
                 if (TemporalCycleCache.Count != 0)
                 {
-                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item!");
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item! " + BlockID);
                 }
 
                 TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
@@ -602,7 +602,7 @@
             {
                 if (ApicalCycleCache.Count != 0)
                 {
-                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!");
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + BlockID);
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
@@ -635,7 +635,7 @@
                     {
                         if (CycleNum - kvp.Key > 3)
                         {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!");
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + BlockID);
                         }
 
                         foreach (var pos in kvp.Value)
@@ -663,7 +663,7 @@
                 }
                 else if (TemporalCycleCache.Count > 1)
                 {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1");
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1" + BlockID);
 
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
@@ -674,7 +674,7 @@
                     {
                         if (CycleNum - kvp.Key > 3)
                         {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!");
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + BlockID );
                         }
 
                         foreach (var pos in kvp.Value)
@@ -691,7 +691,7 @@
                                     }
                                     else
                                     {
-                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! ");
+                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + BlockID);
                                     }
                                 }
                             }
@@ -702,7 +702,7 @@
                 }
                 else if (ApicalCycleCache.Count > 1)
                 {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1");
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + BlockID);
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
 
@@ -717,7 +717,7 @@
                 {
                     if (CycleNum - kvp.Key > 3)
                     {
-                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!");
+                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + BlockID);
                     }
 
                     foreach (var pos in kvp.Value)
@@ -1193,13 +1193,13 @@
             }
             else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))  
             {
-                Console.WriteLine("Error : ConnectTwoNeurons :: Cannot Connect Neuron to itself!");     // No Same Column Connections 
+                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + BlockID);     // No Same Column Connections 
                     //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
             {
-                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING]");
+                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + BlockID);
                 return false;
             }            
 

@@ -292,7 +292,7 @@ namespace FirstOrderMemory.Models
 
                 if(ProximoDistalDendriticList.Count > 100)
                 {
-                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 100 Distal Dendritic Connections");
+                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 100 Distal Dendritic Connections ");
 
                     Thread.Sleep(1000);
                 }
