@@ -1178,7 +1178,7 @@
             // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
             if (cType == ConnectionType.DISTALDENDRITICNEURON)
             {
-                if(DendriticNeuron.NeuronID.X == 3 && DendriticNeuron.NeuronID.Y == 1 && DendriticNeuron.NeuronID.Z == 1 && AxonalNeuron.NeuronID.X == 0 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
+                if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
                 {
                     bool breakpoint = false;
                     breakpoint = true;
