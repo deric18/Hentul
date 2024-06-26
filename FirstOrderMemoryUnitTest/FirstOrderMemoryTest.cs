@@ -27,8 +27,8 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestMultipleInstanceOfSOM()
         {
-            BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1, 3, 10);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10, 1, 3, 10);
+            BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1);
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10, 1);
 
             bbm3.Init(0, 0);
 
@@ -799,7 +799,7 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestSOMBBMCloneUT()
         {
-            BlockBehaviourManager bbm2 = bbManager.CloneBBM(0, 0, 0);
+            BlockBehaviourManager bbm2 = bbManager.CloneBBM(0);
 
             bbManager.Columns[3, 3].Neurons[5].flag = 1;
 
