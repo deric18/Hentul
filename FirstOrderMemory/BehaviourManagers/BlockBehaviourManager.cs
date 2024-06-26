@@ -176,7 +176,7 @@
             {
                 for (int j = 0; j < numColumns; j++)
                 {
-                    Columns[i, j] = new Column(i, j, Z);
+                    Columns[i, j] = new Column(i, j, Z, BlockID);
                 }
             }
         }
@@ -1394,7 +1394,7 @@
                 {
 
                     if (this.TemporalLineArray[i, j] == null)
-                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), NeuronType.TEMPORAL);
+                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BlockID, NeuronType.TEMPORAL);
 
                     for (int k = 0; k < NumColumns; k++)
                     {
@@ -1431,7 +1431,7 @@
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
-                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), NeuronType.APICAL);
+                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BlockID, NeuronType.APICAL);
 
                     for (int k = 0; k < NumColumns; k++)
                     {

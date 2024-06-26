@@ -7,13 +7,13 @@
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons) 
+        public Column(int x, int y, int numberOfNeurons, string BlockId) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position_SOM(x, y, i)));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BlockId));
             }            
             Init = 0;
         }

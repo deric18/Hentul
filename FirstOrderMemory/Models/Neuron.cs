@@ -33,6 +33,8 @@ namespace FirstOrderMemory.Models
 
         private ulong redundantCounter = 0;
 
+        public string BlockID { get; private set; }
+
         public Position_SOM NeuronID { get; private set; }
 
         public NeuronType nType { get; private set; }
@@ -51,9 +53,10 @@ namespace FirstOrderMemory.Models
         
         public int Voltage { get; private set; }
 
-        public Neuron(Position_SOM neuronId, NeuronType nType = NeuronType.NORMAL)
+        public Neuron(Position_SOM neuronId, string BlockId, NeuronType nType = NeuronType.NORMAL)
         {
             NeuronID = neuronId;
+            BlockID = BlockId;
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();            
             ProximoDistalDendriticList = new Dictionary<string, Synapse>();
@@ -292,7 +295,7 @@ namespace FirstOrderMemory.Models
 
                 if(ProximoDistalDendriticList.Count > 100)
                 {
-                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 100 Distal Dendritic Connections ");
+                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 100 Distal Dendritic Connections " + BlockID);
 
                     Thread.Sleep(1000);
                 }
