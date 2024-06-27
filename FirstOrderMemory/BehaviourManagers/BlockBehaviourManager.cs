@@ -98,7 +98,8 @@
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
         private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
-
+        private const uint PRUNE_THRESHOLD = 25;
+        private const uint PRUNE_STRENGTH = 1;
 
         #endregion
 
@@ -286,8 +287,7 @@
                                 {
                                     if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
                                     {
-                                        presynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                                        postSynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                                        postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
 
                                         if (!blockBehaviourManager.ConnectTwoNeuronsOrIncrementStrength(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
                                         {
@@ -311,8 +311,8 @@
                                 {
                                     if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
                                     {
-                                        presynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.AxonalNeuronId);
-                                        postSynapticNeuron = blockBehaviourManager.ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                                        presynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.AxonalNeuronId);
+                                        postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
 
                                         if (!blockBehaviourManager.ConnectTwoNeuronsOrIncrementStrength(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
                                         {
@@ -648,7 +648,7 @@
                             {
                                 if (synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
                                 {
-                                    var neuronToCleanUp = ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                                    var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
 
                                     if (neuronToCleanUp.Voltage != 0)
                                     {
@@ -683,7 +683,7 @@
                             {
                                 if (synapse.DendronalNeuronalId != null) // && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
                                 {
-                                    var neuronToCleanUp = ConvertStringPosToNeuron(synapse.DendronalNeuronalId);
+                                    var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
 
                                     if (neuronToCleanUp.Voltage != 0)
                                     {
@@ -748,12 +748,9 @@
 
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 1000 && BlockBehaviourManager.CycleNum % 50 == 0)
+            if (BlockBehaviourManager.CycleNum >= 1000 && BlockBehaviourManager.CycleNum % 500 == 0)
             {
-                foreach (var col in this.Columns)
-                {
-                    col.PruneCycleRefresh();
-                }
+                Prune();
 
                 TotalBurstFire = 0;
                 TotalPredictionFires = 0;
@@ -764,6 +761,75 @@
             CycleNum++;
             // Process Next pattern.          
         }
+
+        private void Prune()
+        {
+
+            for (int i = 0; i < NumColumns; i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    foreach (var neuron in Columns[i, j].Neurons)
+                    {
+                        if (neuron.NeuronID.ToString().Equals("3-1-1-N"))
+                        {
+                            int bp = 1;
+                        }
+
+                        if (neuron.ProximoDistalDendriticList == null || neuron.ProximoDistalDendriticList.Count == 0)
+                        { return; }
+
+                        List<string> DremoveList = null;
+                        List<string> AremoveList = null;
+
+                        var distalDendriticList = neuron.ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.GetStrength() <= PRUNE_STRENGTH && x.PredictiveHitCount != 5);
+
+                        if (distalDendriticList.Count() != 0)
+                        {
+                            foreach (var kvp in neuron.ProximoDistalDendriticList)
+                            {
+
+                                if (kvp.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ((BlockBehaviourManager.CycleNum - Math.Max(kvp.Value.lastFiredCycle, kvp.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
+                                {
+
+                                    //Remove Distal Dendrite from Neuron
+                                    if (DremoveList == null)
+                                    {
+                                        DremoveList = new List<string>();
+                                    }
+
+                                    DremoveList.Add(kvp.Key);
+
+
+                                    //Remove Corresponding Connected Axonal Neuron
+                                    var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
+                                    if (axonalNeuron.AxonalList.TryGetValue(neuron.NeuronID.ToString(), out var connection))
+                                    {
+                                        axonalNeuron.AxonalList.Remove(neuron.NeuronID.ToString());
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                    }
+                                }
+                            }
+
+                            if (DremoveList?.Count > 0)
+                            {
+                                for (int k = 0; k < DremoveList.Count; k++)
+                                {
+                                    neuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
+
+                                    BlockBehaviourManager.totalDendronalConnections--;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+                 
 
         private void PrepNetworkForNextCycle()
         {
@@ -800,7 +866,7 @@
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)
                 {
-                    ProcessSpikeFromNeuron(ConvertStringPosToNeuron(synapse.AxonalNeuronId), ConvertStringPosToNeuron(synapse.DendronalNeuronalId), synapse.cType);
+                    ProcessSpikeFromNeuron(GetNeuronFromString(synapse.AxonalNeuronId), GetNeuronFromString(synapse.DendronalNeuronalId), synapse.cType);
                 }
             }
         }
@@ -816,7 +882,7 @@
 
                 foreach (var item in PredictedNeuronsforThisCycle.Keys)
                 {
-                    var neuronToAdd = ConvertStringPosToNeuron(item);
+                    var neuronToAdd = GetNeuronFromString(item);
 
                     if (neuronToAdd != null)
                     {
@@ -1148,9 +1214,17 @@
             }
             else
             {
-                Console.WriteLine("ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
+                Console.WriteLine("ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID );
+                PrintBlockDetails();
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
+        }
+
+        private void PrintBlockDetails()
+        {
+            Console.WriteLine("Block ID : " + BlockID.X);
+            Console.WriteLine("Unit ID : " + BlockID.Y);
+            Console.WriteLine("BBM ID : " + BlockID.Z);
         }
 
         public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
@@ -1256,7 +1330,7 @@
             return toReturn;
         }
 
-        public Neuron ConvertStringPosToNeuron(string posString)
+        public Neuron GetNeuronFromString(string posString)
         {
             var parts = posString.Split('-');
             int x = Convert.ToInt32(parts[0]);
@@ -1273,11 +1347,10 @@
             {
                 int breakpoint = 1;
 
-                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns Block ID : " + BlockID.ToString() + " : posString :  " + posString);
+                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns  posString :  " + posString);
             }
 
             return GetNeuronFromPosition(nType, x, y, z);
-
         }
 
         public SDR_SOM GetPredictedSDR()
@@ -1327,12 +1400,12 @@
 
         private void StrengthenTemporalConnection(Neuron neuron)
         {
-            PramoteCorrectlyPredictedDendronal(ConvertStringPosToNeuron(neuron.GetMyTemporalPartner()), neuron);
+            PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyTemporalPartner()), neuron);
         }
 
         private void StrengthenApicalConnection(Neuron neuron)
         {
-            PramoteCorrectlyPredictedDendronal(ConvertStringPosToNeuron(neuron.GetMyApicalPartner()), neuron);
+            PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyApicalPartner()), neuron);
         }
 
         private void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron)
@@ -1362,7 +1435,7 @@
             {
                 foreach (var neuronKey in neuron.ProximoDistalDendriticList.Keys)
                 {
-                    var distallyConnectedNeuron = ConvertStringPosToNeuron(neuronKey);
+                    var distallyConnectedNeuron = GetNeuronFromString(neuronKey);
 
                     if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringLastCycle, distallyConnectedNeuron))
                     {

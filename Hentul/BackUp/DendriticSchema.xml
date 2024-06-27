@@ -1,2 +1,6 @@
 <Connections>
+  <DistalDendriticConnection>
+    <SourceNeuronID>0-7-5-N</SourceNeuronID>
+    <TargetNeuronID>1-5-8-N</TargetNeuronID>
+  </DistalDendriticConnection>
 </Connections>

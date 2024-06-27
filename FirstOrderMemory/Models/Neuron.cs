@@ -24,10 +24,8 @@ namespace FirstOrderMemory.Models
         private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
-        private const int AXONAL_CONNECTION = 1;
-        private const uint PRUNE_THRESHOLD = 25;
-        private const uint DISTALNEURONPLASTICITY = 5;
-        private const uint PRUNESTRENGTH = 1;
+        private const int AXONAL_CONNECTION = 1;        
+        private const uint DISTALNEURONPLASTICITY = 5;        
 
         #endregion
 
@@ -293,10 +291,10 @@ namespace FirstOrderMemory.Models
 
                 //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
-                if(ProximoDistalDendriticList.Count > 100)
+                if(ProximoDistalDendriticList.Count > 400)
                 {
-                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 100 Distal Dendritic Connections " + BlockID);
-
+                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 400 Distal Dendritic Connections " + BlockID);
+                    Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
                     Thread.Sleep(1000);
                 }
                 
@@ -334,6 +332,7 @@ namespace FirstOrderMemory.Models
                 return true;
             }
         }
+
         public int CompareTo(Neuron? other)
         {
             return this.Voltage > other.Voltage ? 10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? -1 : -1;
@@ -351,47 +350,15 @@ namespace FirstOrderMemory.Models
             CurrentState = NeuronState.RESTING;
         }
 
-        internal void Prune()
+        internal void PruneDendrite()
         {
 
-            if(NeuronID.ToString().Equals("3-1-1-N"))
-            {
-                int bp = 1;
-            }
+            
+        }
 
-            if (ProximoDistalDendriticList == null || ProximoDistalDendriticList.Count == 0)
-            { return; }
+        internal void PruneAxon()
+        {
 
-            List<string> removeList = null;
-
-            var distalDendriticList = ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.GetStrength() <= PRUNESTRENGTH && x.PredictiveHitCount != 5);
-
-            if (distalDendriticList.Count() != 0)
-            {
-                foreach (var item in ProximoDistalDendriticList)
-                {
-
-                    if (item.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ( (BlockBehaviourManager.CycleNum - Math.Max(item.Value.lastFiredCycle, item.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
-                    {
-                        if (removeList == null)
-                        {
-                            removeList = new List<string>();
-                        }
-
-                        removeList.Add(item.Key);
-                    }
-                }
-
-                if (removeList?.Count > 0)
-                {
-                    for (int i = 0; i < removeList.Count; i++)
-                    {
-                        ProximoDistalDendriticList.Remove(removeList[i]);
-
-                        BlockBehaviourManager.totalDendronalConnections--;
-                    }
-                }
-            }
         }
 
         internal bool DidItContribute(Neuron temporalContributor)

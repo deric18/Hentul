@@ -109,11 +109,6 @@
                     neuron.CleanUpContributersList();
                 }
             }
-        }
-
-        internal void PruneCycleRefresh()
-        {
-            this.Neurons.ForEach(neuron => neuron.Prune());
-        }
+        }        
     }
 }

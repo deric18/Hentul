@@ -62,14 +62,14 @@ namespace FirstOrderMemoryUnitTest
 
             Neuron newron = clonedBBM.Columns[2, 4].Neurons[5];
 
-            Neuron temporalNeuron1 = clonedBBM.ConvertStringPosToNeuron(newron.GetMyTemporalPartner());
+            Neuron temporalNeuron1 = clonedBBM.GetNeuronFromString(newron.GetMyTemporalPartner());
             Neuron temporalNeuron2 = clonedBBM.Columns[5, 3].Neurons[9];
 
             Assert.AreEqual("0-4-5-T", temporalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("0-3-9-T", clonedBBM.ConvertStringPosToNeuron(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
+            Assert.AreEqual("0-3-9-T", clonedBBM.GetNeuronFromString(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
 
-            Neuron apicalNeuron1 = clonedBBM.ConvertStringPosToNeuron(clonedBBM.Columns[2, 4].Neurons[5].GetMyApicalPartner());
-            Neuron apicalNeuron2 = clonedBBM.ConvertStringPosToNeuron(clonedBBM.Columns[5, 3].Neurons[9].GetMyApicalPartner());
+            Neuron apicalNeuron1 = clonedBBM.GetNeuronFromString(clonedBBM.Columns[2, 4].Neurons[5].GetMyApicalPartner());
+            Neuron apicalNeuron2 = clonedBBM.GetNeuronFromString(clonedBBM.Columns[5, 3].Neurons[9].GetMyApicalPartner());
 
             Assert.AreEqual("2-4-0-A", apicalNeuron1.NeuronID.ToString());
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
@@ -165,7 +165,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(sdr1);
 
-            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeuronsOrIncrementStrength(bbManager.ConvertStringPosToNeuron(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
+            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeuronsOrIncrementStrength(bbManager.GetNeuronFromString(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
 
             Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
 
@@ -303,12 +303,12 @@ namespace FirstOrderMemoryUnitTest
         {
             Neuron neuron = bbManager.Columns[2, 4].Neurons[5];
 
-            Neuron temporalNeuron1 = bbManager.ConvertStringPosToNeuron(neuron.GetMyTemporalPartner());
+            Neuron temporalNeuron1 = bbManager.GetNeuronFromString(neuron.GetMyTemporalPartner());
             Neuron temporalNeuron2 = bbManager.Columns[5, 3].Neurons[9];
 
 
             Assert.AreEqual("0-4-5-T", temporalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("0-3-9-T", bbManager.ConvertStringPosToNeuron(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
+            Assert.AreEqual("0-3-9-T", bbManager.GetNeuronFromString(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
 
         }
 
@@ -451,7 +451,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(temporalInputPattern, true);
 
-            var temporalNeuron = bbManager.ConvertStringPosToNeuron(normalNeuron.GetMyTemporalPartner());
+            var temporalNeuron = bbManager.GetNeuronFromString(normalNeuron.GetMyTemporalPartner());
 
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
 
@@ -483,13 +483,13 @@ namespace FirstOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(position.ToString());
+            Neuron normalNeuron = bbManager.GetNeuronFromString(position.ToString());
 
             Position_SOM overlapPos = TestUtils.GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
             var overlapNeuron = bbManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
-            var temporalNeuron = bbManager.ConvertStringPosToNeuron(overlapNeuron.GetMyTemporalPartner());
+            var temporalNeuron = bbManager.GetNeuronFromString(overlapNeuron.GetMyTemporalPartner());
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
@@ -515,8 +515,8 @@ namespace FirstOrderMemoryUnitTest
         public void TestApicalLineUT()
         {
 
-            Neuron apicalNeuron1 = bbManager.ConvertStringPosToNeuron(bbManager.Columns[2, 4].Neurons[5].GetMyApicalPartner());
-            Neuron apicalNeuron2 = bbManager.ConvertStringPosToNeuron(bbManager.Columns[5, 3].Neurons[9].GetMyApicalPartner());
+            Neuron apicalNeuron1 = bbManager.GetNeuronFromString(bbManager.Columns[2, 4].Neurons[5].GetMyApicalPartner());
+            Neuron apicalNeuron2 = bbManager.GetNeuronFromString(bbManager.Columns[5, 3].Neurons[9].GetMyApicalPartner());
 
 
 
@@ -557,9 +557,9 @@ namespace FirstOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = bbManager.ConvertStringPosToNeuron(apicalPosList[0].ToString());
+            Neuron normalNeuron = bbManager.GetNeuronFromString(apicalPosList[0].ToString());
 
-            var apicalNeuron = bbManager.ConvertStringPosToNeuron(normalNeuron.GetMyApicalPartner());
+            var apicalNeuron = bbManager.GetNeuronFromString(normalNeuron.GetMyApicalPartner());
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
@@ -807,7 +807,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.AreEqual(bbm2.Columns[0, 1].Neurons.Count, bbManager.Columns[0, 1].Neurons.Count);
 
-            Assert.IsTrue(bbm2.ConvertStringPosToNeuron(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.ConvertStringPosToNeuron(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
+            Assert.IsTrue(bbm2.GetNeuronFromString(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.GetNeuronFromString(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
 
             Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[5].flag);
         }
