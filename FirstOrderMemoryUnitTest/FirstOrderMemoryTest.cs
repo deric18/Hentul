@@ -802,7 +802,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.BackUp("1.xml");
 
-            bbManager.RetoreFromBackUp("1.xml");
+            bbManager.RestoreFromBackUp("1.xml");
 
             Assert.DoesNotThrow(() => new Exception());
         }

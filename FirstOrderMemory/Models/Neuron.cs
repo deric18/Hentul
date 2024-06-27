@@ -93,7 +93,6 @@ namespace FirstOrderMemory.Models
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }
 
-
         public string GetMyTemporalPartner()
         {
             string pos = ProximoDistalDendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.AxonalNeuronId;
@@ -118,7 +117,6 @@ namespace FirstOrderMemory.Models
             throw new InvalidOperationException();
         }
         
-
         public void InitProximalConnectionForDendriticConnection(int i, int j, int k)
         {                        
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
@@ -189,7 +187,6 @@ namespace FirstOrderMemory.Models
         {
             try
             {
-
                 if (key == "0-0-1")
                 {
                     int bp2 = 1;
@@ -202,17 +199,13 @@ namespace FirstOrderMemory.Models
 
                 if (ProximoDistalDendriticList.TryGetValue(key, out var synapse))
                 {
-                    Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
-                    
-                    //Do Nothing;
-
+                    Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);                                        
                     return false;
                 }
                 else
                 {
 
-                    ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));
-                    
+                    ProximoDistalDendriticList.Add(key, new Synapse(key, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.PROXIMALDENDRITICNEURON, false));                    
                     return true;
                 }
             }
@@ -220,9 +213,7 @@ namespace FirstOrderMemory.Models
             {
                 throw;
                 int bp = 1;
-            }
-
-            return true;
+            }            
         }
 
         //Gets Called for Dendritic End of the Neuron
@@ -348,17 +339,6 @@ namespace FirstOrderMemory.Models
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
-        }
-
-        internal void PruneDendrite()
-        {
-
-            
-        }
-
-        internal void PruneAxon()
-        {
-
         }
 
         internal bool DidItContribute(Neuron temporalContributor)

@@ -171,7 +171,7 @@
 
             num_continuous_burst = 0;
 
-            LogMode = false;
+            LogMode = true;
 
             for (int i = 0; i < numColumns; i++)
             {
@@ -361,12 +361,10 @@
 
             xmlDocument.LoadXml("<Connections></Connections>");
 
-            if (!devbox)
-            {
-                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp";
+            backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
 
-                filename = "\\DendriticSchema.xml";
-            }
+            filename = filename +  "-DendriticSchema.xml";
+            
 
             foreach (var column in Columns)
             {
@@ -404,9 +402,9 @@
             xmlDocument?.Save(backupDirectory + filename);
         }
 
-        public void RetoreFromBackUp(string filename)
+        public void RestoreFromBackUp(string filename)
         {
-
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -506,6 +504,7 @@
                                 throw new InvalidOperationException("Fire :: This should not happen ! Bug in PickAwinner or Bursting Logic!!!");
 
                             }
+
                             predictedNeuronPositions = null;
                         }
 
@@ -826,8 +825,7 @@
                     }
                 }
             }
-        }
-                 
+        }                 
 
         private void PrepNetworkForNextCycle()
         {
