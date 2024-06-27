@@ -265,8 +265,7 @@ namespace FirstOrderMemoryUnitTest
         {
             //Case 1: All Predicted Neurons Fired without anyone Bursting.
             //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
-
-
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -274,12 +273,14 @@ namespace FirstOrderMemoryUnitTest
         {
             //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
             //All Burswting neurons should create one new dendronal connection with previously fired neurons and the correctly fired neuron should be strengthed decently.
+            Assert.Fail();
         }
 
         [TestMethod]
         public void TestWire3UT() 
         {
             // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -287,6 +288,7 @@ namespace FirstOrderMemoryUnitTest
         {
             //Case 4 : All columns Bursted:
             //Every Neuron that fired in the previous Cycle should now have one new connection with every burst cell
+            Assert.Fail();
 
         }
 
@@ -295,8 +297,17 @@ namespace FirstOrderMemoryUnitTest
         {
             //Case 5 : Some Columns Bursted and Some of the Columns Fired.
             // Every cell bursted should have new dendronal connection with neurons firing last cycle and same with the ones that fired , if it doesnt already have one.
+            Assert.Fail();
+
         }
 
+        [TestMethod]
+        public void TestPrune()
+        {
+            //Create a dummy 2 sided connection , Covnert the synapse to an active syanopse , Update CycleNum , Prune the synapse and check if the new synapse is removed.
+
+            Assert.Fail();
+        }
 
         [TestMethod]
         public void TestTemporalLines()

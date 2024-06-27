@@ -800,7 +800,6 @@
 
                                     DremoveList.Add(kvp.Key);
 
-
                                     //Remove Corresponding Connected Axonal Neuron
                                     var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
                                     if (axonalNeuron.AxonalList.TryGetValue(neuron.NeuronID.ToString(), out var connection))
@@ -827,7 +826,6 @@
                     }
                 }
             }
-
         }
                  
 
