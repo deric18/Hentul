@@ -149,6 +149,33 @@
             LoadImage();
         }
 
+        public void Init()
+        {
+            Stopwatch stopWatch = new Stopwatch();
+
+            Console.WriteLine("Starting Initialization  of FOM objects : \n");
+
+            stopWatch.Start();
+
+            for (int i = 0; i < NumBBMNeeded; i++)
+            {
+                fomBBM[i].Init(0, 0, 1, 1, 10);
+            }
+
+            //somBlock.Init();
+
+            stopWatch.Stop();
+
+            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");
+
+            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
+
+            Console.WriteLine("Range" + NumPixelsToProcessPerBlock.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
+            Console.WriteLine("Total First Order BBMs Created :" + NumBBMNeeded.ToString() + "\n");
+
+        }
+
         private List<string> AddAllTheFruits()
         {
             var dict = new List<string>();

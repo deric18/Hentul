@@ -67,6 +67,8 @@ namespace Hentul.UT
 
             sg = new ScreenGrabber(count);
 
+            sg.Init();
+
             for (int i = 0; i < count; i++)
             {
 
