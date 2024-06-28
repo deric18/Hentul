@@ -1,4 +1,6 @@
-﻿namespace FirstOrderMemory.Models
+﻿using Common;
+
+namespace FirstOrderMemory.Models
 {
     public class Column
     {
@@ -7,13 +9,13 @@
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons, Position_SOM BlockId) 
+        public Column(int x, int y, int numberOfNeurons, Position BlockId, Position UnitId, int BBMID) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BlockId));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BlockId, UnitId, BBMID));
             }            
             Init = 0;
         }

@@ -119,7 +119,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z, i);
+                fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z);
             }
 
             #region Unused Variables
@@ -138,9 +138,7 @@
             //lowerBound = 51;
             //RounRobinIteration = 0;
             #endregion
-
-            if (ShouldInit)
-                Init();
+            
             if (isMock)
                 ImageIndex = mockImageIndex;
             else
@@ -165,33 +163,6 @@
             dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\white.png");
 
             return dict;
-        }
-
-        private void Init()
-        {
-            Stopwatch stopWatch = new Stopwatch();
-
-            Console.WriteLine("Starting Initialization  of FOM objects : \n");
-
-            stopWatch.Start();
-
-            for (int i = 0; i < NumBBMNeeded; i++)
-            {
-                fomBBM[i].Init(i);
-            }
-
-            //somBlock.Init();
-
-            stopWatch.Stop();
-
-            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");
-
-            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
-
-            Console.WriteLine("Range" + NumPixelsToProcessPerBlock.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
-            Console.WriteLine("Total First Order BBMs Created :" + NumBBMNeeded.ToString() + "\n");
-
         }
 
         public bool SwitchImage()
@@ -246,9 +217,7 @@
                     for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
                     {
                         for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                        {                            
-                            List<Position_SOM> bbmPositions = new List<Position_SOM>();
-
+                        {                                                       
                             BoolEncoder boolEncoder = new BoolEncoder(100, 20);
 
                             for (int j = 0; j < num_pixels_per_bbm_y; j++)
@@ -279,6 +248,11 @@
                                 {
                                     if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
                                     {
+                                        if (fomBBM[bbmId].TemporalLineArray.Length == 0)
+                                        {
+                                            fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                        }
+
                                         if (boolEncoder.HasValues())
                                             fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
 
@@ -289,7 +263,7 @@
                         }
                     }
                 }
-            }            
+            }
 
             PrintBlockVital();
 
@@ -342,11 +316,6 @@
                 throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
 
             return nextMinNumberOfPixels;
-        }
-
-        public void CleanPixelData()
-        {
-            BucketToData.Clear();
         }
 
         public void PrintBlockVital()

@@ -15,7 +15,9 @@
 
         public int Z { get; private set; }
 
-        public Position_SOM BlockID;
+        public Position BlockId { get; private set; }
+        public Position UnitId { get; private set; }
+        public int BBMID { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
 
@@ -105,14 +107,12 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int Z = 10, int BlockId = 0, int UnitId = 0, int BbmId = 0)
+        public BlockBehaviourManager(int numColumns = 10, int Z = 10)
         {
             if (numColumns != Z)
             {
                 throw new InvalidOperationException("CONSTRUCTOR :: numColumns should be equal to Z");
-            }
-
-            this.BlockID = new Position_SOM(BlockId, UnitId, BbmId);
+            }            
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
 
@@ -172,22 +172,28 @@
             num_continuous_burst = 0;
 
             LogMode = true;
-
-            for (int i = 0; i < numColumns; i++)
-            {
-                for (int j = 0; j < numColumns; j++)
-                {
-                    Columns[i, j] = new Column(i, j, Z, BlockID);
-                }
-            }
+           
         }
 
-        public void Init(int x = -1, int y = -1)
+        public void Init(int blockid_x, int blockId_Y, int UnitId_x, int UnitID_y, int bbmID)
         {
+            BlockId = new Position(blockid_x, blockId_Y);
 
-            ReadDendriticSchema(x, y);
+            UnitId = new Position(UnitId_x, UnitID_y);
 
-            ReadAxonalSchema(x, y);
+            BBMID = bbmID;
+
+            for (int i = 0; i < NumColumns; i++)
+            {
+                for (int j = 0; j < NumColumns; j++)
+                {
+                    Columns[i, j] = new Column(i, j, Z, BlockId, UnitId, BBMID);
+                }
+            }
+
+            ReadDendriticSchema();
+
+            ReadAxonalSchema();
 
             GenerateTemporalLines();
 
@@ -260,9 +266,9 @@
         {
             BlockBehaviourManager blockBehaviourManager;
 
-            blockBehaviourManager = new BlockBehaviourManager(NumColumns, Z, x);
+            blockBehaviourManager = new BlockBehaviourManager(NumColumns, Z);
 
-            blockBehaviourManager.Init();
+            blockBehaviourManager.Init(blockBehaviourManager.BlockId.X, blockBehaviourManager.BlockId.Y, blockBehaviourManager.UnitId.X, blockBehaviourManager.UnitId.Y, blockBehaviourManager.BBMID);
 
             return blockBehaviourManager;
 
@@ -380,7 +386,7 @@
                             var distalNode = xmlDocument.CreateNode(XmlNodeType.Element, "DistalDendriticConnection", string.Empty);
 
                             var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
-                            blockIdElement.InnerText = BlockID.X.ToString() + BlockID.Y.ToString() + BlockID.Z.ToString();
+                            blockIdElement.InnerText = BlockId.X.ToString() + BlockId.Y.ToString();
 
                             var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
 
@@ -475,7 +481,7 @@
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 if(LogMode)
-                                    Console.WriteLine("INFO :: Block ID : " + BlockID + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    Console.WriteLine("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
 
@@ -490,7 +496,7 @@
                             else if (predictedNeuronPositions.Count == 1)
                             {
                                 if(LogMode)
-                                    Console.WriteLine("Block ID : " + BlockID + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                    Console.WriteLine("Block ID : " + PrintBlockDetailsSingleLine() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
 
@@ -568,7 +574,7 @@
                 if (BurstCache.Count == 0)
                     BurstCache.Add(CycleNum, incomingPattern.ActiveBits);
                 else
-                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + BlockID);                
+                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + PrintBlockDetailsSingleLine());                
             }            
 
             Fire();
@@ -597,7 +603,7 @@
             {
                 if (TemporalCycleCache.Count != 0)
                 {
-                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item! " + BlockID);
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item! " + PrintBlockDetailsSingleLine());
                 }
 
                 TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
@@ -607,7 +613,7 @@
             {
                 if (ApicalCycleCache.Count != 0)
                 {
-                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + BlockID);
+                    Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + PrintBlockDetailsSingleLine());
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
@@ -638,7 +644,7 @@
                     {
                         if (CycleNum - kvp.Key > 3)
                         {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + BlockID);
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
                         }
 
                         foreach (var pos in kvp.Value)
@@ -666,7 +672,7 @@
                 }
                 else if (TemporalCycleCache.Count > 1)
                 {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1" + BlockID);
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1" + PrintBlockDetailsSingleLine());
 
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
@@ -677,7 +683,7 @@
                     {
                         if (CycleNum - kvp.Key > 3)
                         {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + BlockID );
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine() );
                         }
 
                         foreach (var pos in kvp.Value)
@@ -694,7 +700,7 @@
                                     }
                                     else
                                     {
-                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + BlockID);
+                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
                                     }
                                 }
                             }
@@ -705,7 +711,7 @@
                 }
                 else if (ApicalCycleCache.Count > 1)
                 {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + BlockID);
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
 
@@ -720,7 +726,7 @@
                 {
                     if (CycleNum - kvp.Key > 3)
                     {
-                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + BlockID);
+                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
                     }
 
                     foreach (var pos in kvp.Value)
@@ -1220,11 +1226,16 @@
             }
         }
 
+        public string PrintBlockDetailsSingleLine()
+        {
+            return " " + BlockId.X + "-" + BlockId.Y + "/" + UnitId.X + "-" + UnitId.Y + "/" + BBMID.ToString();
+        }
+
         private void PrintBlockDetails()
         {
-            Console.WriteLine("Block ID : " + BlockID.X);
-            Console.WriteLine("Unit ID : " + BlockID.Y);
-            Console.WriteLine("BBM ID : " + BlockID.Z);
+            Console.Write("Block ID : X : " + BlockId.X.ToString() + " Y :" + BlockId.Y.ToString());
+            Console.WriteLine("Unit ID X: " + UnitId.X.ToString() + " Y :" + UnitId.Y.ToString() );
+            Console.WriteLine("BBM ID : " + BBMID);
         }
 
         public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
@@ -1267,13 +1278,13 @@
             }
             else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))  
             {
-                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + BlockID);     // No Same Column Connections 
+                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine());     // No Same Column Connections 
                     //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
             {
-                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + BlockID);
+                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
                 return false;
             }            
 
@@ -1453,7 +1464,7 @@
             // print warning when all the bits of the neuron fired. with more than 8% sparsity
             if (LogMode && ( TotalBurstFire > 0 || TotalPredictionFires > 0 ) && PerCycleFireSparsityPercentage > 0)
             {
-                Console.WriteLine(BlockID.ToString() + " Loses:" + TotalBurstFire.ToString() + " Wins:" + TotalPredictionFires.ToString() + "  Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
+                Console.WriteLine(PrintBlockDetailsSingleLine() + " Loses:" + TotalBurstFire.ToString() + " Wins:" + TotalPredictionFires.ToString() + "  Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
             }
         }
 
@@ -1467,7 +1478,7 @@
                 {
 
                     if (this.TemporalLineArray[i, j] == null)
-                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BlockID, NeuronType.TEMPORAL);
+                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BlockId, UnitId, BBMID, NeuronType.TEMPORAL);
 
                     for (int k = 0; k < NumColumns; k++)
                     {
@@ -1504,7 +1515,7 @@
             {
                 for (int j = 0; j < NumColumns; j++)
                 {
-                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BlockID, NeuronType.APICAL);
+                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BlockId, UnitId, BBMID, NeuronType.APICAL);
 
                     for (int k = 0; k < NumColumns; k++)
                     {
@@ -1605,7 +1616,7 @@
             this.totalAxonalConnections++;
         }
 
-        private void ReadDendriticSchema(int intX, int intY)
+        private void ReadDendriticSchema()
         {
 
             #region REAL Code
@@ -1727,7 +1738,7 @@
             #endregion
         }
 
-        public void ReadAxonalSchema(int intX, int intY)
+        public void ReadAxonalSchema()
         {
             #region Cache : Cache Code
             //if (AxonalCache.Count != 0)

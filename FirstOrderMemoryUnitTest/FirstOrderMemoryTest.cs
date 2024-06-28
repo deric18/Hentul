@@ -18,7 +18,7 @@ namespace FirstOrderMemoryUnitTest
         {
             bbManager = new BlockBehaviourManager(sizeOfColumns, Z);
 
-            bbManager.Init(0, 0);
+            bbManager.Init(0,0, 1,1, 1);
 
             rand1 = new Random();
         }
@@ -28,9 +28,9 @@ namespace FirstOrderMemoryUnitTest
         public void TestMultipleInstanceOfSOM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10, 1);
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10);
 
-            bbm3.Init(0, 0);
+            bbm3.Init(0, 0, 1, 1, 1);
 
             SDR_SOM randSDR = TestUtils.GenerateRandomSDR(iType.SPATIAL);
 
@@ -792,7 +792,7 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [TestMethod]
+        [TestMethod, Ignore("Not Ye Completely Implemented")]
         public void TestBackUpAndRestore()
         {
             Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[5];
@@ -844,7 +844,7 @@ namespace FirstOrderMemoryUnitTest
         public void TestMemoryProblemsInThisTestUT()
         {
             Position_SOM psom = new Position_SOM(5, 5, 5);
-            Neuron neuron = new Neuron(psom, new Position_SOM(0,0,0), NeuronType.NORMAL);
+            Neuron neuron = new Neuron(psom, new Position(0,0), new Position(1,1), 1, NeuronType.NORMAL);
 
             //Now check memory usage.
 

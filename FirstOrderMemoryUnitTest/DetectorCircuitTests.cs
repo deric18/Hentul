@@ -16,7 +16,7 @@
         {
             bbManager = new BlockBehaviourManager(NumColumns, Z);
 
-            bbManager.Init();
+            bbManager.Init(0,1,0,1,11);
 
         }
 

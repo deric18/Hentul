@@ -33,9 +33,9 @@
 
             fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range];
 
-            fomBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1, 0);
-            fomBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2, 0);
-            fomBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3, 0);
+            fomBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1);
+            fomBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2);
+            fomBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3);
 
             Init();
         }
@@ -69,9 +69,9 @@
 
             stopWatch.Start();
 
-            fomBBM[0].Init(0, 0);
-            fomBBM[1].Init(1, 0);
-            fomBBM[2].Init(2, 0);
+            fomBBM[0].Init(0, 0, 1, 1, 11);
+            fomBBM[1].Init(1, 0, 1, 1, 11);
+            fomBBM[2].Init(2, 0, 1, 1, 11);
 
             stopWatch.Stop();
 

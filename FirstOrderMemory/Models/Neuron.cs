@@ -31,7 +31,11 @@ namespace FirstOrderMemory.Models
 
         private ulong redundantCounter = 0;
 
-        public Position_SOM BlockID { get; private set; }
+        public Position BlockID { get; private set; }
+
+        public Position UnitID { get; private set; }
+
+        public Position BBMId { get; private set; }
 
         public Position_SOM NeuronID { get; private set; }
 
@@ -51,10 +55,12 @@ namespace FirstOrderMemory.Models
         
         public int Voltage { get; private set; }
 
-        public Neuron(Position_SOM neuronId, Position_SOM blockid, NeuronType nType = NeuronType.NORMAL)
+        public Neuron(Position_SOM neuronId, Position blockid, Position unitId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
             NeuronID = neuronId;
-            BlockID = new Position_SOM(blockid.X, blockid.Y, blockid.Z);
+            BlockID = blockid;
+            UnitID = unitId;
+            BBMId = BBMId;
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();            
             ProximoDistalDendriticList = new Dictionary<string, Synapse>();
