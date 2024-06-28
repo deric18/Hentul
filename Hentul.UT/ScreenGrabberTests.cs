@@ -1,10 +1,6 @@
 namespace Hentul.UT
-{
-    using Common;
-    using FirstOrderMemory.Models.Encoders;
-    using Hentul;
-    using System.Drawing;
-    using System.Reflection.Metadata.Ecma335;
+{    
+    using Hentul;    
     using System.Text;
 
     public class ScreenGrabberTest
@@ -12,6 +8,7 @@ namespace Hentul.UT
         ScreenGrabber sg;
         Random rand;
         int count = 25;
+        bool[,] booleans;
 
         bool[,] image = new bool[600, 600];
 
@@ -28,9 +25,30 @@ namespace Hentul.UT
             //Create Spatial & Temporal SDRs
             //Fire
 
-            sg = new ScreenGrabber(25, true, false, 7);
+            sg = new ScreenGrabber(25);
 
-            sg.GrabNProcess();
+            int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
+            int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
+
+            booleans = new bool[bound_x, bound_y];
+
+            sg.GrabNProcess(ref booleans);
+
+            //Not sure what to do here : How to verify id the all the block are being used
+
+        }
+
+        [Test]
+        public void TestAllBlocksAreBeingUsedinScreenGrabber()
+        {
+            sg = new ScreenGrabber(25);
+
+            int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
+            int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
+
+            booleans = new bool[bound_x, bound_y];
+
+            sg.GrabNProcess(ref booleans);
 
 
         }
@@ -201,14 +219,12 @@ namespace Hentul.UT
         {
             ScreenGrabber sg = new ScreenGrabber(count, true, false, 7);
 
-
-
             int TotalNumberOfPixelsToProcess_X = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
 
             int TotalPixelsCoveredPerIteration = sg.BlockOffset * sg.BlockOffset; //2500
 
-            bool[,] booleans = new bool[TotalNumberOfPixelsToProcess_X, TotalNumberOfPixelsToProcess_Y];
+            booleans = new bool[TotalNumberOfPixelsToProcess_X, TotalNumberOfPixelsToProcess_Y];
 
             int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / sg.BlockOffset);
             int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / sg.BlockOffset);
@@ -219,8 +235,7 @@ namespace Hentul.UT
             int num_bbm_per_unit_y = 2;
             int num_pixels_per_bbm_x = 10;
             int num_pixels_per_bbm_y = 10;
-
-            List<int> bbmIDRecords = new List<int>();
+            
 
             for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
             {
@@ -229,9 +244,9 @@ namespace Hentul.UT
                     int bbmId = 0;
 
                     for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-                    {                        
+                    {
                         for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                        {                            
+                        {
                             for (int j = 0; j < num_pixels_per_bbm_y; j++)
                             {
                                 for (int i = 0; i < num_pixels_per_bbm_x; i++)
@@ -244,21 +259,21 @@ namespace Hentul.UT
                                     //    int breakpoint = 1;
                                     //}
 
-                                    booleans[x, y] = true;                                    
+                                    booleans[x, y] = true;
                                 }
 
                                 if (j % 2 == 0)
                                 {
                                     bbmId++;
                                 }
-                            }                            
-                        }                        
+                            }
+                        }
                     }
 
                     Assert.AreEqual(125, bbmId);
                 }
             }
-            
+
 
             for (int i = 0; i < TotalNumberOfPixelsToProcess_X; i++)
             {
@@ -274,9 +289,50 @@ namespace Hentul.UT
         }
 
         [Test]
+        public void TestForLogicEdgeCase2()
+        {
+            ScreenGrabber sg = new ScreenGrabber(count, true, false, 1);            
+
+            int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
+            int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
+
+            booleans = new bool[bound_x, bound_y];
+
+            sg.GrabNProcess(ref booleans);
+
+            for (int i = 0; i < bound_x; i++)
+            {
+                for (int j = 0; j < bound_y; j++)
+                {
+                    if(booleans[i, j] == false)
+                    {
+                        Console.WriteLine(" i : " + i.ToString() + " J: " +j.ToString());
+                        Assert.Fail();
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void TestFOMForImage2()
+        {
+            ScreenGrabber sg = new ScreenGrabber(count, false, true, 2);            
+
+            int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
+            int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
+
+            booleans = new bool[bound_x, bound_y];
+
+            sg.GrabNProcess(ref booleans);
+
+            Assert.Pass();
+            
+        }
+
+        [Test]
         public void TestImageSizeforAllLoadedImages()
         {
-            sg = new ScreenGrabber(count, true, false);
+            sg = new ScreenGrabber(count, true, false, 0);
 
             int image1height = sg.bmp.Size.Height;
             int image1Width = sg.bmp.Size.Width;
@@ -339,44 +395,49 @@ namespace Hentul.UT
         }
 
         [Test]
-        public void TestImagePixelCoverage()
+        public void TestImagePixelCoverageWithDebug()
         {
             string filepath = @"C:\Users\depint\source\repos\Hentul\Hentul.UT\TestDocs\errorsIndexes.txt";
 
             int doubleRange = 2 * count;
 
             //Load some dummy black and white image worth 600 * 600 pixels
-            sg = new ScreenGrabber(25, true, false, 7);
+            sg = new ScreenGrabber(25, true, false, rand.Next(0, 8));            
 
-            int expected = (600 * 600) / 2500;
+            int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
+            int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
 
-            int actual = 0;
-            int errorCount = 0;
+            booleans = new bool[bound_x, bound_y];
 
-            sg.GrabNProcess();
+            sg.GrabNProcess(ref booleans);
 
-            StringBuilder sb = new StringBuilder();
-
-            for (int i1 = 0; i1 < 600; i1++)
+            for (int i = 0; i < bound_x; i++)
             {
-                for (int k1 = 0; k1 < 600; k1++)
+                for (int j = 0; j < bound_y; j++)
                 {
-                    if (image[i1, k1] == false)
-                        sb.Append("(" + i1.ToString() + "," + k1.ToString() + "), ");
+                    Assert.IsTrue(booleans[i, j]);
                 }
-                sb.AppendLine("-");
             }
 
-            File.WriteAllText(filepath, sb.ToString());
+            if (false)      //Set to 'true' only for debugging.
+            {
+                StringBuilder sb = new StringBuilder();
 
-            //Assert.AreEqual(0, errorCount);
+                for (int i1 = 0; i1 < 600; i1++)
+                {
+                    for (int k1 = 0; k1 < 600; k1++)
+                    {
+                        if (image[i1, k1] == false)
+                            sb.Append("(" + i1.ToString() + "," + k1.ToString() + "), ");
+                    }
+                    sb.AppendLine("-");
+                }
 
-            Assert.AreEqual(expected, actual);
-
-            //Assert all values in the array are true.
+                File.WriteAllText(filepath, sb.ToString());
+            }
         }
 
-
+        #region Unused Test Cases
         /*
          * 
          * 
@@ -744,5 +805,6 @@ namespace Hentul.UT
             return errorCount;
         }
         */
+        #endregion
     }
 }

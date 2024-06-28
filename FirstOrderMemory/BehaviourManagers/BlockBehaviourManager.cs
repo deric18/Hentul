@@ -372,7 +372,7 @@
                 {
                     var distalList = neuron.ProximoDistalDendriticList.Where(conList => conList.Value.cType.Equals(ConnectionType.DISTALDENDRITICNEURON)).ToList();
 
-                    if (distalList.Count > 0)
+                    if (distalList.Count > 2)
                     {
                         foreach (var distalSynapse in distalList)
                         {
@@ -587,6 +587,12 @@
 
         private void ValidateInput(SDR_SOM incomingPattern)
         {
+            if (incomingPattern.ActiveBits.Count == 0)
+            {
+                Console.WriteLine("EXCEPTION :: Incoming Pattern cannot be empty");
+                throw new InvalidOperationException("Incoming Pattern cannot be empty");
+            }
+
             if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
             {
                 if (TemporalCycleCache.Count != 0)
@@ -607,18 +613,16 @@
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
             }
 
-            if (incomingPattern.ActiveBits.Count == 0)
-                return;
-
-            foreach( var pos in incomingPattern.ActiveBits)
+            foreach (var pos in incomingPattern.ActiveBits)
             {
-                if(pos.X > NumColumns || pos.Y > NumColumns || pos.Z > Z)
+                if (pos.X > NumColumns || pos.Y > NumColumns || pos.Z > Z)
                 {
                     Console.WriteLine("EXCEPTION :: Incoming pattern is not encoded in the correct format");
 
                     throw new InvalidDataException("Incoming SDR is not encoded correctly");
                 }
             }
+
         }
 
         private void PostCycleCleanup()

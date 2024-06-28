@@ -216,7 +216,7 @@
             }
         }
 
-        public void GrabNProcess()          //We process one image at once.
+        public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
         {
             //Todo : Pixel combination should not be serial , it shoudl be randomly distributed through out the unit
 
@@ -233,9 +233,7 @@
             int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
 
             int num_unit_per_block_x = 5;
-            int num_unit_per_block_y = 5;
-            int num_bbm_per_unit_x = 5;
-            int num_bbm_per_unit_y = 2;
+            int num_unit_per_block_y = 5;            
             int num_pixels_per_bbm_x = 10;
             int num_pixels_per_bbm_y = 10;
 
@@ -250,6 +248,7 @@
                         for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                         {                            
                             List<Position_SOM> bbmPositions = new List<Position_SOM>();
+
                             BoolEncoder boolEncoder = new BoolEncoder(100, 20);
 
                             for (int j = 0; j < num_pixels_per_bbm_y; j++)
@@ -266,22 +265,27 @@
                                         int bp = 1;
                                     }
 
-                                    if (CheckifPixelisBlack(pixel_x, pixel_y))
-                                    {
-                                        // Need to encode Position Coordinates
-                                        // i = 7 && j = 4
-                                        boolEncoder.SetEncoderValues((j % 2).ToString()  + "-" + i.ToString());
-                                    }                                    
+                                    if (IsMock && booleans != null)
+                                    {                                        
+                                        booleans[pixel_x, pixel_y] = true;
+                                    }
+                                    else if (CheckifPixelisBlack(pixel_x, pixel_y))
+                                    {                                                                                
+                                        boolEncoder.SetEncoderValues((j % 2).ToString() + "-" + i.ToString());
+                                    }                                                             
                                 }
 
-                                if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                if (IsMock == false)
                                 {
-                                    if (boolEncoder.HasValues())
-                                        fomBBM[bbmId].Fire(boolEncoder.Encode(iType.SPATIAL));
+                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                    {
+                                        if (boolEncoder.HasValues())
+                                            fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
 
-                                    boolEncoder.ClearEncoderValues();
+                                        boolEncoder.ClearEncoderValues();
+                                    }
                                 }
-                            }                            
+                            }                    
                         }
                     }
                 }

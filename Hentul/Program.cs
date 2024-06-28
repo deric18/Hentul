@@ -8,15 +8,15 @@ Console.WriteLine("System Initialized Finally! Press any Key to start Neural Eng
 
 int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 
-Tuple<int, int, int, int> tuple;
+bool[,] dummybooleans = null;
 
-//Console.ReadKey();
+Console.ReadKey();
 
 
 while (true)
 {
 
-    screenGrabber.GrabNProcess();                
+    screenGrabber.GrabNProcess(booleans: ref dummybooleans);                
                 
     Console.WriteLine("Switching to Next Image");
 
@@ -26,8 +26,8 @@ while (true)
     }
 
 
-    //Console.WriteLine("Press any key to load next image");
-    //Console.ReadKey();
+    Console.WriteLine("Press any key to load next image");
+    Console.ReadKey();
 
 
     screenGrabber.LoadImage();    
