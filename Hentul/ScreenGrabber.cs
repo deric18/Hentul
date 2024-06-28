@@ -275,7 +275,7 @@
                                 {
                                     if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
                                     {
-                                        if (fomBBM[bbmId].TemporalLineArray.Length == 0)
+                                        if (fomBBM[bbmId].TemporalLineArray[0,0] == null)
                                         {
                                             fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
                                         }
