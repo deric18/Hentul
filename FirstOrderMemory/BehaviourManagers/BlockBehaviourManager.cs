@@ -115,6 +115,8 @@
 
             totalDendronalConnections = 0;
 
+            X = x;
+
             Y = y;
 
             this.Z = Z;

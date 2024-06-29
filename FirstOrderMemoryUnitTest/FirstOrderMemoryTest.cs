@@ -9,14 +9,15 @@ namespace FirstOrderMemoryUnitTest
     public class FirstOrderMemoryTest
     {
         BlockBehaviourManager? bbManager;
-        const int sizeOfColumns = 10;
+        const int X = 10;
+        const int Y = 10;
         int Z = 10;
         Random rand1;
 
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(sizeOfColumns, Z);
+            bbManager = new BlockBehaviourManager(X, Y, Z);
 
             bbManager.Init(0,0, 1,1, 1);
 
@@ -659,7 +660,7 @@ namespace FirstOrderMemoryUnitTest
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
-            Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.NumColumns , predictedNeurons.Count);
+            Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.X , predictedNeurons.Count);
 
             bbManager.Fire(spatialSdr);
 
@@ -694,7 +695,7 @@ namespace FirstOrderMemoryUnitTest
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
-            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.NumColumns, predictedNeurons.Count);
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Y, predictedNeurons.Count);
 
             bbManager.Fire(spatialSdr);
 
@@ -731,13 +732,13 @@ namespace FirstOrderMemoryUnitTest
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
-            Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.NumColumns, predictedNeurons.Count);
+            Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.X, predictedNeurons.Count);
 
             bbManager.Fire(apicalSdr);
 
             predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
-            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.dNumColumns, predictedNeurons.Count);
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Y, predictedNeurons.Count);
 
             bbManager.Fire(spatialSdr);
 
@@ -792,7 +793,7 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [TestMethod, Ignore("Not Ye Completely Implemented")]
+        [TestMethod, Ignore("Not Yet Completely Implemented")]
         public void TestBackUpAndRestore()
         {
             Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[5];
