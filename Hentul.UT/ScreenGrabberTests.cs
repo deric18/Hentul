@@ -41,7 +41,7 @@ namespace Hentul.UT
         [Test]
         public void TestAllBlocksAreBeingUsedinScreenGrabber()
         {
-            sg = new ScreenGrabber(25);
+            sg = new ScreenGrabber(25, true, false, 2);
 
             int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
             int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
@@ -50,6 +50,10 @@ namespace Hentul.UT
 
             sg.GrabNProcess(ref booleans);
 
+            for (int i = 0; i < sg.fomBBM.Length; i++)
+            {
+                Console.WriteLine(sg.MockBlockNumFires[i]); 
+            }
 
         }
 

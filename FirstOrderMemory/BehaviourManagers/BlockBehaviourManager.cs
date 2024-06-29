@@ -7,14 +7,13 @@
     public class BlockBehaviourManager
     {
         #region VARIABLES
-        public static ulong CycleNum { get; private set; }
+        public static ulong CycleNum { get; private set; }        
 
-        public const bool devbox = false;
+        public int X { get; private set; }
 
-        public int NumColumns { get; private set; }
+        public int Y { get; private set; }        
 
         public int Z { get; private set; }
-
         public Position BlockId { get; private set; }
         public Position UnitId { get; private set; }
         public int BBMID { get; private set; }
@@ -79,7 +78,7 @@
         public bool IsCurrentTemporal { get; private set; }
         public bool IsCurrentApical { get; private set; }
 
-        public bool LogMode { get; private set; }
+        public LogMode Mode { get; private set; }
 
         #endregion
 
@@ -107,12 +106,8 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int numColumns = 10, int Z = 10)
-        {
-            if (numColumns != Z)
-            {
-                throw new InvalidOperationException("CONSTRUCTOR :: numColumns should be equal to Z");
-            }            
+        public BlockBehaviourManager(int x, int y = 10, int Z = 10)
+        {                        
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
 
@@ -120,7 +115,7 @@
 
             totalDendronalConnections = 0;
 
-            this.NumColumns = numColumns;
+            Y = y;
 
             this.Z = Z;
 
@@ -145,11 +140,11 @@
 
             apicalContributors = new List<Neuron>();
 
-            TemporalLineArray = new Neuron[numColumns, numColumns];
+            TemporalLineArray = new Neuron[y, y];
 
-            ApicalLineArray = new Neuron[numColumns, numColumns];
+            ApicalLineArray = new Neuron[y, y];
 
-            Columns = new Column[numColumns, numColumns];
+            Columns = new Column[y, y];
 
             ColumnsThatBurst = new List<Position_SOM>();
 
@@ -171,7 +166,7 @@
 
             num_continuous_burst = 0;
 
-            LogMode = true;
+            Mode = LogMode.BurstOnly;
            
         }
 
@@ -183,9 +178,9 @@
 
             BBMID = bbmID;
 
-            for (int i = 0; i < NumColumns; i++)
+            for (int i = 0; i < X; i++)
             {
-                for (int j = 0; j < NumColumns; j++)
+                for (int j = 0; j < Y; j++)
                 {
                     Columns[i, j] = new Column(i, j, Z, BlockId, UnitId, BBMID);
                 }
@@ -266,7 +261,7 @@
         {
             BlockBehaviourManager blockBehaviourManager;
 
-            blockBehaviourManager = new BlockBehaviourManager(NumColumns, Z);
+            blockBehaviourManager = new BlockBehaviourManager(X, Y, Z);
 
             blockBehaviourManager.Init(blockBehaviourManager.BlockId.X, blockBehaviourManager.BlockId.Y, blockBehaviourManager.UnitId.X, blockBehaviourManager.UnitId.Y, blockBehaviourManager.BBMID);
 
@@ -276,9 +271,9 @@
 
             try
             {
-                for (int i = 0; i < blockBehaviourManager.NumColumns; i++)
+                for (int i = 0; i < blockBehaviourManager.Y; i++)
                 {
-                    for (int j = 0; j < blockBehaviourManager.NumColumns; j++)
+                    for (int j = 0; j < blockBehaviourManager.Y; j++)
                     {
                         for (int k = 0; k < blockBehaviourManager.Columns[0, 0].Neurons.Count; k++)
                         {
@@ -428,8 +423,8 @@
 
             if (CurrentCycleState.Equals(BlockCycle.CLEANUP))
             {
-                for (int i = 0; i < NumColumns; i++)
-                    for (int j = 0; j < NumColumns; j++)
+                for (int i = 0; i < X; i++)
+                    for (int j = 0; j < Y; j++)
                     {
                         if (Columns[i, j].PreCleanupCheck())
                         {
@@ -480,7 +475,7 @@
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                if(LogMode)
+                                if(Mode == LogMode.BurstOnly)
                                     Console.WriteLine("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
@@ -495,7 +490,7 @@
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
-                                if(LogMode)
+                                if(Mode == LogMode.All)
                                     Console.WriteLine("Block ID : " + PrintBlockDetailsSingleLine() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
@@ -621,7 +616,7 @@
 
             foreach (var pos in incomingPattern.ActiveBits)
             {
-                if (pos.X > NumColumns || pos.Y > NumColumns || pos.Z > Z)
+                if (pos.X > X || pos.Y > Y || pos.Z > Z)
                 {
                     Console.WriteLine("EXCEPTION :: Incoming pattern is not encoded in the correct format");
 
@@ -731,7 +726,7 @@
 
                     foreach (var pos in kvp.Value)
                     {
-                        for (int i = 0; i < NumColumns; i++)
+                        for (int i = 0; i < Z; i++)
                         {
                             var neuronToCleanUp = Columns[pos.X, pos.Y].Neurons[i];
 
@@ -774,9 +769,9 @@
         private void Prune()
         {
 
-            for (int i = 0; i < NumColumns; i++)
+            for (int i = 0; i < X; i++)
             {
-                for (int j = 0; j < NumColumns; j++)
+                for (int j = 0; j < Y; j++)
                 {
                     foreach (var neuron in Columns[i, j].Neurons)
                     {
@@ -839,7 +834,7 @@
 
         private void PrepNetworkForNextCycle()
         {
-            PerCycleFireSparsityPercentage = ( NeuronsFiringThisCycle.Count * 100 / (NumColumns * NumColumns * Z) );
+            PerCycleFireSparsityPercentage = ( NeuronsFiringThisCycle.Count * 100 / (X * Y * Z) );
 
             NeuronsFiringLastCycle.Clear();
 
@@ -971,12 +966,8 @@
                         {
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
-                                if (CheckifBothNeuronsAreSame(dendriticNeuron, axonalNeuron) == false)
-                                {
-
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false)                                
                                     ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-
-                                }
                             }
                         }
                     }
@@ -1016,7 +1007,7 @@
                         {
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
-                                if (CheckifBothNeuronsAreSame(axonalNeuron, dendriticNeuron) == false)
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
                                     ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
@@ -1027,7 +1018,7 @@
                     {
                         foreach (var dendronalNeuron in NeuronsFiringThisCycle)
                         {
-                            if (CheckifBothNeuronsAreSame(axonalneuron, dendronalNeuron) == false)
+                            if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
                                 ConnectTwoNeuronsOrIncrementStrength(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
                         }
                     }
@@ -1049,7 +1040,8 @@
                         {
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
-                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }
@@ -1073,7 +1065,8 @@
                     //Throw if any of the neurons that fired last cycle even though connected did not deploarize
                     if(CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
                     {
-                        Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together");                        
+                        Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
+                        //Thread.Sleep(10000);
                     }
 
                     //Boost All the Bursting Neurons
@@ -1083,7 +1076,8 @@
                         {
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
-                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }
@@ -1098,7 +1092,8 @@
                         {
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
-                                ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }                    
@@ -1278,7 +1273,7 @@
             }
             else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))  
             {
-                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine());     // No Same Column Connections 
+                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() +" Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
                     //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
@@ -1311,8 +1306,8 @@
             return false;
         }
 
-        public bool CheckifBothNeuronsAreSame(Neuron neuron1, Neuron neuron2) =>
-            neuron1.NeuronID.X == neuron2.NeuronID.X && neuron1.NeuronID.Y == neuron2.NeuronID.Y && neuron1.NeuronID.Z == neuron2.NeuronID.Z;
+        public bool CheckifBothNeuronsAreSameOrintheSameColumn(Neuron neuron1, Neuron neuron2) =>
+            neuron1.NeuronID.X == neuron2.NeuronID.X && neuron1.NeuronID.Y == neuron2.NeuronID.Y;
 
         public Neuron GetNeuronFromPosition(Position_SOM pos)
             => Columns[pos.X, pos.Y].Neurons[pos.Z];
@@ -1378,7 +1373,7 @@
 
             ActiveBits.Sort();
 
-            return new SDR_SOM(NumColumns, NumColumns, ActiveBits, iType.SPATIAL);
+            return new SDR_SOM(X, Y, ActiveBits, iType.SPATIAL);
         }
 
         public SDR_SOM GetAllFiringNeuronsThisCycle()
@@ -1387,7 +1382,7 @@
 
             NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
 
-            return new SDR_SOM(NumColumns, NumColumns, activeBits, iType.SPATIAL);
+            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }
 
         #endregion
@@ -1462,7 +1457,7 @@
         {
             // Print sparsity of the block.
             // print warning when all the bits of the neuron fired. with more than 8% sparsity
-            if (LogMode && ( TotalBurstFire > 0 || TotalPredictionFires > 0 ) && PerCycleFireSparsityPercentage > 0)
+            if (Mode != LogMode.None && ( TotalBurstFire > 0 || TotalPredictionFires > 0 ) && PerCycleFireSparsityPercentage > 0)
             {
                 Console.WriteLine(PrintBlockDetailsSingleLine() + " Loses:" + TotalBurstFire.ToString() + " Wins:" + TotalPredictionFires.ToString() + "  Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
             }
@@ -1472,15 +1467,15 @@
         {
             // T : (x,y, z) => (0,y,x)
 
-            for (int i = 0; i < NumColumns; i++)
+            for (int i = 0; i < Y; i++)
             {
-                for (int j = 0; j < NumColumns; j++)
+                for (int j = 0; j < Z; j++)
                 {
 
                     if (this.TemporalLineArray[i, j] == null)
                         this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BlockId, UnitId, BBMID, NeuronType.TEMPORAL);
 
-                    for (int k = 0; k < NumColumns; k++)
+                    for (int k = 0; k < X; k++)
                     {
                         ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                     }
@@ -1511,13 +1506,13 @@
 
         private void GenerateApicalLines()
         {
-            for (int i = 0; i < NumColumns; i++)
+            for (int i = 0; i < X; i++)
             {
-                for (int j = 0; j < NumColumns; j++)
+                for (int j = 0; j < Y; j++)
                 {
                     this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BlockId, UnitId, BBMID, NeuronType.APICAL);
 
-                    for (int k = 0; k < NumColumns; k++)
+                    for (int k = 0; k < Z; k++)
                     {
                         ConnectTwoNeuronsOrIncrementStrength(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
                     }
@@ -1571,41 +1566,6 @@
             return temporalNeuronsPositions;
         }
 
-        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates3(List<Position_SOM> activeBits)
-        {
-            List<Neuron> temporalNeurons = new List<Neuron>();
-
-            if (activeBits.Count == 0)
-                return temporalNeurons;
-
-            foreach (var position in activeBits)
-            {
-                temporalNeurons.Add(this.TemporalLineArray[position.Y, position.X]);
-            }
-
-            return temporalNeurons;
-        }
-
-        private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates4(List<Position_SOM> positionLists)
-        {
-            List<Neuron> toReturn = new List<Neuron>();
-
-            if (positionLists.Count == 0)
-                return toReturn;
-
-            toReturn = new List<Neuron>();
-
-            foreach (var position in positionLists)
-            {
-                for (int i = 0; i < this.NumColumns; i++)
-                {
-                    toReturn.Add(this.Columns[i, position.Y].Neurons[position.X]);
-                }
-            }
-
-            return toReturn;
-        }
-
         private void IncrementProximalConnectionCount()
         {
             this.totalProximalConnections++;
@@ -1626,16 +1586,9 @@
             XmlDocument document = new XmlDocument();
 
             string dendriteDocumentPath;
-
-            if (devbox)
-            {
-                dendriteDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
-            }
-            else
-            {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
-            }
-
+            
+            dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+            
             if (!File.Exists(dendriteDocumentPath))
             {
                 throw new FileNotFoundException(dendriteDocumentPath);
@@ -1775,14 +1728,7 @@
             XmlDocument document = new XmlDocument();
             string axonalDocumentPath;
 
-            if (devbox)
-            {
-                axonalDocumentPath = "C:\\Users\\depint\\Desktop\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
-            }
-            else
-            {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
-            }
+            axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
 
             if (!File.Exists(axonalDocumentPath))
             {
@@ -1863,6 +1809,13 @@
             POLOARIZED,
             FIRING,
             CLEANUP
+        }
+
+        public enum LogMode
+        {
+            None,
+            BurstOnly,
+            All
         }
     }
 }

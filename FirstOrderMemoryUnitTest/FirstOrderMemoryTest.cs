@@ -40,24 +40,24 @@ namespace FirstOrderMemoryUnitTest
 
             bbm3.Fire(randSDR);
 
-            for (int i = 0; i < clonedBBM.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.Y; i++)
             {
-                Assert.IsNotNull(clonedBBM.TemporalLineArray[i, clonedBBM.NumColumns - 1]);
+                Assert.IsNotNull(clonedBBM.TemporalLineArray[i, clonedBBM.Z - 1]);
             }
 
-            for (int i = 0; i < clonedBBM.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.X; i++)
             {
-                Assert.IsNotNull(clonedBBM.ApicalLineArray[i, clonedBBM.NumColumns - 1]);
+                Assert.IsNotNull(clonedBBM.ApicalLineArray[i, clonedBBM.Y - 1]);
             }
 
-            for (int i = 0; i < bbm3.NumColumns; i++)
+            for (int i = 0; i < bbm3.Y; i++)
             {
-                Assert.IsNotNull(bbm3.TemporalLineArray[i, bbm3.NumColumns - 1]);
+                Assert.IsNotNull(bbm3.TemporalLineArray[i, bbm3.Z - 1]);
             }
 
-            for (int i = 0; i < bbm3.NumColumns; i++)
+            for (int i = 0; i < bbm3.X; i++)
             {
-                Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.NumColumns - 1]);
+                Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.Y - 1]);
             }
 
             Neuron newron = clonedBBM.Columns[2, 4].Neurons[5];
@@ -75,11 +75,11 @@ namespace FirstOrderMemoryUnitTest
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
 
             //Dendrtonal & Axonal  Connections for Cloned Instance
-            for (int i = 0; i < clonedBBM.NumColumns; i++)
+            for (int i = 0; i < clonedBBM.X; i++)
             {
-                for (int j = 0; j < clonedBBM.NumColumns; j++)
+                for (int j = 0; j < clonedBBM.Y; j++)
                 {
-                    for (int k = 0; k < clonedBBM.NumColumns; k++)
+                    for (int k = 0; k < clonedBBM.Z; k++)
                     {
                         Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
 
@@ -100,11 +100,11 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
         {
-            for (int i = 0; i < bbManager?.NumColumns; i++)
+            for (int i = 0; i < bbManager?.X; i++)
             {
-                for (int j = 0; j < bbManager.NumColumns; j++)
+                for (int j = 0; j < bbManager.Y; j++)
                 {
-                    for (int k = 0; k < bbManager.NumColumns; k++)
+                    for (int k = 0; k < bbManager.Z; k++)
                     {
                         Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
 
@@ -737,7 +737,7 @@ namespace FirstOrderMemoryUnitTest
 
             predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
-            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.NumColumns, predictedNeurons.Count);
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.dNumColumns, predictedNeurons.Count);
 
             bbManager.Fire(spatialSdr);
 

@@ -35,7 +35,10 @@
         int NumColumns, Z;
 
         public Dictionary<int, List<Position_SOM>> Buckets;
+
         public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
+
+        public int[] MockBlockNumFires { get; private set; } 
 
         private bool devbox = false;
 
@@ -44,6 +47,8 @@
         public int UnitOffset;
 
         public int ImageIndex { get; private set; }
+
+        public ulong CycleNum;
 
         public List<string> ImageList { get; private set; }
 
@@ -117,6 +122,8 @@
 
             Z = 10;
 
+            CycleNum = 0;
+
             for (int i = 0; i < NumBBMNeeded; i++)
             {
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z);
@@ -144,6 +151,8 @@
             else
                 ImageIndex = 0;
 
+            MockBlockNumFires = new int[NumBBMNeeded];
+
             ImageList = AddAllTheFruits();
 
             LoadImage();
@@ -160,16 +169,12 @@
             for (int i = 0; i < NumBBMNeeded; i++)
             {
                 fomBBM[i].Init(0, 0, 1, 1, 10);
-            }
-
-            //somBlock.Init();
+            }        
 
             stopWatch.Stop();
 
             Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");
-
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
-
             Console.WriteLine("Range" + NumPixelsToProcessPerBlock.ToString() + "\n");
             Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created :" + NumBBMNeeded.ToString() + "\n");
@@ -275,7 +280,9 @@
                                 {
                                     if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
                                     {
-                                        if (fomBBM[bbmId].TemporalLineArray.Length == 0)
+                                        CycleNum++;
+
+                                        if (fomBBM[bbmId].TemporalLineArray[0,0] == null)
                                         {
                                             fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
                                         }
@@ -284,6 +291,14 @@
                                             fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
 
                                         boolEncoder.ClearEncoderValues();
+                                    }
+                                }
+                                else
+                                {
+                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                    {
+                                        MockBlockNumFires[bbmId]++;
+                                        bbmId++;
                                     }
                                 }
                             }                    
@@ -353,6 +368,8 @@
             {
                 fom.PrintBlockStats();
             }
+
+            Console.WriteLine(" Orchestrator CycleNum : " + CycleNum.ToString());
         }
 
         public void BackUp()
