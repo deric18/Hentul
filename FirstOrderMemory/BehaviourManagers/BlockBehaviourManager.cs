@@ -265,6 +265,8 @@
 
             blockBehaviourManager = new BlockBehaviourManager(X, Y, Z);
 
+            blockBehaviourManager.Init(0, 1, 0, 1, 99);
+
             blockBehaviourManager.Init(blockBehaviourManager.BlockId.X, blockBehaviourManager.BlockId.Y, blockBehaviourManager.UnitId.X, blockBehaviourManager.UnitId.Y, blockBehaviourManager.BBMID);
 
             return blockBehaviourManager;
@@ -407,7 +409,7 @@
 
         public void RestoreFromBackUp(string filename)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         #endregion
