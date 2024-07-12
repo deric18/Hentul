@@ -314,12 +314,7 @@
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
 
             Thread.Sleep(5000);
-        }
-
-        private int GetBucketIdFromPosition(int i, int j)
-        {
-            throw new NotImplementedException();
-        }
+        }        
 
         public bool CheckifPixelisBlack(int x, int y)
         {

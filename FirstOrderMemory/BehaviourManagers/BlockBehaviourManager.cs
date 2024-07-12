@@ -168,7 +168,7 @@
 
             num_continuous_burst = 0;
 
-            Mode = LogMode.BurstOnly;
+            Mode = LogMode.All;
            
         }
 
@@ -479,7 +479,7 @@
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                if(Mode == LogMode.BurstOnly)
+                                if(Mode == LogMode.BurstOnly || Mode == LogMode.All)
                                     Console.WriteLine("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
@@ -1582,16 +1582,40 @@
 
         private void ReadDendriticSchema()
         {
+            SchemaType schemToLoad = SchemaType.INVALID;
+
+
 
             #region REAL Code
 
             // Todo: Extend Support for Columns Length unique from Number of Rows and Columns.
 
+            if ( (X == 10 && Y == 10 && Z == 10))
+            {
+                schemToLoad = SchemaType.FOMSCHEMA;
+            }            
+            else if( X == 10 && Y == 1000 && Z == 4)
+            {
+                schemToLoad = SchemaType.SOMSCHEMA;
+            }            
+
             XmlDocument document = new XmlDocument();
 
-            string dendriteDocumentPath;
-            
-            dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+            string dendriteDocumentPath = null;
+
+            if(schemToLoad == SchemaType.INVALID)
+            {
+                throw new InvalidOperationException("Schema Type Cannot be Invalid");
+            }
+
+            if (schemToLoad == SchemaType.FOMSCHEMA)
+            {
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+            }
+            else if(schemToLoad == SchemaType.SOMSCHEMA)
+            {
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchemaSOM.xml";
+            }
             
             if (!File.Exists(dendriteDocumentPath))
             {
@@ -1728,11 +1752,35 @@
             //}
 
             #endregion
+            SchemaType schemaToLoad = SchemaType.INVALID;
+
+            if ((X == 10 && Y == 10 && Z == 10))
+            {
+                schemaToLoad = SchemaType.FOMSCHEMA;
+            }
+            else if (X == 10 && Y == 1000 && Z == 4)
+            {
+                schemaToLoad = SchemaType.SOMSCHEMA;
+            }
 
             XmlDocument document = new XmlDocument();
-            string axonalDocumentPath;
 
-            axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            string axonalDocumentPath = null;
+
+            if (schemaToLoad == SchemaType.INVALID)
+            {
+                throw new InvalidOperationException("Schema Type Cannot be Invalid");
+            }
+
+
+            if (schemaToLoad == SchemaType.FOMSCHEMA)
+            {
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+            }
+            else if (schemaToLoad == SchemaType.SOMSCHEMA)
+            {
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema-SOM.xml";
+            }            
 
             if (!File.Exists(axonalDocumentPath))
             {
@@ -1805,6 +1853,14 @@
         }
 
         #endregion
+
+        public enum SchemaType
+        {
+            FOMSCHEMA,
+            SOMSCHEMA,
+            INVALID
+
+        }
 
         public enum BlockCycle
         {

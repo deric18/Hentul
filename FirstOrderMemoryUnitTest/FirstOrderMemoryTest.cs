@@ -24,7 +24,6 @@ namespace FirstOrderMemoryUnitTest
             rand1 = new Random();
         }
 
-
         [TestMethod]
         public void TestMultipleInstanceOfSOM()
         {
@@ -130,7 +129,6 @@ namespace FirstOrderMemoryUnitTest
                 }
             }
         }
-
 
         [TestMethod]
         public void TestMaxVoltageDeplorizedNeuronAlwaysGetPicked()
@@ -260,7 +258,6 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-
         [TestMethod]
         public void TestWire1UT()
         {
@@ -327,7 +324,7 @@ namespace FirstOrderMemoryUnitTest
         [Test]
         public void TestDistalDendronalConnectionsShouldNotBeLimitedUT()
         {
-            // Todo: BUG : Why doe DitalDendriticCount never exceed more than 400
+            // Todo: BUG : Why do DistalDendriticCount never exceed more than 400
             // Create a new Dendronal Connection make sure it is a new Dendronal Connection , 
 
             List<SDR_SOM> sDR_SOMs = TestUtils.GenerateFixedRandomSDR_SOMs(8, 0, 9);
@@ -480,8 +477,6 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
         }
-
-
 
         [TestMethod]
         public void TestTemporalWiringUT()
@@ -824,6 +819,42 @@ namespace FirstOrderMemoryUnitTest
             Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[5].flag);
         }
 
+        [TestMethod]
+        public void TestFOMStructureForDifferentX_Y_Z()
+        {
+            BlockBehaviourManager newBBM = new BlockBehaviourManager(10, 1000, 4);
+
+            newBBM.Init(0, 1, 0, 1, 1);
+
+            for (int i = 0; i < bbManager?.X; i++)
+            {
+                for (int j = 0; j < bbManager.Y; j++)
+                {
+                    for (int k = 0; k < bbManager.Z; k++)
+                    {
+                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+
+                        if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count != 4)
+                        {
+                            int bp = 1;
+                        }
+
+                        if (bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count != 6)
+                        {
+                            int bp = 1;
+                        }
+
+                        //Assert.AreEqual(6, bbManager.Columns[i, j].Neurons[k].dendriticList.Count);
+
+                        //Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
+
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 2)));
+
+                        Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 2)));
+                    }
+                }
+            }
+        }
 
         public void TestInternalStructureAfterOperation()
         {
