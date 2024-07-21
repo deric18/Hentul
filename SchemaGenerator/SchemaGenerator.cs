@@ -5,8 +5,8 @@ namespace SchemaGenerator
     internal class SchemaGenerator
     {
         private const string filePath = "C:\\Users\\depint\\source\\repos\\Hentul\\SchemaGenerator\\Schemas\\";
-        private const string denrticicfileName = "DendriticSchema.xml";
-        private const string axonalfileName = "AxonalSchema.xml";
+        private const string denrticicfileName = "DendriticSchemaSOM.xml";
+        private const string axonalfileName = "AxonalSchema-SOM.xml";
 
         private bool debox = true;
 
@@ -14,6 +14,7 @@ namespace SchemaGenerator
         int numY = 0;
         int numZ = 0;
         int numL = 0;
+
         Random rand;
 
         public SchemaGenerator(int x = 250, int y = 10, int z = 10, int numConns = 2)

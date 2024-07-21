@@ -1582,19 +1582,17 @@
 
         private void ReadDendriticSchema()
         {
-            SchemaType schemToLoad = SchemaType.INVALID;
-
-
-
             #region REAL Code
 
             // Todo: Extend Support for Columns Length unique from Number of Rows and Columns.
+
+            SchemaType schemToLoad = SchemaType.INVALID;
 
             if ( (X == 10 && Y == 10 && Z == 10))
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }            
-            else if( X == 10 && Y == 1000 && Z == 4)
+            else if( X == 1000 && Y == 10 && Z == 4)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }            

@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Schema Docs\AxonalSchema-SOM.xml" />
     <None Remove="Schema Docs\AxonalSchema.xml" />
     <None Remove="Schema Docs\ConnectorSchema.xml" />
     <None Remove="Schema Docs\dendriticSchema.json" />
+    <None Remove="Schema Docs\DendriticSchemaSOM.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +33,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Schema Docs\AxonalSchema-SOM.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Schema Docs\dendriticSchema.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Schema Docs\DendriticSchemaSOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

@@ -12,11 +12,10 @@ bool[,] dummybooleans = null;
 
 Console.ReadKey();
 
-
 while (true)
 {
 
-    screenGrabber.GrabNProcess(booleans: ref dummybooleans);                
+    screenGrabber.GrabNProcess(booleans: ref dummybooleans);
                 
     Console.WriteLine("Switching to Next Image");
 
@@ -24,7 +23,6 @@ while (true)
     {
         break;
     }
-
 
     //Console.WriteLine("Press any key to load next image");
     //Console.ReadKey();

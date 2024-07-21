@@ -4,7 +4,9 @@ using SchemaGenerator;
 
 Console.WriteLine("Generting Schemas :");
 
-SchemaGenerator.SchemaGenerator sg = new SchemaGenerator.SchemaGenerator(100, 10, 10, 2);
+SchemaGenerator.SchemaGenerator sg = new SchemaGenerator.SchemaGenerator(1000, 10, 4, 2);
+
+//SOM : 1000 * 10 * 4
 
 Console.WriteLine("Press any key to generate Dendritic Schema :");
 

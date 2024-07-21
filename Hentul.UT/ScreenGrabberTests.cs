@@ -58,6 +58,14 @@ namespace Hentul.UT
         }
 
         [Test]
+        public void TestSOMBBMStructure()
+        {
+            sg = new ScreenGrabber(25, false, true, 2);
+
+
+        }
+
+        [Test]
         public void CompareImagePixelDatatoSDR()
         {
             //Extract Pixel Data from Image
