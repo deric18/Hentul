@@ -146,7 +146,7 @@
 
             ApicalLineArray = new Neuron[y, y];
 
-            Columns = new Column[y, y];
+            Columns = new Column[X, Y];
 
             ColumnsThatBurst = new List<Position_SOM>();
 
@@ -184,7 +184,14 @@
             {
                 for (int j = 0; j < Y; j++)
                 {
-                    Columns[i, j] = new Column(i, j, Z, BlockId, UnitId, BBMID);
+                    try
+                    { 
+                        Columns[i, j] = new Column(i, j, Z, BlockId, UnitId, BBMID);
+                    }
+                    catch (Exception ex)
+                    {
+                        int breakpoint = 0;
+                    }
                 }
             }
 
@@ -223,8 +230,10 @@
             }
         }
 
-        public void InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
+        public bool InitDendriticConnectionForConnector(int x, int y, int z, int i, int j, int k)
         {
+            bool toRet = false;
+
             if (x == i && y == j && z == k || (z > Z))
             {
                 int breakpoint = 1;
@@ -235,7 +244,7 @@
 
                 Neuron neuron = col.Neurons[z];
 
-                neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+               toRet =  neuron.InitProximalConnectionForDendriticConnection(i, j, k);
 
                 IncrementProximalConnectionCount();
 
@@ -250,13 +259,15 @@
             }
             catch (Exception ex)
             {
-
+                toRet = false;
                 Console.WriteLine(ex.ToString());
 
                 throw;
 
                 int breakpoint = 1;
             }
+
+            return toRet;
         }
 
         public BlockBehaviourManager CloneBBM(int x)
@@ -1608,14 +1619,14 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchema.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchema.xml";
             }
             else if(schemToLoad == SchemaType.SOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\ConnectorSchemaSOM.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchemaSOM.xml";
             }
             
-            if (!File.Exists(dendriteDocumentPath))
+            if (File.Exists(dendriteDocumentPath) == false)
             {
                 throw new FileNotFoundException(dendriteDocumentPath);
             }
@@ -1674,10 +1685,10 @@
 
                         var proximalNodes = node.ChildNodes;
 
-                        var neuronNodes = proximalNodes.Item(0)
-                            .SelectNodes("Neuron");
+                        //var neuronNodes = proximalNodes.Item(0)
+                        //    .SelectNodes("Neuron");
 
-                        if (neuronNodes.Count != 4)
+                        if (proximalNodes.Count != 4)
                         {
                             throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
                         }
@@ -1685,7 +1696,7 @@
                         //4 -> 2 Proximal Dendronal Connections
                         int numDendriticConnectionCount = 0;
 
-                        foreach (XmlNode neuron in neuronNodes)
+                        foreach (XmlNode neuron in proximalNodes)
                         {
                             //ProximalConnection
                             if (neuron?.Attributes?.Count != 3)
@@ -1698,7 +1709,10 @@
                             int g = Convert.ToInt32(neuron.Attributes[2].Value);
 
                             //Money Shot!!!
-                            InitDendriticConnectionForConnector(a, b, c, e, f, g);
+                            if(InitDendriticConnectionForConnector(a, b, c, e, f, g) == false)
+                            {
+                                throw new InvalidDataException("InitDendriticConnectionForConnector :: Duplicate Dendritic Coo0rdiantes");
+                            }
 
                             numDendriticConnectionCount++;
 

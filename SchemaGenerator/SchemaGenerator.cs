@@ -30,30 +30,31 @@ namespace SchemaGenerator
         {
             XmlDocument xmlDocument = new XmlDocument();
 
-            xmlDocument.LoadXml("<DendriticSchema></DendriticSchema>");
+            xmlDocument.LoadXml("<Connections></Connections>");
 
             for (int i = 0; i < numX; i++)              //Column Level
             {                                
                 for (int j = 0; j < numY; j++)          //Neuron Level
                 {
-                    var sourceNeuronElement = xmlDocument?.CreateElement("Neuron", string.Empty);
+                    var sourceNeuronElement = xmlDocument?.CreateElement("Column", string.Empty);
 
-                    sourceNeuronElement?.SetAttribute("X", i.ToString());
-                    sourceNeuronElement?.SetAttribute("Y", j.ToString());
+                    sourceNeuronElement?.SetAttribute("x", i.ToString());
+                    sourceNeuronElement?.SetAttribute("y", j.ToString());
 
                     for (int k = 0; k < numZ; k++)      //Proximal Connection Per Neuron Level
                     {
+                        var neuronNode = xmlDocument?.CreateElement("Neuron", string.Empty);
                         
-                        var proximalNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
                         int cache = int.MaxValue;
 
-                        proximalNode?.SetAttribute("X", i.ToString());
-                        proximalNode?.SetAttribute("Y", j.ToString());
-                        proximalNode?.SetAttribute("Z", k.ToString());
+                        neuronNode?.SetAttribute("X", i.ToString());
+                        neuronNode?.SetAttribute("Y", j.ToString());
+                        neuronNode?.SetAttribute("Z", k.ToString());
+                        
 
                         for (int l = 0; l < numL; l++)   //Connections to other Neurons except Source Neuron
                         {
-                            var neuronNode = xmlDocument?.CreateElement("Connection", string.Empty);
+                            var childneuronNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
 
                             int x = GetRandomNumberExcept(0, numX, i);
 
@@ -65,16 +66,16 @@ namespace SchemaGenerator
                             int y = GetRandomNumberExcept(0, numY, j);
                             int z = GetRandomNumberExcept(0, numZ, k);
 
-                            neuronNode?.SetAttribute("X", x.ToString());
-                            neuronNode?.SetAttribute("Y", y.ToString());
-                            neuronNode?.SetAttribute("Z", z.ToString());
+                            childneuronNode?.SetAttribute("X", x.ToString());
+                            childneuronNode?.SetAttribute("Y", y.ToString());
+                            childneuronNode?.SetAttribute("Z", z.ToString());
 
-                            proximalNode.AppendChild(neuronNode);
+                            neuronNode.AppendChild(childneuronNode);
 
                             cache = l;
-                        }
-                         
-                        sourceNeuronElement?.AppendChild(proximalNode);                        
+                        }                                                
+
+                        sourceNeuronElement?.AppendChild(neuronNode);                        
                     }
 
                     xmlDocument?.DocumentElement?.AppendChild(sourceNeuronElement);

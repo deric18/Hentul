@@ -4,7 +4,7 @@ using SchemaGenerator;
 
 Console.WriteLine("Generting Schemas :");
 
-SchemaGenerator.SchemaGenerator sg = new SchemaGenerator.SchemaGenerator(1000, 10, 4, 2);
+SchemaGenerator.SchemaGenerator sg = new SchemaGenerator.SchemaGenerator(10, 10, 10, 4);
 
 //SOM : 1000 * 10 * 4
 
