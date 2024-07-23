@@ -1688,7 +1688,7 @@
                         //var neuronNodes = proximalNodes.Item(0)
                         //    .SelectNodes("Neuron");
 
-                        if (proximalNodes.Count != 4)
+                        if (! ( proximalNodes.Count == 4 || proximalNodes.Count == 2 ))
                         {
                             throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
                         }
@@ -1718,7 +1718,6 @@
 
                             if (numDendriticConnectionCount == 2)
                                 break;
-
                         }
 
                         string key = a.ToString() + "-" + b.ToString() + "-" + c.ToString();
