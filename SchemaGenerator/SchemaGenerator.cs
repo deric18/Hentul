@@ -13,7 +13,7 @@ namespace SchemaGenerator
         int numX = 0;
         int numY = 0;
         int numZ = 0;
-        int numL = 0;
+        int numberOfAxons = 0;
 
         Random rand;
 
@@ -22,7 +22,7 @@ namespace SchemaGenerator
             this.numX = x;
             this.numY = y;
             this.numZ = z;
-            this.numL = numConns;
+            this.numberOfAxons = numConns;
             rand = new Random();
         }
         
@@ -52,7 +52,7 @@ namespace SchemaGenerator
                         neuronNode?.SetAttribute("Z", k.ToString());
                         
 
-                        for (int l = 0; l < numL; l++)   //Connections to other Neurons except Source Neuron
+                        for (int l = 0; l < numberOfAxons; l++)   //Connections to other Neurons except Source Neuron
                         {
                             var childneuronNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
 
@@ -96,17 +96,18 @@ namespace SchemaGenerator
             for (int i = 0; i < numX; i++)              //Column Level
             {                
                 for (int j = 0; j < numY; j++)          //Neuron Level
-                {
-                    var axonalConnectionNode = xmlDocument?.CreateElement("AxonalConnection", string.Empty);
-
-                    axonalConnectionNode.SetAttribute("X", i.ToString());
-                    axonalConnectionNode.SetAttribute("Y", j.ToString());
-
+                {                   
                     for (int k = 0; k < numZ; k++)      //Proximal Connection Per Neuron Level
                     {
+                        var axonalConnectionNode = xmlDocument?.CreateElement("AxonalConnection", string.Empty);
+
+                        axonalConnectionNode.SetAttribute("X", i.ToString());
+                        axonalConnectionNode.SetAttribute("Y", j.ToString());
+                        axonalConnectionNode.SetAttribute("Z", k.ToString());
+
                         int cache = int.MaxValue;
 
-                        for (int l = 0; l < numL; l++)   //Connections to other Neurons except Source Neuron
+                        for (int l = 0; l < numberOfAxons; l++)   //Connections to other Neurons except Source Neuron
                         {
                             var proximalConnection = xmlDocument.CreateElement("Neuron", string.Empty);
 
@@ -127,10 +128,10 @@ namespace SchemaGenerator
                             axonalConnectionNode.AppendChild(proximalConnection);
 
                             cache = x;
-                        }                        
-                    }
+                        }
 
-                    xmlDocument?.DocumentElement?.AppendChild(axonalConnectionNode);
+                        xmlDocument?.DocumentElement?.AppendChild(axonalConnectionNode);
+                    }                    
                 }
             }
 

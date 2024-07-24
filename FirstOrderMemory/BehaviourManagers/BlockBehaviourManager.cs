@@ -142,9 +142,9 @@
 
             apicalContributors = new List<Neuron>();
 
-            TemporalLineArray = new Neuron[y, y];
+            TemporalLineArray = new Neuron[Z, Y];
 
-            ApicalLineArray = new Neuron[y, y];
+            ApicalLineArray = new Neuron[X, Y];
 
             Columns = new Column[X, Y];
 
@@ -1482,9 +1482,9 @@
         {
             // T : (x,y, z) => (0,y,x)
 
-            for (int i = 0; i < Y; i++)
+            for (int i = 0; i < Z; i++)
             {
-                for (int j = 0; j < Z; j++)
+                for (int j = 0; j < Y; j++)
                 {
 
                     if (this.TemporalLineArray[i, j] == null)
@@ -1492,7 +1492,17 @@
 
                     for (int k = 0; k < X; k++)
                     {
-                        ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+                        try
+                        {
+                            ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, j].Neurons[i], ConnectionType.TEMPRORAL);
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine(e.ToString());
+
+                            var item1 = TemporalLineArray[i, j] as Neuron;
+                            var item2 = Columns[k, j].Neurons[i] as Neuron;
+                        }
                     }
                 }
             }
@@ -1593,9 +1603,7 @@
 
         private void ReadDendriticSchema()
         {
-            #region REAL Code
-
-            // Todo: Extend Support for Columns Length unique from Number of Rows and Columns.
+            #region REAL Code           
 
             SchemaType schemToLoad = SchemaType.INVALID;
 
@@ -1763,32 +1771,33 @@
             //}
 
             #endregion
-            SchemaType schemaToLoad = SchemaType.INVALID;
+
+            SchemaType schemToLoad = SchemaType.INVALID;
 
             if ((X == 10 && Y == 10 && Z == 10))
             {
-                schemaToLoad = SchemaType.FOMSCHEMA;
+                schemToLoad = SchemaType.FOMSCHEMA;
             }
-            else if (X == 10 && Y == 1000 && Z == 4)
+            else if (X == 1000 && Y == 10 && Z == 4)
             {
-                schemaToLoad = SchemaType.SOMSCHEMA;
+                schemToLoad = SchemaType.SOMSCHEMA;
             }
 
             XmlDocument document = new XmlDocument();
 
             string axonalDocumentPath = null;
 
-            if (schemaToLoad == SchemaType.INVALID)
+            if (schemToLoad == SchemaType.INVALID)
             {
                 throw new InvalidOperationException("Schema Type Cannot be Invalid");
             }
 
 
-            if (schemaToLoad == SchemaType.FOMSCHEMA)
+            if (schemToLoad == SchemaType.FOMSCHEMA)
             {
                 axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
             }
-            else if (schemaToLoad == SchemaType.SOMSCHEMA)
+            else if (schemToLoad == SchemaType.SOMSCHEMA)
             {
                 axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema-SOM.xml";
             }            

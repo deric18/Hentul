@@ -221,7 +221,7 @@
 
         public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
         {
-            //Todo : Pixel combination should not be serial , it shoudl be randomly distributed through out the unit
+            //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
 
             Stopwatch stopWatch = new Stopwatch();
 
