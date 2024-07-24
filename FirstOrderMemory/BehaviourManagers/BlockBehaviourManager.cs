@@ -142,7 +142,7 @@
 
             apicalContributors = new List<Neuron>();
 
-            TemporalLineArray = new Neuron[Z, Y];
+            TemporalLineArray = new Neuron[Y, Z];
 
             ApicalLineArray = new Neuron[X, Y];
 
@@ -1481,6 +1481,7 @@
         private void GenerateTemporalLines()
         {
             // T : (x,y, z) => (0,y,x)
+            // Dont make any changes without understanding this Co mpletely !! Burned hands 
 
             for (int i = 0; i < Y; i++)
             {

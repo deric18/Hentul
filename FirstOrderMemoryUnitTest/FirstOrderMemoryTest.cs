@@ -844,9 +844,9 @@ namespace FirstOrderMemoryUnitTest
                             int bp = 1;
                         }
 
-                        Assert.AreEqual(2, bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
+                        Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count, 4);
 
-                        Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
+                        Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].AxonalList.Count, 2);
 
                         Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 2)));
 
