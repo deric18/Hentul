@@ -1482,9 +1482,9 @@
         {
             // T : (x,y, z) => (0,y,x)
 
-            for (int i = 0; i < Z; i++)
+            for (int i = 0; i < Y; i++)
             {
-                for (int j = 0; j < Y; j++)
+                for (int j = 0; j < Z; j++)
                 {
 
                     if (this.TemporalLineArray[i, j] == null)
@@ -1494,14 +1494,14 @@
                     {
                         try
                         {
-                            ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, j].Neurons[i], ConnectionType.TEMPRORAL);
+                            ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                         }
                         catch(Exception e)
                         {
                             Console.WriteLine(e.ToString());
 
-                            var item1 = TemporalLineArray[i, j] as Neuron;
-                            var item2 = Columns[k, j].Neurons[i] as Neuron;
+                            var item1 = TemporalLineArray[j, i] as Neuron;
+                            var item2 = Columns[k, i].Neurons[j] as Neuron;
                         }
                     }
                 }
