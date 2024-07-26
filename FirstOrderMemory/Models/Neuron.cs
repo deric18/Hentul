@@ -25,7 +25,7 @@ namespace FirstOrderMemory.Models
         private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;        
-        private const uint DISTALNEURONPLASTICITY = 5;        
+        private const uint DISTALNEURONPLASTICITY = 5;
 
         #endregion
 
@@ -43,8 +43,15 @@ namespace FirstOrderMemory.Models
 
         public Dictionary<string, char> TAContributors { get; private set; }
 
+        /// <summary>
+        /// Key is always Dendronal Neurons ID && Value is Synapse
+        /// </summary>
         public Dictionary<string, Synapse> AxonalList { get; private set; }
 
+
+        /// <summary>
+        /// Key is always Axonal Neuronal ID && Value is Synapse
+        /// </summary>
         public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }                
 
         public List<Segment>? Segments { get; private set; } = null;

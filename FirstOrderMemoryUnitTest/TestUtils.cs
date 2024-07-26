@@ -20,7 +20,7 @@
         internal static SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType)
         {
             return new SDR_SOM(10, 10, posList, inputPatternType);
-        }
+        }        
 
         internal static Position_SOM GenerateRandomPosition()
         {

@@ -914,6 +914,7 @@
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
 
                     List<Neuron> contributingList;
+
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
                         contributingList = new List<Neuron>();
@@ -927,7 +928,7 @@
 
                             foreach (var contributingNeuron in contributingList)
                             {
-                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
                                 PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
@@ -939,7 +940,6 @@
                     //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
                     //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
                     //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
-
 
                     //Boost the few correctly predicted neurons
                     List<Neuron> contributingList;
@@ -1042,7 +1042,7 @@
                 {
                     //Case 4 : All columns Bursted: highly likely first fire or totally new pattern coming in :
                     //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
-                    //         If in the middle of the cycle(atleast 10,000 cycles ) then Need to do somethign new Todo.
+                    //         Todo : If in the middle of the cycle(atleast 10,000 cycles ) then Need to do something new.
 
 
                     //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
@@ -1311,6 +1311,11 @@
                     TotalDistalDendriticConnections++;
                 }
 
+                if(Mode == LogMode.All || Mode ==  LogMode.Info)
+                {
+                    Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                }
+
                 return true;
             }
             else
@@ -1429,8 +1434,10 @@
             PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyApicalPartner()), neuron);
         }
 
-        private void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron)
+        public void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron)
         {
+            // BUG: Axonal synapses are not being incremented as the dendronal ones are.!
+
             if (targetNeuron.ProximoDistalDendriticList.Count == 0)
             {
                 throw new Exception("Not Supposed to Happen : Trying to Pramote connection on a neuron , not connected yet!");
@@ -1896,7 +1903,8 @@
         {
             None,
             BurstOnly,
-            All
+            All,
+            Info
         }
     }
 }
