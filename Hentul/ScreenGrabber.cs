@@ -12,6 +12,7 @@
     using System.Numerics;
     using System.Drawing.Imaging;
     using FirstOrderMemory.Models.Encoders;
+    using FirstOrderMemory.BehaviourManagers;
 
     public struct POINT
     {
@@ -119,7 +120,7 @@
 
             NumBBMNeeded = (int)value;
 
-            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[NumBBMNeeded];
+            fomBBM = new BlockBehaviourManager[NumBBMNeeded];
 
             NumColumns = 10;
 
@@ -131,7 +132,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z);
+                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LogMode.BurstOnly);
             } 
             
             if (isMock)

@@ -58,6 +58,13 @@ namespace Hentul.UT
         }
 
         [Test]
+        public void TestAnalyseAllFOMBlocksAreParticipating()
+        {
+            //Build a block broader Cycle Counter and compare it against all the Blocks Cycles.
+        }
+
+
+        [Test]
         public void TestSOMBBMStructure()
         {
             sg = new ScreenGrabber(25, false, true, 2);

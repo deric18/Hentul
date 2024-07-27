@@ -80,6 +80,8 @@
 
         public LogMode Mode { get; private set; }
 
+        public ulong[] WireCasesTracker { get; private set; }
+
         #endregion
 
         #region CONSTANTS
@@ -106,7 +108,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 10)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 10, LogMode mode = LogMode.BurstOnly)
         {                        
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -168,8 +170,11 @@
 
             num_continuous_burst = 0;
 
-            Mode = LogMode.All;
-           
+            Mode = mode;
+
+            WireCasesTracker = new ulong[5];
+
+
         }
 
         public void Init(int blockid_x, int blockId_Y, int UnitId_x, int UnitID_y, int bbmID)
@@ -491,7 +496,7 @@
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 if(Mode == LogMode.BurstOnly || Mode == LogMode.All)
-                                    Console.WriteLine("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    Console.WriteLine("BURST :: Block ID : " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);                                                                
 
@@ -505,8 +510,8 @@
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
-                                if(Mode == LogMode.All)
-                                    Console.WriteLine("Block ID : " + PrintBlockDetailsSingleLine() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                if(Mode == LogMode.All || Mode == LogMode.Info)
+                                    Console.WriteLine("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
 
@@ -913,6 +918,11 @@
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
 
+                    WireCasesTracker[0]++;
+
+                    if(Mode == LogMode.All || Mode == LogMode.Info)
+                        Console.WriteLine(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
+
                     List<Neuron> contributingList;
 
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
@@ -942,6 +952,12 @@
                     //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
 
                     //Boost the few correctly predicted neurons
+
+                    WireCasesTracker[1]++;
+
+                    if (Mode == LogMode.All || Mode == LogMode.Info)
+                        Console.WriteLine(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
+
                     List<Neuron> contributingList;
 
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
@@ -994,6 +1010,11 @@
                     // Strengthen the ones which fired correctly 
                     List<Neuron> contributingList;
 
+                    WireCasesTracker[2]++;                    
+
+                    Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                    Thread.Sleep(1000);
+
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
                         contributingList = new List<Neuron>();
@@ -1013,7 +1034,6 @@
                             }
                         }
                     }
-
 
                     // The ones that fired without prediction , parse through them and strengthen
                     foreach (var position in ColumnsThatBurst)
@@ -1048,6 +1068,10 @@
                     //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
                     //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
                     //BUG 2: TotalNumberOfDistalConnections always get limited to 400
+                    //
+                    WireCasesTracker[3]++;
+
+                    Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
 
                     foreach (var position in ColumnsThatBurst)
                     {
@@ -1064,11 +1088,16 @@
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
 
-                    //Case 5 : Some Columns Bursted and Some of the Columns Fired that were not predicted but had recieved some voltage from somewhere.
+                    //Case 5 : None of the predicted Neurons did Fire and some also did BURST and some of them did Fire that were not added to the prediction list.
                     //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
                     //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
-                    
+
                     //Bug : Somehow all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
+
+                    WireCasesTracker[4]++;
+
+                    Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
+                    Thread.Sleep(1000);
 
                     List<Neuron> burstList = new List<Neuron>();
 
@@ -1081,7 +1110,7 @@
                     if(CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
                     {
                         Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
-                        //Thread.Sleep(10000);
+                        Thread.Sleep(1000);
                     }
 
                     //Boost All the Bursting Neurons
