@@ -1064,11 +1064,11 @@
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
 
-                    //Case 5 : Some Columns Bursted and Some of the Columns Fired.
+                    //Case 5 : Some Columns Bursted and Some of the Columns Fired that were not predicted but had recieved some voltage from somewhere.
                     //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
                     //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
-                    //Bug : Somehow the all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
-
+                    
+                    //Bug : Somehow all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
 
                     List<Neuron> burstList = new List<Neuron>();
 
@@ -1281,15 +1281,18 @@
             }
 
             if (AxonalNeuron == null || DendriticNeuron == null)
+            {
                 return false;
+            }
             else if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
-            {       // Post Init Temporal / Apical Neurons should not connect with anybody else.
+            {
+                // Post Init Temporal / Apical Neurons should not connect with anybody else.
                 throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
             }
-            else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))  
+            else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
             {
-                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() +" Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
-                    //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
+                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
+                                                                                                                                                                                                          //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
@@ -1299,9 +1302,9 @@
             }            
 
 
-
             bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType);
             bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);
+
 
             if (IsAxonalConnectionSuccesful && IsDendronalConnectionSuccesful)
             {

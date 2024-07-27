@@ -355,9 +355,9 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestWireCase3() 
         {
-            // Case 3 : None Bursted , Some fired which were predicted, Some Fired which were NOT predicted 
+            // Case 3 : None Bursted , Some fired which were predicted, Some Did Not Burst But Fired which were NOT predicted 
 
-
+            //Difficult to repro , will repro later. bigger fish to fry!
 
             Assert.Fail();
         }
@@ -385,9 +385,10 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestWireCase5() 
         {
-            //Case 5 : Some Columns Bursted and Some of the Columns Fired.
+            //Case 5 : Some Columns Bursted and Some of the Columns Fired Incorrectly.
             // Every cell bursted should have new dendronal connection with neurons firing last cycle and same with the ones that fired , if it doesnt already have one.
 
+            
 
             Assert.Fail();
 

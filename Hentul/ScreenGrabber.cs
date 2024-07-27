@@ -6,7 +6,6 @@
     using Common;
     using FirstOrderMemory.Models;
     using System.Diagnostics;
-    using SecondOrderMemory.BehaviourManagers;
     using System.Collections.Generic;
     using Hentul.UT;
     using System.Diagnostics.Eventing.Reader;
@@ -22,6 +21,9 @@
 
     public class ScreenGrabber
     {
+
+        #region Used Variables
+
         public int NumPixelsToProcessPerBlock { get; private set; }
 
         public int numPixelsProcessedPerBBM;
@@ -60,6 +62,9 @@
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
         private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
+
+
+        #endregion
 
         #region Unused Variables
 
@@ -127,7 +132,18 @@
             for (int i = 0; i < NumBBMNeeded; i++)
             {
                 fomBBM[i] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(NumColumns, Z);
-            }
+            } 
+            
+            if (isMock)
+                ImageIndex = mockImageIndex;
+            else
+                ImageIndex = 0;
+
+            MockBlockNumFires = new int[NumBBMNeeded];
+
+            ImageList = AddAllTheFruits();
+
+            LoadImage();
 
             #region Unused Variables
             //CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
@@ -145,17 +161,6 @@
             //lowerBound = 51;
             //RounRobinIteration = 0;
             #endregion
-            
-            if (isMock)
-                ImageIndex = mockImageIndex;
-            else
-                ImageIndex = 0;
-
-            MockBlockNumFires = new int[NumBBMNeeded];
-
-            ImageList = AddAllTheFruits();
-
-            LoadImage();
         }
 
         public void Init()
