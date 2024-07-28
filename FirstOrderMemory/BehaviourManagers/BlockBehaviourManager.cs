@@ -7,13 +7,14 @@
     public class BlockBehaviourManager
     {
         #region VARIABLES
-        public static ulong CycleNum { get; private set; }        
+        public ulong CycleNum { get; private set; }        
 
         public int X { get; private set; }
 
         public int Y { get; private set; }        
 
         public int Z { get; private set; }
+
         public Position BlockId { get; private set; }
         public Position UnitId { get; private set; }
         public int BBMID { get; private set; }
@@ -173,8 +174,6 @@
             Mode = mode;
 
             WireCasesTracker = new ulong[5];
-
-
         }
 
         public void Init(int blockid_x, int blockId_Y, int UnitId_x, int UnitID_y, int bbmID)
@@ -772,7 +771,7 @@
 
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (BlockBehaviourManager.CycleNum >= 1000 && BlockBehaviourManager.CycleNum % 500 == 0)
+            if (CycleNum >= 1000 && CycleNum % 500 == 0)
             {
                 Prune();
 
@@ -813,7 +812,7 @@
                             foreach (var kvp in neuron.ProximoDistalDendriticList)
                             {
 
-                                if (kvp.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ((BlockBehaviourManager.CycleNum - Math.Max(kvp.Value.lastFiredCycle, kvp.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
+                                if (kvp.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ((CycleNum - Math.Max(kvp.Value.lastFiredCycle, kvp.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
                                 {
 
                                     //Remove Distal Dendrite from Neuron
@@ -855,6 +854,11 @@
         private void PrepNetworkForNextCycle()
         {
             PerCycleFireSparsityPercentage = ( NeuronsFiringThisCycle.Count * 100 / (X * Y * Z) );
+
+            if(PerCycleFireSparsityPercentage > 20)
+            {
+                Console.WriteLine("WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
+            }
 
             NeuronsFiringLastCycle.Clear();
 
@@ -1331,8 +1335,8 @@
             }            
 
 
-            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, cType);
-            bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, cType);
+            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType);
+            bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, cType);
 
 
             if (IsAxonalConnectionSuccesful && IsDendronalConnectionSuccesful)
@@ -1485,7 +1489,7 @@
 
                 //Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
 
-                synapse.IncrementHitCount();
+                synapse.IncrementHitCount(CycleNum);
             }
         }
 
@@ -1513,7 +1517,7 @@
             // print warning when all the bits of the neuron fired. with more than 8% sparsity
             if (Mode != LogMode.None && ( TotalBurstFire > 0 || TotalPredictionFires > 0 ) && PerCycleFireSparsityPercentage > 0)
             {
-                Console.WriteLine(PrintBlockDetailsSingleLine() + " Loses:" + TotalBurstFire.ToString() + " Wins:" + TotalPredictionFires.ToString() + "  Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%");
+                Console.WriteLine(PrintBlockDetailsSingleLine() + " Wins: " + TotalPredictionFires.ToString()  +  " Loses: " + TotalBurstFire.ToString() + "  Fire Sparsity : " + PerCycleFireSparsityPercentage.ToString() + "%" + "TOTALCYCLESCONTRIBUTED : " + CycleNum.ToString());
             }
         }
 

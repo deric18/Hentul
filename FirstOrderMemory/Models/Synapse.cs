@@ -48,7 +48,7 @@ namespace FirstOrderMemory.Models
             return _strength;
         }
 
-        public void IncrementHitCount()
+        public void IncrementHitCount(ulong currentCycleNum)
         {
 
             if (DendronalNeuronalId.ToString().Equals("5-3-0-N") && AxonalNeuronId.ToString().Equals("0-2-0-N"))
@@ -65,13 +65,13 @@ namespace FirstOrderMemory.Models
                 FiringHitCount++;
                 _strength++;
 
-                this.lastFiredCycle = BlockBehaviourManager.CycleNum;
+                this.lastFiredCycle = currentCycleNum;
             }
             else
             {
                 PredictiveHitCount++;
 
-                this.lastPredictedCycle = BlockBehaviourManager.CycleNum;
+                this.lastPredictedCycle = currentCycleNum;
             }
         }
     }

@@ -230,7 +230,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ConnectionType? cType = null)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, ConnectionType? cType = null)
         {
 
             if(cType == ConnectionType.APICAL)
@@ -260,7 +260,7 @@ namespace FirstOrderMemory.Models
                     {
                         Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
-                        synapse1.IncrementHitCount();
+                        synapse1.IncrementHitCount(CycleNum);
 
                         return true;
 
@@ -269,11 +269,11 @@ namespace FirstOrderMemory.Models
                     {
                         if (cType.Equals(ConnectionType.TEMPRORAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
                         }
                         else if (cType.Equals(ConnectionType.APICAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
                         }                        
 
                         return true;
@@ -285,13 +285,13 @@ namespace FirstOrderMemory.Models
 
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                synapse.IncrementHitCount();
+                synapse.IncrementHitCount(CycleNum);
 
                 return false;
             }
             else
             {
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), BlockBehaviourManager.CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
 
                 //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
@@ -312,7 +312,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, NeuronType ntype, ConnectionType connectionType)
+        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -331,7 +331,7 @@ namespace FirstOrderMemory.Models
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, BlockBehaviourManager.CycleNum, AXONAL_CONNECTION, connectionType));                
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType));                
 
                 return true;
             }

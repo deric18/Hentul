@@ -1,5 +1,6 @@
 ﻿namespace Hentul
 {
+ 
     using System.Drawing;
     using System.Runtime.InteropServices;
     using System.Configuration;
@@ -39,7 +40,9 @@
 
         public Dictionary<int, List<Position_SOM>> Buckets;
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
+        public BlockBehaviourManager[] fomBBM { get; private set; }
+
+        public BlockBehaviourManager somBBM { get; private set; }
 
         public int[] MockBlockNumFires { get; private set; } 
 
@@ -240,74 +243,79 @@
 
             int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
             int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
-
+            int TotalReps = 1;
             int num_unit_per_block_x = 5;
             int num_unit_per_block_y = 5;            
-            int num_pixels_per_bbm_x = 10;
-            int num_pixels_per_bbm_y = 10;
+            int num_pixels_per_Unit_x = 10;
+            int num_pixels_per_Unit_y = 10;
 
-            for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
+            for (int reps = 0; reps < TotalReps; reps++)
             {
-                for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
+
+                for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
                 {
-                    int bbmId = 0;
-
-                    for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+                    for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
                     {
-                        for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                        {                                                       
-                            BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+                        int bbmId = 0;
 
-                            for (int j = 0; j < num_pixels_per_bbm_y; j++)
+                        for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+                        {
+                            for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                             {
-                                for (int i = 0; i < num_pixels_per_bbm_x; i++)
+                                BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+
+                                for (int j = 0; j < num_pixels_per_Unit_x; j++)
                                 {
-                                    int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                    int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-                                    //if the pixel is Black then tag the pixel location
-
-                                    if(blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
+                                    for (int i = 0; i < num_pixels_per_Unit_y; i++)
                                     {
-                                        int bp = 1;
-                                    }
+                                        int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+                                        int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
 
-                                    if (IsMock && booleans != null)
-                                    {                                        
-                                        booleans[pixel_x, pixel_y] = true;
-                                    }
-                                    else if (CheckifPixelisBlack(pixel_x, pixel_y))
-                                    {                                                                                
-                                        boolEncoder.SetEncoderValues((j % 2).ToString() + "-" + i.ToString());
-                                    }                                                             
-                                }
+                                        //if the pixel is Black then tag the pixel location
 
-                                if (IsMock == false)
-                                {
-                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-                                    {
-                                        CycleNum++;
-
-                                        if (fomBBM[bbmId].TemporalLineArray[0,0] == null)
+                                        if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
                                         {
-                                            fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                            int bp = 1;
                                         }
 
-                                        if (boolEncoder.HasValues())
-                                            fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
+                                        if (IsMock && booleans != null)
+                                        {
+                                            booleans[pixel_x, pixel_y] = true;
+                                        }
+                                        else if (CheckifPixelisBlack(pixel_x, pixel_y))
+                                        {
+                                            boolEncoder.SetEncoderValues((j % 2).ToString() + "-" + i.ToString());
+                                        }
+                                    }
 
-                                        boolEncoder.ClearEncoderValues();
-                                    }
-                                }
-                                else
-                                {
-                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                    if (IsMock == false)
                                     {
-                                        MockBlockNumFires[bbmId]++;
-                                        bbmId++;
+                                        if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                        {                                            
+                                            if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
+                                            {
+                                                fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                            }
+
+                                            if (boolEncoder.HasValues())
+                                            {
+                                                CycleNum++;
+                                                fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
+                                            }
+
+                                            boolEncoder.ClearEncoderValues();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                        {
+                                            MockBlockNumFires[bbmId]++;
+                                            bbmId++;
+                                        }
                                     }
                                 }
-                            }                    
+                            }
                         }
                     }
                 }
@@ -369,8 +377,33 @@
             {
                 fom.PrintBlockStats();
             }
+            
+            Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
 
-            Console.WriteLine(" Orchestrator CycleNum : " + CycleNum.ToString());
+            int w = Console.Read();
+
+            if (w == 49)
+            {
+                ulong totalIncludedCycle = 0;
+
+                for (int i = 0; i < fomBBM.Count(); i++)
+                {
+                    if(fomBBM[i].BlockId != null)
+                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
+
+                    totalIncludedCycle += fomBBM[i].CycleNum;
+
+                }
+
+                Console.WriteLine("Total PArticipated Cycles : " + totalIncludedCycle);
+                Console.WriteLine(" Orchestrator CycleNum : " + CycleNum.ToString());
+                if(totalIncludedCycle != CycleNum)
+                {
+                    Console.WriteLine("ERROR : Incorrect Cycle Distribution amoung blocks");
+                    Thread.Sleep(5000);
+                }
+            }
+
         }
 
         public void BackUp()

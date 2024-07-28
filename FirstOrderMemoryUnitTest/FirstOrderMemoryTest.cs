@@ -510,13 +510,13 @@ namespace FirstOrderMemoryUnitTest
 
                 dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
 
-                if (BlockBehaviourManager.CycleNum > 74 && BlockBehaviourManager.CycleNum % 25 == 0)
+                if (bbManager.CycleNum > 74 && bbManager.CycleNum % 25 == 0)
                 {
                     dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
-                    postcheckCycle = BlockBehaviourManager.CycleNum;
+                    postcheckCycle = bbManager.CycleNum;
                 }
 
-                if (BlockBehaviourManager.CycleNum > 74 && BlockBehaviourManager.CycleNum == postcheckCycle + 1)
+                if (bbManager.CycleNum > 74 && bbManager.CycleNum == postcheckCycle + 1)
                 {
                     dendronalconnectionsAfterPruning = BlockBehaviourManager.totalDendronalConnections;
 
