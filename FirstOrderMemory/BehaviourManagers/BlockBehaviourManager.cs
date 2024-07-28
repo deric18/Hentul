@@ -16,7 +16,9 @@
         public int Z { get; private set; }
 
         public Position BlockId { get; private set; }
+
         public Position UnitId { get; private set; }
+
         public int BBMID { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
@@ -86,6 +88,7 @@
         #endregion
 
         #region CONSTANTS
+
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
@@ -133,8 +136,7 @@
             IsCurrentApical = false;
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<Neuron>>();
-
-            //_predictedSegmentForThisCycle = new List<Segment>();
+            
             PredictedNeuronsForNextCycle = new Dictionary<string, List<Neuron>>();
 
             NeuronsFiringThisCycle = new List<Neuron>();
@@ -151,11 +153,7 @@
 
             Columns = new Column[X, Y];
 
-            ColumnsThatBurst = new List<Position_SOM>();
-
-            //DendriticCache = new Dictionary<string, int[]>();
-
-            //AxonalCache = new Dictionary<string, int[]>();
+            ColumnsThatBurst = new List<Position_SOM>();            
 
             TemporalCycleCache = new Dictionary<ulong, List<Position_SOM>>();
 
@@ -1655,7 +1653,7 @@
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }            
-            else if( X == 1000 && Y == 10 && Z == 4)
+            else if( X == 1250 && Y == 10 && Z == 4)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }            
@@ -1822,7 +1820,7 @@
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
-            else if (X == 1000 && Y == 10 && Z == 4)
+            else if (X == 1250 && Y == 10 && Z == 4)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }

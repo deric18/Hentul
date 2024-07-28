@@ -917,7 +917,7 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestSOMColumnStructure()
         {
-            BlockBehaviourManager newBBM = new BlockBehaviourManager(1000, 10, 4);
+            BlockBehaviourManager newBBM = new BlockBehaviourManager(1250, 10, 4);
 
             newBBM.Init(0, 1, 0, 1, 1);
 

@@ -125,6 +125,10 @@
 
             fomBBM = new BlockBehaviourManager[NumBBMNeeded];
 
+            int x1 = 10 * NumBBMNeeded;
+
+            somBBM = new BlockBehaviourManager(x1, 10, 4);
+
             NumColumns = 10;
 
             IsMock = isMock;
@@ -148,6 +152,8 @@
             ImageList = AddAllTheFruits();
 
             LoadImage();
+
+            Init();
 
             #region Unused Variables
             //CenterCenter = new Tuple<int, int>((LeftUpper.Item1 + RightUpper.Item1) / 2, ((RightUpper.Item2 + LeftBottom.Item2) / 2));
@@ -182,12 +188,22 @@
 
             stopWatch.Stop();
 
-            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");
-            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
-            Console.WriteLine("Range" + NumPixelsToProcessPerBlock.ToString() + "\n");
+            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");            
+            Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
             Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
-            Console.WriteLine("Total First Order BBMs Created :" + NumBBMNeeded.ToString() + "\n");
+            Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
 
+            stopWatch.Start();
+
+            Console.WriteLine("Initing SOM Instance now :");
+
+            somBBM.Init(0,0,0,0,1);
+
+            stopWatch.Stop();
+
+            Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");
+
+            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
         private List<string> AddAllTheFruits()
@@ -251,7 +267,6 @@
 
             for (int reps = 0; reps < TotalReps; reps++)
             {
-
                 for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
                 {
                     for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
@@ -300,7 +315,19 @@
                                             if (boolEncoder.HasValues())
                                             {
                                                 CycleNum++;
+                                                
                                                 fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
+                                                
+                                                SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+
+                                                if (fomSDR != null && fomSDR.ActiveBits.Count != 0 )
+                                                {
+                                                    fomSDR = AddSOMOverheadtoFOMSDR(fomSDR);
+
+                                                    somBBM.Fire(fomSDR);
+
+                                                }
+
                                             }
 
                                             boolEncoder.ClearEncoderValues();
@@ -328,7 +355,12 @@
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
 
             Thread.Sleep(5000);
-        }        
+        }
+
+        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR)
+        {
+            throw new NotImplementedException();
+        }
 
         public bool CheckifPixelisBlack(int x, int y)
         {
