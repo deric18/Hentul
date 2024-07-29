@@ -586,7 +586,11 @@
                 if (BurstCache.Count == 0)
                     BurstCache.Add(CycleNum, incomingPattern.ActiveBits);
                 else
-                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + PrintBlockDetailsSingleLine());                
+                {
+                    Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + PrintBlockDetailsSingleLine());
+                    Thread.Sleep(2000);
+                }
+                
             }            
 
             Fire();
@@ -616,6 +620,7 @@
                 if (TemporalCycleCache.Count != 0)
                 {
                     Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item! " + PrintBlockDetailsSingleLine());
+                    Thread.Sleep(2000);
                 }
 
                 TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
@@ -626,6 +631,7 @@
                 if (ApicalCycleCache.Count != 0)
                 {
                     Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + PrintBlockDetailsSingleLine());
+                    Thread.Sleep(2000);
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
@@ -657,6 +663,7 @@
                         if (CycleNum - kvp.Key > 3)
                         {
                             Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
+                            Thread.Sleep(2000);
                         }
 
                         foreach (var pos in kvp.Value)
@@ -1323,12 +1330,13 @@
             else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
             {
                 Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
-                                                                                                                                                                                                          //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
+                Thread.Sleep(2000);                                                                                                                                                      //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
             {
                 Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
+                Thread.Sleep(2000);
                 return false;
             }            
 
