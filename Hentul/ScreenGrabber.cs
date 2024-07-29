@@ -368,7 +368,7 @@
 
             foreach (var pos in fomSDR.ActiveBits)
             {
-                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, blockIdY * block_offset  * pos.Y));        // Needs more thought
+                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, pos.Y));
             }
 
             toRet = new SDR_SOM(1250, 10, newPosList, iType.SPATIAL);

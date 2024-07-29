@@ -1425,7 +1425,7 @@
                     ActiveBits.Add(pos);
             }
 
-            ActiveBits.Sort();
+            //ActiveBits.Sort();
 
             return new SDR_SOM(X, Y, ActiveBits, iType.SPATIAL);
         }
