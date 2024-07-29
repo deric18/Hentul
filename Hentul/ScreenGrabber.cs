@@ -14,6 +14,7 @@
     using System.Drawing.Imaging;
     using FirstOrderMemory.Models.Encoders;
     using FirstOrderMemory.BehaviourManagers;
+    using System.Reflection.Metadata.Ecma335;
 
     public struct POINT
     {
@@ -195,7 +196,7 @@
 
             stopWatch.Start();
 
-            Console.WriteLine("Initing SOM Instance now :");
+            Console.WriteLine("Initing SOM Instance now ... \n");
 
             somBBM.Init(0,0,0,0,1);
 
@@ -252,16 +253,19 @@
 
             stopWatch.Start();
 
+            int TotalReps = 1;
+
             int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
 
             int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
 
             int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
-            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
-            int TotalReps = 1;
+            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);     
+            
             int num_unit_per_block_x = 5;
             int num_unit_per_block_y = 5;            
+
             int num_pixels_per_Unit_x = 10;
             int num_pixels_per_Unit_y = 10;
 
@@ -322,10 +326,9 @@
 
                                                 if (fomSDR != null && fomSDR.ActiveBits.Count != 0 )
                                                 {
-                                                    fomSDR = AddSOMOverheadtoFOMSDR(fomSDR);
+                                                    fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
 
                                                     somBBM.Fire(fomSDR);
-
                                                 }
 
                                             }
@@ -357,9 +360,20 @@
             Thread.Sleep(5000);
         }
 
-        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR)
+        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
         {
-            throw new NotImplementedException();
+            SDR_SOM toRet;
+            int block_offset = 10;
+            List<Position_SOM> newPosList = new List<Position_SOM>();
+
+            foreach (var pos in fomSDR.ActiveBits)
+            {
+                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, blockIdY * block_offset  * pos.Y));        // Needs more thought
+            }
+
+            toRet = new SDR_SOM(1250, 10, newPosList, iType.SPATIAL);
+
+            return toRet;
         }
 
         public bool CheckifPixelisBlack(int x, int y)

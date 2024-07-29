@@ -1403,7 +1403,7 @@
                 nType = Convert.ToChar(parts[3]);
             }
 
-            if (x > 9 || y > 9 || z > 9)
+            if (x > X || y > Y || z > Z)
             {
                 int breakpoint = 1;
 
