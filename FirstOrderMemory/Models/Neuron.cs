@@ -1,5 +1,6 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
 using Common;
+using System.Data;
 
 namespace FirstOrderMemory.Models
 {
@@ -230,7 +231,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, ConnectionType? cType = null)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, ConnectionType? cType = null)
         {
 
             if(cType == ConnectionType.APICAL)
@@ -295,7 +296,7 @@ namespace FirstOrderMemory.Models
 
                 //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
 
-                if(ProximoDistalDendriticList.Count > 400)
+                if( (ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1400 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
                 {
                     Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 400 Distal Dendritic Connections " + BlockID);
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);

@@ -81,6 +81,8 @@
         public bool IsCurrentTemporal { get; private set; }
         public bool IsCurrentApical { get; private set; }
 
+        private SchemaType schemToLoad;
+
         public LogMode Mode { get; private set; }
 
         public ulong[] WireCasesTracker { get; private set; }
@@ -170,6 +172,8 @@
             num_continuous_burst = 0;
 
             Mode = mode;
+
+            schemToLoad = SchemaType.INVALID;
 
             WireCasesTracker = new ulong[5];
         }
@@ -790,8 +794,63 @@
             // Process Next pattern.          
         }
 
-        private void Prune()
+        private void Prune(Neuron prunedNeuron = null)
         {
+            if(prunedNeuron != null)
+            {
+                if (prunedNeuron.ProximoDistalDendriticList == null || prunedNeuron.ProximoDistalDendriticList.Count == 0)
+                { return; }
+
+                List<string> DremoveList = null;
+                List<string> AremoveList = null;
+
+                var distalDendriticList = prunedNeuron.ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.GetStrength() <= PRUNE_STRENGTH && x.PredictiveHitCount != 5);
+
+                if (distalDendriticList.Count() != 0)
+                {
+                    foreach (var kvp in prunedNeuron.ProximoDistalDendriticList)
+                    {
+
+                        if (kvp.Value.cType == ConnectionType.DISTALDENDRITICNEURON && ((CycleNum - Math.Max(kvp.Value.lastFiredCycle, kvp.Value.lastPredictedCycle)) > PRUNE_THRESHOLD))
+                        {
+
+                            //Remove Distal Dendrite from Neuron
+                            if (DremoveList == null)
+                            {
+                                DremoveList = new List<string>();
+                            }
+
+                            DremoveList.Add(kvp.Key);
+
+                            //Remove Corresponding Connected Axonal Neuron
+                            var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
+
+                            if (axonalNeuron.AxonalList.TryGetValue(prunedNeuron.NeuronID.ToString(), out var connection))
+                            {
+                                axonalNeuron.AxonalList.Remove(prunedNeuron.NeuronID.ToString());
+                            }
+                            else
+                            {
+                                Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                            }
+                        }
+                    }
+
+                    Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunedNeuron.NeuronID.ToString());
+
+                    if (DremoveList?.Count > 0)
+                    {
+                        for (int k = 0; k < DremoveList.Count; k++)
+                        {
+                            prunedNeuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
+
+                            BlockBehaviourManager.totalDendronalConnections--;
+                        }
+                    }                    
+                }
+
+                return;
+            }
 
             for (int i = 0; i < X; i++)
             {
@@ -1006,8 +1065,10 @@
                         {
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false)                                
-                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false)
+                                {                                                                           
+                                        ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);                                 
+                                }
                             }
                         }
                     }
@@ -1042,20 +1103,7 @@
                                 PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
-                    }
-
-                    // The ones that fired without prediction , parse through them and strengthen
-                    foreach (var position in ColumnsThatBurst)
-                    {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                            }
-                        }
-                    }
+                    }                  
 
                     // Fired But Did Not Get Predicted
                     foreach (var axonalneuron in NeuronsFiringLastCycle)
@@ -1309,15 +1357,15 @@
         public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
             // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
-            if (cType == ConnectionType.DISTALDENDRITICNEURON)
-            {
-                if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
-                {
-                    bool breakpoint = false;
-                    breakpoint = true;
-                }
-            }
-
+            //if (cType == ConnectionType.DISTALDENDRITICNEURON)
+            //{
+            //    if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
+            //    {
+            //        bool breakpoint = false;
+            //        breakpoint = true;
+            //    }
+            //}
+                                              
             if (AxonalNeuron == null || DendriticNeuron == null)
             {
                 return false;
@@ -1338,11 +1386,22 @@
                 Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
                 Thread.Sleep(2000);
                 return false;
-            }            
+            }
+
+            if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
+            {
+                Prune(DendriticNeuron);
+
+                if((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
+                {
+                    Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
+                    Thread.Sleep(1000);
+                }
+            }
 
 
             bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType);
-            bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, cType);
+            bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType);
 
 
             if (IsAxonalConnectionSuccesful && IsDendronalConnectionSuccesful)
@@ -1653,9 +1712,7 @@
 
         private void ReadDendriticSchema()
         {
-            #region REAL Code           
-
-            SchemaType schemToLoad = SchemaType.INVALID;
+            #region REAL Code                       
 
             if ( (X == 10 && Y == 10 && Z == 10))
             {
@@ -1820,9 +1877,7 @@
             //    return;
             //}
 
-            #endregion
-
-            SchemaType schemToLoad = SchemaType.INVALID;
+            #endregion            
 
             if ((X == 10 && Y == 10 && Z == 10))
             {
