@@ -253,7 +253,7 @@
 
             stopWatch.Start();
 
-            int TotalReps = 1;
+            int TotalReps = 5;
 
             int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
@@ -423,7 +423,13 @@
             {
                 fom.PrintBlockStats();
             }
+
+            //PrintMoreBlockVitals();
             
+        }
+
+        private void PrintMoreBlockVitals()
+        {
             Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
 
             int w = Console.Read();
@@ -434,22 +440,22 @@
 
                 for (int i = 0; i < fomBBM.Count(); i++)
                 {
-                    if(fomBBM[i].BlockId != null)
+                    if (fomBBM[i].BlockId != null)
                         Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
 
                     totalIncludedCycle += fomBBM[i].CycleNum;
 
                 }
 
-                Console.WriteLine("Total PArticipated Cycles : " + totalIncludedCycle);
-                Console.WriteLine(" Orchestrator CycleNum : " + CycleNum.ToString());
-                if(totalIncludedCycle != CycleNum)
+                Console.WriteLine("Total Participated Cycles : " + totalIncludedCycle);
+                Console.WriteLine("Orchestrator CycleNum : " + CycleNum.ToString());
+
+                if (totalIncludedCycle != CycleNum)
                 {
                     Console.WriteLine("ERROR : Incorrect Cycle Distribution amoung blocks");
                     Thread.Sleep(5000);
                 }
             }
-
         }
 
         public void BackUp()
