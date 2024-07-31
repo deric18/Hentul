@@ -1440,7 +1440,7 @@
                     if (AxonalNeuron.RemoveDistalAxonalConnection(DendriticNeuron) == false)
                     {
                         Console.WriteLine(" WARNING :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        Console.ReadKey();
+                        //Console.ReadKey();
                     }
                 }
 

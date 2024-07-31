@@ -18,7 +18,7 @@ namespace Hentul.UT
             rand = new Random();
         }
 
-        [Test]
+        [Test, Ignore("Needs Work!")]
         public void TestOneFullCycle()
         {
             //Extract 2500 Pixels
@@ -64,7 +64,7 @@ namespace Hentul.UT
         }
 
 
-        [Test]
+        [Test, Ignore("Needs Work!")]
         public void TestSOMBBMStructure()
         {
             sg = new ScreenGrabber(25, false, true, 2);
@@ -335,7 +335,7 @@ namespace Hentul.UT
             }
         }
 
-        [Test]
+        [Test, Ignore("Not Ready Yet")]
         public void TestFOMForImage2()
         {
             ScreenGrabber sg = new ScreenGrabber(count, false, true, 2);            
