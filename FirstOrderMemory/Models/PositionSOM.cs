@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace FirstOrderMemory.Models
 {
-    public class Position_SOM : Position, IEqualityComparer<Position_SOM>
+    public class Position_SOM : Position, IEqualityComparer<Position_SOM>, IComparable<Position>
     {
         public char W { get; private set; }
 
@@ -56,6 +56,29 @@ namespace FirstOrderMemory.Models
         public int GetHashCode([DisallowNull] Position_SOM obj)
         {
             return obj.W + obj.X + obj.Y + obj.Z;
-        }       
+        }
+
+        public int CompareTo(Position? other)
+        {
+            if (X > other.X)
+                return 1;
+            else
+            {
+                if (Y > other.Y)
+                    return 1;
+                else
+                {
+                    if (Z > other.Z)                    
+                        return 1;   
+                    else
+                    {
+                        if (X == other.X && Y == other.Y && Z == other.Z)
+                            return 0;
+                    }
+                }
+            }
+
+            return -1;
+        }
     }
 }

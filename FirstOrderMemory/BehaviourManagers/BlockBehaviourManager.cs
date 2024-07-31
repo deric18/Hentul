@@ -7,6 +7,7 @@
     public class BlockBehaviourManager
     {
         #region VARIABLES
+
         public ulong CycleNum { get; private set; }        
 
         public int X { get; private set; }
@@ -311,7 +312,7 @@
                                     {
                                         postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
 
-                                        if (!blockBehaviourManager.ConnectTwoNeuronsOrIncrementStrength(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
+                                        if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
                                         {
                                             Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
                                         }
@@ -336,7 +337,7 @@
                                         presynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.AxonalNeuronId);
                                         postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
 
-                                        if (!blockBehaviourManager.ConnectTwoNeuronsOrIncrementStrength(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+                                        if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
                                         {
                                             Console.WriteLine("Could Not Clone Axonal Connection Properly!!!");
                                         }
@@ -438,7 +439,7 @@
             //Prepare all the neurons that are predicted 
             if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
             {
-                Console.WriteLine("Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
+                Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
                 throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
@@ -449,7 +450,7 @@
                     {
                         if (Columns[i, j].PreCleanupCheck())
                         {
-                            Console.WriteLine("Precycle Cleanup Error : Column {0} {1} is pre Firing", i, j);
+                            Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : Column {0} {1} is pre Firing", i, j);
                             throw new Exception("PreCycle Cleanup Exception!!!");
                         }
                     }
@@ -520,11 +521,8 @@
                             }
                             else
                             {
-
-                                Console.WriteLine("There Should only be one winner in the Column");
-
+                                Console.WriteLine(schemToLoad.ToString() +  "There Should only be one winner in the Column");
                                 throw new InvalidOperationException("Fire :: This should not happen ! Bug in PickAwinner or Bursting Logic!!!");
-
                             }
 
                             predictedNeuronPositions = null;
@@ -902,9 +900,11 @@
 
                             if (DremoveList?.Count > 0)
                             {
+                                neuron.IncrementPruneCount();
+
                                 for (int k = 0; k < DremoveList.Count; k++)
                                 {
-                                    neuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
+                                    neuron.ProximoDistalDendriticList.Remove(DremoveList[k]);                                    
 
                                     BlockBehaviourManager.totalDendronalConnections--;
                                 }
@@ -937,6 +937,12 @@
             foreach (var kvp in PredictedNeuronsForNextCycle)
             {
                 PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
+            }
+
+            if(PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
+            {
+                Console.WriteLine("WARNING :: Total Number of Predicted NEurons should not exceed more than 10% of Network size");
+                Console.ReadKey();
             }
 
             PredictedNeuronsForNextCycle.Clear();
@@ -1067,7 +1073,7 @@
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false)
                                 {                                                                           
-                                        ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);                                 
+                                        ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);                                 
                                 }
                             }
                         }
@@ -1111,7 +1117,7 @@
                         foreach (var dendronalNeuron in NeuronsFiringThisCycle)
                         {
                             if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
-                                ConnectTwoNeuronsOrIncrementStrength(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
                         }
                     }
                 }
@@ -1137,7 +1143,7 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }
@@ -1166,8 +1172,18 @@
                     //Throw if any of the neurons that fired last cycle even though connected did not deploarize
                     if(CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
                     {
-                        Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
-                        Thread.Sleep(1000);
+                        foreach(var neuron in burstList)
+                        {
+                            foreach(var lastcycleneuron in NeuronsFiringLastCycle)
+                            {
+                                if(neuron.Equals(lastcycleneuron) && BBMUtils.CheckIfTwoNeuronsAreConnected(lastcycleneuron, neuron))
+                                {
+                                    Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
+
+                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron);
+                                }
+                            }
+                        }                        
                     }
 
                     //Boost All the Bursting Neurons
@@ -1178,7 +1194,7 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }
@@ -1194,7 +1210,7 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
                             }
                         }
                     }                    
@@ -1316,7 +1332,7 @@
             }
             else
             {
-                Console.WriteLine("ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID );
+                Console.WriteLine(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID );
                 PrintBlockDetails();
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
@@ -1324,7 +1340,7 @@
 
         public string PrintBlockDetailsSingleLine()
         {
-            return " " + BlockId.X + "-" + BlockId.Y + "/" + UnitId.X + "-" + UnitId.Y + "/" + BBMID.ToString();
+            return " Unit ID X :" + UnitId.X + " Unit ID Y : " + UnitId.Y + "/ BBM ID : " + BBMID.ToString();
         }
 
         private void PrintBlockDetails()
@@ -1334,27 +1350,35 @@
             Console.WriteLine("BBM ID : " + BBMID);
         }
 
-        public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
+        public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
         {
             List<Neuron> contributingList = new List<Neuron>();
 
             //If bursting then 
-            if (predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
+            //if (predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
+            //{
+            //    int breakpoint = 1;
+            //}
+
+            //Need to check if the synapse is active and only then add it to the list
+            if (BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(contributingNeuron, predictedNeuron))
             {
-                int breakpoint = 1;
+                if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+                {
+                    contributingList.Add(contributingNeuron);
+                }
+                else
+                {
+                    PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+                }
+
+                return true;
             }
 
-            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
-            {                
-                contributingList.Add(contributingNeuron);
-            }
-            else
-            {
-                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
-            }
+            return false;
         }
 
-        public bool ConnectTwoNeuronsOrIncrementStrength(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
         {
             // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
             //if (cType == ConnectionType.DISTALDENDRITICNEURON)
@@ -1399,29 +1423,32 @@
                 }
             }
 
+            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad);            
 
-            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType);
-            bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType);
-
-
-            if (IsAxonalConnectionSuccesful && IsDendronalConnectionSuccesful)
+            if (IsAxonalConnectionSuccesful )
             {
+                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType);
 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
                 {
                     TotalDistalDendriticConnections++;
                 }
 
-                if(Mode == LogMode.All || Mode ==  LogMode.Info)
+                if(IsDendronalConnectionSuccesful &&  (Mode == LogMode.All || Mode ==  LogMode.Info))
                 {
                     Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                }
+                else if(IsDendronalConnectionSuccesful == false)
+                {
+                    Console.WriteLine(" WARNING :: AAxonal Connected Succeded but Distal Connection Failed ! This happend when there is a bug in Prunning logic! This needs to be checked out");
+                    Console.ReadKey();
                 }
 
                 return true;
             }
             else
             {
-                //Console.WriteLine("INFO :: Connection Already Exists So Just Strengthened it");                
+                
             }
 
             return false;
@@ -1603,7 +1630,7 @@
                     {
                         try
                         {
-                            ConnectTwoNeuronsOrIncrementStrength(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+                            ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
                         }
                         catch(Exception e)
                         {
@@ -1648,7 +1675,7 @@
 
                     for (int k = 0; k < Z; k++)
                     {
-                        ConnectTwoNeuronsOrIncrementStrength(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
+                        ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
                     }
                 }
             }
@@ -1979,6 +2006,8 @@
 
         #endregion
 
+        #region ENUMS
+
         public enum SchemaType
         {
             FOMSCHEMA,
@@ -2003,5 +2032,7 @@
             All,
             Info
         }
+
+        #endregion
     }
 }

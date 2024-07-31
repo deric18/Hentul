@@ -351,7 +351,9 @@
                 }
             }
 
-            PrintBlockVital();
+            //PrintBlockVital();
+
+            PrintMoreBlockVitals();
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
@@ -464,6 +466,8 @@
             {
                 fomBBM[i].BackUp(i.ToString());
             }
+
+            somBBM.BackUp("SOM-1");
         }
 
         #region UnUsed Code

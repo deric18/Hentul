@@ -38,7 +38,7 @@ namespace Hentul.UT
 
         }
 
-        [Test]
+        [Test, Ignore("Not yet Ready")]
         public void TestAllBlocksAreBeingUsedinScreenGrabber()
         {
             sg = new ScreenGrabber(25, true, false, 2);

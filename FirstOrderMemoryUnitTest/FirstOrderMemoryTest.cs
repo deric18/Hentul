@@ -164,7 +164,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(sdr1);
 
-            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeuronsOrIncrementStrength(bbManager.GetNeuronFromString(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
+            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeurons(bbManager.GetNeuronFromString(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
 
             Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
 
@@ -219,7 +219,7 @@ namespace FirstOrderMemoryUnitTest
             var neuron1 = bbManager.Columns[0, 2].Neurons[0];
             var neuron2 = bbManager.Columns[5, 3].Neurons[0];            
 
-            if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.AXONTONEURON))     //Connect the two neurons
+            if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.AXONTONEURON))     //Connect the two neurons
             {
                 throw new InvalidProgramException("Could Not Connect 2 Neurons");
             }
@@ -275,7 +275,7 @@ namespace FirstOrderMemoryUnitTest
             Neuron axonalNeuron = bbManager.Columns[axonalPos.X, axonalPos.Y].Neurons[axonalPos.Z];
             Neuron dendronalNeuron = bbManager.Columns[dendronalPos.X, dendronalPos.Y].Neurons[dendronalPos.Z];
 
-            if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
+            if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
             {
                 throw new Exception("Could Not connect two neurons!");
             }
@@ -317,7 +317,7 @@ namespace FirstOrderMemoryUnitTest
             Neuron dendronalNeuron2 = bbManager.Columns[dendronalPos2.X, dendronalPos2.Y].Neurons[dendronalPos2.Z];
 
 
-            if (!bbManager.ConnectTwoNeuronsOrIncrementStrength(axonalNeuron, dendronalNeuron1, ConnectionType.DISTALDENDRITICNEURON))
+            if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron1, ConnectionType.DISTALDENDRITICNEURON))
             {
                 throw new Exception("Could Not connect two neurons!");
             }
@@ -453,7 +453,7 @@ namespace FirstOrderMemoryUnitTest
             Neuron neuron1 = bbManager.Columns[pos1.X , pos1.Y].Neurons[pos1.Z];
             Neuron neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
 
-            if(!bbManager.ConnectTwoNeuronsOrIncrementStrength(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))
+            if(!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))
             {
                 throw new Exception("Could Not connect two neurons!");
             }
@@ -889,7 +889,7 @@ namespace FirstOrderMemoryUnitTest
             Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[5];
             Neuron dendronalNeuronID = bbManager.Columns[1, 5].Neurons[8];
 
-            bbManager.ConnectTwoNeuronsOrIncrementStrength(axonalNeuronID, dendronalNeuronID, ConnectionType.DISTALDENDRITICNEURON);
+            bbManager.ConnectTwoNeurons(axonalNeuronID, dendronalNeuronID, ConnectionType.DISTALDENDRITICNEURON);
 
             bbManager.BackUp("1.xml");
 

@@ -32,6 +32,8 @@ namespace FirstOrderMemory.Models
 
         private ulong redundantCounter = 0;
 
+        public uint PruneCount { get; private set; }
+
         public Position BlockID { get; private set; }
 
         public Position UnitID { get; private set; }
@@ -76,7 +78,10 @@ namespace FirstOrderMemory.Models
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
             flag = 0;
+            PruneCount = 0;
         }
+
+        public void IncrementPruneCount() => PruneCount++;
 
         public void ChangeCurrentStateTo(NeuronState state)
         {
@@ -90,6 +95,7 @@ namespace FirstOrderMemory.Models
             if (AxonalList == null || AxonalList?.Count == 0)
             {
                 Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
+                Console.ReadKey();
                 return;
             }
 
@@ -313,7 +319,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType)
+        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schema)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -327,12 +333,14 @@ namespace FirstOrderMemory.Models
 
                 //synapse.IncrementHitCount();
 
+                Console.WriteLine(schema.ToString() + "INFO :: Axon already connected to Neuron");
+
                 return true;
             }
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType));                
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, false));                
 
                 return true;
             }
