@@ -284,12 +284,12 @@ namespace FirstOrderMemoryUnitTest
             
             bbManager.Fire(axonalSdr);
 
-            //Make the synapsse Active           
-            RepeatCycle(axonalSdr, dendronalSdr, 5);
-
             dendronalNeuron.ProcessVoltage(10);
 
-            bbManager.Fire(dendronalSdr);            
+            bbManager.Fire(dendronalSdr);
+
+            //Make the synapsse Active           
+            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1, true, dendronalNeuron);            
 
             var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();            
 
@@ -297,7 +297,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.IsTrue(prefireSynapseStrength < postFiringSynapeStrength);            
         }
-             
+        
 
         [TestMethod]
         public void TestWireCase2() 
@@ -951,13 +951,31 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
-        public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount)
+        public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
         {
-            for (int i = 0; i < repCount; i++)
-            {
 
-                bbManager.Fire(axonalNeurondr);
-                bbManager.Fire(dendronalNeuronSdr);
+            if (ShouldDepolarize == false)
+            {
+                for (int i = 0; i < repCount; i++)
+                {
+
+                    bbManager.Fire(axonalNeurondr);
+
+
+
+                    bbManager.Fire(dendronalNeuronSdr);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < repCount; i++)
+                {
+                    bbManager.Fire(axonalNeurondr);
+
+                    neuronToDeplarize.ProcessVoltage(10);
+
+                    bbManager.Fire(dendronalNeuronSdr);
+                }
             }
         }
 

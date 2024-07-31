@@ -1,6 +1,7 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
 using Common;
 using System.Data;
+using Bond;
 
 namespace FirstOrderMemory.Models
 {
@@ -344,6 +345,20 @@ namespace FirstOrderMemory.Models
 
                 return true;
             }
+        }
+
+        internal bool RemoveDistalAxonalConnection(Neuron dendronalNeuron)
+        {
+            if (AxonalList.TryGetValue(dendronalNeuron.NeuronID.ToString(), out var synapse))
+            {                
+                Console.WriteLine("INFO :: Removing axonal connection to a neuron" + dendronalNeuron.NeuronID);
+
+                AxonalList.Remove(dendronalNeuron.NeuronID.ToString());
+
+                return true;
+            }
+
+            return false;
         }
 
         public int CompareTo(Neuron? other)
