@@ -25,7 +25,7 @@ while (true)
     }
 
     Console.WriteLine("Press any key to load next image");
-    //Console.ReadKey();
+    Console.ReadKey();
 
 
     screenGrabber.LoadImage();    

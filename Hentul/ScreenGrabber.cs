@@ -253,7 +253,7 @@
 
             stopWatch.Start();
 
-            int TotalReps = 1;
+            int TotalReps = 2;
 
             int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
@@ -303,10 +303,12 @@
                                         }
                                         else if (CheckifPixelisBlack(pixel_x, pixel_y))
                                         {
-                                            boolEncoder.SetEncoderValues((j % 2).ToString() + "-" + i.ToString());
+
+                                            var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
+                                            boolEncoder.SetEncoderValues(dataToEncode);
+
                                         }
                                     }
-
                                     if (IsMock == false)
                                     {
                                         if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
@@ -319,8 +321,10 @@
                                             if (boolEncoder.HasValues())
                                             {
                                                 CycleNum++;
-                                                
-                                                fomBBM[bbmId++].Fire(boolEncoder.Encode(iType.SPATIAL));
+
+                                                var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+
+                                                fomBBM[bbmId++].Fire(imageSDR);
                                                 
                                                 SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
 
@@ -355,11 +359,16 @@
 
             PrintMoreBlockVitals();
 
+
+            BackUp();
+
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
             Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
 
-            Thread.Sleep(5000);
+            Console.WriteLine("Done Processing Image");
+
+            Console.Read();
         }
 
         private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
@@ -458,6 +467,8 @@
                     Thread.Sleep(5000);
                 }
             }
+
+            // Todo : Need Interactive Debuger and Analyser
         }
 
         public void BackUp()
