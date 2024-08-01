@@ -917,9 +917,9 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestSOMColumnStructure()
         {
-            BlockBehaviourManager newBBM = new BlockBehaviourManager(1250, 10, 4);
+            BlockBehaviourManager somBBM = new BlockBehaviourManager(1250, 10, 4);
 
-            newBBM.Init(0, 1, 0, 1, 1);
+            somBBM.Init(0, 1, 0, 1, 1);
 
             for (int i = 0; i < bbManager?.X; i++)
             {
@@ -929,19 +929,9 @@ namespace FirstOrderMemoryUnitTest
                     {
                         Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
 
-                        if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count != 4)
-                        {
-                            int bp = 1;
-                        }
-
-                        if (bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count != 6)
-                        {
-                            int bp = 1;
-                        }
-
                         Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count, 4);
 
-                        Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].AxonalList.Count, 2);
+                        Assert.AreEqual(2, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
 
                         Assert.IsNotNull(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 2)));
 
@@ -960,8 +950,6 @@ namespace FirstOrderMemoryUnitTest
                 {
 
                     bbManager.Fire(axonalNeurondr);
-
-
 
                     bbManager.Fire(dendronalNeuronSdr);
                 }

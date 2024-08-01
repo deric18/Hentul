@@ -88,7 +88,16 @@
         public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron) =>
             neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
 
-
-
+        public static bool CheckifNeuronListStringHAsNeuron(List<string> stringlist, Neuron neuron)
+        {
+            foreach (var item in stringlist)
+            {
+                if (item.Equals(neuron.NeuronID))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

@@ -15,19 +15,19 @@ namespace FirstOrderMemory.Models
     {
         #region FLAGS
 
-        public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
-        public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
-        public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        private const int INITIAL_SYNAPTIC_CONNECTION_STRENGTH = 1;        
-        private const int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
-        private const int TEMPORAL_NEURON_FIRE_VALUE = 40;
-        private const int APICAL_NEURONAL_FIRE_VALUE = 40;
-        private const int NMDA_NEURONAL_FIRE_VALUE = 100;        
-        private const int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
-        private const int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
-        private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
-        private const int AXONAL_CONNECTION = 1;        
-        private const uint DISTALNEURONPLASTICITY = 5;
+        public static readonly int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
+        public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
+        public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
+        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
+        public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
+        public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
+        public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
+        public static readonly int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        public static readonly int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
+        public static readonly int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
+        public static readonly uint AXONAL_CONNECTION = 1;
+        public static readonly uint DISTALNEURONPLASTICITY = 5;
+        public static readonly uint INITIAL_SYNAPTIC_CONNECTION_STRENGTH = 1;
 
         #endregion
 
@@ -347,7 +347,7 @@ namespace FirstOrderMemory.Models
             }
         }
 
-        internal bool RemoveDistalAxonalConnection(Neuron dendronalNeuron)
+        internal bool RemoveAxonalConnection(Neuron dendronalNeuron)
         {
             if (AxonalList.TryGetValue(dendronalNeuron.NeuronID.ToString(), out var synapse))
             {                

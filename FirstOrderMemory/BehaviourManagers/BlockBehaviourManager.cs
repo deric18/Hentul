@@ -607,6 +607,34 @@
             if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
 
+
+            ValidateNetwork();
+        }
+
+        private void ValidateNetwork()
+        {
+            if(PredictedNeuronsForNextCycle.Count >= ( 0.1 * X * Y *  Z))
+            {
+                Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many Predictions for the size of the network ");
+                Console.Read();
+            }
+            else if( NeuronsFiringThisCycle.Count >= (0.1 * X * Y * Z))
+            {
+                Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many FIRINGS for the size of the network ");
+                Console.Read();
+            }
+
+            foreach( var neuroString in PredictedNeuronsforThisCycle.Keys)
+            {
+                var neuron = GetNeuronFromString(neuroString);
+
+                if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) && neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE)
+                {
+
+                    Console.WriteLine(" WARNING :: Neuron that was heavily Predicted to a level fo firing did not get Fired!!!");
+                    Thread.Sleep(2000);
+                }
+            }
         }
 
         private void ValidateInput(SDR_SOM incomingPattern)
@@ -921,7 +949,7 @@
 
             if (PerCycleFireSparsityPercentage > 20)
             {
-                Console.WriteLine("WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
             }
 
             NeuronsFiringLastCycle.Clear();
@@ -941,7 +969,7 @@
 
             if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
             {
-                Console.WriteLine("WARNING :: Total Number of Predicted NEurons should not exceed more than 10% of Network size");
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted NEurons should not exceed more than 10% of Network size");
 
                 //Console.ReadKey();
             }
@@ -1420,6 +1448,7 @@
                 }
             }
 
+            //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
             bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad);
 
             if (IsAxonalConnectionSuccesful)
@@ -1435,13 +1464,15 @@
                 {
                     Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
                 }
-                else if (IsDendronalConnectionSuccesful == false)
+                else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compramised : Throw;
                 {
-                    if (AxonalNeuron.RemoveDistalAxonalConnection(DendriticNeuron) == false)
+                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == false)
                     {
                         Console.WriteLine(" WARNING :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        //Console.ReadKey();
+                        Thread.Sleep(5000);
                     }
+
+                    throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());
                 }
 
                 return true;
@@ -1939,10 +1970,9 @@
                 throw new FileNotFoundException(axonalDocumentPath);
             }
 
-
             document.Load(axonalDocumentPath);
 
-            XmlNodeList columns = document.GetElementsByTagName("axonalConnection");
+            XmlNodeList columns = schemToLoad.Equals(SchemaType.FOMSCHEMA) ? document.GetElementsByTagName("axonalConnection") : document.GetElementsByTagName("AxonalConnection");
 
             for (int icount = 0; icount < columns.Count; icount++)
             {//axonalConnection
@@ -1952,7 +1982,6 @@
                 if (connection.Attributes.Count != 3)
                 {
                     throw new InvalidDataException();
-
                 }
 
                 int x = Convert.ToInt32(connection.Attributes[0].Value);
