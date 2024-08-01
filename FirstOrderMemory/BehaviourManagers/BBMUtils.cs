@@ -31,21 +31,26 @@
         {
             bool toRet = false;
 
-            foreach (var item in axonalNeuron.AxonalList)
+            if (axonalNeuron.AxonalList.TryGetValue(dendriticNeuron.NeuronID.ToString(), out Synapse synapse))
             {
-                if (item.Key == dendriticNeuron.NeuronID.ToString())
-                {
-                    foreach (var kvp in dendriticNeuron.ProximoDistalDendriticList)
-                    {
-                        if (kvp.Key == axonalNeuron.NeuronID.ToString())
-                        {
-                            toRet = true;
-                            break;
-                        }
-                    }
-                }
+                toRet = true;
             }
 
+            if(toRet == true)
+            {
+
+                if(dendriticNeuron.ProximoDistalDendriticList.TryGetValue(axonalNeuron.NeuronID.ToString(), out var synapse1) == false)
+                {                    
+                    toRet = false;
+                }
+
+                if (toRet == false)
+                {
+                    Console.WriteLine(" ERROR :: CheckIFTowNeuronsAreConnected ::: Axon is not connected but Dendrite is Connected . Structure is Compromised!");
+                    Thread.Sleep(5000);
+                }
+            }
+            
             return toRet;
         }
 

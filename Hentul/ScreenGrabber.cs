@@ -253,7 +253,7 @@
 
             stopWatch.Start();
 
-            int TotalReps = 5;
+            int TotalReps = 1;
 
             int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
