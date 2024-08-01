@@ -434,7 +434,7 @@
         {
             Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
 
-            int w = 49;//Console.Read();
+            int w = Console.Read();
 
             if (w == 49)
             {
