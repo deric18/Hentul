@@ -862,7 +862,11 @@
                                     var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
                                     if (axonalNeuron.AxonalList.TryGetValue(neuron.NeuronID.ToString(), out var connection))
                                     {
-                                        axonalNeuron.AxonalList.Remove(neuron.NeuronID.ToString());
+                                        if(axonalNeuron.RemoveAxonalConnection(neuron) == false)
+                                        {
+                                            Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
+                                            throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
+                                        }
                                     }
                                     else
                                     {
@@ -905,7 +909,7 @@
 
                 var distalDendriticList = prunedNeuron.ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.GetStrength() <= PRUNE_STRENGTH && x.PredictiveHitCount != 5);
 
-                //Remmove only connected Distal Dendritic connections
+                //Remove only connected Distal Dendritic connections
                 if (distalDendriticList.Count() != 0)
                 {                    
                     foreach (var kvp in prunedNeuron.ProximoDistalDendriticList)
@@ -928,7 +932,7 @@
                                 if(axonalNeuron.RemoveAxonalConnection(prunedNeuron) == false)
                                 {
                                     Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
-                                    throw new InvalidOperationException();
+                                    throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
                                 }
                             }
                             else
@@ -951,6 +955,7 @@
                         }
                     }
                 }
+                
 
                 return;
             }
