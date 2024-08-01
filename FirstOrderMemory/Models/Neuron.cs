@@ -241,16 +241,9 @@ namespace FirstOrderMemory.Models
         public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, ConnectionType? cType = null)
         {
 
-            if(cType == ConnectionType.APICAL)
+            if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
             {
-                bool breakpoint = false;
-                breakpoint = true;
-            }            
-
-            if(cType.Equals(ConnectionType.TEMPRORAL))
-            {
-                bool breakpoint = false;
-                breakpoint = true;
+                bool bp = true;
             }
 
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
@@ -290,12 +283,11 @@ namespace FirstOrderMemory.Models
                 
             }
                         
-
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
                 synapse.IncrementHitCount(CycleNum);
 
-                return false;
+                return true;
             }
             else
             {
@@ -351,6 +343,14 @@ namespace FirstOrderMemory.Models
         {
             if (AxonalList.TryGetValue(dendronalNeuron.NeuronID.ToString(), out var synapse))
             {                
+
+                if(synapse.cType.Equals(ConnectionType.AXONTONEURON))
+                {
+                    Console.WriteLine(" WARNING :: RemoveAxonalConnection :: Cannot Remove Schema Based Axonal Connections");
+                    Thread.Sleep(5000);
+                    return false;
+                }
+
                 Console.WriteLine("INFO :: Removing axonal connection to a neuron" + dendronalNeuron.NeuronID);
 
                 AxonalList.Remove(dendronalNeuron.NeuronID.ToString());

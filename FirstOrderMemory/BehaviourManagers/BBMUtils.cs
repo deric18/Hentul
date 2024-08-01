@@ -33,7 +33,6 @@
 
             foreach (var item in axonalNeuron.AxonalList)
             {
-
                 if (item.Key == dendriticNeuron.NeuronID.ToString())
                 {
                     foreach (var kvp in dendriticNeuron.ProximoDistalDendriticList)
