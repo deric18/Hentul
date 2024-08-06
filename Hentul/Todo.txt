@@ -1,2 +1,3 @@
-﻿1. UT for all the FOM array Usage
-2. SOM Layer need to generate a movement action for the cursor to move across the screen to observe and classify the image.
+﻿1. UT for all the FOM array Usage in Hentul.UT
+2. Build a coordiante System.
+3. SOM Layer need to generate a movement action for the cursor to move across the screen to observe and classify the image.

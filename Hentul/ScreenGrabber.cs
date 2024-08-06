@@ -469,6 +469,91 @@
             }
 
             // Todo : Need Interactive Debuger and Analyser
+            Investigate();
+
+        }
+
+        private void Investigate()
+        {
+            Console.WriteLine("Options : \n 1.Display all the FOMS and the number of cycles they were included in. \n 2.Enter a sepcific FOM ID to investigate Further. \n 3.Investigate SOM");
+            int option = Console.Read() - 48;
+
+            switch (option)
+            {
+                case 1:
+                    {
+                        for (int i = 0; i < fomBBM.Count(); i++)
+                        {
+
+                        }
+                    }
+                    break;
+                case 2:
+                    {
+                        Console.WriteLine("1. Show me all the Cycles that the BBM were included in \n 2.Show me all the Neurons with the highest number of Dedndritic Connections \n 3.Show me all the Neurons with the highest number of Active Dendritic Connections" +
+                            " \n 4. Show me all the neurons with maximum number of Axonal Connections \n 5. Show me all the neurons with maximum number of Active Axonal Connections \n 6. Show me all the important connections learned");
+                        int option1 = Console.Read() - 48;
+                        switch (option1)
+                        {
+                            case 1:
+                                {
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    break;
+                                }
+                            case 3:
+                                {
+
+                                    break;
+                                }
+                            case 4:
+                                {
+                                    break;
+                                }
+                            case 5:
+                                {
+                                    break;
+                                }
+                            case 6:
+                                {
+                                    break;
+                                }
+                        }                        
+                    }
+                    break;
+                case 3:
+                   {
+                        Console.WriteLine("1.Show me all the Neurons with the highest number of Dedndritic Connections \n 2.Show me all the Neurons with the highest number of Active Dendritic Connections" +
+                            " \n 3. Show me all the neurons with maximum number of Axonal Connections \n 4. Show me all the neurons with maximum number of Active Axonal Connections \n 5. Show me all the important connections learned");
+                        int option1 = Console.Read() - 48;
+                        switch (option1)
+                        {
+                            case 1:
+                                {
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    break;
+                                }
+                            case 3:
+                                {
+
+                                    break;
+                                }
+                            case 4:
+                                {
+                                    break;
+                                }
+                        }
+                    }
+                   break;
+
+                default:break;
+            }
+
         }
 
         public void BackUp()

@@ -8,6 +8,7 @@ namespace FirstOrderMemory.Models.Encoders
 
         //Todo : need method that can completely generate brand new mappings.
         //Todo : need method to perform both Dense representations and Sparse representations.
+        //Todo : Add more UTs
 
         Dictionary<string, Position_SOM> Mappings;
         List<Position_SOM> _positions;
@@ -40,6 +41,7 @@ namespace FirstOrderMemory.Models.Encoders
             };
         }
 
+        //One parse can process 20 pixels in one shot
         public void SetEncoderValues(string position)
         {            
             if (_positions.Count > W)
@@ -76,8 +78,11 @@ namespace FirstOrderMemory.Models.Encoders
 
             double sqrt = Math.Sqrt(N);
 
-            if (sqrt % 1 != 0.0)            
+            if (sqrt % 1 != 0.0)
+            {
                 Console.WriteLine("WARNING :: Encode :: Encoder size is not perfect Sqaure! It Should always be a perfect Square!!!");
+                throw new InvalidOperationException();
+            }
 
 
             return new SDR_SOM((int)sqrt, (int)sqrt, _positions, iType);

@@ -26,6 +26,18 @@
         }
 
         [TestMethod]
+        public void TestBoolEncoder1()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
+        public void TestBoolEncoder2()
+        {
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
         public void TestByteEncoder1()
         {
             byte toEncode1 = (byte)1;
