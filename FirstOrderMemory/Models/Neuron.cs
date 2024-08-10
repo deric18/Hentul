@@ -1,7 +1,5 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
 using Common;
-using System.Data;
-using Bond;
 
 namespace FirstOrderMemory.Models
 {

@@ -632,7 +632,7 @@
                 {
 
                     Console.WriteLine(" WARNING :: Neuron that was heavily Predicted to a level fo firing did not get Fired!!!");
-                    Console.Read();
+                    Thread.Sleep(3000);
                 }
             }
         }

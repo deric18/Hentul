@@ -2,19 +2,28 @@
 {
  
     using System.Drawing;
-    using System.Runtime.InteropServices;
+    
     using System.Configuration;
     using Common;
     using FirstOrderMemory.Models;
     using System.Diagnostics;
     using System.Collections.Generic;
-    using Hentul.UT;
+    using Hentul.UT;    
+    using FirstOrderMemory.Models.Encoders;
+    using FirstOrderMemory.BehaviourManagers;
+    using SixLabors.ImageSharp;
+
+    #region UNUSED 
+
     using System.Diagnostics.Eventing.Reader;
     using System.Numerics;
     using System.Drawing.Imaging;
-    using FirstOrderMemory.Models.Encoders;
-    using FirstOrderMemory.BehaviourManagers;
     using System.Reflection.Metadata.Ecma335;
+    using System.Runtime.InteropServices;
+    using Image = SixLabors.ImageSharp.Image;
+
+    #endregion
+
 
     public struct POINT
     {
@@ -269,83 +278,87 @@
             int num_pixels_per_Unit_x = 10;
             int num_pixels_per_Unit_y = 10;
 
-            for (int reps = 0; reps < TotalReps; reps++)
+            using (Image image = Image.Load(ImageList[ImageIndex]))
             {
-                for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
+
+                for (int reps = 0; reps < TotalReps; reps++)
                 {
-                    for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
+                    for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
                     {
-                        int bbmId = 0;
-
-                        for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+                        for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
                         {
-                            for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
+                            int bbmId = 0;
+
+                            for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
                             {
-                                BoolEncoder boolEncoder = new BoolEncoder(100, 20);
-
-                                for (int j = 0; j < num_pixels_per_Unit_x; j++)
+                                for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                                 {
-                                    for (int i = 0; i < num_pixels_per_Unit_y; i++)
+                                    BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+
+                                    for (int j = 0; j < num_pixels_per_Unit_x; j++)
                                     {
-                                        int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                        int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-                                        //if the pixel is Black then tag the pixel location
-
-                                        if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
+                                        for (int i = 0; i < num_pixels_per_Unit_y; i++)
                                         {
-                                            int bp = 1;
-                                        }
+                                            int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+                                            int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
 
-                                        if (IsMock && booleans != null)
-                                        {
-                                            booleans[pixel_x, pixel_y] = true;
-                                        }
-                                        else if (CheckifPixelisBlack(pixel_x, pixel_y))
-                                        {
+                                            //if the pixel is Black then tag the pixel location
 
-                                            var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-                                            boolEncoder.SetEncoderValues(dataToEncode);
-
-                                        }
-                                    }
-                                    if (IsMock == false)
-                                    {
-                                        if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-                                        {                                            
-                                            if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
+                                            if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
                                             {
-                                                fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                                int bp = 1;
                                             }
 
-                                            if (boolEncoder.HasValues())
+                                            if (IsMock && booleans != null)
                                             {
-                                                CycleNum++;
+                                                booleans[pixel_x, pixel_y] = true;
+                                            }
+                                            else if (CheckifPixelisBlack(pixel_x, pixel_y))
+                                            {
 
-                                                var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+                                                var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
+                                                boolEncoder.SetEncoderValues(dataToEncode);
 
-                                                fomBBM[bbmId++].Fire(imageSDR);
-                                                
-                                                SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-                                                if (fomSDR != null && fomSDR.ActiveBits.Count != 0 )
+                                            }
+                                        }
+                                        if (IsMock == false)
+                                        {
+                                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                            {
+                                                if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
                                                 {
-                                                    fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-                                                    somBBM.Fire(fomSDR);
+                                                    fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
                                                 }
 
-                                            }
+                                                if (boolEncoder.HasValues())
+                                                {
+                                                    CycleNum++;
 
-                                            boolEncoder.ClearEncoderValues();
+                                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+
+                                                    fomBBM[bbmId++].Fire(imageSDR);
+
+                                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+
+                                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
+                                                    {
+                                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
+
+                                                        somBBM.Fire(fomSDR);
+                                                    }
+
+                                                }
+
+                                                boolEncoder.ClearEncoderValues();
+                                            }
                                         }
-                                    }
-                                    else
-                                    {
-                                        if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                        else
                                         {
-                                            MockBlockNumFires[bbmId]++;
-                                            bbmId++;
+                                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                            {
+                                                MockBlockNumFires[bbmId]++;
+                                                bbmId++;
+                                            }
                                         }
                                     }
                                 }
@@ -353,9 +366,7 @@
                         }
                     }
                 }
-            }
-
-            //PrintBlockVital();
+            }            
 
             PrintMoreBlockVitals();
 
