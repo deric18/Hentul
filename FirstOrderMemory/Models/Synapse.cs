@@ -43,6 +43,17 @@ namespace FirstOrderMemory.Models
             }
         }
 
+        public void Print()
+        {
+            Console.WriteLine(" Axonal Neuron ID : " + AxonalNeuronId);
+            Console.WriteLine(" Dendronal Neuron ID : " + DendronalNeuronalId);
+            Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle);
+            Console.WriteLine(" Active : " +  ( IsActive ? "Yes" : "NO") );
+            Console.WriteLine(" Stringeth : " + _strength.ToString() );
+            Console.WriteLine(" Connection Type : " + cType.ToString());
+            Console.WriteLine(" Firing Hit Count : " + FiringHitCount.ToString() + " \n " ); 
+        }
+
         public uint GetStrength()
         {            
             return _strength;

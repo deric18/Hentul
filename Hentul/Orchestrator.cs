@@ -1,4 +1,4 @@
-﻿namespace HentulWinforms
+﻿namespace Hentul
 {
     using FirstOrderMemory.Models;
     using FirstOrderMemory.BehaviourManagers;
@@ -7,6 +7,7 @@
     using Common;
     using FirstOrderMemory.Models.Encoders;
     using SixLabors.ImageSharp;
+    using System.Drawing;
 
     internal class Orchestrator
     {
@@ -188,7 +189,7 @@
             int num_pixels_per_Unit_x = 10;
             int num_pixels_per_Unit_y = 10;
 
-            using (Image image = Image.Load(ImageList[ImageIndex++]))
+            using (SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(ImageList[ImageIndex++]))
             {
 
                 for (int reps = 0; reps < TotalReps; reps++)

@@ -24,7 +24,6 @@
 
     #endregion
 
-
     public struct POINT
     {
         public int X;
@@ -186,19 +185,7 @@
         public void Init()
         {
             Stopwatch stopWatch = new Stopwatch();
-
-            Console.WriteLine("Starting Initialization  of FOM objects : \n");
-
-            stopWatch.Start();
-
-            for (int i = 0; i < NumBBMNeeded; i++)
-            {
-                fomBBM[i].Init(0, 0, 1, 1, 10);
-            }        
-
-            stopWatch.Stop();
-
-            Console.WriteLine("Finished Init for this Instance , Total Time ELapsed : " + stopWatch.ElapsedMilliseconds.ToString() + "\n");            
+            
             Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
             Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
@@ -327,7 +314,11 @@
                                             {
                                                 if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
                                                 {
+                                                    Console.WriteLine("Starting Initialization  of FOM objects : \n");
+
                                                     fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+
+                                                    Console.WriteLine("Finished Init for this Instance"  + " Block ID X : " + blockid_x.ToString() + "  Block ID Y :" + blockid_y.ToString() + " UNIT ID X : " +unitId_x.ToString() + " UNIT ID Y :" + unitId_y.ToString());                                                    
                                                 }
 
                                                 if (boolEncoder.HasValues())
@@ -370,7 +361,6 @@
 
             PrintMoreBlockVitals();
 
-
             BackUp();
 
             Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
@@ -407,7 +397,6 @@
 
             return (color.R < 200 && color.G < 200 && color.B < 200);
         }
-
 
         public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
         {
@@ -463,7 +452,7 @@
                 for (int i = 0; i < fomBBM.Count(); i++)
                 {
                     if (fomBBM[i].BlockId != null)
-                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
+                        Console.WriteLine(" :: Block ID : " + i.ToString() + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + " Inclusions: " + fomBBM[i].CycleNum.ToString());
 
                     totalIncludedCycle += fomBBM[i].CycleNum;
 
@@ -484,85 +473,152 @@
 
         }
 
+        //Todo : Finish this method
         private void Investigate()
         {
-            Console.WriteLine("Options : \n 1.Display all the FOMS and the number of cycles they were included in. \n 2.Enter a sepcific FOM ID to investigate Further. \n 3.Investigate SOM");
-            int option = Console.Read() - 48;
+            int optionMain = 1;
 
-            switch (option)
+            while (optionMain != 4)
             {
-                case 1:
-                    {
-                        for (int i = 0; i < fomBBM.Count(); i++)
-                        {
 
+                Console.WriteLine("Options : \n 1.Display all the FOMS and the number of cycles they were included in. \n" +
+                                           "2.Enter a sepcific FOM ID to investigate Further. \n " +
+                                           "3.Investigate SOM \n " +
+                                           "4.Exit");
+                int option = Console.Read() - 48;
+
+                switch (option)
+                {
+                    case 1:
+                        {
+                            for (int i = 0; i < fomBBM.Count(); i++)
+                            {
+                                if (fomBBM[i].BlockId != null)
+                                    Console.WriteLine(" :: Block ID : " + i.ToString() + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + " Inclusions: " + fomBBM[i].CycleNum.ToString());
+
+                            }
                         }
-                    }
-                    break;
-                case 2:
-                    {
-                        Console.WriteLine("1. Show me all the Cycles that the BBM were included in \n 2.Show me all the Neurons with the highest number of Dedndritic Connections \n 3.Show me all the Neurons with the highest number of Active Dendritic Connections" +
-                            " \n 4. Show me all the neurons with maximum number of Axonal Connections \n 5. Show me all the neurons with maximum number of Active Axonal Connections \n 6. Show me all the important connections learned");
-                        int option1 = Console.Read() - 48;
-                        switch (option1)
+                        break;
+                    case 2:
                         {
-                            case 1:
-                                {
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    break;
-                                }
-                            case 3:
-                                {
+                            while (true)
+                            {
+                                Console.WriteLine(" Enter FOM ID to Investigate : ");
 
-                                    break;
-                                }
-                            case 4:
-                                {
-                                    break;
-                                }
-                            case 5:
-                                {
-                                    break;
-                                }
-                            case 6:
-                                {
-                                    break;
-                                }
-                        }                        
-                    }
-                    break;
-                case 3:
-                   {
-                        Console.WriteLine("1.Show me all the Neurons with the highest number of Dedndritic Connections \n 2.Show me all the Neurons with the highest number of Active Dendritic Connections" +
-                            " \n 3. Show me all the neurons with maximum number of Axonal Connections \n 4. Show me all the neurons with maximum number of Active Axonal Connections \n 5. Show me all the important connections learned");
-                        int option1 = Console.Read() - 48;
-                        switch (option1)
-                        {
-                            case 1:
-                                {
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    break;
-                                }
-                            case 3:
-                                {
+                                int fomid = Console.Read();
 
-                                    break;
-                                }
-                            case 4:
+
+
+                                Console.WriteLine("1. Display Vitals : \n " +
+                                                  "2. Show me all the Neurons with the highest number of Dedndritic Connections \n" +
+                                                  "3. Show me all the Neurons with the highest number of Active Dendritic Connections \n " +
+                                                  "4. Show me all the neurons with maximum number of Axonal Connections \n" +
+                                                  "5. Show me all the neurons with maximum number of Active Axonal Connections \n " +
+                                                  "6. Show me all the important connections learned \n " +
+                                                  "7. Break ");
+
+                                int option1 = Console.Read() - 48;
+
+
+                                switch (option1)
                                 {
-                                    break;
+                                    case 1:
+                                        {
+                                            Console.WriteLine(" Total Axonal Connections : " + fomBBM[fomid].totalAxonalConnections + " Total Distal Connections : " + fomBBM[fomid].TotalDistalDendriticConnections.ToString());
+
+                                            int w = 1;
+
+                                            Console.WriteLine(" Investigate Neuron [0/1] : ");
+
+                                            w = Console.Read() - 49;
+
+                                            while (w == 1)
+                                            {
+
+                                                Console.WriteLine(" Print which Neuron to investigate [X/Y/Z] : ");
+
+                                                int w2x = Console.Read() - 49;
+                                                int w2y = Console.Read() - 49;
+                                                int w2z = Console.Read() - 49;
+
+                                                Console.WriteLine(" Total ProximoDistalConnection Count :  " + fomBBM[fomid].Columns[w2x, w2y].Neurons[w2z].ProximoDistalDendriticList.Count);
+
+                                                foreach (var distalconnection in fomBBM[fomid].Columns[w2x, w2y].Neurons[w2z].ProximoDistalDendriticList.Values)
+                                                {
+                                                    distalconnection.Print();
+                                                }
+
+                                                Console.WriteLine(" Total ProximoDistalConnection Count :  " + fomBBM[fomid].Columns[w2x, w2y].Neurons[w2z].ProximoDistalDendriticList.Count);
+
+                                                foreach (var axonalConnection in fomBBM[fomid].Columns[w2x, w2y].Neurons[w2z].AxonalList.Values)
+                                                {
+                                                    axonalConnection.Print();
+                                                }
+
+                                            }
+                                            break;
+                                        }
+                                    case 2:
+                                        {
+                                            break;
+                                        }
+                                    case 3:
+                                        {
+
+                                            break;
+                                        }
+                                    case 4:
+                                        {
+                                            break;
+                                        }
+                                    case 5:
+                                        {
+                                            break;
+                                        }
+                                    case 6:
+                                        {
+                                            break;
+                                        }
+                                    case 7:
+                                        break;
                                 }
+                            }
                         }
-                    }
-                   break;
+                    case 3:
+                        {
+                            Console.WriteLine("1.Show me all the Neurons with the highest number of Dedndritic Connections \n " +
+                                              "2.Show me all the Neurons with the highest number of Active Dendritic Connections \n " +
+                                              "3. Show me all the neurons with maximum number of Axonal Connections \n " +
+                                              "4. Show me all the neurons with maximum number of Active Axonal Connections \n " +
+                                              "5. Show me all the important connections learned \n ");
 
-                default:break;
+                            int option1 = Console.Read() - 48;
+
+                            switch (option1)
+                            {
+                                case 1:
+                                    {
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        break;
+                                    }
+                                case 3:
+                                    {
+
+                                        break;
+                                    }
+                                case 4:
+                                    {
+                                        break;
+                                    }
+                            }
+                        }
+                        break;
+
+                    default: break;
+                }
             }
 
         }

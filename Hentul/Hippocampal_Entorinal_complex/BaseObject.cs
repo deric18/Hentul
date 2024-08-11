@@ -1,6 +1,6 @@
 ﻿/// Author : Deric Pinto
 
-namespace FirstOrderMemory.Models.Hippocampal_Entorinal_complex
+namespace Hentul.Hippocampal_Entorinal_complex
 {
     using System;
     using System.Collections.Generic;

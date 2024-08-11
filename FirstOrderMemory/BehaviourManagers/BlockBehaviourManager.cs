@@ -1015,6 +1015,8 @@
 
         private void Wire()
         {
+            //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
+
             if (CurrentCycleState.Equals(BlockCycle.FIRING))
             {
 
@@ -1110,6 +1112,8 @@
                     }
 
                     //Bug : Boosting should not juice the same neurons!
+
+                    //Todo : Need to revisti this stratergy of connecting all the boosted neurons.
 
                     //Boost the Bursting neurons
                     foreach (var position in ColumnsThatBurst)
