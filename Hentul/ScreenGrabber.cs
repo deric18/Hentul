@@ -2,7 +2,6 @@
 {
  
     using System.Drawing;
-    
     using System.Configuration;
     using Common;
     using FirstOrderMemory.Models;
@@ -22,13 +21,14 @@
     using System.Runtime.InteropServices;
     using Image = SixLabors.ImageSharp.Image;
 
-    #endregion
-
     public struct POINT
     {
         public int X;
         public int Y;
     }
+
+    #endregion
+
 
     public class ScreenGrabber
     {
@@ -51,7 +51,9 @@
 
         public BlockBehaviourManager[] fomBBM { get; private set; }
 
-        public BlockBehaviourManager somBBM { get; private set; }
+        public BlockBehaviourManager somL3a { get; private set; }
+
+        public BlockBehaviourManager somL3b { get; private set; }
 
         public int[] MockBlockNumFires { get; private set; } 
 
@@ -70,12 +72,6 @@
         public int blackPixelCount = 0;
 
         public Bitmap bmp;
-
-        private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
-        private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
-        private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
-        private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
-
 
         #endregion
 
@@ -100,6 +96,10 @@
         public int lowerBound;
         public int RounRobinIteration;
 
+        private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
+        private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
+        private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
+        private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
         #endregion
 
@@ -136,7 +136,9 @@
 
             int x1 = 10 * NumBBMNeeded;
 
-            somBBM = new BlockBehaviourManager(x1, 10, 4);
+            somL3a = new BlockBehaviourManager(x1, 10, 4);
+
+            somL3b = new BlockBehaviourManager(x1, 10, 4);
 
             NumColumns = 10;
 
@@ -194,7 +196,9 @@
 
             Console.WriteLine("Initing SOM Instance now ... \n");
 
-            somBBM.Init(0,0,0,0,1);
+            somL3a.Init(0,0,0,0,1);
+
+            somL3b.Init(0, 0, 0, 0, 1);
 
             stopWatch.Stop();
 
@@ -284,17 +288,11 @@
 
                                     for (int j = 0; j < num_pixels_per_Unit_x; j++)
                                     {
+                                        //Prepare Data
                                         for (int i = 0; i < num_pixels_per_Unit_y; i++)
                                         {
                                             int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                            int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-                                            //if the pixel is Black then tag the pixel location
-
-                                            if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-                                            {
-                                                int bp = 1;
-                                            }
+                                            int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;                                            
 
                                             if (IsMock && booleans != null)
                                             {
@@ -308,9 +306,11 @@
 
                                             }
                                         }
+
+                                        //Process Pixel Data
                                         if (IsMock == false)
                                         {
-                                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                            if (j % 2 == 1)     
                                             {
                                                 if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
                                                 {
@@ -325,18 +325,9 @@
                                                 {
                                                     CycleNum++;
 
-                                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+                                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);                                                    
 
-                                                    fomBBM[bbmId++].Fire(imageSDR);
-
-                                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-                                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-                                                    {
-                                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-                                                        somBBM.Fire(fomSDR);
-                                                    }
+                                                    FireAsPerSchema(imageSDR, bbmId, blockid_x, blockid_y);
 
                                                 }
 
@@ -370,6 +361,33 @@
             Console.WriteLine("Done Processing Image");
 
             Console.Read();
+        }
+
+        private void FireAsPerSchema(SDR_SOM imageSDR, int bbmId, int blockid_x, int blockid_y)
+        {
+
+
+
+            // Current :  4 --> 3b
+            // Todo    :  4[NLC] -S-> 3b[LC], 3b -S-> 3a[LC], 3a -W-> 4, HPC -W-> 4 
+
+
+
+
+
+            fomBBM[bbmId++].Fire(imageSDR);
+
+            SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+
+            if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
+            {
+                fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
+
+                somL3a.Fire(fomSDR);
+
+                somL3b.Fire(fomSDR);
+
+            }
         }
 
         private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
@@ -491,6 +509,8 @@
                 {
                     case 1:
                         {
+                            Console.WriteLine("Option 1 Selected Listing all the Blcok Details");
+
                             for (int i = 0; i < fomBBM.Count(); i++)
                             {
                                 if (fomBBM[i].BlockId != null)
@@ -506,8 +526,6 @@
                                 Console.WriteLine(" Enter FOM ID to Investigate : ");
 
                                 int fomid = Console.Read();
-
-
 
                                 Console.WriteLine("1. Display Vitals : \n " +
                                                   "2. Show me all the Neurons with the highest number of Dedndritic Connections \n" +
@@ -630,7 +648,43 @@
                 fomBBM[i].BackUp(i.ToString());
             }
 
-            somBBM.BackUp("SOM-1");
+            somL3a.BackUp("SOM-1");
+        }
+
+
+        [DllImport("user32.dll")]
+        static extern bool GetCursorPos(out POINT lpPoint);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetWindowDC(IntPtr window);
+        [DllImport("gdi32.dll", SetLastError = true)]
+        public static extern uint GetPixel(IntPtr dc, int x, int y);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int ReleaseDC(IntPtr window, IntPtr dc);
+        [DllImport("User32.Dll")]
+        public static extern long SetCursorPos(int x, int y);
+        [DllImport("User32.Dll")]
+        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+
+        public void MoveCursorToSpecificPosition(Position position)
+        {
+            POINT p;
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            p.X = position.X;
+            p.Y = position.Y;
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+
+        }      
+
+        public void SetMousetoStartingPoint()
+        {            
         }
 
         #region UnUsed Code
@@ -643,98 +697,7 @@
 
             return bmp.GetPixel(x, y);
         }
-
-        public Tuple<int, int, int, int> GetNextCoordinates(int x1, int y1, int x2, int y2)
-        {
-            Tuple<int, int, int, int> retVal = null;
-
-            if (RounRobinIteration >= 6)
-            {
-                // Todo: Implement BackUp();
-
-                Console.WriteLine("Completed 6 Iterations of the Image !!! Swithcing to next image in queue!");
-
-                return new Tuple<int, int, int, int>(-1, -1, -1, -1);
-            }
-
-            switch (CurrentDirection.ToUpper())
-            {
-                case "RIGHT":
-                    {
-                        if (x2 < rightBound)
-                        {
-                            retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
-                        }
-                        else
-                        {
-                            CurrentDirection = "UP";
-                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
-                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
-                            //retVal = new Tuple<int, int, int, int>(rightBound, RounRobinIteration * Offset, rightBound - 1 + Offset, 2);
-                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
-                            //retVal.Item2 = RounRobinIteration * Offset;
-                            rightBound -= Offset;
-
-                        }
-                        break;
-                    }
-                case "DOWN":
-                    {
-                        if (y1 < lowerBound)
-                        {
-                            retVal = new Tuple<int, int, int, int>(x1, y1 - Offset, x2, y2 - Offset);
-                        }
-                        else
-                        {
-                            CurrentDirection = "RIGHT";
-                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
-                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
-                            lowerBound += Offset;
-                            retVal = new Tuple<int, int, int, int>(x1 + Offset, y1, x2 + Offset, y2);
-                            RounRobinIteration++;
-                        }
-                        break;
-                    }
-                case "LEFT":
-                    {
-                        if (x1 > leftBound)
-                        {
-                            retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
-                        }
-                        else
-                        {
-                            CurrentDirection = "DOWN";
-                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
-                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
-                            leftBound += Offset;
-                            retVal = new Tuple<int, int, int, int>(x1, y1 - Offset, x2, y2 - Offset);
-                        }
-                        break;
-                    }
-                case "UP":
-                    {
-                        if (y2 < upperBound)
-                        {
-                            retVal = new Tuple<int, int, int, int>(x1, y1 + Offset, x2, y2 + Offset);
-                        }
-                        else
-                        {
-                            CurrentDirection = "LEFT";
-                            Console.WriteLine("Changing Parse Direction on the Image to " + CurrentDirection.ToString());
-                            Console.WriteLine("Cuurent Image Being Analysed : " + ImageList[ImageIndex].Split(new char[] { '\\' })[7]);
-                            upperBound -= Offset;
-                            retVal = new Tuple<int, int, int, int>(x1 - Offset, y1, x2 - Offset, y2);
-                        }
-                        break;
-                    }
-                default:
-                    {
-                        throw new InvalidOperationException("GetNextCooridnate :: Direction shouldnt be anything other than above 4 values");
-                    }
-            }
-
-            return retVal;
-        }
+        
 
         private void ResetOffsets()
         {

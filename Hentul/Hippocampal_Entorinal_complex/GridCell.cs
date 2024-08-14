@@ -7,15 +7,15 @@ namespace Hentul
     using System.Numerics;
     using System.Drawing.Imaging;
     using System.Reflection.Metadata.Ecma335;
+    using Hentul.Enums;
     using System.Runtime.InteropServices;
     
     public class GridCell
     {
+        #region VARIABLES & CONTRUCTORS
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetCursorPos(out POINT lpPoint);
-
-
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr GetDesktopWindow();
         [DllImport("user32.dll", SetLastError = true)]
@@ -38,6 +38,8 @@ namespace Hentul
 
         Dictionary<string, BaseObject> Objects { get; set; }
 
+        public HCCState State { get; set; }
+
         public GridCell(Position position) 
         { 
             Objects = new Dictionary<string, BaseObject>();
@@ -45,26 +47,52 @@ namespace Hentul
             BoundaryCells = new Position[4];
         }
 
-        public void UpdateCurrentPosition(Position position)
+        #endregion
+
+        
+        public void DetectObject()
         {
-            PlaceCell = position;
+
+            //Traverse through Object Maps and what sensory inputs are telling you.
+
         }
+
+
+        private void ComputeBoundaries()
+        {
+
+        }
+
+
+        public void Update()
+        {
+            //Update current Position
+            //Update Grid Cell Map
+        }
+
+
 
         public void UpdateGridCellMap()
         {
 
         }
 
-        internal void AddKnownObject()
+        private void AddKnownObject()
         {
 
         }
 
-        public void AddUnknownObject()
+        private void LearnUnknownObject()
         {
 
         }
-             
+
+        public void UpdateCurrentPosition(Position position)
+        {
+            PlaceCell = position;
+            State = HCCState.None;
+        }
+        
 
         public void MoveCursorToSpecificPosition(int x, int y)
         {
@@ -79,7 +107,6 @@ namespace Hentul
             SetCursorPos(p.X, p.Y);
 
             ReleaseDC(desk, dc);
-
         }
 
         public void MoveCursor(POINT p)
@@ -106,10 +133,9 @@ namespace Hentul
                 Console.Clear();
                 Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
                 return point;
-            }            
+            }
 
             return point;
         }
-
     }
 }
