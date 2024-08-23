@@ -9,9 +9,21 @@ namespace Hentul
     {
         public Position[] Boundaries { get; private set; }
 
+
+
         public BaseObject() 
         {
             
+        }
+
+        public void FormObjectMap()
+        {
+
+        }
+
+        public void ComputeBoundaries()
+        {
+
         }
     }
 }

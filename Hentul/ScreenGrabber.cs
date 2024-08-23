@@ -198,7 +198,7 @@
 
             somL3a.Init(0,0,0,0,1);
 
-            somL3b.Init(0, 0, 0, 0, 1);
+            //somL3b.Init(0, 0, 0, 0, 1);
 
             stopWatch.Stop();
 
@@ -365,15 +365,8 @@
 
         private void FireAsPerSchema(SDR_SOM imageSDR, int bbmId, int blockid_x, int blockid_y)
         {
-
-
-
             // Current :  4 --> 3b
             // Todo    :  4[NLC] -S-> 3b[LC], 3b -S-> 3a[LC], 3a -W-> 4, HPC -W-> 4 
-
-
-
-
 
             fomBBM[bbmId++].Fire(imageSDR);
 
@@ -385,7 +378,10 @@
 
                 somL3a.Fire(fomSDR);
 
-                somL3b.Fire(fomSDR);
+
+                
+
+                //somL3b.Fire(fomSDR);
 
             }
         }
