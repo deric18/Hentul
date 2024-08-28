@@ -63,7 +63,6 @@ namespace Hentul
 
         private Bitmap bmp;
 
-
         public BlockBehaviourManager[] fomBBM { get; private set; }
 
         public BlockBehaviourManager somL3a { get; private set; }
@@ -113,7 +112,7 @@ namespace Hentul
             Stopwatch stopWatch = new Stopwatch();
 
             Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");            
+            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
 
             stopWatch.Start();
 
@@ -148,7 +147,34 @@ namespace Hentul
 
         #endregion
 
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
 
+
+
+       
+        public void StartCycle()
+        {
+
+            while (true)
+            {
+                LearnFirstObject();
+
+            }
+
+
+        }
+
+
+        /// <summary>
+        /// PROBLEMS:
+        /// 
+        /// ALGORITHM:
+        /// 
+        /// </summary>
         public void DetectObject()
         {
             if (Objects == null || Objects.Count == 0)
@@ -162,11 +188,36 @@ namespace Hentul
 
         }
 
+
+        /// <summary>
+        /// 
+        /// PROBLEMS:
+        /// 1. How to figure out on the current mouse position whether if its on an object and how to traverse through the object of the object itself is bigger than the current visual radius.
+        /// 2. How to handle 2 different types of feed processing ? Narrow vs Broad fields of vision.
+        /// 
+        /// ALGORITHM : 
+        /// 1. Get Current Position of the Mouse Pointer and get current Screen Measurements
+        /// 2. 
+        /// 
+        /// </summary>
         private void LearnFirstObject()
         {
             //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.
 
+            POINT currentMousePosition = GetCurrentPointerPosition();
 
+
+        }
+
+
+        private void ExploreOneSingleObjectObject()
+        {
+
+        }
+
+
+        private void ProcessBlock()
+        {
             int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
             int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
 
@@ -220,6 +271,7 @@ namespace Hentul
                                         }
                                     }
 
+
                                     //Process Pixel Data                                    
                                     if (j % 2 == 1)
                                     {
@@ -236,7 +288,7 @@ namespace Hentul
                                         7. Orchestrator will train the entire network to this object.
                                                                                                                               
                                         */
-                                        
+
                                         if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
                                         {
                                             Console.WriteLine("Starting Initialization  of FOM objects : \n");
@@ -252,7 +304,7 @@ namespace Hentul
 
                                             var imageSDR = boolEncoder.Encode(iType.SPATIAL);
 
-                                            FireAsPerSchema(imageSDR, bbmId, blockid_x, blockid_y);
+                                            //FireAsPerSchema(imageSDR, bbmId, blockid_x, blockid_y);
 
                                         }
 
@@ -264,7 +316,7 @@ namespace Hentul
                     }
                 }
             }
-        }    
+        }
 
         private void ComputeBoundaries()
         {
