@@ -432,35 +432,7 @@
 
         #endregion
 
-        #region FIRE & WIRE
-
-        private void PreCyclePrep()
-        {
-            //Prepare all the neurons that are predicted 
-            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
-            {
-                Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
-                throw new Exception("PreCycle Cleanup Exception!!!");
-            }
-
-            if (CurrentCycleState.Equals(BlockCycle.CLEANUP))
-            {
-                for (int i = 0; i < X; i++)
-                    for (int j = 0; j < Y; j++)
-                    {
-                        if (Columns[i, j].PreCleanupCheck())
-                        {
-                            Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : Column {0} {1} is pre Firing", i, j);
-                            throw new Exception("PreCycle Cleanup Exception!!!");
-                        }
-                    }
-            }
-
-            NumberOfColumnsThatFiredThisCycle = 0;
-
-            IsBurstOnly = false;
-
-        }
+        #region FIRE & WIRE        
 
         /// <summary>
         /// Processes the Incoming Input Pattern
@@ -611,20 +583,561 @@
             ValidateNetwork();
         }
 
+
+        public void  LTP()
+        {
+
+            /* FUNCTION : Recognise new connections made while recognising the new objects which did not exist before.
+			 * Q : What connections should be specifically strengthened ? and to what level should each connection be strengthened ?
+            ALGO :: 
+            1. Maintain a Delta of all the new connections that has happened for the brief period of time which truly lead to the discovery of the new object.
+            2. If LTP is called that means this new batch was effective in recognising the object so strengthen these new connections.
+            IMPLEMENTATION :
+            1. Analyse() method to check what changes have been made from the last run iteration to compute delta.
+            2. If LTP() is called start boosting connections
+            3. Need heavy UT, CTs, & SVTs  for verifyign these connections are true and correct
+
+            */
+
+
+
+        }
+
+        private   Analyse()
+        { 
+
+        }
+
+        private void Fire()
+        {
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                //check if the synapse is active only then fire
+
+                //Console.WriteLine(" Firing Neuron : " + neuron.NeuronID.ToString());
+
+                neuron.Fire();
+
+                foreach (Synapse synapse in neuron.AxonalList.Values)
+                {
+                    ProcessSpikeFromNeuron(GetNeuronFromString(synapse.AxonalNeuronId), GetNeuronFromString(synapse.DendronalNeuronalId), synapse.cType);
+                }
+            }
+        }
+
+        private void Wire()
+        {
+            //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
+
+            if (CurrentCycleState.Equals(BlockCycle.FIRING))
+            {
+
+                CurrentCycleState = BlockCycle.FIRING;
+
+                List<Neuron> predictedNeuronList = new List<Neuron>();
+
+                foreach (var item in PredictedNeuronsforThisCycle.Keys)
+                {
+                    var neuronToAdd = GetNeuronFromString(item);
+
+                    if (neuronToAdd != null)
+                    {
+                        predictedNeuronList.Add(neuronToAdd);
+                    }
+                };
+
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+
+                // ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumsnThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
+                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
+                {
+                    //Case 1: All Predicted Neurons Fired without anyone Bursting.
+
+                    WireCasesTracker[0]++;
+
+                    if (Mode == LogMode.All || Mode == LogMode.Info)
+                        Console.WriteLine(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
+
+                    List<Neuron> contributingList;
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        contributingList = new List<Neuron>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
+                            }
+                        }
+                    }
+                }
+                else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
+                {
+                    //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
+                    //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
+                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
+
+                    //Boost the few correctly predicted neurons
+
+                    WireCasesTracker[1]++;
+
+                    if (Mode == LogMode.All || Mode == LogMode.Info)
+                        Console.WriteLine(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
+
+                    List<Neuron> contributingList;
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        //if correctlyPredictedNeuron is also present in ColumnsThatBurst then remove it from the list ColumnsThatBurst , leads to double Wiring!!!
+                        int index = BBMUtils.CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
+
+                        if (index != -1 && index < ColumnsThatBurst.Count)
+                        {
+                            ColumnsThatBurst.RemoveAt(index);
+                        }
+
+                        contributingList = new List<Neuron>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
+                            }
+                        }
+                    }
+
+                    //Bug : Boosting should not juice the same neurons!
+
+                    //Todo : Need to revisti this stratergy of connecting all the boosted neurons.
+
+                    //Boost the Bursting neurons
+                    foreach (var position in ColumnsThatBurst)
+                    {
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
+                                {
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                }
+                            }
+                        }
+                    }
+
+                }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
+                else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
+                {
+                    // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
+                    // Strengthen the ones which fired correctly 
+                    List<Neuron> contributingList;
+
+                    WireCasesTracker[2]++;
+
+                    Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                    Thread.Sleep(1000);
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        contributingList = new List<Neuron>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
+                            }
+                        }
+                    }
+
+                    // Fired But Did Not Get Predicted
+                    foreach (var axonalneuron in NeuronsFiringLastCycle)
+                    {
+                        foreach (var dendronalNeuron in NeuronsFiringThisCycle)
+                        {
+                            if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
+                                ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                        }
+                    }
+                }
+                else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
+                {
+                    //Case 4 : All columns Bursted: highly likely first fire or totally new pattern coming in :
+                    //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
+                    //         Todo : If in the middle of the cycle(atleast 10,000 cycles ) then Need to do something new.
+
+
+                    //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
+                    //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
+                    //BUG 2: TotalNumberOfDistalConnections always get limited to 400
+                    //
+                    WireCasesTracker[3]++;
+
+                    Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
+
+                    foreach (var position in ColumnsThatBurst)
+                    {
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
+                }
+                else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
+                {
+
+                    //Case 5 : None of the predicted Neurons did Fire and some also did BURST and some of them did Fire that were not added to the prediction list.
+                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
+                    //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
+
+                    //Bug : Somehow all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
+
+                    WireCasesTracker[4]++;
+
+                    Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
+                    Thread.Sleep(1000);
+
+                    List<Neuron> burstList = new List<Neuron>();
+
+                    foreach (var item in ColumnsThatBurst)
+                    {
+                        burstList.AddRange(Columns[item.X, item.Y].Neurons);
+                    }
+
+                    //Throw if any of the neurons that fired last cycle even though connected did not deploarize
+                    if (CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
+                    {
+                        foreach (var neuron in burstList)
+                        {
+                            foreach (var lastcycleneuron in NeuronsFiringLastCycle)
+                            {
+                                if (neuron.Equals(lastcycleneuron) && BBMUtils.CheckIfTwoNeuronsAreConnected(lastcycleneuron, neuron))
+                                {
+                                    Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
+
+                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron);
+                                }
+                            }
+                        }
+                    }
+
+                    //Boost All the Bursting Neurons
+                    foreach (var position in ColumnsThatBurst)
+                    {
+                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
+
+                    //Boost the Non Bursting Neurons
+
+                    var firingNeurons = AntiUniounWithNeuronsFiringThisCycle(burstList);
+
+                    if (firingNeurons.Count != 0)
+                    {
+                        foreach (var dendriticNeuron in firingNeurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                            }
+                        }
+                    }
+
+                    //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
+                }
+                else
+                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
+                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
+                }
+
+            }
+            else if (IsCurrentTemporal)
+            {
+                CurrentCycleState = BlockCycle.DEPOLARIZATION;
+
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+                foreach (var neuron in NeuronsFiringThisCycle)
+                {
+                    if (neuron.nType.Equals(NeuronType.NORMAL))
+                    {
+                        foreach (var temporalContributor in temporalContributors)
+                        {
+                            if (neuron.DidItContribute(temporalContributor))
+                            {
+                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (IsCurrentApical)
+            {
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+
+                CurrentCycleState = BlockCycle.DEPOLARIZATION;
+
+                foreach (var neuron in NeuronsFiringThisCycle)
+                {
+                    foreach (var apicalContributor in apicalContributors)
+                    {
+                        if (neuron.DidItContribute(apicalContributor))
+                        {
+                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron);
+                        }
+                    }
+                }
+            }
+        }
+
+        #region INTERNAL METHODS
+
+        public string PrintBlockDetailsSingleLine()
+        {
+            return " Unit ID X :" + UnitId.X + " Unit ID Y : " + UnitId.Y + "/ BBM ID : " + BBMID.ToString();
+        }        
+
+        public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
+        {
+            List<Neuron> contributingList = new List<Neuron>();
+
+            //If bursting then 
+            //if (predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
+            //{
+            //    int breakpoint = 1;
+            //}
+
+            //Need to check if the synapse is active and only then add it to the list            
+            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+            {
+                contributingList.Add(contributingNeuron);
+            }
+            else
+            {
+                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+            }
+
+            return true;
+        }
+
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
+        {
+            // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
+            //if (cType == ConnectionType.DISTALDENDRITICNEURON)
+            //{
+            //    if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
+            //    {
+            //        bool breakpoint = false;
+            //        breakpoint = true;
+            //    }
+            //}
+
+            if (AxonalNeuron == null || DendriticNeuron == null)
+            {
+                return false;
+            }
+            else if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
+            {
+                // Post Init Temporal / Apical Neurons should not connect with anybody else.
+                throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
+            }
+            else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
+            {
+                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
+                Thread.Sleep(2000);                                                                                                                                                      //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
+                return false;
+            }
+            else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
+            {
+                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
+                Thread.Sleep(2000);
+                return false;
+            }
+
+            if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
+            {
+                Console.WriteLine(" EVENT :: ConnectTwoNeurons :::: Neuron inelgible to be have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
+
+                PruneSingleNeuron(DendriticNeuron);
+
+                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
+                {
+                    Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
+                    Thread.Sleep(1000);
+                }
+            }
+
+            //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
+            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad);
+
+            if (IsAxonalConnectionSuccesful)
+            {
+                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType);
+
+                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
+                {
+                    TotalDistalDendriticConnections++;
+                }
+
+                if (IsDendronalConnectionSuccesful && (Mode == LogMode.All || Mode == LogMode.Info))
+                {
+                    Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                }
+                else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised : Throw;
+                {
+                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == false)
+                    {
+                        Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                        Thread.Sleep(5000);
+                    }
+
+                    throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());
+                }
+
+                return true;
+            }
+            else
+            {
+
+            }
+
+            return false;
+        }
+
+        public bool CheckifBothNeuronsAreSameOrintheSameColumn(Neuron neuron1, Neuron neuron2) =>
+            neuron1.NeuronID.X == neuron2.NeuronID.X && neuron1.NeuronID.Y == neuron2.NeuronID.Y;
+
+        public Neuron GetNeuronFromPosition(Position_SOM pos)
+            => Columns[pos.X, pos.Y].Neurons[pos.Z];
+
+        public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
+        {
+            Neuron toReturn = null;
+
+            if (w == 'N' || w == 'n')
+            {
+                toReturn = Columns[x, y].Neurons[z];
+            }
+            else if (w == 'T' || w == 't')
+            {
+                toReturn = TemporalLineArray[y, z];
+            }
+            else if (w == 'A' || w == 'a')
+            {
+                toReturn = ApicalLineArray[x, y];
+            }
+            else
+            {
+                throw new InvalidOperationException(" GetNeuronFromPosition :: Your Column structure is messed up!!!");
+            }
+
+            return toReturn;
+        }
+
+        public Neuron GetNeuronFromString(string posString)
+        {
+            var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+            char nType = 'N';
+
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
+
+            if (x > X || y > Y || z > Z)
+            {
+                int breakpoint = 1;
+
+                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns  posString :  " + posString);
+            }
+
+            return GetNeuronFromPosition(nType, x, y, z);
+        }
+
+        public SDR_SOM GetPredictedSDR()
+        {
+            List<Position_SOM> ActiveBits = new List<Position_SOM>();
+
+            foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
+            {
+                var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
+
+                if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
+                    ActiveBits.Add(pos);
+            }
+
+            //ActiveBits.Sort();
+
+            return new SDR_SOM(X, Y, ActiveBits, iType.SPATIAL);
+        }
+
+        public SDR_SOM GetAllFiringNeuronsThisCycle()
+        {
+            List<Position_SOM> activeBits = new List<Position_SOM>();
+
+            NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+
+            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region PRIVATE METHODS
+
         private void ValidateNetwork()
         {
-            if(PredictedNeuronsForNextCycle.Count >= ( 0.1 * X * Y *  Z))
+            if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
             {
                 Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many Predictions for the size of the network ");
                 Console.Read();
             }
-            else if( NeuronsFiringThisCycle.Count >= (0.1 * X * Y * Z))
+            else if (NeuronsFiringThisCycle.Count >= (0.1 * X * Y * Z))
             {
                 Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many FIRINGS for the size of the network ");
                 Console.Read();
             }
 
-            foreach( var neuroString in PredictedNeuronsforThisCycle.Keys)
+            foreach (var neuroString in PredictedNeuronsforThisCycle.Keys)
             {
                 var neuron = GetNeuronFromString(neuroString);
 
@@ -822,7 +1335,7 @@
 
         private void Prune()
         {
-            
+
             for (int i = 0; i < X; i++)
             {
                 for (int j = 0; j < Y; j++)
@@ -862,7 +1375,7 @@
                                     var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
                                     if (axonalNeuron.AxonalList.TryGetValue(neuron.NeuronID.ToString(), out var connection))
                                     {
-                                        if(axonalNeuron.RemoveAxonalConnection(neuron) == false)
+                                        if (axonalNeuron.RemoveAxonalConnection(neuron) == false)
                                         {
                                             Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
                                             throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
@@ -896,7 +1409,7 @@
         {
             if (prunedNeuron != null)
             {
-                if(prunedNeuron.NeuronID.ToString() == "2-8-0-N" || prunedNeuron.NeuronID.ToString() == "5-1-7-N")
+                if (prunedNeuron.NeuronID.ToString() == "2-8-0-N" || prunedNeuron.NeuronID.ToString() == "5-1-7-N")
                 {
                     bool bp = true;
                 }
@@ -911,7 +1424,7 @@
 
                 //Remove only connected Distal Dendritic connections
                 if (distalDendriticList.Count() != 0)
-                {                    
+                {
                     foreach (var kvp in prunedNeuron.ProximoDistalDendriticList)
                     {
 
@@ -919,8 +1432,8 @@
                         {
 
                             //Remove Distal Dendrite from Neuron
-                            if (DremoveList == null)                            
-                                DremoveList = new List<string>();                            
+                            if (DremoveList == null)
+                                DremoveList = new List<string>();
 
                             DremoveList.Add(kvp.Key);
 
@@ -929,7 +1442,7 @@
 
                             if (axonalNeuron.AxonalList.TryGetValue(prunedNeuron.NeuronID.ToString(), out var connection))
                             {
-                                if(axonalNeuron.RemoveAxonalConnection(prunedNeuron) == false)
+                                if (axonalNeuron.RemoveAxonalConnection(prunedNeuron) == false)
                                 {
                                     Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
                                     throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
@@ -942,375 +1455,53 @@
                         }
                     }
 
-                    if(Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
                         Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunedNeuron.NeuronID.ToString());
 
                     if (DremoveList?.Count > 0)
                     {
                         for (int k = 0; k < DremoveList.Count; k++)
-                        {                            
+                        {
                             prunedNeuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
 
                             BlockBehaviourManager.totalDendronalConnections--;
                         }
                     }
                 }
-                
+
 
                 return;
             }
         }
 
-        private void PrepNetworkForNextCycle()
+        private void PreCyclePrep()
         {
-            PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count * 100 / (X * Y * Z));
-
-            if (PerCycleFireSparsityPercentage > 20)
+            //Prepare all the neurons that are predicted 
+            if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
             {
-                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
+                Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
+                throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
-            NeuronsFiringLastCycle.Clear();
-
-            foreach (var neuron in NeuronsFiringThisCycle)
+            if (CurrentCycleState.Equals(BlockCycle.CLEANUP))
             {
-                if (neuron.nType.Equals(NeuronType.NORMAL))
-                    NeuronsFiringLastCycle.Add(neuron);
+                for (int i = 0; i < X; i++)
+                    for (int j = 0; j < Y; j++)
+                    {
+                        if (Columns[i, j].PreCleanupCheck())
+                        {
+                            Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : Column {0} {1} is pre Firing", i, j);
+                            throw new Exception("PreCycle Cleanup Exception!!!");
+                        }
+                    }
             }
 
-            PredictedNeuronsforThisCycle.Clear();
+            NumberOfColumnsThatFiredThisCycle = 0;
 
-            foreach (var kvp in PredictedNeuronsForNextCycle)
-            {
-                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
-            }
+            IsBurstOnly = false;
 
-            if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
-            {
-                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted NEurons should not exceed more than 10% of Network size");
-
-                //Console.ReadKey();
-            }
-
-            PredictedNeuronsForNextCycle.Clear();
         }
 
-        private void Fire()
-        {
-
-            foreach (var neuron in NeuronsFiringThisCycle)
-            {
-                //check if the synapse is active only then fire
-
-                //Console.WriteLine(" Firing Neuron : " + neuron.NeuronID.ToString());
-
-                neuron.Fire();
-
-                foreach (Synapse synapse in neuron.AxonalList.Values)
-                {
-                    ProcessSpikeFromNeuron(GetNeuronFromString(synapse.AxonalNeuronId), GetNeuronFromString(synapse.DendronalNeuronalId), synapse.cType);
-                }
-            }
-        }
-
-        private void Wire()
-        {
-            //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
-
-            if (CurrentCycleState.Equals(BlockCycle.FIRING))
-            {
-
-                CurrentCycleState = BlockCycle.FIRING;
-
-                List<Neuron> predictedNeuronList = new List<Neuron>();
-
-                foreach (var item in PredictedNeuronsforThisCycle.Keys)
-                {
-                    var neuronToAdd = GetNeuronFromString(item);
-
-                    if (neuronToAdd != null)
-                    {
-                        predictedNeuronList.Add(neuronToAdd);
-                    }
-                };
-
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-
-                // ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumsnThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
-                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
-                {
-                    //Case 1: All Predicted Neurons Fired without anyone Bursting.
-
-                    WireCasesTracker[0]++;
-
-                    if (Mode == LogMode.All || Mode == LogMode.Info)
-                        Console.WriteLine(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
-
-                    List<Neuron> contributingList;
-
-                    foreach (var correctlyPredictedNeuron in correctPredictionList)
-                    {
-                        contributingList = new List<Neuron>();
-
-                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            if (contributingList?.Count == 0)
-                            {
-                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                            }
-
-                            foreach (var contributingNeuron in contributingList)
-                            {
-                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
-                            }
-                        }
-                    }
-                }
-                else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
-                {
-                    //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
-                    //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
-                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
-
-                    //Boost the few correctly predicted neurons
-
-                    WireCasesTracker[1]++;
-
-                    if (Mode == LogMode.All || Mode == LogMode.Info)
-                        Console.WriteLine(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
-
-                    List<Neuron> contributingList;
-
-                    foreach (var correctlyPredictedNeuron in correctPredictionList)
-                    {
-                        //if correctlyPredictedNeuron is also present in ColumnsThatBurst then remove it from the list ColumnsThatBurst , leads to double Wiring!!!
-                        int index = BBMUtils.CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
-
-                        if (index != -1 && index < ColumnsThatBurst.Count)
-                        {
-                            ColumnsThatBurst.RemoveAt(index);
-                        }
-
-                        contributingList = new List<Neuron>();
-
-                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            if (contributingList?.Count == 0)
-                            {
-                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                            }
-
-                            foreach (var contributingNeuron in contributingList)
-                            {
-                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
-                            }
-                        }
-                    }
-
-                    //Bug : Boosting should not juice the same neurons!
-
-                    //Todo : Need to revisti this stratergy of connecting all the boosted neurons.
-
-                    //Boost the Bursting neurons
-                    foreach (var position in ColumnsThatBurst)
-                    {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
-                                {                                  
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                                }
-                            }
-                        }
-                    }
-
-                }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
-                else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
-                {
-                    // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
-                    // Strengthen the ones which fired correctly 
-                    List<Neuron> contributingList;
-
-                    WireCasesTracker[2]++;
-
-                    Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
-                    Thread.Sleep(1000);
-
-                    foreach (var correctlyPredictedNeuron in correctPredictionList)
-                    {
-                        contributingList = new List<Neuron>();
-
-                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            if (contributingList?.Count == 0)
-                            {
-                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                            }
-
-                            foreach (var contributingNeuron in contributingList)
-                            {
-                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
-                            }
-                        }
-                    }
-
-                    // Fired But Did Not Get Predicted
-                    foreach (var axonalneuron in NeuronsFiringLastCycle)
-                    {
-                        foreach (var dendronalNeuron in NeuronsFiringThisCycle)
-                        {
-                            if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
-                                ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                        }
-                    }
-                }
-                else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
-                {
-                    //Case 4 : All columns Bursted: highly likely first fire or totally new pattern coming in :
-                    //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
-                    //         Todo : If in the middle of the cycle(atleast 10,000 cycles ) then Need to do something new.
-
-
-                    //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
-                    //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
-                    //BUG 2: TotalNumberOfDistalConnections always get limited to 400
-                    //
-                    WireCasesTracker[3]++;
-
-                    Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
-
-                    foreach (var position in ColumnsThatBurst)
-                    {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                            }
-                        }
-                    }
-                }
-                else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
-                {
-
-                    //Case 5 : None of the predicted Neurons did Fire and some also did BURST and some of them did Fire that were not added to the prediction list.
-                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
-                    //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
-
-                    //Bug : Somehow all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
-
-                    WireCasesTracker[4]++;
-
-                    Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
-                    Thread.Sleep(1000);
-
-                    List<Neuron> burstList = new List<Neuron>();
-
-                    foreach (var item in ColumnsThatBurst)
-                    {
-                        burstList.AddRange(Columns[item.X, item.Y].Neurons);
-                    }
-
-                    //Throw if any of the neurons that fired last cycle even though connected did not deploarize
-                    if (CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
-                    {
-                        foreach (var neuron in burstList)
-                        {
-                            foreach (var lastcycleneuron in NeuronsFiringLastCycle)
-                            {
-                                if (neuron.Equals(lastcycleneuron) && BBMUtils.CheckIfTwoNeuronsAreConnected(lastcycleneuron, neuron))
-                                {
-                                    Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
-
-                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron);
-                                }
-                            }
-                        }
-                    }
-
-                    //Boost All the Bursting Neurons
-                    foreach (var position in ColumnsThatBurst)
-                    {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                            }
-                        }
-                    }
-
-                    //Boost the Non Bursting Neurons
-
-                    var firingNeurons = AntiUniounWithNeuronsFiringThisCycle(burstList);
-
-                    if (firingNeurons.Count != 0)
-                    {
-                        foreach (var dendriticNeuron in firingNeurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                            }
-                        }
-                    }
-
-                    //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
-                }
-                else
-                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
-                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
-                }
-
-            }
-            else if (IsCurrentTemporal)
-            {
-                CurrentCycleState = BlockCycle.DEPOLARIZATION;
-
-                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-                foreach (var neuron in NeuronsFiringThisCycle)
-                {
-                    if (neuron.nType.Equals(NeuronType.NORMAL))
-                    {
-                        foreach (var temporalContributor in temporalContributors)
-                        {
-                            if (neuron.DidItContribute(temporalContributor))
-                            {
-                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron);
-                            }
-                        }
-                    }
-                }
-            }
-            else if (IsCurrentApical)
-            {
-                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-
-                CurrentCycleState = BlockCycle.DEPOLARIZATION;
-
-                foreach (var neuron in NeuronsFiringThisCycle)
-                {
-                    foreach (var apicalContributor in apicalContributors)
-                    {
-                        if (neuron.DidItContribute(apicalContributor))
-                        {
-                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron);
-                        }
-                    }
-                }
-            }
-        }
 
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
@@ -1389,11 +1580,6 @@
             }
         }
 
-        public string PrintBlockDetailsSingleLine()
-        {
-            return " Unit ID X :" + UnitId.X + " Unit ID Y : " + UnitId.Y + "/ BBM ID : " + BBMID.ToString();
-        }
-
         private void PrintBlockDetails()
         {
             Console.Write("Block ID : X : " + BlockId.X.ToString() + " Y :" + BlockId.Y.ToString());
@@ -1401,196 +1587,39 @@
             Console.WriteLine("BBM ID : " + BBMID);
         }
 
-        public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
+        private void PrepNetworkForNextCycle()
         {
-            List<Neuron> contributingList = new List<Neuron>();
+            PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count * 100 / (X * Y * Z));
 
-            //If bursting then 
-            //if (predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
-            //{
-            //    int breakpoint = 1;
-            //}
-
-            //Need to check if the synapse is active and only then add it to the list            
-            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+            if (PerCycleFireSparsityPercentage > 20)
             {
-                contributingList.Add(contributingNeuron);
-            }
-            else
-            {
-                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
             }
 
-            return true;
+            NeuronsFiringLastCycle.Clear();
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                if (neuron.nType.Equals(NeuronType.NORMAL))
+                    NeuronsFiringLastCycle.Add(neuron);
+            }
+
+            PredictedNeuronsforThisCycle.Clear();
+
+            foreach (var kvp in PredictedNeuronsForNextCycle)
+            {
+                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
+            }
+
+            if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
+            {
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted NEurons should not exceed more than 10% of Network size");
+
+                //Console.ReadKey();
+            }
+
+            PredictedNeuronsForNextCycle.Clear();
         }
-
-
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
-        {
-            // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
-            //if (cType == ConnectionType.DISTALDENDRITICNEURON)
-            //{
-            //    if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
-            //    {
-            //        bool breakpoint = false;
-            //        breakpoint = true;
-            //    }
-            //}
-
-            if (AxonalNeuron == null || DendriticNeuron == null)
-            {
-                return false;
-            }
-            else if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
-            {
-                // Post Init Temporal / Apical Neurons should not connect with anybody else.
-                throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
-            }
-            else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
-            {
-                Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
-                Thread.Sleep(2000);                                                                                                                                                      //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
-                return false;
-            }
-            else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
-            {
-                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
-                Thread.Sleep(2000);
-                return false;
-            }
-
-            if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
-            {
-                Console.WriteLine(" EVENT :: ConnectTwoNeurons :::: Neuron inelgible to be have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
-
-                PruneSingleNeuron(DendriticNeuron);
-
-                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
-                {
-                    Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
-                    Thread.Sleep(1000);
-                }
-            }
-
-            //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
-            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad);
-
-            if (IsAxonalConnectionSuccesful)
-            {
-                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType);
-
-                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
-                {
-                    TotalDistalDendriticConnections++;
-                }
-
-                if (IsDendronalConnectionSuccesful && (Mode == LogMode.All || Mode == LogMode.Info))
-                {
-                    Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
-                }
-                else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised : Throw;
-                {
-                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == false)
-                    {
-                        Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        Thread.Sleep(5000);
-                    }
-
-                    throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());
-                }
-
-                return true;
-            }
-            else
-            {
-
-            }
-
-            return false;
-        }
-
-        public bool CheckifBothNeuronsAreSameOrintheSameColumn(Neuron neuron1, Neuron neuron2) =>
-            neuron1.NeuronID.X == neuron2.NeuronID.X && neuron1.NeuronID.Y == neuron2.NeuronID.Y;
-
-        public Neuron GetNeuronFromPosition(Position_SOM pos)
-            => Columns[pos.X, pos.Y].Neurons[pos.Z];
-
-        public Neuron GetNeuronFromPosition(char w, int x, int y, int z)
-        {
-            Neuron toReturn = null;
-
-            if (w == 'N' || w == 'n')
-            {
-                toReturn = Columns[x, y].Neurons[z];
-            }
-            else if (w == 'T' || w == 't')
-            {
-                toReturn = TemporalLineArray[y, z];
-            }
-            else if (w == 'A' || w == 'a')
-            {
-                toReturn = ApicalLineArray[x, y];
-            }
-            else
-            {
-                throw new InvalidOperationException(" GetNeuronFromPosition :: Your Column structure is messed up!!!");
-            }
-
-            return toReturn;
-        }
-
-        public Neuron GetNeuronFromString(string posString)
-        {
-            var parts = posString.Split('-');
-            int x = Convert.ToInt32(parts[0]);
-            int y = Convert.ToInt32(parts[1]);
-            int z = Convert.ToInt32(parts[2]);
-            char nType = 'N';
-
-            if (parts.Length == 4)
-            {
-                nType = Convert.ToChar(parts[3]);
-            }
-
-            if (x > X || y > Y || z > Z)
-            {
-                int breakpoint = 1;
-
-                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns  posString :  " + posString);
-            }
-
-            return GetNeuronFromPosition(nType, x, y, z);
-        }
-
-        public SDR_SOM GetPredictedSDR()
-        {
-            List<Position_SOM> ActiveBits = new List<Position_SOM>();
-
-            foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
-            {
-                var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
-
-                if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
-                    ActiveBits.Add(pos);
-            }
-
-            //ActiveBits.Sort();
-
-            return new SDR_SOM(X, Y, ActiveBits, iType.SPATIAL);
-        }
-
-        public SDR_SOM GetAllFiringNeuronsThisCycle()
-        {
-            List<Position_SOM> activeBits = new List<Position_SOM>();
-
-            NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
-
-            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
-        }
-
-        #endregion
-
-        #region PRIVATE METHODS
 
         private List<Neuron> AntiUniounWithNeuronsFiringThisCycle(List<Neuron> burstList)
         {

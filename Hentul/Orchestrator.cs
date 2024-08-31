@@ -206,15 +206,22 @@ namespace Hentul
 
             POINT currentMousePosition = GetCurrentPointerPosition();
 
+            if(DecideNarroOrBroadScope())
+            {
+                // Do narrow scope 
+            }
+            else
+            {
+                // Do broad scope
+            }
+           
 
         }
 
-
-        private void ExploreOneSingleObjectObject()
+        private bool DecideNarowOrBroadScope()
         {
-
+            
         }
-
 
         private void ProcessBlock()
         {
