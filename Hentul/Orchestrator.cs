@@ -178,7 +178,10 @@ namespace Hentul
         public void DetectObject()
         {
             if (Objects == null || Objects.Count == 0)
+            {
                 LearnFirstObject();
+                // LTP on 3a and 4. for the new object. send out SDRs that need to map for 3a 
+            }
 
             //Traverse through Object Maps and what sensory inputs are telling you.
 
@@ -196,9 +199,9 @@ namespace Hentul
         /// 2. How to handle 2 different types of feed processing ? Narrow vs Broad fields of vision.
         /// 
         /// ALGORITHM : 
-        /// 1. Get Current Position of the Mouse Pointer and get current Screen Measurements
-        /// 2. 
-        /// 
+        /// 1. Get Current Position of the Mouse Pointer and get current Screen Measurements.
+        /// 2. Run around the object trying to figure out the object, go to as many unexplored locations on the object as possible.
+        /// 3. After you feel you have explored all the points on the object , concurrently keep storing all the locations onto the new unrecognised Object.                
         /// </summary>
         private void LearnFirstObject()
         {
@@ -206,7 +209,7 @@ namespace Hentul
 
             POINT currentMousePosition = GetCurrentPointerPosition();
 
-            if(DecideNarroOrBroadScope())
+            if(DecideNarrowOrBroadScope())
             {
                 // Do narrow scope 
             }
