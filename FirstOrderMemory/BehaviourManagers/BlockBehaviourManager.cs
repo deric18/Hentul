@@ -591,18 +591,25 @@
 			 * Q's :
 			 * What connections should be specifically strengthened ? and to what level should each connection be strengthened ?
 			 * Apical Connections will only be strengthend , Should Temporal location signals should also be LTP'd ? No.
+			 * 
             ALGO :: 
             1. Maintain a Delta of all the new connections that has happened for the brief period of time which truly lead to the discovery of the new object.
             2. If LTP is called that means this new batch was effective in recognising the object so strengthen these new connections.
+
             IMPLEMENTATION :
-            1. Analyse() method to check what changes have been made from the last run iteration to compute delta.
-            2. If LTP() is called start boosting connections
-            3. Need UT, CTs, & SVTs  for verifyign these connections are true and correct
+            1. Run through the SDR and wire up the incoming apical connection with the respective neuron.
+            2. Both Apical SDR corresponds to the existing neuronal structure , No transformations needed.
+            3.  
+            4. Need UT, CTs, & SVTs  for verifyign these connections are true and correct
 
             */
 
+            foreach(var positions in feedbackSignal.ActiveBits)
+            {
 
+                // LTP from 3a - 4 is mostly for circuitry wiring , since this is hard wiring these connections for Burst Prevention for future post object recognition for figuring out better computation of error in prediction.
 
+            }
 
         }
 
