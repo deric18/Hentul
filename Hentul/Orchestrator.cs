@@ -92,9 +92,7 @@ namespace Hentul
 
             ImageList = AddAllTheFruits();
 
-
             Init();
-
 
             Console.WriteLine("Loading Image : " + ImageList[ImageIndex].ToString().Split(new char[1] { '\\' })[7]);
 
@@ -155,20 +153,25 @@ namespace Hentul
 
 
 
-       
+        /// <summary>
+        /// Orchestration Engine
+        /// </summary>
         public void StartCycle()
-        {
+        {            
 
             while (true)
             {
-                LearnFirstObject();
+                //Check how big the entire creen / image is and kee papring through all the objects.
+
+                DetectObject();
+                StoreObject();
+                MoveToNextObject();
 
             }
 
 
         }
-
-
+     
         /// <summary>
         /// PROBLEMS:
         /// 
@@ -180,15 +183,23 @@ namespace Hentul
             if (Objects == null || Objects.Count == 0)
             {
                 LearnFirstObject();
-                // LTP on 3a and 4. for the new object. send out SDRs that need to map for 3a 
+
+                // Push new object representation to 3A
+                // Push Wiring Burst Avoiding LTP to 4 from 3A.
+                
             }
 
             //Traverse through Object Maps and what sensory inputs are telling you.
+        }
 
+        private void MoveToNextObject()
+        {
+            throw new NotImplementedException();
+        }
 
-
-
-
+        private void StoreObject()
+        {
+            throw new NotImplementedException();
         }
 
 
@@ -209,21 +220,32 @@ namespace Hentul
 
             POINT currentMousePosition = GetCurrentPointerPosition();
 
-            if(DecideNarrowOrBroadScope())
+            switch (GetScope())
             {
-                // Do narrow scope 
-            }
-            else
-            {
-                // Do broad scope
+                case VisionScope.NarrowScope:
+                    {
+                        break;
+                    }
+                case VisionScope.ObjectScope:
+                    {
+                        break;
+                    }
+                case VisionScope.BroadScope:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
             }
            
 
         }
 
-        private bool DecideNarowOrBroadScope()
+        private VisionScope GetScope()
         {
-            
+            throw new NotImplementedException();
         }
 
         private void ProcessBlock()
@@ -333,7 +355,6 @@ namespace Hentul
 
         }
 
-
         public void Update()
         {
             //Update current Position
@@ -439,5 +460,12 @@ namespace Hentul
 
             return nextMinNumberOfPixels;
         }
+    }
+
+    public enum VisionScope
+    {
+        BroadScope,
+        ObjectScope,
+        NarrowScope
     }
 }
