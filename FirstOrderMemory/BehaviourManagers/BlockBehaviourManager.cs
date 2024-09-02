@@ -7,6 +7,7 @@
     public class BlockBehaviourManager
     {
         #region VARIABLES
+        public LayerType Layer { get; private set; }
 
         public ulong CycleNum { get; private set; }
 
@@ -115,7 +116,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 10, LogMode mode = LogMode.BurstOnly)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 10, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly)
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -177,6 +178,8 @@
             schemToLoad = SchemaType.INVALID;
 
             WireCasesTracker = new ulong[5];
+
+            this.Layer = layertype;
         }
 
         public void Init(int blockid_x, int blockId_Y, int UnitId_x, int UnitID_y, int bbmID)
@@ -604,19 +607,9 @@
 
             */
 
-            foreach(var positions in feedbackSignal.ActiveBits)
-            {
+            throw new NotImplementedException();
 
-                // LTP from 3a - 4 is mostly for circuitry wiring , since this is hard wiring these connections for Burst Prevention for future post object recognition for figuring out better computation of error in prediction.
-
-            }
-
-        }
-
-        private void  Analyse()
-        { 
-            //Compute Delta
-        }
+        }      
 
         private void Fire()
         {
@@ -1133,6 +1126,17 @@
         #endregion
 
         #region PRIVATE METHODS
+
+        private void LTPApicalNeurons(Neuron ApicalNeuron, Neuron NormalNeuron)
+        {
+            if(!NormalNeuron.GetMyApicalPartner().Equals(ApicalNeuron.NeuronID.ToString()))
+            {
+                throw new InvalidOperationException("Cannot Boost connectivity of a non Apical Neuron to Normal Neuron");
+            }
+
+
+
+        }
 
         private void ValidateNetwork()
         {
@@ -2099,6 +2103,14 @@
         #endregion
 
         #region ENUMS
+
+        public enum LayerType
+        {
+            Layer_4,
+            Layer_3A,
+            Layer_3B,
+            UNKNOWN
+        }
 
         public enum SchemaType
         {

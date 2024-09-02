@@ -102,7 +102,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4 ,BlockBehaviourManager.LogMode.BurstOnly);
             }
 
             if (isMock)
