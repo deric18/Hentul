@@ -6,10 +6,38 @@
     using System.Diagnostics;
     using Common;
     using FirstOrderMemory.Models.Encoders;
-    using SixLabors.ImageSharp;
+    using System.Runtime.InteropServices;
+    using System;    
+    using HentulWinforms.Hippocampal_Entorinal_complex;
 
     internal class Orchestrator
     {
+
+        public struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+
+        #region DLLImport
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetCursorPos(out POINT lpPoint);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetWindowDC(IntPtr window);
+        [DllImport("gdi32.dll", SetLastError = true)]
+        public static extern uint GetPixel(IntPtr dc, int x, int y);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int ReleaseDC(IntPtr window, IntPtr dc);
+        [DllImport("User32.Dll")]
+        public static extern long SetCursorPos(int x, int y);
+        [DllImport("User32.Dll")]
+        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+        #endregion
+
+
         #region Used Variables
 
         public int NumPixelsToProcessPerBlock { get; private set; }
@@ -19,6 +47,8 @@
         public int NumBBMNeeded { get; private set; }
 
         private bool LogMode { get; set; }
+
+        Dictionary<string, BaseObject> Objects { get; set; }
 
         public bool IsMock { get; private set; }
 
@@ -42,11 +72,15 @@
 
         public ulong CycleNum;
 
+        public POINT point;
+
         public List<string> ImageList { get; private set; }
 
         public int blackPixelCount = 0;
 
         public Bitmap bmp;
+
+        public int range;
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -60,7 +94,11 @@
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
 
+            this.range = range;
+
             NumPixelsToProcessPerBlock = range;
+
+            bmp = new Bitmap(range + range, range + range);
 
             numPixelsProcessedPerBBM = 20;
 
@@ -108,18 +146,169 @@
                 ImageIndex = mockImageIndex;
             else
                 ImageIndex = 0;
-                
+
 
             MockBlockNumFires = new int[NumBBMNeeded];
-
-
-            ImageList = AddAllTheFruits();
-
-
 
             LoadFOMnBOM();
 
         }
+
+
+        public void StartCycle()
+        {
+            while (true)
+            {
+                //Check how big the entire creen / image is and kee papring through all the objects.
+
+                DetectObject();
+                StoreObject();
+                MoveToNextObject();
+
+            }
+        }
+
+        /// <summary>
+        /// PROBLEMS:
+        /// 
+        /// ALGORITHM:
+        /// 
+        /// </summary>
+        public void DetectObject()
+        {
+            if (Objects == null || Objects.Count == 0)
+            {
+                if (LearnFirstObject())
+                {
+                    // Push new object representation to 3A
+                    // Push Wiring Burst Avoiding LTP to 4 from 3A.
+                }
+            }
+
+            //Traverse through Object Maps and what sensory inputs are telling you.
+        }
+
+        private void MoveToNextObject()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void StoreObject()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// 
+        /// PROBLEMS:
+        /// 1. How to figure out on the current mouse position whether if its on an object and how to traverse through the object of the object itself is bigger than the current visual radius.
+        /// 2. How to handle 2 different types of feed processing ? Narrow vs Broad fields of vision.
+        /// 
+        /// ALGORITHM : 
+        /// 1. Get Current Position of the Mouse Pointer and get current Screen Measurements.
+        /// 2. Run around the object trying to figure out the object, go to as many unexplored locations on the object as possible.
+        /// 3. After you feel you have explored all the points on the object , concurrently keep storing all the locations onto the new unrecognised Object.                
+        /// </summary>
+        private bool LearnFirstObject()
+        {
+            //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.
+
+            POINT currentMousePosition = GetCurrentPointerPosition();
+
+            switch (GetScope())
+            {
+                case VisionScope.NarrowScope:       // High Detail In-Object Scope
+                    {
+
+                        break;
+                    }
+                case VisionScope.ObjectScope:       // Fully View of Object
+                    {
+                        break;
+                    }
+                case VisionScope.BroadScope:        // complete visual view at capacity.
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+
+            return true;
+        }
+
+        private VisionScope GetScope()
+        {
+            VisionScope scopeToReturn = VisionScope.NarrowScope;
+
+            bool makesSense = false;
+
+            while (makesSense != false)
+            {
+
+                // Get Screen Pixel Values 
+
+                // Analyse
+
+                // Increase or decrease Scope && try again
+
+                makesSense = DoesItMakeSense();
+            }
+
+            return scopeToReturn;
+        }
+
+        private bool DoesItMakeSense()
+        {
+            // Check if cursor is currently on top of an object or just screen saver ?
+            //If object , check what is the size of the object and return the dimension needed to cover the whole object.
+            AdjustScopetoNearestObject();
+
+
+            //if Scope is not on Object then return broad scope to grab the whole screen view with lower pixel rate.
+            GrabWholeScreen();
+
+            return true;
+
+        }
+
+        private Bitmap GrabWholeScreen()
+        {
+
+            // Bitmap bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            throw new NotImplementedException();
+
+
+
+        }
+
+        //private void CaptureScreen()
+        //{
+        //    System.Drawing.Rectangle bounds = Screen.PrimaryScreen.Bounds;
+
+        //    Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
+
+        //    using (Graphics graphics = Graphics.FromImage(bitmap))
+        //    {
+        //        graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+        //    }
+
+        //    return bitmap;
+        //}
+
+        private void AdjustScopetoNearestObject()
+        {
+            POINT p = GetCurrentPointerPosition();
+
+
+
+
+
+        }
+
 
         public void LoadFOMnBOM()
         {
@@ -148,22 +337,6 @@
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
-        private List<string> AddAllTheFruits()
-        {
-            var dict = new List<string>();
-
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Ananas.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\orange.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\bannana.jpg");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\grapes.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\watermelon.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\white.png");
-
-            return dict;
-        }
-
         public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
         {
             //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
@@ -188,74 +361,70 @@
             int num_pixels_per_Unit_x = 10;
             int num_pixels_per_Unit_y = 10;
 
-            using (Image image = Image.Load(ImageList[ImageIndex++]))
+            for (int reps = 0; reps < TotalReps; reps++)
             {
-
-                for (int reps = 0; reps < TotalReps; reps++)
+                for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
                 {
-                    for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
+                    for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
                     {
-                        for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
+                        int bbmId = 0;
+
+                        for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
                         {
-                            int bbmId = 0;
-
-                            for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+                            for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
                             {
-                                for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
+                                BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+
+                                for (int j = 0; j < num_pixels_per_Unit_x; j++)
                                 {
-                                    BoolEncoder boolEncoder = new BoolEncoder(100, 20);
-
-                                    for (int j = 0; j < num_pixels_per_Unit_x; j++)
+                                    for (int i = 0; i < num_pixels_per_Unit_y; i++)
                                     {
-                                        for (int i = 0; i < num_pixels_per_Unit_y; i++)
+                                        int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+                                        int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
+
+                                        //if the pixel is Black then tag the pixel location
+
+                                        if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
                                         {
-                                            int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                            int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-                                            //if the pixel is Black then tag the pixel location
-
-                                            if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-                                            {
-                                                int bp = 1;
-                                            }
-
-                                            if (CheckifPixelisBlack(pixel_x, pixel_y))
-                                            {
-
-                                                var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-                                                boolEncoder.SetEncoderValues(dataToEncode);
-
-                                            }
+                                            int bp = 1;
                                         }
 
-                                        if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                        if (CheckifPixelisBlack(pixel_x, pixel_y))
                                         {
-                                            if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
-                                            {
-                                                fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
-                                            }
 
-                                            if (boolEncoder.HasValues())
-                                            {
-                                                CycleNum++;
+                                            var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
+                                            boolEncoder.SetEncoderValues(dataToEncode);
 
-                                                var imageSDR = boolEncoder.Encode(iType.SPATIAL);
-
-                                                fomBBM[bbmId++].Fire(imageSDR);
-
-                                                SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-                                                if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-                                                {
-                                                    fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-                                                    somBBM.Fire(fomSDR);
-                                                }
-
-                                            }
-
-                                            boolEncoder.ClearEncoderValues();
                                         }
+                                    }
+
+                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+                                    {
+                                        if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
+                                        {
+                                            fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                        }
+
+                                        if (boolEncoder.HasValues())
+                                        {
+                                            CycleNum++;
+
+                                            var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+
+                                            fomBBM[bbmId++].Fire(imageSDR);
+
+                                            SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+
+                                            if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
+                                            {
+                                                fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
+
+                                                somBBM.Fire(fomSDR);
+                                            }
+
+                                        }
+
+                                        boolEncoder.ClearEncoderValues();
                                     }
                                 }
                             }
@@ -264,8 +433,8 @@
                 }
             }
 
-            PrintMoreBlockVitals();
 
+            PrintMoreBlockVitals();
 
             BackUp();
 
@@ -276,6 +445,119 @@
             Console.WriteLine("Done Processing Image");
 
             Console.Read();
+        }
+
+        public void Grab()
+        {
+            
+            Console.WriteLine("Grabbing cursor Position");
+
+            //Console.CursorVisible = false;
+
+            POINT Point = this.GetCurrentPointerPosition();
+            
+
+            //Console.CursorVisible = true;
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int x1 = Point.X - range < 0 ? 0 : Point.X - range;
+            int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
+            int x2 = Math.Abs(Point.X + range);
+            int y2 = Math.Abs(Point.Y + range);
+
+            this.GetColorByRange(x1, y1, x2, y2);
+        }
+       
+
+        // Already grey scalled.
+        private void GetColorByRange(int x1, int y1, int x2, int y2)
+        {
+            IntPtr desk = GetDesktopWindow();
+
+            IntPtr dc = GetWindowDC(desk);
+
+
+            for (int i = x1, k = 0; i < x2 && k < range + range; i++, k++)
+            {
+                for (int j = y1, l = 0; j < y2 && l < range + range; j++, l++)
+                {
+                    int a = (int)GetPixel(dc, i, j);
+
+                    Color color = System.Drawing.Color.FromArgb(255,
+                                                 (a >> 0) & 0xff,
+                                                 (a >> 8) & 0xff,
+                                                 (a >> 16) & 0xff);
+
+                    bmp.SetPixel(k, l, color);
+
+                }
+
+            }            
+
+            ReleaseDC(desk, dc);            
+        }
+
+
+        // Already grey scalled.
+        private static Color GetColorAt(int x, int y)
+        {
+            IntPtr desk = GetDesktopWindow();
+
+            IntPtr dc = GetWindowDC(desk);
+
+            int a = (int)GetPixel(dc, x, y);
+
+            ReleaseDC(desk, dc);
+
+            return System.Drawing.Color.FromArgb(255,
+                                                 (a >> 0) & 0xff,
+                                                 (a >> 8) & 0xff,
+                                                 (a >> 16) & 0xff);
+        }
+
+        public void MoveCursorToSpecificPosition(int x, int y)
+        {
+            POINT p;
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            p.X = x;
+            p.Y = y;
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+        }
+
+        public void MoveCursor(POINT p)
+        {
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+        }
+
+        public POINT GetCurrentPointerPosition()
+        {
+            POINT point;
+
+            point = new POINT();
+            point.X = 0;
+            point.Y = 0;
+
+            if (GetCursorPos(out point))
+            {
+                //Console.Clear();
+                //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
+                return point;
+            }
+
+            return point;
         }
 
         private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
@@ -371,5 +653,13 @@
 
             somBBM.BackUp("SOM-1");
         }
+    }
+
+    public enum VisionScope
+    {
+        BroadScope,
+        ObjectScope,
+        NarrowScope,
+        UNKNOWN
     }
 }

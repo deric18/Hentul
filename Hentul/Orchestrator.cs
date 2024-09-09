@@ -12,8 +12,7 @@ namespace Hentul
     using FirstOrderMemory.Models;
     using FirstOrderMemory.BehaviourManagers;
     using System.Diagnostics;
-    using System.Drawing;
-    using SixLabors.ImageSharp;
+    using System.Drawing;    
     using Image = SixLabors.ImageSharp.Image;
     using FirstOrderMemory.Models.Encoders;
 
@@ -157,8 +156,7 @@ namespace Hentul
         /// Orchestration Engine
         /// </summary>
         public void StartCycle()
-        {            
-
+        {
             while (true)
             {
                 //Check how big the entire creen / image is and kee papring through all the objects.
@@ -168,10 +166,8 @@ namespace Hentul
                 MoveToNextObject();
 
             }
-
-
         }
-     
+
         /// <summary>
         /// PROBLEMS:
         /// 
@@ -182,11 +178,11 @@ namespace Hentul
         {
             if (Objects == null || Objects.Count == 0)
             {
-                LearnFirstObject();
-
-                // Push new object representation to 3A
-                // Push Wiring Burst Avoiding LTP to 4 from 3A.
-                
+                if (LearnFirstObject())
+                {
+                    // Push new object representation to 3A
+                    // Push Wiring Burst Avoiding LTP to 4 from 3A.
+                }
             }
 
             //Traverse through Object Maps and what sensory inputs are telling you.
@@ -214,7 +210,7 @@ namespace Hentul
         /// 2. Run around the object trying to figure out the object, go to as many unexplored locations on the object as possible.
         /// 3. After you feel you have explored all the points on the object , concurrently keep storing all the locations onto the new unrecognised Object.                
         /// </summary>
-        private void LearnFirstObject()
+        private bool LearnFirstObject()
         {
             //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.
 
@@ -222,15 +218,15 @@ namespace Hentul
 
             switch (GetScope())
             {
-                case VisionScope.NarrowScope:
+                case VisionScope.NarrowScope:       // High Detail In-Object Scope
                     {
                         break;
                     }
-                case VisionScope.ObjectScope:
+                case VisionScope.ObjectScope:       // Fully View of Object
                     {
                         break;
                     }
-                case VisionScope.BroadScope:
+                case VisionScope.BroadScope:        // complete visual view at capacity.
                     {
                         break;
                     }
@@ -239,13 +235,77 @@ namespace Hentul
                         break;
                     }
             }
-           
 
+            return true;
         }
 
         private VisionScope GetScope()
         {
+            VisionScope scopeToReturn = VisionScope.UNKNOWN;
+
+            bool makesSense = false;
+
+            while (makesSense != false)
+            {
+
+                // Get Screen Pixel Values 
+
+                // Analyse
+
+                // Increase or decrease Scope && try again
+
+                makesSense = DoesItMakeSense();
+            }
+
+            return scopeToReturn;
+        }
+
+        private bool DoesItMakeSense()
+        {
+            // Check if cursor is currently on top of an object or just screen saver ?
+            //If object , check what is the size of the object and return the dimension needed to cover the whole object.
+            AdjustScopetoNearestObject();
+
+
+            //if Scope is not on Object then return broad scope to grab the whole screen view with lower pixel rate.
+            GrabWholeScreen();
+
+            return true;
+
+        }
+
+        private Bitmap GrabWholeScreen()
+        {
+
+            // Bitmap bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             throw new NotImplementedException();
+
+
+
+        }
+
+        //private void CaptureScreen()
+        //{
+        //    System.Drawing.Rectangle bounds = Screen.PrimaryScreen.Bounds;
+
+        //    Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
+
+        //    using (Graphics graphics = Graphics.FromImage(bitmap))
+        //    {
+        //        graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+        //    }
+
+        //    return bitmap;
+        //}
+
+        private void AdjustScopetoNearestObject()
+        {
+            POINT p = GetCurrentPointerPosition();
+
+
+
+
+
         }
 
         private void ProcessBlock()
@@ -362,6 +422,16 @@ namespace Hentul
         }
 
 
+        private static System.Drawing.Color GetColorAt(int x, int y)
+        {
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+            int a = (int)GetPixel(dc, x, y);
+            ReleaseDC(desk, dc);
+            return System.Drawing.Color.FromArgb(255, (a >> 0) & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff);
+        }
+
+
         public void UpdateGridCellMap()
         {
 
@@ -461,11 +531,11 @@ namespace Hentul
             return nextMinNumberOfPixels;
         }
     }
-
     public enum VisionScope
     {
         BroadScope,
         ObjectScope,
-        NarrowScope
+        NarrowScope,
+        UNKNOWN
     }
 }
