@@ -36,7 +36,10 @@ namespace HentulWinforms
             labelX = new Label();
             labelY = new Label();
             recache = new Button();
+            EdgedImage = new PictureBox();
+            readyLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
             // 
             // StartButton
@@ -66,7 +69,6 @@ namespace HentulWinforms
             labelX.Size = new Size(39, 15);
             labelX.TabIndex = 2;
             labelX.Text = "labelX";
-            labelX.Click += label1_Click;
             // 
             // labelY
             // 
@@ -87,12 +89,31 @@ namespace HentulWinforms
             recache.UseVisualStyleBackColor = true;
             recache.Click += button1_Click;
             // 
+            // EdgedImage
+            // 
+            EdgedImage.Location = new Point(1059, 210);
+            EdgedImage.Name = "EdgedImage";
+            EdgedImage.Size = new Size(250, 168);
+            EdgedImage.TabIndex = 5;
+            EdgedImage.TabStop = false;
+            // 
+            // readyLabel
+            // 
+            readyLabel.AutoSize = true;
+            readyLabel.Location = new Point(551, 247);
+            readyLabel.Name = "readyLabel";
+            readyLabel.Size = new Size(38, 15);
+            readyLabel.TabIndex = 6;
+            readyLabel.Text = "label1";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(readyLabel);
+            Controls.Add(EdgedImage);
             Controls.Add(recache);
             Controls.Add(labelY);
             Controls.Add(labelX);
@@ -102,6 +123,7 @@ namespace HentulWinforms
             Text = "Form1";
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)CurrentImage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)EdgedImage).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -118,5 +140,7 @@ namespace HentulWinforms
         private Label labelX;
         private Label labelY;
         private Button recache;
+        private PictureBox EdgedImage;
+        private Label readyLabel;
     }
 }

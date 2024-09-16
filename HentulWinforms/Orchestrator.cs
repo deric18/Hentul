@@ -38,6 +38,8 @@
         #endregion
 
 
+        #region CONSTRUCTOR 
+
         #region Used Variables
 
         public int NumPixelsToProcessPerBlock { get; private set; }
@@ -58,7 +60,9 @@
 
         public BlockBehaviourManager[] fomBBM { get; private set; }
 
-        public BlockBehaviourManager somBBM { get; private set; }
+        public BlockBehaviourManager somBBM_L3B { get; private set; }
+
+        public BlockBehaviourManager somBBM_L3A { get; private set; }
 
         public int[] MockBlockNumFires { get; private set; }
 
@@ -150,10 +154,42 @@
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
-            LoadFOMnBOM();
+            LoadFOMnSOM();
 
         }
 
+
+        public void LoadFOMnSOM()
+        {
+
+            Console.WriteLine("Starting Initialization  of FOM objects : \n");
+
+
+            for (int i = 0; i < NumBBMNeeded; i++)
+            {
+                fomBBM[i].Init(0, 0, 1, 1, 10);
+            }
+
+
+            Console.WriteLine("Finished Init for this Instance \n");
+            Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
+            Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
+
+
+            Console.WriteLine("Initing SOM Instance now ... \n");
+
+            somBBM_L3A.Init(0, 0, 0, 0, 1);
+
+            somBBM_L3B.Init(0, 0, 0, 0, 1);
+
+            Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
+
+            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
+        }
+
+
+        #endregion
 
         public void StartCycle()
         {
@@ -193,11 +229,13 @@
             throw new NotImplementedException();
         }
 
-        private void StoreObject()
+        private void StoreObject() 
         {
             throw new NotImplementedException();
         }
 
+
+        #region PRIVATE HELPER METHODS
 
         /// <summary>
         /// 
@@ -212,23 +250,51 @@
         /// </summary>
         private bool LearnFirstObject()
         {
-            //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.
+            //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.            
+
+            while (true)
+            {
+                GrabChunk();
+                ProcessChunk();
+            }
+           
+
+            return true;
+        }
+
+        private void GrabChunk()
+        {
+
+        }
+
+        private void ProcessChunk()
+        {
+            // -> L4, -> L3b, L3b -> HP -> output , DoesItMatch Expectation ? y ? Get 5 more confirmations and store model : work on the second prediction if there is 
+
+
+
+
+        }
+
+
+        private void GetPixelsAsPerScope()
+        {
 
             POINT currentMousePosition = GetCurrentPointerPosition();
+
 
             switch (GetScope())
             {
                 case VisionScope.NarrowScope:       // High Detail In-Object Scope
-                    {
-
+                    {                        
                         break;
                     }
                 case VisionScope.ObjectScope:       // Fully View of Object
-                    {
+                    {                        
                         break;
                     }
                 case VisionScope.BroadScope:        // complete visual view at capacity.
-                    {
+                    {                        
                         break;
                     }
                 default:
@@ -236,9 +302,23 @@
                         break;
                     }
             }
-
-            return true;
         }
+
+        private void GetNarrowcopePixelValues()
+        {
+
+        }
+
+        private void GetObjectScopePixelValues()
+        {
+
+        }
+
+        private void GetBroaderScopeValues()
+        {
+
+        }
+
 
         private VisionScope GetScope()
         {
@@ -260,6 +340,8 @@
 
             return scopeToReturn;
         }
+
+
 
         private bool DoesItMakeSense()
         {
@@ -285,19 +367,7 @@
 
         }
 
-        //private void CaptureScreen()
-        //{
-        //    System.Drawing.Rectangle bounds = Screen.PrimaryScreen.Bounds;
-
-        //    Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
-
-        //    using (Graphics graphics = Graphics.FromImage(bitmap))
-        //    {
-        //        graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
-        //    }
-
-        //    return bitmap;
-        //}
+   
 
         private void AdjustScopetoNearestObject()
         {
@@ -309,33 +379,6 @@
 
         }
 
-
-        public void LoadFOMnBOM()
-        {
-
-            Console.WriteLine("Starting Initialization  of FOM objects : \n");
-
-
-            for (int i = 0; i < NumBBMNeeded; i++)
-            {
-                fomBBM[i].Init(0, 0, 1, 1, 10);
-            }
-
-
-            Console.WriteLine("Finished Init for this Instance \n");
-            Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
-            Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
-
-
-            Console.WriteLine("Initing SOM Instance now ... \n");
-
-            somBBM.Init(0, 0, 0, 0, 1);
-
-            Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
-
-            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
-        }
 
         public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
         {
@@ -467,6 +510,7 @@
             int y2 = Math.Abs(Point.Y + range);
 
             this.GetColorByRange(x1, y1, x2, y2);
+
         }
        
 
@@ -653,6 +697,8 @@
 
             somBBM.BackUp("SOM-1");
         }
+
+        #endregion
     }
 
     public enum VisionScope
