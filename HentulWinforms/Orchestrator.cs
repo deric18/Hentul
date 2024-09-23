@@ -131,7 +131,7 @@
 
             int x1 = 10 * NumBBMNeeded;
 
-            somBBM = new BlockBehaviourManager(x1, 10, 4);
+            somBBM_L3B = new BlockBehaviourManager(x1, 10, 4);
 
             NumColumns = 10;
 
@@ -151,6 +151,10 @@
             else
                 ImageIndex = 0;
 
+
+            somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
+
+            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -462,7 +466,7 @@
                                             {
                                                 fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
 
-                                                somBBM.Fire(fomSDR);
+                                                somBBM_L3B.Fire(fomSDR);
                                             }
 
                                         }
@@ -695,7 +699,7 @@
                 fomBBM[i].BackUp(i.ToString());
             }
 
-            somBBM.BackUp("SOM-1");
+            somBBM_L3B.BackUp("SOM-1");
         }
 
         #endregion

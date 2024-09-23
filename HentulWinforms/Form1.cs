@@ -8,7 +8,7 @@ namespace HentulWinforms
     public partial class Form1 : Form
     {
         Orchestrator orchestrator;
-        readonly int numPixels = 25;
+        readonly int numPixels = 50;
 
         public Form1()
         {
@@ -61,7 +61,6 @@ namespace HentulWinforms
             orchestrator.Grab();
 
             EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
 
         }
 

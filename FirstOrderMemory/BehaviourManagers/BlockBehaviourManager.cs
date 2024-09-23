@@ -444,6 +444,8 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
+
+
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
@@ -473,7 +475,7 @@
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 if (Mode == LogMode.BurstOnly || Mode == LogMode.All)
-                                    Console.WriteLine("BURST :: " + schemToLoad.ToString() + ( schemToLoad.Equals(SchemaType.FOMSCHEMA) ? " Block ID : " + PrintBlockDetailsSingleLine() : " SOM Block " ) + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    Console.WriteLine("BURST :: " + schemToLoad.ToString() + (schemToLoad.Equals(SchemaType.FOMSCHEMA) ? " Block ID : " + PrintBlockDetailsSingleLine() : " SOM Block ") + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
 
@@ -586,8 +588,7 @@
             ValidateNetwork();
         }
 
-
-        public void  LTP(SDR_SOM feedbackSignal)
+        public void LTP(SDR_SOM feedbackSignal)
         {
 
             /* FUNCTION : Recognise new connections made while recognising the new objects which did not exist before.
@@ -609,7 +610,7 @@
 
             throw new NotImplementedException();
 
-        }      
+        }
 
         private void Fire()
         {
@@ -629,10 +630,166 @@
             }
         }
 
+        private void PostCycleCleanup()
+        {
+
+
+            //Todo : Need Selective Clean Up Logic , Should never perform Full Clean up.
+
+
+            foreach (var neuronList in PredictedNeuronsforThisCycle)
+            {
+
+                var neuron = GetNeuronFromString(neuronList.Key);
+
+                if (neuron.Voltage >= 250 && NeuronsFiringThisCycle.Contains(neuron) == false)
+                {
+                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " BLOCK ID : " + BlockId.ToString() + " Neuron ID : " + neuron.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    Thread.Sleep(3000);
+                }
+            }
+
+            //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
+            if (PreviousBlockCycle.Equals(BlockCycle.DEPOLARIZATION) && CurrentCycleState.Equals(BlockCycle.FIRING))
+            {
+                if (TemporalCycleCache.Count == 1)
+                {
+                    foreach (var kvp in TemporalCycleCache)
+                    {
+                        if (CycleNum - kvp.Key > 3)
+                        {
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
+                            Thread.Sleep(2000);
+                        }
+
+                        foreach (var pos in kvp.Value)
+                        {
+                            if (pos.X == 4 && pos.Y == 2)
+                            {
+                                int breakpoint = 0;
+                            }
+                            foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
+                            {
+                                if (synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
+                                {
+                                    var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
+
+                                    if (neuronToCleanUp.Voltage != 0)
+                                    {
+                                        neuronToCleanUp.FlushVoltage();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    TemporalCycleCache.Clear();
+                }
+                else if (TemporalCycleCache.Count > 1)
+                {
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1" + PrintBlockDetailsSingleLine());
+
+                    throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
+                }
+
+                if (ApicalCycleCache.Count == 1)
+                {
+                    foreach (var kvp in ApicalCycleCache)
+                    {
+                        if (CycleNum - kvp.Key > 3)
+                        {
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                        }
+
+                        foreach (var pos in kvp.Value)
+                        {
+                            foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
+                            {
+                                if (synapse.DendronalNeuronalId != null) // && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
+                                {
+                                    var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
+
+                                    if (neuronToCleanUp.Voltage != 0)
+                                    {
+                                        neuronToCleanUp.FlushVoltage();
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ApicalCycleCache.Clear();
+                }
+                else if (ApicalCycleCache.Count > 1)
+                {
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
+                    throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
+                }
+
+                PreviousBlockCycle = BlockCycle.POLOARIZED;
+            }
+
+
+            //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up. Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
+            if (IsBurstOnly)
+            {
+                foreach (var kvp in BurstCache)
+                {
+                    if (CycleNum - kvp.Key > 3)
+                    {
+                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                    }
+
+                    foreach (var pos in kvp.Value)
+                    {
+                        for (int i = 0; i < Z; i++)
+                        {
+                            var neuronToCleanUp = Columns[pos.X, pos.Y].Neurons[i];
+
+                            if (neuronToCleanUp.Voltage != 0)
+                            {
+                                neuronToCleanUp.FlushVoltage();
+                            }
+                            else
+                            {
+                                //Console.WriteLine("WARNING :: PostCycleCleanUp ::: CASE 3 [Burwst Clean up] :::: Tried to clean up a neuron which was not depolarized!!!");
+                            }
+                        }
+                    }
+                }
+
+                BurstCache.Clear();
+            }
+
+
+            //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Keepingg them in the list will only conplicate next cycle process            
+            NeuronsFiringThisCycle.Clear();
+
+            ColumnsThatBurst.Clear();
+
+            //Every 50 Cycles Prune unused and under Firing Connections
+            if (CycleNum >= 1000 && CycleNum % 500 == 0)
+            {
+                Prune();
+
+                TotalBurstFire = 0;
+                TotalPredictionFires = 0;
+            }
+
+            IsBurstOnly = false;
+
+            CycleNum++;
+            // Process Next pattern.          
+        }
+
         private void Wire()
         {
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
-
+            
             if (CurrentCycleState.Equals(BlockCycle.FIRING))
             {
 
@@ -933,7 +1090,7 @@
         public string PrintBlockDetailsSingleLine()
         {
             return " Unit ID X :" + UnitId.X + " Unit ID Y : " + UnitId.Y + "/ BBM ID : " + BBMID.ToString();
-        }        
+        }
 
         public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
         {
@@ -1129,7 +1286,7 @@
 
         private void LTPApicalNeurons(Neuron ApicalNeuron, Neuron NormalNeuron)
         {
-            if(!NormalNeuron.GetMyApicalPartner().Equals(ApicalNeuron.NeuronID.ToString()))
+            if (!NormalNeuron.GetMyApicalPartner().Equals(ApicalNeuron.NeuronID.ToString()))
             {
                 throw new InvalidOperationException("Cannot Boost connectivity of a non Apical Neuron to Normal Neuron");
             }
@@ -1140,6 +1297,7 @@
 
         private void ValidateNetwork()
         {
+
             if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
             {
                 Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many Predictions for the size of the network ");
@@ -1204,147 +1362,6 @@
                 }
             }
 
-        }
-
-        private void PostCycleCleanup()
-        {
-            //Todo : Need Selective Clean Up Logic , Should never perform Full Clean up.
-
-            //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
-            if (PreviousBlockCycle.Equals(BlockCycle.DEPOLARIZATION) && CurrentCycleState.Equals(BlockCycle.FIRING))
-            {
-                if (TemporalCycleCache.Count == 1)
-                {
-                    foreach (var kvp in TemporalCycleCache)
-                    {
-                        if (CycleNum - kvp.Key > 3)
-                        {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
-                            Thread.Sleep(2000);
-                        }
-
-                        foreach (var pos in kvp.Value)
-                        {
-                            if (pos.X == 4 && pos.Y == 2)
-                            {
-                                int breakpoint = 0;
-                            }
-                            foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
-                            {
-                                if (synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
-                                {
-                                    var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
-
-                                    if (neuronToCleanUp.Voltage != 0)
-                                    {
-                                        neuronToCleanUp.FlushVoltage();
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    TemporalCycleCache.Clear();
-                }
-                else if (TemporalCycleCache.Count > 1)
-                {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1" + PrintBlockDetailsSingleLine());
-
-                    throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
-                }
-
-                if (ApicalCycleCache.Count == 1)
-                {
-                    foreach (var kvp in ApicalCycleCache)
-                    {
-                        if (CycleNum - kvp.Key > 3)
-                        {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
-                        }
-
-                        foreach (var pos in kvp.Value)
-                        {
-                            foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
-                            {
-                                if (synapse.DendronalNeuronalId != null) // && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
-                                {
-                                    var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
-
-                                    if (neuronToCleanUp.Voltage != 0)
-                                    {
-                                        neuronToCleanUp.FlushVoltage();
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    ApicalCycleCache.Clear();
-                }
-                else if (ApicalCycleCache.Count > 1)
-                {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
-                    throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
-                }
-
-                PreviousBlockCycle = BlockCycle.POLOARIZED;
-            }
-
-
-            //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up. Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
-            if (IsBurstOnly)
-            {
-                foreach (var kvp in BurstCache)
-                {
-                    if (CycleNum - kvp.Key > 3)
-                    {
-                        Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
-                    }
-
-                    foreach (var pos in kvp.Value)
-                    {
-                        for (int i = 0; i < Z; i++)
-                        {
-                            var neuronToCleanUp = Columns[pos.X, pos.Y].Neurons[i];
-
-                            if (neuronToCleanUp.Voltage != 0)
-                            {
-                                neuronToCleanUp.FlushVoltage();
-                            }
-                            else
-                            {
-                                //Console.WriteLine("WARNING :: PostCycleCleanUp ::: CASE 3 [Burwst Clean up] :::: Tried to clean up a neuron which was not depolarized!!!");
-                            }
-                        }
-                    }
-                }
-
-                BurstCache.Clear();
-            }
-
-
-            //Case 3: If NeuronFiringThicCycle has any Temporal / APical Firing Neurons they should be cleaned up [Thougt : The neurons have already fired and Wired , Keepign them in the list will only conplicate next cycle process            
-            NeuronsFiringThisCycle.Clear();
-            ColumnsThatBurst.Clear();
-
-
-            //Every 50 Cycles Prune unused and under Firing Connections
-            if (CycleNum >= 1000 && CycleNum % 500 == 0)
-            {
-                Prune();
-
-                TotalBurstFire = 0;
-                TotalPredictionFires = 0;
-            }
-
-            IsBurstOnly = false;
-
-            CycleNum++;
-            // Process Next pattern.          
         }
 
         private void Prune()
@@ -1516,7 +1533,6 @@
 
         }
 
-
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
@@ -1535,20 +1551,20 @@
                     if (cType.Equals(ConnectionType.TEMPRORAL))
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'T');
-                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE);
+                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, Mode);
                     }
                     else if (cType.Equals(ConnectionType.APICAL))
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'A');
-                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE);
+                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, Mode);
                     }
                 }
                 else
                 {
                     if (cType.Equals(ConnectionType.TEMPRORAL))
-                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE);
+                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, Mode);
                     else if (cType.Equals(ConnectionType.APICAL))
-                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE);
+                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, Mode);
 
                     #region Removed Code [Potential Bug OR Feature
                     //if (cType.Equals(ConnectionType.TEMPRORAL))
@@ -1567,13 +1583,13 @@
                     switch (synapse.cType)
                     {
                         case ConnectionType.DISTALDENDRITICNEURON:
-                            targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE);
+                            targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, Mode);
                             break;
                         case ConnectionType.PROXIMALDENDRITICNEURON:
-                            targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE);
+                            targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE, Mode);
                             break;
                         case ConnectionType.NMDATONEURON:
-                            targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE);
+                            targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, Mode);
                             break;
                     }
                 }
@@ -1584,7 +1600,7 @@
             }
             else if (cType.Equals(ConnectionType.AXONTONEURON))
             {
-                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE);
+                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, Mode);
             }
             else
             {
@@ -1627,7 +1643,7 @@
 
             if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
             {
-                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted NEurons should not exceed more than 10% of Network size");
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
 
                 //Console.ReadKey();
             }
@@ -1859,7 +1875,7 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchema.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchemaFOM.xml";
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA)
             {
@@ -2025,7 +2041,7 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchema.xml";
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchemaFOM.xml";
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA)
             {

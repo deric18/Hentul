@@ -1,5 +1,6 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
 using Common;
+using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
 namespace FirstOrderMemory.Models
 {
@@ -16,7 +17,7 @@ namespace FirstOrderMemory.Models
         public static readonly int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
-        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
+        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 200;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
@@ -103,11 +104,19 @@ namespace FirstOrderMemory.Models
             ChangeCurrentStateTo(NeuronState.FIRING);
         }
 
-        public void ProcessVoltage(int voltage)
+        public void ProcessVoltage(int voltage, LogMode logmode = LogMode.BurstOnly)
         {
             Voltage += voltage;
 
             CurrentState = NeuronState.PREDICTED;
+
+            if(voltage >= COMMON_NEURONAL_FIRE_VOLTAGE)
+            {
+                if((logmode == LogMode.Info || logmode == LogMode.All))
+                    Console.WriteLine(" INFO :: Neurons.cs :::: Neuron " + NeuronID.ToString() + " is entering firing Mode");
+
+                CurrentState = NeuronState.FIRING;
+            }
 
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }

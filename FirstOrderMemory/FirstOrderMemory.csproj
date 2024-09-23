@@ -8,9 +8,8 @@
 
   <ItemGroup>
     <None Remove="Schema Docs\AxonalSchema-SOM.xml" />
-    <None Remove="Schema Docs\AxonalSchema.xml" />
-    <None Remove="Schema Docs\dendriticSchema.json" />
-    <None Remove="Schema Docs\DendriticSchema.xml" />
+    <None Remove="Schema Docs\AxonalSchemaFOM.xml" />
+    <None Remove="Schema Docs\DendriticSchemaFOM.xml" />
     <None Remove="Schema Docs\DendriticSchemaSOM.xml" />
   </ItemGroup>
 
@@ -18,10 +17,10 @@
     <EmbeddedResource Include="Schema Docs\AxonalSchema-SOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\AxonalSchema.xml">
+    <EmbeddedResource Include="Schema Docs\AxonalSchemaFOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\DendriticSchema.xml">
+    <EmbeddedResource Include="Schema Docs\DendriticSchemaFOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Schema Docs\DendriticSchemaSOM.xml">
@@ -35,12 +34,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Schema Docs\dendriticSchema.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 
 </Project>

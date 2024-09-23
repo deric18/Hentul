@@ -5,8 +5,8 @@ namespace SchemaGenerator
     internal class SchemaGenerator
     {
         private const string filePath = "C:\\Users\\depint\\source\\repos\\Hentul\\SchemaGenerator\\Schemas\\";
-        private const string denrticicfileName = "DendriticSchemaSOM.xml";
-        private const string axonalfileName = "AxonalSchema-SOM.xml";
+        private const string denrticicfileName = "DendriticSchemaFOM.xml";
+        private const string axonalfileName = "AxonalSchemaFOM.xml";
 
         private bool debox = true;
 
@@ -14,20 +14,23 @@ namespace SchemaGenerator
         int numY = 0;
         int numZ = 0;
         int numberOfAxons = 0;
+        int numberOfDendrities = 0;
 
         Random rand;
 
-        public SchemaGenerator(int x = 250, int y = 10, int z = 10, int numConns = 2)
+        public SchemaGenerator(int x = 10, int y = 10, int z = 4, int numAxon = 2, int numDen = 4)
         {
             this.numX = x;
             this.numY = y;
             this.numZ = z;
-            this.numberOfAxons = numConns;
+            this.numberOfAxons = numAxon;
+            this.numberOfDendrities = numDen;
             rand = new Random();
         }
         
         public void GenerateDendriticSchema()
         {
+            
             XmlDocument xmlDocument = new XmlDocument();
 
             xmlDocument.LoadXml("<Connections></Connections>");
@@ -52,17 +55,11 @@ namespace SchemaGenerator
                         neuronNode?.SetAttribute("Z", k.ToString());
                         
 
-                        for (int l = 0; l < numberOfAxons; l++)   //Connections to other Neurons except Source Neuron
+                        for (int l = 0; l < numberOfDendrities; l++)   //Connections to other Neurons except Source Neuron
                         {
                             var childneuronNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
 
-                            int x = GetRandomNumberExcept(0, numX, i);
-
-                            while (x == cache || x == i)
-                            {
-                                x = GetRandomNumberExcept(0, numX, i);
-                            }
-
+                            int x = GetRandomNumberExcept(0, numX, i);                                                       
                             int y = GetRandomNumberExcept(0, numY, j);
                             int z = GetRandomNumberExcept(0, numZ, k);
 
