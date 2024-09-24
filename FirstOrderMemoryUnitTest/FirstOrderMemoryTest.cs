@@ -405,14 +405,14 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalLines()
         {
-            Neuron neuron = bbManager.Columns[2, 4].Neurons[5];
+            Neuron neuron = bbManager.Columns[2, 4].Neurons[3];
 
             Neuron temporalNeuron1 = bbManager.GetNeuronFromString(neuron.GetMyTemporalPartner());
-            Neuron temporalNeuron2 = bbManager.Columns[5, 3].Neurons[9];
+            Neuron temporalNeuron2 = bbManager.Columns[5, 3].Neurons[2];
 
 
-            Assert.AreEqual("0-4-5-T", temporalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("0-3-9-T", bbManager.GetNeuronFromString(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
+            Assert.AreEqual("0-4-3-T", temporalNeuron1.NeuronID.ToString());
+            Assert.AreEqual("0-3-2-T", bbManager.GetNeuronFromString(temporalNeuron2.GetMyTemporalPartner()).NeuronID.ToString());
 
         }
 
@@ -712,7 +712,7 @@ namespace FirstOrderMemoryUnitTest
 		{                        
             List<Position_SOM> posList = new List<Position_SOM>()
             {
-                new Position_SOM(5,5,5)
+                new Position_SOM(5,2,2)
             };
 
             SDR_SOM TemporalSdr = TestUtils.GenerateRandomSDRFromPosition(posList, iType.TEMPORAL);
@@ -721,21 +721,21 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(TemporalSdr);
 
-            Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 5).Voltage > 0);
+            Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 2).Voltage > 0);
 
             bbManager.Fire(ApicalSdr);
 
-            Assert.IsTrue(bbManager.GetNeuronFromPosition('n',5, 5, 9).Voltage > 0);
+            Assert.IsTrue(bbManager.GetNeuronFromPosition('n',5, 2, 2).Voltage > 0);
 
             bbManager.Fire(SpatialSdr);
 
-            var state = bbManager.GetNeuronFromPosition('n', 5, 5, 5).CurrentState;
+            var state = bbManager.GetNeuronFromPosition('n', 5, 5, 0).CurrentState;
 
             Assert.IsTrue(state.Equals(NeuronState.RESTING));
 
-            Assert.AreEqual(0, bbManager.GetNeuronFromPosition('N', 7, 5, 5).Voltage);
+            Assert.AreEqual(0, bbManager.GetNeuronFromPosition('N', 7, 5, 3).Voltage);
 
-            Assert.AreEqual(0, bbManager.GetNeuronFromPosition('n', 5, 1, 5).Voltage);
+            Assert.AreEqual(0, bbManager.GetNeuronFromPosition('n', 5, 1, 2).Voltage);
         }
 
         [TestMethod]
@@ -836,15 +836,19 @@ namespace FirstOrderMemoryUnitTest
 
             foreach (var pos in temporalSdr.ActiveBits)
             {
-                foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
                 {
+                    if(neuron.Voltage != 0 )
+                    {
+                        int breakpoint = 1;
+                    }
                     Assert.AreEqual(0, neuron.Voltage);
                 }
             }
 
             foreach (var pos in apicalSdr.ActiveBits)
             {
-                foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
                 {
                     Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
                     Assert.AreEqual(0, neuron.Voltage);
@@ -903,15 +907,15 @@ namespace FirstOrderMemoryUnitTest
         {
             BlockBehaviourManager bbm2 = bbManager.CloneBBM(0);
 
-            bbManager.Columns[3, 3].Neurons[5].flag = 1;
+            bbManager.Columns[3, 3].Neurons[3].flag = 1;
 
-            Assert.AreNotEqual(bbManager.Columns[3, 3].Neurons[5].flag, bbm2.Columns[3, 3].Neurons[5].flag);
+            Assert.AreNotEqual(bbManager.Columns[3, 3].Neurons[3].flag, bbm2.Columns[3, 3].Neurons[3].flag);
 
             Assert.AreEqual(bbm2.Columns[0, 1].Neurons.Count, bbManager.Columns[0, 1].Neurons.Count);
 
-            Assert.IsTrue(bbm2.GetNeuronFromString(bbm2.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID.Equals(bbManager.GetNeuronFromString(bbManager.Columns[3, 2].Neurons[5].GetMyTemporalPartner()).NeuronID));
+            Assert.IsTrue(bbm2.GetNeuronFromString(bbm2.Columns[3, 2].Neurons[2].GetMyTemporalPartner()).NeuronID.Equals(bbManager.GetNeuronFromString(bbManager.Columns[3, 2].Neurons[2].GetMyTemporalPartner()).NeuronID));
 
-            Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[5].flag);
+            Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[3].flag);
         }
 
         [TestMethod]

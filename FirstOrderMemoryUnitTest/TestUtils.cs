@@ -9,7 +9,7 @@
     {
         internal static Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
         {
-            return new Position_SOM(spatial.X, spatial.Y, temporal.X);
+            return new Position_SOM(spatial.X, spatial.Y, temporal.Y);
         }
 
         internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position pos)
