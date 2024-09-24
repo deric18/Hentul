@@ -101,16 +101,16 @@
             List<Position_SOM> spatialPosList = new List<Position_SOM>()
             {
                 new Position_SOM(2,4),
-                new Position_SOM(8,3),
-                new Position_SOM(7,2),
+                new Position_SOM(1,3),
+                new Position_SOM(3,2),
                 new Position_SOM(0,0)
             };
 
             List<Position_SOM> temporalPosList = new List<Position_SOM>()
             {
-                new Position_SOM(2,4),
-                new Position_SOM(8,3),
-                new Position_SOM(7,2),
+                new Position_SOM(4,2),
+                new Position_SOM(3,1),
+                new Position_SOM(2,3),
                 new Position_SOM(0,0)
             };
 

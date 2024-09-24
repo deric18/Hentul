@@ -828,7 +828,7 @@ namespace FirstOrderMemoryUnitTest
 
             predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
-            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Y, predictedNeurons.Count);
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
 
             bbManager.Fire(spatialSdr);
 
