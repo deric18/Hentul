@@ -7,23 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Schema Docs\AxonalSchema.xml" />
     <None Remove="Schema Docs\ConnectorSchema.xml" />
     <None Remove="Schema Docs\dendriticSchema.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schema Docs\AxonalSchema.xml">
+    <EmbeddedResource Include="Schema Docs\OldSchema\AxonalSchema.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\ConnectorSchema.xml">
+    <EmbeddedResource Include="Schema Docs\OldSchema\ConnectorSchema.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Bond.Core.CSharp" Version="10.0.0" />
-    <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Schema Docs\dendriticSchema.json">
+    <Resource Include="Schema Docs\OldSchema\dendriticSchema.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

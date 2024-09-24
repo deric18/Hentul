@@ -1,0 +1,6 @@
+﻿1. Schema Support for 10*4*10 cell tall FOM's and 1000*4*10 SOMs.
+2. CT for all the FOM array Usage in Hentul.UT
+
+
+Futre : 
+SOM Layer need to generate a movement action for the cursor to move across the screen to observe and classify the image.

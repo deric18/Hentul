@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -7,17 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Schema Docs\AxonalSchema.xml" />
-    <None Remove="Schema Docs\ConnectorSchema.xml" />
+    <None Remove="Schema Docs\AxonalSchema-SOM.xml" />
+    <None Remove="Schema Docs\AxonalSchemaFOM.xml" />
+    <None Remove="Schema Docs\DendriticSchemaFOM.xml" />
+    <None Remove="Schema Docs\DendriticSchemaSOM.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schema Docs\AxonalSchema.xml">
+    <EmbeddedResource Include="Schema Docs\AxonalSchema-SOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\ConnectorSchema.xml">
+    <EmbeddedResource Include="Schema Docs\AxonalSchemaFOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Schema Docs\DendriticSchemaFOM.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Schema Docs\DendriticSchemaSOM.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

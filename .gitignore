@@ -1,10 +1,16 @@
 obj/
 bin/
 .vs/
-FirstOrderMemory/bin/Debug/
-FirstOrderMemoryUnitTest/bin/Debug/
-SecondORderMemory/bin/Debug/
-SecondORderMemoryUnitTest/bin/Debug/
+FirstOrderMemory/bin/
+FirstOrderMemory/obj/
+FirstOrderMemoryUnitTest/bin/
+FirstOrderMemoryUnitTest/obj/
+SecondORderMemory/bin/
+SecondORderMemory/obj/
+SecondORderMemoryUnitTest/bin
+SecondORderMemoryUnitTest/obj
+Hentul/obj
+Hentul/bin
 
 #OS junk files
     [Tt]humbs.db

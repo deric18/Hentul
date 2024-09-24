@@ -2,7 +2,7 @@
 
 namespace SecondOrderMemory.Models
 {
-    public class Position_SOM : Position
+    public class Position_SOM : Position, IComparable
     {
         public char W { get; private set; }
 
@@ -25,7 +25,7 @@ namespace SecondOrderMemory.Models
         public static string ConvertIKJtoString(int i, int j, int k, char w = 'N')
         {
             if (w == 'N')
-                return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
+                return i.ToString() + "-" + j.ToString() + "-" + k.ToString() + '-' + 'N';
             else if (w == 'T')
                 return i.ToString() + "-" + j.ToString() + "-" + k.ToString() + "-" + w;
             else if (w == 'A')
@@ -42,6 +42,20 @@ namespace SecondOrderMemory.Models
         public new string ToString()
         {
             return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString() + "-" + W.ToString();
+        }
+      
+        public int CompareTo(object? obj1)
+        {
+            if (obj1.GetType() == typeof(Position_SOM))
+            {
+                Position_SOM obj = (Position_SOM)obj1;
+
+                if (X + Y + Z > obj.X + obj.Y + obj.Z) return -1;
+                else if (obj.X + obj.Y + obj.Z < obj.X + obj.Y + obj.Z) return +1;
+                else
+                    return 0;
+            }
+            return 0;
         }
     }
 }

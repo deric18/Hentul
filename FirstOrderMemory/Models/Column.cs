@@ -1,21 +1,21 @@
-﻿namespace FirstOrderMemory.Models
-{
-    using Common;
+﻿using Common;
 
+namespace FirstOrderMemory.Models
+{
     public class Column
     {
         public List<Neuron> Neurons { get; private set; }
-        public Position ColumnID { get; private set; }        
+        public Position_SOM ColumnID { get; private set; }        
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons) 
+        public Column(int x, int y, int numberOfNeurons, Position BlockId, Position UnitId, int BBMID) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
-            ColumnID = new Position(x, y, numberOfNeurons);
+            ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position(x, y, i)));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BlockId, UnitId, BBMID));
             }            
             Init = 0;
         }
@@ -35,13 +35,14 @@
         internal List<Neuron>? GetPredictedNeuronsFromColumn()
         {
             List<Neuron> toReturn = new List<Neuron>();
-            List<Neuron> predictedNeurons = Neurons.Where(neuron => neuron.CurrentState == NeuronState.PREDICTED).ToList();
+            List<Neuron> predictedNeurons = Neurons.Where(neuron => neuron.CurrentState != NeuronState.RESTING).ToList();
 
             if (predictedNeurons.Count() > 1 )          //Pick a winner
             {
                 //Pick the most strongly predicted neuron and then fire
-                predictedNeurons.Sort();
-                return predictedNeurons;
+
+                return PickWinner();
+                
             }
             else if (predictedNeurons.Count == 0)       //Burst
             {
@@ -58,23 +59,58 @@
             }
         }
 
+        private List<Neuron> PickWinner()
+        {
+            int maxVoltage = 0, maxIndex = 0, continuousCounter = 0;
+
+            List<Neuron> toReturn = new List<Neuron>();
+
+            for(int i = 0; i < Neurons.Count; i++)
+            {
+                if (Neurons[i].Voltage > maxVoltage)
+                {
+                    maxVoltage = Neurons[i].Voltage;
+                    maxIndex = i;
+                    if (i >= 1 && Neurons[i - 1].Voltage == Neurons[i].Voltage)
+                        continuousCounter++;
+                }
+            }
+
+            if (continuousCounter == Neurons.Count - 2)
+                return Neurons;
+            else
+                toReturn.Add(Neurons[maxIndex]);
+
+            return toReturn;
+        }
+
         internal bool PreCleanupCheck()
         {
-            return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).Count() > 0;
+            if(Neurons.Any(x => x.CurrentState == NeuronState.FIRING))
+            {
+                int breakpoint = 1;
+                return true;
+            }
+
+            return false;
         }
 
         internal void PostCycleCleanup()
         {
             var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
-            firingNeurons.ForEach((x) => {
-                x.FlushVoltage();
 
-            });
-        }
+            foreach (var neuron in firingNeurons)
+            {
+                neuron.FlushVoltage();
+            }
 
-        internal void PruneCycleRefresh()
-        {
-            this.Neurons.ForEach(neuron => neuron.PruneCycleRefresh());
-        }
+            foreach (var neuron in Neurons)
+            {
+                if (neuron.TAContributors.Count > 0)
+                {
+                    neuron.CleanUpContributersList();
+                }
+            }
+        }        
     }
 }
