@@ -63,11 +63,11 @@
 
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));                    
 
-                    bool b = predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0,1,4)});
+                    bool b = predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0,1,3)});
 
                     if (b)
                     {
-                        predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0, 1, 4) });
+                        predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0, 1, 3) });
                     }
 
                     Assert.IsFalse(b);
@@ -110,13 +110,13 @@
         {
             // HighVoltagePredictedNeuronGetsPickedForFiring from a Column
 
-            Position_SOM position1 = new Position_SOM(3, 2, 5);
+            Position_SOM position1 = new Position_SOM(3, 2, 1);
 
-            Position_SOM position2 = new Position_SOM(3, 2, 6);
+            Position_SOM position2 = new Position_SOM(3, 2, 2);
 
-            Position_SOM position3 = new Position_SOM(3, 2, 7);
+            Position_SOM position3 = new Position_SOM(3, 2, 3);
 
-            Position_SOM higherVoltagePos= new Position_SOM(3, 2, 7);
+            Position_SOM higherVoltagePos= new Position_SOM(3, 2, 0);
 
             Neuron neuron1 = bbManager.Columns[position1.X, position1.Y].Neurons[position1.Z];
 
