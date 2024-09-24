@@ -38,6 +38,7 @@ namespace HentulWinforms
             recache = new Button();
             EdgedImage = new PictureBox();
             readyLabel = new Label();
+            ObjectLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -106,12 +107,22 @@ namespace HentulWinforms
             readyLabel.TabIndex = 6;
             readyLabel.Text = "label1";
             // 
+            // ObjectLabel
+            // 
+            ObjectLabel.AutoSize = true;
+            ObjectLabel.Location = new Point(1105, 521);
+            ObjectLabel.Name = "ObjectLabel";
+            ObjectLabel.Size = new Size(70, 15);
+            ObjectLabel.TabIndex = 7;
+            ObjectLabel.Text = "ObjectLabel";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(ObjectLabel);
             Controls.Add(readyLabel);
             Controls.Add(EdgedImage);
             Controls.Add(recache);
@@ -142,5 +153,6 @@ namespace HentulWinforms
         private Button recache;
         private PictureBox EdgedImage;
         private Label readyLabel;
+        private Label ObjectLabel;
     }
 }

@@ -16,18 +16,14 @@ namespace HentulWinforms
         }
 
         private void StartButton_Click(object sender, EventArgs e)
-        {
-            orchestrator = new Orchestrator(numPixels);
-
-            orchestrator.StartCycle();
+        {            
+            ObjectLabel.Text = orchestrator.StartCycle();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
 
-            readyLabel.Text = "Start Position";
-
-            Thread.Sleep(2000);
+            readyLabel.Text = "Start Position";            
 
             readyLabel.Text = "Ready Now";
 
@@ -58,10 +54,7 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            orchestrator.Grab();
-
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
+                                    
         }
 
 

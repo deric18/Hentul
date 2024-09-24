@@ -7,7 +7,7 @@
     using Common;
     using FirstOrderMemory.Models.Encoders;
     using System.Runtime.InteropServices;
-    using System;    
+    using System;
     using HentulWinforms.Hippocampal_Entorinal_complex;
 
     internal class Orchestrator
@@ -137,7 +137,7 @@
 
             IsMock = isMock;
 
-            Z = 10;
+            Z = 4;
 
             CycleNum = 0;
 
@@ -154,7 +154,7 @@
 
             somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
 
-            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
+            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -195,17 +195,18 @@
 
         #endregion
 
-        public void StartCycle()
+        public string StartCycle()
         {
-            while (true)
-            {
-                //Check how big the entire creen / image is and kee papring through all the objects.
 
-                DetectObject();
-                StoreObject();
-                MoveToNextObject();
+            //Check how big the entire creen / image is and kee papring through all the objects.
 
-            }
+            var str = DetectObject();
+            StoreObject();
+
+            return str;
+
+
+
         }
 
         /// <summary>
@@ -214,32 +215,22 @@
         /// ALGORITHM:
         /// 
         /// </summary>
-        public void DetectObject()
+        public string DetectObject()
         {
+            var obj = string.Empty;
+
             if (Objects == null || Objects.Count == 0)
             {
-                if (LearnFirstObject())
-                {
-                    // Push new object representation to 3A
-                    // Push Wiring Burst Avoiding LTP to 4 from 3A.
-                }
+                obj = LearnFirstObject();
+                
             }
 
             //Traverse through Object Maps and what sensory inputs are telling you.
-        }
 
-        private void MoveToNextObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void StoreObject() 
-        {
-            throw new NotImplementedException();
+            return obj;
         }
 
 
-        #region PRIVATE HELPER METHODS
 
         /// <summary>
         /// 
@@ -252,33 +243,76 @@
         /// 2. Run around the object trying to figure out the object, go to as many unexplored locations on the object as possible.
         /// 3. After you feel you have explored all the points on the object , concurrently keep storing all the locations onto the new unrecognised Object.                
         /// </summary>
-        private bool LearnFirstObject()
+        private string LearnFirstObject()
         {
             //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.            
 
-            while (true)
-            {
-                GrabChunk();
-                ProcessChunk();
-            }
-           
-
-            return true;
-        }
-
-        private void GrabChunk()
-        {
-
-        }
-
-        private void ProcessChunk()
-        {
             // -> L4, -> L3b, L3b -> HP -> output , DoesItMatch Expectation ? y ? Get 5 more confirmations and store model : work on the second prediction if there is 
 
+            string obj = string.Empty;
+
+            bool stillRecognising = true;
+
+            while (stillRecognising)
+            {
+                // feed L4
+                SDR_SOM fomSdr;
+                for (int i = 0; i < fomBBM.Length; i++)
+                {
+                    fomSdr = GetFomSdrForIteration(i);
+                    fomBBM[i].Fire(fomSdr);
+                }
+
+                //feed same pattern SOM BBM L3A
+                SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
+                somBBM_L3A.Fire(Sdr_Som3A);
+
+                // init L3B to Apple
+                SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
+                somBBM_L3B.Fire(Sdr_SomL3B);
+
+                // Push new object representation to 3A
+                // Push Wiring Burst Avoiding LTP to 4 from 3A.
+            }
 
 
-
+            return obj;
         }
+
+
+        private SDR_SOM GetFomSdrForIteration(int i)
+        {
+            throw new NotImplementedException();
+        }
+
+        private SDR_SOM GetSdrSomFromFOMs()
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+
+
+
+
+
+
+        private void MoveToNextObject()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void StoreObject()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        #region PRIVATE HELPER METHODS
+
+
 
 
         private void GetPixelsAsPerScope()
@@ -290,15 +324,15 @@
             switch (GetScope())
             {
                 case VisionScope.NarrowScope:       // High Detail In-Object Scope
-                    {                        
+                    {
                         break;
                     }
                 case VisionScope.ObjectScope:       // Fully View of Object
-                    {                        
+                    {
                         break;
                     }
                 case VisionScope.BroadScope:        // complete visual view at capacity.
-                    {                        
+                    {
                         break;
                     }
                 default:
@@ -371,7 +405,7 @@
 
         }
 
-   
+
 
         private void AdjustScopetoNearestObject()
         {
@@ -496,13 +530,13 @@
 
         public void Grab()
         {
-            
+
             Console.WriteLine("Grabbing cursor Position");
 
             //Console.CursorVisible = false;
 
             POINT Point = this.GetCurrentPointerPosition();
-            
+
 
             //Console.CursorVisible = true;
 
@@ -516,7 +550,7 @@
             this.GetColorByRange(x1, y1, x2, y2);
 
         }
-       
+
 
         // Already grey scalled.
         private void GetColorByRange(int x1, int y1, int x2, int y2)
@@ -541,9 +575,9 @@
 
                 }
 
-            }            
+            }
 
-            ReleaseDC(desk, dc);            
+            ReleaseDC(desk, dc);
         }
 
 

@@ -66,9 +66,9 @@
             List<Position_SOM> positions = new List<Position_SOM>();
 
             positions.Add(new Position_SOM(3, 2, 1));
-            positions.Add(new Position_SOM(5, 5, 5));
+            positions.Add(new Position_SOM(5, 5, 0));
             positions.Add(new Position_SOM(7, 8, 2)); 
-            positions.Add(new Position_SOM(8, 3, 2));
+            positions.Add(new Position_SOM(8, 3, 3));
 
             return positions;
 
@@ -84,7 +84,7 @@
 
             for (int i = 0; i < numPos; i++)
             {
-                posList.Add(new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9)));
+                posList.Add(new Position_SOM(rand.Next(0, 10), rand.Next(0, 9), rand.Next(0, 3)));
             }
 
             return new SDR_SOM(10, 10, posList, inputPatternType);

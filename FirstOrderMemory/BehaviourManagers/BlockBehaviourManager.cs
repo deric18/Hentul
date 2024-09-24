@@ -116,7 +116,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 10, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly)
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -1338,6 +1338,14 @@
                     Thread.Sleep(2000);
                 }
 
+                foreach(var input in incomingPattern.ActiveBits)
+                {
+                    if(input.X >= X || input.Y >= Z)
+                    {
+                        throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceeding bounds!");
+                    }
+                }
+
                 TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
             }
 
@@ -1804,7 +1812,7 @@
 
             foreach (var position in activeBits)
             {
-                temporalNeurons.Add(this.TemporalLineArray[position.Y, position.X]);
+                temporalNeurons.Add(this.TemporalLineArray[position.X, position.Y]);
             }
 
             return temporalNeurons;
@@ -1820,7 +1828,7 @@
 
             foreach (var position in activeBits)
             {
-                temporalNeurons.Add(new Position_SOM(position.Y, position.X));
+                temporalNeurons.Add(new Position_SOM(position.X, position.Y));
             }
 
             return temporalNeurons;
@@ -1855,7 +1863,7 @@
         {
             #region REAL Code                       
 
-            if ((X == 10 && Y == 10 && Z == 10))
+            if ((X == 10 && Y == 10 && Z == 4))
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
@@ -2020,7 +2028,9 @@
 
             #endregion            
 
-            if ((X == 10 && Y == 10 && Z == 10))
+            schemToLoad = SchemaType.INVALID;
+
+            if ((X == 10 && Y == 10 && Z == 4))
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
@@ -2055,7 +2065,7 @@
 
             document.Load(axonalDocumentPath);
 
-            XmlNodeList columns = schemToLoad.Equals(SchemaType.FOMSCHEMA) ? document.GetElementsByTagName("axonalConnection") : document.GetElementsByTagName("AxonalConnection");
+            XmlNodeList columns = document.GetElementsByTagName("AxonalConnection");
 
             for (int icount = 0; icount < columns.Count; icount++)
             {//axonalConnection
