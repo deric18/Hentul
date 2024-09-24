@@ -104,7 +104,7 @@
 
             bmp = new Bitmap(range + range, range + range);
 
-            numPixelsProcessedPerBBM = 20;
+            numPixelsProcessedPerBBM = 10;
 
             LogMode = false;
 
@@ -129,7 +129,7 @@
 
             fomBBM = new BlockBehaviourManager[NumBBMNeeded];
 
-            int x1 = 10 * NumBBMNeeded;
+            int x1 = numPixelsProcessedPerBBM * NumBBMNeeded;
 
             somBBM_L3B = new BlockBehaviourManager(x1, 10, 4);
 

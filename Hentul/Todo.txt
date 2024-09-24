@@ -1,4 +1,13 @@
-﻿1. Schema Support for 10*4*10 cell tall FOM's and 1000*4*10 SOMs.
+﻿Notes : 
+
+1. Implement Schema for data flow for Burst Avoidance Learning Algo
+Q - Real world Desktop will need Image Segmentation ( hard problem) and Attention , Fruits only needs attention.
+A - Only do attention for now as a good POC.
+
+Todo : Attention ?
+
+
+
 2. CT for all the FOM array Usage in Hentul.UT
 
 
