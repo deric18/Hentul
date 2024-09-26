@@ -53,15 +53,30 @@ namespace SchemaGenerator
                         neuronNode?.SetAttribute("X", i.ToString());
                         neuronNode?.SetAttribute("Y", j.ToString());
                         neuronNode?.SetAttribute("Z", k.ToString());
-                        
+
+                        int[] cacheX = new int[numberOfDendrities] , cacheY = new int[numberOfDendrities], cacheZ = new int[numberOfDendrities];
+
+                        int x, y, z;
 
                         for (int l = 0; l < numberOfDendrities; l++)   //Connections to other Neurons except Source Neuron
                         {
                             var childneuronNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
 
-                            int x = GetRandomNumberExcept(0, numX, i);                                                       
-                            int y = GetRandomNumberExcept(0, numY, j);
-                            int z = GetRandomNumberExcept(0, numZ, k);
+                            x = GetRandomNumberExcept(0, numX, i);                                                       
+                            y = GetRandomNumberExcept(0, numY, j);
+                            z = GetRandomNumberExcept(0, numZ, k);
+
+                            while (CheckforRedudancy(cacheX, cacheY, cacheZ, x, y, z))
+                            {
+                                x = GetRandomNumberExcept(0, numX, i);
+                                y = GetRandomNumberExcept(0, numY, j);
+                                z = GetRandomNumberExcept(0, numZ, k);
+
+                                cacheX[l] = x;
+                                cacheY[l] = y;
+                                cacheZ[l] = z;
+
+                            }
 
                             childneuronNode?.SetAttribute("X", x.ToString());
                             childneuronNode?.SetAttribute("Y", y.ToString());
@@ -82,6 +97,25 @@ namespace SchemaGenerator
 
             xmlDocument?.Save(filePath + denrticicfileName);        
 
+        }
+
+        private bool CheckforRedudancy(int[] cacheX, int[] cacheY, int[] cacheZ, int x, int y, int z)
+        {
+            for (int i = 0; i < cacheX.Length; i++)
+            {
+                if (cacheX[i] == x)
+                {
+                    if (cacheY[i] == y)
+                    {
+                        if(cacheZ[i] == z)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public void GenerateAxonalSchema()
