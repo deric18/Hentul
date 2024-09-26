@@ -39,6 +39,7 @@ namespace HentulWinforms
             EdgedImage = new PictureBox();
             readyLabel = new Label();
             ObjectLabel = new Label();
+            label_done = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -116,12 +117,23 @@ namespace HentulWinforms
             ObjectLabel.TabIndex = 7;
             ObjectLabel.Text = "ObjectLabel";
             // 
+            // label_done
+            // 
+            label_done.AutoSize = true;
+            label_done.Location = new Point(398, 650);
+            label_done.Name = "label_done";
+            label_done.Size = new Size(64, 15);
+            label_done.TabIndex = 8;
+            label_done.Text = "Processing";
+            label_done.Click += label1_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(label_done);
             Controls.Add(ObjectLabel);
             Controls.Add(readyLabel);
             Controls.Add(EdgedImage);
@@ -154,5 +166,6 @@ namespace HentulWinforms
         private PictureBox EdgedImage;
         private Label readyLabel;
         private Label ObjectLabel;
+        private Label label_done;
     }
 }

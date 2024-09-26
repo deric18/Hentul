@@ -1887,7 +1887,7 @@
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\25K Club\\DendriticSchemaSOM.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
             }
 
             if (File.Exists(dendriteDocumentPath) == false)
@@ -2055,7 +2055,7 @@
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\25K Club\\AxonalSchemaSOM.xml";
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
             }
 
             if (!File.Exists(axonalDocumentPath))

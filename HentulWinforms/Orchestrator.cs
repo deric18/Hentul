@@ -195,6 +195,31 @@
 
         #endregion
 
+
+        public void Process()
+        {
+            // STEP 1 : Prepare SDR's for L4 and L3A
+            SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
+            SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
+
+
+            // STEP 2 : Push SDRs to L4 and L3A
+            for (int i = 0; i < fomBBM.Length; i++)
+            {
+
+                
+                fomBBM[i].Fire(fomSdr);
+            }
+            
+            somBBM_L3A.Fire(Sdr_Som3A);            
+
+            // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
+
+            
+        }
+
+
+
         public string StartCycle()
         {
 
@@ -289,14 +314,6 @@
         {
             throw new NotImplementedException();
         }
-
-
-
-
-
-
-
-
 
 
         private void MoveToNextObject()
