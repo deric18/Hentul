@@ -5,19 +5,19 @@ namespace HentulWinforms
     using FirstOrderMemory.Models;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
+    using System.Drawing.Imaging;
 
     public partial class Form1 : Form
     {
         Orchestrator orchestrator;
 
-        readonly int numPixels = 100;
+        readonly int numPixels = 10;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
         Orchestrator.POINT RightTop = new Orchestrator.POINT();
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
         Orchestrator.POINT RightBottom = new Orchestrator.POINT();
-
 
 
         public Form1()
@@ -27,8 +27,82 @@ namespace HentulWinforms
 
         private void StartButton_Click(object sender, EventArgs e)
         {
-            ObjectLabel.Text = orchestrator.StartCycle();
+            var value = LeftTop;
+
+            value.X = value.X + numPixels;
+            value.Y = value.Y + numPixels;
+
+            orchestrator.MoveCursor(value);
+
+            labelX.Text = value.X.ToString();
+            labelY.Text = value.Y.ToString();
+
+            while (true)
+            {
+
+                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
+                {
+                    label_done.Text = "Finished Processing Image";
+                    break;
+                }
+                else
+                {
+                    if (value.X <= RightTop.X - numPixels)                    
+                       value = MoveRight(value);                                            
+                    else
+                    {
+                        if (value.Y <= RightBottom.Y - numPixels)
+                        {
+                            value = MoveDown(value);
+                            value = SetLeft(value);
+                        }
+                        else
+                        {
+                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
+                            {
+                                label_done.Text = "Finished Processing Image";
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                orchestrator.MoveCursor(value);
+
+                orchestrator.Grab();
+
+                CurrentImage.Image = orchestrator.bmp;
+
+                CurrentImage.Refresh();
+
+                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
+
+                EdgedImage.Refresh();
+
+                orchestrator.Process();
+            }
         }
+
+
+        private Orchestrator.POINT MoveRight(Orchestrator.POINT value)
+        {
+            value.X = value.X + numPixels * 2;
+            return value;
+        }
+        
+
+        private Orchestrator.POINT MoveDown(Orchestrator.POINT value)
+        {
+            value.Y = value.Y + numPixels * 2;
+            return value;
+        }
+
+        private Orchestrator.POINT SetLeft(Orchestrator.POINT value)
+        {
+            value.X = value.X - Math.Abs(LeftTop.X - RightTop.X) + numPixels;
+            return value;
+        }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -42,79 +116,30 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
+            var standard = LeftTop;
 
-            while (true)
-            {                
+            standard.X = standard.X + numPixels;
+            standard.Y = standard.Y + numPixels;
 
-                orchestrator.MoveCursorToSpecificPosition(LeftTop.X, LeftTop.Y);                                
+            orchestrator.MoveCursor(standard);
 
-                SDR_SOM fomSdr;
+            value = orchestrator.GetCurrentPointerPosition();
 
-               
+            labelX.Text = value.X.ToString();
+            labelY.Text = value.Y.ToString();
 
+            orchestrator.Grab();
 
-                //Move Cursor               
+            CurrentImage.Image = orchestrator.bmp;
 
-                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                {
-                    label_done.Text = "Finished Processing Image";
-                    break;
-                }
-                else
-                {
-                    if (value.X <= RightTop.X - numPixels)
-                    {
-                        orchestrator.MoveCursor(MoveRight(value));
-                                                
-                    }
-                    else
-                    {
-                        if (value.Y <= RightBottom.Y - numPixels)
-                        {
-                            orchestrator.MoveCursor(MoveDown(value));                           
-                        }
-                        else
-                        {
-                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                            {
-                                label_done.Text = "finsihed Processing Image";
-                                break;
-                            }
-                        }
-                    }
-                }                
+            CurrentImage.Refresh();
 
-                orchestrator.MoveCursor(value);
+            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
 
-                orchestrator.Grab();
-
-                CurrentImage.Image = orchestrator.bmp;
-
-                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                //orchestrator.Process();
-            }
+            EdgedImage.Refresh();
 
         }
-
-
-        private Orchestrator.POINT MoveLeft(Orchestrator.POINT value)
-        {
-            value.X = value.X - numPixels;
-            return value;
-        }
-
-        private Orchestrator.POINT MoveRight(Orchestrator.POINT value)
-        {            
-            value.X = value.X + numPixels;
-            return value;
-        }
-
-        private Orchestrator.POINT MoveDown(Orchestrator.POINT value)
-        {
-            value.X = value.Y + numPixels;
-            return value;
-        }
+                     
 
         private Orchestrator.POINT MoveUp(Orchestrator.POINT value)
         {
@@ -132,7 +157,7 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            LeftTop.X = 784; LeftTop.Y = 367; RightTop.X = 1414; RightTop.Y = 367; LeftBottom.X = 784; LeftBottom.Y = 1034; RightBottom.X = 1414; RightBottom.Y = 1034;
+            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1598; RightTop.Y = 365; LeftBottom.X = 960; LeftBottom.Y = 1032; RightBottom.X = 1598; RightBottom.Y = 1032;
 
         }
 
@@ -171,6 +196,11 @@ namespace HentulWinforms
         }
 
         private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void labelY_Click(object sender, EventArgs e)
         {
 
         }

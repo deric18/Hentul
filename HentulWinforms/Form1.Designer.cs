@@ -35,7 +35,7 @@ namespace HentulWinforms
             CurrentImage = new PictureBox();
             labelX = new Label();
             labelY = new Label();
-            recache = new Button();
+            Start = new Button();
             EdgedImage = new PictureBox();
             readyLabel = new Label();
             ObjectLabel = new Label();
@@ -66,7 +66,7 @@ namespace HentulWinforms
             // labelX
             // 
             labelX.AutoSize = true;
-            labelX.Location = new Point(617, 521);
+            labelX.Location = new Point(398, 508);
             labelX.Name = "labelX";
             labelX.Size = new Size(39, 15);
             labelX.TabIndex = 2;
@@ -75,21 +75,22 @@ namespace HentulWinforms
             // labelY
             // 
             labelY.AutoSize = true;
-            labelY.Location = new Point(768, 522);
+            labelY.Location = new Point(499, 508);
             labelY.Name = "labelY";
             labelY.Size = new Size(39, 15);
             labelY.TabIndex = 3;
             labelY.Text = "labelY";
+            labelY.Click += labelY_Click;
             // 
-            // recache
+            // Start
             // 
-            recache.Location = new Point(380, 247);
-            recache.Name = "recache";
-            recache.Size = new Size(75, 23);
-            recache.TabIndex = 4;
-            recache.Text = "Recache Cursor image";
-            recache.UseVisualStyleBackColor = true;
-            recache.Click += button1_Click;
+            Start.Location = new Point(380, 247);
+            Start.Name = "Start";
+            Start.Size = new Size(75, 23);
+            Start.TabIndex = 4;
+            Start.Text = "Start";
+            Start.UseVisualStyleBackColor = true;
+            Start.Click += button1_Click;
             // 
             // EdgedImage
             // 
@@ -102,7 +103,7 @@ namespace HentulWinforms
             // readyLabel
             // 
             readyLabel.AutoSize = true;
-            readyLabel.Location = new Point(551, 247);
+            readyLabel.Location = new Point(399, 167);
             readyLabel.Name = "readyLabel";
             readyLabel.Size = new Size(38, 15);
             readyLabel.TabIndex = 6;
@@ -137,7 +138,7 @@ namespace HentulWinforms
             Controls.Add(ObjectLabel);
             Controls.Add(readyLabel);
             Controls.Add(EdgedImage);
-            Controls.Add(recache);
+            Controls.Add(Start);
             Controls.Add(labelY);
             Controls.Add(labelX);
             Controls.Add(CurrentImage);
@@ -162,7 +163,7 @@ namespace HentulWinforms
         private PictureBox CurrentImage;
         private Label labelX;
         private Label labelY;
-        private Button recache;
+        private Button Start;
         private PictureBox EdgedImage;
         private Label readyLabel;
         private Label ObjectLabel;

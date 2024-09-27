@@ -9,6 +9,8 @@
     using System.Runtime.InteropServices;
     using System;
     using HentulWinforms.Hippocampal_Entorinal_complex;
+    using System.Drawing.Imaging;
+    using OpenCvSharp;
 
     internal class Orchestrator
     {
@@ -86,6 +88,8 @@
 
         public int range;
 
+        public string filename;
+
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
@@ -160,6 +164,8 @@
 
             LoadFOMnSOM();
 
+            filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
+
         }
 
 
@@ -199,21 +205,25 @@
         public void Process()
         {
             // STEP 1 : Prepare SDR's for L4 and L3A
+
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
+
             SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
+
 
 
             // STEP 2 : Push SDRs to L4 and L3A
             for (int i = 0; i < fomBBM.Length; i++)
-            {
-
-                
+            {                
                 fomBBM[i].Fire(fomSdr);
             }
+
+
             
             somBBM_L3A.Fire(Sdr_Som3A);            
 
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
+
 
             
         }
@@ -548,14 +558,9 @@
         public void Grab()
         {
 
-            Console.WriteLine("Grabbing cursor Position");
+            Console.WriteLine("Grabbing cursor Position");            
 
-            //Console.CursorVisible = false;
-
-            POINT Point = this.GetCurrentPointerPosition();
-
-
-            //Console.CursorVisible = true;
+            POINT Point = this.GetCurrentPointerPosition();            
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
@@ -564,7 +569,13 @@
             int x2 = Math.Abs(Point.X + range);
             int y2 = Math.Abs(Point.Y + range);
 
-            this.GetColorByRange(x1, y1, x2, y2);
+            //this.GetColorByRange(x1, y1, x2, y2);
+
+            Rectangle rect = new Rectangle(x1, y1, x2, y2);
+            bmp = new Bitmap(rect.Width, rect.Height, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(bmp);
+            g.CopyFromScreen(rect.Left, rect.Top, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
+            bmp.Save(filename, ImageFormat.Jpeg);
 
         }
 
