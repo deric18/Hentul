@@ -90,6 +90,9 @@
 
         public string filename;
 
+        List<Position_SOM> ONbits1;
+        List<Position_SOM> ONbits2;
+
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
         private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
@@ -162,6 +165,20 @@
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
+            ONbits1 = new List<Position_SOM>()
+            {
+                new Position_SOM(2,2),
+                new Position_SOM(2,8),
+                new Position_SOM(5,5)
+            };
+
+            ONbits2 = new List<Position_SOM>()
+            {
+                new Position_SOM(5,6),
+                new Position_SOM(8,8),
+                new Position_SOM(8,2),
+            };
+
             LoadFOMnSOM();
 
             filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
@@ -204,15 +221,54 @@
 
         public void Process()
         {
-            // STEP 1 : Prepare SDR's for L4 and L3A
+            // STEP 1 : Fire SDR's for L4 and L3A
 
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
 
             SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
 
 
+            // STEP 1A : Fire all FOM's first!
 
-            // STEP 2 : Push SDRs to L4 and L3A
+            BlockBehaviourManager fom;
+            Mapper mapper = new Mapper(50, 10 * 10);
+            mapper.ParseBitmap(bmp);
+            
+            List<Position_SOM> ONbits3 = new List<Position_SOM>();
+
+            ONbits3.AddRange(ONbits1);
+            ONbits3.AddRange(ONbits2);
+
+            SDR_SOM ONsdr1 = new SDR_SOM(10, 10, ONbits1, iType.SPATIAL);
+            SDR_SOM ONsdr2 = new SDR_SOM(10, 10, ONbits2, iType.SPATIAL);
+            SDR_SOM ONsdr3 = new SDR_SOM(10, 10, ONbits3, iType.SPATIAL);
+
+            foreach (var fomid in mapper.firstbitfoms)
+            {                
+                fomBBM[fomid].Fire(ONsdr1);
+            }
+
+            foreach (var fomid in mapper.secondbitfoms)
+            {
+                fomBBM[fomid].Fire(ONsdr2);
+            }
+
+            foreach(var fomid in mapper.doublebitfoms)
+            {
+                fomBBM[fomid].Fire(ONsdr3);
+            }
+
+
+
+            //STEP 1B : Fire all L3B SOM's
+
+
+
+
+
+
+            // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
+
             for (int i = 0; i < fomBBM.Length; i++)
             {                
                 fomBBM[i].Fire(fomSdr);
@@ -222,14 +278,18 @@
             
             somBBM_L3A.Fire(Sdr_Som3A);            
 
+
+
+
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
 
             
-        }
+        }       
 
 
 
+        #region BIG MAN WORK
         public string StartCycle()
         {
 
@@ -288,43 +348,110 @@
 
             bool stillRecognising = true;
 
-            while (stillRecognising)
-            {
-                // feed L4
-                SDR_SOM fomSdr;
-                for (int i = 0; i < fomBBM.Length; i++)
-                {
-                    fomSdr = GetFomSdrForIteration(i);
-                    fomBBM[i].Fire(fomSdr);
-                }
+            //while (stillRecognising)
+            //{
+            //    // feed L4
+            //    SDR_SOM fomSdr;
+            //    for (int i = 0; i < fomBBM.Length; i++)
+            //    {
+            //        fomSdr = GetFomSdrForIteration(i, mapper);
+            //        fomBBM[i].Fire(fomSdr);
+            //    }
 
-                //feed same pattern SOM BBM L3A
-                SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
-                somBBM_L3A.Fire(Sdr_Som3A);
+            //    //feed same pattern SOM BBM L3A
+            //    SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
+            //    somBBM_L3A.Fire(Sdr_Som3A);
 
-                // init L3B to Apple
-                SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
-                somBBM_L3B.Fire(Sdr_SomL3B);
+            //    // init L3B to Apple
+            //    SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
+            //    somBBM_L3B.Fire(Sdr_SomL3B);
 
-                // Push new object representation to 3A
-                // Push Wiring Burst Avoiding LTP to 4 from 3A.
-            }
+            //    // Push new object representation to 3A
+            //    // Push Wiring Burst Avoiding LTP to 4 from 3A.
+            //}
 
 
             return obj;
         }
 
-
-        private SDR_SOM GetFomSdrForIteration(int i)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
 
         private SDR_SOM GetSdrSomFromFOMs()
         {
             throw new NotImplementedException();
         }
 
+        public void MoveCursorToSpecificPosition(int x, int y)
+        {
+            POINT p;
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            p.X = x;
+            p.Y = y;
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+        }
+
+        public void MoveCursor(POINT p)
+        {
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+        }
+
+        public POINT GetCurrentPointerPosition()
+        {
+            POINT point;
+
+            point = new POINT();
+            point.X = 0;
+            point.Y = 0;
+
+            if (GetCursorPos(out point))
+            {
+                //Console.Clear();
+                //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
+                return point;
+            }
+
+            return point;
+        }
+
+        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
+        {
+            SDR_SOM toRet;
+            int block_offset = 10;
+            List<Position_SOM> newPosList = new List<Position_SOM>();
+
+            foreach (var pos in fomSDR.ActiveBits)
+            {
+                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, pos.Y));
+            }
+
+            toRet = new SDR_SOM(1250, 10, newPosList, iType.SPATIAL);
+
+            return toRet;
+        }
+
+        public bool CheckifPixelisBlack(int x, int y)
+        {
+            if (x >= bmp.Width || y >= bmp.Height)
+                return false;
+
+            var color = bmp.GetPixel(x, y);
+
+            return (color.R < 200 && color.G < 200 && color.B < 200);
+        }
+
+        #region Future Work
 
         private void MoveToNextObject()
         {
@@ -608,6 +735,9 @@
             ReleaseDC(desk, dc);
         }
 
+        #endregion
+
+
 
         // Already grey scalled.
         private static Color GetColorAt(int x, int y)
@@ -626,76 +756,7 @@
                                                  (a >> 16) & 0xff);
         }
 
-        public void MoveCursorToSpecificPosition(int x, int y)
-        {
-            POINT p;
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            p.X = x;
-            p.Y = y;
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
-        }
-
-        public void MoveCursor(POINT p)
-        {
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
-        }
-
-        public POINT GetCurrentPointerPosition()
-        {
-            POINT point;
-
-            point = new POINT();
-            point.X = 0;
-            point.Y = 0;
-
-            if (GetCursorPos(out point))
-            {
-                //Console.Clear();
-                //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
-                return point;
-            }
-
-            return point;
-        }
-
-        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
-        {
-            SDR_SOM toRet;
-            int block_offset = 10;
-            List<Position_SOM> newPosList = new List<Position_SOM>();
-
-            foreach (var pos in fomSDR.ActiveBits)
-            {
-                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, pos.Y));
-            }
-
-            toRet = new SDR_SOM(1250, 10, newPosList, iType.SPATIAL);
-
-            return toRet;
-        }
-
-        public bool CheckifPixelisBlack(int x, int y)
-        {
-            if (x >= bmp.Width || y >= bmp.Height)
-                return false;
-
-            var color = bmp.GetPixel(x, y);
-
-            return (color.R < 200 && color.G < 200 && color.B < 200);
-        }
-
+        
         public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
         {
             if (numberOfPixels_Index % BlockOffset == 0)
