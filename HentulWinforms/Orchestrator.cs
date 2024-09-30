@@ -92,6 +92,8 @@
 
         List<Position_SOM> ONbits1;
         List<Position_SOM> ONbits2;
+        List<Position_SOM> ONbits3;
+        List<Position_SOM> ONbits4;
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -168,6 +170,19 @@
                 new Position_SOM(8,2),
             };
 
+            ONbits3 = new List<Position_SOM>()
+            {
+                new Position_SOM(5,6),
+                new Position_SOM(8,8),
+                new Position_SOM(8,2),
+            };
+
+            ONbits4 = new List<Position_SOM>()
+            {
+                new Position_SOM(5,6),
+                new Position_SOM(8,8),
+                new Position_SOM(8,2),
+            };
             LoadFOMnSOM();
 
             filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
@@ -232,20 +247,7 @@
             SDR_SOM ONsdr2 = new SDR_SOM(10, 10, ONbits2, iType.SPATIAL);
             SDR_SOM ONsdr3 = new SDR_SOM(10, 10, ONbits3, iType.SPATIAL);
 
-            foreach (var fomid in mapper.firstbitfoms)
-            {                
-                fomBBM[fomid].Fire(ONsdr1);
-            }
-
-            foreach (var fomid in mapper.secondbitfoms)
-            {
-                fomBBM[fomid].Fire(ONsdr2);
-            }
-
-            foreach(var fomid in mapper.doublebitfoms)
-            {
-                fomBBM[fomid].Fire(ONsdr3);
-            }
+            
 
 
 

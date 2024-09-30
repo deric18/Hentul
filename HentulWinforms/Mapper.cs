@@ -22,6 +22,10 @@
         public List<Position_SOM> ONbits1;
         public List<Position_SOM> ONbits2;
 
+        public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
+        public Dictionary<MAPPERCASE, List<int>> SOMBBMIDS { get; private set; }
+
+
         public Mapper(int numBBM, int numPixels)
         {
             if (numBBM != 50 || numPixels != 100)
@@ -50,6 +54,9 @@
                 new Position_SOM(8,8),
                 new Position_SOM(8,2),
             };
+
+            FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
+            SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
         }
 
 
@@ -160,7 +167,7 @@
         }
 
 
-        public List<Position> ParseBitmap(Bitmap bitmap)
+        public void ParseBitmap(Bitmap bitmap)
         {
             if (bitmap.Width != LENGTH || bitmap.Height != WIDTH)
             {
@@ -192,72 +199,142 @@
 
                 if ( check1 && check2 && check3 && check4 )                                 //4's
                 {
-                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
+
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ALL);
                 }
                 else if (check1 && check2 && check3 && check4 == false)
                 {
-                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
+
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
                 }
                 else if (check1 && check2 && check4 && check3 == false)
                 {
-                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
                 }
                 else if (check1 && check3 && check4 && check2 == false)
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
                 }
                 else if (check2 && check3 && check4 && check1 == false)                     //3's
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
                 }
                 else if (check1 && check2 && check3 == false && check4 == false)
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
                 }
                 else if (check1 && check3 && check2 == false && check4 == false)
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
                 }
                 else if (check4 && check3 && check2 == false && check1 == false)
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
                 }
                 else if (check4 && check1 && check2 == false && check3 == false)
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
                 }
                 else if (check4 && check2 && check3 == false && check1 == false)
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
                 }
                 else if (check2 && check3 && check4 == false && check1 == false)            //2's
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
                 }
                 else if (check1 && check2 == false && check3 == false && check4 == false)    
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONE);
                 }
                 else if (check2 && check1 == false && check3 == false && check4 == false)    
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWO);
                 }
                 else if (check3 && check1 == false && check2 == false && check4 == false)    
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.THREE);
                 }
                 else if (check4 && check1 == false && check2 == false && check3 == false)    //1's
                 {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);
 
+                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.FOUR);
                 }
                 else
                 {
                     //No Fire :: Do Nothing!
                 }
             }
+        }                
+
+        private void CheckNInsert(Dictionary<MAPPERCASE, List<int>> dict, int bbmID, MAPPERCASE mapperCase)
+        {
+            if (dict == null)
+                return;
+
+            List<int> intlist;
+
+            if(dict.TryGetValue(mapperCase, out intlist))
+            {
+                if(!intlist.Contains(bbmID))
+                {
+                    intlist.Add(bbmID);
+                }
+            }
+            else
+            {
+                intlist = new List<int>() { bbmID };
+                dict.Add(mapperCase, intlist);
+            }
         }
-        
+
         private bool CheckIfColorIsBlack(Color color)
             => (color.R < 200 && color.G < 190 && color.B < 190);
+    }
+
+    public enum MAPPERCASE
+    {
+        ALL,
+        ONETWOTHREEE,
+        TWOTHREEFOUR,
+        ONETWOFOUR,
+        ONETHREEFOUR,
+        ONETWO,
+        ONETHREE,
+        ONEFOUR,
+        TWOTHREE,
+        TWOFOUR,
+        THREEFOUR,
+        ONE,
+        TWO,
+        THREE,
+        FOUR
+
     }
 }
