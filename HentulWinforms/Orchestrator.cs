@@ -11,6 +11,8 @@
     using HentulWinforms.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
     using OpenCvSharp;
+    using static HentulWinforms.Mapper;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
     internal class Orchestrator
     {
@@ -158,31 +160,28 @@
 
             ONbits1 = new List<Position_SOM>()
             {
-                new Position_SOM(2,2),
-                new Position_SOM(2,8),
-                new Position_SOM(5,5)
+                new Position_SOM(0,1),
+                new Position_SOM(2,2)                
             };
 
             ONbits2 = new List<Position_SOM>()
             {
-                new Position_SOM(5,6),
-                new Position_SOM(8,8),
-                new Position_SOM(8,2),
+                new Position_SOM(6, 0),                
+                new Position_SOM(8, 4)
             };
 
             ONbits3 = new List<Position_SOM>()
             {
                 new Position_SOM(5,6),
-                new Position_SOM(8,8),
-                new Position_SOM(8,2),
+                new Position_SOM(8,9)                
             };
 
             ONbits4 = new List<Position_SOM>()
-            {
-                new Position_SOM(5,6),
-                new Position_SOM(8,8),
-                new Position_SOM(8,2),
+            {                
+                new Position_SOM(7,1),
+                new Position_SOM(9,2)
             };
+
             LoadFOMnSOM();
 
             filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
@@ -237,26 +236,146 @@
             BlockBehaviourManager fom;
             Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
             mapper.ParseBitmap(bmp);
-            
-            List<Position_SOM> ONbits3 = new List<Position_SOM>();
 
-            ONbits3.AddRange(ONbits1);
-            ONbits3.AddRange(ONbits2);
+            List<Position_SOM> somPosition = new List<Position_SOM>();
 
-            SDR_SOM ONsdr1 = new SDR_SOM(10, 10, ONbits1, iType.SPATIAL);
-            SDR_SOM ONsdr2 = new SDR_SOM(10, 10, ONbits2, iType.SPATIAL);
-            SDR_SOM ONsdr3 = new SDR_SOM(10, 10, ONbits3, iType.SPATIAL);
+            foreach (var kvp in mapper.FOMBBMIDS)
+            {
+                switch (kvp.Key)
+                {
+                    case MAPPERCASE.ALL:
+                        {                            
+                            foreach(var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));                               
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOTHREEE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREEFOUR:
+                        {
 
-            
-
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONEFOUR: 
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREE: 
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOFOUR: 
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREEFOUR: 
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONE: 
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.FOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    default:
+                        {
+                            throw new NotImplementedException();
+                        }
+                }
+            }
 
 
             //STEP 1B : Fire all L3B SOM's
-            
 
 
-
-
+            somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
 
             // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
@@ -561,115 +680,115 @@
         }
 
 
-        public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
-        {
-            //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
+        //public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
+        //{
+        //    //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
 
-            Stopwatch stopWatch = new Stopwatch();
+        //    Stopwatch stopWatch = new Stopwatch();
 
-            stopWatch.Start();
+        //    stopWatch.Start();
 
-            int TotalReps = 2;
+        //    int TotalReps = 2;
 
-            int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
-            int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
+        //    int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
+        //    int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
 
-            int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
+        //    int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
 
-            int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
-            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
+        //    int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
+        //    int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
 
-            int num_unit_per_block_x = 5;
-            int num_unit_per_block_y = 5;
+        //    int num_unit_per_block_x = 5;
+        //    int num_unit_per_block_y = 5;
 
-            int num_pixels_per_Unit_x = 10;
-            int num_pixels_per_Unit_y = 10;
+        //    int num_pixels_per_Unit_x = 10;
+        //    int num_pixels_per_Unit_y = 10;
 
-            for (int reps = 0; reps < TotalReps; reps++)
-            {
-                for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
-                {
-                    for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-                    {
-                        int bbmId = 0;
+        //    for (int reps = 0; reps < TotalReps; reps++)
+        //    {
+        //        for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
+        //        {
+        //            for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
+        //            {
+        //                int bbmId = 0;
 
-                        for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-                        {
-                            for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                            {
-                                BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+        //                for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+        //                {
+        //                    for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
+        //                    {
+        //                        BoolEncoder boolEncoder = new BoolEncoder(100, 20);
 
-                                for (int j = 0; j < num_pixels_per_Unit_x; j++)
-                                {
-                                    for (int i = 0; i < num_pixels_per_Unit_y; i++)
-                                    {
-                                        int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                        int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
+        //                        for (int j = 0; j < num_pixels_per_Unit_x; j++)
+        //                        {
+        //                            for (int i = 0; i < num_pixels_per_Unit_y; i++)
+        //                            {
+        //                                int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+        //                                int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
 
-                                        //if the pixel is Black then tag the pixel location
+        //                                //if the pixel is Black then tag the pixel location
 
-                                        if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-                                        {
-                                            int bp = 1;
-                                        }
+        //                                if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
+        //                                {
+        //                                    int bp = 1;
+        //                                }
 
-                                        if (CheckifPixelisBlack(pixel_x, pixel_y))
-                                        {
+        //                                if (CheckifPixelisBlack(pixel_x, pixel_y))
+        //                                {
 
-                                            var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-                                            boolEncoder.SetEncoderValues(dataToEncode);
+        //                                    var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
+        //                                    boolEncoder.SetEncoderValues(dataToEncode);
 
-                                        }
-                                    }
+        //                                }
+        //                            }
 
-                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-                                    {
-                                        if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
-                                        {
-                                            fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
-                                        }
+        //                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+        //                            {
+        //                                if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
+        //                                {
+        //                                    fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+        //                                }
 
-                                        if (boolEncoder.HasValues())
-                                        {
-                                            CycleNum++;
+        //                                if (boolEncoder.HasValues())
+        //                                {
+        //                                    CycleNum++;
 
-                                            var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+        //                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
 
-                                            fomBBM[bbmId++].Fire(imageSDR);
+        //                                    fomBBM[bbmId++].Fire(imageSDR);
 
-                                            SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+        //                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
 
-                                            if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-                                            {
-                                                fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
+        //                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
+        //                                    {
+        //                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
 
-                                                somBBM_L3B.Fire(fomSDR);
-                                            }
+        //                                        somBBM_L3B.Fire(fomSDR);
+        //                                    }
 
-                                        }
+        //                                }
 
-                                        boolEncoder.ClearEncoderValues();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //                                boolEncoder.ClearEncoderValues();
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
 
 
-            PrintMoreBlockVitals();
+        //    PrintMoreBlockVitals();
 
-            BackUp();
+        //    BackUp();
 
-            Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
+        //    Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
 
-            Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
+        //    Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
 
-            Console.WriteLine("Done Processing Image");
+        //    Console.WriteLine("Done Processing Image");
 
-            Console.Read();
-        }
+        //    Console.Read();
+        //}
 
         public void Grab()
         {
@@ -746,33 +865,33 @@
         }
 
         
-        public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        {
-            if (numberOfPixels_Index % BlockOffset == 0)
-            {
-                return numberOfPixels_Index;
-            }
+        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
+        //{
+        //    if (numberOfPixels_Index % BlockOffset == 0)
+        //    {
+        //        return numberOfPixels_Index;
+        //    }
 
-            int nextMinNumberOfPixels = numberOfPixels_Index;
+        //    int nextMinNumberOfPixels = numberOfPixels_Index;
 
-            int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
+        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
 
-            while (nextMinNumberOfPixels % 50 != 0)
-            {
-                nextMinNumberOfPixels--;
+        //    while (nextMinNumberOfPixels % 50 != 0)
+        //    {
+        //        nextMinNumberOfPixels--;
 
-                if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
-                {
-                    Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
-                }
+        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
+        //        {
+        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
+        //        }
 
-            }
+        //    }
 
-            if (nextMinNumberOfPixels % 50 != 0)
-                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
+        //    if (nextMinNumberOfPixels % 50 != 0)
+        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
 
-            return nextMinNumberOfPixels;
-        }
+        //    return nextMinNumberOfPixels;
+        //}
 
         private void PrintMoreBlockVitals()
         {

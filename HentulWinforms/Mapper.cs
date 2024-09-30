@@ -2,6 +2,9 @@
 {
     using Common;
     using FirstOrderMemory.Models;
+    using System.Collections.Generic;
+    using System.Reflection.Metadata.Ecma335;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
     internal class Mapper
     {
@@ -19,11 +22,16 @@
 
         public Dictionary<int, Position[]> Mappings { get; private set; }
 
-        public List<Position_SOM> ONbits1;
-        public List<Position_SOM> ONbits2;
+        List<Position_SOM> ONbits1FOM;
+        List<Position_SOM> ONbits2FOM;
+        List<Position_SOM> ONbits3FOM;
+        List<Position_SOM> ONbits4FOM;
+
 
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
         public Dictionary<MAPPERCASE, List<int>> SOMBBMIDS { get; private set; }
+
+        public List<Position_SOM> somPositions;
 
 
         public Mapper(int numBBM, int numPixels)
@@ -41,19 +49,31 @@
             secondbitfoms = new List<int>();
             doublebitfoms = new List<int>();
 
-            ONbits1 = new List<Position_SOM>()
+            ONbits1FOM = new List<Position_SOM>()
             {
-                new Position_SOM(2,2),
-                new Position_SOM(2,8),
-                new Position_SOM(5,5)
+                new Position_SOM(0,1),
+                new Position_SOM(2,2)
             };
 
-            ONbits2 = new List<Position_SOM>()
+            ONbits2FOM = new List<Position_SOM>()
+            {
+                new Position_SOM(6, 0),
+                new Position_SOM(8, 4)
+            };
+
+            ONbits3FOM = new List<Position_SOM>()
             {
                 new Position_SOM(5,6),
-                new Position_SOM(8,8),
-                new Position_SOM(8,2),
+                new Position_SOM(8,9)
             };
+
+            ONbits4FOM = new List<Position_SOM>()
+            {
+                new Position_SOM(7,1),
+                new Position_SOM(9,2)
+            };
+
+            somPositions = new List<Position_SOM>();
 
             FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
             SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
@@ -63,7 +83,7 @@
         private void PerformMappingsFor()
         {
             Mappings = new Dictionary<int, Position[]> {
-                                {   0   , new Position[4] { new Position (  0   ,   0   ), new Position( 0   ,   1   ), new Position(    1   ,   0   ), new Position(    1   ,   1   ) } },
+                {   0   , new Position[4] { new Position (  0   ,   0   ), new Position( 0   ,   1   ), new Position(    1   ,   0   ), new Position(    1   ,   1   ) } },
                 {   1   , new Position[4] { new Position (  0   ,   2   ), new Position( 0   ,   3   ), new Position(    1   ,   2   ), new Position(    1   ,   3   ) } },
                 {   2   , new Position[4] { new Position (  0   ,   4   ), new Position( 0   ,   5   ), new Position(    1   ,   4   ), new Position(    1   ,   5   ) } },
                 {   3   , new Position[4] { new Position (  0   ,   6   ), new Position( 0   ,   7   ), new Position(    1   ,   6   ), new Position(    1   ,   7   ) } },
@@ -73,7 +93,7 @@
                 {   7   , new Position[4] { new Position (  2   ,   14  ), new Position( 2   ,   15  ), new Position(    3   ,   14  ), new Position(    3   ,   5   ) } },
                 {   8   , new Position[4] { new Position (  2   ,   16  ), new Position( 2   ,   17  ), new Position(    3   ,   16  ), new Position(    3   ,   7   ) } },
                 {   9   , new Position[4] { new Position (  2   ,   18  ), new Position( 2   ,   19  ), new Position(    3   ,   18  ), new Position(    3   ,   9   ) } },
-                {   10  , new Position[4] { new Position (  4   ,   0   ), new Position( 4   ,   1   ), new Position(    5       0   ), new Position(    5   ,   1   ) } },
+                {   10  , new Position[4] { new Position (  4   ,   0   ), new Position( 4   ,   1   ), new Position(    5   ,   0   ), new Position(    5   ,   1   ) } },
                 {   11  , new Position[4] { new Position (  4   ,   2   ), new Position( 4   ,   3   ), new Position(    5   ,   2   ), new Position(    5   ,   3   ) } },
                 {   12  , new Position[4] { new Position (  4   ,   4   ), new Position( 4   ,   5   ), new Position(    5   ,   4   ), new Position(    5   ,   5   ) } },
                 {   13  , new Position[4] { new Position (  4   ,   6   ), new Position( 4   ,   7   ), new Position(    5   ,   6   ), new Position(    5   ,   7   ) } },
@@ -166,6 +186,204 @@
                 };
         }
 
+        public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, LayerType layerType, int bbmID)
+        {
+            SDR_SOM toRet;
+            var positionstoAdd = new List<Position_SOM>();
+
+            switch (mappercase)
+            {
+                case MAPPERCASE.ALL:
+                    {                        
+
+                      
+                            positionstoAdd.AddRange(ONbits1FOM);
+                            positionstoAdd.AddRange(ONbits2FOM);
+                            positionstoAdd.AddRange(ONbits3FOM);
+                            positionstoAdd.AddRange(ONbits4FOM);
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                                                
+                    }
+                    break;
+                case MAPPERCASE.ONETWOTHREEE:
+                    {
+                            positionstoAdd.AddRange(ONbits1FOM);
+                            positionstoAdd.AddRange(ONbits2FOM);
+                            positionstoAdd.AddRange(ONbits3FOM);                            
+                       
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));                           
+                        
+                    }
+                    break;
+                case MAPPERCASE.TWOTHREEFOUR:
+                    {
+                                                 
+                            positionstoAdd.AddRange(ONbits2FOM);
+                            positionstoAdd.AddRange(ONbits3FOM);
+                            positionstoAdd.AddRange(ONbits4FOM);
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                case MAPPERCASE.ONETWOFOUR:
+                    {
+                        
+                            positionstoAdd.AddRange(ONbits1FOM);
+                            positionstoAdd.AddRange(ONbits2FOM);                           
+                            positionstoAdd.AddRange(ONbits4FOM);
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                case MAPPERCASE.ONETHREEFOUR:
+                    {
+                        
+                            positionstoAdd.AddRange(ONbits1FOM);                            
+                            positionstoAdd.AddRange(ONbits3FOM);
+                            positionstoAdd.AddRange(ONbits4FOM);
+                       
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                case MAPPERCASE.ONETWO:
+                    {
+                        
+                            positionstoAdd.AddRange(ONbits1FOM);
+                       
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));                            
+                        
+                    }
+                    break;
+                case MAPPERCASE.ONETHREE:
+                    {
+                       
+                            positionstoAdd.AddRange(ONbits1FOM);                            
+                            positionstoAdd.AddRange(ONbits3FOM);
+
+                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));                            
+                       
+                    }
+                    break;
+                case MAPPERCASE.ONEFOUR:
+                    {
+                        
+                            positionstoAdd.AddRange(ONbits1FOM);                            
+                            positionstoAdd.AddRange(ONbits4FOM);
+
+                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                case MAPPERCASE.TWOTHREE:
+                    {
+                                                    
+                            positionstoAdd.AddRange(ONbits2FOM);
+                            positionstoAdd.AddRange(ONbits3FOM);
+
+                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
+                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));                         
+                        
+                    }
+                    break;
+                case MAPPERCASE.TWOFOUR:
+                    {
+                                                
+                            positionstoAdd.AddRange(ONbits2FOM);                         
+                            positionstoAdd.AddRange(ONbits4FOM);
+                       
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                case MAPPERCASE.THREEFOUR:
+                    {
+                                                 
+                            positionstoAdd.AddRange(ONbits3FOM);
+                            positionstoAdd.AddRange(ONbits4FOM);
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                case MAPPERCASE.ONE:
+                    {
+                        
+                            positionstoAdd.AddRange(ONbits1FOM);                            
+                       
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
+                            
+                        
+                    }
+                    break;
+                case MAPPERCASE.TWO:
+                    {
+                                                   
+                            positionstoAdd.AddRange(ONbits2FOM);                            
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));                            
+                        
+                    }
+                    break;
+                case MAPPERCASE.THREE:
+                    {
+                                                  
+                            positionstoAdd.AddRange(ONbits4FOM);
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));                            
+                        
+                    }
+                    break;
+                case MAPPERCASE.FOUR:
+                    {
+                          positionstoAdd.AddRange(ONbits4FOM);
+                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
+                        
+                    }
+                    break;
+                default:
+                    {
+                        throw new NotImplementedException("No Valid Mapper Case Found for Layer Type");
+                    }
+            }
+
+            return new SDR_SOM(LENGTH, WIDTH, positionstoAdd, iType.SPATIAL);
+
+        }
+
+        private List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbits1FOM, int bbmID)
+        {
+            List<Position_SOM> retList = new List<Position_SOM>();
+            Position_SOM newPosition;
+
+            foreach (var pos in oNbits1FOM)
+            {
+                newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
+                retList.Add(newPosition);
+            }
+
+            return retList;
+        }
 
         public void ParseBitmap(Bitmap bitmap)
         {

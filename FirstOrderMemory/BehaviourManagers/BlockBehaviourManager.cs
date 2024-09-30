@@ -2129,7 +2129,6 @@
         #endregion
 
         #region ENUMS
-
         public enum LayerType
         {
             Layer_4,
