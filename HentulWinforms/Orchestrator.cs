@@ -44,7 +44,7 @@
 
         #region Used Variables
 
-        public int NumPixelsToProcessPerBlock { get; private set; }
+        public int Range { get; private set; }
 
         public int numPixelsProcessedPerBBM;
 
@@ -70,7 +70,7 @@
 
         private bool devbox = false;
 
-        public int BlockOffset;
+        public int BlockSize;
 
         public int UnitOffset;
 
@@ -104,41 +104,31 @@
         public Orchestrator(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
+            if(range != 10)
+            {
+                throw new InvalidOperationException("Invalid Operation !");
+            }
 
-            this.range = range;
-
-            NumPixelsToProcessPerBlock = range;
+            Range = range;  //10
 
             bmp = new Bitmap(range + range, range + range);
 
-            numPixelsProcessedPerBBM = 10;
+            numPixelsProcessedPerBBM = 4;
 
             LogMode = false;
 
-            double numerator = (2 * NumPixelsToProcessPerBlock) * (2 * NumPixelsToProcessPerBlock);
+            BlockSize = (2 * range) * (2 * range); //400            
 
-            double denominator = numPixelsProcessedPerBBM;
+            NumBBMNeeded = (BlockSize / numPixelsProcessedPerBBM);   //100
 
-            double value = (numerator / denominator);
+            bool b = NumBBMNeeded % 1 != 0;
 
-            bool b = value % 1 != 0;
-
-            if (value % 1 != 0)
+            if (NumBBMNeeded  != 100)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcessPerBlock.ToString());
-            }
+                throw new InvalidDataException("Number Of FOMM BBMs needed should always be 100, it throws off SOM Schema of 1250" + range.ToString());
+            }            
 
-            BlockOffset = range * 2;
-
-            UnitOffset = 10;
-
-            NumBBMNeeded = (int)value;
-
-            fomBBM = new BlockBehaviourManager[NumBBMNeeded];
-
-            int x1 = numPixelsProcessedPerBBM * NumBBMNeeded;
-
-            somBBM_L3B = new BlockBehaviourManager(x1, 10, 4);
+            fomBBM = new BlockBehaviourManager[NumBBMNeeded];            
 
             NumColumns = 10;
 
@@ -157,7 +147,6 @@
                 ImageIndex = mockImageIndex;
             else
                 ImageIndex = 0;
-
 
             somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
 
@@ -199,8 +188,8 @@
 
 
             Console.WriteLine("Finished Init for this Instance \n");
-            Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
+            Console.WriteLine("Range : " + range.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (range * range * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
 
 
@@ -231,7 +220,7 @@
             // STEP 1A : Fire all FOM's first!
 
             BlockBehaviourManager fom;
-            Mapper mapper = new Mapper(50, 10 * 10);
+            Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
             mapper.ParseBitmap(bmp);
             
             List<Position_SOM> ONbits3 = new List<Position_SOM>();
@@ -261,6 +250,7 @@
 
 
             //STEP 1B : Fire all L3B SOM's
+            
 
 
 
@@ -277,9 +267,6 @@
 
             
             somBBM_L3A.Fire(Sdr_Som3A);            
-
-
-
 
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 

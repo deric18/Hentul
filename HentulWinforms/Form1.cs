@@ -11,7 +11,7 @@ namespace HentulWinforms
     {
         Orchestrator orchestrator;
 
-        readonly int numPixels = 5;
+        readonly int numPixels = 10;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
