@@ -19,7 +19,7 @@ namespace FirstOrderMemoryUnitTest
         {
             bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4);
 
-            bbManager.Init(0,0, 1, 1, 1);
+            bbManager.Init(1);
 
             rand1 = new Random();
         }
@@ -30,7 +30,7 @@ namespace FirstOrderMemoryUnitTest
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1);
             BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10);
 
-            bbm3.Init(0, 0, 1, 1, 1);
+            bbm3.Init(1);
 
             SDR_SOM randSDR = TestUtils.GenerateRandomSDR(iType.SPATIAL);
 
@@ -923,7 +923,7 @@ namespace FirstOrderMemoryUnitTest
         {
             BlockBehaviourManager somBBM = new BlockBehaviourManager(1250, 10, 4);
 
-            somBBM.Init(0, 1, 0, 1, 1);
+            somBBM.Init(1);
 
             for (int i = 0; i < bbManager?.X; i++)
             {
@@ -991,7 +991,7 @@ namespace FirstOrderMemoryUnitTest
         public void TestMemoryProblemsInThisTestUT()
         {
             Position_SOM psom = new Position_SOM(5, 5, 5);
-            Neuron neuron = new Neuron(psom, new Position(0,0), new Position(1,1), 1, NeuronType.NORMAL);
+            Neuron neuron = new Neuron(psom, 1, NeuronType.NORMAL);
 
             //Now check memory usage.
 

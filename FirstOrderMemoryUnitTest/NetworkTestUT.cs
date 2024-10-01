@@ -19,7 +19,7 @@
         {
             bbManager = new BlockBehaviourManager(X, Y, Z);
 
-            bbManager.Init(0, 0, 1, 1, 1);            
+            bbManager.Init(1);            
         }
 
         [TestMethod]

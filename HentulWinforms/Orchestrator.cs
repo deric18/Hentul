@@ -121,7 +121,7 @@
 
             LogMode = false;
 
-            BlockSize = (2 * range) * (2 * range); //400            
+            BlockSize = (2 * range) * (2 * range); //400
 
             NumBBMNeeded = (BlockSize / numPixelsProcessedPerBBM);   //100
 
@@ -197,7 +197,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i].Init(0, 0, 1, 1, 10);
+                fomBBM[i].Init(i);
             }
 
 
@@ -209,9 +209,9 @@
 
             Console.WriteLine("Initing SOM Instance now ... \n");
 
-            somBBM_L3A.Init(0, 0, 0, 0, 1);
+            somBBM_L3A.Init(1);
 
-            somBBM_L3B.Init(0, 0, 0, 0, 1);
+            somBBM_L3B.Init(1);
 
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
 
@@ -374,20 +374,20 @@
 
             //STEP 1B : Fire all L3B SOM's
 
-
+            if(mapper.somPositions.Count != 0)
             somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
 
             // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
 
-            for (int i = 0; i < fomBBM.Length; i++)
-            {                
-                fomBBM[i].Fire(fomSdr);
-            }
+            //for (int i = 0; i < fomBBM.Length; i++)
+            //{                
+            //    fomBBM[i].Fire(fomSdr);
+            //}
 
 
             
-            somBBM_L3A.Fire(Sdr_Som3A);            
+            //somBBM_L3A.Fire(Sdr_Som3A);            
 
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
@@ -559,6 +559,48 @@
             return (color.R < 200 && color.G < 200 && color.B < 200);
         }
 
+
+        private void PrintMoreBlockVitals()
+        {
+            Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
+
+            int w = Console.Read();
+
+            if (w == 49)
+            {
+                ulong totalIncludedCycle = 0;
+
+                for (int i = 0; i < fomBBM.Count(); i++)
+                {
+                    if (fomBBM[i].BBMID != 0)
+                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
+
+                    totalIncludedCycle += fomBBM[i].CycleNum;
+
+                }
+
+                Console.WriteLine("Total Participated Cycles : " + totalIncludedCycle);
+                Console.WriteLine("Orchestrator CycleNum : " + CycleNum.ToString());
+
+                if (totalIncludedCycle != CycleNum)
+                {
+                    Console.WriteLine("ERROR : Incorrect Cycle Distribution amoung blocks");
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+        public void BackUp()
+        {
+            for (int i = 0; i < fomBBM.Length; i++)
+            {
+                fomBBM[i].BackUp(i.ToString());
+            }
+
+            somBBM_L3B.BackUp("SOM-1");
+        }
+
+
         #region Future Work
 
         private void MoveToNextObject()
@@ -680,6 +722,9 @@
         }
 
 
+        #region TRASH
+
+
         //public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
         //{
         //    //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
@@ -790,6 +835,34 @@
         //    Console.Read();
         //}
 
+        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
+        //{
+        //    if (numberOfPixels_Index % BlockOffset == 0)
+        //    {
+        //        return numberOfPixels_Index;
+        //    }
+
+        //    int nextMinNumberOfPixels = numberOfPixels_Index;
+
+        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
+
+        //    while (nextMinNumberOfPixels % 50 != 0)
+        //    {
+        //        nextMinNumberOfPixels--;
+
+        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
+        //        {
+        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
+        //        }
+
+        //    }
+
+        //    if (nextMinNumberOfPixels % 50 != 0)
+        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
+
+        //    return nextMinNumberOfPixels;
+        //}
+
         public void Grab()
         {
 
@@ -864,74 +937,7 @@
                                                  (a >> 16) & 0xff);
         }
 
-        
-        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        //{
-        //    if (numberOfPixels_Index % BlockOffset == 0)
-        //    {
-        //        return numberOfPixels_Index;
-        //    }
-
-        //    int nextMinNumberOfPixels = numberOfPixels_Index;
-
-        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
-
-        //    while (nextMinNumberOfPixels % 50 != 0)
-        //    {
-        //        nextMinNumberOfPixels--;
-
-        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
-        //        {
-        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
-        //        }
-
-        //    }
-
-        //    if (nextMinNumberOfPixels % 50 != 0)
-        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
-
-        //    return nextMinNumberOfPixels;
-        //}
-
-        private void PrintMoreBlockVitals()
-        {
-            Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
-
-            int w = Console.Read();
-
-            if (w == 49)
-            {
-                ulong totalIncludedCycle = 0;
-
-                for (int i = 0; i < fomBBM.Count(); i++)
-                {
-                    if (fomBBM[i].BlockId != null)
-                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
-
-                    totalIncludedCycle += fomBBM[i].CycleNum;
-
-                }
-
-                Console.WriteLine("Total Participated Cycles : " + totalIncludedCycle);
-                Console.WriteLine("Orchestrator CycleNum : " + CycleNum.ToString());
-
-                if (totalIncludedCycle != CycleNum)
-                {
-                    Console.WriteLine("ERROR : Incorrect Cycle Distribution amoung blocks");
-                    Thread.Sleep(5000);
-                }
-            }
-        }
-
-        public void BackUp()
-        {
-            for (int i = 0; i < fomBBM.Length; i++)
-            {
-                fomBBM[i].BackUp(i.ToString());
-            }
-
-            somBBM_L3B.BackUp("SOM-1");
-        }
+        #endregion        
 
         #endregion
     }

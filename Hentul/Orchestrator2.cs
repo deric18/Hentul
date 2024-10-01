@@ -130,7 +130,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i].Init(0, 0, 1, 1, 10);
+                fomBBM[i].Init(10);
             }
 
 
@@ -142,7 +142,7 @@
 
             Console.WriteLine("Initing SOM Instance now ... \n");
 
-            somBBM.Init(0, 0, 0, 0, 1);
+            somBBM.Init(1);
 
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
 
@@ -233,7 +233,7 @@
                                         {
                                             if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
                                             {
-                                                fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                                fomBBM[bbmId].Init(bbmId);
                                             }
 
                                             if (boolEncoder.HasValues())
@@ -345,7 +345,7 @@
 
                 for (int i = 0; i < fomBBM.Count(); i++)
                 {
-                    if (fomBBM[i].BlockId != null)
+                    if (fomBBM[i].BBMID != 0)
                         Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
 
                     totalIncludedCycle += fomBBM[i].CycleNum;

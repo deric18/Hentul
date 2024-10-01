@@ -9,13 +9,13 @@ namespace FirstOrderMemory.Models
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons, Position BlockId, Position UnitId, int BBMID) 
+        public Column(int x, int y, int numberOfNeurons, int BBMID) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BlockId, UnitId, BBMID));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BBMID));
             }            
             Init = 0;
         }

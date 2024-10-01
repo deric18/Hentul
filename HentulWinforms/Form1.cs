@@ -79,7 +79,7 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                //orchestrator.Process();
+                orchestrator.Process();
             }
         }
 

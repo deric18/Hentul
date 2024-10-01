@@ -121,7 +121,7 @@ namespace HentulWinforms
             // label_done
             // 
             label_done.AutoSize = true;
-            label_done.Location = new Point(398, 650);
+            label_done.Location = new Point(31, 29);
             label_done.Name = "label_done";
             label_done.Size = new Size(64, 15);
             label_done.TabIndex = 8;

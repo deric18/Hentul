@@ -115,7 +115,7 @@ namespace Hentul
 
             Console.WriteLine("Initing SOM Instance now ... \n");
 
-            somL3a.Init(0, 0, 0, 0, 1);
+            somL3a.Init(1);
 
             //somL3b.Init(0, 0, 0, 0, 1);
 
@@ -385,7 +385,7 @@ namespace Hentul
                                         {
                                             Console.WriteLine("Starting Initialization  of FOM objects : \n");
 
-                                            fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+                                            fomBBM[bbmId].Init(bbmId);
 
                                             Console.WriteLine("Finished Init for this Instance" + " Block ID X : " + blockid_x.ToString() + "  Block ID Y :" + blockid_y.ToString() + " UNIT ID X : " + unitId_x.ToString() + " UNIT ID Y :" + unitId_y.ToString());
                                         }

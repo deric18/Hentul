@@ -3,6 +3,8 @@
     using FirstOrderMemory.Models;
     using Common;
     using System.Xml;
+    using System.Security.Cryptography;
+    using System;
 
     public class BlockBehaviourManager
     {
@@ -16,11 +18,7 @@
         public int Y { get; private set; }
 
         public int Z { get; private set; }
-
-        public Position BlockId { get; private set; }
-
-        public Position UnitId { get; private set; }
-
+        
         public int BBMID { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
@@ -88,6 +86,8 @@
         public LogMode Mode { get; private set; }
 
         public ulong[] WireCasesTracker { get; private set; }
+
+        string logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
 
         #endregion
 
@@ -182,12 +182,8 @@
             this.Layer = layertype;
         }
 
-        public void Init(int blockid_x, int blockId_Y, int UnitId_x, int UnitID_y, int bbmID)
-        {
-            BlockId = new Position(blockid_x, blockId_Y);
-
-            UnitId = new Position(UnitId_x, UnitID_y);
-
+        public void Init(int bbmID)
+        {            
             BBMID = bbmID;
 
             for (int i = 0; i < X; i++)
@@ -196,7 +192,7 @@
                 {
                     try
                     {
-                        Columns[i, j] = new Column(i, j, Z, BlockId, UnitId, BBMID);
+                        Columns[i, j] = new Column(i, j, Z, BBMID);
                     }
                     catch (Exception ex)
                     {
@@ -235,6 +231,7 @@
             {
 
                 Console.WriteLine(ex.ToString());
+                WriteLogsToFile(ex.Message);
 
                 throw;
             }
@@ -286,9 +283,9 @@
 
             blockBehaviourManager = new BlockBehaviourManager(X, Y, Z);
 
-            blockBehaviourManager.Init(0, 1, 0, 1, 99);
+            blockBehaviourManager.Init(x);
 
-            blockBehaviourManager.Init(blockBehaviourManager.BlockId.X, blockBehaviourManager.BlockId.Y, blockBehaviourManager.UnitId.X, blockBehaviourManager.UnitId.Y, blockBehaviourManager.BBMID);
+            blockBehaviourManager.Init(blockBehaviourManager.BBMID);
 
             return blockBehaviourManager;
 
@@ -405,8 +402,7 @@
 
                             var distalNode = xmlDocument.CreateNode(XmlNodeType.Element, "DistalDendriticConnection", string.Empty);
 
-                            var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
-                            blockIdElement.InnerText = BlockId.X.ToString() + BlockId.Y.ToString();
+                            var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);                            
 
                             var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
 
@@ -475,7 +471,10 @@
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
                                 if (Mode == LogMode.BurstOnly || Mode == LogMode.All)
+                                {
                                     Console.WriteLine("BURST :: " + schemToLoad.ToString() + (schemToLoad.Equals(SchemaType.FOMSCHEMA) ? " Block ID : " + PrintBlockDetailsSingleLine() : " SOM Block ") + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    WriteLogsToFile("BURST :: " + schemToLoad.ToString() + (schemToLoad.Equals(SchemaType.FOMSCHEMA) ? " Block ID : " + PrintBlockDetailsSingleLine() : " SOM Block ") + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                }
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
 
@@ -490,7 +489,10 @@
                             else if (predictedNeuronPositions.Count == 1)
                             {
                                 if (Mode == LogMode.All || Mode == LogMode.Info)
+                                {
                                     Console.WriteLine("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                    WriteLogsToFile("INFO :: Block ID : " + PrintBlockDetailsSingleLine() + " Old  Pattern : Predicting Predicted Neurons Count : " + predictedNeuronPositions.Count.ToString());
+                                }
 
                                 AddNeuronListToNeuronsFiringThisCycleList(predictedNeuronPositions);
 
@@ -567,7 +569,9 @@
                 else
                 {
                     Console.WriteLine("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + PrintBlockDetailsSingleLine());
-                    Thread.Sleep(2000);
+                    WriteLogsToFile("ERROR : Fire :: BurstCache was not cleaned up from last cycle ." + PrintBlockDetailsSingleLine());
+                    WriteLogsToFile("Thread Being Slept to 2000");
+                    //Thread.Sleep(2000);
                 }
 
             }
@@ -644,8 +648,9 @@
 
                 if (neuron.Voltage >= 250 && NeuronsFiringThisCycle.Contains(neuron) == false)
                 {
-                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " BLOCK ID : " + BlockId.ToString() + " Neuron ID : " + neuron.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                    Thread.Sleep(3000);
+                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    //Thread.Sleep(3000);
                 }
             }
 
@@ -659,6 +664,7 @@
                         if (CycleNum - kvp.Key > 3)
                         {
                             Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
+                            WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
                             Thread.Sleep(2000);
                         }
 
@@ -699,6 +705,7 @@
                         if (CycleNum - kvp.Key > 3)
                         {
                             Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                            WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
                         }
 
                         foreach (var pos in kvp.Value)
@@ -742,6 +749,7 @@
                     if (CycleNum - kvp.Key > 3)
                     {
                         Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                        WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
                     }
 
                     foreach (var pos in kvp.Value)
@@ -781,9 +789,7 @@
             }
 
             IsBurstOnly = false;
-
-            CycleNum++;
-            // Process Next pattern.          
+                        
         }
 
         private void Wire()
@@ -817,7 +823,10 @@
                     WireCasesTracker[0]++;
 
                     if (Mode == LogMode.All || Mode == LogMode.Info)
+                    {
                         Console.WriteLine(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
+                        WriteLogsToFile(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
+                    }
 
                     List<Neuron> contributingList;
 
@@ -852,7 +861,10 @@
                     WireCasesTracker[1]++;
 
                     if (Mode == LogMode.All || Mode == LogMode.Info)
+                    {
                         Console.WriteLine(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
+                        WriteLogsToFile(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
+                    }
 
                     List<Neuron> contributingList;
 
@@ -913,6 +925,7 @@
                     WireCasesTracker[2]++;
 
                     Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                    WriteLogsToFile(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
                     Thread.Sleep(1000);
 
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
@@ -959,6 +972,7 @@
                     WireCasesTracker[3]++;
 
                     Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
+                    WriteLogsToFile(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
 
                     foreach (var position in ColumnsThatBurst)
                     {
@@ -984,6 +998,7 @@
                     WireCasesTracker[4]++;
 
                     Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
+                    WriteLogsToFile(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
                     Thread.Sleep(1000);
 
                     List<Neuron> burstList = new List<Neuron>();
@@ -1003,6 +1018,7 @@
                                 if (neuron.Equals(lastcycleneuron) && BBMUtils.CheckIfTwoNeuronsAreConnected(lastcycleneuron, neuron))
                                 {
                                     Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
+                                    WriteLogsToFile("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
 
                                     PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron);
                                 }
@@ -1089,7 +1105,7 @@
 
         public string PrintBlockDetailsSingleLine()
         {
-            return " Unit ID X :" + UnitId.X + " Unit ID Y : " + UnitId.Y + "/ BBM ID : " + BBMID.ToString();
+            return "  BBM ID : " + BBMID.ToString();
         }
 
         public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
@@ -1139,26 +1155,30 @@
             else if (AxonalNeuron.NeuronID.X == DendriticNeuron.NeuronID.X && AxonalNeuron.NeuronID.Y == DendriticNeuron.NeuronID.Y && AxonalNeuron.nType.Equals(DendriticNeuron.nType))
             {
                 Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
-                Thread.Sleep(2000);                                                                                                                                                      //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
+                WriteLogsToFile("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());
+                //Thread.Sleep(2000);                                                                                                                                                      //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
                 return false;
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
             {
                 Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
-                Thread.Sleep(2000);
+                WriteLogsToFile("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
+                //Thread.Sleep(2000);
                 return false;
             }
 
             if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
             {
-                Console.WriteLine(" EVENT :: ConnectTwoNeurons :::: Neuron inelgible to be have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
+                Console.WriteLine("EVENT :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
+                WriteLogsToFile(" EVENT :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
 
                 PruneSingleNeuron(DendriticNeuron);
 
                 if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
                 {
                     Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
-                    Thread.Sleep(1000);
+                    WriteLogsToFile("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
+                    //Thread.Sleep(1000);
                 }
             }
 
@@ -1177,13 +1197,15 @@
                 if (IsDendronalConnectionSuccesful && (Mode == LogMode.All || Mode == LogMode.Info))
                 {
                     Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    WriteLogsToFile("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised : Throw;
                 {
                     if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == false)
                     {
                         Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        Thread.Sleep(5000);
+                        WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                        //Thread.Sleep(5000);
                     }
 
                     throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());
@@ -1297,6 +1319,7 @@
 
         private void ValidateNetwork()
         {
+            CycleNum++;
 
             if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
             {
@@ -1335,7 +1358,8 @@
                 if (TemporalCycleCache.Count != 0)
                 {
                     Console.WriteLine("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item! " + PrintBlockDetailsSingleLine());
-                    Thread.Sleep(2000);
+                    WriteLogsToFile("ERROR :: Fire() :::: Trying to Add Temporal Pattern to a Valid cache Item! " + PrintBlockDetailsSingleLine());
+                    //Thread.Sleep(2000);
                 }
 
                 foreach(var input in incomingPattern.ActiveBits)
@@ -1354,7 +1378,8 @@
                 if (ApicalCycleCache.Count != 0)
                 {
                     Console.WriteLine("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + PrintBlockDetailsSingleLine());
-                    Thread.Sleep(2000);
+                    WriteLogsToFile("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + PrintBlockDetailsSingleLine());
+                    //Thread.Sleep(2000);
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
@@ -1490,12 +1515,16 @@
                             else
                             {
                                 Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
                             }
                         }
                     }
 
                     if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    {
                         Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunedNeuron.NeuronID.ToString());
+                        WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunedNeuron.NeuronID.ToString());
+                    }
 
                     if (DremoveList?.Count > 0)
                     {
@@ -1613,15 +1642,14 @@
             else
             {
                 Console.WriteLine(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
+                WriteLogsToFile(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
                 PrintBlockDetails();
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
         }
 
         private void PrintBlockDetails()
-        {
-            Console.Write("Block ID : X : " + BlockId.X.ToString() + " Y :" + BlockId.Y.ToString());
-            Console.WriteLine("Unit ID X: " + UnitId.X.ToString() + " Y :" + UnitId.Y.ToString());
+        {            
             Console.WriteLine("BBM ID : " + BBMID);
         }
 
@@ -1632,6 +1660,7 @@
             if (PerCycleFireSparsityPercentage > 20)
             {
                 Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
+                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
             }
 
             NeuronsFiringLastCycle.Clear();
@@ -1652,7 +1681,7 @@
             if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
             {
                 Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
-
+                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
                 //Console.ReadKey();
             }
 
@@ -1746,7 +1775,7 @@
                 {
 
                     if (this.TemporalLineArray[i, j] == null)
-                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BlockId, UnitId, BBMID, NeuronType.TEMPORAL);
+                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BBMID, NeuronType.TEMPORAL);
 
                     for (int k = 0; k < X; k++)
                     {
@@ -1793,7 +1822,7 @@
             {
                 for (int j = 0; j < Y; j++)
                 {
-                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BlockId, UnitId, BBMID, NeuronType.APICAL);
+                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BBMID, NeuronType.APICAL);
 
                     for (int k = 0; k < Z; k++)
                     {
@@ -2124,6 +2153,12 @@
                     axonCounter++;
                 }
             }
+        }
+
+        private void WriteLogsToFile(string logline)
+        {
+            File.AppendAllText(logfilename, logline + "\n");            
+            
         }
 
         #endregion

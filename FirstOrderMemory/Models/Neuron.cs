@@ -33,11 +33,7 @@ namespace FirstOrderMemory.Models
         private ulong redundantCounter = 0;
 
         public uint PruneCount { get; private set; }
-
-        public Position BlockID { get; private set; }
-
-        public Position UnitID { get; private set; }
-
+        
         public Position BBMId { get; private set; }
 
         public Position_SOM NeuronID { get; private set; }
@@ -65,11 +61,9 @@ namespace FirstOrderMemory.Models
         
         public int Voltage { get; private set; }
 
-        public Neuron(Position_SOM neuronId, Position blockid, Position unitId, int BBMId, NeuronType nType = NeuronType.NORMAL)
+        public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
-            NeuronID = neuronId;
-            BlockID = blockid;
-            UnitID = unitId;
+            NeuronID = neuronId;            
             BBMId = BBMId;
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();            
@@ -310,9 +304,9 @@ namespace FirstOrderMemory.Models
 
                 if( (ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1400 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
                 {
-                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 400 Distal Dendritic Connections " + BlockID);
+                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString());
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                 }
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
@@ -360,7 +354,7 @@ namespace FirstOrderMemory.Models
                 if(synapse.cType.Equals(ConnectionType.AXONTONEURON))
                 {
                     Console.WriteLine(" WARNING :: RemoveAxonalConnection :: Cannot Remove Schema Based Axonal Connections");
-                    Thread.Sleep(5000);
+                    //Thread.Sleep(5000);
                     return false;
                 }
 

@@ -36,7 +36,7 @@
 
         public Mapper(int numBBM, int numPixels)
         {
-            if (numBBM != 50 || numPixels != 100)
+            if (numBBM != 100 || numPixels != 400)
             {
                 throw new InvalidOperationException("Currently only supported for 10*10 Image Size with 2 Pixel per BBM W");
             }
@@ -355,7 +355,7 @@
                     break;
                 case MAPPERCASE.FOUR:
                     {
-                          positionstoAdd.AddRange(ONbits4FOM);
+                            positionstoAdd.AddRange(ONbits4FOM);
                         
                             somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
                         
