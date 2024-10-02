@@ -248,10 +248,10 @@ namespace FirstOrderMemory.Models
         public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, ConnectionType? cType = null)
         {
 
-            if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
-            {
-                bool bp = true;
-            }
+            //if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
+            //{
+            //    bool bp = true;
+            //}
 
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
             {

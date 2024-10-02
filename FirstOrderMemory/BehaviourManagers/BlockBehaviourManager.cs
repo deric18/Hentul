@@ -189,8 +189,10 @@
 
             this.Layer = layertype;
 
-            FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)0.1 * x * y * Z;
-            FOM_TOTAL_NEURON_CONNECTIONLIMIT = SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)0.9 * x * y * Z;
+            FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.1 * x * y * Z);
+            SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);
+            FOM_TOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
+            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.05 * x * y * Z);
 
             OverConnectedOffenderList = new List<Neuron>();
             OverConnectedInShortInterval = new List<Neuron>();
@@ -486,8 +488,8 @@
                             {
                                 if (Mode == LogMode.BurstOnly || Mode == LogMode.All)
                                 {
-                                    Console.WriteLine("BURST :: " + schemToLoad.ToString() + (schemToLoad.Equals(SchemaType.FOMSCHEMA) ? " Block ID : " + PrintBlockDetailsSingleLine() : " SOM Block ") + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
-                                    WriteLogsToFile("BURST :: " + schemToLoad.ToString() + (schemToLoad.Equals(SchemaType.FOMSCHEMA) ? " Block ID : " + PrintBlockDetailsSingleLine() : " SOM Block ") + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    Console.WriteLine("INFO :: BURST :: " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
+                                    WriteLogsToFile("INFO :: BURST :: " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
                                 }
 
                                 AddNeuronListToNeuronsFiringThisCycleList(Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].Neurons);
@@ -514,7 +516,7 @@
                             }
                             else
                             {
-                                Console.WriteLine(schemToLoad.ToString() + "There Should only be one winner in the Column");
+                                Console.WriteLine("ERROR :: s" + schemToLoad.ToString() + "There Should only be one winner in the Column");
                                 throw new InvalidOperationException("Fire :: This should not happen ! Bug in PickAwinner or Bursting Logic!!!");
                             }
 
@@ -1119,7 +1121,7 @@
 
         public string PrintBlockDetailsSingleLine()
         {
-            return "  BBM ID : " + BBMID.ToString();
+            return "  BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString();
         }
 
         public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
@@ -1175,16 +1177,18 @@
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
             {
-                Console.WriteLine("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
-                WriteLogsToFile("ConnectTwoNeurons() :::: ERROR :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
+                Console.WriteLine("ERROR :: ConnectTwoNeurons() :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
+                WriteLogsToFile("ERROR :: ConnectTwoNeurons() :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
                 //Thread.Sleep(2000);
                 return false;
             }
 
-            if ((DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA))
+
+            //Check For OverConnecting Neurons
+            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) &&  ( (DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA)))
             {
-                Console.WriteLine("EVENT :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
-                WriteLogsToFile(" EVENT :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
+                Console.WriteLine("WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
+                WriteLogsToFile(" WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
 
                 PruneSingleNeuron(DendriticNeuron);
 
@@ -1440,8 +1444,9 @@
                         x.cType == ConnectionType.DISTALDENDRITICNEURON &&
                         (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
 
-                        if (distalDendriticList.Count() < 0.1 * neuron.ProximoDistalDendriticList.Count)
+                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT) ) && distalDendriticList.Count() < 0.5 * neuron.ProximoDistalDendriticList.Count)
                         {
+                            WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + neuron.NeuronID.ToString());
                             OverConnectedInShortInterval.Add(neuron);
                         }
 
@@ -1491,37 +1496,38 @@
             }
         }
 
-        private void PruneSingleNeuron(Neuron prunedNeuron)
+        private void PruneSingleNeuron(Neuron prunableNeuron)
         {
-            if (prunedNeuron != null)
+            if (prunableNeuron != null && prunableNeuron.nType.Equals(NeuronType.NORMAL))
             {
-                if (prunedNeuron.NeuronID.ToString() == "2-8-0-N" || prunedNeuron.NeuronID.ToString() == "5-1-7-N")
+                if (prunableNeuron.NeuronID.ToString() == "2-8-0-N" || prunableNeuron.NeuronID.ToString() == "5-1-7-N")
                 {
                     bool bp = true;
                 }
 
-                if (prunedNeuron.ProximoDistalDendriticList == null || prunedNeuron.ProximoDistalDendriticList.Count == 0)
+                if (prunableNeuron.ProximoDistalDendriticList == null || prunableNeuron.ProximoDistalDendriticList.Count == 0)
                 { return; }
 
                 List<string> DremoveList = null;
                 List<string> AremoveList = null;
 
-                var distalDendriticList = prunedNeuron.ProximoDistalDendriticList.Values.Where(x =>
+                var distalDendriticList = prunableNeuron.ProximoDistalDendriticList.Values.Where(x =>
                         x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) &&
                         x.GetStrength() <= PRUNE_STRENGTH &&
                         x.PredictiveHitCount != 5 &&
                         x.cType == ConnectionType.DISTALDENDRITICNEURON &&
                         (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
 
-                if (distalDendriticList.Count() < 0.1 * prunedNeuron.ProximoDistalDendriticList.Count)
+                if ( ( prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT )) && distalDendriticList.Count() < 0.1 * prunableNeuron.ProximoDistalDendriticList.Count)
                 {
-                    OverConnectedInShortInterval.Add(prunedNeuron);
+                    WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
+                    OverConnectedInShortInterval.Add(prunableNeuron);
                 }
 
                 //Remove only connected Distal Dendritic connections
                 if (distalDendriticList.Count() != 0)
                 {
-                    foreach (var kvp in prunedNeuron.ProximoDistalDendriticList)
+                    foreach (var kvp in prunableNeuron.ProximoDistalDendriticList)
                     {
                         //Remove Distal Dendrite from Neuron
                         if (DremoveList == null)
@@ -1532,9 +1538,9 @@
                         //Remove Corresponding Connected Axonal Neuron
                         var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
 
-                        if (axonalNeuron.AxonalList.TryGetValue(prunedNeuron.NeuronID.ToString(), out var connection))
+                        if (axonalNeuron.AxonalList.TryGetValue(prunableNeuron.NeuronID.ToString(), out var connection))
                         {
-                            if (axonalNeuron.RemoveAxonalConnection(prunedNeuron) == false)
+                            if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == false)
                             {
                                 Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
                                 throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
@@ -1549,15 +1555,15 @@
 
                     if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
                     {
-                        Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunedNeuron.NeuronID.ToString());
-                        WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunedNeuron.NeuronID.ToString());
+                        Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString());
+                        WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString());
                     }
 
                     if (DremoveList?.Count > 0)
                     {
                         for (int k = 0; k < DremoveList.Count; k++)
                         {
-                            prunedNeuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
+                            prunableNeuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
 
                             BlockBehaviourManager.totalDendronalConnections--;
                         }

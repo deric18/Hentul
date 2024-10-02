@@ -37,7 +37,6 @@ namespace HentulWinforms
             labelY = new Label();
             Start = new Button();
             EdgedImage = new PictureBox();
-            readyLabel = new Label();
             ObjectLabel = new Label();
             label_done = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
@@ -100,15 +99,6 @@ namespace HentulWinforms
             EdgedImage.TabIndex = 5;
             EdgedImage.TabStop = false;
             // 
-            // readyLabel
-            // 
-            readyLabel.AutoSize = true;
-            readyLabel.Location = new Point(399, 167);
-            readyLabel.Name = "readyLabel";
-            readyLabel.Size = new Size(38, 15);
-            readyLabel.TabIndex = 6;
-            readyLabel.Text = "label1";
-            // 
             // ObjectLabel
             // 
             ObjectLabel.AutoSize = true;
@@ -136,7 +126,6 @@ namespace HentulWinforms
             ClientSize = new Size(1705, 903);
             Controls.Add(label_done);
             Controls.Add(ObjectLabel);
-            Controls.Add(readyLabel);
             Controls.Add(EdgedImage);
             Controls.Add(Start);
             Controls.Add(labelY);
@@ -165,7 +154,6 @@ namespace HentulWinforms
         private Label labelY;
         private Button Start;
         private PictureBox EdgedImage;
-        private Label readyLabel;
         private Label ObjectLabel;
         private Label label_done;
     }

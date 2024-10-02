@@ -12,6 +12,8 @@ namespace HentulWinforms
         Orchestrator orchestrator;
 
         readonly int numPixels = 10;
+        int counter = 0;
+        int numRotations = 50;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -26,7 +28,12 @@ namespace HentulWinforms
         }
 
         private void StartButton_Click(object sender, EventArgs e)
-        {
+        {                        
+            
+            label_done.Text = "Procesing";
+
+            label_done.Refresh();
+
             var value = LeftTop;
 
             value.X = value.X + numPixels;
@@ -36,10 +43,7 @@ namespace HentulWinforms
 
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
-
-            int counter = 0;
-
-            int numRotations = 5;
+                 
 
             while (counter < numRotations)
             {
@@ -71,6 +75,9 @@ namespace HentulWinforms
                     }
                 }
 
+                labelX.Text = value.X.ToString(); labelX.Refresh(); 
+                labelY.Text = value.Y.ToString(); labelY.Refresh();
+
                 orchestrator.MoveCursor(value);
 
                 orchestrator.Grab();
@@ -87,6 +94,12 @@ namespace HentulWinforms
 
                 counter++;
             }
+
+            label_done.Text = "Done";
+
+            label_done.Refresh();
+
+            numRotations += 50; 
         }
 
 
@@ -111,12 +124,7 @@ namespace HentulWinforms
 
 
         private void button1_Click(object sender, EventArgs e)
-        {
-
-            readyLabel.Text = "Start Position";
-
-            readyLabel.Text = "Ready Now";
-
+        {            
             var value = orchestrator.GetCurrentPointerPosition();
 
             labelX.Text = value.X.ToString();
@@ -144,6 +152,9 @@ namespace HentulWinforms
 
             EdgedImage.Refresh();
 
+            label_done.Text = "Ready";
+
+            label_done.Refresh();
         }
                      
 
@@ -165,6 +176,10 @@ namespace HentulWinforms
 
             LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1598; RightTop.Y = 365; LeftBottom.X = 960; LeftBottom.Y = 1032; RightBottom.X = 1598; RightBottom.Y = 1032;
 
+            label_done.Text = "Ready";
+
+            label_done.Refresh();
+
         }
 
 
@@ -185,10 +200,6 @@ namespace HentulWinforms
 
             return BitmapConverter.ToBitmap(imgdetect);
         }
-
-
-
-
 
 
         private void label1_Click1(object sender, EventArgs e)
