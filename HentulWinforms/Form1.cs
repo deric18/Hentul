@@ -37,7 +37,11 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            while (true)
+            int counter = 0;
+
+            int numRotations = 5;
+
+            while (counter < numRotations)
             {
 
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
@@ -80,6 +84,8 @@ namespace HentulWinforms
                 EdgedImage.Refresh();
 
                 orchestrator.Process();
+
+                counter++;
             }
         }
 
