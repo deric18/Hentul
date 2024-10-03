@@ -13,7 +13,7 @@ namespace HentulWinforms
 
         readonly int numPixels = 10;
         int counter = 0;
-        int numRotations = 50;
+        int numRotations = 100;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -97,9 +97,7 @@ namespace HentulWinforms
 
             label_done.Text = "Done";
 
-            label_done.Refresh();
-
-            numRotations += 50; 
+            label_done.Refresh();            
         }
 
 

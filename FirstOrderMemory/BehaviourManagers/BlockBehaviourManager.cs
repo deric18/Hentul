@@ -94,8 +94,8 @@
 
         #endregion
 
-            #region CONSTANTS
-
+        #region CONSTANTS
+        
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
@@ -516,7 +516,7 @@
                             }
                             else
                             {
-                                Console.WriteLine("ERROR :: s" + schemToLoad.ToString() + "There Should only be one winner in the Column");
+                                Console.WriteLine("ERROR :: " + schemToLoad.ToString() + "There Should only be one winner in the Column");
                                 throw new InvalidOperationException("Fire :: This should not happen ! Bug in PickAwinner or Bursting Logic!!!");
                             }
 
@@ -662,10 +662,10 @@
 
                 var neuron = GetNeuronFromString(neuronList.Key);
 
-                if (neuron.Voltage >= 250 && NeuronsFiringThisCycle.Contains(neuron) == false)
+                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
                 {
-                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                    WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
                     //Thread.Sleep(3000);
                 }
             }
@@ -1522,7 +1522,7 @@
                 {
                     WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
                     OverConnectedInShortInterval.Add(prunableNeuron);
-                }
+                }                
 
                 //Remove only connected Distal Dendritic connections
                 if (distalDendriticList.Count() != 0)
@@ -1552,12 +1552,9 @@
                             WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
                         }
                     }
-
-                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
-                    {
-                        Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString());
-                        WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString());
-                    }
+                    
+                    Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString() + "Layer Type : " + Layer.ToString());
+                    WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString() + "Layer Type : " + Layer.ToString());
 
                     if (DremoveList?.Count > 0)
                     {
