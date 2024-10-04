@@ -115,12 +115,12 @@
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
         private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
-        private const uint PRUNE_THRESHOLD = 25;
+        private const uint PRUNE_THRESHOLD = 10;
         private const uint PRUNE_STRENGTH = 1;
-        private readonly int FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = 10;
-        private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = 10;
-        private readonly int FOM_TOTAL_NEURON_CONNECTIONLIMIT = 90;
-        private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT = 900;
+        private readonly int FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
+        private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
+        private readonly int FOM_TOTAL_NEURON_CONNECTIONLIMIT;
+        private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT;
 
 
         #endregion
@@ -197,7 +197,7 @@
             FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.1 * x * y * Z);
             SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);
             FOM_TOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
-            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.05 * x * y * Z);
+            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
 
             OverConnectedOffenderList = new List<Neuron>();
             OverConnectedInShortInterval = new List<Neuron>();
@@ -680,10 +680,10 @@
                 PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
             }
 
-            if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
+            if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
             {
-                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
-                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
+                Console.WriteLine("WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size" + PrintBlockDetailsSingleLine());
+                WriteLogsToFile("WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size" + PrintBlockDetailsSingleLine());
                 //Console.ReadKey();
             }
 
