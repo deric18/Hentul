@@ -117,10 +117,10 @@
 
             List<Position_SOM> temporalPosList = new List<Position_SOM>()
             {
-                new Position_SOM(1,2),
-                new Position_SOM(3,1),
-                new Position_SOM(3,2),
-                new Position_SOM(0,0)
+                new Position_SOM(2, 1),
+                new Position_SOM(1, 3),
+                new Position_SOM(2, 3),
+                new Position_SOM(0, 0)
             };
 
 

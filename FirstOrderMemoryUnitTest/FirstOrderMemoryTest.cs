@@ -596,12 +596,12 @@ namespace FirstOrderMemoryUnitTest
             {
                 previousStrength = preSynapse.GetStrength();
             }
+            
+            bbManager.Fire(temporalInputPattern, false , true);
 
-            for (int i = 0; i < 10; i++)
-            {
-                bbManager.Fire(temporalInputPattern);
-                bbManager.Fire(spatialInputPattern);
-            }
+            Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
+
+            bbManager.Fire(spatialInputPattern, true, true);
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
@@ -612,7 +612,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.IsTrue(currentStrength > previousStrength);
 
-            Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
+            Assert.AreEqual(NeuronState.FIRING, overlapNeuron.CurrentState);
         }
 
         [TestMethod]
