@@ -312,75 +312,75 @@
 
             #region Cache Code for Connector
 
-            try
-            {
-                for (int i = 0; i < blockBehaviourManager.Y; i++)
-                {
-                    for (int j = 0; j < blockBehaviourManager.Y; j++)
-                    {
-                        for (int k = 0; k < blockBehaviourManager.Columns[0, 0].Neurons.Count; k++)
-                        {
-                            //Proximal Dendritic Connections
-                            Neuron presynapticNeuron, postSynapticNeuron;
+            //try
+            //{
+            //    for (int i = 0; i < blockBehaviourManager.Y; i++)
+            //    {
+            //        for (int j = 0; j < blockBehaviourManager.Y; j++)
+            //        {
+            //            for (int k = 0; k < blockBehaviourManager.Columns[0, 0].Neurons.Count; k++)
+            //            {
+            //                //Proximal Dendritic Connections
+            //                Neuron presynapticNeuron, postSynapticNeuron;
 
-                            for (int l = 0; l < Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.Count; l++)
-                            {
-                                var synapse = Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.ElementAt(l);
+            //                for (int l = 0; l < Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.Count; l++)
+            //                {
+            //                    var synapse = Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.ElementAt(l);
 
-                                if (synapse != null)
-                                {
-                                    if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
-                                    {
-                                        postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
+            //                    if (synapse != null)
+            //                    {
+            //                        if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
+            //                        {
+            //                            postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
 
-                                        if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
-                                        {
-                                            Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-                                }
-                            }
+            //                            if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
+            //                            {
+            //                                Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
+            //                            }
+            //                        }
+            //                    }
+            //                    else
+            //                    {
+            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+            //                    }
+            //                }
 
 
-                            //Axonal Connections
-                            for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
-                            {
-                                var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
+            //                //Axonal Connections
+            //                for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
+            //                {
+            //                    var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
 
-                                if (synapse != null)
-                                {
-                                    if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
-                                    {
-                                        presynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.AxonalNeuronId);
-                                        postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
+            //                    if (synapse != null)
+            //                    {
+            //                        if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
+            //                        {
+            //                            presynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.AxonalNeuronId);
+            //                            postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
 
-                                        if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
-                                        {
-                                            Console.WriteLine("Could Not Clone Axonal Connection Properly!!!");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-                                }
-                            }
-                        }
-                    }
-                }
+            //                            if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
+            //                            {
+            //                                Console.WriteLine("Could Not Clone Axonal Connection Properly!!!");
+            //                            }
+            //                        }
+            //                    }
+            //                    else
+            //                    {
+            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
 
-                blockBehaviourManager.GenerateTemporalLines();
+            //    blockBehaviourManager.GenerateTemporalLines();
 
-                blockBehaviourManager.GenerateApicalLines();
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+            //    blockBehaviourManager.GenerateApicalLines();
+            //}
+            //catch (Exception e)
+            //{
+            //    throw;
+            //}
 
             #endregion
         }
@@ -491,7 +491,7 @@
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
-                                if (Mode == LogMode.BurstOnly || Mode == LogMode.All)
+                                if (Mode == LogMode.Info || Mode == LogMode.All)
                                 {
                                     Console.WriteLine("INFO :: BURST :: " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
                                     WriteLogsToFile("INFO :: BURST :: " + PrintBlockDetailsSingleLine() + " Bursting for incoming pattern X :" + incomingPattern.ActiveBits[i].X + " Y : " + incomingPattern.ActiveBits[i].Y);
@@ -1248,7 +1248,7 @@
 
                 PruneSingleNeuron(DendriticNeuron);
 
-                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= 400 && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= 1400 && schemToLoad == SchemaType.SOMSCHEMA))
+                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA))
                 {
                     Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
                     WriteLogsToFile("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
@@ -1497,9 +1497,7 @@
 
                         var distalDendriticList = neuron.ProximoDistalDendriticList.Values.Where(x =>
                         x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) &&
-                        x.GetStrength() <= PRUNE_STRENGTH &&
-                        x.PredictiveHitCount != 5 &&
-                        x.cType == ConnectionType.DISTALDENDRITICNEURON &&
+                        x.IsActive == false &&
                         (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
 
                         if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT) ) && distalDendriticList.Count() < 0.5 * neuron.ProximoDistalDendriticList.Count)
@@ -1571,9 +1569,7 @@
 
                 var distalDendriticList = prunableNeuron.ProximoDistalDendriticList.Values.Where(x =>
                         x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) &&
-                        x.GetStrength() <= PRUNE_STRENGTH &&
-                        x.PredictiveHitCount != 5 &&
-                        x.cType == ConnectionType.DISTALDENDRITICNEURON &&
+                        x.IsActive == false &&                                                
                         (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
 
                 if ( ( prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT )) && distalDendriticList.Count() < 0.1 * prunableNeuron.ProximoDistalDendriticList.Count)
@@ -1610,9 +1606,12 @@
                             WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
                         }
                     }
-                    
-                    Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString() + "Layer Type : " + Layer.ToString());
-                    WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString() + "Layer Type : " + Layer.ToString());
+
+                    if (Mode == LogMode.All || Mode == LogMode.Info)
+                    {
+                        Console.WriteLine("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString() + "Layer Type : " + Layer.ToString());
+                        WriteLogsToFile("INFO : Succesfully removed " + DremoveList.Count.ToString() + " neurons from neuron " + prunableNeuron.NeuronID.ToString() + "Layer Type : " + Layer.ToString());
+                    }
 
                     if (DremoveList?.Count > 0)
                     {

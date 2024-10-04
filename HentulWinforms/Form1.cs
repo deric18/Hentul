@@ -172,7 +172,7 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1598; RightTop.Y = 365; LeftBottom.X = 960; LeftBottom.Y = 1032; RightBottom.X = 1598; RightBottom.Y = 1032;
+            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1375; RightTop.Y = 365; LeftBottom.X = 960; LeftBottom.Y = 1032; RightBottom.X = 1375; RightBottom.Y = 1032;
 
             label_done.Text = "Ready";
 
