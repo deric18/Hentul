@@ -656,7 +656,8 @@
 
             //Todo : Need Selective Clean Up Logic , Should never perform Full Clean up.
 
-
+            // Check neuron that had firing voltage but still did not fire. 
+            // Todo : Fire these as well since this is a SNN Model
             foreach (var neuronList in PredictedNeuronsforThisCycle)
             {
 
@@ -790,7 +791,13 @@
             }
 
 
-            //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Keepingg them in the list will only conplicate next cycle process            
+            //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Keepingg them in the list will only complicate next cycle process
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {                
+                //Cleanup voltages of all the Neurons that Fired this cycle
+                neuron.FlushVoltage();
+            }
+
             NeuronsFiringThisCycle.Clear();
 
             ColumnsThatBurst.Clear();
@@ -1384,7 +1391,7 @@
 
                 foreach (var input in incomingPattern.ActiveBits)
                 {
-                    if (input.X >= X || input.Y >= Z)
+                    if (input.X >= X || input.Y >= Z)   //Verified!
                     {
                         throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceeding bounds!");
                     }
@@ -1401,19 +1408,21 @@
                     WriteLogsToFile("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + PrintBlockDetailsSingleLine());
                     //Thread.Sleep(2000);
                 }
+                
+                foreach (var pos in incomingPattern.ActiveBits)
+                {
+                    if (pos.X > X || pos.Y > Y || pos.Z > Z)
+                    {
+                        Console.WriteLine("EXCEPTION :: Incoming pattern is not encoded in the correct format");
+
+                        throw new InvalidDataException("Incoming SDR is not encoded correctly");
+                    }
+                }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
             }
 
-            foreach (var pos in incomingPattern.ActiveBits)
-            {
-                if (pos.X > X || pos.Y > Y || pos.Z > Z)
-                {
-                    Console.WriteLine("EXCEPTION :: Incoming pattern is not encoded in the correct format");
-
-                    throw new InvalidDataException("Incoming SDR is not encoded correctly");
-                }
-            }
+           
 
         }
 
@@ -1692,15 +1701,18 @@
                 Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
                 WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
             }
-
+            
             NeuronsFiringLastCycle.Clear();
 
             foreach (var neuron in NeuronsFiringThisCycle)
-            {
+            {                
+                //Prep for Next cycle Prediction
                 if (neuron.nType.Equals(NeuronType.NORMAL))
                     NeuronsFiringLastCycle.Add(neuron);
+                
             }
 
+            
             PredictedNeuronsforThisCycle.Clear();
 
             foreach (var kvp in PredictedNeuronsForNextCycle)

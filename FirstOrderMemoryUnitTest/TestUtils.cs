@@ -12,21 +12,19 @@
             return new Position_SOM(spatial.X, spatial.Y, temporal.Y);
         }
 
-        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position pos)
-        {
-            return bbManager.Columns[pos.Z, pos.Y].Neurons[pos.X];
-        }
+        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position_SOM pos) =>        
+            bbManager.Columns[pos.Z, pos.X].Neurons[pos.Y];        
+        
 
-        internal static SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType)
-        {
-            return new SDR_SOM(10, 10, posList, inputPatternType);
-        }        
+        internal static SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType) =>
+        new SDR_SOM(10, 10, posList, inputPatternType);
+                
 
         internal static Position_SOM GenerateRandomPosition()
         {
             Random rand = new Random();
 
-            return new Position_SOM(rand.Next(0, 9), rand.Next(0, 9), rand.Next(0, 9));
+            return new Position_SOM(rand.Next(0, 10), rand.Next(0, 10), rand.Next(0, 10));
         }
 
 
@@ -82,10 +80,21 @@
 
             List<Position_SOM> posList = new List<Position_SOM>();
 
-            for (int i = 0; i < numPos; i++)
+            if (inputPatternType == iType.SPATIAL)
             {
-                posList.Add(new Position_SOM(rand.Next(0, 10), rand.Next(0, 9), rand.Next(0, 3)));
+                for (int i = 0; i < numPos; i++)
+                {
+                    posList.Add(new Position_SOM(rand.Next(0, 10), rand.Next(0, 10), rand.Next(0, 4)));
+                }
             }
+            else if (inputPatternType == iType.TEMPORAL)
+            {
+                for (int i = 0; i < numPos; i++)
+                {
+                    posList.Add(new Position_SOM(rand.Next(0, 10), rand.Next(0, 4), rand.Next(0, 10)));
+                }
+            }
+
 
             return new SDR_SOM(10, 10, posList, inputPatternType);
         }
@@ -100,17 +109,17 @@
 
             List<Position_SOM> spatialPosList = new List<Position_SOM>()
             {
-                new Position_SOM(2,4),
-                new Position_SOM(1,3),
-                new Position_SOM(3,2),
-                new Position_SOM(0,0)
+                new Position_SOM(5,2, 1),
+                new Position_SOM(7,1, 3),
+                new Position_SOM(8,2, 3),
+                new Position_SOM(4,0, 0)
             };
 
             List<Position_SOM> temporalPosList = new List<Position_SOM>()
             {
-                new Position_SOM(4,2),
+                new Position_SOM(1,2),
                 new Position_SOM(3,1),
-                new Position_SOM(2,3),
+                new Position_SOM(3,2),
                 new Position_SOM(0,0)
             };
 

@@ -532,7 +532,7 @@ namespace FirstOrderMemoryUnitTest
 
 
         /// <summary>
-        /// Lit Up a Temporal Line Ensure , the associated Normal Neurons deploarize and ensure there is not strength changes to there temporal partner.
+        /// Lite up a Temporal Line Ensure , the associated Normal Neurons deploarize and ensure there is no strength changes to there temporal partner.
         /// </summary>
         [TestMethod]
         public void TestTemporalFiringUT()
@@ -541,8 +541,7 @@ namespace FirstOrderMemoryUnitTest
 
             Position_SOM temporalposition = temporalInputPattern.ActiveBits[0];
 
-
-            Neuron TemporalNeuron = bbManager.GetNeuronFromPosition(temporalposition);
+            Neuron TemporalNeuron = bbManager.GetNeuronFromString(TestUtils.GetSpatialNeuronFromTemporalCoordinate(bbManager, temporalposition).GetMyTemporalPartner());
 
             uint previousStrength = 0, currentStrength = 0;
 
@@ -553,7 +552,7 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(temporalInputPattern, true);
+            bbManager.Fire(temporalInputPattern, true, true);
 
             var temporalNeuron = bbManager.GetNeuronFromString(normalNeuron.GetMyTemporalPartner());
 
@@ -585,7 +584,7 @@ namespace FirstOrderMemoryUnitTest
 
             uint previousStrength = 0, currentStrength = 0;
 
-            Neuron normalNeuron = bbManager.GetNeuronFromString(position.ToString());
+            Neuron normalNeuron = bbManager.GetNeuronFromPosition(position);
 
             Position_SOM overlapPos = TestUtils.GetSpatialAndTemporalOverlap(spatialInputPattern.ActiveBits[0], temporalInputPattern.ActiveBits[0]);
 
@@ -598,8 +597,11 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(temporalInputPattern);
-            bbManager.Fire(spatialInputPattern);
+            for (int i = 0; i < 10; i++)
+            {
+                bbManager.Fire(temporalInputPattern);
+                bbManager.Fire(spatialInputPattern);
+            }
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
