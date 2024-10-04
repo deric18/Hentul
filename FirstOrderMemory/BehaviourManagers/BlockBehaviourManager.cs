@@ -3,7 +3,7 @@
     using FirstOrderMemory.Models;
     using Common;
     using System.Xml;
-    using System.Security.Cryptography;
+    using System.Linq;
     using System;
 
     public class BlockBehaviourManager
@@ -21,6 +21,8 @@
 
         public int BBMID { get; private set; }
 
+        public Dictionary<string, List<Neuron>> PredictedNeuronsforLastCycle { get; private set; }
+
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsforThisCycle { get; private set; }
@@ -29,7 +31,7 @@
 
         public List<Neuron> NeuronsFiringLastCycle { get; private set; }
 
-        private List<Segment>? _predictedSegmentForThisCycle;
+        //private List<Segment>? _predictedSegmentForThisCycle;
 
         public List<Position_SOM> ColumnsThatBurst { get; private set; }
 
@@ -45,9 +47,9 @@
 
         private Dictionary<ulong, List<Position_SOM>> TemporalCycleCache { get; set; }
 
-        private Dictionary<ulong, List<Position_SOM>> ApicalCycleCache { get; set; }
-
         private Dictionary<ulong, List<Position_SOM>> BurstCache { get; set; }
+
+        private Dictionary<ulong, List<Position_SOM>> ApicalCycleCache { get; set; }
 
         public Neuron[,] TemporalLineArray { get; private set; }
 
@@ -100,6 +102,7 @@
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
         public static UInt16 DISTALNEUROPLASTICITY = 5;
+        public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
@@ -146,6 +149,8 @@
             IsCurrentApical = false;
 
             IsCurrentApical = false;
+
+            PredictedNeuronsforLastCycle = new Dictionary<string, List<Neuron>>();
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<Neuron>>();
 
@@ -599,38 +604,14 @@
                 Wire();
             }
 
-            PrepNetworkForNextCycle();
+            PrepNetworkForNextCycle(ignorePostCycleCleanUp);
 
             if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
 
 
             ValidateNetwork();
-        }
-
-        public void LTP(SDR_SOM feedbackSignal)
-        {
-
-            /* FUNCTION : Recognise new connections made while recognising the new objects which did not exist before.
-			 * Q's :
-			 * What connections should be specifically strengthened ? and to what level should each connection be strengthened ?
-			 * Apical Connections will only be strengthend , Should Temporal location signals should also be LTP'd ? No.
-			 * 
-            ALGO :: 
-            1. Maintain a Delta of all the new connections that has happened for the brief period of time which truly lead to the discovery of the new object.
-            2. If LTP is called that means this new batch was effective in recognising the object so strengthen these new connections.
-
-            IMPLEMENTATION :
-            1. Run through the SDR and wire up the incoming apical connection with the respective neuron.
-            2. Both Apical SDR corresponds to the existing neuronal structure , No transformations needed.
-            3.  
-            4. Need UT, CTs, & SVTs  for verifyign these connections are true and correct
-
-            */
-
-            throw new NotImplementedException();
-
-        }
+        }      
 
         private void Fire()
         {
@@ -650,14 +631,82 @@
             }
         }
 
-        private void PostCycleCleanup()
+        private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp)
         {
+            PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count * 100 / (X * Y * Z));
+
+            if (PerCycleFireSparsityPercentage > 20)
+            {
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
+                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
+            }
+
+            NeuronsFiringLastCycle.Clear();
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                //Prep for Next cycle Prediction
+                if (neuron.nType.Equals(NeuronType.NORMAL))
+                    NeuronsFiringLastCycle.Add(neuron);
+
+            }
+
+            //Clean Up stale voltage
+            if (ignorePostCycleCleanUp == false)
+            {
+                var flushList = BBMUtils.GetNonOverlappingNeuronsFromSecondList(ConvertDictToList(PredictedNeuronsforThisCycle), NeuronsFiringThisCycle);
+                foreach (var neuron in flushList)
+                    neuron.FlushVoltage();
+
+            }
+            else
+            {
+                Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+                WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+            }
 
 
-            //Todo : Need Selective Clean Up Logic , Should never perform Full Clean up.
+            Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+            PredictedNeuronsforLastCycle.Clear();
 
-            // Check neuron that had firing voltage but still did not fire. 
-            // Todo : Fire these as well since this is a SNN Model
+            foreach( var kvp in PredictedNeuronsforThisCycle )            
+                PredictedNeuronsforLastCycle.Add(kvp.Key, kvp.Value);
+            
+
+            PredictedNeuronsforThisCycle.Clear();
+
+            foreach (var kvp in PredictedNeuronsForNextCycle)
+            {
+                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
+            }
+
+            if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
+            {
+                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
+                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
+                //Console.ReadKey();
+            }
+
+            PredictedNeuronsForNextCycle.Clear();
+        }
+
+        private List<Neuron> ConvertDictToList(Dictionary<string, List<Neuron>> predictedNeuronsforLastCycle)
+        {
+            List<Neuron> toRet = new List<Neuron>();
+
+            foreach(var kvp in predictedNeuronsforLastCycle)
+            {
+                toRet.Add(GetNeuronFromString(kvp.Key));    
+            }
+
+            return toRet;
+        }
+
+        //Selective Clean Up Logic , Should never perform Full Clean up.
+        private void PostCycleCleanup()
+        {            
+
+            // Check for Stale Votlage Clean Up 
             foreach (var neuronList in PredictedNeuronsforThisCycle)
             {
 
@@ -1690,45 +1739,7 @@
         private void PrintBlockDetails()
         {
             Console.WriteLine("BBM ID : " + BBMID);
-        }
-
-        private void PrepNetworkForNextCycle()
-        {
-            PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count * 100 / (X * Y * Z));
-
-            if (PerCycleFireSparsityPercentage > 20)
-            {
-                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
-                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
-            }
-            
-            NeuronsFiringLastCycle.Clear();
-
-            foreach (var neuron in NeuronsFiringThisCycle)
-            {                
-                //Prep for Next cycle Prediction
-                if (neuron.nType.Equals(NeuronType.NORMAL))
-                    NeuronsFiringLastCycle.Add(neuron);
-                
-            }
-
-            
-            PredictedNeuronsforThisCycle.Clear();
-
-            foreach (var kvp in PredictedNeuronsForNextCycle)
-            {
-                PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
-            }
-
-            if (PredictedNeuronsForNextCycle.Count >= (0.05 * X * Y * Z))
-            {
-                Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
-                WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size");
-                //Console.ReadKey();
-            }
-
-            PredictedNeuronsForNextCycle.Clear();
-        }
+        }      
 
         private List<Neuron> AntiUniounWithNeuronsFiringThisCycle(List<Neuron> burstList)
         {
@@ -2242,3 +2253,33 @@
         #endregion
     }
 }
+
+
+
+#region Experimental Code
+
+//public void LTP(SDR_SOM feedbackSignal)
+//{
+
+//    /* FUNCTION : Recognise new connections made while recognising the new objects which did not exist before.
+//     * Q's :
+//     * What connections should be specifically strengthened ? and to what level should each connection be strengthened ?
+//     * Apical Connections will only be strengthend , Should Temporal location signals should also be LTP'd ? No.
+//     * 
+//    ALGO :: 
+//    1. Maintain a Delta of all the new connections that has happened for the brief period of time which truly lead to the discovery of the new object.
+//    2. If LTP is called that means this new batch was effective in recognising the object so strengthen these new connections.
+
+//    IMPLEMENTATION :
+//    1. Run through the SDR and wire up the incoming apical connection with the respective neuron.
+//    2. Both Apical SDR corresponds to the existing neuronal structure , No transformations needed.
+//    3.  
+//    4. Need UT, CTs, & SVTs  for verifyign these connections are true and correct
+
+//    */
+
+//    throw new NotImplementedException();
+
+//}
+
+#endregion

@@ -88,7 +88,7 @@
         }
 
         public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron) =>
-            neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
+            neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);        
 
         public static bool CheckifNeuronListStringHAsNeuron(List<string> stringlist, Neuron neuron)
         {
@@ -100,6 +100,38 @@
                 }
             }
             return false;
+        }
+
+        public static bool DoListsHaveAnyOverlap(List<Neuron> list1, List<Neuron> list2)
+        {
+            foreach (var neuron in list1)
+            {
+                foreach (var item in list2)
+                {
+                    if(neuron.NeuronID.Equals(item.NeuronID))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        public static List<Neuron> GetNonOverlappingNeuronsFromSecondList(List<Neuron> firstList, List<Neuron> secondList)
+        {
+            List<Neuron> toret = new List<Neuron>();
+
+            foreach (var neuron in firstList)
+            {
+                if(!secondList.Contains(neuron))
+                {
+                    toret.Add(neuron);
+                }
+            }
+
+            return toret;
         }
     }
 }

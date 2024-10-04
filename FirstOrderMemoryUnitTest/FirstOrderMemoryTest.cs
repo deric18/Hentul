@@ -876,8 +876,11 @@ namespace FirstOrderMemoryUnitTest
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
             var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            var depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
             bbManager.Fire(temporalSdr);
+
+            depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
@@ -885,11 +888,15 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(apicalSdr);
 
+            depolarizedNeuronList1 = FindDepolarizedNeuronList();
+
             predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
             Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
 
             bbManager.Fire(spatialSdr);
+
+            depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 
@@ -923,7 +930,7 @@ namespace FirstOrderMemoryUnitTest
                 }
             }
 
-            var depolarizedNeuronList1 = FindDepolarizedNeuronList();
+            depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
             if(depolarizedNeuronList1.Count != 0)
             {
@@ -933,7 +940,12 @@ namespace FirstOrderMemoryUnitTest
 
                 foreach (var neuronFromList1 in depolarizedNeuronList1)
                 {
-                    Assert.IsFalse(BBMUtils.CheckNeuronListHasThisNeuron(depolarizedNeuronList2, neuronFromList1));
+                    bool value = BBMUtils.CheckNeuronListHasThisNeuron(depolarizedNeuronList2, neuronFromList1);
+                    if (value)
+                    {
+                        int bp = 1;
+                    }
+                    Assert.IsFalse(value);
                 }
             }            
         }
