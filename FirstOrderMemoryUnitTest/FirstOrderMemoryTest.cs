@@ -670,11 +670,11 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(apicalInputPattern);
+            bbManager.Fire(apicalInputPattern, true, true);
 
             normalNeuron.ProcessVoltage(1);
 
-            bbManager.Fire(spatialInputPattern);
+            bbManager.Fire(spatialInputPattern, true, true);
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
@@ -813,12 +813,13 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [TestMethod]
-        public void TestPostCycleCleanupTemporalandApical()
+        public void TestPostCycleCleanupTemporalandApical1()
         {
             //After Temporal && Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
+
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
-            var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
 
             bbManager.Fire(temporalSdr);
 
@@ -865,6 +866,82 @@ namespace FirstOrderMemoryUnitTest
                     Assert.AreEqual(0, neuron.Voltage);
                 }
             }
+        }
+
+        [TestMethod]
+        public void TestPostCycleCleanupTemporalandApical2()
+        {
+            //After Temporal , Apical ,& Spatial Fire , Check for some Depolarized neuron if it gets cleaned up after one cycle
+
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+
+            bbManager.Fire(temporalSdr);
+
+            var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+            Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.X, predictedNeurons.Count);
+
+            bbManager.Fire(apicalSdr);
+
+            predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
+
+            bbManager.Fire(spatialSdr);
+
+            Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
+
+            foreach (var pos in temporalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    if (neuron.Voltage != 0)
+                    {
+                        int breakpoint = 1;
+                    }
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            foreach (var pos in apicalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            foreach (var pos in spatialSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            var depolarizedNeuronList1 = FindDepolarizedNeuronList();
+
+            if(depolarizedNeuronList1.Count != 0)
+            {
+                bbManager.Fire(GetSDRExcludingThisList(depolarizedNeuronList1));
+
+                var depolarizedNeuronList2 = FindDepolarizedNeuronList();
+
+                foreach (var neuronFromList1 in depolarizedNeuronList1)
+                {
+                    Assert.IsFalse(BBMUtils.CheckNeuronListHasThisNeuron(depolarizedNeuronList2, neuronFromList1));
+                }
+            }            
+        }
+
+        //Hoping that (9,9,4) never gets added as a predicted Neuron
+        private SDR_SOM GetSDRExcludingThisList(List<Neuron> depolarizedNeuronList)
+        {
+            return new SDR_SOM(X, Y, new List<Position_SOM>() { new Position_SOM(X-1, Y-1, Z-1, 'N') }, iType.SPATIAL);
         }
 
         [TestMethod]
@@ -1006,6 +1083,30 @@ namespace FirstOrderMemoryUnitTest
         public void TestTemporalAndApicalFiringAndWiringUT()
         {
 
+        }
+
+
+        private List<Neuron> FindDepolarizedNeuronList()
+        {
+            List<Neuron> toRetList = new List<Neuron>();
+
+            for(int i=0; i < X; i++)
+            {
+                for (int j = 0; j < Y; j++)
+                {
+                    for (int k = 0; k < Z; k++)
+                    {
+                        Neuron neuron = bbManager.Columns[i, j].Neurons[k];
+                        
+                        if (!neuron.CurrentState.Equals(NeuronState.RESTING))
+                        {
+                            toRetList.Add(neuron);
+                        }
+                    }
+                }
+            }
+
+            return toRetList;
         }
     }
 }

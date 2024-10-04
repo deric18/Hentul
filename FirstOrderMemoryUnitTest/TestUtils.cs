@@ -36,7 +36,7 @@
 
         internal static SDR_SOM GenerateApicalOrSpatialSDRForDepolarization(iType iType = iType.APICAL)
         {
-            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType);            
+            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType);
         }
 
 
@@ -80,7 +80,7 @@
 
             List<Position_SOM> posList = new List<Position_SOM>();
 
-            if (inputPatternType == iType.SPATIAL)
+            if (inputPatternType == iType.SPATIAL || inputPatternType == iType.APICAL)
             {
                 for (int i = 0; i < numPos; i++)
                 {
