@@ -2,7 +2,9 @@
 {
     using Common;
     using FirstOrderMemory.Models;
+    using SixLabors.ImageSharp.Formats.Bmp;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Reflection.Metadata.Ecma335;
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
@@ -32,7 +34,7 @@
         public Dictionary<MAPPERCASE, List<int>> SOMBBMIDS { get; private set; }
 
         public List<Position_SOM> somPositions;
-
+        public bool[,] flagCheckArr { get; private set; }
 
         public Mapper(int numBBM, int numPixels)
         {
@@ -73,13 +75,14 @@
                 new Position_SOM(9,2)
             };
 
-            somPositions = new List<Position_SOM>();
+            somPositions = new List<Position_SOM>();            
 
             FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
             SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
         }
 
 
+        /// <BBM ID , Locations of Pixels for BBMID >
         private void PerformMappingsFor()
         {
             Mappings = new Dictionary<int, Position[]> {
@@ -393,9 +396,9 @@
 
                 //Todo: Fix this
             }
-
-
+            
             List<Position> toRet = new List<Position>();
+            flagCheckArr = new bool[bitmap.Height, bitmap.Width];
 
             int cacheI = 0;
             int cacheJ = 0;
@@ -404,6 +407,15 @@
             {
                 var bbmID = kvp.Key;
                 var posList = kvp.Value;
+
+                if (!flagCheckArr[posList[0].X, posList[0].Y])
+                    flagCheckArr[posList[0].X, posList[0].Y] = true;
+                if (!flagCheckArr[posList[1].X, posList[1].Y])
+                    flagCheckArr[posList[1].X, posList[1].Y] = true;
+                if (!flagCheckArr[posList[2].X, posList[2].Y])
+                    flagCheckArr[posList[2].X, posList[2].Y] = true;
+                if (!flagCheckArr[posList[3].X, posList[3].Y])
+                    flagCheckArr[posList[3].X, posList[3].Y] = true;
 
                 Color color1 = bitmap.GetPixel(posList[0].X, posList[0].Y);
                 Color color2 = bitmap.GetPixel(posList[1].X, posList[1].Y);
