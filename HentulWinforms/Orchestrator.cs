@@ -188,7 +188,6 @@
 
         }
 
-
         public void LoadFOMnSOM()
         {
 
@@ -218,7 +217,6 @@
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
-
         #endregion
 
 
@@ -230,195 +228,180 @@
 
             #region STEP 1
             // STEP 1 : Fire SDR's for L4 and L3A
-            
+
             // STEP 1A : Fire all FOM's first!
 
             BlockBehaviourManager fom;
             Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
             mapper.ParseBitmap(bmp);
-<<<<<<< HEAD
+
             List<Position_SOM> somPosition = new List<Position_SOM>();
 
             foreach (var kvp in mapper.FOMBBMIDS)
-=======
 
-            for (int i = 0; i < bmp.Height; i++)
->>>>>>> 48dd5312f3c7dd7701b886ad7773c5259d59aee7
+
+                for (int i = 0; i < bmp.Height; i++)
+                {
+                    for (int j = 0; j < bmp.Width; j++)
+                    {
+                        if (mapper.flagCheckArr[i, j] == false)
+                        {
+                            int bp = 1;
+                        }
+                    }
+                }
+
+            foreach (var kvp in mapper.FOMBBMIDS)
             {
-                for (int j = 0; j < bmp.Width; j++)
+                switch (kvp.Key)
                 {
-                    if (mapper.flagCheckArr[i, j] == false)
-                    {
-                        int bp = 1;
-                    }
+                    case MAPPERCASE.ALL:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOTHREEE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREEFOUR:
+                        {
+
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.FOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    default:
+                        {
+                            throw new NotImplementedException();
+                        }
                 }
-
-                List<Position_SOM> somPosition = new List<Position_SOM>();
-
-                foreach (var kvp in mapper.FOMBBMIDS)
-                {
-                    switch (kvp.Key)
-                    {
-                        case MAPPERCASE.ALL:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONETWOTHREEE:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.TWOTHREEFOUR:
-                            {
-
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONETWOFOUR:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONETHREEFOUR:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONETWO:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONETHREE:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONEFOUR:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.TWOTHREE:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.TWOFOUR:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.THREEFOUR:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.ONE:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.TWO:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.THREE:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        case MAPPERCASE.FOUR:
-                            {
-                                foreach (var bbmID in kvp.Value)
-                                {
-                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
-                                }
-                            }
-                            break;
-                        default:
-                            {
-                                throw new NotImplementedException();
-                            }
-                    }
-                }
-
-
-                //STEP 1B : Fire all L3B SOM's
-
-                if (mapper.somPositions.Count != 0)
-                    somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
-
-
-                // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
-
-                //for (int i = 0; i < fomBBM.Length; i++)
-                //{                
-                //    fomBBM[i].Fire(fomSdr);
-                //}
-
-
-
-                //somBBM_L3A.Fire(Sdr_Som3A);            
-
-                // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
-
-
-
             }
-<<<<<<< HEAD
 
 
             //STEP 1B : Fire all L3B SOM's
 
-            if(mapper.somPositions.Count != 0)
+            if (mapper.somPositions.Count != 0)
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
 
+            // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
+
+            //for (int i = 0; i < fomBBM.Length; i++)
+            //{                
+            //    fomBBM[i].Fire(fomSdr);
+            //}
+
+
+
+            //somBBM_L3A.Fire(Sdr_Som3A);            
+
+            // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
 
             #endregion
@@ -444,16 +427,9 @@
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
 
-            #endregion
-
-
+            #endregion        
 
         }
-
-=======
-        }
->>>>>>> 48dd5312f3c7dd7701b886ad7773c5259d59aee7
-
 
         #region BIG MAN WORK
 
