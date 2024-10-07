@@ -108,7 +108,7 @@
         public Orchestrator(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
-            if(range != 10)
+            if (range != 10)
             {
                 throw new InvalidOperationException("Invalid Operation !");
             }
@@ -127,12 +127,12 @@
 
             bool b = NumBBMNeeded % 1 != 0;
 
-            if (NumBBMNeeded  != 100)
+            if (NumBBMNeeded != 100)
             {
                 throw new InvalidDataException("Number Of FOMM BBMs needed should always be 100, it throws off SOM Schema of 1250" + range.ToString());
-            }            
+            }
 
-            fomBBM = new BlockBehaviourManager[NumBBMNeeded];            
+            fomBBM = new BlockBehaviourManager[NumBBMNeeded];
 
             NumColumns = 10;
 
@@ -161,23 +161,23 @@
             ONbits1 = new List<Position_SOM>()
             {
                 new Position_SOM(0,1),
-                new Position_SOM(2,2)                
+                new Position_SOM(2,2)
             };
 
             ONbits2 = new List<Position_SOM>()
             {
-                new Position_SOM(6, 0),                
+                new Position_SOM(6, 0),
                 new Position_SOM(8, 4)
             };
 
             ONbits3 = new List<Position_SOM>()
             {
                 new Position_SOM(5,6),
-                new Position_SOM(8,9)                
+                new Position_SOM(8,9)
             };
 
             ONbits4 = new List<Position_SOM>()
-            {                
+            {
                 new Position_SOM(7,1),
                 new Position_SOM(9,2)
             };
@@ -237,173 +237,185 @@
             Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
             mapper.ParseBitmap(bmp);
 
-            List<Position_SOM> somPosition = new List<Position_SOM>();
-
-            foreach (var kvp in mapper.FOMBBMIDS)
+            for (int i = 0; i < bmp.Height; i++)
             {
-                switch (kvp.Key)
+                for (int j = 0; j < bmp.Width; j++)
                 {
-                    case MAPPERCASE.ALL:
-                        {                            
-                            foreach(var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));                               
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETWOTHREEE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWOTHREEFOUR:
-                        {
-
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETWOFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETHREEFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETWO:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETHREE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONEFOUR: 
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWOTHREE: 
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWOFOUR: 
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.THREEFOUR: 
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONE: 
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWO:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.THREE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.FOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
-                            }
-                        }
-                        break;
-                    default:
-                        {
-                            throw new NotImplementedException();
-                        }
+                    if (mapper.flagCheckArr[i, j] == false)
+                    {
+                        int bp = 1;
+                    }
                 }
+
+                List<Position_SOM> somPosition = new List<Position_SOM>();
+
+                foreach (var kvp in mapper.FOMBBMIDS)
+                {
+                    switch (kvp.Key)
+                    {
+                        case MAPPERCASE.ALL:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONETWOTHREEE:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.TWOTHREEFOUR:
+                            {
+
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONETWOFOUR:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONETHREEFOUR:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONETWO:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONETHREE:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONEFOUR:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.TWOTHREE:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.TWOFOUR:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.THREEFOUR:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.ONE:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.TWO:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.THREE:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        case MAPPERCASE.FOUR:
+                            {
+                                foreach (var bbmID in kvp.Value)
+                                {
+                                    fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
+                                }
+                            }
+                            break;
+                        default:
+                            {
+                                throw new NotImplementedException();
+                            }
+                    }
+                }
+
+
+                //STEP 1B : Fire all L3B SOM's
+
+                if (mapper.somPositions.Count != 0)
+                    somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
+
+
+                // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
+
+                //for (int i = 0; i < fomBBM.Length; i++)
+                //{                
+                //    fomBBM[i].Fire(fomSdr);
+                //}
+
+
+
+                //somBBM_L3A.Fire(Sdr_Som3A);            
+
+                // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
+
+
+
             }
-
-
-            //STEP 1B : Fire all L3B SOM's
-
-            if(mapper.somPositions.Count != 0)
-            somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
-
-
-            // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
-
-            //for (int i = 0; i < fomBBM.Length; i++)
-            //{                
-            //    fomBBM[i].Fire(fomSdr);
-            //}
-
-
-            
-            //somBBM_L3A.Fire(Sdr_Som3A);            
-
-            // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
-
-
-            
-        }       
-
+        }
 
 
         #region BIG MAN WORK
+
         public string StartCycle()
         {
 
             //Check how big the entire creen / image is and kee papring through all the objects.
 
             var str = DetectObject();
+
             StoreObject();
 
             return str;
@@ -425,7 +437,7 @@
             if (Objects == null || Objects.Count == 0)
             {
                 obj = LearnFirstObject();
-                
+
             }
 
             //Traverse through Object Maps and what sensory inputs are telling you.
@@ -866,23 +878,25 @@
         public void Grab()
         {
 
-            Console.WriteLine("Grabbing cursor Position");            
+            Console.WriteLine("Grabbing cursor Position");
 
-            POINT Point = this.GetCurrentPointerPosition();            
+            POINT Point = this.GetCurrentPointerPosition();
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - range < 0 ? 0 : Point.X - range;
-            int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
-            int x2 = Math.Abs(Point.X + range);
-            int y2 = Math.Abs(Point.Y + range);
-
-            //this.GetColorByRange(x1, y1, x2, y2);
+            int x1 = Point.X - range < 0 ? 0 : Point.X - Range;
+            int y1 = Point.Y - range < 0 ? 0 : Point.Y - Range;
+            int x2 = Math.Abs(Point.X + Range);
+            int y2 = Math.Abs(Point.Y + Range);            
 
             Rectangle rect = new Rectangle(x1, y1, x2, y2);
+
             bmp = new Bitmap(rect.Width, rect.Height, PixelFormat.Format32bppArgb);
+
             Graphics g = Graphics.FromImage(bmp);
-            g.CopyFromScreen(rect.Left, rect.Top, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
+
+            g.CopyFromScreen(x1, y1, x2, y2, bmp.Size, CopyPixelOperation.SourceCopy);
+
             bmp.Save(filename, ImageFormat.Jpeg);
 
         }
@@ -937,7 +951,7 @@
                                                  (a >> 16) & 0xff);
         }
 
-        #endregion        
+        #endregion
 
         #endregion
     }
