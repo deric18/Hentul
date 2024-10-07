@@ -2254,7 +2254,6 @@
 }
 
 
-
 #region Experimental Code
 
 //public void LTP(SDR_SOM feedbackSignal)

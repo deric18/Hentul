@@ -224,19 +224,18 @@
 
         public void Process()
         {
-            // STEP 1 : Fire SDR's for L4 and L3A
 
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
-
             SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
 
-
+            #region STEP 1
+            // STEP 1 : Fire SDR's for L4 and L3A
+            
             // STEP 1A : Fire all FOM's first!
 
             BlockBehaviourManager fom;
             Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
             mapper.ParseBitmap(bmp);
-
             List<Position_SOM> somPosition = new List<Position_SOM>();
 
             foreach (var kvp in mapper.FOMBBMIDS)
@@ -375,8 +374,15 @@
             //STEP 1B : Fire all L3B SOM's
 
             if(mapper.somPositions.Count != 0)
-            somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
+                somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
+
+
+
+            #endregion
+
+
+            #region STEP 2
 
             // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
 
@@ -386,14 +392,21 @@
             //}
 
 
-            
+
             //somBBM_L3A.Fire(Sdr_Som3A);            
+
+            #endregion
+
+            #region STEP 3
 
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
 
-            
-        }       
+            #endregion
+
+
+
+        }
 
 
 
@@ -872,10 +885,10 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - range < 0 ? 0 : Point.X - range;
-            int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
-            int x2 = Math.Abs(Point.X + range);
-            int y2 = Math.Abs(Point.Y + range);
+            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
+            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
+            int x2 = Math.Abs(Point.X + Range);
+            int y2 = Math.Abs(Point.Y + Range);
 
             //this.GetColorByRange(x1, y1, x2, y2);
 
@@ -896,9 +909,9 @@
             IntPtr dc = GetWindowDC(desk);
 
 
-            for (int i = x1, k = 0; i < x2 && k < range + range; i++, k++)
+            for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
             {
-                for (int j = y1, l = 0; j < y2 && l < range + range; j++, l++)
+                for (int j = y1, l = 0; j < y2 && l < Range + range; j++, l++)
                 {
                     int a = (int)GetPixel(dc, i, j);
 

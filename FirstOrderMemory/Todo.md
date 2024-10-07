@@ -1,4 +1,4 @@
 Two Isues :
 
 -Prune is not efficient
--OverConnection amoung SOM Layer
+-OverConnection among SOM Layer
