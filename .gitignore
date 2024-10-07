@@ -17,6 +17,7 @@ Hentul/bin
     *.DS_Store
     
 #Visual Studio files	
+    *.log
 	*.cace
 	*.cache
 	*.json

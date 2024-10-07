@@ -232,24 +232,27 @@
             // STEP 1A : Fire all FOM's first!
 
             BlockBehaviourManager fom;
+
             Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
+
             mapper.ParseBitmap(bmp);
 
             List<Position_SOM> somPosition = new List<Position_SOM>();
 
-            foreach (var kvp in mapper.FOMBBMIDS)
+            int blackCount = 0;
 
-
-                for (int i = 0; i < bmp.Height; i++)
+            for (int i = 0; i < bmp.Width; i++)
+            {
+                for (int j = 0; j < bmp.Height; j++)
                 {
-                    for (int j = 0; j < bmp.Width; j++)
+                    if (mapper.flagCheckArr[i, j] == false)
                     {
-                        if (mapper.flagCheckArr[i, j] == false)
-                        {
-                            int bp = 1;
-                        }
+                        blackCount++;
                     }
                 }
+            }
+
+
 
             foreach (var kvp in mapper.FOMBBMIDS)
             {
@@ -384,24 +387,11 @@
             }
 
 
+
             //STEP 1B : Fire all L3B SOM's
 
             if (mapper.somPositions.Count != 0)
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
-
-
-            // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
-
-            //for (int i = 0; i < fomBBM.Length; i++)
-            //{                
-            //    fomBBM[i].Fire(fomSdr);
-            //}
-
-
-
-            //somBBM_L3A.Fire(Sdr_Som3A);            
-
-            // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
 
             #endregion
@@ -427,7 +417,7 @@
             // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
 
-            #endregion        
+            #endregion
 
         }
 
@@ -908,20 +898,22 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
+            int Range2 = Range + Range;
+
             int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
             int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
-            int x2 = Math.Abs(Point.X + Range);
+            int x2 = Math.Abs(Point.X + Range2);
             int y2 = Math.Abs(Point.Y + Range);
 
             //this.GetColorByRange(x1, y1, x2, y2);
 
             Rectangle rect = new Rectangle(x1, y1, x2, y2);
 
-            bmp = new Bitmap(rect.Width, rect.Height, PixelFormat.Format32bppArgb);
+            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
 
             Graphics g = Graphics.FromImage(bmp);
 
-            g.CopyFromScreen(x1, y1, x2, y2, bmp.Size, CopyPixelOperation.SourceCopy);
+            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
 
             bmp.Save(filename, ImageFormat.Jpeg);
 

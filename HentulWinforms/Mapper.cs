@@ -53,8 +53,8 @@
 
             ONbits1FOM = new List<Position_SOM>()
             {
-                new Position_SOM(0,1),
-                new Position_SOM(2,2)
+                new Position_SOM(0, 1),
+                new Position_SOM(2, 2)
             };
 
             ONbits2FOM = new List<Position_SOM>()
@@ -65,14 +65,14 @@
 
             ONbits3FOM = new List<Position_SOM>()
             {
-                new Position_SOM(5,6),
-                new Position_SOM(8,9)
+                new Position_SOM(5, 6),
+                new Position_SOM(8, 9)
             };
 
             ONbits4FOM = new List<Position_SOM>()
             {
-                new Position_SOM(7,1),
-                new Position_SOM(9,2)
+                new Position_SOM(7, 1),
+                new Position_SOM(9, 2)
             };
 
             somPositions = new List<Position_SOM>();            
@@ -82,7 +82,14 @@
         }
 
 
+        /// <summary>
         /// <BBM ID , Locations of Pixels for BBMID >
+        /// Image  Size : X : 20 rows Y : 20 Columns 
+        /// Number Of Pixels : 400 pixels
+        /// BBM : 100
+        /// NumPixelPerBBM : 4
+        /// Row ID could be more than 20 but the total numbero f rows processed will be 20 , this is a misnomer that confused me a while back.
+        /// </summary>
         private void PerformMappingsFor()
         {
             Mappings = new Dictionary<int, Position[]> {
@@ -197,9 +204,7 @@
             switch (mappercase)
             {
                 case MAPPERCASE.ALL:
-                    {                        
-
-                      
+                    {                                              
                             positionstoAdd.AddRange(ONbits1FOM);
                             positionstoAdd.AddRange(ONbits2FOM);
                             positionstoAdd.AddRange(ONbits3FOM);
@@ -371,7 +376,6 @@
             }
 
             return new SDR_SOM(LENGTH, WIDTH, positionstoAdd, iType.SPATIAL);
-
         }
 
         private List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbits1FOM, int bbmID)
@@ -390,15 +394,13 @@
 
         public void ParseBitmap(Bitmap bitmap)
         {
-            if (bitmap.Width != LENGTH || bitmap.Height != WIDTH)
+            if (bitmap.Width != 40 || bitmap.Height != 20)
             {
-                int bp = 1;
-
-                //Todo: Fix this
+                throw new InvalidDataException("Invalid Data Dimensions!");                
             }
             
             List<Position> toRet = new List<Position>();
-            flagCheckArr = new bool[bitmap.Height, bitmap.Width];
+            flagCheckArr = new bool[bitmap.Width, bitmap.Height];
 
             int cacheI = 0;
             int cacheJ = 0;
@@ -408,19 +410,19 @@
                 var bbmID = kvp.Key;
                 var posList = kvp.Value;
 
-                if (!flagCheckArr[posList[0].X, posList[0].Y])
-                    flagCheckArr[posList[0].X, posList[0].Y] = true;
-                if (!flagCheckArr[posList[1].X, posList[1].Y])
-                    flagCheckArr[posList[1].X, posList[1].Y] = true;
-                if (!flagCheckArr[posList[2].X, posList[2].Y])
-                    flagCheckArr[posList[2].X, posList[2].Y] = true;
-                if (!flagCheckArr[posList[3].X, posList[3].Y])
-                    flagCheckArr[posList[3].X, posList[3].Y] = true;
+                //if (!flagCheckArr[posList[0].X, posList[0].Y])
+                //    flagCheckArr[posList[0].X, posList[0].Y] = true;
+                //if (!flagCheckArr[posList[1].X, posList[1].Y])
+                //    flagCheckArr[posList[1].X, posList[1].Y] = true;
+                //if (!flagCheckArr[posList[2].X, posList[2].Y])
+                //    flagCheckArr[posList[2].X, posList[2].Y] = true;
+                //if (!flagCheckArr[posList[3].X, posList[3].Y])
+                //    flagCheckArr[posList[3].X, posList[3].Y] = true;
 
-                Color color1 = bitmap.GetPixel(posList[0].X, posList[0].Y);
-                Color color2 = bitmap.GetPixel(posList[1].X, posList[1].Y);
-                Color color3 = bitmap.GetPixel(posList[2].X, posList[2].Y);
-                Color color4 = bitmap.GetPixel(posList[3].X, posList[3].Y);
+                Color color1 = bitmap.GetPixel(posList[0].X, posList[0].Y); flagCheckArr[posList[0].X, posList[0].Y] = true;
+                Color color2 = bitmap.GetPixel(posList[1].X, posList[1].Y); flagCheckArr[posList[1].X, posList[1].Y] = true;
+                Color color3 = bitmap.GetPixel(posList[2].X, posList[2].Y); flagCheckArr[posList[2].X, posList[2].Y] = true;
+                Color color4 = bitmap.GetPixel(posList[3].X, posList[3].Y); flagCheckArr[posList[3].X, posList[3].Y] = true;
 
                 bool check1 = CheckIfColorIsBlack(color1);
                 bool check2 = CheckIfColorIsBlack(color2);
