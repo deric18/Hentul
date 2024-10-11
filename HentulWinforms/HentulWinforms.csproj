@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FirstOrderMemory\FirstOrderMemory.csproj" />
+    <ProjectReference Include="..\Hentul\Hentul.csproj" />
   </ItemGroup>
 
 </Project>

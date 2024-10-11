@@ -45,11 +45,11 @@ namespace HentulWinforms
             // 
             // StartButton
             // 
-            StartButton.Location = new Point(380, 355);
+            StartButton.Location = new Point(380, 290);
             StartButton.Name = "StartButton";
-            StartButton.Size = new Size(75, 23);
+            StartButton.Size = new Size(136, 23);
             StartButton.TabIndex = 0;
-            StartButton.Text = "Start Cycle";
+            StartButton.Text = "Start Training";
             StartButton.UseVisualStyleBackColor = true;
             StartButton.Click += StartButton_Click;
             // 
@@ -85,9 +85,9 @@ namespace HentulWinforms
             // 
             Start.Location = new Point(380, 247);
             Start.Name = "Start";
-            Start.Size = new Size(75, 23);
+            Start.Size = new Size(136, 23);
             Start.TabIndex = 4;
-            Start.Text = "Start";
+            Start.Text = "Init ";
             Start.UseVisualStyleBackColor = true;
             Start.Click += button1_Click;
             // 

@@ -8,10 +8,9 @@
     using FirstOrderMemory.Models.Encoders;
     using System.Runtime.InteropServices;
     using System;
-    using HentulWinforms.Hippocampal_Entorinal_complex;
+    using Hentul.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
-    using OpenCvSharp;
-    using static HentulWinforms.Mapper;
+    using Hentul;
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
     internal class Orchestrator
@@ -54,13 +53,9 @@
 
         private bool LogMode { get; set; }
 
-        Dictionary<string, BaseObject> Objects { get; set; }
-
         public bool IsMock { get; private set; }
 
         int NumColumns, Z;
-
-        public Dictionary<int, List<Position_SOM>> Buckets;
 
         public BlockBehaviourManager[] fomBBM { get; private set; }
 
@@ -68,13 +63,13 @@
 
         public BlockBehaviourManager somBBM_L3A { get; private set; }
 
+        public HippocampalComplex HCAccessor { get; private set; }
+
         public int[] MockBlockNumFires { get; private set; }
 
         private bool devbox = false;
 
         public int BlockSize;
-
-        public int UnitOffset;
 
         public int ImageIndex { get; private set; }
 
@@ -84,13 +79,11 @@
 
         public List<string> ImageList { get; private set; }
 
-        public int blackPixelCount = 0;
-
         public Bitmap bmp;
 
-        public int range;
-
         public string filename;
+
+        public NetworkMode NMode { get; set; }
 
         List<Position_SOM> ONbits1;
         List<Position_SOM> ONbits2;
@@ -142,6 +135,8 @@
 
             CycleNum = 0;
 
+            NMode = NetworkMode.TRAINING;
+
             for (int i = 0; i < NumBBMNeeded; i++)
             {
                 fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.BurstOnly);
@@ -155,6 +150,8 @@
             somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
 
             somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);
+
+            HCAccessor = new HippocampalComplex();
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -201,8 +198,8 @@
 
 
             Console.WriteLine("Finished Init for this Instance \n");
-            Console.WriteLine("Range : " + range.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (range * range * 4).ToString() + "\n");
+            Console.WriteLine("Range : " + Range.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
 
 
@@ -220,7 +217,7 @@
         #endregion
 
 
-        public void Process()
+        public void ProcesStep1()
         {
 
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
@@ -251,8 +248,6 @@
                     }
                 }
             }
-
-
 
             foreach (var kvp in mapper.FOMBBMIDS)
             {
@@ -386,57 +381,79 @@
                 }
             }
 
-
-
             //STEP 1B : Fire all L3B SOM's
 
             if (mapper.somPositions.Count != 0)
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
 
-            #endregion
+            #endregion                       
 
+        }
+
+        public void ProcessStep2()
+        {
 
             #region STEP 2
 
-            // STEP 2 : Push SDRs from L4 -> L3A and L3B -> HC
+            // STEP 2 :
+            // If Prediction Mode
+            // Collect Predictions from L4 & L3A [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
+            // Project  L3B -> HC if any for next motor output
+            // Push SDRs from L4 -> L3A for better Spatial Pooling
+            // Else If Training Mode            
+            // Push L4 -> L3A for spatial pooling
+            // Let orchestrator take over with next location
 
-            //for (int i = 0; i < fomBBM.Length; i++)
-            //{                
-            //    fomBBM[i].Fire(fomSdr);
-            //}
+
+
+            // Project  L3B -> HC for  populating object sensei into HCE            
+            if (NMode.Equals(NetworkMode.TRAINING))
+            {                
+                //Execute next location coordinate from Form and execute it.
 
 
 
-            //somBBM_L3A.Fire(Sdr_Som3A);            
+            }
+            else if (NMode.Equals(NetworkMode.PREDICTION))
+            {
+                
+                // If any output from HC execute the location output if NOT then take the standar default output.
+            }
 
             #endregion
+        }
 
+
+        public string ProcessStep3()
+        {
             #region STEP 3
+            string obj = string.Empty;
+            // STEP 3 :
+            // Check if there is any desired output from HEC , Use it to depolarize L4 and Perfrom Motor Output.
+            // if no motor output exists , most likely very early in training phase , let orchestrator run on its own.
 
-            // STEP 3 : Check if L3B has any prediction and if it does Load it to HC-EC and Push the pattern to L3A and Apical LTP it into L4 for BAL Else Repeat.            
 
-
+            return obj;
             #endregion
-
         }
 
         #region BIG MAN WORK
 
-        public string StartCycle()
-        {
+        //public string StartCycle()
+        //{
 
-            //Check how big the entire creen / image is and kee papring through all the objects.
+        //    //Check how big the entire screen / image is and kee papring through all the objects.
 
-            var str = DetectObject();
+        //    var str = DetectObject();
 
-            StoreObject();
+        //    StoreObject();
 
-            return str;
+        //    return str;
 
 
 
-        }
+        //}
 
         /// <summary>
         /// PROBLEMS:
@@ -444,20 +461,20 @@
         /// ALGORITHM:
         /// 
         /// </summary>
-        public string DetectObject()
-        {
-            var obj = string.Empty;
+        //public string DetectObject()
+        //{
+        //    var obj = string.Empty;
 
-            if (Objects == null || Objects.Count == 0)
-            {
-                obj = LearnFirstObject();
+        //    if (Objects == null || Objects.Count == 0)
+        //    {
+        //        obj = LearnFirstObject();
 
-            }
+        //    }
 
-            //Traverse through Object Maps and what sensory inputs are telling you.
+        //    //Traverse through Object Maps and what sensory inputs are telling you.
 
-            return obj;
-        }
+        //    return obj;
+        //}
 
 
 
@@ -626,6 +643,11 @@
             somBBM_L3B.BackUp("SOM-1");
         }
 
+
+        public void Restore()
+        {
+
+        }
 
         #region Future Work
 
@@ -930,7 +952,7 @@
 
             for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
             {
-                for (int j = y1, l = 0; j < y2 && l < Range + range; j++, l++)
+                for (int j = y1, l = 0; j < y2 && l < Range + Range; j++, l++)
                 {
                     int a = (int)GetPixel(dc, i, j);
 
@@ -950,28 +972,18 @@
 
         #endregion
 
-
-
-        // Already grey scalled.
-        private static Color GetColorAt(int x, int y)
-        {
-            IntPtr desk = GetDesktopWindow();
-
-            IntPtr dc = GetWindowDC(desk);
-
-            int a = (int)GetPixel(dc, x, y);
-
-            ReleaseDC(desk, dc);
-
-            return System.Drawing.Color.FromArgb(255,
-                                                 (a >> 0) & 0xff,
-                                                 (a >> 8) & 0xff,
-                                                 (a >> 16) & 0xff);
-        }
-
         #endregion
 
         #endregion
+    }
+
+
+    #region Enums
+
+    public enum NetworkMode
+    {
+        TRAINING,
+        PREDICTION
     }
 
     public enum VisionScope
@@ -981,4 +993,6 @@
         NarrowScope,
         UNKNOWN
     }
+
+    #endregion
 }

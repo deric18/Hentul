@@ -28,8 +28,8 @@ namespace HentulWinforms
         }
 
         private void StartButton_Click(object sender, EventArgs e)
-        {                        
-            
+        {
+
             label_done.Text = "Procesing";
 
             label_done.Refresh();
@@ -43,9 +43,9 @@ namespace HentulWinforms
 
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
-                 
 
-            while (counter < numRotations)
+
+            while (true)
             {
 
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
@@ -55,8 +55,8 @@ namespace HentulWinforms
                 }
                 else
                 {
-                    if (value.X <= RightTop.X - numPixels)                    
-                       value = MoveRight(value);                                            
+                    if (value.X <= RightTop.X - numPixels)
+                        value = MoveRight(value);
                     else
                     {
                         if (value.Y <= RightBottom.Y - numPixels)
@@ -75,7 +75,7 @@ namespace HentulWinforms
                     }
                 }
 
-                labelX.Text = value.X.ToString(); labelX.Refresh(); 
+                labelX.Text = value.X.ToString(); labelX.Refresh();
                 labelY.Text = value.Y.ToString(); labelY.Refresh();
 
                 orchestrator.MoveCursor(value);
@@ -90,23 +90,37 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                orchestrator.Process();
+                orchestrator.ProcesStep1();
+
+                //orchestrator.ProcessStep2();
+
+                //ObjectLabel.Text = orchestrator.ProcessStep3();
 
                 counter++;
             }
 
-            label_done.Text = "Done";
+            label_done.Text = "Done"; label_done.Refresh();
 
-            label_done.Refresh();            
+            if (label_done.Text == "Finished Processing Image")
+            {
+                orchestrator.BackUp();
+                //orchestrator.RotateImage();
+                orchestrator.NMode = NetworkMode.PREDICTION;
+
+                StartButton.Text = "Start Prediciton";
+
+
+
+            }
         }
-
+        
 
         private Orchestrator.POINT MoveRight(Orchestrator.POINT value)
         {
             value.X = value.X + numPixels * 2;
             return value;
         }
-        
+
 
         private Orchestrator.POINT MoveDown(Orchestrator.POINT value)
         {
@@ -122,7 +136,12 @@ namespace HentulWinforms
 
 
         private void button1_Click(object sender, EventArgs e)
-        {            
+        {
+            label_done.Text = "Innitting...";
+            label_done.Refresh();
+
+            orchestrator = new Orchestrator(numPixels);
+
             var value = orchestrator.GetCurrentPointerPosition();
 
             labelX.Text = value.X.ToString();
@@ -150,11 +169,9 @@ namespace HentulWinforms
 
             EdgedImage.Refresh();
 
-            label_done.Text = "Ready";
-
-            label_done.Refresh();
+            label_done.Text = "Ready";            
         }
-                     
+
 
         private Orchestrator.POINT MoveUp(Orchestrator.POINT value)
         {
@@ -164,20 +181,8 @@ namespace HentulWinforms
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-            orchestrator = new Orchestrator(numPixels);
-
-            var value = orchestrator.GetCurrentPointerPosition();
-
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
-
-            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1375; RightTop.Y = 365; LeftBottom.X = 960; LeftBottom.Y = 1032; RightBottom.X = 1375; RightBottom.Y = 1032;
-
+            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1475; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1032; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
             label_done.Text = "Ready";
-
-            label_done.Refresh();
-
         }
 
 
@@ -219,5 +224,7 @@ namespace HentulWinforms
         {
 
         }
+
+       
     }
 }

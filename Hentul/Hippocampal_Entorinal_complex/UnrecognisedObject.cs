@@ -1,9 +1,10 @@
 ﻿/// Author : Deric Pinto
 /// 
 
-namespace Hentul
+namespace Hentul.Hippocampal_Entorinal_complex
 {
-    public class UnrecognisedObject : BaseObject
+    internal class UnrecognisedObject : BaseObject
     {
+
     }
 }
