@@ -397,14 +397,18 @@
             #region STEP 2
 
             // STEP 2 :
+            // Project  L3B -> HC if any for next motor output [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
             // If Prediction Mode
-            // Collect Predictions from L4 & L3A [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
-            // Project  L3B -> HC if any for next motor output
-            // Push SDRs from L4 -> L3A for better Spatial Pooling
-            // Else If Training Mode            
-            // Push L4 -> L3A for spatial pooling
-            // Let orchestrator take over with next location
-
+            //  {
+            //     Collect Predictions from HCE for next motor output if Set the bool flag accordingly.
+            //     if there are any recognitions done so far for a particular object in L3A, Display it too and inform HEC as well.
+            //  }
+            // If Training Mode      
+            //  {
+            //      Push L4 -> L3A for spatial pooling.
+            //      if there are any recognitions done so far for a particular object in L3A, Display it too and inform HEC as well.
+            //  }
+            // Push SDRs from L4 -> L3A for better Spatial Pooling.            
 
 
             // Project  L3B -> HC for  populating object sensei into HCE            
@@ -428,13 +432,18 @@
         public string ProcessStep3()
         {
             #region STEP 3
-            string obj = string.Empty;
-            // STEP 3 :
-            // Check if there is any desired output from HEC , Use it to depolarize L4 and Perfrom Motor Output.
-            // if no motor output exists , most likely very early in training phase , let orchestrator run on its own.
 
+            string obj = string.Empty;
+
+            // STEP 3 :
+            // If object identified , return label and stop.
+            // Else 
+            // If there is any desired output from HEC , send back those cooridanates for next motor output. and Depolarize L3A only if there is already a decision made in HEC ?
+            
 
             return obj;
+
+            
             #endregion
         }
 
