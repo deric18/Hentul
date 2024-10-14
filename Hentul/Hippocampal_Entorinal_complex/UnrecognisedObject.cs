@@ -3,8 +3,13 @@
 
 namespace Hentul.Hippocampal_Entorinal_complex
 {
-    internal class UnrecognisedObject : BaseObject
+    public class UnrecognisedObject : BaseObject
     {
+        public bool IsObjectIdentified { get; private set; }
 
+        internal UnrecognisedObject()
+        {
+            IsObjectIdentified = false; 
+        }
     }
 }

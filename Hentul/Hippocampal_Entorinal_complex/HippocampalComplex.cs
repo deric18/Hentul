@@ -1,50 +1,52 @@
-﻿namespace Hentul.Hippocampal_Entorinal_complex
+﻿using HentulWinforms;
+
+namespace Hentul.Hippocampal_Entorinal_complex
 {
     public class HippocampalComplex
     {
-        Dictionary<string, BaseObject>? Objects { get; set; }
+        public Dictionary<string, RecognisedObject>? Objects { get; private set; }
 
-        UnrecognisedObject? CurrentObject { get; set; }
+        public UnrecognisedObject? CurrentObject { get; private set; }
 
-        public HippocampalComplex? HCEComplex { get; private set; }
+        private NetworkMode networkMode;
 
         public HippocampalComplex()
         {
 
-            Objects = new Dictionary<string, BaseObject>();
-            CurrentObject = null;
-        }
+            Objects = new Dictionary<string, RecognisedObject>();
+            CurrentObject = new UnrecognisedObject();
+            networkMode = NetworkMode.TRAINING;
+        }        
 
-        internal bool DetectObject(Sensation_Location sensei)
+        public void SetNetworkModeToTraining()
         {
-            if (Objects.Count == 0)
-                return false;
-
-            bool objectDetected = false;
-
-            foreach (var obj in Objects)
-            {
-                //match sensei with obj
-            }
-
-            return objectDetected;
+            networkMode = NetworkMode.TRAINING;               
         }
 
-        internal void ProcessPatternForObject(Sensation_Location sensei)
+        public void SetNetworkModeToPrediction()
+        {
+            networkMode = NetworkMode.PREDICTION;
+        }
+
+
+
+        public void ProcessCurrentPatternForObject(Sensation_Location sensei)
         {
             if (CurrentObject == null)
                 CurrentObject = new UnrecognisedObject();
 
-            //Next pattern wrt this current object.
-            //Decide whether to store or throw it away.
-
+            //Keep storing <Location , ActiveBit> -> KVPs under Training Mode , If Under PredictionMode keep updating CurrentObject based on the best prediction
+            
         }
+
+
+
 
         public void FinishedProcessingImage()
         {
             //Store object into list and move on to next object
         }
 
-
+        public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
     }
 }

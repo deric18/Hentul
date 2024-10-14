@@ -1,6 +1,6 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
-    internal class BaseObject
+    public   class BaseObject
     {
 
     }

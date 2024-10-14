@@ -1,8 +1,18 @@
-﻿namespace Hentul.Hippocampal_Entorinal_complex
+﻿using Common;
+
+namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    internal class Sensation_Location
+    public class Sensation_Location
     {
+        public string Location { get; set; }
 
+        public List<Position> ActiveBits { get; set; }
+
+        public Sensation_Location(string location, List<Position> activebits) 
+        {
+            Location = location;
+            ActiveBits = activebits;
+        }
     }
 }

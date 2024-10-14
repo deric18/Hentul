@@ -61,9 +61,7 @@
 
         public BlockBehaviourManager somBBM_L3B { get; private set; }
 
-        public BlockBehaviourManager somBBM_L3A { get; private set; }
-
-        public HippocampalComplex HCAccessor { get; private set; }
+        public BlockBehaviourManager somBBM_L3A { get; private set; }        
 
         public int[] MockBlockNumFires { get; private set; }
 
@@ -149,9 +147,7 @@
 
             somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
 
-            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);
-
-            HCAccessor = new HippocampalComplex();
+            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);            
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -398,17 +394,18 @@
 
             // STEP 2 :
             // Project  L3B -> HC if any for next motor output [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
+            //     if there are any recognitions done so far for a particular object in L3A, Display it too and inform HEC as well.
             // If Prediction Mode
             //  {
-            //     Collect Predictions from HCE for next motor output if Set the bool flag accordingly.
-            //     if there are any recognitions done so far for a particular object in L3A, Display it too and inform HEC as well.
+            //     Collect Predictions from HCE for next motor output if Set the bool flag accordingly.            
             //  }
             // If Training Mode      
             //  {
-            //      Push L4 -> L3A for spatial pooling.
-            //      if there are any recognitions done so far for a particular object in L3A, Display it too and inform HEC as well.
+            //      Push L4 -> L3A for spatial pooling.            
             //  }
             // Push SDRs from L4 -> L3A for better Spatial Pooling.            
+
+            var l3b = somBBM_L3B;
 
 
             // Project  L3B -> HC for  populating object sensei into HCE            
@@ -426,6 +423,7 @@
             }
 
             #endregion
+
         }
 
 
