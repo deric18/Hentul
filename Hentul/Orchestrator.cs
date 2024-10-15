@@ -14,7 +14,7 @@
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
     using System.Drawing;
 
-    internal class Orchestrator
+    public class Orchestrator
     {
 
         public struct POINT
@@ -408,10 +408,12 @@
 
 
 
-            // Project  L3B -> HC for  populating object sensei into HCE            
+            // Project  L3B -> HC for  populating object sensei into HCE
+            
             if (NMode.Equals(NetworkMode.TRAINING))
-            {                
-                //Execute next location coordinate from Form and execute it.
+            {
+                //Create Sennsei <Location, ActivePosition> , feed it HC Accessor.
+                Sensation_Location sensei = 
 
 
 
@@ -423,8 +425,7 @@
             }
 
             #endregion
-        }
-
+        }        
 
         public string ProcessStep3()
         {
@@ -971,6 +972,11 @@
             ReleaseDC(desk, dc);
         }
 
+        public void ChangeNetworkModeTo(NetworkMode mode)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #endregion
@@ -980,12 +986,6 @@
 
 
     #region Enums
-
-    public enum NetworkMode
-    {
-        TRAINING,
-        PREDICTION
-    }
 
     public enum VisionScope
     {

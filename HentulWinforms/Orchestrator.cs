@@ -987,11 +987,7 @@
 
     #region Enums
 
-    public enum NetworkMode
-    {
-        TRAINING,
-        PREDICTION
-    }
+
 
     public enum VisionScope
     {

@@ -1,7 +1,8 @@
-﻿using HentulWinforms;
-
-namespace Hentul.Hippocampal_Entorinal_complex
+﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
+
+    using Common;
+
     public class HippocampalComplex
     {
         public Dictionary<string, RecognisedObject>? Objects { get; private set; }
@@ -9,6 +10,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public UnrecognisedObject? CurrentObject { get; private set; }
 
         private NetworkMode networkMode;
+        
+        public int NumberOfITerationsToConfirmation { get; private set; }
 
         public HippocampalComplex()
         {
@@ -16,7 +19,10 @@ namespace Hentul.Hippocampal_Entorinal_complex
             Objects = new Dictionary<string, RecognisedObject>();
             CurrentObject = new UnrecognisedObject();
             networkMode = NetworkMode.TRAINING;
-        }        
+            NumberOfITerationsToConfirmation = 0;
+        }
+
+        public NetworkMode GetCurrentNetworkMode() => networkMode;
 
         public void SetNetworkModeToTraining()
         {
@@ -25,23 +31,67 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public void SetNetworkModeToPrediction()
         {
+
+            ConvertUnrecognisedObjectToRecognisedObject();
             networkMode = NetworkMode.PREDICTION;
         }
 
-
-
-        public void ProcessCurrentPatternForObject(Sensation_Location sensei)
+        private void ConvertUnrecognisedObjectToRecognisedObject()
         {
-            if (CurrentObject == null)
-                CurrentObject = new UnrecognisedObject();
+            if(CurrentObject.ObjectPattern.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot Transform empty object!");
+            }
 
-            //Keep storing <Location , ActiveBit> -> KVPs under Training Mode , If Under PredictionMode keep updating CurrentObject based on the best prediction
-            
+            RecognisedObject newObject = new RecognisedObject(CurrentObject);
         }
 
 
+        // Gets called by Orchestrator.
+        /// <summary>
+        /// Need to define specfic limits for 
+        /// 1. object sensei count
+        /// 2. Number of cycles 
+        /// </summary>
+        /// <param name="sensei"></param>
+        /// <param name="prediction"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void ProcessCurrentPatternForObject(Sensation_Location sensei, string objectName, Sensation_Location? prediction = null)
+        {
 
+            if (networkMode == NetworkMode.TRAINING)
+            {
+                CurrentObject.SetObjectLabel(objectName);
 
+                // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.
+                if(!CurrentObject.AddNewSenei(sensei.Location, sensei.ActiveBits))
+                {
+                    int breakpoint = 1; // pattern already added.
+                }
+                
+            }
+            else if (networkMode == NetworkMode.PREDICTION)
+            {
+                if (Objects.Count == 0)
+                {
+                    throw new InvalidOperationException("Object Cannot be null under PRediction Mode");
+                }
+
+                throw new NotImplementedException();
+
+                /* If Under PredictionMode 
+                1. Parse known Objects for this location , 
+                    if any recognised , put them in priority queue , 
+                    else run through prediction 
+                2. If any object is recognised, 
+                    enter verification Mode and verify atleast 6 more positions.
+                3. Else , continue with more inputs from Orchestrator. Record number of iterations to confirmation
+                */
+            }
+
+        }
+
+        
         public void FinishedProcessingImage()
         {
             //Store object into list and move on to next object
