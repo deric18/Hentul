@@ -44,97 +44,90 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            if (networkMode.Equals(NetworkMode.TRAINING))
+            while (true)
             {
-                while (true)
-                {
 
-                    if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                    {
-                        label_done.Text = "Finished Processing Image";
-                        break;
-                    }
+                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
+                {
+                    label_done.Text = "Finished Processing Image";
+                    break;
+                }
+                else
+                {
+                    if (value.X <= RightTop.X - numPixels)
+                        value = MoveRight(value);
                     else
                     {
-                        if (value.X <= RightTop.X - numPixels)
-                            value = MoveRight(value);
+                        if (value.Y <= RightBottom.Y - numPixels)
+                        {
+                            value = MoveDown(value);
+                            value = SetLeft(value);
+                        }
                         else
                         {
-                            if (value.Y <= RightBottom.Y - numPixels)
+                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                             {
-                                value = MoveDown(value);
-                                value = SetLeft(value);
-                            }
-                            else
-                            {
-                                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                                {
-                                    label_done.Text = "Finished Processing Image";
-                                    break;
-                                }
+                                label_done.Text = "Finished Processing Image";
+                                break;
                             }
                         }
                     }
-
-                    labelX.Text = value.X.ToString(); labelX.Refresh();
-                    labelY.Text = value.Y.ToString(); labelY.Refresh();
-
-                    orchestrator.MoveCursor(value);
-
-                    orchestrator.Grab();
-
-                    CurrentImage.Image = orchestrator.bmp;
-
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcesStep1();
-
-                    //orchestrator.ProcessStep2();
-
-                    //ObjectLabel.Text = orchestrator.ProcessStep3();
-
-                    counter++;
                 }
 
-                label_done.Text = "Done"; label_done.Refresh();
+                labelX.Text = value.X.ToString(); labelX.Refresh();
+                labelY.Text = value.Y.ToString(); labelY.Refresh();
 
-                if (label_done.Text == "Finished Processing Image")
-                {
-                    orchestrator.BackUp();
+                orchestrator.MoveCursor(value);
 
-                    //orchestrator.RotateImage();
-                    networkMode = NetworkMode.PREDICTION;
-                    orchestrator.ChangeNetworkModeTo(NetworkMode.PREDICTION);
+                orchestrator.Grab();
 
-                    StartButton.Text = "Start Prediciton";
+                CurrentImage.Image = orchestrator.bmp;
 
-                }
+                CurrentImage.Refresh();
+
+                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
+
+                EdgedImage.Refresh();
+
+                orchestrator.ProcesStep1();
+
+                orchestrator.ProcessStep2();
+
+                orchestrator.ProcessStep3();
+
+                counter++;
             }
-            else if(networkMode.Equals(NetworkMode.PREDICTION))
+
+            label_done.Text = "Done"; label_done.Refresh();
+
+            if (label_done.Text == "Finished Processing Image")
             {
+                orchestrator.BackUp();
+
+                //orchestrator.RotateImage();
+                networkMode = NetworkMode.PREDICTION;
+                orchestrator.ChangeNetworkModeTo(NetworkMode.PREDICTION);
+
+                StartButton.Text = "Start Prediciton";
 
             }
         }
-        
 
-        private Orchestrator.POINT MoveRight(Orchestrator.POINT value)
+
+        public Orchestrator.POINT MoveRight(Orchestrator.POINT value)
         {
             value.X = value.X + numPixels * 2;
             return value;
         }
 
 
-        private Orchestrator.POINT MoveDown(Orchestrator.POINT value)
+        public Orchestrator.POINT MoveDown(Orchestrator.POINT value)
         {
             value.Y = value.Y + numPixels * 2;
             return value;
         }
 
-        private Orchestrator.POINT SetLeft(Orchestrator.POINT value)
+        public Orchestrator.POINT SetLeft(Orchestrator.POINT value)
         {
             value.X = value.X - Math.Abs(LeftTop.X - RightTop.X) + numPixels;
             return value;
@@ -146,7 +139,7 @@ namespace HentulWinforms
             label_done.Text = "Innitting...";
             label_done.Refresh();
             networkMode = NetworkMode.TRAINING;
-            orchestrator = new Orchestrator(numPixels);            
+            orchestrator = new Orchestrator(numPixels);
 
             var value = orchestrator.GetCurrentPointerPosition();
 
@@ -175,7 +168,7 @@ namespace HentulWinforms
 
             EdgedImage.Refresh();
 
-            label_done.Text = "Ready";            
+            label_done.Text = "Ready";
         }
 
 
@@ -231,6 +224,6 @@ namespace HentulWinforms
 
         }
 
-       
+
     }
 }

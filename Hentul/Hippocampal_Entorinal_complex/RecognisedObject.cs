@@ -1,44 +1,35 @@
 ﻿
 using Common;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.Intrinsics.X86;
 
 /// Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
     public class RecognisedObject : BaseObject
     {
-        public Dictionary<string, List<Position>> ObjectPattern { get; set; }
+        public List<Sensation_Location> ObjectSnapshot { get; set; }
         public string Label { get; private set; }
 
         public RecognisedObject(string name)
         {
             Label = name;
-            ObjectPattern = new Dictionary<string, List<Position>>();
+            ObjectSnapshot = new List<Sensation_Location>();
         }
 
         public RecognisedObject(UnrecognisedObject unrec) 
         {
             Label = unrec.Label;
-            ObjectPattern = unrec.ObjectPattern;
+            ObjectSnapshot = unrec.ObjectSnapshot;
         }
 
-        public int CheckPatternMatchPercentage(string location, List<Position> acitivePosition)
+        public int CheckPatternMatchPercentage(Sensation_Location sensei)
         {
-            int percent = 0;            
+            int percent = 0;
 
-            if (ObjectPattern.TryGetValue(location, out List<Position> result))
+            if(Sensation_Location.CompareSensei(ObjectSnapshot, sensei))
             {
-                int matchCounter = 0;
-                foreach (var item in result)
-                {
-
-                    if (acitivePosition.Contains(item))
-                    {
-                        matchCounter++;
-                    }
-                }
-
-                percent = ( ( matchCounter * 100 ) / result.Count );
+                percent = 100;
             }
 
 

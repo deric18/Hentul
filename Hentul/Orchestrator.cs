@@ -402,18 +402,22 @@
             // Collect Predictions from L4 & L3A [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
             // Project  L3B -> HC if any for next motor output
             // Push SDRs from L4 -> L3A for better Spatial Pooling
-            // Else If Training Mode            
+            // Else If Training Mode
             // Push L4 -> L3A for spatial pooling
+            // 
             // Let orchestrator take over with next location
 
 
 
             // Project  L3B -> HC for  populating object sensei into HCE
-            
+
             if (NMode.Equals(NetworkMode.TRAINING))
             {
                 //Create Sennsei <Location, ActivePosition> , feed it HC Accessor.
-                Sensation_Location sensei = 
+                
+                //Sensation_Location sensei = new Sensation_Location()
+
+                //HCAccessor.ProcessCurrentPatternForObject(sensei, "Apple");
 
 
 
@@ -431,6 +435,7 @@
         {
             #region STEP 3
             string obj = string.Empty;
+
             // STEP 3 :
             // Check if there is any desired output from HEC , Use it to depolarize L4 and Perfrom Motor Output.
             // if no motor output exists , most likely very early in training phase , let orchestrator run on its own.

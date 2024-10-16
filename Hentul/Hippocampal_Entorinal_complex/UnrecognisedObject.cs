@@ -10,23 +10,31 @@ namespace Hentul.Hippocampal_Entorinal_complex
     {
         public bool IsObjectIdentified { get; private set; }
 
-        public Dictionary<string, List<Position>> ObjectPattern { get; set; }
+        public List<Sensation_Location> ObjectSnapshot { get; set; }
 
         public string Label { get; private set; }
 
         public UnrecognisedObject()
         {
             Label = string.Empty;
-            ObjectPattern = new Dictionary<string, List<Position>>();
+            ObjectSnapshot = new List<Sensation_Location>();
         }
 
-        public bool AddNewSenei(string location, List<Position> positions)
+        public bool AddNewSenei(Sensation_Location sensei)
         {
-            if (!ObjectPattern.ContainsKey(location))
+            if(ObjectSnapshot.Count == 0)
             {
-                ObjectPattern.Add(location, positions);
-
+                ObjectSnapshot.Add(sensei);
                 return true;
+            }
+
+
+            foreach(var sensloc in ObjectSnapshot)
+            {
+                if(Sensation_Location.CompareSensei(sensei, sensloc) == false)
+                {
+                    ObjectSnapshot.Add(sensei);
+                }
             }
 
             return false;

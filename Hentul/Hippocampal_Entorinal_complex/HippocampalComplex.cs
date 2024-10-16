@@ -38,7 +38,7 @@
 
         private void ConvertUnrecognisedObjectToRecognisedObject()
         {
-            if(CurrentObject.ObjectPattern.Count == 0)
+            if(CurrentObject.ObjectSnapshot.Count == 0)
             {
                 throw new InvalidOperationException("Cannot Transform empty object!");
             }
@@ -56,7 +56,7 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void ProcessCurrentPatternForObject(Sensation_Location sensei, string objectName, Sensation_Location? prediction = null)
+        public void ProcessCurrentPatternForObject(int cycleNum, Sensation_Location sensei, string objectName, Sensation_Location? prediction = null)
         {
 
             if (networkMode == NetworkMode.TRAINING)
@@ -64,17 +64,16 @@
                 CurrentObject.SetObjectLabel(objectName);
 
                 // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.
-                if(!CurrentObject.AddNewSenei(sensei.Location, sensei.ActiveBits))
+                if(!CurrentObject.AddNewSenei(sensei))
                 {
                     int breakpoint = 1; // pattern already added.
-                }
-                
+                }                
             }
             else if (networkMode == NetworkMode.PREDICTION)
             {
                 if (Objects.Count == 0)
                 {
-                    throw new InvalidOperationException("Object Cannot be null under PRediction Mode");
+                    throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
 
                 throw new NotImplementedException();
@@ -88,7 +87,6 @@
                 3. Else , continue with more inputs from Orchestrator. Record number of iterations to confirmation
                 */
             }
-
         }
 
         
