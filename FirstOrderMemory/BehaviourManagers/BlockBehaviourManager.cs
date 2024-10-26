@@ -430,6 +430,7 @@
                             sourceNeuronElement.InnerText = distalSynapse.Value.AxonalNeuronId.ToString();
 
                             var targetNeuronElement = xmlDocument.CreateNode(XmlNodeType.Element, "TargetNeuronID", string.Empty);
+
                             targetNeuronElement.InnerText = distalSynapse.Value.DendronalNeuronalId.ToString();
 
                             distalNode.AppendChild(sourceNeuronElement);
@@ -1171,6 +1172,17 @@
                     }
                 }
             }
+        }
+
+        public void Pool(SDR_SOM poolingSDR)
+        {
+            if(Layer.Equals(LayerType.Layer_3A) == false)
+            {
+                throw new InvalidOperationException("Only Layer 3A can Pool atm!");
+            }
+
+            // Record all the commonly firing neurons in every BBM and cache them for that specific pattern.
+
         }
 
         #region INTERNAL METHODS

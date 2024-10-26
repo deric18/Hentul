@@ -9,6 +9,10 @@
 
         public UnrecognisedObject? CurrentObject { get; private set; }
 
+        public Position CurrentPosition { get; private set; }
+
+        public Position[] BoundaryPositions { get; private set; } 
+
         private NetworkMode networkMode;
         
         public int NumberOfITerationsToConfirmation { get; private set; }
@@ -19,10 +23,15 @@
             Objects = new Dictionary<string, RecognisedObject>();
             CurrentObject = new UnrecognisedObject();
             networkMode = NetworkMode.TRAINING;
-            NumberOfITerationsToConfirmation = 0;
+            NumberOfITerationsToConfirmation = 6;
         }
 
         public NetworkMode GetCurrentNetworkMode() => networkMode;
+
+        public void UpdateCurrenttPosition(Position pos)
+        {
+            CurrentPosition = pos;
+        }
 
         public void SetNetworkModeToTraining()
         {
@@ -56,18 +65,23 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void ProcessCurrentPatternForObject(int cycleNum, Sensation_Location sensei, string objectName, Sensation_Location? prediction = null)
+        public void ProcessCurrentPatternForObject(int cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
         {
 
             if (networkMode == NetworkMode.TRAINING)
-            {
-                CurrentObject.SetObjectLabel(objectName);
+            {                
 
                 // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.
-                if(!CurrentObject.AddNewSenei(sensei))
+                if(CurrentObject.AddNewSenei(sensei) == false)
                 {
                     int breakpoint = 1; // pattern already added.
-                }                
+                }
+
+                ParseAllKnownObjectsForIncomingPattern();
+
+
+
+
             }
             else if (networkMode == NetworkMode.PREDICTION)
             {
@@ -89,7 +103,11 @@
             }
         }
 
-        
+        private void ParseAllKnownObjectsForIncomingPattern()
+        {
+            throw new NotImplementedException();
+        }
+
         public void FinishedProcessingImage()
         {
             //Store object into list and move on to next object

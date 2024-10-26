@@ -98,7 +98,7 @@ namespace HentulWinforms
                 counter++;
             }
 
-            label_done.Text = "Done"; label_done.Refresh();
+            
 
             if (label_done.Text == "Finished Processing Image")
             {

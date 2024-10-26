@@ -396,23 +396,17 @@
         {
 
             #region STEP 2
-
-            // STEP 2 :
-            // If Prediction Mode
-            // Collect Predictions from L4 & L3A [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
-            // Project  L3B -> HC if any for next motor output
-            // Push SDRs from L4 -> L3A for better Spatial Pooling
-            // Else If Training Mode
-            // Push L4 -> L3A for spatial pooling
-            // 
-            // Let orchestrator take over with next location
-
-
-
+           
             // Project  L3B -> HC for  populating object sensei into HCE
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
+
+                SDR_SOM sdr = GetSdrSomFromFOMs();
+
+                somBBM_L3A.Pool(sdr);
+
+
                 //Create Sennsei <Location, ActivePosition> , feed it HC Accessor.
                 
                 //Sensation_Location sensei = new Sensation_Location()
@@ -434,6 +428,7 @@
         public string ProcessStep3()
         {
             #region STEP 3
+
             string obj = string.Empty;
 
             // STEP 3 :
@@ -537,6 +532,7 @@
         private SDR_SOM GetSdrSomFromFOMs()
         {
             throw new NotImplementedException();
+            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
         }
 
         public void MoveCursorToSpecificPosition(int x, int y)
@@ -979,7 +975,7 @@
 
         public void ChangeNetworkModeTo(NetworkMode mode)
         {
-            throw new NotImplementedException();
+            NMode = mode;
         }
 
         #endregion
