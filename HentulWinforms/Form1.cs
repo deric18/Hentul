@@ -91,9 +91,7 @@ namespace HentulWinforms
 
                 orchestrator.ProcesStep1();
 
-                orchestrator.ProcessStep2();
-
-                orchestrator.ProcessStep3();
+                orchestrator.ProcessStep2();                                           
 
                 counter++;
             }

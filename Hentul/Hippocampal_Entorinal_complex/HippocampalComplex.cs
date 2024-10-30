@@ -2,20 +2,27 @@
 {
 
     using Common;
+    using FirstOrderMemory.Models;
+    using System.Xml;
 
     public class HippocampalComplex
     {
+
+        #region  VARIABLES & CONSTRUCTORS
+
         public Dictionary<string, RecognisedObject>? Objects { get; private set; }
 
         public UnrecognisedObject? CurrentObject { get; private set; }
 
         public Position CurrentPosition { get; private set; }
 
-        public Position[] BoundaryPositions { get; private set; } 
+        public Position[] BoundaryPositions { get; private set; }
 
         private NetworkMode networkMode;
-        
+
         public int NumberOfITerationsToConfirmation { get; private set; }
+
+        private string backupDir;
 
         public HippocampalComplex()
         {
@@ -24,36 +31,10 @@
             CurrentObject = new UnrecognisedObject();
             networkMode = NetworkMode.TRAINING;
             NumberOfITerationsToConfirmation = 6;
+            backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
         }
 
-        public NetworkMode GetCurrentNetworkMode() => networkMode;
-
-        public void UpdateCurrenttPosition(Position pos)
-        {
-            CurrentPosition = pos;
-        }
-
-        public void SetNetworkModeToTraining()
-        {
-            networkMode = NetworkMode.TRAINING;               
-        }
-
-        public void SetNetworkModeToPrediction()
-        {
-
-            ConvertUnrecognisedObjectToRecognisedObject();
-            networkMode = NetworkMode.PREDICTION;
-        }
-
-        private void ConvertUnrecognisedObjectToRecognisedObject()
-        {
-            if(CurrentObject.ObjectSnapshot.Count == 0)
-            {
-                throw new InvalidOperationException("Cannot Transform empty object!");
-            }
-
-            RecognisedObject newObject = new RecognisedObject(CurrentObject);
-        }
+        #endregion
 
 
         // Gets called by Orchestrator.
@@ -65,23 +46,32 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void ProcessCurrentPatternForObject(int cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
+        public Position ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
         {
+            Position toReturn = null;
 
             if (networkMode == NetworkMode.TRAINING)
-            {                
-
+            {
                 // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.
-                if(CurrentObject.AddNewSenei(sensei) == false)
+                if (CurrentObject.AddNewSenei(sensei) == false)
                 {
-                    int breakpoint = 1; // pattern already added.
+                    int breakpoint1 = 1; // pattern already added.
                 }
 
-                ParseAllKnownObjectsForIncomingPattern();
+                var matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
 
+                if (matchingObjectList.Count != 0)
+                {
+                    //Object identified even in training phase
 
+                    int breakpint = 1;
 
-
+                }
+                else
+                {
+                    int breapoint2 = 1;
+                    CurrentObject.AddNewSenei(sensei);
+                }
             }
             else if (networkMode == NetworkMode.PREDICTION)
             {
@@ -89,8 +79,6 @@
                 {
                     throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
-
-                throw new NotImplementedException();
 
                 /* If Under PredictionMode 
                 1. Parse known Objects for this location , 
@@ -100,13 +88,127 @@
                     enter verification Mode and verify atleast 6 more positions.
                 3. Else , continue with more inputs from Orchestrator. Record number of iterations to confirmation
                 */
+
+                var matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
+
+
+                if (matchingObjectList.Count != 0)
+                {
+                    foreach( var matchingObject in matchingObjectList)
+                    {
+
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("Object did not match none of Recognised Objects ");
+                }
+
+
+
+
             }
+
+            return toReturn;
         }
 
-        private void ParseAllKnownObjectsForIncomingPattern()
+        public void DoneWithTraining()
         {
-            throw new NotImplementedException();
+            ConvertUnrecognisedObjectToRecognisedObject();
         }
+
+        private List<RecognisedObject> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)
+        {
+            List<RecognisedObject> setAsideList = new List<RecognisedObject>();
+
+            foreach (var obj in Objects.Values)
+            {
+                if (obj.CheckPatternMatchPercentage(sensei) != 0)
+                {
+                    setAsideList.Add(obj);
+                }
+            }
+
+            return setAsideList;
+        }
+
+        private void Backup()
+        {
+            var xmlDocument = new XmlDocument();
+
+            xmlDocument.LoadXml("<HippocampalEntorhinalComplex></HippocampalEntorhinalComplex>");
+
+            string filename = "HC-EC.xml";
+
+            foreach (var kvp in Objects)
+            {
+                foreach (var sensei in kvp.Value.ObjectSnapshot)
+                {
+                   foreach(var item in sensei.Snapshot)
+                    {
+                        foreach( var pos in item.Value)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            //var distalNode = xmlDocument.CreateNode(XmlNodeType.Element, kvp.Key, string.Empty);
+
+            //var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
+
+            //var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
+
+            //sourceNeuronElement.InnerText = distalSynapse.Value.AxonalNeuronId.ToString();
+
+            //var targetNeuronElement = xmlDocument.CreateNode(XmlNodeType.Element, "TargetNeuronID", string.Empty);
+
+            //targetNeuronElement.InnerText = distalSynapse.Value.DendronalNeuronalId.ToString();
+
+            //distalNode.AppendChild(sourceNeuronElement);
+            //distalNode.AppendChild(targetNeuronElement);
+
+            //xmlDocument?.DocumentElement?.AppendChild(distalNode);
+        
+            xmlDocument?.Save(backupDir + filename);            
+
+        }
+
+        private void Restore()
+        {
+
+        }
+        public NetworkMode GetCurrentNetworkMode() => networkMode;
+
+        public void UpdateCurrenttPosition(Position pos)
+        {
+            CurrentPosition = pos;
+        }
+
+        public void SetNetworkModeToTraining()
+        {
+            networkMode = NetworkMode.TRAINING;
+        }
+
+        public void SetNetworkModeToPrediction()
+        {
+
+            ConvertUnrecognisedObjectToRecognisedObject();
+            networkMode = NetworkMode.PREDICTION;
+        }
+
+        private void ConvertUnrecognisedObjectToRecognisedObject()
+        {
+            if (CurrentObject.ObjectSnapshot.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot Transform empty object!");
+            }
+
+            RecognisedObject newObject = new RecognisedObject(CurrentObject);
+        }
+
+
 
         public void FinishedProcessingImage()
         {

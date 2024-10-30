@@ -15,7 +15,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public static bool CompareSensei(Sensation_Location sense1, Sensation_Location sense2)
         {            
-
+            // Needs work , better return percentage.
             foreach (var item in sense1.Snapshot)
             {
                 if (sense2.Snapshot.TryGetValue(item.Key, out var s))

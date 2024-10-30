@@ -392,12 +392,10 @@
 
         }
 
-        public void ProcessStep2()
+        public Position ProcessStep2()
         {
 
-            #region STEP 2
-           
-            // Project  L3B -> HC for  populating object sensei into HCE
+            Position nextMotorOutput = null;
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
@@ -408,36 +406,31 @@
 
 
                 //Create Sennsei <Location, ActivePosition> , feed it HC Accessor.
-                
-                //Sensation_Location sensei = new Sensation_Location()
 
-                //HCAccessor.ProcessCurrentPatternForObject(sensei, "Apple");
+                var currentSensei = GetSenseiFromSOMLayer3A();
 
+                var predictedSensei = GetPredictedSenseiFromSOMLayer3A();
 
+                HCAccessor.ProcessCurrentPatternForObject(CycleNum, currentSensei, predictedSensei);                
 
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
-                
+
                 // If any output from HC execute the location output if NOT then take the standar default output.
+                var currentSensei = GetSenseiFromSOMLayer3A();
+
+                var predictedSensei = GetPredictedSenseiFromSOMLayer3A();
+
+                HCAccessor.ProcessCurrentPatternForObject(CycleNum, currentSensei, predictedSensei);
             }
 
-            #endregion
-        }        
+            return nextMotorOutput;
+        }
 
-        public string ProcessStep3()
+        public void DoneWithTraining()
         {
-            #region STEP 3
-
-            string obj = string.Empty;
-
-            // STEP 3 :
-            // Check if there is any desired output from HEC , Use it to depolarize L4 and Perfrom Motor Output.
-            // if no motor output exists , most likely very early in training phase , let orchestrator run on its own.
-
-
-            return obj;
-            #endregion
+            HCAccessor.DoneWithTraining();
         }
 
         #region BIG MAN WORK
@@ -529,6 +522,19 @@
 
         #endregion
 
+        private Sensation_Location GetSenseiFromSOMLayer3A()
+        {
+            Sensation_Location sensei = null;
+
+            
+            return sensei;
+        }
+
+        private Sensation_Location GetPredictedSenseiFromSOMLayer3A()
+        {
+            throw new NotImplementedException();
+        }
+
         private SDR_SOM GetSdrSomFromFOMs()
         {
             throw new NotImplementedException();
@@ -604,7 +610,6 @@
 
             return (color.R < 200 && color.G < 200 && color.B < 200);
         }
-
 
         private void PrintMoreBlockVitals()
         {
@@ -977,7 +982,7 @@
         {
             NMode = mode;
         }
-
+       
         #endregion
 
         #endregion
