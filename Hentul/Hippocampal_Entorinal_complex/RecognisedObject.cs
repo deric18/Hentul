@@ -24,16 +24,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
         }
 
         public int CheckPatternMatchPercentage(Sensation_Location sensei)
-        {
-            int percent = 0;
-
-            if(Sensation_Location.CompareSensei(ObjectSnapshot, sensei))
-            {
-                percent = 100;
-            }
-
-
-            return percent;
+        {            
+            return Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot);
         }        
     }
 

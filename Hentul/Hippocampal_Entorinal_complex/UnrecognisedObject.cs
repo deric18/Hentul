@@ -27,15 +27,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 ObjectSnapshot.Add(sensei);
                 return true;
             }
-
-
-            foreach(var sensloc in ObjectSnapshot)
+           
+            if(Sensation_Location.CompareSenseiBool(ObjectSnapshot, sensei))
             {
-                if(Sensation_Location.CompareSensei(sensei, sensloc) == false)
-                {
-                    ObjectSnapshot.Add(sensei);
-                }
-            }
+                ObjectSnapshot.Add(sensei);
+                return true;
+            }            
 
             return false;
         }

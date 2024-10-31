@@ -105,6 +105,7 @@ namespace HentulWinforms
                 //orchestrator.RotateImage();
                 networkMode = NetworkMode.PREDICTION;
                 orchestrator.ChangeNetworkModeTo(NetworkMode.PREDICTION);
+                orchestrator.DoneWithTraining();
 
                 StartButton.Text = "Start Prediciton";
 
