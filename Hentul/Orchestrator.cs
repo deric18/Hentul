@@ -402,10 +402,7 @@
 
                 SDR_SOM sdr = GetSdrSomFromFOMs();
 
-                somBBM_L3A.Pool(sdr);
-
-
-                //Create Sennsei <Location, ActivePosition> , feed it HC Accessor.
+                somBBM_L3A.Pool(sdr);                
 
                 var currentSensei = GetSenseiFromSOMLayer3A();
 
