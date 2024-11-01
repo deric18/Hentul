@@ -1,8 +1,7 @@
 ﻿namespace Hentul
 {
     using Common;
-    using FirstOrderMemory.Models;
-    using SixLabors.ImageSharp.Formats.Bmp;
+    using FirstOrderMemory.Models;    
     using System.Collections.Generic;
     using System.Drawing;
     using System.Reflection.Metadata.Ecma335;
@@ -18,10 +17,7 @@
         public const int LENGTH = 10;
         public const int WIDTH = 10;
 
-        public List<int> firstbitfoms;
-        public List<int> secondbitfoms;
-        public List<int> doublebitfoms;
-
+        
         public Dictionary<int, Position[]> Mappings { get; private set; }
 
         List<Position_SOM> ONbits1FOM;
@@ -46,10 +42,9 @@
             NumBBM = numBBM;
             NumPixels = numPixels;
             NumPixelsPerBBM = numPixels / numBBM;
+            
             PerformMappingsFor();
-            firstbitfoms = new List<int>();
-            secondbitfoms = new List<int>();
-            doublebitfoms = new List<int>();
+            
 
             ONbits1FOM = new List<Position_SOM>()
             {
@@ -196,9 +191,8 @@
                 };
         }
 
-        public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, LayerType layerType, int bbmID)
-        {
-            SDR_SOM toRet;
+        public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, int bbmID)
+        {         
             var positionstoAdd = new List<Position_SOM>();
 
             switch (mappercase)
@@ -364,9 +358,7 @@
                 case MAPPERCASE.FOUR:
                     {
                             positionstoAdd.AddRange(ONbits4FOM);
-                        
-                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-                        
+                            somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));                        
                     }
                     break;
                 default:
@@ -378,12 +370,12 @@
             return new SDR_SOM(LENGTH, WIDTH, positionstoAdd, iType.SPATIAL);
         }
 
-        private List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbits1FOM, int bbmID)
+        internal static List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbitsFOM, int bbmID)
         {
             List<Position_SOM> retList = new List<Position_SOM>();
             Position_SOM newPosition;
 
-            foreach (var pos in oNbits1FOM)
+            foreach (var pos in oNbitsFOM)
             {
                 newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
                 retList.Add(newPosition);
@@ -400,24 +392,12 @@
             }
             
             List<Position> toRet = new List<Position>();
-            flagCheckArr = new bool[bitmap.Width, bitmap.Height];
-
-            int cacheI = 0;
-            int cacheJ = 0;
+            flagCheckArr = new bool[bitmap.Width, bitmap.Height];            
 
             foreach (var kvp in Mappings)
             {
                 var bbmID = kvp.Key;
-                var posList = kvp.Value;
-
-                //if (!flagCheckArr[posList[0].X, posList[0].Y])
-                //    flagCheckArr[posList[0].X, posList[0].Y] = true;
-                //if (!flagCheckArr[posList[1].X, posList[1].Y])
-                //    flagCheckArr[posList[1].X, posList[1].Y] = true;
-                //if (!flagCheckArr[posList[2].X, posList[2].Y])
-                //    flagCheckArr[posList[2].X, posList[2].Y] = true;
-                //if (!flagCheckArr[posList[3].X, posList[3].Y])
-                //    flagCheckArr[posList[3].X, posList[3].Y] = true;
+                var posList = kvp.Value;                
 
                 Color color1 = bitmap.GetPixel(posList[0].X, posList[0].Y); flagCheckArr[posList[0].X, posList[0].Y] = true;
                 Color color2 = bitmap.GetPixel(posList[1].X, posList[1].Y); flagCheckArr[posList[1].X, posList[1].Y] = true;
@@ -429,7 +409,7 @@
                 bool check3 = CheckIfColorIsBlack(color3);
                 bool check4 = CheckIfColorIsBlack(color4);
 
-                if ( check1 && check2 && check3 && check4 )                                 //4's
+                if ( check1 && check2 && check3 && check4 )                                 
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
 
@@ -548,6 +528,42 @@
 
         private bool CheckIfColorIsBlack(Color color)
             => (color.R < 200 && color.G < 190 && color.B < 190);
+
+        internal void clean()
+        {
+            somPositions.Clear();
+        }
+        
+
+        // Chunk out % 100 ( typical BBM Size) and add the Position coordinates automatically.
+        internal Dictionary<int, List<Position>> GetSenseLocDictFromSOMSDR(SDR_SOM sdr_SOM)
+        {
+            Dictionary<int, List<Position>> senseLocDict = null;
+
+            if(sdr_SOM.ActiveBits.Count == 0 )
+            {
+                int exception = 1;
+                //throw new InvalidDataException("SDR SOM is empty for Layer 3B!!!");
+            }
+
+            senseLocDict = new Dictionary<int, List<Position>>();
+
+            foreach(var pos in sdr_SOM.ActiveBits)
+            {
+                int bbmID = pos.X % 100;
+
+                if(senseLocDict.TryGetValue(bbmID, out List<Position> posList))
+                {
+                    posList.Add(pos);
+                }
+                else
+                {
+                    senseLocDict.Add(bbmID, new List<Position>() { pos } );
+                }
+            }
+
+            return senseLocDict;
+        }
     }
 
     public enum MAPPERCASE

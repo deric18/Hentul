@@ -94,6 +94,8 @@
         public List<Neuron> OverConnectedOffenderList { get; private set; }
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
 
+        private bool IgnorePostCycleCleanUp;
+
         #endregion
 
         #region CONSTANTS
@@ -201,6 +203,8 @@
 
             OverConnectedOffenderList = new List<Neuron>();
             OverConnectedInShortInterval = new List<Neuron>();
+
+            IgnorePostCycleCleanUp = false;
         }
 
         public void Init(int bbmID)
@@ -469,6 +473,7 @@
             // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
 
             //BUG: Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
+            this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
             if (ignorePrecyclePrep == false)
                 PreCyclePrep();
 
@@ -1370,7 +1375,7 @@
             {
                 var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
 
-                if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
+				if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
                     ActiveBits.Add(pos);
             }
 
@@ -1379,11 +1384,14 @@
             return new SDR_SOM(X, Y, ActiveBits, iType.SPATIAL);
         }
 
-        public SDR_SOM GetAllFiringNeuronsThisCycle()
+		public SDR_SOM GetAllFiringNeuronsThisCycle()
         {
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
-            NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+            if (IgnorePostCycleCleanUp)
+                NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+            else
+                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }

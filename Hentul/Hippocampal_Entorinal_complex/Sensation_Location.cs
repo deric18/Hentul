@@ -8,7 +8,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public string ID { get; set; }
         public Dictionary<int, List<Position>> Snapshot { get; set; }
 
-        public Sensation_Location(int cycleNumber, Dictionary<int, List<Position>> snapshot)
+        public Sensation_Location(ulong cycleNumber, Dictionary<int, List<Position>> snapshot)
         {
             this.Snapshot = snapshot;
         }

@@ -86,6 +86,10 @@
 
         public NetworkMode NMode { get; set; }
 
+        List<int> firingFOM;
+
+        Mapper mapper;
+
         List<Position_SOM> ONbits1;
         List<Position_SOM> ONbits2;
         List<Position_SOM> ONbits3;
@@ -155,6 +159,10 @@
             HCAccessor = new HippocampalComplex();
 
             MockBlockNumFires = new int[NumBBMNeeded];
+
+            firingFOM = new List<int>();
+
+            mapper = new Mapper(NumBBMNeeded, BlockSize);
 
             ONbits1 = new List<Position_SOM>()
             {
@@ -229,13 +237,11 @@
 
             // STEP 1A : Fire all FOM's first!
 
-            BlockBehaviourManager fom;
-
-            Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
+            BlockBehaviourManager fom;            
 
             mapper.ParseBitmap(bmp);
 
-            List<Position_SOM> somPosition = new List<Position_SOM>();
+            List<Position_SOM> somPosition = new List<Position_SOM>();            
 
             int blackCount = 0;
 
@@ -258,7 +264,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -266,7 +273,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -275,7 +283,8 @@
 
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -283,7 +292,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -291,7 +301,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -299,7 +310,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -307,7 +319,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -315,7 +328,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -323,7 +337,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -331,7 +346,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -339,7 +355,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -347,7 +364,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -355,7 +373,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -363,7 +382,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -371,7 +391,8 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID));
+                                firingFOM.Add(bbmID);
                             }
                         }
                         break;
@@ -402,33 +423,61 @@
 
                 SDR_SOM sdr = GetSdrSomFromFOMs();
 
-                somBBM_L3A.Pool(sdr);                
+                somBBM_L3A.Pool(sdr);
 
-                var currentSensei = GetSenseiFromSOMLayer3A();
+                var firingSensei = new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle()));
 
-                var predictedSensei = GetPredictedSenseiFromSOMLayer3A();
-
-                HCAccessor.ProcessCurrentPatternForObject(CycleNum, currentSensei, predictedSensei);                
+                HCAccessor.ProcessCurrentPatternForObject(
+                   CycleNum,
+                   firingSensei);
 
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
+                // If any output from HC execute the location output if NOT then take the standar default output.                                
 
-                // If any output from HC execute the location output if NOT then take the standar default output.
-                var currentSensei = GetSenseiFromSOMLayer3A();
-
-                var predictedSensei = GetPredictedSenseiFromSOMLayer3A();
-
-                HCAccessor.ProcessCurrentPatternForObject(CycleNum, currentSensei, predictedSensei);
+                nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
+                    CycleNum,
+                    new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle())),
+                    new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetPredictedSDR())));
             }
 
             return nextMotorOutput;
         }
 
+        public void ProcesStep3()
+        {
+            mapper.clean();            
+        }
+
         public void DoneWithTraining()
         {
             HCAccessor.DoneWithTraining();
+        }       
+
+        private SDR_SOM GetSdrSomFromFOMs()
+        {
+            if(firingFOM.Count == 0)
+            {
+                int exception = 1;
+            }
+
+            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
+            List<Position_SOM> posList = new List<Position_SOM>();
+
+            foreach (var fomID in firingFOM)
+            {
+                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllFiringNeuronsThisCycle().ActiveBits, fomID));
+            }
+
+            if (posList != null || posList.Count != 0)
+            {
+                return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
+            }
+
+            throw new NullReferenceException(" FOM BBM returned empty position list");
         }
+       
 
         #region BIG MAN WORK
 
@@ -518,25 +567,6 @@
         }
 
         #endregion
-
-        private Sensation_Location GetSenseiFromSOMLayer3A()
-        {
-            Sensation_Location sensei = null;
-
-            
-            return sensei;
-        }
-
-        private Sensation_Location GetPredictedSenseiFromSOMLayer3A()
-        {
-            throw new NotImplementedException();
-        }
-
-        private SDR_SOM GetSdrSomFromFOMs()
-        {
-            throw new NotImplementedException();
-            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
-        }
 
         public void MoveCursorToSpecificPosition(int x, int y)
         {
