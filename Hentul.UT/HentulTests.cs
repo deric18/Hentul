@@ -3,7 +3,7 @@ namespace Hentul.UT
     using Hentul;    
     using System.Text;
 
-    public class ScreenGrabberTest
+    public class HentulTests
     {
         ScreenGrabber sg;
         Random rand;

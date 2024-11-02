@@ -425,6 +425,8 @@
 
                 somBBM_L3A.Pool(sdr);
 
+
+                //Wrong : location should be the location of the mouse pointer relative to the image and nnot just BBMID and that should be location.
                 var firingSensei = new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle()));
 
                 HCAccessor.ProcessCurrentPatternForObject(
