@@ -1,8 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;
-    using FirstOrderMemory.Models;
+    using Common;    
     using System.Xml;
 
     public class HippocampalComplex
@@ -10,9 +9,9 @@
 
         #region  VARIABLES & CONSTRUCTORS
 
-        public Dictionary<string, RecognisedObject>? Objects { get; private set; }
+        public Dictionary<string, RecognisedEntity>? Objects { get; private set; }
 
-        public UnrecognisedObject? CurrentObject { get; private set; }
+        public UnrecognisedEntity? CurrentObject { get; private set; }
 
         public Position CurrentPosition { get; private set; }
 
@@ -27,8 +26,8 @@
         public HippocampalComplex()
         {
 
-            Objects = new Dictionary<string, RecognisedObject>();
-            CurrentObject = new UnrecognisedObject();
+            Objects = new Dictionary<string, RecognisedEntity>();
+            CurrentObject = new UnrecognisedEntity();
             networkMode = NetworkMode.TRAINING;
             NumberOfITerationsToConfirmation = 6;
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
@@ -117,9 +116,9 @@
             ConvertUnrecognisedObjectToRecognisedObject();
         }
 
-        private List<RecognisedObject> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)
+        private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)
         {
-            List<RecognisedObject> setAsideList = new List<RecognisedObject>();
+            List<RecognisedEntity> setAsideList = new List<RecognisedEntity>();
 
             foreach (var obj in Objects.Values)
             {
@@ -144,7 +143,7 @@
             {
                 foreach (var sensei in kvp.Value.ObjectSnapshot)
                 {
-                   foreach(var item in sensei.Snapshot)
+                   foreach(var item in sensei.Sensation)
                     {
                         foreach( var pos in item.Value)
                         {
@@ -205,7 +204,7 @@
                 throw new InvalidOperationException("Cannot Transform empty object!");
             }
 
-            RecognisedObject newObject = new RecognisedObject(CurrentObject);
+            RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
         }
 
 

@@ -352,7 +352,7 @@ namespace FirstOrderMemoryUnitTest
             Assert.IsTrue(prefireSynapseStrength1 < postFiringSynapeStrength1);            
         }
 
-        [TestMethod]
+        [Test]
         public void TestWireCase3() 
         {
             // Case 3 : None Bursted , Some fired which were predicted, Some Did Not Burst But Fired which were NOT predicted 
@@ -382,7 +382,7 @@ namespace FirstOrderMemoryUnitTest
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestWireCase5() 
         {
             //Case 5 : Some Columns Bursted and Some of the Columns Fired Incorrectly.
@@ -394,12 +394,10 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [TestMethod]
+        [TestMethod, Ignore(" Prune gets called 50 cycles")]
         public void TestPrune()
         {
-            //Create a dummy 2 sided connection , Covnert the synapse to an active syanopse , Update CycleNum , Prune the synapse and check if the new synapse is removed.
-
-            Assert.Fail();
+            //Create a dummy 2 sided Inactive connection , Increment CycleNum , Check if Prune is called and check if the new synapse is removed.            
         }
 
         [TestMethod]
@@ -532,7 +530,7 @@ namespace FirstOrderMemoryUnitTest
 
 
         /// <summary>
-        /// Lite up a Temporal Line Ensure , the associated Normal Neurons deploarize and ensure there is no strength changes to there temporal partner.
+        /// Lite up a Temporal Line Ensure the associated Normal Neurons deploarize and ensure there is no strength changes to there temporal partner.
         /// </summary>
         [TestMethod]
         public void TestTemporalFiringUT()
@@ -612,7 +610,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.IsTrue(currentStrength > previousStrength);
 
-            Assert.AreEqual(NeuronState.FIRING, overlapNeuron.CurrentState);
+            Assert.AreEqual(NeuronState.SPIKING, overlapNeuron.CurrentState);
         }
 
         [TestMethod]
@@ -683,7 +681,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.IsTrue(currentStrength > previousStrength);
 
-            Assert.AreEqual(NeuronState.FIRING, apicalNeuron.CurrentState);
+            Assert.AreEqual(NeuronState.SPIKING, apicalNeuron.CurrentState);
         }
 
         [TestMethod]

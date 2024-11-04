@@ -408,7 +408,6 @@
             if (mapper.somPositions.Count != 0)
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
-
             #endregion                       
 
         }

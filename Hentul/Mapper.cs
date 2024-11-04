@@ -3,9 +3,7 @@
     using Common;
     using FirstOrderMemory.Models;    
     using System.Collections.Generic;
-    using System.Drawing;
-    using System.Reflection.Metadata.Ecma335;
-    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using System.Drawing;        
 
     internal class Mapper
     {
@@ -15,8 +13,7 @@
         public int NumPixelsPerBBM { get; private set; }
 
         public const int LENGTH = 10;
-        public const int WIDTH = 10;
-
+        public const int WIDTH = 10;        
         
         public Dictionary<int, Position[]> Mappings { get; private set; }
 
@@ -535,7 +532,13 @@
         }
         
 
-        // Chunk out % 100 ( typical BBM Size) and add the Position coordinates automatically.
+        /// <summary>
+        /// Generates a reference frame for the sensation and the context under which it is being sensed currently 
+        /// for instance if is large object which needs multiple parses in one screen then it will adapt a reference frame of th object with boundary cells, grid cells only for that object
+        /// if its a whole bunch of objects in one room then it will adapt a reference frame of the whole room and  then start marking location of every object in the room with locations within the rooms boundary cells. similary same for the house or external .
+        /// </summary>
+        /// <param name="sdr_SOM"></param>
+        /// <returns></returns>
         internal Dictionary<int, List<Position>> GetSenseLocDictFromSOMSDR(SDR_SOM sdr_SOM)
         {
             Dictionary<int, List<Position>> senseLocDict = null;
@@ -545,22 +548,8 @@
                 int exception = 1;
                 //throw new InvalidDataException("SDR SOM is empty for Layer 3B!!!");
             }
-
-            senseLocDict = new Dictionary<int, List<Position>>();
-
-            foreach(var pos in sdr_SOM.ActiveBits)
-            {
-                int bbmID = pos.X % 100;
-
-                if(senseLocDict.TryGetValue(bbmID, out List<Position> posList))
-                {
-                    posList.Add(pos);
-                }
-                else
-                {
-                    senseLocDict.Add(bbmID, new List<Position>() { pos } );
-                }
-            }
+            
+            
 
             return senseLocDict;
         }

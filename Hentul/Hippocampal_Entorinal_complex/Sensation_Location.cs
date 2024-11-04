@@ -1,26 +1,25 @@
-﻿using Common;
-
-namespace Hentul.Hippocampal_Entorinal_complex
+﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
+    using Common;
 
     public class Sensation_Location
-    {
-        public string ID { get; set; }
-        public Dictionary<int, List<Position>> Snapshot { get; set; }
+    {                
 
-        public Sensation_Location(ulong cycleNumber, Dictionary<int, List<Position>> snapshot)
+        public SortedDictionary<Position, KeyValuePair<int, List<Position>>> sensLoc { get; private set; }
+
+        public Sensation_Location(KeyValuePair<int, List<Position>> sensation, Position location)
         {
-            this.Snapshot = snapshot;
+                                   
         }
 
         public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetensei)
         {
-            int total = sourceSensei.Snapshot.Count;
+            int total = sourceSensei.Sensation.Count;
             int match = 0;
 
-            foreach (var item in sourceSensei.Snapshot)
+            foreach (var item in sourceSensei.Sensation)
             {
-                if (targetensei.Snapshot.TryGetValue(item.Key, out var s))
+                if (targetensei.Sensation.TryGetValue(item.Key, out var s))
                 {
                     foreach (var position in s)
                     {
@@ -32,12 +31,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 }
             }
 
-            return (int)((match * 100) / sourceSensei.Snapshot.Count);
+            return (int)((match * 100) / sourceSensei.Sensation.Count);
         }
 
         public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> sensei1ist)
         {
-            int total = sensei.Snapshot.Count;
+            int total = sensei.Sensation.Count;
             int maxMatch = 0;
 
             foreach (var item in sensei1ist)
@@ -98,9 +97,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public static bool CompareSenseiBool(Sensation_Location sourceSensei, Sensation_Location targetensei)
         {
 
-            foreach (var item in sourceSensei.Snapshot)
+            foreach (var item in sourceSensei.Sensation)
             {
-                if (targetensei.Snapshot.TryGetValue(item.Key, out var s))
+                if (targetensei.Sensation.TryGetValue(item.Key, out var s))
                 {
                     foreach (var position in s)
                     {

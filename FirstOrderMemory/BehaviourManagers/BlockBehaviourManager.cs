@@ -846,16 +846,25 @@
             }
 
 
-            //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Keepingg them in the list will only complicate next cycle process
+            //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Kepingg them in the list will only complicate next cycle process , the other thing is if any neuron is spiking , it should not be cleaned up
+            // since that will run the temporal dynamics of the system.
+
             foreach (var neuron in NeuronsFiringThisCycle)
             {                
-                //Cleanup voltages of all the Neurons that Fired this cycle
-                neuron.FlushVoltage();
+                //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
+                if( neuron.CurrentState != NeuronState.SPIKING)
+                    neuron.FlushVoltage();
             }
 
-            NeuronsFiringThisCycle.Clear();
+            if(Layer.Equals(LayerType.Layer_3B) || Layer.Equals(LayerType.Layer_3A))
+            {
 
-            ColumnsThatBurst.Clear();
+            }
+            else
+            {
+                NeuronsFiringThisCycle.Clear();
+                ColumnsThatBurst.Clear();
+            }                        
 
             //Every 50 Cycles Prune unused and under Firing Connections
             if (CycleNum >= 1000 && CycleNum % 500 == 0)
@@ -1394,6 +1403,19 @@
                 NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
+        }
+
+        public List<Position> GetAnySpikeTrainNeuronsThisCycle()
+        {
+            List<Position> spikingNeurons = new List<Position>();
+
+
+            if (IgnorePostCycleCleanUp)
+                NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL && n.CurrentState == NeuronState.SPIKING) spikingNeurons.Add(n.NeuronID); });
+            else
+                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL && n.CurrentState == NeuronState.SPIKING) spikingNeurons.Add(n.NeuronID); });
+
+            return spikingNeurons;
         }
 
         #endregion
