@@ -7,9 +7,20 @@
 
         public SortedDictionary<Position, KeyValuePair<int, List<Position>>> sensLoc { get; private set; }
 
-        public Sensation_Location(KeyValuePair<int, List<Position>> sensation, Position location)
+        public Sensation_Location()
         {
-                                   
+            sensLoc = new SortedDictionary<Position, KeyValuePair<int, List<Position>>>();
+        }
+
+        public bool AddNewSensationAtThisLocation(Position location, KeyValuePair<int, List<Position>> sensation)
+        {
+            if(!sensLoc.TryGetValue(location, out var kvp))
+            {
+                sensLoc.Add(location, sensation);
+                return true;
+            }
+
+            return false;
         }
 
         public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetensei)

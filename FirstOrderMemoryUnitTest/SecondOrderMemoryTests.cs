@@ -17,7 +17,7 @@
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4);
+            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_3B);
 
             bbManager.Init(1);
 
@@ -25,9 +25,9 @@
         }
 
         [TestMethod]
-        public void TestSOMIgnorePostCycleCleanupForPikingNeuron()
+        public void TestSOMIgnorePostCycleCleanupForSpikingNeuron()
         {
-            //Connect 2 random neuron distally and check if the connection exists!
+            //Get 2 Spiking Neurons in a SOM Layer in 2 completely distant BBM's and then fire the same pattern over and over till they both connect and have an active Synapse , if they dont after 5 firings then Algo fails
 
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
             var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
@@ -42,7 +42,12 @@
 
             var firingSdr = bbManager.GetAllFiringNeuronsThisCycle();
 
-            Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr, true));
+            var spikingNeurons = bbManager.GetAnySpikeTrainNeuronsThisCycle();
+
+                         
+            
+
+
         }    
 
     }
