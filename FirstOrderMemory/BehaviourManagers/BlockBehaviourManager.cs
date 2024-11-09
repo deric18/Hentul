@@ -545,6 +545,8 @@
 
                         PreviousBlockCycle = BlockCycle.DEPOLARIZATION;
 
+                        CurrentCycleState = BlockCycle.DEPOLARIZATION;
+
                         List<Neuron> temporalLineNeurons = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits as List<Position_SOM>);
 
                         if (temporalLineNeurons.Count != 0)
@@ -562,6 +564,8 @@
                 case iType.APICAL:
                     {
                         PreviousBlockCycle = BlockCycle.DEPOLARIZATION;
+
+                        CurrentCycleState = BlockCycle.DEPOLARIZATION;
 
                         IsCurrentApical = true;
 
@@ -665,7 +669,7 @@
 
                 foreach (var neuron in predictedNeuronsNotFired)
                 {
-                    if(neuron.NeuronID.ToString() == "5-2-1-N")
+                    if(neuron.NeuronID.ToString() == "55-2-1-N")
                     {
                         bool breakpoint = true;
                     }
@@ -1411,11 +1415,16 @@
         {
             List<Position> spikingNeurons = new List<Position>();
 
-
-            if (IgnorePostCycleCleanUp)
-                NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL && n.CurrentState == NeuronState.SPIKING) spikingNeurons.Add(n.NeuronID); });
-            else
-                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL && n.CurrentState == NeuronState.SPIKING) spikingNeurons.Add(n.NeuronID); });
+            foreach(var col in Columns)
+            {
+                foreach(var neuron in col.Neurons)
+                {
+                    if(neuron.CurrentState == NeuronState.SPIKING)
+                    {
+                        spikingNeurons.Add(neuron.NeuronID);
+                    }
+                }
+            }
 
             return spikingNeurons;
         }
@@ -1692,7 +1701,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (sourceNeuron.NeuronID.ToString().Equals("55-2-1-A") && targetNeuron.NeuronID.ToString().Equals("55-2-1-N"))
+            if (sourceNeuron.NeuronID.ToString().Equals("0-2-1-T") && targetNeuron.NeuronID.ToString().Equals("55-2-1-N"))
             {
                 bool breakpoint = false;
             }
