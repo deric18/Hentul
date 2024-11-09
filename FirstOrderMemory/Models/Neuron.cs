@@ -126,6 +126,11 @@ namespace FirstOrderMemory.Models
 
         public void ProcessVoltage(int voltage, LogMode logmode = LogMode.BurstOnly)
         {
+            if(NeuronID.ToString().Equals("55-2-1-N"))
+            {
+                bool breakpoiunt = true;
+            }
+
             Voltage += voltage;
 
             CurrentState = NeuronState.PREDICTED;
@@ -176,8 +181,6 @@ namespace FirstOrderMemory.Models
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
             AddNewAxonalConnection(key);
         }
-
-        public void PostCycleCleanup() => FlushVoltage();        
 
         internal void CleanUpContributersList()
         {
@@ -401,6 +404,11 @@ namespace FirstOrderMemory.Models
         internal void FlushVoltage()
         {
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
+            if (NeuronID.ToString().Equals("55-2-1-N") || NeuronID.ToString().Equals("755-2-1-N"))
+            {
+                bool breakpoiunt = true;
+            }
+
             Voltage = 0;
             CurrentState = NeuronState.RESTING;
         }

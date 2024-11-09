@@ -118,20 +118,22 @@
             return false;
         }
 
-
-        public static List<Neuron> GetNonOverlappingNeuronsFromSecondList(List<Neuron> firstList, List<Neuron> secondList)
+        /// <summary>
+        /// Returns a new list that contains all the neurons in the second list that are not present in first list.
+        /// </summary>                
+        public static List<Neuron> GetNonOverlappingNeuronsFromSecondList(List<Neuron> predictedList, List<Neuron> firingList)
         {
-            List<Neuron> toret = new List<Neuron>();
+            List<Neuron> toRet = new List<Neuron>();
 
-            foreach (var neuron in firstList)
+            foreach (var neuron in predictedList)
             {
-                if(!secondList.Contains(neuron))
+                if(firingList.Contains(neuron) == false && neuron.nType == NeuronType.NORMAL)
                 {
-                    toret.Add(neuron);
+                    toRet.Add(neuron);
                 }
             }
 
-            return toret;
+            return toRet;
         }
     }
 }

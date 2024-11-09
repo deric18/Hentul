@@ -470,10 +470,11 @@
 
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
-            // Todo : If there is a burst and there is any neuron in any of the columns the fired in the last cycle that has a connection to the bursting column. Column CheckPointing.
+            // Todo : Instead of depolarizing every single neuron for temporal and apical inputs , check if there is already a depolarized neuron and add voltage. // Helps with better cleanup
 
-            //BUG: Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
+            // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
+
             if (ignorePrecyclePrep == false)
                 PreCyclePrep();
 
@@ -658,12 +659,20 @@
             }
 
             //Clean Up stale voltage
-            if (ignorePostCycleCleanUp == false)
+            if (ignorePostCycleCleanUp == false && CurrentCycleState.Equals(BlockCycle.FIRING))
             {
-                var flushList = BBMUtils.GetNonOverlappingNeuronsFromSecondList(ConvertDictToList(PredictedNeuronsforThisCycle), NeuronsFiringThisCycle);
-                foreach (var neuron in flushList)
-                    neuron.FlushVoltage();
+                var predictedNeuronsNotFired = BBMUtils.GetNonOverlappingNeuronsFromSecondList(ConvertDictToList(PredictedNeuronsforThisCycle), NeuronsFiringThisCycle);       //Neurons that were predicted but did not fire.
 
+                foreach (var neuron in predictedNeuronsNotFired)
+                {
+                    if(neuron.NeuronID.ToString() == "5-2-1-N")
+                    {
+                        bool breakpoint = true;
+                    }
+
+                    if(neuron.CurrentState.Equals(NeuronState.SPIKING) == false)
+                        neuron.FlushVoltage();
+                }
             }
             else
             {
@@ -752,7 +761,7 @@
                                 {
                                     var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
 
-                                    if (neuronToCleanUp.Voltage != 0)
+                                    if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
                                         neuronToCleanUp.FlushVoltage();
                                     }
@@ -788,11 +797,11 @@
                                 {
                                     var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
 
-                                    if (neuronToCleanUp.Voltage != 0)
+                                    if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
                                         neuronToCleanUp.FlushVoltage();
                                     }
-                                    else
+                                    else if(neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
                                         Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
                                     }
@@ -850,21 +859,15 @@
             // since that will run the temporal dynamics of the system.
 
             foreach (var neuron in NeuronsFiringThisCycle)
-            {                
+            {
                 //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
                 if( neuron.CurrentState != NeuronState.SPIKING)
                     neuron.FlushVoltage();
             }
+            
+            NeuronsFiringThisCycle.Clear();
 
-            if(Layer.Equals(LayerType.Layer_3B) || Layer.Equals(LayerType.Layer_3A))
-            {
-
-            }
-            else
-            {
-                NeuronsFiringThisCycle.Clear();
-                ColumnsThatBurst.Clear();
-            }                        
+            ColumnsThatBurst.Clear();                             
 
             //Every 50 Cycles Prune unused and under Firing Connections
             if (CycleNum >= 1000 && CycleNum % 500 == 0)
@@ -876,7 +879,6 @@
             }
 
             IsBurstOnly = false;
-
         }
 
         private void Wire()
@@ -1424,17 +1426,6 @@
 
         #region PRIVATE METHODS
 
-        private void LTPApicalNeurons(Neuron ApicalNeuron, Neuron NormalNeuron)
-        {
-            if (!NormalNeuron.GetMyApicalPartner().Equals(ApicalNeuron.NeuronID.ToString()))
-            {
-                throw new InvalidOperationException("Cannot Boost connectivity of a non Apical Neuron to Normal Neuron");
-            }
-
-
-
-        }
-
         private void ValidateNetwork()
         {
             CycleNum++;
@@ -1490,8 +1481,7 @@
 
                 TemporalCycleCache.Add(CycleNum, TransformTemporalCoordinatesToSpatialCoordinates1(incomingPattern.ActiveBits));
             }
-
-            if (incomingPattern.InputPatternType.Equals(iType.APICAL))
+            else if (incomingPattern.InputPatternType.Equals(iType.APICAL))
             {
                 if (ApicalCycleCache.Count != 0)
                 {
@@ -1702,7 +1692,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (sourceNeuron.NeuronID.ToString().Equals("0-1-2-T") && targetNeuron.NeuronID.ToString().Equals("5-2-1-N"))
+            if (sourceNeuron.NeuronID.ToString().Equals("55-2-1-A") && targetNeuron.NeuronID.ToString().Equals("55-2-1-N"))
             {
                 bool breakpoint = false;
             }
@@ -1939,7 +1929,6 @@
             }
 
             return temporalNeurons;
-
         }
 
         private List<Position_SOM> TransformTemporalCoordinatesToSpatialCoordinates1(List<Position_SOM> activeBits)
@@ -2271,7 +2260,6 @@
             FOMSCHEMA,
             SOMSCHEMA,
             INVALID
-
         }
 
         public enum BlockCycle

@@ -575,8 +575,8 @@ namespace FirstOrderMemoryUnitTest
         {
             // Fire Temporal Pattern then Fire Spatial Pattern and see if the temporal wiring took place.
 
-            SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
-            SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            SDR_SOM temporalInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
+            SDR_SOM spatialInputPattern = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
 
             Position_SOM position = spatialInputPattern.ActiveBits[0];
 
@@ -687,8 +687,8 @@ namespace FirstOrderMemoryUnitTest
         [TestMethod]
         public void TestTemporalnApicalnSpatialFire()
         {            
-            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
-            var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL);
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
+            var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL, bbManager.Layer);
             var spatialSdr = TestUtils.GetSpatialAndTemporalOverlapSDR(apicalSdr, temporalSdr);
 
 
@@ -743,8 +743,8 @@ namespace FirstOrderMemoryUnitTest
         {
             //After Temporal , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
 
-            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);            
-            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
 
             bbManager.Fire(temporalSdr);
 
@@ -815,9 +815,9 @@ namespace FirstOrderMemoryUnitTest
         {
             //After Temporal && Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
 
-            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
-            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
 
             bbManager.Fire(temporalSdr);
 
@@ -871,9 +871,9 @@ namespace FirstOrderMemoryUnitTest
         {
             //After Temporal , Apical ,& Spatial Fire , Check for some Depolarized neuron if it gets cleaned up after one cycle
 
-            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL);
+            var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
-            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
             var depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
             bbManager.Fire(temporalSdr);
@@ -902,11 +902,12 @@ namespace FirstOrderMemoryUnitTest
             {
                 foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
                 {
-                    if (neuron.Voltage != 0)
+                    if (neuron.Voltage != 0 && neuron.CurrentState == NeuronState.RESTING)
                     {
                         int breakpoint = 1;
                     }
                     Assert.AreEqual(0, neuron.Voltage);
+                    Assert.AreEqual(NeuronState.RESTING, neuron.CurrentState);
                 }
             }
 
@@ -916,6 +917,7 @@ namespace FirstOrderMemoryUnitTest
                 {
                     Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
                     Assert.AreEqual(0, neuron.Voltage);
+                    Assert.AreEqual(NeuronState.RESTING, neuron.CurrentState);
                 }
             }
 
@@ -925,6 +927,7 @@ namespace FirstOrderMemoryUnitTest
                 {
                     Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
                     Assert.AreEqual(0, neuron.Voltage);
+                    Assert.AreEqual(NeuronState.RESTING, neuron.CurrentState);
                 }
             }
 
@@ -932,8 +935,10 @@ namespace FirstOrderMemoryUnitTest
 
             if(depolarizedNeuronList1.Count != 0)
             {
-                bbManager.Fire(GetSDRExcludingThisList(depolarizedNeuronList1));
-
+                var sdr = GetSDRExcludingThisList(depolarizedNeuronList1);
+                
+                bbManager.Fire(sdr);
+                
                 var depolarizedNeuronList2 = FindDepolarizedNeuronList();
 
                 foreach (var neuronFromList1 in depolarizedNeuronList1)

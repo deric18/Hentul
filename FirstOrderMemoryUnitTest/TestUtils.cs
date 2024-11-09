@@ -4,21 +4,79 @@
     using FirstOrderMemory.Models;
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models.Encoders;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
     internal static class TestUtils
     {
-        internal static Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
-        {
-            return new Position_SOM(spatial.X, spatial.Y, temporal.Y);
+
+        internal static SDR_SOM AddOffsetToSDR(SDR_SOM sdr, int offset)
+        {            
+            List<Position_SOM> posList = new List<Position_SOM>();
+
+            foreach (var pos in sdr.ActiveBits)
+            {
+                if (pos.X + (offset * 100) > 1250)
+                {
+                    throw new InvalidOperationException("Added offset could not exceed network Layer Length!");
+                }
+                
+                posList.Add(new Position_SOM(pos.X + offset * 100, pos.Y , 0));
+            }
+
+            return new SDR_SOM(sdr.Length, sdr.Breadth, posList, sdr.InputPatternType);
         }
 
-        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position_SOM pos) =>        
-            bbManager.Columns[pos.Z, pos.X].Neurons[pos.Y];        
-        
+
+        internal static SDR_SOM GetEmptySpatialPattern(List<Position_SOM> lastFirsingCells, int length, int breadth, iType iType, LayerType layerType) =>                    
+            new SDR_SOM(length, breadth, GetExclusivePositionList(lastFirsingCells, layerType), iType);        
+
+
+        private static List<Position_SOM> GetExclusivePositionList(List<Position_SOM> lastFiringCells, LayerType layerType)
+        {
+            List<Position_SOM> exlcudedPosList = new List<Position_SOM>();
+            Random rand = new Random();
+            List<int> excludeX = new List<int>();
+            List<int> excludeY = new List<int>();
+            List<int> excludeZ = new List<int>();
+            int maxX = 1000, maxY = 10, maxZ = 4;
+
+            if (layerType != LayerType.Layer_4)
+            {
+                lastFiringCells.ForEach(pos =>
+                {
+                    excludeX.Add(pos.X);
+                    excludeY.Add(pos.Y);
+                    excludeZ.Add(pos.Z);
+                });
+            }
+
+            int x = 0, y = 0;
+
+            while (exlcudedPosList.Count != 1)
+            {
+                x = rand.Next(0, maxX); y = rand.Next(0, maxY);
+
+                if(excludeX.Contains(x) == false && excludeY.Contains(y) == false)
+                {
+                    exlcudedPosList.Add(new Position_SOM(x, y));
+                }                
+            }
+
+            return exlcudedPosList;
+        }
+
+        internal static Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
+        {
+            return new Position_SOM(spatial.X, temporal.X, temporal.Y);
+        }
+
+        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position_SOM pos) =>
+            bbManager.Columns[pos.Z, pos.X].Neurons[pos.Y];
+
 
         internal static SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType) =>
         new SDR_SOM(10, 10, posList, inputPatternType);
-                
+
 
         internal static Position_SOM GenerateRandomPosition()
         {
@@ -30,7 +88,7 @@
 
         internal static SDR_SOM GenerateTemporalSDRforDepolarization()
         {
-            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType.TEMPORAL);            
+            return new SDR_SOM(10, 10, GeneratePositionsForPredictiveTest1(), iType.TEMPORAL);
         }
 
 
@@ -50,9 +108,9 @@
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
-            for(int i = 0; i < temporalSdr.ActiveBits.Count; i++)
+            for (int i = 0; i < temporalSdr.ActiveBits.Count; i++)
             {
-                activeBits.Add(GetSpatialAndTemporalOverlap(temporalSdr.ActiveBits[i], apicalSdr.ActiveBits[i]));
+                activeBits.Add(new Position_SOM(apicalSdr.ActiveBits[i].X, temporalSdr.ActiveBits[i].X, temporalSdr.ActiveBits[i].Z));
             }
 
             return new SDR_SOM(apicalSdr.Length, apicalSdr.Breadth, activeBits);
@@ -65,7 +123,7 @@
 
             positions.Add(new Position_SOM(3, 2, 1));
             positions.Add(new Position_SOM(5, 5, 0));
-            positions.Add(new Position_SOM(7, 8, 2)); 
+            positions.Add(new Position_SOM(7, 8, 2));
             positions.Add(new Position_SOM(8, 3, 3));
 
             return positions;
@@ -99,38 +157,68 @@
             return new SDR_SOM(10, 10, posList, inputPatternType);
         }
 
-        internal static SDR_SOM GenerateSpecificSDRForTemporalWiring(iType inputPatternType)
+        internal static SDR_SOM GenerateSpecificSDRForTemporalWiring(iType inputPatternType, LayerType layerType)
         {
 
             //For Overlapping Temporal and Spatial Patterns , All that has to be done is to match the y-Coordiante.
 
-            Random rand = new Random();
-            int numPos = rand.Next(0, 10);
-
-            List<Position_SOM> spatialPosList = new List<Position_SOM>()
+            if (layerType == LayerType.Layer_4)
             {
-                new Position_SOM(5,2, 1),
-                new Position_SOM(7,1, 3),
-                new Position_SOM(8,2, 3),
-                new Position_SOM(4,0, 0)
-            };
+                Random rand = new Random();                
 
-            List<Position_SOM> temporalPosList = new List<Position_SOM>()
-            {
-                new Position_SOM(2, 1),
-                new Position_SOM(1, 3),
-                new Position_SOM(2, 3),
-                new Position_SOM(0, 0)
-            };
+                List<Position_SOM> spatialPosList = new List<Position_SOM>()
+                {
+                    new Position_SOM(5, 2, 1),
+                    new Position_SOM(7, 1, 3),
+                    new Position_SOM(8, 2, 3),
+                    new Position_SOM(4, 0, 0)
+                };
 
+                List<Position_SOM> temporalPosList = new List<Position_SOM>()
+                {
+                    new Position_SOM(2, 1),
+                    new Position_SOM(1, 3),
+                    new Position_SOM(2, 3),
+                    new Position_SOM(0, 0)
+                };
 
-            if (inputPatternType == iType.TEMPORAL)
-            {
-                return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
+                if (inputPatternType == iType.TEMPORAL)
+                {
+                    return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
+                }
+                else
+                {
+                    return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
+                }
             }
             else
             {
-                return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
+                Random rand = new Random();                
+
+                List<Position_SOM> spatialPosList = new List<Position_SOM>()
+                {
+                    new Position_SOM(55, 2, 1),
+                    new Position_SOM(21, 1, 3),
+                    new Position_SOM(43, 8, 3),
+                    new Position_SOM(51, 9, 0)
+                };
+
+                List<Position_SOM> temporalPosList = new List<Position_SOM>()
+                {
+                    new Position_SOM(2, 1),
+                    new Position_SOM(1, 3),
+                    new Position_SOM(8, 3),
+                    new Position_SOM(9, 0)
+                };
+
+                if (inputPatternType == iType.TEMPORAL)
+                {
+                    return new SDR_SOM(10, 4, temporalPosList, inputPatternType);
+                }
+                else
+                {
+                    return new SDR_SOM(1250, 10, spatialPosList, inputPatternType);
+                }
             }
         }
 
@@ -141,7 +229,7 @@
             encoder.Encode((byte)ch);
 
             return (SDR_SOM)encoder.GetSparseSDR();
-        }                     
+        }
 
         internal static List<SDR_SOM> GenerateFixedRandomSDR_SOMs(int iterations, int minValue, int maxValue)
         {
@@ -154,7 +242,7 @@
             List<int> Zcordinates = GenerateUnqiueRandomNumbers(subIterations, minValue, maxValue);
             int i = 0, j = 0;
 
-            while(i < iterations)
+            while (i < iterations)
             {
                 while (j < subIterations)
                 {
@@ -169,7 +257,7 @@
 
         }
 
-        internal static List<SDR_SOM> GetSpecificPatternAmoungNoise(int iterations, int patternSize, int noiseSize, int minValue , int maxValue)
+        internal static List<SDR_SOM> GetSpecificPatternAmoungNoise(int iterations, int patternSize, int noiseSize, int minValue, int maxValue)
         {
             List<SDR_SOM> toReturn = new List<SDR_SOM>();
 
@@ -180,22 +268,22 @@
             int NumColumns = 10;
 
 
-            SDR_SOM pattern1 = new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM> () { new Position_SOM( 5, 5, 5) }, iType.SPATIAL);
+            SDR_SOM pattern1 = new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM>() { new Position_SOM(5, 5, 5) }, iType.SPATIAL);
             SDR_SOM pattern2 = new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM>() { new Position_SOM(7, 7, 7) }, iType.SPATIAL);
 
 
-            for (int i = 0; i < iterations; i++) 
+            for (int i = 0; i < iterations; i++)
             {
                 List<SDR_SOM> toAdd = new List<SDR_SOM>();
-                    
 
-                for(int j = 0; j < noiseSize; j++)
+
+                for (int j = 0; j < noiseSize; j++)
                 {
                     try
                     {
                         toAdd.Add(new SDR_SOM(NumColumns, NumColumns, new List<Position_SOM>() { new Position_SOM(Xcordinates[j], Ycordinates[j], Zcordinates[j]) }));
                     }
-                    catch(Exception e) 
+                    catch (Exception e)
                     {
                         int breakpoint = 1;
                     }
@@ -207,22 +295,22 @@
 
 
             return toReturn;
-        }      
+        }
 
         private static List<int> GenerateUnqiueRandomNumbers(int num_nums, int minValue, int maxValue)
         {
             List<int> toReturn = new List<int>();
             Random rand = new Random();
             int num = 0;
-            bool b = false; 
+            bool b = false;
 
-            while(toReturn.Count <= num_nums) 
+            while (toReturn.Count <= num_nums)
             {
-                num = rand.Next(minValue, maxValue);                
+                num = rand.Next(minValue, maxValue);
 
                 b = toReturn.Contains(num);
 
-                if(b == false)
+                if (b == false)
                 {
                     toReturn.Add(num);
                 }
@@ -240,6 +328,6 @@
             }
 
             return toReturn;
-        }        
+        }
     }
 }

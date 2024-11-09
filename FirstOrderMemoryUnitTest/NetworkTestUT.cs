@@ -22,22 +22,22 @@
             bbManager.Init(1);            
         }
 
-        [TestMethod]
+        [TestMethod, Ignore("")]
         public void TestHowManyPatternsCanOneFOMBlockRemember()
         {
-            Assert.Fail();
+            throw new NotImplementedException();
         }
 
-        [TestMethod]
+        [TestMethod, Ignore("")]
         public void TestHowManyNeuronsCanWeDeleteBEforeNetworkForgets()
         {
-            Assert.Fail();
+            throw new NotImplementedException();
         }
 
-        [TestMethod]
+        [TestMethod, Ignore("")]
         public void TestHowMuchNoiseCanBeIntroduced()
         {
-            Assert.Fail();
+            throw new NotImplementedException();
         }
 
 
