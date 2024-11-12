@@ -5,6 +5,7 @@
     using System.Xml;
     using System.Linq;
     using System;
+    using System.ComponentModel.Design;
 
     public class BlockBehaviourManager
     {
@@ -77,10 +78,12 @@
 
         private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
-        public BlockCycle PreviousBlockCycle { get; private set; }
+        public iType PreviousiType { get; private set; }
 
-        public BlockCycle CurrentCycleState { get; private set; }
+        public iType CurrentiType { get; private set; }
+
         public bool IsCurrentTemporal { get; private set; }
+
         public bool IsCurrentApical { get; private set; }
 
         private SchemaType schemToLoad;
@@ -144,9 +147,9 @@
 
             this.Z = Z;
 
-            PreviousBlockCycle = BlockCycle.INITIALIZATION;
+            PreviousiType = iType.NONE;
 
-            this.CurrentCycleState = BlockCycle.INITIALIZATION;
+            CurrentiType = iType.NONE;
 
             IsCurrentApical = false;
 
@@ -469,9 +472,7 @@
 
 
         public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
-        {
-            // Todo : Instead of depolarizing every single neuron for temporal and apical inputs , check if there is already a depolarized neuron and add voltage. // Helps with better cleanup
-
+        {            
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 
@@ -535,17 +536,15 @@
                             predictedNeuronPositions = null;
                         }
 
-                        CurrentCycleState = BlockCycle.FIRING;
+                        CurrentiType = incomingPattern.InputPatternType;
 
                         break;
                     }
                 case iType.TEMPORAL:
                     {
-                        IsCurrentTemporal = true;
+                        IsCurrentTemporal = true;                        
 
-                        PreviousBlockCycle = BlockCycle.DEPOLARIZATION;
-
-                        CurrentCycleState = BlockCycle.DEPOLARIZATION;
+                        CurrentiType = incomingPattern.InputPatternType;
 
                         List<Neuron> temporalLineNeurons = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits as List<Position_SOM>);
 
@@ -562,10 +561,8 @@
                         break;
                     }
                 case iType.APICAL:
-                    {
-                        PreviousBlockCycle = BlockCycle.DEPOLARIZATION;
-
-                        CurrentCycleState = BlockCycle.DEPOLARIZATION;
+                    {                        
+                        CurrentiType = incomingPattern.InputPatternType;
 
                         IsCurrentApical = true;
 
@@ -610,12 +607,12 @@
 
             Fire();
 
-            if (CurrentCycleState == BlockCycle.FIRING || IsCurrentApical || IsCurrentTemporal)
+            if (CurrentiType == iType.SPATIAL || IsCurrentApical || IsCurrentTemporal)
             {
                 Wire();
             }
 
-            PrepNetworkForNextCycle(ignorePostCycleCleanUp);
+            PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
 
             if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup();
@@ -633,7 +630,7 @@
 
                 //Console.WriteLine(" Firing Neuron : " + neuron.NeuronID.ToString());
 
-                neuron.Fire();
+                neuron.Fire(CycleNum, Mode, logfilename);
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)
                 {
@@ -642,7 +639,7 @@
             }
         }
 
-        private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp)
+        private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type)
         {
             PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count * 100 / (X * Y * Z));
 
@@ -650,33 +647,29 @@
             {
                 Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
                 WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
-            }
+            }            
 
-            NeuronsFiringLastCycle.Clear();
-
-            foreach (var neuron in NeuronsFiringThisCycle)
+            if (CurrentiType == iType.SPATIAL)      
             {
-                //Prep for Next cycle Prediction
-                if (neuron.nType.Equals(NeuronType.NORMAL))
-                    NeuronsFiringLastCycle.Add(neuron);
+                NeuronsFiringLastCycle.Clear();
 
+                foreach (var neuron in NeuronsFiringThisCycle)
+                {
+                    //Prep for Next cycle Prediction
+                    if (neuron.nType.Equals(NeuronType.NORMAL))
+                        NeuronsFiringLastCycle.Add(neuron);
+
+                }
+                
             }
 
             //Clean Up stale voltage
-            if (ignorePostCycleCleanUp == false && CurrentCycleState.Equals(BlockCycle.FIRING))
+            if (ignorePostCycleCleanUp == false && CurrentiType.Equals(iType.SPATIAL))
             {
-                var predictedNeuronsNotFired = BBMUtils.GetNonOverlappingNeuronsFromSecondList(ConvertDictToList(PredictedNeuronsforThisCycle), NeuronsFiringThisCycle);       //Neurons that were predicted but did not fire.
-
-                foreach (var neuron in predictedNeuronsNotFired)
+                foreach(var column in Columns)
                 {
-                    if(neuron.NeuronID.ToString() == "55-2-1-N")
-                    {
-                        bool breakpoint = true;
-                    }
-
-                    if(neuron.CurrentState.Equals(NeuronState.SPIKING) == false)
-                        neuron.FlushVoltage();
-                }
+                    column.PostCycleCleanup();
+                }                                
             }
             else
             {
@@ -707,6 +700,8 @@
             }
 
             PredictedNeuronsForNextCycle.Clear();
+
+            PreviousiType = type;
         }
 
         private List<Neuron> ConvertDictToList(Dictionary<string, List<Neuron>> predictedNeuronsforLastCycle)
@@ -723,24 +718,9 @@
 
         //Selective Clean Up Logic , Should never perform Full Clean up.
         private void PostCycleCleanup()
-        {            
-
-            // Check for Stale Votlage Clean Up 
-            foreach (var neuronList in PredictedNeuronsforThisCycle)
-            {
-
-                var neuron = GetNeuronFromString(neuronList.Key);
-
-                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
-                {
-                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                    WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                    //Thread.Sleep(3000);
-                }
-            }
-
+        {                       
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
-            if (PreviousBlockCycle.Equals(BlockCycle.DEPOLARIZATION) && CurrentCycleState.Equals(BlockCycle.FIRING))
+            if ( ( PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL) ) && CurrentiType.Equals(iType.SPATIAL))
             {
                 if (TemporalCycleCache.Count == 1)
                 {
@@ -821,8 +801,7 @@
                     Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
-
-                PreviousBlockCycle = BlockCycle.POLOARIZED;
+                
             }
 
 
@@ -861,14 +840,27 @@
 
             //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Kepingg them in the list will only complicate next cycle process , the other thing is if any neuron is spiking , it should not be cleaned up
             // since that will run the temporal dynamics of the system.
-
-            foreach (var neuron in NeuronsFiringThisCycle)
+            if (CurrentiType == iType.SPATIAL)
             {
-                //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
-                if( neuron.CurrentState != NeuronState.SPIKING)
-                    neuron.FlushVoltage();
+                foreach (var neuron in NeuronsFiringThisCycle)
+                {
+                    //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
+                    if (neuron.CurrentState != NeuronState.SPIKING)
+                        neuron.FlushVoltage();
+                }
+                
+            }            
+
+            //Case 4: Clean Up Stale Spiking Neurons
+            foreach (var neuron in GetSpikingNeuronList())
+            {                
+                if (neuron.CurrentState == NeuronState.SPIKING)
+                {
+                    neuron.CheckSpikingFlush(CycleNum);
+                }
             }
-            
+
+
             NeuronsFiringThisCycle.Clear();
 
             ColumnsThatBurst.Clear();                             
@@ -877,22 +869,34 @@
             if (CycleNum >= 1000 && CycleNum % 500 == 0)
             {
                 Prune();
-
                 TotalBurstFire = 0;
                 TotalPredictionFires = 0;
             }
 
             IsBurstOnly = false;
+
+
+            // Check for Stale Votlage Clean Up 
+            foreach (var neuronList in PredictedNeuronsforThisCycle)
+            {
+
+                var neuron = GetNeuronFromString(neuronList.Key);
+
+                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
+                {
+                    Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                    //Thread.Sleep(3000);
+                }
+            }
         }
 
         private void Wire()
         {
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
-            if (CurrentCycleState.Equals(BlockCycle.FIRING))
-            {
-
-                CurrentCycleState = BlockCycle.FIRING;
+            if (CurrentiType.Equals(iType.SPATIAL))
+            {                
 
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
@@ -928,20 +932,16 @@
                         contributingList = new List<Neuron>();
 
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            if (contributingList?.Count == 0)
-                            {
-                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                            }
-
+                        {                            
                             foreach (var contributingNeuron in contributingList)
                             {
-                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
                                 PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
                     }
+
+                    BuildSequenceMemory();
                 }
                 else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
                 {
@@ -991,7 +991,7 @@
 
                     //Bug : Boosting should not juice the same neurons!
 
-                    //Todo : Need to revisti this stratergy of connecting all the boosted neurons.
+                    //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
 
                     //Boost the Bursting neurons
                     foreach (var position in ColumnsThatBurst)
@@ -1012,6 +1012,7 @@
                 else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
                 {
                     // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
+                    
                     // Strengthen the ones which fired correctly 
                     List<Neuron> contributingList;
 
@@ -1041,15 +1042,8 @@
                         }
                     }
 
-                    // Fired But Did Not Get Predicted
-                    foreach (var axonalneuron in NeuronsFiringLastCycle)
-                    {
-                        foreach (var dendronalNeuron in NeuronsFiringThisCycle)
-                        {
-                            if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
-                                ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                        }
-                    }
+                    //For the ones that were not predicted, perform sequence memory.
+                    BuildSequenceMemory();
                 }
                 else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
@@ -1154,11 +1148,10 @@
                 {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
-
             }
             else if (IsCurrentTemporal)
             {
-                CurrentCycleState = BlockCycle.DEPOLARIZATION;
+                CurrentiType = iType.TEMPORAL;
 
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
                 foreach (var neuron in NeuronsFiringThisCycle)
@@ -1179,7 +1172,7 @@
             {
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
 
-                CurrentCycleState = BlockCycle.DEPOLARIZATION;
+                CurrentiType = iType.APICAL;
 
                 foreach (var neuron in NeuronsFiringThisCycle)
                 {
@@ -1235,7 +1228,7 @@
             return true;
         }
 
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType)
+        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
         {
             // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
             //if (cType == ConnectionType.DISTALDENDRITICNEURON)
@@ -1247,11 +1240,12 @@
             //    }
             //}
 
+            //Check & Bounds
             if (AxonalNeuron == null || DendriticNeuron == null)
             {
                 return false;
             }
-            else if (CurrentCycleState != BlockCycle.INITIALIZATION && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
+            else if (CurrentiType != iType.NONE && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
             {
                 // Post Init Temporal / Apical Neurons should not connect with anybody else.
                 throw new InvalidOperationException("ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
@@ -1289,12 +1283,14 @@
                 }
             }
 
+
+
             //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
-            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad);
+            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
 
             if (IsAxonalConnectionSuccesful)
             {
-                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType);
+                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType, IsActive);
 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
                 {
@@ -1411,6 +1407,24 @@
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }
 
+        private List<Neuron> GetSpikingNeuronList()
+        {
+            List<Neuron> spikingNeuronList = new List<Neuron>();
+
+            foreach (var col in Columns)
+            {
+                foreach (var neuron in col.Neurons)
+                {
+                    if (neuron.CurrentState == NeuronState.SPIKING)
+                    {
+                        spikingNeuronList.Add(neuron);
+                    }
+                }
+            }
+
+            return spikingNeuronList;
+        }
+
         public List<Position> GetAnySpikeTrainNeuronsThisCycle()
         {
             List<Position> spikingNeurons = new List<Position>();
@@ -1435,10 +1449,21 @@
 
         #region PRIVATE METHODS
 
+        private void BuildSequenceMemory()
+        {
+            foreach (var axonalneuron in NeuronsFiringLastCycle)
+            {
+                foreach (var dendronalNeuron in NeuronsFiringThisCycle)
+                {
+                    if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
+                        ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                }
+            }
+        }
+
         private void ValidateNetwork()
         {
-            CycleNum++;
-
+            
             if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
             {
                 Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many Predictions for the size of the network ");
@@ -1470,6 +1495,14 @@
                 Console.WriteLine("EXCEPTION :: Incoming Pattern cannot be empty");
                 throw new InvalidOperationException("Incoming Pattern cannot be empty");
             }
+
+            if ( (PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
+            {
+                throw new InvalidDataException(" Input Validated Failed :: Network cannot proces simulateneous same pattern types");
+            }
+
+            if(incomingPattern.InputPatternType.Equals(iType.SPATIAL))
+                CycleNum++;
 
             if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
             {
@@ -1679,7 +1712,7 @@
                 throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
-            if (CurrentCycleState.Equals(BlockCycle.CLEANUP))
+            if (CurrentiType.Equals(BlockCycle.CLEANUP))
             {
                 for (int i = 0; i < X; i++)
                     for (int j = 0; j < Y; j++)
@@ -1701,7 +1734,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (sourceNeuron.NeuronID.ToString().Equals("0-2-1-T") && targetNeuron.NeuronID.ToString().Equals("55-2-1-N"))
+            if (sourceNeuron.NeuronID.ToString().Equals("55-2-1-N") && targetNeuron.NeuronID.ToString().Equals("314-6-2-N"))
             {
                 bool breakpoint = false;
             }
@@ -1716,20 +1749,20 @@
                     if (cType.Equals(ConnectionType.TEMPRORAL))
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'T');
-                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, Mode);
+                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
                     }
                     else if (cType.Equals(ConnectionType.APICAL))
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'A');
-                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, Mode);
+                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
                     }
                 }
                 else
                 {
                     if (cType.Equals(ConnectionType.TEMPRORAL))
-                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, Mode);
+                        targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
                     else if (cType.Equals(ConnectionType.APICAL))
-                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, Mode);
+                        targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
 
                     #region Removed Code [Potential Bug OR Feature
                     //if (cType.Equals(ConnectionType.TEMPRORAL))
@@ -1748,13 +1781,13 @@
                     switch (synapse.cType)
                     {
                         case ConnectionType.DISTALDENDRITICNEURON:
-                            targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, Mode);
+                            targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
                             break;
                         case ConnectionType.PROXIMALDENDRITICNEURON:
-                            targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE, Mode);
+                            targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
                             break;
                         case ConnectionType.NMDATONEURON:
-                            targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, Mode);
+                            targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, CycleNum, Mode);
                             break;
                     }
                 }
@@ -1765,7 +1798,7 @@
             }
             else if (cType.Equals(ConnectionType.AXONTONEURON))
             {
-                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, Mode);
+                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
             }
             else
             {
@@ -1798,12 +1831,12 @@
 
         private void StrengthenTemporalConnection(Neuron neuron)
         {
-            PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyTemporalPartner()), neuron);
+            PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyTemporalPartner1()), neuron);
         }
 
         private void StrengthenApicalConnection(Neuron neuron)
         {
-            PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyApicalPartner()), neuron);
+            PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyApicalPartner1()), neuron);
         }
 
         public void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron)

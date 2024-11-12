@@ -19,13 +19,7 @@ namespace FirstOrderMemory.Models
             }            
             Init = 0;
         }
-
-
-
-        public void BurstFire()
-        {
-            Neurons.ForEach(x => x.Fire());
-        }
+        
 
         /// <summary>
         /// Fires the predicted neurons in the column , if there are no predicted neurons then it Bursts.
@@ -95,9 +89,14 @@ namespace FirstOrderMemory.Models
             return false;
         }
 
-        internal void PostCycleCleanup()
+        internal void PostCycleCleanup(bool cleanUpspiking = false)
         {
-            var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
+            var firingNeurons = Neurons.Where( n => n.CurrentState != NeuronState.RESTING ).ToList();
+
+            if(cleanUpspiking)
+            {
+                firingNeurons = firingNeurons.Where( n => n.CurrentState != NeuronState.SPIKING ).ToList();
+            }
 
             foreach (var neuron in firingNeurons)
             {

@@ -74,7 +74,7 @@
             bbManager.Columns[pos.Z, pos.X].Neurons[pos.Y];
 
 
-        internal static SDR_SOM GenerateRandomSDRFromPosition(List<Position_SOM> posList, iType inputPatternType) =>
+        internal static SDR_SOM ConvertPositionToSDR(List<Position_SOM> posList, iType inputPatternType) =>
         new SDR_SOM(10, 10, posList, inputPatternType);
 
 
@@ -328,6 +328,17 @@
             }
 
             return toReturn;
+        }
+
+        internal static SDR_SOM ConvertSpatialToTemporal(List<Position_SOM> possom, LayerType layer)
+        {
+            List<Position_SOM> posList = new List<Position_SOM>();
+            
+                foreach(var item in possom) {
+                    posList.Add(new Position_SOM(item.Y, item.Z));
+                }
+
+            return new SDR_SOM(10, 4, posList, iType.TEMPORAL);
         }
     }
 }
