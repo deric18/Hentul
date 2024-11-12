@@ -669,7 +669,7 @@
                 foreach(var column in Columns)
                 {
                     column.PostCycleCleanup();
-                }                                
+                }
             }
             else
             {
@@ -677,13 +677,11 @@
                 WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
             }
 
-
             Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
             PredictedNeuronsforLastCycle.Clear();
 
             foreach( var kvp in PredictedNeuronsforThisCycle )            
-                PredictedNeuronsforLastCycle.Add(kvp.Key, kvp.Value);
-            
+                PredictedNeuronsforLastCycle.Add(kvp.Key, kvp.Value);            
 
             PredictedNeuronsforThisCycle.Clear();
 
@@ -848,7 +846,21 @@
                     if (neuron.CurrentState != NeuronState.SPIKING)
                         neuron.FlushVoltage();
                 }
-                
+
+                // Alternative approach bit more sophisticated but buggy.
+                //foreach (var neuronList in PredictedNeuronsforThisCycle)
+                //{
+
+                //    var neuron = GetNeuronFromString(neuronList.Key);
+
+                //    if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
+                //    {
+                //        Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                //        WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                //        //Thread.Sleep(3000);
+                //    }
+                //}
+
             }            
 
             //Case 4: Clean Up Stale Spiking Neurons
@@ -1002,7 +1014,10 @@
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
                                 {
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                    if ( ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                                    {
+                                        throw new InvalidOperationException("Unable to connect neurons!");
+                                    }
                                 }
                             }
                         }
@@ -1121,7 +1136,10 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                    if(ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                                    {
+                                        throw new InvalidOperationException("Unable to connect two neurons!");
+                                    }
                             }
                         }
                     }
@@ -1137,7 +1155,10 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                                    if ( ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                                    {
+                                        throw new InvalidOperationException("Unable to Connect two neurons!");
+                                    }
                             }
                         }
                     }
@@ -1425,9 +1446,9 @@
             return spikingNeuronList;
         }
 
-        public List<Position> GetAnySpikeTrainNeuronsThisCycle()
+        public List<Position_SOM> GetAnySpikeTrainNeuronsThisCycle()
         {
-            List<Position> spikingNeurons = new List<Position>();
+            List<Position_SOM> spikingNeurons = new List<Position_SOM>();
 
             foreach(var col in Columns)
             {
@@ -1456,7 +1477,10 @@
                 foreach (var dendronalNeuron in NeuronsFiringThisCycle)
                 {
                     if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
-                        ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON);
+                        if(ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                        {
+                            throw new InvalidOperationException("Could Not connect two neuron!");
+                        }
                 }
             }
         }
@@ -1952,7 +1976,10 @@
 
                     for (int k = 0; k < Z; k++)
                     {
-                        ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL);
+                        if(ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL) == false)
+                        {
+                            throw new InvalidOperationException("Unable to connect two neurons!");
+                        }
                     }
                 }
             }

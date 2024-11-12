@@ -114,11 +114,6 @@ namespace FirstOrderMemoryUnitTest
                             int bp = 1;
                         }
 
-                        if (bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count != 4)
-                        {
-                            int bp = 1;
-                        }
-
                         Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
 
                         Assert.AreEqual(2, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);

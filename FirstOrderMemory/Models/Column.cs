@@ -89,17 +89,17 @@ namespace FirstOrderMemory.Models
             return false;
         }
 
-        internal void PostCycleCleanup(bool cleanUpspiking = false)
+        internal void PostCycleCleanup(bool cleanUpSpiking = false)
         {
             var firingNeurons = Neurons.Where( n => n.CurrentState != NeuronState.RESTING ).ToList();
 
-            if(cleanUpspiking)
+            if(cleanUpSpiking == false)
             {
                 firingNeurons = firingNeurons.Where( n => n.CurrentState != NeuronState.SPIKING ).ToList();
             }
 
             foreach (var neuron in firingNeurons)
-            {
+            {                
                 neuron.FlushVoltage();
             }
 

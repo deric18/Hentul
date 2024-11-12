@@ -135,5 +135,20 @@
 
             return toRet;
         }
+
+        public static List<Position_SOM> GetNonOverlappingNeuronsFromSecondList(List<Position_SOM> predictedList, List<Position_SOM> firingList)
+        {
+            List<Position_SOM> toRet = new List<Position_SOM>();
+
+            foreach (var neuron in predictedList)
+            {
+                if (firingList.Contains(neuron) == false && neuron.W == 'N')
+                {
+                    toRet.Add(neuron);
+                }
+            }
+
+            return toRet;
+        }
     }
 }

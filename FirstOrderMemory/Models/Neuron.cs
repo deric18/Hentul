@@ -31,6 +31,9 @@ namespace FirstOrderMemory.Models
 
         #endregion
 
+
+        #region VARIABLES && CONSTRUCTORS
+
         private ulong redundantCounter = 0;
 
         public uint PruneCount { get; private set; }
@@ -80,6 +83,8 @@ namespace FirstOrderMemory.Models
         }
 
         public void IncrementPruneCount() => PruneCount++;
+
+        #endregion
 
         public void ProcessCurrentState(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string fileName = null)
         {
