@@ -1,6 +1,7 @@
 namespace Hentul.UT
 {    
-    using Hentul;    
+    using Hentul;
+    using Hentul.Hippocampal_Entorinal_complex;
     using System.Text;
 
     public class HentulTests
@@ -16,6 +17,31 @@ namespace Hentul.UT
         public void Setup()
         {
             rand = new Random();
+        }
+
+
+        [Test]
+        public void TestSenseiMatchPercentagePositiveTest()
+        {
+            Sensation_Location sensei1 = new Sensation_Location();
+            Sensation_Location sensei2 = new Sensation_Location();
+
+            sensei1.AddNewSensationAtThisLocation(new Position)
+
+            Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2));
+
+        }
+
+        [Test]
+        public void TestSenseiMatchPercentageNegativeTest()
+        {
+            Sensation_Location sensei1 = new Sensation_Location();
+            Sensation_Location sensei2 = new Sensation_Location();
+
+            sensei1.AddNewSensationAtThisLocation(new Position)
+
+            Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2));
+
         }
 
         [Test, Ignore("Needs Work!")]

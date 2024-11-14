@@ -425,8 +425,8 @@
                 somBBM_L3A.Pool(sdr);
 
 
-                //Wrong : location should be the location of the mouse pointer relative to the image and nnot just BBMID and that should be location.
-                var firingSensei = new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle()));
+                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                var firingSensei = new Sensation_Location(mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle()));
 
                 HCAccessor.ProcessCurrentPatternForObject(
                    CycleNum,
@@ -439,8 +439,8 @@
 
                 nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
-                    new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle())),
-                    new Sensation_Location(CycleNum, mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetPredictedSDR())));
+                    new Sensation_Location(mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle())),
+                    new Sensation_Location(mapper.GetSenseLocDictFromSOMSDR(somBBM_L3B.GetPredictedSDR())));
             }
 
             return nextMotorOutput;
@@ -476,7 +476,7 @@
                 return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
             }
 
-            throw new NullReferenceException(" FOM BBM returned empty position list");
+            throw new NullReferenceException(" FOM BBM returned empty position list ");
         }
        
 

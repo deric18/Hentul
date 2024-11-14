@@ -5,14 +5,23 @@
     public class Sensation_Location
     {                
 
-        public SortedDictionary<Position, KeyValuePair<int, List<Position>>> sensLoc { get; private set; }
+        /// <summary>
+        /// Key : Location on the Screen
+        /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
+        /// </summary>
+        public Dictionary<string, KeyValuePair<int, List<Position>>> sensLoc { get; private set; }
 
         public Sensation_Location()
         {
-            sensLoc = new SortedDictionary<Position, KeyValuePair<int, List<Position>>>();
+            sensLoc = new Dictionary<string, KeyValuePair<int, List<Position>>>();
         }
 
-        public bool AddNewSensationAtThisLocation(Position location, KeyValuePair<int, List<Position>> sensation)
+        public Sensation_Location(Dictionary<string, KeyValuePair<int, List<Position>>> sensLoc)
+        {
+            this.sensLoc = sensLoc;
+        }
+
+        public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position>> sensation)
         {
             if(!sensLoc.TryGetValue(location, out var kvp))
             {
@@ -23,34 +32,32 @@
             return false;
         }
 
-        public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetensei)
+        public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei)
         {
-            int total = sourceSensei.Sensation.Count;
-            int match = 0;
+            int maxMatchPercentage = sourceSensei.sensLoc.Count > targetSensei.sensLoc.Count ? ( ( targetSensei.sensLoc.Count * 1000) / sourceSensei.sensLoc.Count ) : 1000;
 
-            foreach (var item in sourceSensei.Sensation)
+            int matchPercentage = 0;
+
+            foreach (var sourceKvp in sourceSensei.sensLoc)
             {
-                if (targetensei.Sensation.TryGetValue(item.Key, out var s))
+                if (targetSensei.sensLoc.TryGetValue(sourceKvp.Key, out var targetKvpValue))
                 {
-                    foreach (var position in s)
-                    {
-                        if (item.Value.Contains(position))
-                        {
-                            match++;
-                        }
-                    }
+                    int cycleMatchPercentage = ComparePositionList(sourceKvp.Value.Value, targetKvpValue.Value);
+
+                    matchPercentage += cycleMatchPercentage;
+
                 }
             }
 
-            return (int)((match * 100) / sourceSensei.Sensation.Count);
+            return matchPercentage * 100  / maxMatchPercentage;
         }
 
-        public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> sensei1ist)
+        public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> senseiList)
         {
-            int total = sensei.Sensation.Count;
+            int total = sensei.sensLoc.Count;
             int maxMatch = 0;
 
-            foreach (var item in sensei1ist)
+            foreach (var item in senseiList)
             {
                 int match = CompareSenseiPercentage(sensei, item);
                 if (match > maxMatch)
@@ -124,5 +131,27 @@
 
             return true;
         }
+
+        public static int ComparePositionList(List<Position> first, List<Position> second)
+        {
+            if(first.Count == 0 || second.Count == 0) return 0;
+
+
+
+            int match = 0;
+
+            foreach (var pos in first)
+            {
+                if (second.Contains(pos))
+                {
+                    match++;
+                }
+            }
+
+
+            return ((100 * match) / first.Count);
+
+        }
+
     }
 }

@@ -3,7 +3,8 @@
     using Common;
     using FirstOrderMemory.Models;    
     using System.Collections.Generic;
-    using System.Drawing;        
+    using System.Drawing;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
     internal class Mapper
     {
@@ -12,8 +13,9 @@
 
         public int NumPixelsPerBBM { get; private set; }
 
-        public const int LENGTH = 10;
-        public const int WIDTH = 10;        
+        public int Xoffset { get; private set; }
+
+        public int YOffset { get; private set; }
         
         public Dictionary<int, Position[]> Mappings { get; private set; }
 
@@ -29,7 +31,10 @@
         public List<Position_SOM> somPositions;
         public bool[,] flagCheckArr { get; private set; }
 
-        public Mapper(int numBBM, int numPixels)
+        public int LENGTH { get; private set; }
+        public int WIDTH { get; private set; }
+
+        public Mapper(int numBBM, int numPixels, LayerType layer)
         {
             if (numBBM != 100 || numPixels != 400)
             {
@@ -71,16 +76,22 @@
 
             FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
             SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
+
+            LENGTH = layer == LayerType.Layer_4 ? 10 : 1250;
+            WIDTH = 10;
+
+            Xoffset = -1;
+            YOffset = -1;
         }
 
 
         /// <summary>
         /// <BBM ID , Locations of Pixels for BBMID >
-        /// Image  Size : X : 20 rows Y : 20 Columns 
+        /// Image  Size : X : 20 rows Y : 20 Columns
         /// Number Of Pixels : 400 pixels
         /// BBM : 100
         /// NumPixelPerBBM : 4
-        /// Row ID could be more than 20 but the total numbero f rows processed will be 20 , this is a misnomer that confused me a while back.
+        /// Row ID could be more than 20 but the total numbero of rows processed will be 20 , this is a misnomer that confused me a while back.
         /// </summary>
         private void PerformMappingsFor()
         {
@@ -364,7 +375,7 @@
                     }
             }
 
-            return new SDR_SOM(LENGTH, WIDTH, positionstoAdd, iType.SPATIAL);
+            return new SDR_SOM(10, 10, positionstoAdd, iType.SPATIAL);
         }
 
         internal static List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbitsFOM, int bbmID)
@@ -381,25 +392,42 @@
             return retList;
         }
 
-        public void ParseBitmap(Bitmap bitmap)
+        public void ParseBitmap(Bitmap bitmap, int XOffset, int YOffset)
         {
             if (bitmap.Width != 40 || bitmap.Height != 20)
             {
                 throw new InvalidDataException("Invalid Data Dimensions!");                
             }
             
-            List<Position> toRet = new List<Position>();
-            flagCheckArr = new bool[bitmap.Width, bitmap.Height];            
+            this.Xoffset = XOffset;
+            this.YOffset = YOffset;
 
+            List<Position> toRet = new List<Position>();
+
+            flagCheckArr = new bool[bitmap.Width, bitmap.Height];
+
+            //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
             foreach (var kvp in Mappings)
             {
                 var bbmID = kvp.Key;
-                var posList = kvp.Value;                
+                var posList = kvp.Value;
 
-                Color color1 = bitmap.GetPixel(posList[0].X, posList[0].Y); flagCheckArr[posList[0].X, posList[0].Y] = true;
-                Color color2 = bitmap.GetPixel(posList[1].X, posList[1].Y); flagCheckArr[posList[1].X, posList[1].Y] = true;
-                Color color3 = bitmap.GetPixel(posList[2].X, posList[2].Y); flagCheckArr[posList[2].X, posList[2].Y] = true;
-                Color color4 = bitmap.GetPixel(posList[3].X, posList[3].Y); flagCheckArr[posList[3].X, posList[3].Y] = true;
+                var pixel1 = posList[0];
+                var pixel2 = posList[1];
+                var pixel3 = posList[2];
+                var pixel4 = posList[3];
+
+                Color color1 = bitmap.GetPixel(pixel1.X, pixel1.Y); 
+                flagCheckArr[pixel1.X, pixel1.Y] = true;
+
+                Color color2 = bitmap.GetPixel(pixel2.X, pixel2.Y); 
+                flagCheckArr[pixel2.X, pixel2.Y] = true;
+                
+                Color color3 = bitmap.GetPixel(pixel3.X, pixel3.Y); 
+                flagCheckArr[pixel3.X, pixel3.Y] = true;
+
+                Color color4 = bitmap.GetPixel(pixel4.X, pixel4.Y);
+                flagCheckArr[pixel4.X, pixel4.Y] = true;
 
                 bool check1 = CheckIfColorIsBlack(color1);
                 bool check2 = CheckIfColorIsBlack(color2);
@@ -529,6 +557,8 @@
         internal void clean()
         {
             somPositions.Clear();
+            Xoffset = -1;
+            YOffset = -1;
         }
         
 
@@ -539,17 +569,39 @@
         /// </summary>
         /// <param name="sdr_SOM"></param>
         /// <returns></returns>
-        internal Dictionary<int, List<Position>> GetSenseLocDictFromSOMSDR(SDR_SOM sdr_SOM)
-        {
-            Dictionary<int, List<Position>> senseLocDict = null;
-
+        internal Dictionary<string, KeyValuePair<int, List<Position>> GetSenseLocDictFromSOMSDR(SDR_SOM sdr_SOM)
+        {            
             if(sdr_SOM.ActiveBits.Count == 0 )
             {
                 int exception = 1;
                 //throw new InvalidDataException("SDR SOM is empty for Layer 3B!!!");
             }
-            
-            
+
+            Dictionary<string, KeyValuePair<int, List<Position>> sensLocDict = null;
+
+
+
+            Position position = new Position(Xoffset, YOffset);
+
+            foreach (var pos in sdr_SOM.ActiveBits) 
+            {
+                int bbmID = pos.X % 100;
+
+                if(bbmID > 99)
+                {
+                    throw new InvalidOperationException("BBM ID canntoexceed more than 99 for this system!");
+                }
+
+
+                if (sensLocDict.TryGetValue(bbmID, out List<Position> posList))
+                {
+                    posList.Add(pos);
+                }
+                else
+                {
+                    senseLocDict.Add(bbmID, new List<Position>() { pos });
+                }
+            }
 
             return senseLocDict;
         }

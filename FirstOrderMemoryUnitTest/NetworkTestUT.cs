@@ -12,29 +12,29 @@
         BlockBehaviourManager? bbManager;
         const int X = 10;
         const int Y = 10;
-        int Z = 10;        
+        int Z = 4;        
 
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z);
+            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4);
 
             bbManager.Init(1);            
         }
 
-        [TestMethod, Ignore("")]
+        [Test]
         public void TestHowManyPatternsCanOneFOMBlockRemember()
         {
             throw new NotImplementedException();
         }
 
-        [TestMethod, Ignore("")]
+        [Test]
         public void TestHowManyNeuronsCanWeDeleteBEforeNetworkForgets()
         {
             throw new NotImplementedException();
         }
 
-        [TestMethod, Ignore("")]
+        [Test]
         public void TestHowMuchNoiseCanBeIntroduced()
         {
             throw new NotImplementedException();
