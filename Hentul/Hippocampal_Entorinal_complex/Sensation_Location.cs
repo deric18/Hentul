@@ -33,7 +33,7 @@
             return false;
         }
 
-        public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei)
+        public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei, bool ignoreBBM)
         {
             int maxMatchPercentage = sourceSensei.sensLoc.Count > targetSensei.sensLoc.Count ? ( ( targetSensei.sensLoc.Count * 1000) / sourceSensei.sensLoc.Count ) : 1000;
 
@@ -43,15 +43,46 @@
             {
                 if (targetSensei.sensLoc.TryGetValue(sourceKvp.Key, out var targetKvpValue))
                 {
-                    int cycleMatchPercentage = ComparePositionList(sourceKvp.Value.Value, targetKvpValue.Value);
+                    if (ignoreBBM == false && targetKvpValue.Key == sourceKvp.Value.Key)
+                    {
+                        int cycleMatchPercentage = ComparePositionList(sourceKvp.Value.Value, targetKvpValue.Value);
 
-                    matchPercentage += cycleMatchPercentage;
+                        matchPercentage += cycleMatchPercentage;
+                    }
+                    else
+                    {
+                        int cycleMatchPercentage = ComparePositionList(sourceKvp.Value.Value, targetKvpValue.Value);
 
+                        matchPercentage += cycleMatchPercentage;
+                    }
                 }
             }
 
             return matchPercentage * 100  / maxMatchPercentage;
         }
+
+
+        public static int ComparePositionList(List<Position_SOM> first, List<Position_SOM> second)
+        {
+            if (first.Count == 0 || second.Count == 0) return 0;
+
+
+
+            int match = 0;
+
+            foreach (var pos in first)
+            {
+                if (second.Contains(pos))
+                {
+                    match++;
+                }
+            }
+
+
+            return ((100 * match) / first.Count);
+
+        }
+
 
         public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> senseiList)
         {
@@ -131,28 +162,6 @@
             }
 
             return true;
-        }
-
-        public static int ComparePositionList(List<Position> first, List<Position> second)
-        {
-            if(first.Count == 0 || second.Count == 0) return 0;
-
-
-
-            int match = 0;
-
-            foreach (var pos in first)
-            {
-                if (second.Contains(pos))
-                {
-                    match++;
-                }
-            }
-
-
-            return ((100 * match) / first.Count);
-
-        }
-
+        }        
     }
 }

@@ -455,7 +455,9 @@
 
         public void RestoreFromBackUp(string filename)
         {
-            //throw new NotImplementedException();
+            var xmlDocument = new XmlDocument();
+
+            xmlDocument.LoadXml(filename);
         }
 
         #endregion

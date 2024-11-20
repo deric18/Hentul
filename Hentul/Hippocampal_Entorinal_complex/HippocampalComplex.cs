@@ -177,7 +177,11 @@
 
         private void Restore()
         {
+            string filename = "HC-EC.xml";
 
+            var xmlDocument = new XmlDocument();
+
+            xmlDocument.LoadXml(backupDir + filename);
         }
         public NetworkMode GetCurrentNetworkMode() => networkMode;
 
