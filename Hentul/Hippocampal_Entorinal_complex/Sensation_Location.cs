@@ -33,7 +33,7 @@
             return false;
         }
 
-        public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei, bool ignoreBBM)
+        public static int CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei, bool ignoreBBM = false)
         {
             int maxMatchPercentage = sourceSensei.sensLoc.Count > targetSensei.sensLoc.Count ? ( ( targetSensei.sensLoc.Count * 1000) / sourceSensei.sensLoc.Count ) : 1000;
 
@@ -84,14 +84,14 @@
         }
 
 
-        public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> senseiList)
+        public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> senseiList, bool ignoreBBM = false)
         {
             int total = sensei.sensLoc.Count;
             int maxMatch = 0;
 
             foreach (var item in senseiList)
             {
-                int match = CompareSenseiPercentage(sensei, item);
+                int match = CompareSenseiPercentage(sensei, item, ignoreBBM);
                 if (match > maxMatch)
                     maxMatch = match;
             }
@@ -149,11 +149,11 @@
 
             foreach (var item in sourceSensei.sensLoc)
             {
-                if (targetensei.sensLoc.TryGetValue(item.Key, out var s))
+                if (targetensei.sensLoc.TryGetValue(item.Key, out var keyValuePair))
                 {
-                    foreach (var position in s)
+                    foreach (var position in keyValuePair.Value)
                     {
-                        if (!item.Value.Contains(position))
+                        if (!item.Value.Value.Contains(position))
                         {
                             return false;
                         }
