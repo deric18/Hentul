@@ -36,6 +36,9 @@
         #endregion
 
 
+        #region PUBLIC API
+
+
         // Gets called by Orchestrator.
         /// <summary>
         /// Need to define specfic limits for 
@@ -116,20 +119,13 @@
             ConvertUnrecognisedObjectToRecognisedObject();
         }
 
-        private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)
-        {
-            List<RecognisedEntity> setAsideList = new List<RecognisedEntity>();
+        public NetworkMode GetCurrentNetworkMode() => networkMode;
+        public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
 
-            foreach (var obj in Objects.Values)
-            {
-                if (obj.CheckPatternMatchPercentage(sensei) != 0)
-                {
-                    setAsideList.Add(obj);
-                }
-            }
+        #endregion
 
-            return setAsideList;
-        }
+
+        #region BACKUP & RESTORE
 
         private void Backup()
         {
@@ -183,9 +179,28 @@
 
             xmlDocument.LoadXml(backupDir + filename);
         }
-        public NetworkMode GetCurrentNetworkMode() => networkMode;
 
-        public void UpdateCurrenttPosition(Position pos)
+        #endregion
+
+
+        #region PRIVATE HELPER METHODS
+
+        private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)
+        {
+            List<RecognisedEntity> setAsideList = new List<RecognisedEntity>();
+
+            foreach (var obj in Objects.Values)
+            {
+                if (obj.CheckPatternMatchPercentage(sensei) != 0)
+                {
+                    setAsideList.Add(obj);
+                }
+            }
+
+            return setAsideList;
+        }
+
+        private void UpdateCurrenttPosition(Position pos)
         {
             CurrentPosition = pos;
         }
@@ -212,13 +227,11 @@
             RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
         }
 
-
-
-        public void FinishedProcessingImage()
+        private void FinishedProcessingImage()
         {
             //Store object into list and move on to next object
         }
 
-        public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
+        #endregion        
     }
 }

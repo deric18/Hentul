@@ -224,21 +224,46 @@
 
         #endregion
 
+        public void ProcessStep0()
+        {
 
-        public void ProcesStep1(int x, int y)
+            Console.WriteLine("Grabbing cursor Position");
+
+            point = this.GetCurrentPointerPosition();
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int Range2 = Range + Range;
+
+            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
+            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
+            int x2 = Math.Abs(point.X + Range2);
+            int y2 = Math.Abs(point.Y + Range);
+
+            //this.GetColorByRange(x1, y1, x2, y2);
+
+            Rectangle rect = new Rectangle(x1, y1, x2, y2);
+
+            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
+
+            Graphics g = Graphics.FromImage(bmp);
+
+            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
+
+            bmp.Save(filename, ImageFormat.Jpeg);
+        }
+
+        public void ProcesStep1()
         {
 
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
             SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
 
-            #region STEP 1
-            // STEP 1 : Fire SDR's for L4 and L3A
-
-            // STEP 1A : Fire all FOM's first!
+            #region STEP 1            
 
             BlockBehaviourManager fom;            
 
-            Mapper.ParseBitmap(bmp, x, y);
+            Mapper.ParseBitmap(bmp);
 
             List<Position_SOM> somPosition = new List<Position_SOM>();            
 
@@ -425,7 +450,7 @@
 
 
                 //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle());
+                var firingSensei = Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle(), point);
 
                 HCAccessor.ProcessCurrentPatternForObject(
                    CycleNum,
@@ -438,8 +463,8 @@
 
                 nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
-                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle()),
-                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetPredictedSDR()));
+                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle(), point),
+                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetPredictedSDR(), point));
             }
 
             return nextMotorOutput;
@@ -945,36 +970,7 @@
 
         //    return nextMinNumberOfPixels;
         //}
-
-        public void Grab()
-        {
-
-            Console.WriteLine("Grabbing cursor Position");
-
-            POINT Point = this.GetCurrentPointerPosition();
-
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            int Range2 = Range + Range;
-
-            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
-            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
-            int x2 = Math.Abs(Point.X + Range2);
-            int y2 = Math.Abs(Point.Y + Range);
-
-            //this.GetColorByRange(x1, y1, x2, y2);
-
-            Rectangle rect = new Rectangle(x1, y1, x2, y2);
-
-            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
-
-            Graphics g = Graphics.FromImage(bmp);
-
-            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
-
-            bmp.Save(filename, ImageFormat.Jpeg);
-        }
-
+        
 
         // Already grey scalled.
         private void GetColorByRange(int x1, int y1, int x2, int y2)

@@ -79,7 +79,7 @@ namespace HentulWinforms
 
                 orchestrator.MoveCursor(value);
 
-                orchestrator.Grab();
+                orchestrator.ProcessStep0();
 
                 CurrentImage.Image = orchestrator.bmp;
 
@@ -89,7 +89,7 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                orchestrator.ProcesStep1(value.X, value.Y);
+                orchestrator.ProcesStep1();
 
                 orchestrator.ProcessStep2();                                           
 
@@ -157,7 +157,7 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            orchestrator.Grab();
+            orchestrator.ProcessStep0();
 
             CurrentImage.Image = orchestrator.bmp;
 

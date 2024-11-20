@@ -21,7 +21,7 @@
     using System.Runtime.InteropServices;
     using Image = SixLabors.ImageSharp.Image;
 
-    public struct POINT
+    public struct POINT2
     {
         public int X;
         public int Y;
@@ -77,7 +77,7 @@
 
         #region Unused Variables
 
-        public POINT Point { get; set; }
+        public POINT2 Point { get; set; }
         public int BucketRowLength { get; private set; }
         public int BucketColLength { get; private set; }
         public int Iterations;
@@ -649,7 +649,7 @@
 
 
         [DllImport("user32.dll")]
-        static extern bool GetCursorPos(out POINT lpPoint);
+        static extern bool GetCursorPos(out POINT2 lpPoint);
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr GetDesktopWindow();
         [DllImport("user32.dll", SetLastError = true)]
@@ -661,11 +661,11 @@
         [DllImport("User32.Dll")]
         public static extern long SetCursorPos(int x, int y);
         [DllImport("User32.Dll")]
-        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT2 point);
 
         public void MoveCursorToSpecificPosition(Position position)
         {
-            POINT p;
+            POINT2 p;
             IntPtr desk = GetDesktopWindow();
             IntPtr dc = GetWindowDC(desk);
 

@@ -19,10 +19,10 @@
             return X == pos.X && Y == pos.Y && Z == pos.Z;
         }
 
-        //public override string ToString()
-        //{
-        //    return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
-        //}
+        public override string ToString()
+        {
+            return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
+        }
 
         //public static Position ConvertStringToPosition(string key)
         //{

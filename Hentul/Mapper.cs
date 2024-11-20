@@ -390,15 +390,12 @@
             return retList;
         }
 
-        public void ParseBitmap(Bitmap bitmap, int XOffset, int YOffset)
+        public void ParseBitmap(Bitmap bitmap)
         {
             if (bitmap.Width != 40 || bitmap.Height != 20)
             {
                 throw new InvalidDataException("Invalid Data Dimensions!");                
-            }
-            
-            this.Xoffset = XOffset;
-            this.YOffset = YOffset;
+            }                        
 
             List<Position> toRet = new List<Position>();
 
@@ -567,7 +564,7 @@
         /// </summary>
         /// <param name="sdr_SOM"></param>
         /// <returns></returns>
-        public Sensation_Location GetSensationLocationFromSDR(SDR_SOM sdr_SOM)
+        public Sensation_Location GetSensationLocationFromSDR(SDR_SOM sdr_SOM, Orchestrator.POINT point)
         {            
             if(sdr_SOM.ActiveBits.Count == 0 )
             {
@@ -575,7 +572,9 @@
                 //throw new InvalidDataException("SDR SOM is empty for Layer 3B!!!");
             }
 
-            Sensation_Location sensation_Location = new Sensation_Location(new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>());
+            Sensation_Location sensation_Location = new Sensation_Location(new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>());            
+
+            int iterator = 0;
 
             Position position = null;
 
@@ -590,10 +589,10 @@
 
                 if (Mappings.TryGetValue(bbmID, out var positions))
                 {
-                    position = new Position(Xoffset + positions[0].X, YOffset + positions[0].Y);
+                    position = new Position(point.X + positions[0].X, point.Y + positions[0].Y);
                 }
 
-                if (sensation_Location.sensLoc.TryGetValue(position.ToString(), out KeyValuePair<int, List<Position_SOM>> kvp))
+                if (sensation_Location.sensLoc.TryGetValue(position?.ToString(), out KeyValuePair<int, List<Position_SOM>> kvp))
                 {
                     throw new InvalidOperationException("Cannot add two sensation to the same Position , Should never Happen!!!");
                 }

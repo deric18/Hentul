@@ -5,15 +5,19 @@
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Text;
     using FirstOrderMemory.Models;
+    using static Hentul.Orchestrator;
 
     public  class OrchestratorTests
     {
         Orchestrator orchetrator;
+        POINT point = new POINT();        
 
         [SetUp]
         public void Setup()
         {
-            orchetrator = new Orchestrator(20, true, true, 1);
+            orchetrator = new Orchestrator(10, true, true, 1);
+            point.X = 10;
+            point.Y = 10;
         }
 
         [Test]
@@ -32,7 +36,9 @@
                 }
                 );
 
-            var sensloc = orchetrator.Mapper.GetSensationLocationFromSDR( sdr );
+            
+
+            var sensloc = orchetrator.Mapper.GetSensationLocationFromSDR( sdr, point);
 
             //Check for the correct bbmID is firing and the correct position key 
             //no need to validate positions since it will be the same.
@@ -60,7 +66,7 @@
 
             sensei1.AddNewSensationAtThisLocation(positionID, kvp);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR);
+            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
             
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2));

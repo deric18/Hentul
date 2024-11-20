@@ -11,7 +11,7 @@
     public class ScreenGrabberForColor
     {
         public Color[,] ColorMap { get; private set; }
-        public POINT Point { get; set; }
+        public POINT2 Point { get; set; }
 
         private const int PixelConst = 3;
 
@@ -181,7 +181,7 @@
         }
 
         [DllImport("user32.dll")]
-        static extern bool GetCursorPos(out POINT lpPoint);
+        static extern bool GetCursorPos(out POINT2 lpPoint);
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr GetDesktopWindow();
         [DllImport("user32.dll", SetLastError = true)]
@@ -193,11 +193,11 @@
         [DllImport("User32.Dll")]
         public static extern long SetCursorPos(int x, int y);
         [DllImport("User32.Dll")]
-        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+        public static extern bool ClientToScreen(IntPtr hWnd, ref POINT2 point);
 
         public void MoveCursor(int offset)
         {
-            POINT p;
+            POINT2 p;
 
             p.X = this.Point.X;
             p.Y = this.Point.Y;
@@ -244,9 +244,9 @@
             }
         }
 
-        private POINT GetCurrentPointerPosition()
+        private POINT2 GetCurrentPointerPosition()
         {
-            POINT point;
+            POINT2 point;
 
             if (GetCursorPos(out point))
             {
