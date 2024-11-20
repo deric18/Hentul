@@ -2,7 +2,7 @@
 namespace HentulWinforms
 {
     using Common;
-    using FirstOrderMemory.Models;
+    using Hentul;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using System.Drawing.Imaging;
@@ -89,7 +89,7 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                orchestrator.ProcesStep1();
+                orchestrator.ProcesStep1(value.X, value.Y);
 
                 orchestrator.ProcessStep2();                                           
 

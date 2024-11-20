@@ -1,12 +1,13 @@
 ﻿namespace Hentul
 {
     using Common;
-    using FirstOrderMemory.Models;    
+    using FirstOrderMemory.Models;
+    using Hentul.Hippocampal_Entorinal_complex;
     using System.Collections.Generic;
     using System.Drawing;
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
-    internal class Mapper
+    public class Mapper
     {
         public int NumBBM { get; private set; }
         public int NumPixels { get; private set; }
@@ -34,7 +35,7 @@
         public int LENGTH { get; private set; }
         public int WIDTH { get; private set; }
 
-        public Mapper(int numBBM, int numPixels, LayerType layer)
+        public Mapper(int numBBM, int numPixels)
         {
             if (numBBM != 100 || numPixels != 400)
             {
@@ -45,7 +46,7 @@
             NumPixels = numPixels;
             NumPixelsPerBBM = numPixels / numBBM;
             
-            PerformMappingsFor();
+            PerformMappings();
             
 
             ONbits1FOM = new List<Position_SOM>()
@@ -75,10 +76,7 @@
             somPositions = new List<Position_SOM>();            
 
             FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
-            SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
-
-            LENGTH = layer == LayerType.Layer_4 ? 10 : 1250;
-            WIDTH = 10;
+            SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();           
 
             Xoffset = -1;
             YOffset = -1;
@@ -93,7 +91,7 @@
         /// NumPixelPerBBM : 4
         /// Row ID could be more than 20 but the total numbero of rows processed will be 20 , this is a misnomer that confused me a while back.
         /// </summary>
-        private void PerformMappingsFor()
+        private void PerformMappings()
         {
             Mappings = new Dictionary<int, Position[]> {
                 {   0   , new Position[4] { new Position (  0   ,   0   ), new Position( 0   ,   1   ), new Position(    1   ,   0   ), new Position(    1   ,   1   ) } },
@@ -569,7 +567,7 @@
         /// </summary>
         /// <param name="sdr_SOM"></param>
         /// <returns></returns>
-        internal Dictionary<string, KeyValuePair<int, List<Position>> GetSenseLocDictFromSOMSDR(SDR_SOM sdr_SOM)
+        public Sensation_Location GetSensationLocationFromSDR(SDR_SOM sdr_SOM)
         {            
             if(sdr_SOM.ActiveBits.Count == 0 )
             {
@@ -577,11 +575,9 @@
                 //throw new InvalidDataException("SDR SOM is empty for Layer 3B!!!");
             }
 
-            Dictionary<string, KeyValuePair<int, List<Position>> sensLocDict = null;
+            Sensation_Location sensation_Location = new Sensation_Location(new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>());
 
-
-
-            Position position = new Position(Xoffset, YOffset);
+            Position position = null;
 
             foreach (var pos in sdr_SOM.ActiveBits) 
             {
@@ -592,19 +588,35 @@
                     throw new InvalidOperationException("BBM ID canntoexceed more than 99 for this system!");
                 }
 
-
-                if (sensLocDict.TryGetValue(bbmID, out List<Position> posList))
+                if (Mappings.TryGetValue(bbmID, out var positions))
                 {
-                    posList.Add(pos);
+                    position = new Position(Xoffset + positions[0].X, YOffset + positions[0].Y);
+                }
+
+                if (sensation_Location.sensLoc.TryGetValue(position.ToString(), out KeyValuePair<int, List<Position_SOM>> kvp))
+                {
+                    throw new InvalidOperationException("Cannot add two sensation to the same Position , Should never Happen!!!");
                 }
                 else
                 {
-                    senseLocDict.Add(bbmID, new List<Position>() { pos });
+                    if (position == null)
+                    {
+                        throw new InvalidOperationException("Poition should never be null");
+                    }
+                    else
+                    {
+                        KeyValuePair<int, List<Position_SOM>> sensation = new KeyValuePair<int, List<Position_SOM>>(
+                            bbmID,
+                            sdr_SOM.ActiveBits ?? new List<Position_SOM>());
+
+                        sensation_Location.AddNewSensationAtThisLocation(position.ToString(), sensation);
+                    }
                 }
             }
 
-            return senseLocDict;
+            return sensation_Location;
         }
+
     }
 
     public enum MAPPERCASE

@@ -9,7 +9,7 @@
 
         #region  VARIABLES & CONSTRUCTORS
 
-        public Dictionary<string, RecognisedEntity>? Objects { get; private set; }
+        public Dictionary<string, RecognisedEntity> Objects { get; private set; }
 
         public UnrecognisedEntity? CurrentObject { get; private set; }
 
@@ -139,36 +139,37 @@
 
             string filename = "HC-EC.xml";
 
-            foreach (var kvp in Objects)
+            foreach (var recognisedObject in Objects)
             {
-                foreach (var sensei in kvp.Value.ObjectSnapshot)
-                {
-                   foreach(var item in sensei.Sensation)
-                    {
-                        foreach( var pos in item.Value)
-                        {
+                var objectNode = xmlDocument.CreateNode(XmlNodeType.Element, recognisedObject.Value.Label, string.Empty);
 
+                foreach (var sensei in recognisedObject.Value.ObjectSnapshot)
+                {                                           
+                    foreach(var dictKVP in sensei.sensLoc)
+                    {
+                        var sensationLocationElement = xmlDocument.CreateElement("SensationLocation");
+                        
+                        sensationLocationElement.SetAttribute("Position", dictKVP.Key);
+
+                        sensationLocationElement.SetAttribute("BBMID", dictKVP.Value.Key.ToString());
+                        
+                        foreach( var positionItem in dictKVP.Value.Value)
+                        {
+                            var xmlNode = xmlDocument.CreateElement("Position");
+
+                            xmlNode.SetAttribute("X", positionItem.X.ToString());
+                            xmlNode.SetAttribute("Y", positionItem.Y.ToString());
+                            xmlNode.SetAttribute("Z", positionItem.Z.ToString());
+
+                            sensationLocationElement.AppendChild(xmlNode);
                         }
+
+                        objectNode.AppendChild(objectNode);
                     }
                 }
-            }
 
-            //var distalNode = xmlDocument.CreateNode(XmlNodeType.Element, kvp.Key, string.Empty);
-
-            //var blockIdElement = xmlDocument.CreateElement("BlockID", string.Empty);
-
-            //var sourceNeuronElement = xmlDocument.CreateElement("SourceNeuronID", string.Empty);
-
-            //sourceNeuronElement.InnerText = distalSynapse.Value.AxonalNeuronId.ToString();
-
-            //var targetNeuronElement = xmlDocument.CreateNode(XmlNodeType.Element, "TargetNeuronID", string.Empty);
-
-            //targetNeuronElement.InnerText = distalSynapse.Value.DendronalNeuronalId.ToString();
-
-            //distalNode.AppendChild(sourceNeuronElement);
-            //distalNode.AppendChild(targetNeuronElement);
-
-            //xmlDocument?.DocumentElement?.AppendChild(distalNode);
+                xmlDocument.AppendChild(objectNode);
+            }                        
         
             xmlDocument?.Save(backupDir + filename);            
 

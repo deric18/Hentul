@@ -1,6 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
     using Common;
+    using FirstOrderMemory.Models;
 
     public class Sensation_Location
     {                
@@ -9,19 +10,19 @@
         /// Key : Location on the Screen
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
         /// </summary>
-        public Dictionary<string, KeyValuePair<int, List<Position>>> sensLoc { get; private set; }
+        public Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
 
         public Sensation_Location()
         {
-            sensLoc = new Dictionary<string, KeyValuePair<int, List<Position>>>();
+            sensLoc = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
         }
 
-        public Sensation_Location(Dictionary<string, KeyValuePair<int, List<Position>>> sensLoc)
+        public Sensation_Location(Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
         {
             this.sensLoc = sensLoc;
         }
 
-        public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position>> sensation)
+        public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position_SOM>> sensation)
         {
             if(!sensLoc.TryGetValue(location, out var kvp))
             {
@@ -115,9 +116,9 @@
         public static bool CompareSenseiBool(Sensation_Location sourceSensei, Sensation_Location targetensei)
         {
 
-            foreach (var item in sourceSensei.Sensation)
+            foreach (var item in sourceSensei.sensLoc)
             {
-                if (targetensei.Sensation.TryGetValue(item.Key, out var s))
+                if (targetensei.sensLoc.TryGetValue(item.Key, out var s))
                 {
                     foreach (var position in s)
                     {
