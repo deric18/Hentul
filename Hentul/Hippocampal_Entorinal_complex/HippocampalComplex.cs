@@ -58,22 +58,7 @@
                 if (CurrentObject.AddNewSenei(sensei) == false)
                 {
                     int breakpoint1 = 1; // pattern already added.
-                }
-
-                var matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
-
-                if (matchingObjectList.Count != 0)
-                {
-                    //Object identified even in training phase
-
-                    int breakpint = 1;
-
-                }
-                else
-                {
-                    int breapoint2 = 1;
-                    CurrentObject.AddNewSenei(sensei);
-                }
+                }                       
             }
             else if (networkMode == NetworkMode.PREDICTION)
             {

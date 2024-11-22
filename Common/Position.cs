@@ -24,6 +24,22 @@
             return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString();
         }
 
+        public static  Position ConvertStringToPosition(string posString)
+        {
+            var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+            char nType = 'N';
+
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
+
+            return new Position(x, y, z);
+        }
+
         //public static Position ConvertStringToPosition(string key)
         //{
         //    var parts = key.Split('-');
