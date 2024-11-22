@@ -37,16 +37,19 @@
 
 
         public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> senseiList, bool includeBBM = true, bool includeLocation = true)
-        {
-            int total = sensei.sensLoc.Count;
+        {            
             int maxMatch = 0;
+
+            Match match;
 
             foreach (var item in senseiList)
             {
-                int match = (CompareSenseiPercentage(sensei, item, includeBBM, includeLocation)).GetTotalMatchPercentage();
+                match = CompareSenseiPercentage(sensei, item, includeBBM, includeLocation);
 
-                if (match > maxMatch)
-                    maxMatch = match;
+                int currentCycleMatch = match.GetTotalMatchPercentage();
+
+                if (currentCycleMatch > maxMatch)
+                    maxMatch = currentCycleMatch;
             }
 
             return maxMatch;
@@ -77,8 +80,7 @@
         /// <param name="targetSensei"></param>
         /// <param name="includeBBM"></param>
         /// <param name="includeLocation"></param>
-        /// <returns>a Percentage 100 if all the source sensations @ locations are also present int target , 0 if not and anyuthing in the middle of how much of a good match it was and parameters selected.</returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <returns>a Percentage 100 if all the source sensations @ locations are also present int target , 0 if not and anyuthing in the middle of how much of a good match it was and parameters selected.</returns>        
         public static Match CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei, bool includeBBM = true, bool includeLocation = true)
         {
             Match match = new Match(sourceSensei);

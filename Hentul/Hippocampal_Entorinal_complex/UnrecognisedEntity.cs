@@ -25,8 +25,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 ObjectSnapshot.Add(sensei);
                 return true;
             }
-            
-            if(Sensation_Location.CompareSenseiBool(ObjectSnapshot, sensei))
+
+            int match = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, true, true);
+
+
+            if (match != 100)
             {
                 ObjectSnapshot.Add(sensei);
                 return true;
