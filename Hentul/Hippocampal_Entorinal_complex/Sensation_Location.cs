@@ -122,6 +122,7 @@
                                 if (item.Key == bbmID)
                                 {
                                     match.IncrementBBMIDMatched();
+
                                     BBMMatchedFlag = true;
 
                                     if (ComparePositionListBoolean(sourceSOMs, item.Value))
@@ -173,6 +174,7 @@
                             if (item.Key == bbmID)
                             {
                                 match.IncrementBBMIDMatched();
+
                                 BBMMatchedFlag = true;
 
                                 if (ComparePositionListBoolean(sourceSOMs, item.Value))

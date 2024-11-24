@@ -20,6 +20,19 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public bool AddNewSenei(Sensation_Location sensei)
         {
+            bool isValid = false;
+
+            foreach( var item in sensei.sensLoc.Values)
+            {
+                if(item.Value.Count > 1)
+                    isValid = true;
+            }
+
+            if (isValid == false)
+            {
+                return false;
+            }
+
             if(ObjectSnapshot.Count == 0)
             {
                 ObjectSnapshot.Add(sensei);

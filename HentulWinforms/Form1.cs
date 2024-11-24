@@ -91,13 +91,11 @@ namespace HentulWinforms
 
                 orchestrator.ProcesStep1();
 
-                orchestrator.ProcessStep2();                                           
+                orchestrator.ProcessStep2();
 
                 counter++;
             }
-
             
-
             if (label_done.Text == "Finished Processing Image")
             {
                 orchestrator.BackUp();

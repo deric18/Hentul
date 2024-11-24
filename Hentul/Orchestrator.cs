@@ -259,7 +259,7 @@
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
             SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
 
-            #region STEP 1            
+            #region STEP 1
 
             BlockBehaviourManager fom;            
 
@@ -432,8 +432,7 @@
             if (Mapper.somPositions.Count != 0)
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL));
 
-            #endregion                       
-
+            #endregion
         }
 
         public Position ProcessStep2()
@@ -472,7 +471,7 @@
 
         public void ProcesStep3()
         {
-            Mapper.clean();            
+            Mapper.clean();
         }
 
         public void DoneWithTraining()
@@ -503,7 +502,6 @@
             throw new NullReferenceException(" FOM BBM returned empty position list ");
         }
        
-
         #region BIG MAN WORK
 
         //public string StartCycle()

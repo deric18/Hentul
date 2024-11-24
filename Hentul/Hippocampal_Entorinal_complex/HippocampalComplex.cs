@@ -57,7 +57,7 @@
                 // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.
                 if (CurrentObject.AddNewSenei(sensei) == false)
                 {
-                    int breakpoint1 = 1; // pattern already added.
+                    int breakpoint1 = 1; // pattern already added or Invalid Pattern.
                 }                       
             }
             else if (networkMode == NetworkMode.PREDICTION)

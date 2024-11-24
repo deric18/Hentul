@@ -42,7 +42,7 @@
             if ( TotalBBMID != NumberOfBBMIDMatches + NumberOfBBMIDMises )
             {
                 throw new InvalidOperationException("Something isn't right , Misses + Hits != Total!");
-            }            
+            }
 
             return ( NumberOfBBMIDMatches * 100 ) / TotalBBMID;
         }

@@ -577,13 +577,16 @@
         /// <returns></returns>
         public Sensation_Location GetSensationLocationFromSDR(SDR_SOM sdr_SOM, Orchestrator.POINT point)
         {
-            if (sdr_SOM.ActiveBits.Count == 0 || sdr_SOM.Length < 1000)
+            if (sdr_SOM.Length < 1000)
             {
                 int exception = 1;
                 throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
             }
 
             Sensation_Location sensation_Location = new Sensation_Location(new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>());
+
+            if(sdr_SOM.ActiveBits.Count == 0)
+                return sensation_Location;
 
             int iterator = 0;
 
@@ -595,7 +598,7 @@
 
                 if (bbmID > 99 || bbmID < 0)
                 {
-                    throw new InvalidOperationException("BBM ID canntoexceed more than 99 for this system!");
+                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
                 }
 
                 position = GetPositionForActiveBit(point, pos.X);
@@ -627,19 +630,18 @@
         private Position GetPositionForActiveBit(Orchestrator.POINT point, int posX)
         {
             Position toReturn = null;
-            //int units = posX % 10;
-            //int tens = posX % 100 / 10;
-            //int hundreds = posX / 100;
+            Random random = new Random();
             int bbmID = posX / 10;
 
             if (Mappings.TryGetValue(bbmID, out var positions))
             {
-                toReturn =  new Position(point.X + positions[0].X, point.Y + positions[0].Y);
+                int LocationOffset = positions[0].X > 20 ? positions[0].Y * -1 : positions[0].Y;
+
+                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);       //Generating Unique Location String for Sensation_Location Object.
             }
 
             return toReturn;
         }
-
     }
 
     public enum MAPPERCASE

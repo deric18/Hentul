@@ -1051,7 +1051,7 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [TestMethod, Ignore("Not Yet Completely Implemented")]
+        [Test, Ignore("Not Yet Completely Implemented")]
         public void TestBackUpAndRestore()
         {
             Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[3];

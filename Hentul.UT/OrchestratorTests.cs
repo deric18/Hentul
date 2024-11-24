@@ -9,7 +9,16 @@
     public  class OrchestratorTests
     {
         Orchestrator orchetrator;
-        POINT point = new POINT();        
+        POINT point = new POINT();
+        string gPos1 = "-4--4-0";
+        string gPos2 = "0-0-0";
+        string gPos3 = "12-12-0";
+        string gPos4 = "18-18-0";
+
+        string bPos1 = "12-23-0-N";
+        string bPos2 = "13-33-2-N";
+        string bPos3 = "14-43-2-N";
+        string bPos4 = "15-77-2-N";
 
         [SetUp]
         public void Setup()
@@ -120,8 +129,14 @@
             foreach (var kvp in sensloc.sensLoc)
             {
                 Position p = Position.ConvertStringToPosition(kvp.Key);
-                Assert.AreEqual(point.X + GetXFromBBM_ID(kvp.Value.Key), p.X);
-                Assert.AreEqual(point.Y + GetYFromBBM_ID(kvp.Value.Key), p.Y);                                
+
+
+                int x = GetXFromBBM_ID(kvp.Value.Key) > 20 ? point.X - GetYFromBBM_ID(kvp.Value.Key) : point.X + GetYFromBBM_ID(kvp.Value.Key);
+                int y = GetXFromBBM_ID(kvp.Value.Key) > 20 ? point.Y - GetYFromBBM_ID(kvp.Value.Key) : point.Y + GetYFromBBM_ID(kvp.Value.Key);
+
+
+                Assert.AreEqual(x, p.X);
+                Assert.AreEqual(y, p.Y);
             }
 
         }
@@ -130,11 +145,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on Location for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForLocationIDOnly()
         {
-            string positionID1 = "40-24-0";
-            string positionID2 = "32-20-0";
-            string positionID3 = "14-12-0";
-            string positionID4 = "18-18-0";
-
+            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -164,10 +175,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(gPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -190,12 +201,7 @@
 
         [Test]
         public void TestCompareSenseiMatchPercentageNegativeTestForLocationIDOnly()
-        {
-            string positionID1 = "40-24-0-N";
-            string positionID2 = "32-44-2-N";
-            string positionID3 = "33-44-2-N";
-            string positionID4 = "34-44-2-N";
-
+        {            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -225,10 +231,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(bPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(bPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -252,11 +258,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on BBM ID for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMIDOnly()
         {
-            string positionID1 = "12-23-0-N";
-            string positionID2 = "13-33-2-N";
-            string positionID3 = "14-43-2-N";
-            string positionID4 = "15-77-2-N";
-
+            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)                     
@@ -286,10 +288,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(gPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -310,11 +312,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on BBM ID for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMIDOnly()
         {
-            string positionID1 = "40-24-0-N";
-            string positionID2 = "32-44-2-N";
-            string positionID3 = "33-44-2-N";
-            string positionID4 = "34-44-2-N";
-
+            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -344,10 +342,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(bPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(bPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -366,12 +364,7 @@
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationIDOnly()
-        {
-            string positionID1 = "40-24-0-N";
-            string positionID2 = "32-44-2-N";
-            string positionID3 = "33-44-2-N";
-            string positionID4 = "34-44-2-N";
-
+        {            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -401,10 +394,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(gPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -423,11 +416,7 @@
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationIDOnly()
-        {
-            string positionID1 = "12-23-0-N";
-            string positionID2 = "13-33-2-N";
-            string positionID3 = "14-43-2-N";
-            string positionID4 = "15-77-2-N";
+        {            
 
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
@@ -458,10 +447,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(bPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(bPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -484,11 +473,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position List for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationID_PositionList()
         {
-            string positionID1 = "40-24-0";
-            string positionID2 = "32-20-0";
-            string positionID3 = "14-12-0";
-            string positionID4 = "18-18-0";
-
+            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -518,10 +503,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(gPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -545,11 +530,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position Lit for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationID_PositionList()
         {
-            string positionID1 = "40-24-0-N";
-            string positionID2 = "32-44-2-N";
-            string positionID3 = "33-44-2-N";
-            string positionID4 = "34-44-2-N";
-
+            
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -579,10 +560,10 @@
 
             Sensation_Location sensei1 = new Sensation_Location();
 
-            sensei1.AddNewSensationAtThisLocation(positionID1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(positionID2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(positionID3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(positionID4, kvp4);
+            sensei1.AddNewSensationAtThisLocation(bPos1, kvp1);
+            sensei1.AddNewSensationAtThisLocation(bPos2, kvp2);
+            sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
+            sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
@@ -601,6 +582,19 @@
             Assert.AreEqual(4, match.NumberOfBBMIDMises);
             Assert.AreEqual(0, match.GetTotalMatchPercentage());
 
+        }
+
+
+        [Test, Ignore("Not Yet Implemented")]
+        public void TestPixelToSensationAtLocationConversion()
+        {
+            throw new NotImplementedException();    
+        }
+
+        [Test, Ignore("Not Yet Implemented")]
+        public void TestGreyScallinOnPixelValue()
+        {
+            throw new NotImplementedException();
         }
 
         private int GetXFromBBM_ID(int bbmId)
