@@ -18,7 +18,8 @@ namespace FirstOrderMemory.Models
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
         public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
-		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 500;
+		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 200;
+        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 500;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
@@ -92,23 +93,23 @@ namespace FirstOrderMemory.Models
             {
                 CurrentState = NeuronState.RESTING;
             }
-            else if ( Voltage > 0 && Voltage < (int)NeuronState.FIRING)
+            else if ( Voltage > 0 && Voltage < COMMON_NEURONAL_FIRE_VOLTAGE)
             {
                 CurrentState = NeuronState.PREDICTED;
             }
-            else if( Voltage > (int) NeuronState.PREDICTED && Voltage < (int)NeuronState.FIRING)
-            {
-                CurrentState = NeuronState.PREDICTED;
-            }
-            else if(Voltage >= (int)NeuronState.FIRING && Voltage < (int)NeuronState.SPIKING )
+            else if( Voltage >= COMMON_NEURONAL_FIRE_VOLTAGE && Voltage < COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
             {
                 CurrentState = NeuronState.FIRING;
             }
-            else if(Voltage >= (int)NeuronState.SPIKING)
-            {                
+            else if(Voltage >= COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
+            {
                 if (logmode == LogMode.BurstOnly && fileName != null)
                 {
                     WriteLogsToFile("Neuron " + NeuronID.ToString() + " entering Spiking Mode", fileName);
+                    if(Voltage >= UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
+                    {
+                        WriteLogsToFile("*******************Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************", fileName);
+                    }
                 }
                 else
                 {
@@ -116,6 +117,10 @@ namespace FirstOrderMemory.Models
                 }
                 CurrentState = NeuronState.SPIKING;
                 lastSpikeCycleNum = cycleNum;
+            }            
+            else
+            {
+                throw new InvalidOperationException("Should Never Happen!");
             }
         }
 
