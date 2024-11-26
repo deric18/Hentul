@@ -13,7 +13,7 @@ namespace HentulWinforms
         NetworkMode networkMode;
         readonly int numPixels = 10;
         int counter = 0;
-        int numRotations = 100;
+        int imageIndex = 0;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -68,6 +68,7 @@ namespace HentulWinforms
                             if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                             {
                                 label_done.Text = "Finished Processing Image";
+                                label_done.Refresh();
                                 break;
                             }
                         }
@@ -89,7 +90,7 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                orchestrator.ProcesStep1();     // Fire FOMS per image
+                orchestrator.ProcesStep1(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
 
                 orchestrator.ProcessStep2();    // Fire SOM per FOMS
 
@@ -102,14 +103,18 @@ namespace HentulWinforms
 
             if (label_done.Text == "Finished Processing Image")
             {
-                orchestrator.BackUp();
-
-                //orchestrator.RotateImage();
-                networkMode = NetworkMode.PREDICTION;
-                orchestrator.ChangeNetworkModeTo(NetworkMode.PREDICTION);
-                orchestrator.DoneWithTraining();
-
-                StartButton.Text = "Start Prediciton";
+                if (imageIndex >= 3)
+                {
+                    orchestrator.BackUp();
+                    StartButton.Text = "Start Prediction";
+                    StartButton.Refresh();
+                }
+                else
+                {
+                    orchestrator.DoneWithTraining();
+                    StartButton.Text = "Start Another Image";
+                    StartButton.Refresh();
+                }
 
             }
         }

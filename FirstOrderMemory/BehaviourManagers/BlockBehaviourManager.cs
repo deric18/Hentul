@@ -692,7 +692,7 @@
                 PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
             }
 
-            if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
+            if (PredictedNeuronsForNextCycle.Count >= (0.2 * X * Y * Z))
             {
                 Console.WriteLine("WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size" + PrintBlockDetailsSingleLine());
                 WriteLogsToFile("WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size" + PrintBlockDetailsSingleLine());
@@ -906,7 +906,7 @@
             }
         }
 
-        private void Wire()
+        private void Wire(bool enableBurstWiring = false)
         {
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
@@ -926,8 +926,7 @@
                 };
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-
-                // ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumsnThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
+                
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
@@ -1013,22 +1012,8 @@
                     //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
 
                     //Boost the Bursting neurons
-                    foreach (var position in ColumnsThatBurst)
-                    {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
-                                {
-                                    if ( ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
-                                    {
-                                        throw new InvalidOperationException("Unable to connect neurons!");
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    if(enableBurstWiring == true)
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
                 else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
@@ -1040,9 +1025,12 @@
 
                     WireCasesTracker[2]++;
 
-                    Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
-                    WriteLogsToFile(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
-                    Thread.Sleep(1000);
+                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    {
+                        Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                        WriteLogsToFile(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                        //Thread.Sleep(1000);
+                    }
 
                     foreach (var correctlyPredictedNeuron in correctPredictionList)
                     {
@@ -1080,20 +1068,14 @@
                     //
                     WireCasesTracker[3]++;
 
-                    Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
-                    WriteLogsToFile(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
-
-                    foreach (var position in ColumnsThatBurst)
+                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
                     {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON);
-                            }
-                        }
+                        Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
+                        WriteLogsToFile(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
                     }
+
+                    if (enableBurstWiring == true)
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
@@ -1106,9 +1088,12 @@
 
                     WireCasesTracker[4]++;
 
-                    Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
-                    WriteLogsToFile(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
-                    Thread.Sleep(1000);
+                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    {
+                        Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
+                        WriteLogsToFile(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
+                        //Thread.Sleep(1000);
+                    }
 
                     List<Neuron> burstList = new List<Neuron>();
 
@@ -1136,20 +1121,8 @@
                     }
 
                     //Boost All the Bursting Neurons
-                    foreach (var position in ColumnsThatBurst)
-                    {
-                        foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    if(ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
-                                    {
-                                        throw new InvalidOperationException("Unable to connect two neurons!");
-                                    }
-                            }
-                        }
-                    }
+                    if (enableBurstWiring == true)
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                     //Boost the Non Bursting Neurons
 
@@ -1228,6 +1201,26 @@
 
         #region INTERNAL METHODS
 
+        private void ConnectAllBurstingNeuronstoNeuronssFiringLastcycle()
+        {
+            foreach (var position in ColumnsThatBurst)
+            {
+                foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
+                {
+                    foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                    {
+                        if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
+                        {
+                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                            {
+                                throw new InvalidOperationException("Unable to connect neurons!");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public string PrintBlockDetailsSingleLine()
         {
             return "  BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString();
@@ -1257,8 +1250,7 @@
         }
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
-        {
-            // Make sure while connecting two neurons we enver connect 2 neurons from the same column to each other , this might result in a fire loop.
+        {            
             //if (cType == ConnectionType.DISTALDENDRITICNEURON)
             //{
             //    if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
@@ -1318,7 +1310,7 @@
 
             if (IsAxonalConnectionSuccesful)
             {
-                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, cType, IsActive);
+                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, logfilename, cType, IsActive);
 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
                 {
@@ -1327,17 +1319,16 @@
 
                 if (IsDendronalConnectionSuccesful && (Mode == LogMode.All || Mode == LogMode.Info))
                 {
-                    Console.WriteLine("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
-                    WriteLogsToFile("INFO :: Added new Distal Connection between tow Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
                 }
-                else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised : Throw;
+                else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
                 {
                     if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
                     {
                         Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
                         WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
-                        //Thread.Sleep(5000);
+                        throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());                        
                     }
 
                     throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());

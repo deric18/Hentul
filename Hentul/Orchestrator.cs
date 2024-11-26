@@ -83,6 +83,8 @@
 
         public string filename;
 
+        public string logfilename;
+
         public NetworkMode NMode { get; set; }
 
         List<int> firingFOM;
@@ -191,6 +193,8 @@
 
             filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
 
+            logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
+
         }
 
         public void LoadFOMnSOM()
@@ -253,7 +257,7 @@
             bmp.Save(filename, ImageFormat.Jpeg);
         }
 
-        public void ProcesStep1()
+        public void ProcesStep1(Bitmap greyScalebmp)
         {
 
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
@@ -263,15 +267,15 @@
 
             BlockBehaviourManager fom;            
 
-            Mapper.ParseBitmap(bmp);
+            Mapper.ParseBitmap(greyScalebmp);
 
             List<Position_SOM> somPosition = new List<Position_SOM>();            
 
             int blackCount = 0;
 
-            for (int i = 0; i < bmp.Width; i++)
+            for (int i = 0; i < greyScalebmp.Width; i++)
             {
-                for (int j = 0; j < bmp.Height; j++)
+                for (int j = 0; j < greyScalebmp.Height; j++)
                 {
                     if (Mapper.flagCheckArr[i, j] == false)
                     {
@@ -430,7 +434,14 @@
             //STEP 1B : Fire all L3B SOM's
 
             if (Mapper.somPositions.Count != 0)
+            {
+                if(Mapper.somPositions.Count > 125)
+                {
+                    WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
+                }
+
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL));
+            }
 
 
             Mapper.clean();
@@ -701,6 +712,11 @@
             somBBM_L3B.BackUp("SOM-1");
         }
 
+
+        private void WriteLogsToFile(string logMsg)
+        {
+            File.WriteAllText(filename, logMsg);
+        }
 
         public void Restore()
         {

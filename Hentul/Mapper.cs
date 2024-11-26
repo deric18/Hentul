@@ -435,10 +435,10 @@
                 Color color4 = bitmap.GetPixel(pixel4.X, pixel4.Y);
                 flagCheckArr[pixel4.X, pixel4.Y] = true;
 
-                bool check1 = CheckIfColorIsBlack(color1);
-                bool check2 = CheckIfColorIsBlack(color2);
-                bool check3 = CheckIfColorIsBlack(color3);
-                bool check4 = CheckIfColorIsBlack(color4);
+                bool check1 = CheckIfColorIsWhite(color1);
+                bool check2 = CheckIfColorIsWhite(color2);
+                bool check3 = CheckIfColorIsWhite(color3);
+                bool check4 = CheckIfColorIsWhite(color4);
 
                 if (check1 && check2 && check3 && check4)
                 {
@@ -556,6 +556,9 @@
                 dict.Add(mapperCase, intlist);
             }
         }
+
+        private bool CheckIfColorIsWhite(Color color)
+            => (color.R > 240 && color.G > 240 && color.B > 240);
 
         private bool CheckIfColorIsBlack(Color color)
             => (color.R < 10 && color.G < 10 && color.B < 10);

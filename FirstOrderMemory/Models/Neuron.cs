@@ -17,9 +17,9 @@ namespace FirstOrderMemory.Models
         public static readonly int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
-        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
-		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 1000;
-        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 1500;
+        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 500;
+		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 5000;
+        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 10000;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
@@ -317,7 +317,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, ConnectionType? cType = null, bool IsActive = false)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
         {
 
             //if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
@@ -370,16 +370,21 @@ namespace FirstOrderMemory.Models
             }
             else
             {
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive));
-
-                //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
-
-                if( (ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1400 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
+                if ((ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
                 {
-                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString());
+
+                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
+                    WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString(), filename);
+
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
+                    WriteLogsToFile(" Total DistalDendritic Count : " + NeuronID.ToString(), filename);
                     //Thread.Sleep(1000);
                 }
+
+
+
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive));                
+                
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
