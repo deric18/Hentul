@@ -418,7 +418,7 @@ namespace FirstOrderMemory.Models
             }
         }
 
-        internal bool RemoveAxonalConnection(Neuron dendronalNeuron)
+        internal ConnectionRemovalReturnType RemoveAxonalConnection(Neuron dendronalNeuron)
         {
             if (AxonalList.TryGetValue(dendronalNeuron.NeuronID.ToString(), out var synapse))
             {                
@@ -427,17 +427,17 @@ namespace FirstOrderMemory.Models
                 {
                     Console.WriteLine(" WARNING :: RemoveAxonalConnection :: Cannot Remove Schema Based Axonal Connections");
                     //Thread.Sleep(5000);
-                    return false;
+                    return ConnectionRemovalReturnType.SOFTFALSE;
                 }
 
                 Console.WriteLine("INFO :: Removing axonal connection to a neuron" + dendronalNeuron.NeuronID);
 
                 AxonalList.Remove(dendronalNeuron.NeuronID.ToString());
 
-                return true;
+                return ConnectionRemovalReturnType.TRUE;
             }
 
-            return false;
+            return ConnectionRemovalReturnType.HARDFALSE;
         }
 
         public int CompareTo(Neuron? other)
@@ -501,5 +501,12 @@ namespace FirstOrderMemory.Models
         APICAL,
         TEMPORAL,
         NORMAL
+    }
+
+    internal enum ConnectionRemovalReturnType
+    {
+        TRUE,
+        HARDFALSE,
+        SOFTFALSE
     }
 }

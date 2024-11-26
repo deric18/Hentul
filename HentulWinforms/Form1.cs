@@ -94,8 +94,12 @@ namespace HentulWinforms
                 orchestrator.ProcessStep2();    // Fire SOM per FOMS
 
                 counter++;                      // Repeat!
+
+                CycleLabel.Text = counter.ToString();
+
+                CycleLabel.Refresh();   
             }
-            
+
             if (label_done.Text == "Finished Processing Image")
             {
                 orchestrator.BackUp();
@@ -221,6 +225,14 @@ namespace HentulWinforms
 
         }
 
+        private void label1_Click_1(object sender, EventArgs e)
+        {
 
+        }
+
+        private void CycleLabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

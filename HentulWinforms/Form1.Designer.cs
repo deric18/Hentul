@@ -39,6 +39,8 @@ namespace HentulWinforms
             EdgedImage = new PictureBox();
             ObjectLabel = new Label();
             label_done = new Label();
+            label1 = new Label();
+            CycleLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -111,12 +113,33 @@ namespace HentulWinforms
             // label_done
             // 
             label_done.AutoSize = true;
-            label_done.Location = new Point(31, 29);
+            label_done.Location = new Point(31, 26);
             label_done.Name = "label_done";
             label_done.Size = new Size(64, 15);
             label_done.TabIndex = 8;
             label_done.Text = "Processing";
             label_done.Click += label1_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(43, 860);
+            label1.Name = "label1";
+            label1.Size = new Size(52, 15);
+            label1.TabIndex = 9;
+            label1.Text = "CYCLE #";
+            label1.Click += label1_Click_1;
+            // 
+            // CycleLabel
+            // 
+            CycleLabel.AutoSize = true;
+            CycleLabel.LiveSetting = System.Windows.Forms.Automation.AutomationLiveSetting.Assertive;
+            CycleLabel.Location = new Point(154, 860);
+            CycleLabel.Name = "CycleLabel";
+            CycleLabel.Size = new Size(13, 15);
+            CycleLabel.TabIndex = 10;
+            CycleLabel.Text = "0";
+            CycleLabel.Click += CycleLabel_Click;
             // 
             // Form1
             // 
@@ -124,6 +147,8 @@ namespace HentulWinforms
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(CycleLabel);
+            Controls.Add(label1);
             Controls.Add(label_done);
             Controls.Add(ObjectLabel);
             Controls.Add(EdgedImage);
@@ -156,5 +181,7 @@ namespace HentulWinforms
         private PictureBox EdgedImage;
         private Label ObjectLabel;
         private Label label_done;
+        private Label label1;
+        private Label CycleLabel;
     }
 }

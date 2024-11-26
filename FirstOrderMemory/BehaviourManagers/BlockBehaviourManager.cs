@@ -880,8 +880,9 @@
             ColumnsThatBurst.Clear();                             
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (CycleNum >= 100 && CycleNum % 100 == 0)
+            if (CycleNum >= 100 && CycleNum % 50 == 0)
             {
+                WriteLogsToFile(" INFO :: Performing Prune(). Cycle NUM : " + CycleNum.ToString() + " BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString() );
                 Prune();
                 TotalBurstFire = 0;
                 TotalPredictionFires = 0;
@@ -1000,6 +1001,10 @@
 
                                 PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
+                        }
+                        else
+                        {
+                            WriteLogsToFile("WIRE WARNING :: coorectly predicted Neuron does not exist in PredictedNeuronsforThisCycle. CorrectlyPredicted Neuron :" + correctlyPredictedNeuron.NeuronID.ToString());
                         }
                     }
 
@@ -1327,7 +1332,7 @@
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised : Throw;
                 {
-                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == false)
+                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
                     {
                         Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
                         WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
@@ -1595,10 +1600,7 @@
                         List<string> DremoveList = null;
                         List<string> AremoveList = null;
 
-                        var distalDendriticList = neuron.ProximoDistalDendriticList.Values.Where(x =>
-                        x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) &&
-                        x.IsActive == false &&
-                        (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
+                        var distalDendriticList = neuron.ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.IsActive == false);
 
                         if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT) ) && distalDendriticList.Count() < 0.5 * neuron.ProximoDistalDendriticList.Count)
                         {
@@ -1614,23 +1616,34 @@
                                 if (DremoveList == null)
                                 {
                                     DremoveList = new List<string>();
-                                }
-
-                                DremoveList.Add(kvp.Key);
+                                }                                
 
                                 //Remove Corresponding Connected Axonal Neuron
                                 var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
+
                                 if (axonalNeuron.AxonalList.TryGetValue(neuron.NeuronID.ToString(), out var connection))
                                 {
-                                    if (axonalNeuron.RemoveAxonalConnection(neuron) == false)
+                                    var result = axonalNeuron.RemoveAxonalConnection(neuron);
+
+                                    if (result == ConnectionRemovalReturnType.HARDFALSE)
                                     {
-                                        Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
+                                        Console.WriteLine(" EXCEPTION : Could not remove connected Axonal Neuron");
                                         throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
+                                    }
+                                    else if(result == ConnectionRemovalReturnType.SOFTFALSE)
+                                    {
+                                        DremoveList.Add(kvp.Key);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
+                                        if (Mode == LogMode.All || Mode == LogMode.Info)
+                                        {
+                                            Console.WriteLine("INFO :: Removing Inactive Synapse AxonalNeuron : " + axonalNeuron.NeuronID + "Dendroanl Neuron : " + kvp.Key);
+                                            WriteLogsToFile("INFO :: Removing Inactive Synapse AxonalNeuron : " + axonalNeuron.NeuronID + "Dendroanl Neuron : " + kvp.Key);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                    WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
                                 }
 
                             }
@@ -1694,7 +1707,7 @@
 
                         if (axonalNeuron.AxonalList.TryGetValue(prunableNeuron.NeuronID.ToString(), out var connection))
                         {
-                            if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == false)
+                            if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == ConnectionRemovalReturnType.HARDFALSE)
                             {
                                 Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
                                 throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
@@ -1878,7 +1891,7 @@
             {
                 if (synapse == null)
                 {
-                    Console.WriteLine("ERROR :: PramoteCorrectPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
+                    Console.WriteLine("ERROR :: PramoteCorrectlyPredictionDendronal: Trying to increment strength on a synapse object that was null!!!");
                     throw new InvalidOperationException("Not Supposed to happen!");
                 }
 
