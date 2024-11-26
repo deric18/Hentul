@@ -432,6 +432,11 @@
             if (Mapper.somPositions.Count != 0)
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL));
 
+
+            Mapper.clean();
+            blackCount = 0;
+            firingFOM.Clear();
+
             #endregion
         }
 
@@ -467,12 +472,7 @@
             }
 
             return nextMotorOutput;
-        }
-
-        public void ProcesStep3()
-        {
-            Mapper.clean();
-        }
+        }        
 
         public void DoneWithTraining()
         {

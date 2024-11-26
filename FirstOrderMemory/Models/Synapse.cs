@@ -14,9 +14,9 @@ namespace FirstOrderMemory.Models
 
         public ConnectionType cType { get; private set; }
         
-        public UInt16 PredictiveHitCount { get; private set; }
+        public int PredictiveHitCount { get; private set; }
 
-        public UInt16 FiringHitCount { get; private set; }
+        public int FiringHitCount { get; private set; }
 
         private uint _strength {  get; set; } 
 

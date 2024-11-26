@@ -79,7 +79,7 @@ namespace HentulWinforms
 
                 orchestrator.MoveCursor(value);
 
-                orchestrator.ProcessStep0();
+                orchestrator.ProcessStep0();        //Grab Image 
 
                 CurrentImage.Image = orchestrator.bmp;
 
@@ -89,11 +89,11 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                orchestrator.ProcesStep1();
+                orchestrator.ProcesStep1();     // Fire FOMS per image
 
-                orchestrator.ProcessStep2();
+                orchestrator.ProcessStep2();    // Fire SOM per FOMS
 
-                counter++;
+                counter++;                      // Repeat!
             }
             
             if (label_done.Text == "Finished Processing Image")

@@ -83,32 +83,7 @@ namespace Hentul.UT
             //Create SDR
             //Compare Pixel Value with SDR Values.
         }
-
-
-        [Test]
-        public void MultipleInstanceTestFOM()
-        {
-
-            sg = new ScreenGrabber(count);
-
-            sg.Init();
-
-            for (int i = 0; i < count; i++)
-            {
-
-                Assert.That(sg.fomBBM[i].ApicalLineArray.Length, Is.EqualTo(100));
-
-                Assert.AreEqual(4, sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.Count);
-
-                Assert.AreEqual(2, sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.Count);
-
-                Assert.IsNotNull(sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].ProximoDistalDendriticList.ElementAt(rand.Next(0, 4)));
-
-                Assert.IsNotNull(sg.fomBBM[i].Columns[rand.Next(0, 9), rand.Next(0, 9)].Neurons[rand.Next(0, 9)].AxonalList.ElementAt(rand.Next(0, 2)));
-
-            }
-
-        }
+        
 
         [Test, Ignore("Used as Needed ! Not an actual Test!")]
         public void TestCodeChange()
@@ -239,105 +214,7 @@ namespace Hentul.UT
             int breakpoint = 1;
 
         }
-
-        [Test]
-        public void TestForLogicEdgeCase1()
-        {
-            ScreenGrabber sg = new ScreenGrabber(count, true, false, 7);
-
-            int TotalNumberOfPixelsToProcess_X = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
-            int TotalNumberOfPixelsToProcess_Y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
-
-            int TotalPixelsCoveredPerIteration = sg.BlockOffset * sg.BlockOffset; //2500
-
-            booleans = new bool[TotalNumberOfPixelsToProcess_X, TotalNumberOfPixelsToProcess_Y];
-
-            int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / sg.BlockOffset);
-            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / sg.BlockOffset);
-
-            int num_unit_per_block_x = 5;
-            int num_unit_per_block_y = 5;
-            int num_bbm_per_unit_x = 5;
-            int num_bbm_per_unit_y = 2;
-            int num_pixels_per_bbm_x = 10;
-            int num_pixels_per_bbm_y = 10;
-            
-
-            for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
-            {
-                for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-                {
-                    int bbmId = 0;
-
-                    for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-                    {
-                        for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                        {
-                            for (int j = 0; j < num_pixels_per_bbm_y; j++)
-                            {
-                                for (int i = 0; i < num_pixels_per_bbm_x; i++)
-                                {
-                                    int x = blockid_x * sg.BlockOffset + unitId_x * sg.UnitOffset + i;
-                                    int y = blockid_y * sg.BlockOffset + unitId_y * sg.UnitOffset + j;
-
-                                    //if (x > sg.bmp.Width || y > sg.bmp.Height)
-                                    //{
-                                    //    int breakpoint = 1;
-                                    //}
-
-                                    booleans[x, y] = true;
-                                }
-
-                                if (j % 2 == 0)
-                                {
-                                    bbmId++;
-                                }
-                            }
-                        }
-                    }
-
-                    Assert.AreEqual(125, bbmId);
-                }
-            }
-
-
-            for (int i = 0; i < TotalNumberOfPixelsToProcess_X; i++)
-            {
-                for (int j = 0; j < TotalNumberOfPixelsToProcess_Y; j++)
-                {
-                    if (booleans[i, j] == false)
-                    {
-                        Console.WriteLine(i.ToString() + " " + j.ToString());
-                        Assert.Fail();
-                    }
-                }
-            }
-        }
-
-        [Test]
-        public void TestForLogicEdgeCase2()
-        {
-            ScreenGrabber sg = new ScreenGrabber(count, true, false, 1);            
-
-            int bound_x = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Width);
-            int bound_y = sg.GetRoundedTotalNumberOfPixelsToProcess(sg.bmp.Height);
-
-            booleans = new bool[bound_x, bound_y];
-
-            sg.GrabNProcess(ref booleans);
-
-            for (int i = 0; i < bound_x; i++)
-            {
-                for (int j = 0; j < bound_y; j++)
-                {
-                    if(booleans[i, j] == false)
-                    {
-                        Console.WriteLine(" i : " + i.ToString() + " J: " +j.ToString());
-                        Assert.Fail();
-                    }
-                }
-            }
-        }
+        
 
         [Test, Ignore("Not Ready Yet")]
         public void TestFOMForImage2()

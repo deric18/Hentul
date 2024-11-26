@@ -106,7 +106,7 @@
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        public static UInt16 DISTALNEUROPLASTICITY = 5;
+        public static int DISTALNEUROPLASTICITY = 25;
         public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
@@ -880,7 +880,7 @@
             ColumnsThatBurst.Clear();                             
 
             //Every 50 Cycles Prune unused and under Firing Connections
-            if (CycleNum >= 1000 && CycleNum % 500 == 0)
+            if (CycleNum >= 100 && CycleNum % 100 == 0)
             {
                 Prune();
                 TotalBurstFire = 0;

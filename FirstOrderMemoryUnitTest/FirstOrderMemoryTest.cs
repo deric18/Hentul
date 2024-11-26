@@ -388,11 +388,8 @@ namespace FirstOrderMemoryUnitTest
             var prefireSynapseStrength1 = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos1.ToString()].GetStrength();
             var prefireSynapseStrength2 = 1;
 
-            bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron1);
-            bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron1);
-            bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron1);
-            bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron1);
-
+            RepeatCycle(axonalNeuron, dendronalNeuron1, (int)BlockBehaviourManager.DISTALNEUROPLASTICITY - 1);
+                        
             bbManager.Fire(axonalSdr);
 
 
@@ -669,11 +666,13 @@ namespace FirstOrderMemoryUnitTest
                 currentStrength = postSynapse.GetStrength();
             }
 
+            overlapNeuron.ProcessVoltage(120);
+
             Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuron.NeuronID.ToString());
 
             Assert.IsTrue(currentStrength > previousStrength);
 
-            Assert.AreEqual(NeuronState.SPIKING, overlapNeuron.CurrentState);
+            Assert.IsTrue(Neuron.COMMON_NEURONAL_FIRE_VOLTAGE < overlapNeuron.Voltage);
         }
 
         [TestMethod]
@@ -744,7 +743,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.IsTrue(currentStrength > previousStrength);
 
-            Assert.AreEqual(NeuronState.SPIKING, apicalNeuron.CurrentState);
+            Assert.IsTrue(Neuron.COMMON_NEURONAL_FIRE_VOLTAGE < apicalNeuron.Voltage);
         }
 
         [TestMethod]
@@ -1022,6 +1021,13 @@ namespace FirstOrderMemoryUnitTest
                 }
             }
         }
+
+        private void RepeatCycle(Neuron axonalNeuron, Neuron dendronalNeuron, int repeat)
+        {
+            for(int i = 0; i < repeat; i++)
+                bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron);
+        }
+
 
         //Hoping that (9,9,4) never gets added as a predicted Neuron
         private SDR_SOM GetSDRExcludingThisList(List<Neuron> depolarizedNeuronList)

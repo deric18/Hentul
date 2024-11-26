@@ -558,9 +558,9 @@
         }
 
         private bool CheckIfColorIsBlack(Color color)
-            => (color.R < 200 && color.G < 190 && color.B < 190);
+            => (color.R < 10 && color.G < 10 && color.B < 10);
 
-        internal void clean()
+        public void clean()
         {
             somPositions.Clear();
             Xoffset = -1;
