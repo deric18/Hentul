@@ -41,6 +41,7 @@ namespace HentulWinforms
             label_done = new Label();
             label1 = new Label();
             CycleLabel = new Label();
+            labelBox = new TextBox();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -141,12 +142,20 @@ namespace HentulWinforms
             CycleLabel.Text = "0";
             CycleLabel.Click += CycleLabel_Click;
             // 
+            // labelBox
+            // 
+            labelBox.Location = new Point(1216, 674);
+            labelBox.Name = "labelBox";
+            labelBox.Size = new Size(100, 23);
+            labelBox.TabIndex = 11;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(labelBox);
             Controls.Add(CycleLabel);
             Controls.Add(label1);
             Controls.Add(label_done);
@@ -183,5 +192,6 @@ namespace HentulWinforms
         private Label label_done;
         private Label label1;
         private Label CycleLabel;
+        private TextBox labelBox;
     }
 }

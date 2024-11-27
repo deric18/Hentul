@@ -23,11 +23,11 @@
 
         private string backupDir;
 
-        public HippocampalComplex()
+        public HippocampalComplex(string firstLabel)
         {
 
             Objects = new Dictionary<string, RecognisedEntity>();
-            CurrentObject = new UnrecognisedEntity();
+            CurrentObject = new UnrecognisedEntity(firstLabel);
             networkMode = NetworkMode.TRAINING;
             NumberOfITerationsToConfirmation = 6;
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
@@ -54,7 +54,8 @@
 
             if (networkMode == NetworkMode.TRAINING)
             {
-                // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.
+                // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.                
+
                 if (CurrentObject.AddNewSenei(sensei) == false)
                 {
                     int breakpoint1 = 1; // pattern already added or Invalid Pattern.
@@ -97,6 +98,11 @@
             }
 
             return toReturn;
+        }
+
+        public void DoneWithTraining(string label)
+        {
+            ConvertUnrecognisedObjectToRecognisedObject(label);
         }
 
         public void DoneWithTraining()
@@ -202,6 +208,22 @@
             networkMode = NetworkMode.PREDICTION;
         }
 
+
+        private void ConvertUnrecognisedObjectToRecognisedObject(string label)
+        {
+            if (CurrentObject.ObjectSnapshot.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot Transform empty object!");
+            }
+
+            RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
+
+            Objects.Add(newObject.Label, newObject);
+
+            CurrentObject = new UnrecognisedEntity(label);
+        }
+
+
         private void ConvertUnrecognisedObjectToRecognisedObject()
         {
             if (CurrentObject.ObjectSnapshot.Count == 0)
@@ -210,6 +232,8 @@
             }
 
             RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
+
+            Objects.Add(newObject.Label, newObject);            
         }
 
         private void FinishedProcessingImage()

@@ -80,7 +80,7 @@ namespace HentulWinforms
 
                 orchestrator.MoveCursor(value);
 
-                orchestrator.ProcessStep0();        //Grab Image 
+                orchestrator.ProcessStep0();        //Grab Image
 
                 CurrentImage.Image = orchestrator.bmp;
 
@@ -105,13 +105,14 @@ namespace HentulWinforms
             {
                 if (imageIndex >= 3)
                 {
-                    orchestrator.BackUp();
+                    //orchestrator.BackUp();
                     StartButton.Text = "Start Prediction";
                     StartButton.Refresh();
+                    orchestrator.DoneWithTraining();
                 }
                 else
                 {
-                    orchestrator.DoneWithTraining();
+                    orchestrator.DoneWithTraining(labelBox.Text);
                     StartButton.Text = "Start Another Image";
                     StartButton.Refresh();
                 }

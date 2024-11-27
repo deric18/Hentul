@@ -157,7 +157,7 @@
 
             somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);
 
-            HCAccessor = new HippocampalComplex();
+            HCAccessor = new HippocampalComplex("Apple");
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -485,10 +485,15 @@
             return nextMotorOutput;
         }        
 
+        public void DoneWithTraining(string label)
+        {
+            HCAccessor.DoneWithTraining(label);
+        }
+
         public void DoneWithTraining()
         {
             HCAccessor.DoneWithTraining();
-        }       
+        }
 
         private SDR_SOM GetSdrSomFromFOMs()
         {

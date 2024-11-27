@@ -10,11 +10,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public List<Sensation_Location> ObjectSnapshot { get; set; }
 
-        public string Label { get; private set; }
+        public string Label { get; internal set; }
 
-        public UnrecognisedEntity()
+        public UnrecognisedEntity(string label)
         {
-            Label = string.Empty;
+            Label = label;
             ObjectSnapshot = new List<Sensation_Location>();
         }
 
