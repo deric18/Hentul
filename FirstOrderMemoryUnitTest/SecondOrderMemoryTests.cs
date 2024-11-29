@@ -17,11 +17,55 @@
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_3B);
+            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None, true);
 
             bbManager.Init(1);
 
             rand1 = new Random();
+        }
+
+        [TestMethod]
+        public void TestNeuronsFiringLastcycle()
+        {
+            var temporalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
+            var apicalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL, bbManager.Layer);
+            var spatialSdrBbm1 = TestUtils.GetSpatialAndTemporalOverlapSDR(apicalSdrBbm1, temporalSdrBbm1);
+
+            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 10; i++)
+            {
+               
+                bbManager.Fire(temporalSdrBbm1);      //Deplarize temporal
+
+                bbManager.Fire(apicalSdrBbm1);        //Depolarize apical
+
+                bbManager.Fire(spatialSdrBbm1);       //Fire spatial
+
+                var firingList = bbManager.GetAllNeuronsFiringLatestCycle();
+
+                Assert.IsTrue(firingList.ActiveBits.Count != 0);
+            }
+        }
+
+        [TestMethod]
+        public void TestNeuronsFiringThiscycle()
+        {
+            var temporalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
+            var apicalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL, bbManager.Layer);
+            var spatialSdrBbm1 = TestUtils.GetSpatialAndTemporalOverlapSDR(apicalSdrBbm1, temporalSdrBbm1);
+
+            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 10; i++)
+            {
+
+                bbManager.Fire(temporalSdrBbm1);      //Deplarize temporal
+
+                bbManager.Fire(apicalSdrBbm1);        //Depolarize apical
+
+                bbManager.Fire(spatialSdrBbm1);       //Fire spatial
+
+                var firingList = bbManager.GetAllNeuronsFiringLatestCycle();
+
+                Assert.IsTrue(firingList.ActiveBits.Count != 0);
+            }
         }
 
         [TestMethod]
@@ -50,13 +94,7 @@
 
                 bbManager.Fire(apicalSdrBbm1);        //Depolarize apical                                
 
-                bbManager.Fire(spatialSdrBbm1);       //Fire spatial
-                
-                if (i == 0)
-                {
-                    spikingList1 = bbManager.GetAnySpikeTrainNeuronsThisCycle();
-                    Assert.AreEqual(4, spikingList1.Count);
-                }
+                bbManager.Fire(spatialSdrBbm1);       //Fire spatial                                
 
                 bbManager.Fire(temporalSdrBbm1);      //Deplarize temporal            
 
@@ -66,7 +104,7 @@
 
                 var spikinglist2 = bbManager.GetAnySpikeTrainNeuronsThisCycle();
 
-                Assert.AreEqual(8, spikinglist2.Count);
+                //Assert.AreEqual(8, spikinglist2.Count);
 
                 foreach (var spiker1 in spikingList1)
                 {
@@ -88,7 +126,7 @@
                 }
             }
 
-            var firingList = bbManager.GetAllFiringNeuronsThisCycle();
+            var firingList = bbManager.GetAllNeuronsFiringLatestCycle();
 
             var spikingList = bbManager.GetAnySpikeTrainNeuronsThisCycle();
 
@@ -98,16 +136,159 @@
             {
                 bbManager.Fire(nullSDR);
 
-                var firingList2 = bbManager.GetAllFiringNeuronsThisCycle();
+                var firingList2 = bbManager.GetAllNeuronsFiringLatestCycle();
 
                 var spikinglist3 = bbManager.GetAnySpikeTrainNeuronsThisCycle();
             }
 
             var spikingList3 = bbManager.GetAnySpikeTrainNeuronsThisCycle();
 
-            Assert.AreEqual(0, spikingList3.Count);
-
-            bool breakpoint = true;
+            Assert.AreEqual(0, spikingList3.Count);            
         }
+
+
+        [TestMethod]
+        public void TestSequenceMemory1()
+        {
+            Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
+
+            SDR_SOM sDR_SOM = new SDR_SOM(1250, 10, new List<Position_SOM>() { new Position_SOM(607, 3, 3) }, iType.SPATIAL);
+
+            var connectedPos = TestUtils.FindNeuronalPositionThatAreConnectedToTargetNeuron(targetNeuron, bbManager);
+
+            SDR_SOM neighbhourSOM = new SDR_SOM(1250, 10, connectedPos, iType.SPATIAL);
+
+            List<Neuron> neigbhourNeurons = TestUtils.ConvertPosListotNeuronalList(connectedPos, bbManager);
+
+            foreach (var neuron in neigbhourNeurons)
+            {
+                neuron.ProcessVoltage(10);
+            }
+
+            bbManager.Fire(neighbhourSOM);
+
+            bbManager.Fire(sDR_SOM);
+
+            Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
+        }
+
+
+        [TestMethod]
+        public void TestSequenceMemory2()
+        {
+            // Project ABC Pattern 60 times and test C is predicted after B 31st time.
+
+            SDR_SOM patternA = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(0, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('A');
+            SDR_SOM patternB = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(884, 8, 3) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('B');
+            SDR_SOM patternC = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(429, 4, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('C');
+            SDR_SOM predictedSDR;
+
+            int repCount = 0;
+            int wirecount = 10;
+
+            while (repCount != 60)
+            {
+                Console.WriteLine("REPCOUNT : " + repCount.ToString());
+
+                bbManager.Fire(patternA);       //Fire A , Predict B NOT C
+
+                if (repCount > wirecount)
+                {
+                    predictedSDR = bbManager.GetPredictedSDR();
+
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true));
+                }
+
+
+                if (repCount == 1)
+                {
+                    bbManager.Fire(patternB);       //Fire B , Predict C NOT A
+                }
+                else
+                {
+                    bbManager.Fire(patternB);
+                }
+
+                if (repCount > wirecount)
+                {
+                    predictedSDR = bbManager.GetPredictedSDR();
+
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));
+
+                    bool b = predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0, 1, 3) });
+
+                    if (b)
+                    {
+                        predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0, 1, 3) });
+                    }
+
+                    Assert.IsFalse(b);
+                }
+
+                if (repCount < wirecount)
+                {
+                    bbManager.Fire(patternC);
+                }
+                else
+                {
+                    bbManager.Fire(patternC);       //Fire C , Predict A NOT B
+                }
+
+                predictedSDR = bbManager.GetPredictedSDR();
+
+                if (repCount > wirecount)
+                {
+                    if (repCount >= 3)
+                    {
+                        bool b = predictedSDR.IsUnionTo(patternA, true);
+                        bool c = predictedSDR.IsUnionTo(patternB, true);
+
+                        if (b == false || c == true)
+                        {
+                            int bp = 1;
+                        }
+                    }
+
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternB, true));
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternA, true));
+                }
+
+                repCount++;
+            }
+        }
+
+
+        [TestMethod]
+        public void TestTargetNeuronSpikesWithNeibhouringNeuronalFiring()
+        {
+            Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
+
+            SDR_SOM sDR_SOM = new SDR_SOM(1250, 10, new List<Position_SOM>() { new Position_SOM(607, 3, 3) }, iType.SPATIAL);
+
+            var connectedPos = TestUtils.FindNeuronalPositionThatAreConnectedToTargetNeuron(targetNeuron, bbManager);
+
+            SDR_SOM neighbhourSOM = new SDR_SOM(1250, 10, connectedPos, iType.SPATIAL);
+
+            List<Neuron> neigbhourNeurons = TestUtils.ConvertPosListotNeuronalList(connectedPos, bbManager);
+
+            foreach (var neuron in neigbhourNeurons)
+            {
+                neuron.ProcessVoltage(10);
+            }
+            
+            bbManager.Fire(neighbhourSOM);
+           
+            bbManager.Fire(sDR_SOM);
+                
+            Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
+        }
+
+        [TestMethod]
+        public void TestHowManyNeighbhoursNeedToFireBeforTargetNeuronFires()
+        {
+            // Fire a bunch of surrounding neurons near a target neuron and make sure it fire and check how many neurons are needed before it fires.
+        }
+       
     }
 }

@@ -18,7 +18,7 @@ namespace FirstOrderMemoryUnitTest
         [TestInitialize]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4);
+            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.None, true);
 
             bbManager.Init(1);
 
@@ -141,7 +141,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(spatialSdr, false, true);
 
-            var firingNeuronList = bbManager.GetAllFiringNeuronsThisCycle();
+            var firingNeuronList = bbManager.GetAllNeuronsFiringLatestCycle();
 
             Assert.AreEqual(1, firingNeuronList.ActiveBits.Count);
 
@@ -759,7 +759,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(spatialSdr, true, true);       //Fire spatial
 
-            var firingSdr = bbManager.GetAllFiringNeuronsThisCycle();
+            var firingSdr = bbManager.GetAllNeuronsFiringLatestCycle();
 
             Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr, true));
         }
@@ -849,14 +849,13 @@ namespace FirstOrderMemoryUnitTest
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
             var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
 
-            bbManager.Fire(apicalSdr);
-           
+            bbManager.Fire(apicalSdr);           
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
             Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
 
-            bbManager.Fire(spatialSdr, false, false);
+            bbManager.Fire(spatialSdr);
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 

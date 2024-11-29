@@ -4,8 +4,7 @@
     using Common;
     using System.Xml;
     using System.Linq;
-    using System;
-    using System.ComponentModel.Design;
+    using System;    
 
     public class BlockBehaviourManager
     {
@@ -22,7 +21,7 @@
 
         public int BBMID { get; private set; }
 
-        public Dictionary<string, List<Neuron>> PredictedNeuronsforLastCycle { get; private set; }
+        public Dictionary<string, List<Neuron>> PredictedNeuronsfromLastCycle { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
 
@@ -76,6 +75,8 @@
 
         private bool IsBurstOnly;
 
+        private bool includeBurstLearning;
+
         private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
         public iType PreviousiType { get; private set; }
@@ -106,7 +107,7 @@
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        public static int DISTALNEUROPLASTICITY = 25;
+        public static int DISTALNEUROPLASTICITY = 5;
         public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
@@ -132,7 +133,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, bool includeBurstLearning = false)
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -155,7 +156,7 @@
 
             IsCurrentApical = false;
 
-            PredictedNeuronsforLastCycle = new Dictionary<string, List<Neuron>>();
+            PredictedNeuronsfromLastCycle = new Dictionary<string, List<Neuron>>();
 
             PredictedNeuronsforThisCycle = new Dictionary<string, List<Neuron>>();
 
@@ -208,6 +209,8 @@
             OverConnectedInShortInterval = new List<Neuron>();
 
             IgnorePostCycleCleanUp = false;
+
+            this.includeBurstLearning = includeBurstLearning;
         }
 
         public void Init(int bbmID)
@@ -666,24 +669,24 @@
             }
 
             //Clean Up stale voltage
-            if (ignorePostCycleCleanUp == false && CurrentiType.Equals(iType.SPATIAL))
-            {
-                foreach(var column in Columns)
-                {
-                    column.PostCycleCleanup();
-                }
-            }
-            else
-            {
-                Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
-                WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
-            }
+            //if (ignorePostCycleCleanUp == false && CurrentiType.Equals(iType.SPATIAL))
+            //{
+            //    foreach (var column in Columns)
+            //    {
+            //        column.PostCycleCleanup();
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+            //    WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+            //}
 
             Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
-            PredictedNeuronsforLastCycle.Clear();
+            PredictedNeuronsfromLastCycle.Clear();
 
             foreach( var kvp in PredictedNeuronsforThisCycle )            
-                PredictedNeuronsforLastCycle.Add(kvp.Key, kvp.Value);            
+                PredictedNeuronsfromLastCycle.Add(kvp.Key, kvp.Value);            
 
             PredictedNeuronsforThisCycle.Clear();
 
@@ -882,7 +885,10 @@
             //Every 50 Cycles Prune unused and under Firing Connections
             if (CycleNum >= 100 && CycleNum % 50 == 0)
             {
-                WriteLogsToFile(" INFO :: Performing Prune(). Cycle NUM : " + CycleNum.ToString() + " BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString() );
+                if (Mode == LogMode.All || Mode == LogMode.Info)
+                {
+                    WriteLogsToFile(" INFO :: Performing Prune(). Cycle NUM : " + CycleNum.ToString() + " BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString());
+                }
                 Prune();
                 TotalBurstFire = 0;
                 TotalPredictionFires = 0;
@@ -906,7 +912,7 @@
             }
         }
 
-        private void Wire(bool enableBurstWiring = false)
+        private void Wire()
         {
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
@@ -1012,7 +1018,7 @@
                     //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
 
                     //Boost the Bursting neurons
-                    if(enableBurstWiring == true)
+                    if(includeBurstLearning == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
@@ -1074,7 +1080,7 @@
                         WriteLogsToFile(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
                     }
 
-                    if (enableBurstWiring == true)
+                    if (includeBurstLearning == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
@@ -1121,7 +1127,7 @@
                     }
 
                     //Boost All the Bursting Neurons
-                    if (enableBurstWiring == true)
+                    if (includeBurstLearning == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                     //Boost the Non Bursting Neurons
@@ -1401,30 +1407,26 @@
         {
             List<Position_SOM> ActiveBits = new List<Position_SOM>();
 
+            //Using PredictedNeuronsforThisCycle as this PredictedNeuronsforNextCycle gets assigned to this.
             foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
             {
                 var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
+				
+                ActiveBits.Add(pos);
+            }            
 
-				if (!ActiveBits.Any(pos1 => pos1.X == pos.X && pos1.Y == pos.Y && pos1.Z == pos.Z))
-                    ActiveBits.Add(pos);
-            }
-
-            //ActiveBits.Sort();
-
-            return new SDR_SOM(X, Y, ActiveBits, iType.SPATIAL);
+            return new SDR_SOM(X, Y, ActiveBits, iType.NONE);
         }
 
-		public SDR_SOM GetAllFiringNeuronsThisCycle()
+        public SDR_SOM GetAllNeuronsFiringLatestCycle()
         {
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
-            if (IgnorePostCycleCleanUp)
-                NeuronsFiringThisCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
-            else
-                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+            NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }
+
 
         private List<Neuron> GetSpikingNeuronList()
         {
@@ -1523,8 +1525,19 @@
                 throw new InvalidDataException(" Input Validated Failed :: Network cannot proces simulateneous same pattern types");
             }
 
-            if(incomingPattern.InputPatternType.Equals(iType.SPATIAL))
+            if (incomingPattern.InputPatternType.Equals(iType.SPATIAL))
+            {
                 CycleNum++;
+
+                foreach (var pos in incomingPattern.ActiveBits)
+                {
+                    if(pos.W == 'W')
+                    {                        
+                        WriteLogsToFile("EXCEPTION :: ValidateInput :: Incoming input has temporal and apical positions whil input Pattern Type is spatial");
+                        throw new InvalidCastException("Incoming input has temporal and apical positions whil input Pattern Type is spatial");
+                    }
+                }
+            }
 
             if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
             {
@@ -1764,7 +1777,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (sourceNeuron.NeuronID.ToString().Equals("55-2-1-N") && targetNeuron.NeuronID.ToString().Equals("314-6-2-N"))
+            if (targetNeuron.NeuronID.ToString().Equals("607-3-3-N"))
             {
                 bool breakpoint = false;
             }
@@ -2019,21 +2032,6 @@
             }
 
             return temporalNeurons;
-        }
-
-        private List<Position_SOM> TransformTemporalCoordinatesToSpatialCoordinates2(List<Position_SOM> activeBits)
-        {
-            List<Position_SOM> temporalNeuronsPositions = new List<Position_SOM>();
-
-            if (activeBits.Count == 0)
-                return temporalNeuronsPositions;
-
-            foreach (var position in activeBits)
-            {
-                temporalNeuronsPositions.Add(this.TemporalLineArray[position.Y, position.X].NeuronID);
-            }
-
-            return temporalNeuronsPositions;
         }
 
         private void IncrementProximalConnectionCount()

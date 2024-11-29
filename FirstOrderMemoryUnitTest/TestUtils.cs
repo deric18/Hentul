@@ -31,6 +31,35 @@
             new SDR_SOM(length, breadth, GetExclusivePositionList(lastFirsingCells, layerType), iType);        
 
 
+        public static  List<Neuron> ConvertStringListotNeuronalList(List<string> stringList, BlockBehaviourManager bbManager)
+        {
+            List<Neuron> neurons = new List<Neuron>();
+
+            foreach (var str in stringList)
+            {
+                Neuron n = bbManager.GetNeuronFromString(str);
+
+                if(n.nType == NeuronType.NORMAL)
+                    neurons.Add(n);
+            }
+
+            return neurons;
+        }
+
+        public static List<Position_SOM> ConvertStringListoPositionList(List<string> stringList)
+        {
+            List<Position_SOM> positionList = new List<Position_SOM>();
+
+            foreach (var str in stringList)
+            {
+                var pos = Position_SOM.ConvertStringToPosition(str);
+                if(pos.W == 'N')
+                    positionList.Add(pos);
+            }
+
+            return positionList;
+        }
+
         private static List<Position_SOM> GetExclusivePositionList(List<Position_SOM> lastFiringCells, LayerType layerType)
         {
             List<Position_SOM> exlcudedPosList = new List<Position_SOM>();
@@ -339,6 +368,39 @@
                 }
 
             return new SDR_SOM(10, 4, posList, iType.TEMPORAL);
+        }
+
+        internal static List<Position_SOM> FindNeuronalPositionThatAreConnectedToTargetNeuron(Neuron targetNeuron, BlockBehaviourManager bbManager)
+        {
+            List<Position_SOM> posList = new List<Position_SOM>();
+
+            foreach (var column in bbManager.Columns)
+            {
+                foreach( var neuron in column.Neurons)
+                {
+                    foreach(var kvp in neuron.AxonalList)
+                    {
+                        if(kvp.Key == targetNeuron.NeuronID.ToString())
+                        {
+                            posList.Add(neuron.NeuronID);
+                        }
+                    }
+                }
+            }
+
+            return posList;
+        }
+
+        internal static List<Neuron> ConvertPosListotNeuronalList(List<Position_SOM> connectedPos, BlockBehaviourManager bbManager)
+        {
+            List<Neuron> neuronList = new List<Neuron>();
+
+            foreach (var item in connectedPos)
+            {
+                neuronList.Add(bbManager.GetNeuronFromPosition(item));
+            }
+
+            return neuronList;
         }
     }
 }

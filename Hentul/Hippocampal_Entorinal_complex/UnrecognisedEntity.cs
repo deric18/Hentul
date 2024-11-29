@@ -12,9 +12,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public string Label { get; internal set; }
 
-        public UnrecognisedEntity(string label)
+        public UnrecognisedEntity()
         {
-            Label = label;
+            Label = string.Empty;
             ObjectSnapshot = new List<Sensation_Location>();
         }
 

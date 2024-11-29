@@ -271,18 +271,18 @@
 
             List<Position_SOM> somPosition = new List<Position_SOM>();            
 
-            int blackCount = 0;
+            int whitecount = 0;
 
-            for (int i = 0; i < greyScalebmp.Width; i++)
-            {
-                for (int j = 0; j < greyScalebmp.Height; j++)
-                {
-                    if (Mapper.flagCheckArr[i, j] == false)
-                    {
-                        blackCount++;
-                    }
-                }
-            }
+            //for (int i = 0; i < greyScalebmp.Width; i++)
+            //{
+            //    for (int j = 0; j < greyScalebmp.Height; j++)
+            //    {
+            //        if (Mapper.flagCheckArr[i, j] == false)
+            //        {
+            //            whitecount++;
+            //        }
+            //    }
+            //}
 
             foreach (var kvp in Mapper.FOMBBMIDS)
             {
@@ -445,7 +445,7 @@
 
 
             Mapper.clean();
-            blackCount = 0;
+            whitecount = 0;
             firingFOM.Clear();
 
             #endregion
@@ -458,19 +458,25 @@
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
+                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
-                SDR_SOM sdr = GetSdrSomFromFOMs();
+                somBBM_L3A.Pool(fom_SDR);
 
-                somBBM_L3A.Pool(sdr);
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle();
 
+                if (som_SDR?.ActiveBits.Count != 0)
+                {
+                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
-                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle(), point);
-
-                HCAccessor.ProcessCurrentPatternForObject(
-                   CycleNum,
-                   firingSensei);
-
+                    HCAccessor.ProcessCurrentPatternForObject(
+                       CycleNum,
+                       firingSensei);
+                }
+                else
+                {
+                    bool breakpoint = true;
+                }
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
@@ -478,12 +484,12 @@
 
                 nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
-                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllFiringNeuronsThisCycle(), point),
+                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllNeuronsFiringLatestCycle(), point),
                     Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetPredictedSDR(), point));
             }
 
             return nextMotorOutput;
-        }        
+        }
 
         public void DoneWithTraining(string label)
         {
@@ -507,7 +513,7 @@
 
             foreach (var fomID in firingFOM)
             {
-                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllFiringNeuronsThisCycle().ActiveBits, fomID));
+                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllNeuronsFiringLatestCycle().ActiveBits, fomID));
             }
 
             if (posList != null || posList.Count != 0)
@@ -675,6 +681,12 @@
             var color = bmp.GetPixel(x, y);
 
             return (color.R < 200 && color.G < 200 && color.B < 200);
+        }
+
+        public void ChangeNetworkModeToPrediction()
+        {
+            NMode = NetworkMode.PREDICTION;
+            HCAccessor.SetNetworkModeToPrediction();
         }
 
         private void PrintMoreBlockVitals()
@@ -1017,12 +1029,7 @@
             }
 
             ReleaseDC(desk, dc);
-        }
-
-        public void ChangeNetworkModeTo(NetworkMode mode)
-        {
-            NMode = mode;
-        }
+        }      
        
         #endregion
 

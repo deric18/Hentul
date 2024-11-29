@@ -17,9 +17,9 @@ namespace FirstOrderMemory.Models
         public static readonly int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
-        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 500;
-		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 5000;
-        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 10000;
+        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
+		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 1000;
+        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 1500;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
@@ -86,6 +86,9 @@ namespace FirstOrderMemory.Models
         public void IncrementPruneCount() => PruneCount++;
 
         #endregion
+
+
+        #region METHODSS
 
         public void ProcessCurrentState(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string fileName = null)
         {
@@ -476,7 +479,7 @@ namespace FirstOrderMemory.Models
         internal void FlushVoltage()
         {
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
-            if (NeuronID.ToString().Equals("55-2-1-N") || NeuronID.ToString().Equals("755-2-1-N"))
+            if (NeuronID.ToString().Equals("607-3-3-N")) 
             {
                 bool breakpoiunt = true;
             }
@@ -489,6 +492,9 @@ namespace FirstOrderMemory.Models
         {
             return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
+
+
+        #endregion
     }
 
     public enum ConnectionType

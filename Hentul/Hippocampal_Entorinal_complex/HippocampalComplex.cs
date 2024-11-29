@@ -27,7 +27,7 @@
         {
 
             Objects = new Dictionary<string, RecognisedEntity>();
-            CurrentObject = new UnrecognisedEntity(firstLabel);
+            CurrentObject = new UnrecognisedEntity();
             networkMode = NetworkMode.TRAINING;
             NumberOfITerationsToConfirmation = 6;
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
@@ -82,19 +82,12 @@
 
                 if (matchingObjectList.Count != 0)
                 {
-                    foreach( var matchingObject in matchingObjectList)
+                    foreach (var matchingObject in matchingObjectList)
                     {
-
+                        //Generate Label and next confirming motor output for return.
+                        //
                     }
-                }
-                else
-                {
-                    throw new InvalidOperationException("Object did not match none of Recognised Objects ");
-                }
-
-
-
-
+                }                
             }
 
             return toReturn;
@@ -218,9 +211,9 @@
 
             RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
 
-            Objects.Add(newObject.Label, newObject);
+            Objects.Add(label, newObject);
 
-            CurrentObject = new UnrecognisedEntity(label);
+            CurrentObject = new UnrecognisedEntity();
         }
 
 
