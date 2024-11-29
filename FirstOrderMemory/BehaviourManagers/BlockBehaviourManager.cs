@@ -620,8 +620,7 @@
             PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
 
             if (ignorePostCycleCleanUp == false)
-                PostCycleCleanup();
-
+                PostCycleCleanup(incomingPattern.InputPatternType);
 
             ValidateNetwork();
         }      
@@ -668,19 +667,34 @@
                 
             }
 
-            //Clean Up stale voltage
-            //if (ignorePostCycleCleanUp == false && CurrentiType.Equals(iType.SPATIAL))
-            //{
-            //    foreach (var column in Columns)
-            //    {
-            //        column.PostCycleCleanup();
-            //    }
-            //}
-            //else
-            //{
-            //    Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
-            //    WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
-            //}
+            /*  Clean Up Policy : 
+             *      1. Any Neuron that was predicted to be fired this cycle but did not will get cleaned up.
+             *      2. Should not touch any neuron that is being deploarized this cycle.             
+             */
+            if (ignorePostCycleCleanUp == false && CurrentiType.Equals(iType.SPATIAL))
+            {
+                // Perform a mutual exclusive list between NeuronsPredictedForThisCycle , NeuronsFiringThisCycle for cleanup
+
+                var predictedList = ConvertDictToList(PredictedNeuronsforThisCycle);
+                var neuronsThatWerePredictedButDidNotFire = BBMUtils.PerformLeftOuterJoinBetweenTwoLists( predictedList, NeuronsFiringLastCycle);
+
+                foreach(var cleanUpNeuron in neuronsThatWerePredictedButDidNotFire)
+                {
+                    if (cleanUpNeuron.NeuronID.ToString() == "2-1-3-N")
+                    {
+                        bool breakpoint = true;
+                    }
+
+
+                    cleanUpNeuron.FlushVoltage();
+                }
+
+            }
+            else
+            {
+                Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+                WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
+            }
 
             Console.WriteLine("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
             PredictedNeuronsfromLastCycle.Clear();
@@ -702,9 +716,7 @@
                 //Console.ReadKey();
             }
 
-            PredictedNeuronsForNextCycle.Clear();
-
-            PreviousiType = type;
+            PredictedNeuronsForNextCycle.Clear();            
         }
 
         private List<Neuron> ConvertDictToList(Dictionary<string, List<Neuron>> predictedNeuronsforLastCycle)
@@ -720,7 +732,7 @@
         }
 
         //Selective Clean Up Logic , Should never perform Full Clean up.
-        private void PostCycleCleanup()
+        private void PostCycleCleanup(iType type)
         {                       
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
             if ( ( PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL) ) && CurrentiType.Equals(iType.SPATIAL))
@@ -733,7 +745,7 @@
                         {
                             Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
                             WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern!" + PrintBlockDetailsSingleLine());
-                            Thread.Sleep(2000);
+                            throw new InvalidOperationException("Temporal Cache is older than Spatial Pattern");
                         }
 
                         foreach (var pos in kvp.Value)
@@ -774,6 +786,7 @@
                         {
                             Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
                             WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                            throw new InvalidOperationException("Apical Cache is older than Spatial Pattern");
                         }
 
                         foreach (var pos in kvp.Value)
@@ -910,6 +923,9 @@
                     //Thread.Sleep(3000);
                 }
             }
+
+
+            PreviousiType = type;
         }
 
         private void Wire()

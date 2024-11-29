@@ -21,13 +21,13 @@
         }        
 
         [TestMethod]
-        public void TestSequenceMemoryCTFOM()
+        public void TestSequenceMemoryCT()
         {
             // Project ABC Pattern 60 times and test C is predicted after B 31st time.
 
             SDR_SOM patternA = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(0, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('A');
-            SDR_SOM patternB = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(884, 8, 3) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('B');
-            SDR_SOM patternC = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(429, 4, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('C');
+            SDR_SOM patternB = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(3, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('B');
+            SDR_SOM patternC = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(5, 5, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('C');
             SDR_SOM predictedSDR;
 
             int repCount = 0;

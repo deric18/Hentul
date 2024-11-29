@@ -859,6 +859,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 
+
             foreach (var pos in apicalSdr.ActiveBits)
             {
                 foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)

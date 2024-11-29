@@ -110,7 +110,7 @@
                 {
                     var neuron1 = bbManager.GetNeuronFromPosition(spiker1);
 
-                    foreach (var spiker2 in BBMUtils.GetNonOverlappingNeuronsFromSecondList(spikinglist2, spikingList1))
+                    foreach (var spiker2 in BBMUtils.GetNonOverlappingPositionsFromSecondList(spikinglist2, spikingList1))
                     {
                         var neuron2 = bbManager.GetNeuronFromPosition(spiker2);
 
@@ -149,32 +149,6 @@
 
         [TestMethod]
         public void TestSequenceMemory1()
-        {
-            Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
-
-            SDR_SOM sDR_SOM = new SDR_SOM(1250, 10, new List<Position_SOM>() { new Position_SOM(607, 3, 3) }, iType.SPATIAL);
-
-            var connectedPos = TestUtils.FindNeuronalPositionThatAreConnectedToTargetNeuron(targetNeuron, bbManager);
-
-            SDR_SOM neighbhourSOM = new SDR_SOM(1250, 10, connectedPos, iType.SPATIAL);
-
-            List<Neuron> neigbhourNeurons = TestUtils.ConvertPosListotNeuronalList(connectedPos, bbManager);
-
-            foreach (var neuron in neigbhourNeurons)
-            {
-                neuron.ProcessVoltage(10);
-            }
-
-            bbManager.Fire(neighbhourSOM);
-
-            bbManager.Fire(sDR_SOM);
-
-            Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
-        }
-
-
-        [TestMethod]
-        public void TestSequenceMemory2()
         {
             // Project ABC Pattern 60 times and test C is predicted after B 31st time.
 
@@ -257,6 +231,32 @@
                 repCount++;
             }
         }
+
+
+        [TestMethod]
+        public void TestSequenceMemory2()
+        {
+            Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
+
+            SDR_SOM sDR_SOM = new SDR_SOM(1250, 10, new List<Position_SOM>() { new Position_SOM(607, 3, 3) }, iType.SPATIAL);
+
+            var connectedPos = TestUtils.FindNeuronalPositionThatAreConnectedToTargetNeuron(targetNeuron, bbManager);
+
+            SDR_SOM neighbhourSOM = new SDR_SOM(1250, 10, connectedPos, iType.SPATIAL);
+
+            List<Neuron> neigbhourNeurons = TestUtils.ConvertPosListotNeuronalList(connectedPos, bbManager);
+
+            foreach (var neuron in neigbhourNeurons)
+            {
+                neuron.ProcessVoltage(10);
+            }
+
+            bbManager.Fire(neighbhourSOM);
+
+            bbManager.Fire(sDR_SOM);
+
+            Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
+        }       
 
 
         [TestMethod]

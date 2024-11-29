@@ -485,7 +485,7 @@ namespace FirstOrderMemory.Models
             }
 
             Voltage = 0;
-            CurrentState = NeuronState.RESTING;
+            ProcessCurrentState(555);
         }
 
         internal bool DidItContribute(Neuron temporalContributor)

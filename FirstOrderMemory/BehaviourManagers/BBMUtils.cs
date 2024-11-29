@@ -136,7 +136,23 @@
             return toRet;
         }
 
-        public static List<Position_SOM> GetNonOverlappingNeuronsFromSecondList(List<Position_SOM> predictedList, List<Position_SOM> firingList)
+
+        public static List<Neuron> PerformLeftOuterJoinBetweenTwoLists(List<Neuron> predictedList, List<Neuron> firingList)
+        {
+            List<Neuron> toRet = new List<Neuron>();
+
+            foreach (var neuron in predictedList)
+            {
+                if (firingList.Contains(neuron) == false && neuron.nType == NeuronType.NORMAL)
+                {
+                    toRet.Add(neuron);
+                }
+            }
+
+            return toRet;
+        }        
+
+        public static List<Position_SOM> GetNonOverlappingPositionsFromSecondList(List<Position_SOM> predictedList, List<Position_SOM> firingList)
         {
             List<Position_SOM> toRet = new List<Position_SOM>();
 
