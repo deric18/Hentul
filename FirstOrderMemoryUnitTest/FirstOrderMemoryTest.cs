@@ -141,7 +141,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(spatialSdr, false, true);
 
-            var firingNeuronList = bbManager.GetAllNeuronsFiringLatestCycle();
+            var firingNeuronList = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
             Assert.AreEqual(1, firingNeuronList.ActiveBits.Count);
 
@@ -759,7 +759,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(spatialSdr, true, true);       //Fire spatial
 
-            var firingSdr = bbManager.GetAllNeuronsFiringLatestCycle();
+            var firingSdr = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
             Assert.IsTrue(firingSdr.IsUnionTo(spatialSdr, true));
         }

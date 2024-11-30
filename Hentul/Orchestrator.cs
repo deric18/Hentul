@@ -230,6 +230,7 @@
 
         public void ProcessStep0()
         {
+            CycleNum++;
 
             Console.WriteLine("Grabbing cursor Position");
 
@@ -462,7 +463,7 @@
 
                 somBBM_L3A.Pool(fom_SDR);
 
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle();
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
                 if (som_SDR?.ActiveBits.Count != 0)
                 {
@@ -484,7 +485,7 @@
 
                 nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
-                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllNeuronsFiringLatestCycle(), point),
+                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum), point),
                     Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetPredictedSDR(), point));
             }
 
@@ -513,7 +514,7 @@
 
             foreach (var fomID in firingFOM)
             {
-                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllNeuronsFiringLatestCycle().ActiveBits, fomID));
+                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllNeuronsFiringLatestCycle(CycleNum).ActiveBits, fomID));
             }
 
             if (posList != null || posList.Count != 0)

@@ -1439,15 +1439,32 @@
             return new SDR_SOM(X, Y, ActiveBits, iType.NONE);
         }
 
-        public SDR_SOM GetAllNeuronsFiringLatestCycle()
+        public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle)
         {
             List<Position_SOM> activeBits = new List<Position_SOM>();
 
-            NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+            if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
+            {                
+
+                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+                
+            }
+            else if(currentCycle - CycleNum <= 3)
+            {
+                CompleteCleanUP();
+            }
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }
 
+        private void CompleteCleanUP()
+        {
+            NeuronsFiringLastCycle.Clear();
+            PredictedNeuronsfromLastCycle.Clear();
+            PredictedNeuronsforThisCycle.Clear();
+            PredictedNeuronsForNextCycle.Clear();
+        }
+    
 
         private List<Neuron> GetSpikingNeuronList()
         {

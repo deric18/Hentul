@@ -40,7 +40,7 @@
 
                 bbManager.Fire(spatialSdrBbm1);       //Fire spatial
 
-                var firingList = bbManager.GetAllNeuronsFiringLatestCycle();
+                var firingList = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
                 Assert.IsTrue(firingList.ActiveBits.Count != 0);
             }
@@ -62,7 +62,7 @@
 
                 bbManager.Fire(spatialSdrBbm1);       //Fire spatial
 
-                var firingList = bbManager.GetAllNeuronsFiringLatestCycle();
+                var firingList = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
                 Assert.IsTrue(firingList.ActiveBits.Count != 0);
             }
@@ -126,7 +126,7 @@
                 }
             }
 
-            var firingList = bbManager.GetAllNeuronsFiringLatestCycle();
+            var firingList = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
             var spikingList = bbManager.GetAnySpikeTrainNeuronsThisCycle();
 
@@ -136,7 +136,7 @@
             {
                 bbManager.Fire(nullSDR);
 
-                var firingList2 = bbManager.GetAllNeuronsFiringLatestCycle();
+                var firingList2 = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
                 var spikinglist3 = bbManager.GetAnySpikeTrainNeuronsThisCycle();
             }
