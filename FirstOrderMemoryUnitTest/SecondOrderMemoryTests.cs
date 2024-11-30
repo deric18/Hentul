@@ -33,7 +33,7 @@
 
             for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 10; i++)
             {
-               
+
                 bbManager.Fire(temporalSdrBbm1);      //Deplarize temporal
 
                 bbManager.Fire(apicalSdrBbm1);        //Depolarize apical
@@ -143,7 +143,7 @@
 
             var spikingList3 = bbManager.GetAnySpikeTrainNeuronsThisCycle();
 
-            Assert.AreEqual(0, spikingList3.Count);            
+            Assert.AreEqual(0, spikingList3.Count);
         }
 
 
@@ -170,8 +170,8 @@
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
 
-                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true));
-                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true));
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true, false));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
                 }
 
 
@@ -183,6 +183,7 @@
                 {
                     bbManager.Fire(patternB);
                 }
+
 
                 if (repCount > wirecount)
                 {
@@ -246,17 +247,25 @@
 
             List<Neuron> neigbhourNeurons = TestUtils.ConvertPosListotNeuronalList(connectedPos, bbManager);
 
+           
             foreach (var neuron in neigbhourNeurons)
             {
                 neuron.ProcessVoltage(10);
             }
 
-            bbManager.Fire(neighbhourSOM);
+            int repCount = 1;
 
-            bbManager.Fire(sDR_SOM);
+            while (repCount > 0)
+            {
+
+                bbManager.Fire(neighbhourSOM);
+                repCount--;
+            }
+
+            bbManager.Fire(sDR_SOM, false, true);
 
             Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
-        }       
+        }
 
 
         [TestMethod]
@@ -276,11 +285,11 @@
             {
                 neuron.ProcessVoltage(10);
             }
-            
+
             bbManager.Fire(neighbhourSOM);
-           
+
             bbManager.Fire(sDR_SOM);
-                
+
             Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
         }
 
@@ -289,6 +298,6 @@
         {
             // Fire a bunch of surrounding neurons near a target neuron and make sure it fire and check how many neurons are needed before it fires.
         }
-       
+
     }
 }

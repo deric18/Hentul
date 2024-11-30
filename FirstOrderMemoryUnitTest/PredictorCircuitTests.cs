@@ -43,8 +43,8 @@
                 {
                     predictedSDR = bbManager.GetPredictedSDR();
                     
-                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true));
-                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true));
+                    Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true, false));
+                    Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
                 }
                
                 

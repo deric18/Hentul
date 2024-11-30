@@ -17,13 +17,16 @@ namespace FirstOrderMemory.Models
             ActiveBits.Sort();
         }
 
-        public bool IsUnionTo(SDR_SOM smallerSDR, bool compareXandYonly = false)
+        public bool IsUnionTo(SDR_SOM smallerSDR, bool compareXandYonly = false, bool strictLengthCheck = false)
         {
             if (smallerSDR.ActiveBits == null)
                 throw new NullReferenceException();
 
-            if (Length != smallerSDR.Length || smallerSDR.Breadth != smallerSDR.Breadth || ActiveBits.Count < smallerSDR?.ActiveBits.Count)
-                return false;
+            if (strictLengthCheck == true)
+            {
+                if (Length != smallerSDR.Length || smallerSDR.Breadth != smallerSDR.Breadth || ActiveBits.Count < smallerSDR?.ActiveBits.Count)
+                    return false;
+            }
 
 
             foreach (var pos in smallerSDR.ActiveBits)
