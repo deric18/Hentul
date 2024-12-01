@@ -8,7 +8,7 @@
 
     public  class OrchestratorTests
     {
-        Orchestrator orchetrator;
+        Orchestrator orchestrator;
         POINT point = new POINT();
         string gPos1 = "-4--4-0";
         string gPos2 = "0-0-0";
@@ -23,7 +23,7 @@
         [SetUp]
         public void Setup()
         {
-            orchetrator = new Orchestrator(10, true, true, 1);
+            orchestrator = new Orchestrator(10, true, true, 1);
             point.X = 10;
             point.Y = 10;
         }
@@ -46,7 +46,7 @@
                 posList
                 );            
 
-            var sensloc = orchetrator.Mapper.GetSensationLocationFromSDR( sdr, point);
+            var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR( sdr, point);
 
             int index = 0;
 
@@ -58,6 +58,57 @@
             }
         }
 
+        [Test]
+        public void TestStep0()
+        {
+
+        }
+
+        [Test]
+        public void TestStep1Positive()
+        {
+            // Provide Positive Greyscaled Image and verify SOM and FOM are Firing.
+        }
+
+        [Test]
+        public void TestStep1Negative()
+        {
+            //Provide null input and verify none of the FOMs and SOM are firing.
+        }
+
+        [Test]
+        public void TestStep2()
+        {
+            //Verify HC has created an unrecognised Entity with one sensei in it 
+        }
+
+        [Test]
+        public void TestConvertUnrecognisedObjectToRecognisedObject()
+        {
+            string obj = "Apple";
+            KeyValuePair<int, List<Position_SOM>> kvp = new KeyValuePair<int, List<Position_SOM>>(1, new List<Position_SOM>()
+                {
+                    new Position_SOM(1,2),
+                    new Position_SOM(2,3),
+                    new Position_SOM(3,4)
+                });
+
+            Dictionary<string, KeyValuePair<int, List<Position_SOM>>> dict = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+
+
+            dict.Add(obj, kvp);
+
+            Sensation_Location sensei = new Sensation_Location(dict);
+
+
+            orchestrator.HCAccessor.ProcessCurrentPatternForObject(1, sensei);
+
+
+            orchestrator.DoneWithTraining();
+
+            Assert.AreEqual(1, orchestrator.HCAccessor.Objects.Count);
+
+        }
 
         [Test, Description("Test all the Active bits under one BBM getss added to the ame BBM KVP.")]
         public void TestMapperGetSenseLocFromSDR_SOM1()
@@ -86,13 +137,13 @@
                 }
                 );
 
-            var sensloc = orchetrator.Mapper.GetSensationLocationFromSDR(sdr, point);
+            var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR(sdr, point);
 
             Assert.AreEqual(1, sensloc.sensLoc.Count);
             Assert.AreEqual(4, sensloc.sensLoc.ElementAt(0).Value.Value.Count);
 
 
-            var sensloc1 = orchetrator.Mapper.GetSensationLocationFromSDR(sdr1, point);
+            var sensloc1 = orchestrator.Mapper.GetSensationLocationFromSDR(sdr1, point);
 
             Assert.AreEqual(4, sensloc1.sensLoc.Count);
             Assert.AreEqual(1, sensloc1.sensLoc.ElementAt(0).Value.Value.Count);
@@ -123,7 +174,7 @@
             point.X = 1340;
             point.Y = 899;
 
-            var sensloc = orchetrator.Mapper.GetSensationLocationFromSDR(sdr, point);
+            var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR(sdr, point);
             
 
             foreach (var kvp in sensloc.sensLoc)
@@ -189,7 +240,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, false, true);
 
@@ -245,7 +296,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, false, true);
 
@@ -302,7 +353,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -356,7 +407,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Assert.AreEqual(0, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -408,7 +459,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -461,7 +512,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 
@@ -517,7 +568,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 
@@ -574,7 +625,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchetrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 
@@ -599,14 +650,14 @@
 
         private int GetXFromBBM_ID(int bbmId)
         {
-            orchetrator.Mapper.Mappings.TryGetValue(bbmId, out var x);
+            orchestrator.Mapper.Mappings.TryGetValue(bbmId, out var x);
 
             return x[0].X;
         }
 
         private int GetYFromBBM_ID(int bbmId)
         {
-            orchetrator.Mapper.Mappings.TryGetValue(bbmId, out var x);
+            orchestrator.Mapper.Mappings.TryGetValue(bbmId, out var x);
 
             return x[0].Y;
         }

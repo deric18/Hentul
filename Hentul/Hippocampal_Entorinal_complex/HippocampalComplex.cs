@@ -58,7 +58,7 @@
 
                 if (CurrentObject.AddNewSenei(sensei) == false)
                 {
-                    int breakpoint1 = 1; // pattern already added or Invalid Pattern.
+                    throw new InvalidOperationException();
                 }                       
             }
             else if (networkMode == NetworkMode.PREDICTION)
@@ -91,12 +91,7 @@
             }
 
             return toReturn;
-        }
-
-        public void DoneWithTraining(string label)
-        {
-            ConvertUnrecognisedObjectToRecognisedObject(label);
-        }
+        }      
 
         public void DoneWithTraining()
         {

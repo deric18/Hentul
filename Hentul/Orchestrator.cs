@@ -145,7 +145,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.None);
             }
 
             if (isMock)
@@ -153,9 +153,9 @@
             else
                 ImageIndex = 0;
 
-            somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
+            somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.None);
 
-            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);
+            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None);
 
             HCAccessor = new HippocampalComplex("Apple");
 
@@ -274,16 +274,22 @@
 
             int whitecount = 0;
 
-            //for (int i = 0; i < greyScalebmp.Width; i++)
-            //{
-            //    for (int j = 0; j < greyScalebmp.Height; j++)
-            //    {
-            //        if (Mapper.flagCheckArr[i, j] == false)
-            //        {
-            //            whitecount++;
-            //        }
-            //    }
-            //}
+
+            // STEP 0 : Prep SDR.
+
+            for (int i = 0; i < greyScalebmp.Width; i++)
+            {
+                for (int j = 0; j < greyScalebmp.Height; j++)
+                {
+                    if (Mapper.flagCheckArr[i, j] == false)
+                    {
+                        whitecount++;
+                    }
+                }
+            }
+
+
+            // STEP 1A : Fire all FOM's
 
             foreach (var kvp in Mapper.FOMBBMIDS)
             {
@@ -432,7 +438,7 @@
                 }
             }
 
-            //STEP 1B : Fire all L3B SOM's
+            // STEP 1B : Fire all L3B SOM's
 
             if (Mapper.somPositions.Count != 0)
             {
@@ -442,6 +448,10 @@
                 }
 
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL));
+            }
+            else
+            {
+                somBBM_L3B.FireBlank(CycleNum);
             }
 
 
@@ -465,7 +475,7 @@
 
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
-                if (som_SDR?.ActiveBits.Count != 0)
+                if (som_SDR != null)
                 {
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
@@ -492,10 +502,6 @@
             return nextMotorOutput;
         }
 
-        public void DoneWithTraining(string label)
-        {
-            HCAccessor.DoneWithTraining(label);
-        }
 
         public void DoneWithTraining()
         {

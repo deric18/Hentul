@@ -133,7 +133,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, bool includeBurstLearning = false)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearning = false)
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -467,16 +467,17 @@
 
         #region FIRE & WIRE        
 
+        #region PUBLIC API
+
         /// <summary>
         /// Processes the Incoming Input Pattern
         /// </summary>
         /// <param name="incomingPattern"> Pattern to Process</param>
+        /// <param name="currentCycle"> Pattern to Process</param>
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
-
-
-        public void Fire(SDR_SOM incomingPattern, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
+        public void Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {            
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
@@ -484,7 +485,7 @@
             if (ignorePrecyclePrep == false)
                 PreCyclePrep();
 
-            ValidateInput(incomingPattern);
+            ValidateInput(incomingPattern, currentCycle);
 
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -595,7 +596,6 @@
                         throw new InvalidOperationException("Invalid Input Pattern Type");
                     }
             }
-
             if (IsBurstOnly)
             {
                 if (BurstCache.Count == 0)
@@ -642,6 +642,74 @@
                 }
             }
         }
+
+        public SDR_SOM GetPredictedSDRForNextCycle(ulong currentCycle = 1)
+        {            
+            SDR_SOM toReturn = null;
+            
+
+            if (currentCycle - CycleNum == 1 && NeuronsFiringLastCycle.Count != 0)
+            {
+                List<Position_SOM> ActiveBits = new List<Position_SOM>();
+
+                //Using PredictedNeuronsforThisCycle as this PredictedNeuronsforNextCycle gets assigned to this.
+                foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
+                {
+                    var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
+                    ActiveBits.Add(pos);
+                    toReturn = new SDR_SOM(X, Y, ActiveBits, iType.NONE);
+                }
+            }
+            else if (currentCycle - CycleNum >= 3)
+            {
+                throw new InvalidOperationException("FOM / SOM does not predict that far ahead!");
+            }
+
+            return toReturn;
+        }
+
+        public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle)
+        {
+            List<Position_SOM> activeBits = new List<Position_SOM>();
+            SDR_SOM toReturn = null;
+
+            if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
+            {
+                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+                toReturn = new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
+            }
+            else if (currentCycle - CycleNum >= 3)
+            {
+                CompleteCleanUP();
+            }
+
+            return toReturn;
+        }
+
+        public void Pool(SDR_SOM poolingSDR)
+        {
+            if (Layer.Equals(LayerType.Layer_3A) == false)
+            {
+                throw new InvalidOperationException("Only Layer 3A can Pool atm!");
+            }
+
+            // Record all the commonly firing neurons in every BBM and cache them for that specific pattern.
+
+        }
+
+        public void FireBlank(ulong currentCycle)
+        {
+            if (CycleNum > currentCycle)
+            {
+                throw new InvalidOperationException("This should never happen");
+            }
+            else
+            {
+                CycleNum = currentCycle;
+            }
+        }
+
+        #endregion
 
         private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type)
         {
@@ -911,21 +979,23 @@
 
             IsBurstOnly = false;
 
-
-            // Check for Stale Votlage Clean Up 
-            foreach (var neuronList in PredictedNeuronsforThisCycle)
+            if (Mode != LogMode.None)
             {
-
-                var neuron = GetNeuronFromString(neuronList.Key);
-
-                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
+                // Check for Stale Votlage Clean Up 
+                foreach (var neuronList in PredictedNeuronsforThisCycle)
                 {
-                    if (Mode != LogMode.None)
+
+                    var neuron = GetNeuronFromString(neuronList.Key);
+
+                    if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
                     {
-                        Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                        WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                        if (Mode != LogMode.None)
+                        {
+                            Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                            WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                        }
+                        //Thread.Sleep(3000);
                     }
-                    //Thread.Sleep(3000);
                 }
             }
 
@@ -1213,18 +1283,7 @@
                     }
                 }
             }
-        }
-
-        public void Pool(SDR_SOM poolingSDR)
-        {
-            if(Layer.Equals(LayerType.Layer_3A) == false)
-            {
-                throw new InvalidOperationException("Only Layer 3A can Pool atm!");
-            }
-
-            // Record all the commonly firing neurons in every BBM and cache them for that specific pattern.
-
-        }
+        }        
 
         #region INTERNAL METHODS
 
@@ -1422,40 +1481,7 @@
             }
 
             return GetNeuronFromPosition(nType, x, y, z);
-        }
-
-        public SDR_SOM GetPredictedSDR()
-        {
-            List<Position_SOM> ActiveBits = new List<Position_SOM>();
-
-            //Using PredictedNeuronsforThisCycle as this PredictedNeuronsforNextCycle gets assigned to this.
-            foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
-            {
-                var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
-				
-                ActiveBits.Add(pos);
-            }            
-
-            return new SDR_SOM(X, Y, ActiveBits, iType.NONE);
-        }
-
-        public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle)
-        {
-            List<Position_SOM> activeBits = new List<Position_SOM>();
-
-            if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
-            {                
-
-                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
-                
-            }
-            else if(currentCycle - CycleNum <= 3)
-            {
-                CompleteCleanUP();
-            }
-
-            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
-        }
+        }       
 
         private void CompleteCleanUP()
         {
@@ -1465,7 +1491,6 @@
             PredictedNeuronsForNextCycle.Clear();
         }
     
-
         private List<Neuron> GetSpikingNeuronList()
         {
             List<Neuron> spikingNeuronList = new List<Neuron>();
@@ -1550,7 +1575,7 @@
             }
         }
 
-        private void ValidateInput(SDR_SOM incomingPattern)
+        private void ValidateInput(SDR_SOM incomingPattern, ulong currentCycle)
         {
             if (incomingPattern.ActiveBits.Count == 0)
             {
@@ -1565,7 +1590,13 @@
 
             if (incomingPattern.InputPatternType.Equals(iType.SPATIAL))
             {
-                CycleNum++;
+
+                if(currentCycle <= CycleNum)
+                {
+                    throw new InvalidOperationException("Invalid Cycle Number");
+                }
+
+                CycleNum = currentCycle;
 
                 foreach (var pos in incomingPattern.ActiveBits)
                 {
@@ -1684,8 +1715,11 @@
                                 }
                                 else
                                 {
-                                    Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
-                                    WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                    if (Mode.Equals(LogMode.None) == false)
+                                    {
+                                        Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                        WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                    }
                                 }
 
                             }
