@@ -491,12 +491,30 @@
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
-                // If any output from HC execute the location output if NOT then take the standar default output.                                
+                // If any output from HC execute the location output if NOT then take the standar default output.
+                // 
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+                var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum+1);
 
-                nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
+
+                if (som_SDR != null)
+                {
+                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+                    var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
+
+                    nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
-                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum), point),
-                    Mapper.GetSensationLocationFromSDR(somBBM_L3B.GetPredictedSDR(), point));
+                    firingSensei,
+                    predictedSensei
+                    );
+                }
+                else
+                {
+                    bool breakpoint = true;
+                }
+
+               
             }
 
             return nextMotorOutput;

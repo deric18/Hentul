@@ -139,7 +139,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7);
 
-            bbManager.Fire(spatialSdr, false, true);
+            bbManager.Fire(spatialSdr, 1, false, true);
 
             var firingNeuronList = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 
@@ -610,7 +610,7 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(temporalInputPattern, true, true);
+            bbManager.Fire(temporalInputPattern, 1, true, true);
 
             var temporalNeuron = bbManager.GetNeuronFromString(normalNeuron.GetMyTemporalPartner1());
 
@@ -655,11 +655,11 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(temporalInputPattern, false, true);
+            bbManager.Fire(temporalInputPattern, 1, false, true);
 
             Assert.AreEqual(NeuronState.FIRING, temporalNeuron.CurrentState);
 
-            bbManager.Fire(spatialInputPattern, true, true);
+            bbManager.Fire(spatialInputPattern, 1, true, true);
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
@@ -699,7 +699,7 @@ namespace FirstOrderMemoryUnitTest
 
             int voltageBeforeFire = apicalFiredNormalNeuron.Voltage;
 
-            bbManager.Fire(apicalInputPattern, true, true);
+            bbManager.Fire(apicalInputPattern, 1, true, true);
 
             int voltagAfterFire = apicalFiredNormalNeuron.Voltage;
 
@@ -730,11 +730,11 @@ namespace FirstOrderMemoryUnitTest
                 previousStrength = preSynapse.GetStrength();
             }
 
-            bbManager.Fire(apicalInputPattern, true, true);
+            bbManager.Fire(apicalInputPattern, 1, true, true);
 
             normalNeuron.ProcessVoltage(1);
 
-            bbManager.Fire(spatialInputPattern, true, true);
+            bbManager.Fire(spatialInputPattern, 1, true, true);
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
@@ -753,11 +753,11 @@ namespace FirstOrderMemoryUnitTest
             var apicalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.APICAL, bbManager.Layer);
             var spatialSdr = TestUtils.GetSpatialAndTemporalOverlapSDR(apicalSdr, temporalSdr);
 
-            bbManager.Fire(temporalSdr, false, true);      //Deplarize temporal
+            bbManager.Fire(temporalSdr, 1, false, true);      //Deplarize temporal
 
-            bbManager.Fire(apicalSdr, true, true);        //Depolarize apical
+            bbManager.Fire(apicalSdr, 1, true, true);        //Depolarize apical
 
-            bbManager.Fire(spatialSdr, true, true);       //Fire spatial
+            bbManager.Fire(spatialSdr, 1, true, true);       //Fire spatial
 
             var firingSdr = bbManager.GetAllNeuronsFiringLatestCycle(bbManager.CycleNum + 1);
 

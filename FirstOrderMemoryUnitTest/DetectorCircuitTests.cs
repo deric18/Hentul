@@ -44,7 +44,7 @@
                     if((numCount / noiseSize) > 0 )             // Should avoid first iteration
                             if((numCount / cycleSize) >= learningCurveCount)        //ShouldCheckAfterLearningCurveCount 
                             {
-                                predictedSDR = bbManager.GetPredictedSDR();
+                                predictedSDR = bbManager.GetPredictedSDRForNextCycle();
                                 Assert.IsTrue(predictedSDR.IsUnionTo(sDR_SOMs[cycleSize - 1]));
                             }
 

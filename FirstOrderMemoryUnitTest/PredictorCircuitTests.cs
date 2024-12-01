@@ -41,7 +41,7 @@
 
                 if(repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDR();
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle();
                     
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true, false));
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
@@ -59,7 +59,7 @@
 
                 if (repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDR();
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle();
 
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));                    
 
@@ -82,7 +82,7 @@
                     bbManager.Fire(patternC);       //Fire C , Predict A NOT B
                 }
 
-                predictedSDR = bbManager.GetPredictedSDR();
+                predictedSDR = bbManager.GetPredictedSDRForNextCycle();
 
                 if (repCount > wirecount)
                 {

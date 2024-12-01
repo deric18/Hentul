@@ -244,7 +244,7 @@
 
                                                 fomBBM[bbmId++].Fire(imageSDR);
 
-                                                SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+                                                SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDRForNextCycle();
 
                                                 if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
                                                 {

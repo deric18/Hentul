@@ -147,9 +147,9 @@
 
                     SDR_SOM[] somSdrArr = new SDR_SOM[3];
 
-                    somSdrArr[0] = fomBBM[0].GetPredictedSDR();
-                    somSdrArr[1] = fomBBM[1].GetPredictedSDR();
-                    somSdrArr[2] = fomBBM[2].GetPredictedSDR();
+                    somSdrArr[0] = fomBBM[0].GetPredictedSDRForNextCycle();
+                    somSdrArr[1] = fomBBM[1].GetPredictedSDRForNextCycle();
+                    somSdrArr[2] = fomBBM[2].GetPredictedSDRForNextCycle();
 
                     SDR_SOM somSdr1 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr1.ActiveBits, iType.SPATIAL);
                     SDR_SOM somSdr2 = new SDR_SOM(SOM_NUM_COLUMNS, SOM_COLUMN_SIZE, sdr2.ActiveBits, iType.SPATIAL);

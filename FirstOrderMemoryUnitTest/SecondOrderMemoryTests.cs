@@ -168,7 +168,7 @@
 
                 if (repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDR();
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle(1);
 
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true, false));
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
@@ -187,7 +187,7 @@
 
                 if (repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDR();
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle(1);
 
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));
 
@@ -210,7 +210,7 @@
                     bbManager.Fire(patternC);       //Fire C , Predict A NOT B
                 }
 
-                predictedSDR = bbManager.GetPredictedSDR();
+                predictedSDR = bbManager.GetPredictedSDRForNextCycle(1);
 
                 if (repCount > wirecount)
                 {
@@ -262,7 +262,7 @@
                 repCount--;
             }
 
-            bbManager.Fire(sDR_SOM, false, true);
+            bbManager.Fire(sDR_SOM, 1, false, true);
 
             Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
         }
