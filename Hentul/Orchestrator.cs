@@ -299,7 +299,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -308,7 +308,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -318,7 +318,7 @@
 
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -327,7 +327,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -336,7 +336,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -345,7 +345,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -354,7 +354,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -363,7 +363,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -372,7 +372,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -381,7 +381,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -390,7 +390,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -399,7 +399,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -408,7 +408,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -417,7 +417,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -426,7 +426,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID));
+                                fomBBM[bbmID].Fire(Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID), CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -447,7 +447,7 @@
                     WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
                 }
 
-                somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL));
+                somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
             }
             else
             {
