@@ -1,15 +1,2 @@
-﻿Notes : 
-
-1. Implement Schema for data flow for Burst Avoidance Learning Algo
-Q - Real world Desktop will need Image Segmentation ( hard problem) and Attention , Fruits only needs attention.
-A - Only do attention for now as a good POC.
-
-Todo : Attention ?
-
-
-
-2. CT for all the FOM array Usage in Hentul.UT
-
-
-Futre : 
-SOM Layer need to generate a movement action for the cursor to move across the screen to observe and classify the image.
+﻿1. Finish Back Up and Restore.
+2. Finish Pooling.

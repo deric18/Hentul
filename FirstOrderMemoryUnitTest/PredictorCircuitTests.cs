@@ -9,12 +9,12 @@
     {
         BlockBehaviourManager bbManager;
         int Numcolmns = 10;
-        int Z = 10;
+        int Z = 4;
 
         [TestInitialize]
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(Numcolmns, Z);
+            bbManager = new BlockBehaviourManager(Numcolmns, Numcolmns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.Trace, false);
 
             bbManager.Init(11);
 
@@ -31,17 +31,19 @@
             SDR_SOM predictedSDR;
 
             int repCount = 0;
-            int wirecount = 10;
+            int wirecount = 2;
+            int total = 60;
+            ulong counter = 1;
 
-            while (repCount != 60)
+            while (repCount != total)
             {
                 Console.WriteLine("REPCOUNT : " + repCount.ToString());
 
-                bbManager.Fire(patternA);       //Fire A , Predict B NOT C
+                bbManager.Fire(patternA, counter++);       //Fire A , Predict B NOT C
 
                 if(repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDRForNextCycle();
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter++);
                     
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true, false));
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
@@ -50,16 +52,16 @@
                 
                 if (repCount == 1)
                 {
-                    bbManager.Fire(patternB);       //Fire B , Predict C NOT A
+                    bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A
                 }
                 else
                 {
-                    bbManager.Fire(patternB);
+                    bbManager.Fire(patternB, counter++);
                 }
 
                 if (repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDRForNextCycle();
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter);
 
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));                    
 
@@ -75,14 +77,14 @@
 
                 if (repCount < wirecount)
                 {
-                    bbManager.Fire(patternC);      
+                    bbManager.Fire(patternC, counter++);      
                 }
                 else
                 {
-                    bbManager.Fire(patternC);       //Fire C , Predict A NOT B
+                    bbManager.Fire(patternC, counter++);       //Fire C , Predict A NOT B
                 }
 
-                predictedSDR = bbManager.GetPredictedSDRForNextCycle();
+                predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter++);
 
                 if (repCount > wirecount)
                 {
@@ -134,13 +136,15 @@
 
             SDR_SOM sdr_SOM = new SDR_SOM(10, 10, new List<Position_SOM>() { position1 }, iType.SPATIAL);
 
+            ulong counter = 1;
+
             bbManager.Fire(apicalSdr);
 
             neuron3.ProcessVoltage(10);
 
             Assert.AreEqual(neuron3.Voltage, 50);
 
-            bbManager.Fire(sdr_SOM);
+            bbManager.Fire(sdr_SOM, counter++);
 
             var firingNeuron = bbManager.NeuronsFiringLastCycle[0];
 

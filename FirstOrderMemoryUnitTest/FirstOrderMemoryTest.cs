@@ -34,12 +34,14 @@ namespace FirstOrderMemoryUnitTest
             bbm3.Init(1);
 
             SDR_SOM randSDR = TestUtils.GenerateRandomSDR(iType.SPATIAL);
+            
+            ulong counter = 1;
 
-            clonedBBM.Fire(randSDR);
+            clonedBBM.Fire(randSDR, counter++);
 
-            bbManager.Fire(randSDR);
+            bbManager.Fire(randSDR, counter++);
 
-            bbm3.Fire(randSDR);
+            bbm3.Fire(randSDR, counter++);
 
             for (int i = 0; i < clonedBBM.Y; i++)
             {
@@ -158,7 +160,7 @@ namespace FirstOrderMemoryUnitTest
 
             SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
 
-            bbManager.Fire(sdr1);
+            bbManager.Fire(sdr1, 1);
 
             InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => bbManager.ConnectTwoNeurons(bbManager.GetNeuronFromString(axonalTemporalNeuron), dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON));
 
@@ -233,11 +235,13 @@ namespace FirstOrderMemoryUnitTest
 
             uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();
 
+            ulong counter = 1;
+
             for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
             {
-                bbManager.Fire(sdr1);
+                bbManager.Fire(sdr1, counter++);
 
-                bbManager.Fire(sdr2);
+                bbManager.Fire(sdr2, counter++);
             }
 
             _ = neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse value1);
@@ -263,15 +267,16 @@ namespace FirstOrderMemoryUnitTest
             
             SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
             SDR_SOM temporalSDR1 = TestUtils.ConvertSpatialToTemporal(new List<Position_SOM>() { neuron1.GetMyTemporalPartner2() }, bbManager.Layer);
+            ulong counter = 1;
 
             bbManager.Fire(temporalSDR1);
-            bbManager.Fire(sdr1);
+            bbManager.Fire(sdr1, counter++);
 
             SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3) }, iType.SPATIAL);
             SDR_SOM temporalSDR2 = TestUtils.ConvertSpatialToTemporal(new List<Position_SOM>() { neuron2.GetMyTemporalPartner2() }, bbManager.Layer);
 
             bbManager.Fire(temporalSDR2);
-            bbManager.Fire(sdr2);
+            bbManager.Fire(sdr2, counter++);
 
 
             if (neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse neuron1Synapse) && neuron2.ProximoDistalDendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse neuron2Synapse))
@@ -297,9 +302,11 @@ namespace FirstOrderMemoryUnitTest
             SDR_SOM apicalSDR1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { neuron1.GetMyApicalPartner() }, iType.APICAL);
             SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
 
+            ulong counter = 1;
+
             bbManager.Fire(temporalSDR1);
             bbManager.Fire(apicalSDR1);
-            bbManager.Fire(sdr1);
+            bbManager.Fire(sdr1, counter++);
 
             
             SDR_SOM temporalSDR2 = TestUtils.ConvertSpatialToTemporal(new List<Position_SOM>() { neuron2.GetMyTemporalPartner2() }, bbManager.Layer);
@@ -308,7 +315,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(temporalSDR2);
             bbManager.Fire(apicalSDR2);
-            bbManager.Fire(sdr2);
+            bbManager.Fire(sdr2, counter++);
 
 
             if (neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse neuron1Synapse) || neuron2.ProximoDistalDendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse neuron2Synapse))
@@ -338,6 +345,8 @@ namespace FirstOrderMemoryUnitTest
             Neuron axonalNeuron = bbManager.Columns[axonalPos.X, axonalPos.Y].Neurons[axonalPos.Z];
             Neuron dendronalNeuron = bbManager.Columns[dendronalPos.X, dendronalPos.Y].Neurons[dendronalPos.Z];
 
+            ulong Counter = 1;
+
             if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
             {
                 throw new Exception("Could Not connect two neurons!");
@@ -345,14 +354,14 @@ namespace FirstOrderMemoryUnitTest
 
             var prefireSynapseStrength = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos.ToString()].GetStrength();
 
-            bbManager.Fire(axonalSdr);
+            bbManager.Fire(axonalSdr, Counter++);
 
             dendronalNeuron.ProcessVoltage(10);
 
-            bbManager.Fire(dendronalSdr);
+            bbManager.Fire(dendronalSdr, Counter++);
 
             //Make the synapsse Active           
-            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1, true, dendronalNeuron);
+            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1, Counter, true, dendronalNeuron);
 
             var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
 
@@ -379,6 +388,7 @@ namespace FirstOrderMemoryUnitTest
             Neuron dendronalNeuron1 = bbManager.Columns[dendronalPos1.X, dendronalPos1.Y].Neurons[dendronalPos1.Z];
             Neuron dendronalNeuron2 = bbManager.Columns[dendronalPos2.X, dendronalPos2.Y].Neurons[dendronalPos2.Z];
 
+            ulong Counter = 1;
 
             if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron1, ConnectionType.DISTALDENDRITICNEURON))
             {
@@ -390,7 +400,7 @@ namespace FirstOrderMemoryUnitTest
 
             RepeatCycle(axonalNeuron, dendronalNeuron1, (int)BlockBehaviourManager.DISTALNEUROPLASTICITY - 1);
                         
-            bbManager.Fire(axonalSdr);
+            bbManager.Fire(axonalSdr, Counter++);
 
 
             //Make the synapsse Active                       
@@ -398,7 +408,7 @@ namespace FirstOrderMemoryUnitTest
 
             dendronalNeuron1.ProcessVoltage(10);
 
-            bbManager.Fire(dendronalSdr);
+            bbManager.Fire(dendronalSdr, Counter++);
 
             var postFiringSynapeStrength1 = bbManager.GetNeuronFromPosition(dendronalPos1).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
             var postFiringSynapeStrength2 = bbManager.GetNeuronFromPosition(dendronalPos2).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
@@ -430,11 +440,13 @@ namespace FirstOrderMemoryUnitTest
 
             SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2, 0) }, iType.SPATIAL);
 
-            bbManager.Fire(sdr1);
+            ulong counter = 1;
+
+            bbManager.Fire(sdr1, counter++);
 
             SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3, 3) }, iType.SPATIAL);
 
-            bbManager.Fire(sdr2);
+            bbManager.Fire(sdr2, counter++);
 
             //Verify both the both the columns have atleast 1 of each other columns axons and dendrites.
 
@@ -511,6 +523,8 @@ namespace FirstOrderMemoryUnitTest
             Neuron neuron1 = bbManager.Columns[pos1.X, pos1.Y].Neurons[pos1.Z];
             Neuron neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
 
+            ulong counter = 1;
+
             if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))
             {
                 throw new Exception("Could Not connect two neurons!");
@@ -520,7 +534,7 @@ namespace FirstOrderMemoryUnitTest
             {
                 Console.WriteLine("repcount : " + i.ToString());
 
-                bbManager.Fire(sdr1);
+                bbManager.Fire(sdr1, counter++);
 
                 Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
@@ -529,18 +543,18 @@ namespace FirstOrderMemoryUnitTest
             {
                 Console.WriteLine("repcount : " + i.ToString());
 
-                bbManager.Fire(sdr1);
+                bbManager.Fire(sdr1, counter++);
 
                 bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30);
 
-                bbManager.Fire(sdr2);
+                bbManager.Fire(sdr2, counter++);
 
                 Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
 
-            bbManager.Fire(sdr1);
+            bbManager.Fire(sdr1, counter++);
 
-            bbManager.Fire(sdr2);
+            bbManager.Fire(sdr2, counter++);
 
             Assert.IsTrue(BBMUtils.CheckNeuronListHasThisNeuron(bbManager.NeuronsFiringLastCycle, neuron2));
         }
@@ -780,6 +794,8 @@ namespace FirstOrderMemoryUnitTest
             SDR_SOM ApicalSdr = TestUtils.ConvertPositionToSDR(posList, iType.APICAL);
             SDR_SOM SpatialSdr = TestUtils.ConvertPositionToSDR(posList, iType.SPATIAL);
 
+            ulong Counter = 1;
+
             bbManager.Fire(TemporalSdr);
 
             Assert.IsTrue(bbManager.GetNeuronFromPosition('N', 7, 5, 2).Voltage > 0);
@@ -788,7 +804,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.IsTrue(bbManager.GetNeuronFromPosition('n', 5, 2, 2).Voltage > 0);
 
-            bbManager.Fire(SpatialSdr);
+            bbManager.Fire(SpatialSdr, Counter);
 
             var state = bbManager.GetNeuronFromPosition('n', 5, 5, 0).CurrentState;
 
@@ -813,14 +829,15 @@ namespace FirstOrderMemoryUnitTest
 
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
             var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
+            ulong counter = 1;
 
-            bbManager.Fire(temporalSdr);
+            bbManager.Fire(temporalSdr, counter++);
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
             Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.X, predictedNeurons.Count);
 
-            bbManager.Fire(spatialSdr);
+            bbManager.Fire(spatialSdr, counter++);
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 
@@ -848,14 +865,15 @@ namespace FirstOrderMemoryUnitTest
 
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
             var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+            ulong counter = 1;
 
-            bbManager.Fire(apicalSdr);           
+            bbManager.Fire(apicalSdr, counter++);           
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
             Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
 
-            bbManager.Fire(spatialSdr);
+            bbManager.Fire(spatialSdr, counter++);
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 
@@ -887,20 +905,21 @@ namespace FirstOrderMemoryUnitTest
             var temporalSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
             var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
+            ulong counter = 1;
 
-            bbManager.Fire(temporalSdr);
+            bbManager.Fire(temporalSdr, counter++);
 
             var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
             Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.X, predictedNeurons.Count);
 
-            bbManager.Fire(apicalSdr);
+            bbManager.Fire(apicalSdr, counter++);
 
             predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
 
             Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
 
-            bbManager.Fire(spatialSdr);
+            bbManager.Fire(spatialSdr, counter++);
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 
@@ -944,8 +963,9 @@ namespace FirstOrderMemoryUnitTest
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
             var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
             var depolarizedNeuronList1 = FindDepolarizedNeuronList();
+            ulong counter = 1;
 
-            bbManager.Fire(temporalSdr);
+            bbManager.Fire(temporalSdr, counter++);
 
             depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
@@ -953,7 +973,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.AreEqual(temporalSdr.ActiveBits.Count * bbManager.X, predictedNeurons.Count);
 
-            bbManager.Fire(apicalSdr);
+            bbManager.Fire(apicalSdr, counter++);
 
             depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
@@ -961,7 +981,7 @@ namespace FirstOrderMemoryUnitTest
 
             Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
 
-            bbManager.Fire(spatialSdr);
+            bbManager.Fire(spatialSdr, counter++);
 
             depolarizedNeuronList1 = FindDepolarizedNeuronList();
 
@@ -1006,7 +1026,7 @@ namespace FirstOrderMemoryUnitTest
             {
                 var sdr = GetSDRExcludingThisList(depolarizedNeuronList1);
 
-                bbManager.Fire(sdr);
+                bbManager.Fire(sdr, counter++);
 
                 var depolarizedNeuronList2 = FindDepolarizedNeuronList();
 
@@ -1022,7 +1042,7 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
-        private void RepeatCycle(Neuron axonalNeuron, Neuron dendronalNeuron, int repeat)
+        private void RepeatCycle(Neuron axonalNeuron, Neuron dendronalNeuron, int repeat, ulong counter = 1)
         {
             for(int i = 0; i < repeat; i++)
                 bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron);
@@ -1042,7 +1062,7 @@ namespace FirstOrderMemoryUnitTest
 
             var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
 
-            bbManager.Fire(spatialSdr);     //Burst
+            bbManager.Fire(spatialSdr, 1);     //Burst
 
             Assert.AreEqual(0, bbManager.NeuronsFiringThisCycle.Count);
 
@@ -1115,7 +1135,7 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
-        public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
+        public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount, ulong counter = 1, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
         {
 
             if (ShouldDepolarize == false)
@@ -1123,20 +1143,20 @@ namespace FirstOrderMemoryUnitTest
                 for (int i = 0; i < repCount; i++)
                 {
 
-                    bbManager.Fire(axonalNeurondr);
+                    bbManager.Fire(axonalNeurondr, counter++);
 
-                    bbManager.Fire(dendronalNeuronSdr);
+                    bbManager.Fire(dendronalNeuronSdr, counter++);
                 }
             }
             else
             {
                 for (int i = 0; i < repCount; i++)
                 {
-                    bbManager.Fire(axonalNeurondr);
+                    bbManager.Fire(axonalNeurondr, counter++);
 
                     neuronToDeplarize.ProcessVoltage(10);
 
-                    bbManager.Fire(dendronalNeuronSdr);
+                    bbManager.Fire(dendronalNeuronSdr, counter++);
                 }
             }
         }

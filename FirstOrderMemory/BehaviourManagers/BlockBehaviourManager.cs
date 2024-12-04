@@ -1027,6 +1027,10 @@
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
+                    if(Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 1 Picked Up!!");
+                    }
 
                     WireCasesTracker[0]++;
 
@@ -1064,10 +1068,9 @@
 
                     WireCasesTracker[1]++;
 
-                    if (Mode == LogMode.All || Mode == LogMode.Info)
+                    if (Mode == LogMode.Trace)
                     {
-                        Console.WriteLine(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
-                        WriteLogsToFile(" EVENT :: Wire CASE 2 just Occured Count : " + WireCasesTracker[1].ToString());
+                        Console.WriteLine("Wire Case 2 Picked Up!!");
                     }
 
                     List<Neuron> contributingList;
@@ -1122,6 +1125,11 @@
 
                     WireCasesTracker[2]++;
 
+                    if (Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 3 Picked Up!!");
+                    }
+
                     if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
                     {
                         Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
@@ -1162,16 +1170,15 @@
                     //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
                     //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
                     //BUG 2: TotalNumberOfDistalConnections always get limited to 400
-                    //
+                    
                     WireCasesTracker[3]++;
 
-                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    if (Mode == LogMode.Trace)
                     {
-                        Console.WriteLine(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
-                        WriteLogsToFile(" EVENT :: FULL ERROR CASE :: Wire CASE 4 just Occured Count : " + WireCasesTracker[3].ToString());
+                        Console.WriteLine("Wire Case 4 Picked Up!!");
                     }
 
-                    if (includeBurstLearning == true)
+                    //if (includeBurstLearning == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
@@ -1185,11 +1192,9 @@
 
                     WireCasesTracker[4]++;
 
-                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    if (Mode == LogMode.Trace)
                     {
-                        Console.WriteLine(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
-                        WriteLogsToFile(" EVENT :: Wire CASE 5 just Occured Count : " + WireCasesTracker[4].ToString());
-                        //Thread.Sleep(1000);
+                        Console.WriteLine("Wire Case 5 Picked Up!!");
                     }
 
                     List<Neuron> burstList = new List<Neuron>();
@@ -2418,10 +2423,11 @@
 
         public enum LogMode
         {
-            None,
-            BurstOnly,
             All,
-            Info
+            Trace,
+            BurstOnly,            
+            Info,
+            None,
         }
 
         #endregion

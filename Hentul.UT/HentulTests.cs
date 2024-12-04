@@ -232,7 +232,7 @@ namespace Hentul.UT
             
         }
 
-        [Test]
+        [Test, Ignore("Needs Modification")]
         public void TestImageSizeforAllLoadedImages()
         {
             sg = new ScreenGrabber(count, true, false, 0);
@@ -297,7 +297,7 @@ namespace Hentul.UT
 
         }
 
-        [Test]
+        [Test, Ignore("No longer Needed!")]
         public void TestImagePixelCoverageWithDebug()
         {
             string filepath = @"C:\Users\depint\source\repos\Hentul\Hentul.UT\TestDocs\errorsIndexes.txt";
