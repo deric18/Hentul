@@ -5,6 +5,7 @@
     using Hentul.Hippocampal_Entorinal_complex;    
     using FirstOrderMemory.Models;
     using static Hentul.Orchestrator;
+    using System.Drawing;
 
     public  class OrchestratorTests
     {
@@ -192,6 +193,12 @@
 
         }
 
+        [Test]
+        public void TestMapperFOMBBMPositiveTest()
+        {
+            //Bitmap bmp = new Bitmap()
+            //var senseLoc = orchestrator.Mapper.ParseBitmap()
+        }
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on Location for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForLocationIDOnly()

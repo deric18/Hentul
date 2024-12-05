@@ -59,7 +59,6 @@
 
             PerformMappings();
 
-
             ONbits1FOM = new List<Position_SOM>()
             {
                 new Position_SOM(0, 1),
@@ -455,6 +454,7 @@
                 else if (check1 && check2 && check4 && check3 == false)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
+
                     CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
                 }
                 else if (check1 && check3 && check4 && check2 == false)
