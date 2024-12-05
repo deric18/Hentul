@@ -5,6 +5,7 @@
     using Hentul.Hippocampal_Entorinal_complex;    
     using FirstOrderMemory.Models;
     using static Hentul.Orchestrator;
+    using System.Drawing;
 
     public  class OrchestratorTests
     {
@@ -59,8 +60,17 @@
         }
 
         [Test]
-        public void TestStep0()
+        public void TestMapperParseBitMap()
         {
+            Bitmap bp = new Bitmap("C:\\Users\\depint\\source\\repos\\Hentul\\Images\\testbmp.png");
+
+
+
+
+            orchestrator.Mapper.ParseBitmap( bp );
+
+
+
 
         }
 

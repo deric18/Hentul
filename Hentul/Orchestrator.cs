@@ -291,6 +291,99 @@
 
             // STEP 1A : Fire all FOM's
 
+            FireAllFOMs();
+
+
+            // STEP 1B : Fire all L3B SOM's
+
+            if (Mapper.somPositions.Count != 0)
+            {
+                if(Mapper.somPositions.Count > 125)
+                {
+                    WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
+                }
+
+                somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
+            }
+            else
+            {
+                somBBM_L3B.FireBlank(CycleNum);
+            }
+
+
+            Mapper.clean();
+            whitecount = 0;
+            firingFOM.Clear();
+
+            #endregion
+        }
+
+        public Position ProcessStep2()
+        {
+
+            Position nextMotorOutput = null;
+
+            if (NMode.Equals(NetworkMode.TRAINING))
+            {
+                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+
+                somBBM_L3A.Pool(fom_SDR);
+
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+
+                if (som_SDR != null)
+                {
+                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+
+                    HCAccessor.ProcessCurrentPatternForObject(
+                       CycleNum,
+                       firingSensei);
+                }
+                else
+                {
+                    bool breakpoint = true;
+                }
+            }
+            else if (NMode.Equals(NetworkMode.PREDICTION))
+            {
+                // If any output from HC execute the location output if NOT then take the standar default output.
+                // 
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+                var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum+1);
+
+
+                if (som_SDR != null)
+                {
+                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+                    var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
+
+                    nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
+                    CycleNum,
+                    firingSensei,
+                    predictedSensei
+                    );
+                }
+                else
+                {
+                    bool breakpoint = true;
+                }
+
+               
+            }
+
+            return nextMotorOutput;
+        }
+
+
+        public void DoneWithTraining()
+        {
+            HCAccessor.DoneWithTraining();
+        }
+
+        private void FireAllFOMs()
+        {
             foreach (var kvp in Mapper.FOMBBMIDS)
             {
                 switch (kvp.Key)
@@ -437,93 +530,6 @@
                         }
                 }
             }
-
-            // STEP 1B : Fire all L3B SOM's
-
-            if (Mapper.somPositions.Count != 0)
-            {
-                if(Mapper.somPositions.Count > 125)
-                {
-                    WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
-                }
-
-                somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
-            }
-            else
-            {
-                somBBM_L3B.FireBlank(CycleNum);
-            }
-
-
-            Mapper.clean();
-            whitecount = 0;
-            firingFOM.Clear();
-
-            #endregion
-        }
-
-        public Position ProcessStep2()
-        {
-
-            Position nextMotorOutput = null;
-
-            if (NMode.Equals(NetworkMode.TRAINING))
-            {
-                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
-
-                somBBM_L3A.Pool(fom_SDR);
-
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-
-                if (som_SDR != null)
-                {
-                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
-
-                    HCAccessor.ProcessCurrentPatternForObject(
-                       CycleNum,
-                       firingSensei);
-                }
-                else
-                {
-                    bool breakpoint = true;
-                }
-            }
-            else if (NMode.Equals(NetworkMode.PREDICTION))
-            {
-                // If any output from HC execute the location output if NOT then take the standar default output.
-                // 
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-                var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum+1);
-
-
-                if (som_SDR != null)
-                {
-                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
-                    var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
-
-                    nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
-                    CycleNum,
-                    firingSensei,
-                    predictedSensei
-                    );
-                }
-                else
-                {
-                    bool breakpoint = true;
-                }
-
-               
-            }
-
-            return nextMotorOutput;
-        }
-
-
-        public void DoneWithTraining()
-        {
-            HCAccessor.DoneWithTraining();
         }
 
         private SDR_SOM GetSdrSomFromFOMs()
