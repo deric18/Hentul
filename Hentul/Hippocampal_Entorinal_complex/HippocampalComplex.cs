@@ -41,7 +41,8 @@
                 "Apple",
                 "Ananas",
                 "Watermelon",
-                "JackFruit"
+                "JackFruit",
+                "Grapes"
             };
             imageIndex = 1;
         }
@@ -109,6 +110,14 @@
         public void DoneWithTraining()
         {
             ConvertUnrecognisedObjectToRecognisedObject();
+
+            CurrentObject = new UnrecognisedEntity();
+
+            if(CurrentObject.Label == string.Empty)
+            {
+                CurrentObject.Label = objectlabellist[imageIndex];
+                imageIndex++;
+            }
         }
 
         public NetworkMode GetCurrentNetworkMode() => networkMode;
@@ -203,9 +212,7 @@
         }
 
         public void SetNetworkModeToPrediction()
-        {
-
-            ConvertUnrecognisedObjectToRecognisedObject();
+        {            
             networkMode = NetworkMode.PREDICTION;
         }
 

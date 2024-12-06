@@ -24,7 +24,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
         }
 
         public bool AddNewSenei(Sensation_Location sensei)
-        {            
+        {
+            bool toReturn = false;
+
             foreach( var item in sensei.sensLoc.Values)
             {
                 if (item.Value.Count <= 1)
@@ -44,19 +46,21 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 if(MatchedSensations.TryGetValue(sensei.Id, out var locStrings))
                 {
                     locStrings.AddRange(sensei.sensLoc.Keys.ToList<string>());
+                    toReturn = true;
                 }
                 else
                 {
                     MatchedSensations.Add(sensei.Id, sensei.sensLoc.Keys.ToList<String>());
+                    toReturn = true;
                 }
             }
             else if (match != 100)
             {
                 ObjectSnapshot.Add(sensei);
-                return true;
+                toReturn = true;
             }
 
-            return false;
+            return toReturn;
         }
 
         public void SetObjectLabel(string name)

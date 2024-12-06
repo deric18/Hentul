@@ -605,7 +605,8 @@
 
                 if (bbmID > 99 || bbmID < 0)
                 {
-                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+                    continue;
                 }
 
                 position = GetPositionForActiveBit(point, pos.X);
