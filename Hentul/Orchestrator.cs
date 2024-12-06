@@ -281,7 +281,7 @@
             {
                 for (int j = 0; j < greyScalebmp.Height; j++)
                 {
-                    if (Mapper.flagCheckArr[i, j] == false)
+                    if (Mapper.testBmpCoverage[i, j] == false)
                     {
                         whitecount++;
                     }

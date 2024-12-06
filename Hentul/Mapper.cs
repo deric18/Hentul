@@ -40,7 +40,7 @@
 
         public List<Position_SOM> somPositions;
 
-        public bool[,] flagCheckArr { get; private set; }
+        public bool[,] testBmpCoverage { get; private set; }
 
         public int LENGTH { get; private set; }
 
@@ -409,13 +409,13 @@
 
             List<Position> toRet = new List<Position>();
 
-            flagCheckArr = new bool[bitmap.Width, bitmap.Height];
+            testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
 
             //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
             foreach (var kvp in Mappings)
             {
                 var bbmID = kvp.Key;
-                var posList = kvp.Value;
+                var posList = kvp.Value;               
 
                 var pixel1 = posList[0];
                 var pixel2 = posList[1];
@@ -423,16 +423,16 @@
                 var pixel4 = posList[3];
 
                 Color color1 = bitmap.GetPixel(pixel1.X, pixel1.Y);
-                flagCheckArr[pixel1.X, pixel1.Y] = true;
+                testBmpCoverage[pixel1.X, pixel1.Y] = true;
 
                 Color color2 = bitmap.GetPixel(pixel2.X, pixel2.Y);
-                flagCheckArr[pixel2.X, pixel2.Y] = true;
+                testBmpCoverage[pixel2.X, pixel2.Y] = true;
 
                 Color color3 = bitmap.GetPixel(pixel3.X, pixel3.Y);
-                flagCheckArr[pixel3.X, pixel3.Y] = true;
+                testBmpCoverage[pixel3.X, pixel3.Y] = true;
 
                 Color color4 = bitmap.GetPixel(pixel4.X, pixel4.Y);
-                flagCheckArr[pixel4.X, pixel4.Y] = true;
+                testBmpCoverage[pixel4.X, pixel4.Y] = true;
 
                 bool check1 = CheckIfColorIsWhite(color1);
                 bool check2 = CheckIfColorIsWhite(color2);
@@ -442,19 +442,21 @@
                 if (check1 && check2 && check3 && check4)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
-
                     CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ALL);
                 }
                 else if (check1 && check2 && check3 && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
+                    if (bbmID == 79)
+                    {
+                        bool breakpoint = true;
+                    }
 
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
                     CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
                 }
                 else if (check1 && check2 && check4 && check3 == false)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
-
                     CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
                 }
                 else if (check1 && check3 && check4 && check2 == false)
@@ -565,6 +567,8 @@
 
         public void clean()
         {
+            FOMBBMIDS.Clear();
+            SOMBBMIDS.Clear();
             somPositions.Clear();
             Xoffset = -1;
             YOffset = -1;

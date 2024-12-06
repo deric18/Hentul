@@ -59,7 +59,7 @@
                 if (CurrentObject.AddNewSenei(sensei) == false)
                 {
                     throw new InvalidOperationException();
-                }                       
+                }
             }
             else if (networkMode == NetworkMode.PREDICTION)
             {

@@ -62,16 +62,45 @@
         [Test]
         public void TestMapperParseBitMap()
         {
-            Bitmap bp = new Bitmap("C:\\Users\\depint\\source\\repos\\Hentul\\Images\\testbmp.png");
+            //Bitmap bp = new Bitmap("C:\\Users\\depint\\source\\repos\\Hentul\\Images\\testbmp.png");            
+
+            Bitmap bp = new Bitmap(40, 20);
+
+            bp.SetPixel(34, 18, Color.White);
+            bp.SetPixel(34, 19, Color.White);
+            bp.SetPixel(35, 18, Color.White);
+            bp.SetPixel(35, 9, Color.White);
 
 
+            orchestrator.Mapper.ParseBitmap(bp);
 
+            int breapoint = 1;
 
-            orchestrator.Mapper.ParseBitmap( bp );
+            Assert.AreEqual(MAPPERCASE.ALL, orchestrator.Mapper.FOMBBMIDS.Keys.ElementAt(0));
+            Assert.AreEqual(89, orchestrator.Mapper.FOMBBMIDS.Values.ElementAt(0).ElementAt(0));
 
+            int trues = 0;
+            int falses = 0;
 
+            for (int i = 0; i < orchestrator.Mapper.testBmpCoverage.GetUpperBound(0); i++)
+            {
+                for (int j = 0; j < orchestrator.Mapper.testBmpCoverage.GetUpperBound(1); j++)
+                {
+                    //Assert.AreEqual(true, orchestrator.Mapper.flagCheckArr[i, j]);
+                    if (orchestrator.Mapper.testBmpCoverage[i, j])
+                    {
+                        trues++;
+                    }
+                    else
+                    {
+                        falses++;
+                        //Assert.False();
+                    }
 
+                }
+            }
 
+            int bp1 = 1;
         }
 
         [Test]

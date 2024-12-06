@@ -227,7 +227,7 @@ namespace HentulWinforms
 
         private void Form1_Load(object sender, EventArgs e)
         {   //RT : 1575, LB : 1032
-            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1175; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1002; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
+            LeftTop.X = 960; LeftTop.Y = 365; RightTop.X = 1575; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1032; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
             label_done.Text = "Ready";
         }
 

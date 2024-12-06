@@ -8,21 +8,59 @@
     public class Sensation_Location
     {
 
+        public string Id { get; set; }
+
         /// <summary>
         /// Key : Location on the Screen
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
         /// </summary>
         public Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
 
+
+        // Used only for Mock Purposes
         public Sensation_Location()
         {
             sensLoc = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
-        }
+            Id = ComputeStringID();            
+        }      
 
+        //Used for Production.
         public Sensation_Location(Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
         {
             this.sensLoc = sensLoc;
+            Id = ComputeStringID();
         }
+
+
+        private string ComputeStringID()
+        {
+            string toReturn = string.Empty;
+
+            if(sensLoc.Count == 0 )            
+                return "EMPTY";
+
+            char delimeter1 = ':';
+            char delimeter2 = '/';
+            int max = sensLoc.Count;
+
+            if (max == 1 || max == 2)
+            {
+                toReturn = sensLoc.ElementAt(0).Value.Key + delimeter1 + sensLoc.ElementAt(0).Value.Value?.ElementAt(0)?.ToString() +
+                   sensLoc.ElementAt(sensLoc.Count - 1).Value.Key + delimeter1 + sensLoc.ElementAt(sensLoc.Count - 1).Value.Value?.ElementAt(0)?.ToString();
+            }
+            else
+            {
+                int mid = sensLoc.Count / 2;
+
+                toReturn = sensLoc.ElementAt(0).Value.Key + delimeter1 + sensLoc.ElementAt(0).Value.Value?.ElementAt(0)?.ToString() +
+                           sensLoc.ElementAt(mid).Value.Key + delimeter1 + sensLoc.ElementAt(mid).Value.Value?.ElementAt(0)?.ToString()    +
+                           sensLoc.ElementAt(max - 1).Value.Key + delimeter1 + sensLoc.ElementAt(max - 1).Value.Value?.ElementAt(0)?.ToString();
+            }
+
+
+            return toReturn;
+        }
+
 
         public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position_SOM>> sensation)
         {
@@ -48,11 +86,38 @@
 
                 int currentCycleMatch = match.GetTotalMatchPercentage();
 
+                if(currentCycleMatch == 100)
+                {
+                    int breakpoint = 10;
+                }
+
                 if (currentCycleMatch > maxMatch)
                     maxMatch = currentCycleMatch;
             }
 
             return maxMatch;
+        }
+
+        public static string GetMatchingSenseiLocation(Sensation_Location sensei, List<Sensation_Location> senseiList)
+        {
+            int maxMatch = 0;
+
+            Match match;
+            string location = null;
+
+            foreach (var item in senseiList)
+            {
+                match = CompareSenseiPercentage(sensei, item, true, true);
+
+                if(match.GetTotalMatchPercentage() == 100)
+                {
+                    return "WTF";
+                }
+
+
+            }
+
+            return "NO WTF";
         }
 
         public static int ComparePositionListPercentage(List<Position_SOM> first, List<Position_SOM> second)
@@ -85,15 +150,18 @@
         {
             Match match = new Match(sourceSensei);
 
-            if (sourceSensei?.sensLoc.Count == 0 || targetSensei?.sensLoc.Count == 0)
+            if (sourceSensei?.sensLoc.Count == 0 || targetSensei?.sensLoc.Count == 0 || sourceSensei.sensLoc.Count != targetSensei.sensLoc.Count )
             {
                 return match;
             }
 
-            int maxMatchPercentage = sourceSensei.sensLoc.Count > targetSensei.sensLoc.Count ? ((targetSensei.sensLoc.Count * 1000) / sourceSensei.sensLoc.Count) : 1000;
+            if ( sourceSensei.sensLoc.Keys.ElementAt(0) == "1188-503-0" && targetSensei.sensLoc.Keys.ElementAt(0) == "1168-503-0")
+            {
+                bool brekapoint = true;
+            }
 
             int matchPercentage = 0;
-
+            bool BBMChecked = false;
             int index = 0;
 
             foreach (var sourceLocationKvp in sourceSensei.sensLoc)
@@ -108,7 +176,7 @@
                         if (includeBBM == true)
                         {
                             // includeLocation == true && includeBBM == true
-
+                            BBMChecked = true;
                             int bbmID = sourceLocationKvp.Value.Key;
 
                             List<Position_SOM> sourceSOMs = sourceLocationKvp.Value.Value;
@@ -137,6 +205,11 @@
                             if (BBMMatchedFlag == false)
                             {
                                 match.IncrementBBMIDMiss();
+                            }
+
+                            if (match.GetTotalMatchPercentage() == 100)
+                            {
+                                int breakpoint = 10;
                             }
                         }
                         else
@@ -167,7 +240,7 @@
 
                         var targetKvp = targetSensei.sensLoc.Values;
 
-                        bool BBMMatchedFlag = false;
+                        bool BBMMatchedFlag = false;                        
 
                         foreach (var item in targetKvp)
                         {
@@ -213,9 +286,9 @@
                 }
 
                 index++;
-            }
+            }             
 
-            if(match.CheckMatchValidity() == false)
+            if (match.CheckMatchValidity() == false)
             {
                 ComputeBBMIDMisses(sourceSensei, targetSensei, match);
             }
