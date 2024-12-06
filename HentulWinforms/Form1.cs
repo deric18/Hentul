@@ -19,21 +19,13 @@ namespace HentulWinforms
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
         Orchestrator.POINT RightTop = new Orchestrator.POINT();
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
-        Orchestrator.POINT RightBottom = new Orchestrator.POINT();
-
-        List<String> objectlabellist;
+        Orchestrator.POINT RightBottom = new Orchestrator.POINT();        
 
         public Form1()
         {
             InitializeComponent();            
             networkMode = NetworkMode.TRAINING;
-            objectlabellist = new List<string>
-            {
-                "Apple",
-                "Ananas",
-                "Watermelon",
-                "JackFruit"
-            };
+            
         }
 
         private void StartButton_Click(object sender, EventArgs e)

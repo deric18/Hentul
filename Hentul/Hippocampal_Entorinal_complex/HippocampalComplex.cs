@@ -23,14 +23,27 @@
 
         private string backupDir;
 
+        private List<string> objectlabellist;
+
+        private int imageIndex;
+
         public HippocampalComplex(string firstLabel)
         {
 
             Objects = new Dictionary<string, RecognisedEntity>();
-            CurrentObject = new UnrecognisedEntity();
+            CurrentObject = new UnrecognisedEntity();            
+            CurrentObject.Label = firstLabel;
             networkMode = NetworkMode.TRAINING;
             NumberOfITerationsToConfirmation = 6;
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
+            objectlabellist = new List<string>
+            {
+                "Apple",
+                "Ananas",
+                "Watermelon",
+                "JackFruit"
+            };
+            imageIndex = 1;
         }
 
         #endregion
@@ -217,6 +230,12 @@
             if (CurrentObject.ObjectSnapshot.Count == 0)
             {
                 throw new InvalidOperationException("Cannot Transform empty object!");
+            }
+
+            if(CurrentObject.Label == string.Empty)
+            {
+                CurrentObject.Label = objectlabellist[imageIndex];
+                imageIndex++;
             }
 
             RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
