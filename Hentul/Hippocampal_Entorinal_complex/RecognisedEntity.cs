@@ -1,73 +1,83 @@
-﻿using Common;
-
-/// Author : Deric Pinto
+﻿/// Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
     public class RecognisedEntity : BaseObject
     {
-        public List<Sensation_Location> ObjectSnapshot { get; set; }        
+        public List<Sensation_Location> ObjectSnapshot { get; set; }
 
-        private List<string> locations;
+        private List<string> _verifiedID;
+
+        public Sensation_Location CurrentComparision;
+
         public string Label { get; private set; }
 
         public RecognisedEntity(string name)
         {
-            Label = name;            
+            Label = name;
             ObjectSnapshot = new List<Sensation_Location>();
         }
 
-        public RecognisedEntity(UnrecognisedEntity unrec) 
+        public RecognisedEntity(UnrecognisedEntity unrec)
         {
             Label = unrec.Label;
             ObjectSnapshot = unrec.ObjectSnapshot;
         }
 
-        public Position GetNextPositionToVerify()
+        public Sensation_Location GetNextSenseiToVerify()
         {
-            Position toReturn = null;
+            Sensation_Location toReturn = null;
 
-            if(ObjectSnapshot.Count == 0)
+            if (ObjectSnapshot.Count == 0)
             {
                 throw new InvalidOperationException("Cannot generate a new Position with empty Object Snapshot");
             }
 
-            if (locations.Count == 0)
+            if (_verifiedID.Count == 0)
             {
-                locations = new List<string>();
+                _verifiedID = new List<string>();
             }
 
-            string pos = GenerateNextKeyLocationToVerify();
+            toReturn = GetRandSenseiToVerify();
 
-            locations.Add(pos);
+            _verifiedID.Add(toReturn.Id);
 
-            return Position.ConvertStringToPosition(pos);
+            return toReturn;
         }
 
-        public string GenerateNextKeyLocationToVerify()
+        private Sensation_Location GetRandSenseiToVerify()
         {
             bool flag = true;
 
-            Random rand = new Random(); 
+            Random rand = new Random();
 
-            int index = rand.Next(0, locations.Count);   
+            int index = rand.Next(0, ObjectSnapshot.Count);
 
-            while (flag)
+            var sensloc = ObjectSnapshot[index];
+
+            if (_verifiedID.Contains(sensloc.Id))
             {
-                var sensloc = ObjectSnapshot[index];
+                while (flag)
+                {
+                    index = rand.Next(0, ObjectSnapshot.Count);
+                    sensloc = ObjectSnapshot[index];
 
-                //var str = sensloc.sensLoc.TryGetValue
-
-
+                    if (_verifiedID.Contains(sensloc.Id) == false)
+                        flag = false;
+                }
             }
 
-            return "3-2-1";
+            _verifiedID.Add((string) sensloc.Id);
+
+            CurrentComparision = sensloc;
+
+            return sensloc;
         }
 
         public int CheckPatternMatchPercentage(Sensation_Location sensei)
         {
             int toReturn = 0;
 
-            toReturn =  Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, true, false);
+            toReturn = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, true, false);
 
             if (toReturn == 0)
             {
@@ -75,7 +85,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             }
 
             return toReturn;
-        }        
+        }
     }
 
 }

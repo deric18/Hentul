@@ -1,9 +1,6 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
-{
-    using Common;
+{    
     using FirstOrderMemory.Models;
-    using System.Text.RegularExpressions;
-    using System;
 
     public class Sensation_Location
     {

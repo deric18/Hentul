@@ -115,19 +115,22 @@
                         throw new InvalidOperationException("Should Never Happne!");
                     }
 
-                    if (currentIterationTOConfirmation < NumberOfITerationsToConfirmation)
-                    {
-                        nextMotorOutput = currentmatchingObject.GetNextPositionToVerify();
-                    }
-
-                    if(currentIterationTOConfirmation == 0)
+                    if (currentIterationTOConfirmation == 0)
                     {
                         currentIterationTOConfirmation++;
+                        // Verify();
                     }
-                    else
+                    else if(currentIterationTOConfirmation > 0) {
                     {
-
+                        //Verify() 
+                        //prepare expected sensation and location and compare them with location and without location and see how good the matches are.
                     }
+
+                    if (currentIterationTOConfirmation < NumberOfITerationsToConfirmation)
+                    {
+                        nextMotorOutput = currentmatchingObject.GetNextSenseiToVerify();
+                            //cache sensation and Locations.
+                    }                    
                 }
             }
 
