@@ -336,9 +336,14 @@
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
-                    HCAccessor.ProcessCurrentPatternForObject(
+                    var nextPos = HCAccessor.ProcessCurrentPatternForObject(
                        CycleNum,
                        firingSensei);
+
+                    if(nextPos != null)
+                    {
+                        bool breakpoint = true;
+                    }
                 }
                 else
                 {
@@ -364,6 +369,7 @@
                     firingSensei,
                     predictedSensei
                     );
+                    
                 }
                 else
                 {

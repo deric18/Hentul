@@ -5,6 +5,7 @@ namespace HentulWinforms
     using Hentul;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
+    using System.Diagnostics.Eventing.Reader;
     using System.Drawing.Imaging;
 
     public partial class Form1 : Form
@@ -126,29 +127,43 @@ namespace HentulWinforms
 
                         orchestrator.MoveCursor(p);
                     }
-
+                    else
+                    {
+                        bool failed = true;
+                    }
                     
+                }
+                else
+                {
+                    bool bp1 = true;
                 }
             }
 
             if (label_done.Text == "Finished Processing Image")
             {
-                if (imageIndex >= 3)
+                if (networkMode == NetworkMode.TRAINING)
                 {
-                    //orchestrator.BackUp();
-                    StartButton.Text = "Start Prediction";
-                    StartButton.Refresh();
-                    orchestrator.DoneWithTraining();                    
-                    orchestrator.ChangeNetworkModeToPrediction();
+                    if (imageIndex >= 3)
+                    {
+                        //orchestrator.BackUp();
+                        StartButton.Text = "Start Prediction";
+                        StartButton.Refresh();
+                        orchestrator.DoneWithTraining();
+                        networkMode = NetworkMode.PREDICTION;
+                        orchestrator.ChangeNetworkModeToPrediction();
+                    }
+                    else
+                    {
+                        orchestrator.DoneWithTraining();
+                        imageIndex++;
+                        StartButton.Text = "Start Another Image";
+                        StartButton.Refresh();
+                    }
                 }
-                else
+                else if(networkMode == NetworkMode.PREDICTION) 
                 {
-                    orchestrator.DoneWithTraining();
-                    imageIndex++;
-                    StartButton.Text = "Start Another Image";
-                    StartButton.Refresh();                    
-                }
-
+                    bool failedToPredict = true;
+                }               
             }
         }
 

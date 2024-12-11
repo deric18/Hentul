@@ -1,7 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;    
+    using Common;
     using System.Xml;
 
     public class HippocampalComplex
@@ -19,6 +19,15 @@
 
         private NetworkMode networkMode;
 
+        private List<RecognisedEntity> matchingObjectList;
+
+        private List<RecognisedEntity> rejectedObjectList;
+
+        private RecognisedEntity currentmatchingObject;
+
+        private bool IsBeingVerified;
+
+        public int currentIterationTOConfirmation;
         public int NumberOfITerationsToConfirmation { get; private set; }
 
         private string backupDir;
@@ -31,10 +40,16 @@
         {
 
             Objects = new Dictionary<string, RecognisedEntity>();
-            CurrentObject = new UnrecognisedEntity();            
+            CurrentObject = new UnrecognisedEntity();
             CurrentObject.Label = firstLabel;
             networkMode = NetworkMode.TRAINING;
             NumberOfITerationsToConfirmation = 6;
+            matchingObjectList = new List<RecognisedEntity>();
+            rejectedObjectList = new List<RecognisedEntity>();
+            currentmatchingObject = null;
+            IsBeingVerified = false;
+            currentIterationTOConfirmation = 0;
+
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
             objectlabellist = new List<string>
             {
@@ -64,7 +79,7 @@
         /// <exception cref="InvalidOperationException"></exception>
         public Position ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
         {
-            Position toReturn = null;
+            Position nextMotorOutput = null;
 
             if (networkMode == NetworkMode.TRAINING)
             {
@@ -82,30 +97,42 @@
                     throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
 
-                /* If Under PredictionMode 
-                1. Parse known Objects for this location , 
-                    if any recognised , put them in priority queue , 
-                    else run through prediction 
-                2. If any object is recognised, 
-                    enter verification Mode and verify atleast 6 more positions.
-                3. Else , continue with more inputs from Orchestrator. Record number of iterations to confirmation
-                */
-
-                var matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
-
-
-                if (matchingObjectList.Count != 0)
+               
+                if (IsBeingVerified == false)
                 {
-                    foreach (var matchingObject in matchingObjectList)
+                    matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
+
+                    if(matchingObjectList.Count > 0)
                     {
-                        //Generate Label and next confirming motor output for return.
-                        //
+                        IsBeingVerified = true;
+                        currentmatchingObject = matchingObjectList.FirstOrDefault();
+                    }                    
+                }
+                else if(IsBeingVerified == true)
+                {
+                    if (matchingObjectList.Count == 0)
+                    {
+                        throw new InvalidOperationException("Should Never Happne!");
                     }
-                }                
+
+                    if (currentIterationTOConfirmation < NumberOfITerationsToConfirmation)
+                    {
+                        nextMotorOutput = currentmatchingObject.GetNextPositionToVerify();
+                    }
+
+                    if(currentIterationTOConfirmation == 0)
+                    {
+                        currentIterationTOConfirmation++;
+                    }
+                    else
+                    {
+
+                    }
+                }
             }
 
-            return toReturn;
-        }      
+            return nextMotorOutput;
+        }
 
         public void DoneWithTraining()
         {
@@ -113,7 +140,7 @@
 
             CurrentObject = new UnrecognisedEntity();
 
-            if(CurrentObject.Label == string.Empty)
+            if (CurrentObject.Label == string.Empty)
             {
                 CurrentObject.Label = objectlabellist[imageIndex];
                 imageIndex++;
@@ -141,16 +168,16 @@
                 var objectNode = xmlDocument.CreateNode(XmlNodeType.Element, recognisedObject.Value.Label, string.Empty);
 
                 foreach (var sensei in recognisedObject.Value.ObjectSnapshot)
-                {                                           
-                    foreach(var dictKVP in sensei.sensLoc)
+                {
+                    foreach (var dictKVP in sensei.sensLoc)
                     {
                         var sensationLocationElement = xmlDocument.CreateElement("SensationLocation");
-                        
+
                         sensationLocationElement.SetAttribute("Position", dictKVP.Key);
 
                         sensationLocationElement.SetAttribute("BBMID", dictKVP.Value.Key.ToString());
-                        
-                        foreach( var positionItem in dictKVP.Value.Value)
+
+                        foreach (var positionItem in dictKVP.Value.Value)
                         {
                             var xmlNode = xmlDocument.CreateElement("Position");
 
@@ -166,9 +193,9 @@
                 }
 
                 xmlDocument.AppendChild(objectNode);
-            }                        
-        
-            xmlDocument?.Save(backupDir + filename);            
+            }
+
+            xmlDocument?.Save(backupDir + filename);
 
         }
 
@@ -212,7 +239,7 @@
         }
 
         public void SetNetworkModeToPrediction()
-        {            
+        {
             networkMode = NetworkMode.PREDICTION;
         }
 
@@ -239,7 +266,7 @@
                 throw new InvalidOperationException("Cannot Transform empty object!");
             }
 
-            if(CurrentObject.Label == string.Empty)
+            if (CurrentObject.Label == string.Empty)
             {
                 CurrentObject.Label = objectlabellist[imageIndex];
                 imageIndex++;
@@ -247,7 +274,7 @@
 
             RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
 
-            Objects.Add(newObject.Label, newObject);            
+            Objects.Add(newObject.Label, newObject);
         }
 
         private void FinishedProcessingImage()
