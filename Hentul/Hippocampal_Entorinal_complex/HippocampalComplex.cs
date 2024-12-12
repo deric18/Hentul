@@ -25,7 +25,7 @@
 
         private RecognisedEntity currentmatchingObject;
 
-        private bool IsBeingVerified;
+        private RecognitionState ObjectState;
 
         public int currentIterationTOConfirmation;
         public int NumberOfITerationsToConfirmation { get; private set; }
@@ -47,7 +47,7 @@
             matchingObjectList = new List<RecognisedEntity>();
             rejectedObjectList = new List<RecognisedEntity>();
             currentmatchingObject = null;
-            IsBeingVerified = false;
+            ObjectState = RecognitionState.None;
             currentIterationTOConfirmation = 0;
 
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
@@ -97,18 +97,18 @@
                     throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
 
-               
-                if (IsBeingVerified == false)
+
+                if (ObjectState != RecognitionState.IsBeingVerified)
                 {
                     matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
 
-                    if(matchingObjectList.Count > 0)
+                    if (matchingObjectList.Count > 0)
                     {
-                        IsBeingVerified = true;
+                        ObjectState = RecognitionState.IsBeingVerified;
                         currentmatchingObject = matchingObjectList.FirstOrDefault();
-                    }                    
+                    }
                 }
-                else if(IsBeingVerified == true)
+                else if (ObjectState == RecognitionState.IsBeingVerified)
                 {
                     if (matchingObjectList.Count == 0)
                     {
@@ -120,17 +120,49 @@
                         currentIterationTOConfirmation++;
                         // Verify();
                     }
-                    else if(currentIterationTOConfirmation > 0) {
-                    {
-                        //Verify() 
-                        //prepare expected sensation and location and compare them with location and without location and see how good the matches are.
-                    }
+                    else if (currentIterationTOConfirmation > 1)
+                    {                       
+                        if (currentIterationTOConfirmation < NumberOfITerationsToConfirmation)
+                        {
+                            Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sensei, currentmatchingObject.CurrentComparision, true, true);
 
-                    if (currentIterationTOConfirmation < NumberOfITerationsToConfirmation)
-                    {
-                        nextMotorOutput = currentmatchingObject.GetNextSenseiToVerify();
-                            //cache sensation and Locations.
-                    }                    
+                            Match matchinWithoutLocation = Sensation_Location.CompareSenseiPercentage(sensei, currentmatchingObject.CurrentComparision, true, false);
+
+                            if(matchWithLocation.GetTotalMatchPercentage() != 100 && matchinWithoutLocation.GetTotalMatchPercentage() != 100)
+                            {
+                                // No Match move onto the next matching Object.
+                                // Remove matched Object from matching List. Clean recognised entity                                
+
+                                matchingObjectList.RemoveAt(GetMatchingObjectIndexFromList(matchingObjectList, currentmatchingObject));
+                                currentmatchingObject.Clean();
+
+                                if (matchingObjectList.Count > 0)
+                                {
+                                    currentmatchingObject = matchingObjectList[0];
+                                    currentIterationTOConfirmation = 0;
+                                    nextMotorOutput = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
+                                }
+                                else
+                                {
+                                    nextMotorOutput = null;
+                                }
+                                
+                            }
+                            else
+                            {
+                                //Matched now continue verification of the object.
+
+                                currentmatchingObject.GetNextSenseiToVerify();
+                                currentIterationTOConfirmation++;
+                            }
+                        }
+                        else
+                        {
+                            //Object has matched
+                            ObjectState = RecognitionState.Recognised;
+                            nextMotorOutput = new Position(int.MaxValue, int.MaxValue);
+                        }
+                    }
                 }
             }
 
@@ -148,9 +180,23 @@
                 CurrentObject.Label = objectlabellist[imageIndex];
                 imageIndex++;
             }
+            
+        }
+        
+        public RecognisedEntity GetCurrentPredictedObject()
+        {
+            if (ObjectState == RecognitionState.Recognised)
+            {
+                return currentmatchingObject;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public NetworkMode GetCurrentNetworkMode() => networkMode;
+
         public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
 
         #endregion
@@ -231,6 +277,27 @@
             return setAsideList;
         }
 
+        private int GetMatchingObjectIndexFromList(List<RecognisedEntity> matchingList, RecognisedEntity matchingObject)
+        {
+            if (matchingList?.Count == 0 || matchingObject == null)
+            {
+                return -1;
+            }
+
+            int index = 0;
+
+            foreach (var item in matchingList)
+            {
+                if (item.Label == matchingObject.Label)
+                {
+                    return index;
+                }
+                index++;
+            }
+
+            return index;
+        }
+
         private void UpdateCurrenttPosition(Position pos)
         {
             CurrentPosition = pos;
@@ -286,5 +353,12 @@
         }
 
         #endregion        
+    }
+
+    public enum RecognitionState
+    {
+        None,
+        IsBeingVerified,
+        Recognised
     }
 }

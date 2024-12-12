@@ -121,6 +121,14 @@ namespace HentulWinforms
 
                     if (motorOutput != null)
                     {
+                        if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
+                        {
+                            //Object Recognised!
+                            var obj = orchestrator.GetPredictedObject();
+                            ObjectLabel.Text = obj.ToString();
+                            ObjectLabel.Refresh();
+                        }
+
                         Hentul.Orchestrator.POINT p = new Orchestrator.POINT();
 
                         p.X = motorOutput.X; p.Y = motorOutput.Y;

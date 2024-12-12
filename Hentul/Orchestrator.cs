@@ -369,6 +369,8 @@
                     firingSensei,
                     predictedSensei
                     );
+
+                    
                     
                 }
                 else
@@ -382,6 +384,7 @@
             return nextMotorOutput;
         }
 
+        public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
         public void DoneWithTraining()
         {

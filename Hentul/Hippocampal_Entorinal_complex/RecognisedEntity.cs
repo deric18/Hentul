@@ -23,6 +23,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
             ObjectSnapshot = unrec.ObjectSnapshot;
         }
 
+        public void Clean()
+        {
+            _verifiedID.Clear();
+            CurrentComparision = null;
+        }
+
         public Sensation_Location GetNextSenseiToVerify()
         {
             Sensation_Location toReturn = null;
@@ -43,6 +49,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             return toReturn;
         }
+
 
         private Sensation_Location GetRandSenseiToVerify()
         {
