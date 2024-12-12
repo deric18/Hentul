@@ -22,6 +22,8 @@
 
         private List<RecognisedEntity> matchingObjectList;
 
+        private Position _cachedPosition;
+
         private List<RecognisedEntity> rejectedObjectList;
 
         private RecognisedEntity currentmatchingObject;
@@ -103,21 +105,28 @@
 
                 if (matchingObjectList.Count > 0)
                 {
+                    _cachedPosition = Orchestrator.GetCurrentPointerPosition1();
+
                     ObjectState = RecognitionState.IsBeingVerified;
+
                     currentmatchingObject = matchingObjectList.FirstOrDefault();
 
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
                     {
-                        if (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
+                        if(currentIterationToConfirmation == 0)
                         {
+
+                        }
+                        else if(currentIterationToConfirmation >= 1)
+                        { 
                             if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                             {
 
                                 //Matched now continue verification of the object.
                                 currentmatchingObject.GetNextSenseiToVerify();
+
                                 var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(currentmatchingObject.CurrentComparisionKeyIndex);
                                 Position p = Position.ConvertStringToPosition(pos);
-
                                 Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
                                 currentmatchingObject.IncrementCurrentComparisionKeyIndex();
@@ -133,26 +142,33 @@
                                 currentmatchingObject.Clean();
 
                                 if (matchingObjectList.Count > 0)
-                                {    // No Match move onto the next matching Object.
-                                     // Remove matched Object from matching List. Clean recognised entity    
-                                    currentmatchingObject = matchingObjectList[0];
-                                    currentIterationToConfirmation = 0;
-                                    Position p  = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
+                                {
+                                    // No Match move onto the next matching Object.
+                                    // Remove matched Object from matching List. Clean recognised entity    
 
+                                    currentmatchingObject = matchingObjectList[0];
+
+                                    currentIterationToConfirmation = 0;
+
+                                    Position p = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
                                     Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
                                 }
                                 else
                                 {
                                     //Move cursor to cache position and return empty , hand back control to form.cs
+                                    Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
+                                    objectLabel = null;
+                                    currentIterationToConfirmation = 0;
+                                    currentmatchingObject.Clean();
+                                    matchingObjectList.Clear();
+                                    break;
                                 }
                             }
                         }
-
                     }
 
                     objectLabel = currentmatchingObject.Label;
-
-                }                                
+                }
             }
 
             return objectLabel;

@@ -685,6 +685,25 @@
             return point;
         }
 
+        public static Position GetCurrentPointerPosition1()
+        {
+            Position position = null;
+            POINT point;
+
+            point = new POINT();
+            point.X = 0;
+            point.Y = 0;
+
+            if (GetCursorPos(out point))
+            {
+                //Console.Clear();
+                //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
+                position = new Position(point.X, point.Y);
+            }
+
+            return position;
+        }
+
         private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
         {
             SDR_SOM toRet;
