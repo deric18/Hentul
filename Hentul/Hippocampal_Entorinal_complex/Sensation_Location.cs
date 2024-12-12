@@ -10,6 +10,7 @@
         /// <summary>
         /// Key : Location on the Screen
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
+        /// Generally 4 or less
         /// </summary>
         public Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
 

@@ -171,14 +171,24 @@
             {
                 for (int i = 0; i < numPos; i++)
                 {
-                    posList.Add(new Position_SOM(rand.Next(0, 10), rand.Next(0, 10), rand.Next(0, 4)));
+                    var pos = new Position_SOM(rand.Next(0, 10), rand.Next(0, 10), rand.Next(0, 4));
+
+                    if (posList.Contains(pos) == false)
+                    {
+                        posList.Add(pos);
+                    }
                 }
             }
             else if (inputPatternType == iType.TEMPORAL)
             {
                 for (int i = 0; i < numPos; i++)
                 {
-                    posList.Add(new Position_SOM(rand.Next(0, 10), rand.Next(0, 4), rand.Next(0, 10)));
+                    var pos = new Position_SOM(rand.Next(0, 10), rand.Next(0, 4), rand.Next(0, 10));
+
+                    if (posList.Contains(pos) == false)
+                    {
+                        posList.Add(pos);
+                    }
                 }
             }
 

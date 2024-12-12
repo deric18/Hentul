@@ -1593,6 +1593,23 @@
                 throw new InvalidDataException(" Input Validated Failed :: Network cannot proces simulateneous same pattern types");
             }
 
+            for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
+            {
+                int x = incomingPattern.ActiveBits[i].X;
+                int y = incomingPattern.ActiveBits[i].Y;
+
+                for (int j = 0; j < incomingPattern.ActiveBits.Count; j++)
+                {
+                    if(i != j)
+                    {
+                        if(incomingPattern.ActiveBits[j].X == x && incomingPattern.ActiveBits[j].Y == y)
+                        {
+                            throw new InvalidDataException("Cannot house the same Row and Column Number twice in one SDR! Please Check Your Input!");
+                        }
+                    }
+                }
+            }
+
             if (incomingPattern.InputPatternType.Equals(iType.SPATIAL))
             {
 

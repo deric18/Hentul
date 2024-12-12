@@ -9,6 +9,21 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public Sensation_Location CurrentComparision;
 
+        public int CurrentComparisionKeyIndex { get; private set; }
+
+        public bool IncrementCurrentComparisionKeyIndex()
+        {
+            if(CurrentComparision.sensLoc.Count - 1 >= (CurrentComparisionKeyIndex + 1))
+            {
+                CurrentComparisionKeyIndex++;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public string Label { get; private set; }
 
         public RecognisedEntity(string name)

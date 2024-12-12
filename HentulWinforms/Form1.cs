@@ -48,35 +48,37 @@ namespace HentulWinforms
 
             while (true)
             {
-                if (networkMode.Equals(NetworkMode.TRAINING))
+                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                 {
-                    if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                    {
-                        label_done.Text = "Finished Processing Image";
-                        break;
-                    }
+                    label_done.Text = "Finished Processing Image";
+                    break;
+                }
+                else
+                {
+                    if (value.X <= RightTop.X - numPixels)
+                        value = MoveRight(value);
                     else
                     {
-                        if (value.X <= RightTop.X - numPixels)
-                            value = MoveRight(value);
+                        if (value.Y <= RightBottom.Y - numPixels)
+                        {
+                            value = MoveDown(value);
+                            value = SetLeft(value);
+                        }
                         else
                         {
-                            if (value.Y <= RightBottom.Y - numPixels)
+                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                             {
-                                value = MoveDown(value);
-                                value = SetLeft(value);
-                            }
-                            else
-                            {
-                                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                                {
-                                    label_done.Text = "Finished Processing Image";
-                                    label_done.Refresh();
-                                    break;
-                                }
+                                label_done.Text = "Finished Processing Image";
+                                label_done.Refresh();
+                                break;
                             }
                         }
                     }
+                }
+
+                if (networkMode.Equals(NetworkMode.TRAINING))
+                {
+                    
 
                     labelX.Text = value.X.ToString(); labelX.Refresh();
                     labelY.Text = value.Y.ToString(); labelY.Refresh();
@@ -121,30 +123,16 @@ namespace HentulWinforms
 
                     if (motorOutput != null)
                     {
-                        if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
-                        {
-                            //Object Recognised!
-                            var obj = orchestrator.GetPredictedObject();
-                            ObjectLabel.Text = obj.ToString();
-                            ObjectLabel.Refresh();
-                        }
-
-                        Hentul.Orchestrator.POINT p = new Orchestrator.POINT();
-
-                        p.X = motorOutput.X; p.Y = motorOutput.Y;
-
-                        orchestrator.MoveCursor(p);
+                        ObjectLabel.Text = motorOutput.ToString();
+                        ObjectLabel.Refresh();
                     }
                     else
                     {
-                        bool failed = true;
+                        //Just Move the cursor to the next default position
+                        orchestrator.MoveCursor(value);
                     }
                     
-                }
-                else
-                {
-                    bool bp1 = true;
-                }
+                }                
             }
 
             if (label_done.Text == "Finished Processing Image")
@@ -153,7 +141,7 @@ namespace HentulWinforms
                 {
                     if (imageIndex >= 3)
                     {
-                        //orchestrator.BackUp();
+                         //orchestrator.BackUp();
                         StartButton.Text = "Start Prediction";
                         StartButton.Refresh();
                         orchestrator.DoneWithTraining();

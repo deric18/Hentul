@@ -318,10 +318,10 @@
             #endregion
         }
 
-        public Position ProcessStep2()
+        public string ProcessStep2()
         {
 
-            Position nextMotorOutput = null;
+            string label = null;
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
@@ -338,17 +338,8 @@
 
                     var nextPos = HCAccessor.ProcessCurrentPatternForObject(
                        CycleNum,
-                       firingSensei);
-
-                    if(nextPos != null)
-                    {
-                        bool breakpoint = true;
-                    }
-                }
-                else
-                {
-                    bool breakpoint = true;
-                }
+                       firingSensei);                    
+                }                
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
@@ -364,14 +355,11 @@
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
-                    nextMotorOutput = HCAccessor.ProcessCurrentPatternForObject(
+                    label = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
                     firingSensei,
                     predictedSensei
-                    );
-
-                    
-                    
+                    );                                        
                 }
                 else
                 {
@@ -381,7 +369,7 @@
                
             }
 
-            return nextMotorOutput;
+            return label;
         }
 
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
@@ -653,7 +641,7 @@
 
         #endregion
 
-        public void MoveCursorToSpecificPosition(int x, int y)
+        public static void MoveCursorToSpecificPosition(int x, int y)
         {
             POINT p;
             IntPtr desk = GetDesktopWindow();
