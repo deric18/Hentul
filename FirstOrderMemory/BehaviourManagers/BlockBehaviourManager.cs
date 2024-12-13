@@ -488,7 +488,7 @@
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 
             if (ignorePrecyclePrep == false)
-                PreCyclePrep(currentCycle);
+                PreCyclePrep(currentCycle, incomingPattern.InputPatternType);
 
             ValidateInput(incomingPattern, currentCycle);
 
@@ -1883,7 +1883,7 @@
             }
         }
 
-        private void PreCyclePrep(ulong incomingCycle)
+        private void PreCyclePrep(ulong incomingCycle, iType itype)
         {
 
             if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES)
@@ -1904,7 +1904,7 @@
                 throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
-            if(incomingCycle < CycleNum)
+            if(itype.Equals(iType.SPATIAL) && incomingCycle < CycleNum)
             {
                 throw new InvalidOperationException("BBM cannot be ahead of Cycle!");
             }
