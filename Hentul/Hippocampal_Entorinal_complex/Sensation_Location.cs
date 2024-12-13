@@ -29,8 +29,13 @@
             Id = ComputeStringID();
         }
 
+        internal void RefreshID()
+        {
+            Id = ComputeStringID();
+        }
 
-        private string ComputeStringID()
+        //Syntax ::  <Key / value[0].Key : value[0].Count>  
+        internal string ComputeStringID()
         {
             string toReturn = string.Empty;
 
@@ -43,16 +48,16 @@
 
             if (max == 1 || max == 2)
             {
-                toReturn = sensLoc.ElementAt(0).Value.Key + delimeter1 + sensLoc.ElementAt(0).Value.Value?.ElementAt(0)?.ToString() +
-                   sensLoc.ElementAt(sensLoc.Count - 1).Value.Key + delimeter1 + sensLoc.ElementAt(sensLoc.Count - 1).Value.Value?.ElementAt(0)?.ToString();
+                toReturn = sensLoc.ElementAt(0).Key + delimeter2 + sensLoc.Values.ElementAt(0).Key.ToString() + sensLoc.Values.ElementAt(0).Value.Count.ToString() +
+                   sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
             }
             else
             {
                 int mid = sensLoc.Count / 2;
-
-                toReturn = sensLoc.ElementAt(0).Value.Key + delimeter1 + sensLoc.ElementAt(0).Value.Value?.ElementAt(0)?.ToString() +
-                           sensLoc.ElementAt(mid).Value.Key + delimeter1 + sensLoc.ElementAt(mid).Value.Value?.ElementAt(0)?.ToString()    +
-                           sensLoc.ElementAt(max - 1).Value.Key + delimeter1 + sensLoc.ElementAt(max - 1).Value.Value?.ElementAt(0)?.ToString();
+                
+                toReturn = sensLoc.ElementAt(0).Key + delimeter2 + sensLoc.Values.ElementAt(0).Key.ToString() + sensLoc.Values.ElementAt(0).Value.Count.ToString() +
+                           sensLoc.ElementAt(mid).Key + delimeter2 + sensLoc.Values.ElementAt(mid).Key.ToString() + sensLoc.Values.ElementAt(mid).Value.Count.ToString() +
+                           sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
             }
 
 

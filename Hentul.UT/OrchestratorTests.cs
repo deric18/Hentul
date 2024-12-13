@@ -24,7 +24,7 @@
         [SetUp]
         public void Setup()
         {
-            orchestrator = new Orchestrator(10, true, true, 1);
+            orchestrator = GetInstance(true, true);
             point.X = 10;
             point.Y = 10;
         }

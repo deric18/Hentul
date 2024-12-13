@@ -9,9 +9,12 @@
     using System.Runtime.InteropServices;
     using System;
     using Hentul.Hippocampal_Entorinal_complex;
-    using System.Drawing.Imaging;        
+    using System.Drawing.Imaging;
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
     using System.Drawing;
+    using OpenCvSharp;
+    using OpenCvSharp.Extensions;
+
 
     public class Orchestrator
     {
@@ -44,6 +47,8 @@
         #region CONSTRUCTOR 
 
         #region Used Variables
+
+        private static Orchestrator _orchestrator;
 
         public int Range { get; private set; }
 
@@ -104,7 +109,7 @@
 
         #endregion
 
-        public Orchestrator(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
+        private Orchestrator(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
             if (range != 10)
@@ -197,6 +202,15 @@
 
         }
 
+        public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = false)
+        {
+            if (_orchestrator == null)
+            {
+                _orchestrator = new Orchestrator(10, isMock, shouldInit);
+            }
+
+            return _orchestrator;
+        }
         public void LoadFOMnSOM()
         {
 
@@ -266,11 +280,11 @@
 
             #region STEP 1
 
-            BlockBehaviourManager fom;            
+            BlockBehaviourManager fom;
 
             Mapper.ParseBitmap(greyScalebmp);
 
-            List<Position_SOM> somPosition = new List<Position_SOM>();            
+            List<Position_SOM> somPosition = new List<Position_SOM>();
 
             int whitecount = 0;
 
@@ -298,7 +312,7 @@
 
             if (Mapper.somPositions.Count != 0)
             {
-                if(Mapper.somPositions.Count > 125)
+                if (Mapper.somPositions.Count > 125)
                 {
                     WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
                 }
@@ -318,10 +332,10 @@
             #endregion
         }
 
-        public string ProcessStep2()
+        public Position ProcessStep2()
         {
 
-            string label = null;
+            Position motorOutput = null;
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
@@ -336,17 +350,17 @@
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
-                    var nextPos = HCAccessor.ProcessCurrentPatternForObject(
+                    HCAccessor.ProcessCurrentPatternForObject(
                        CycleNum,
-                       firingSensei);                    
-                }                
+                       firingSensei);
+                }
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
                 // If any output from HC execute the location output if NOT then take the standar default output.
                 // 
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-                var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum+1);
+                var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
 
 
                 if (som_SDR != null)
@@ -355,21 +369,40 @@
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
-                    label = HCAccessor.ProcessCurrentPatternForObject(
+                    motorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
                     firingSensei,
                     predictedSensei
-                    );                                        
+                    );
                 }
                 else
                 {
                     bool breakpoint = true;
                 }
-
-               
             }
 
-            return label;
+            return motorOutput;
+        }
+
+
+        public Sensation_Location ProcessStep2ForHC()
+        {
+
+            Sensation_Location sensei = null;
+
+            SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+
+            somBBM_L3A.Pool(fom_SDR);
+
+            var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+
+            if (som_SDR != null)
+            {
+                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                sensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+            }
+
+            return sensei;
         }
 
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
@@ -379,6 +412,18 @@
             HCAccessor.DoneWithTraining();
         }
 
+        internal Bitmap ConverToEdgedBitmap()
+        {
+            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
+
+            bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
+
+            var edgeImage = Cv2.ImRead(filename);
+            var imgdetect = new Mat();
+            Cv2.Canny(edgeImage, imgdetect, 50, 200);
+
+            return BitmapConverter.ToBitmap(imgdetect);
+        }
         private void FireAllFOMs()
         {
             foreach (var kvp in Mapper.FOMBBMIDS)
@@ -531,7 +576,7 @@
 
         private SDR_SOM GetSdrSomFromFOMs()
         {
-            if(firingFOM.Count == 0)
+            if (firingFOM.Count == 0)
             {
                 int exception = 1;
             }
@@ -551,7 +596,7 @@
 
             throw new NullReferenceException(" FOM BBM returned empty position list ");
         }
-       
+
         #region BIG MAN WORK
 
         //public string StartCycle()
@@ -1048,7 +1093,7 @@
 
         //    return nextMinNumberOfPixels;
         //}
-        
+
 
         // Already grey scalled.
         private void GetColorByRange(int x1, int y1, int x2, int y2)
@@ -1076,8 +1121,8 @@
             }
 
             ReleaseDC(desk, dc);
-        }      
-       
+        }
+
         #endregion
 
         #endregion

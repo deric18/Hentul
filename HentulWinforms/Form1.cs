@@ -123,8 +123,21 @@ namespace HentulWinforms
 
                     if (motorOutput != null)
                     {
-                        ObjectLabel.Text = motorOutput.ToString();
-                        ObjectLabel.Refresh();
+                        if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
+                        {
+                            //Object Recognised!
+                            var obj = orchestrator.GetPredictedObject();
+                            ObjectLabel.Text = obj.Label;
+                            ObjectLabel.Refresh();
+
+                            label_done.Text = "Object Recognised!";
+                            label_done.Refresh();
+                            break;
+                        }
+
+                        Orchestrator.POINT p = new Orchestrator.POINT();
+                        p.X = motorOutput.X; p.Y = motorOutput.Y;
+                        orchestrator.MoveCursor(p);
                     }
                     else
                     {
@@ -189,7 +202,7 @@ namespace HentulWinforms
             label_done.Text = "Innitting...";
             label_done.Refresh();
             networkMode = NetworkMode.TRAINING;
-            orchestrator = new Orchestrator(numPixels);
+            orchestrator = Orchestrator.GetInstance();
 
             var value = orchestrator.GetCurrentPointerPosition();
 

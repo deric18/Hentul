@@ -1,4 +1,7 @@
-﻿/// Author : Deric Pinto
+﻿using Common;
+using FirstOrderMemory.Models;
+
+/// Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
     public class RecognisedEntity : BaseObject
@@ -35,7 +38,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public RecognisedEntity(UnrecognisedEntity unrec)
         {
             Label = unrec.Label;
-            ObjectSnapshot = unrec.ObjectSnapshot;
+            ObjectSnapshot = unrec.ObjectSnapshot;            
         }
 
         public void Clean()
@@ -44,7 +47,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             CurrentComparision = null;
         }
 
-        public Sensation_Location GetNextSenseiToVerify()
+        public Sensation_Location GetNextSenseiToVerify(Sensation_Location? source = null)
         {
             Sensation_Location toReturn = null;
 
@@ -53,7 +56,45 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 throw new InvalidOperationException("Cannot generate a new Position with empty Object Snapshot");
             }
 
-            if (_verifiedID.Count == 0)
+            var matchingSensei = PickMostMatchingSensei(source);
+
+            if ( matchingSensei != null)
+            {
+                CurrentComparision = matchingSensei;
+            }
+            else
+            {
+                int matchCount = 0;
+                int max = source.sensLoc.Count-1;
+
+                foreach (var sensei in ObjectSnapshot)
+                {
+                    foreach (var location in sensei.sensLoc.Keys)       //Match Only Keys
+                    {
+                        Position pos = Position.ConvertStringToPosition(location);
+                        
+
+                        if (source.sensLoc.TryGetValue(pos.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
+                        {
+                            matchCount++;
+                        }                       
+                        //compare sensei ID for further matching.
+                    }
+
+                    if(matchCount == max)
+                    {
+                        CurrentComparision = sensei;
+                        break;
+                    }
+                }
+            }
+
+            if (CurrentComparision != null)
+            {
+                return CurrentComparision;
+            }
+
+            if (_verifiedID == null || _verifiedID?.Count == 0)
             {
                 _verifiedID = new List<string>();
             }
@@ -65,6 +106,22 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return toReturn;
         }
 
+        private Sensation_Location PickMostMatchingSensei(Sensation_Location? source)
+        {
+            Sensation_Location toRet = null;
+
+            source.ComputeStringID();
+
+            foreach (var sensei in ObjectSnapshot)
+            {
+                if(source.Id == sensei.Id)
+                {
+                    toRet = sensei;
+                }
+            }
+
+            return toRet;
+        }
 
         private Sensation_Location GetRandSenseiToVerify()
         {
@@ -107,6 +164,14 @@ namespace Hentul.Hippocampal_Entorinal_complex
             }
 
             return toReturn;
+        }
+
+        public void DoneTraining()
+        {
+            foreach(var sensei in ObjectSnapshot)
+            {
+                sensei.RefreshID();
+            }
         }
     }
 

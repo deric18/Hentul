@@ -2,7 +2,6 @@
 {
 
     using Common;
-    using System.Reflection.Emit;
     using System.Xml;
 
     public class HippocampalComplex
@@ -39,13 +38,16 @@
 
         private int imageIndex;
 
-        public HippocampalComplex(string firstLabel)
+        private bool isMock;
+
+        public HippocampalComplex(string firstLabel, bool Ismock = false, NetworkMode nMode = NetworkMode.TRAINING)
         {
 
             Objects = new Dictionary<string, RecognisedEntity>();
             CurrentObject = new UnrecognisedEntity();
             CurrentObject.Label = firstLabel;
-            networkMode = NetworkMode.TRAINING;
+            isMock = Ismock;
+            networkMode = nMode;
             NumberOfITerationsToConfirmation = 6;
             matchingObjectList = new List<RecognisedEntity>();
             rejectedObjectList = new List<RecognisedEntity>();
@@ -80,9 +82,10 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public string ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
+        public Position ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
         {
             string objectLabel = null;
+            Position toReturn = null;
 
             if (networkMode == NetworkMode.TRAINING)
             {
@@ -113,65 +116,68 @@
 
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
                     {
-                        if(currentIterationToConfirmation == 0)
+                        if(currentIterationToConfirmation == 0)                        
+                            currentmatchingObject.GetNextSenseiToVerify(sensei);
+                        
+                        if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                         {
 
+                            //Matched now continue verification of the object.
+                            currentmatchingObject.GetNextSenseiToVerify(sensei);
+
+                            var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(currentmatchingObject.CurrentComparisionKeyIndex);                            
+                            Position p = Position.ConvertStringToPosition(pos);
+                            Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
+
+                            currentmatchingObject.IncrementCurrentComparisionKeyIndex();
+
+                            currentIterationToConfirmation++;
+
+                            //Perform Step 0 , Step 1
+                            sensei = ProcessStep1N2FromOrchestrator();
                         }
-                        else if(currentIterationToConfirmation >= 1)
-                        { 
-                            if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
+                        else
+                        {
+                            //Dint match , Move onto next object if there is , if not then move back to the last position of the matchingobjectlist
+
+                            matchingObjectList.RemoveAt(GetMatchingObjectIndexFromList(matchingObjectList, currentmatchingObject));
+
+                            currentmatchingObject.Clean();
+
+                            if (matchingObjectList.Count > 0)
                             {
+                                //Load next object and Init  
 
-                                //Matched now continue verification of the object.
-                                currentmatchingObject.GetNextSenseiToVerify();
+                                currentmatchingObject = matchingObjectList[0];
 
-                                var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(currentmatchingObject.CurrentComparisionKeyIndex);
-                                Position p = Position.ConvertStringToPosition(pos);
+                                currentIterationToConfirmation = 0;
+
+                                Position p = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify(sensei).sensLoc.Keys.FirstOrDefault());
                                 Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
-                                currentmatchingObject.IncrementCurrentComparisionKeyIndex();
-
-                                currentIterationToConfirmation++;
+                                //Perform Step 0 , Step 1
+                                sensei = ProcessStep1N2FromOrchestrator();
                             }
                             else
                             {
-                                //Dint match , Move onto next object if there is , if not then move back to the last position of the matchingobjectlist
-
-                                matchingObjectList.RemoveAt(GetMatchingObjectIndexFromList(matchingObjectList, currentmatchingObject));
-
+                                //Move cursor to cache position and return empty , hand back control to form.cs
+                                Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
+                                objectLabel = null;
+                                currentIterationToConfirmation = 0;
                                 currentmatchingObject.Clean();
-
-                                if (matchingObjectList.Count > 0)
-                                {
-                                    // No Match move onto the next matching Object.
-                                    // Remove matched Object from matching List. Clean recognised entity    
-
-                                    currentmatchingObject = matchingObjectList[0];
-
-                                    currentIterationToConfirmation = 0;
-
-                                    Position p = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
-                                    Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
-                                }
-                                else
-                                {
-                                    //Move cursor to cache position and return empty , hand back control to form.cs
-                                    Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
-                                    objectLabel = null;
-                                    currentIterationToConfirmation = 0;
-                                    currentmatchingObject.Clean();
-                                    matchingObjectList.Clear();
-                                    break;
-                                }
+                                matchingObjectList.Clear();
+                                break;
                             }
                         }
                     }
 
+                    ObjectState = RecognitionState.Recognised;
+                    toReturn = new Position(int.MaxValue, int.MaxValue);
                     objectLabel = currentmatchingObject.Label;
                 }
             }
 
-            return objectLabel;
+            return toReturn;
         }
 
         public void DoneWithTraining()
@@ -203,6 +209,18 @@
         public NetworkMode GetCurrentNetworkMode() => networkMode;
 
         public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
+
+
+        public void LoadMockObject(List<RecognisedEntity> mockrecgs)
+        {
+            if (isMock == true)
+            {
+                foreach (var obj in mockrecgs)
+                {
+                    Objects.Add(obj.Label, obj);
+                }
+            }
+        }
 
         #endregion
 
@@ -267,26 +285,38 @@
 
         #region PRIVATE HELPER METHODS
 
+        private Sensation_Location ProcessStep1N2FromOrchestrator()
+        {
+            var instance = Orchestrator.GetInstance();
+            instance.ProcessStep0();
+            var bmp = instance.ConverToEdgedBitmap();
+            instance.ProcesStep1(bmp);
+            return instance.ProcessStep2ForHC();
+        }
 
         private bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
         {
             bool toReturn = false;
 
+            if(currentmatchingObject.Label.ToLower() == "watermelon")
+            {
+                bool bp = true;
+            }
+
             Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, currentmatchingObject.CurrentComparision, true, true);
 
             Match matchinWithoutLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, currentmatchingObject.CurrentComparision, true, false);
 
-            if (matchWithLocation.GetTotalMatchPercentage() != 100 || matchinWithoutLocation.GetTotalMatchPercentage() != 100)
+            int withLocation = matchinWithoutLocation.GetTotalMatchPercentage();
+
+            int withoutLocation = matchWithLocation.GetTotalMatchPercentage();
+
+            if (withLocation != 100 || withoutLocation != 100)
             {
-
-
                 toReturn = false;
-
             }
             else
             {
-
-
                 toReturn = true;
             }
 
@@ -374,6 +404,8 @@
             }
 
             RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
+
+            newObject.DoneTraining();
 
             Objects.Add(newObject.Label, newObject);
         }

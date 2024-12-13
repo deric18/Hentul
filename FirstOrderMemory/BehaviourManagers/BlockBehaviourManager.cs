@@ -98,6 +98,8 @@
         public List<Neuron> OverConnectedOffenderList { get; private set; }
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
 
+        private uint _firingBlacnkStreak;
+
         private bool IgnorePostCycleCleanUp;
 
         #endregion
@@ -127,6 +129,7 @@
         private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
         private readonly int FOM_TOTAL_NEURON_CONNECTIONLIMIT;
         private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT;
+        private const int NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES = 3;
 
 
         #endregion
@@ -209,6 +212,8 @@
             OverConnectedInShortInterval = new List<Neuron>();
 
             IgnorePostCycleCleanUp = false;
+
+            _firingBlacnkStreak = 0;
 
             this.includeBurstLearning = includeBurstLearning;
         }
@@ -483,9 +488,11 @@
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 
             if (ignorePrecyclePrep == false)
-                PreCyclePrep();
+                PreCyclePrep(currentCycle);
 
             ValidateInput(incomingPattern, currentCycle);
+
+            _firingBlacnkStreak = 0;
 
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -673,15 +680,16 @@
             List<Position_SOM> activeBits = new List<Position_SOM>();
             SDR_SOM toReturn = null;
 
+            if (_firingBlacnkStreak > NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES && NeuronsFiringLastCycle.Count > 0)
+            {
+                throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
+            }
+
             if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
             {
                 NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
                 toReturn = new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
-            }
-            else if (currentCycle - CycleNum >= 3)
-            {
-                CompleteCleanUP();
-            }
+            }            
 
             return toReturn;
         }
@@ -704,9 +712,17 @@
                 throw new InvalidOperationException("This should never happen");
             }
             else
-            {
+            {                
                 CycleNum = currentCycle;
-            }
+
+                _firingBlacnkStreak++;
+
+                if(_firingBlacnkStreak > NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES && NeuronsFiringLastCycle.Count > 0)
+                {
+                    FlushAllNeuronsInList(NeuronsFiringLastCycle);
+                    CompleteCleanUP();
+                }
+            }           
         }
 
         #endregion
@@ -951,10 +967,11 @@
 
             }            
 
-            //Case 4: Clean Up Stale Spiking Neurons
+            // Case 4: Clean Up Stale Spiking Neurons
+            // BUG : If the neuron did fire this cycle as well and it is still spiking then it should be allowed to stay spiking 
             foreach (var neuron in GetSpikingNeuronList())
             {                
-                if (neuron.CurrentState == NeuronState.SPIKING)
+                if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
                 {
                     neuron.CheckSpikingFlush(CycleNum);
                 }
@@ -1288,9 +1305,20 @@
                     }
                 }
             }
-        }        
+        }
 
         #region INTERNAL METHODS
+
+        private void FlushAllNeuronsInList(List<Neuron> list)
+        {
+            foreach (var neuron in list)
+            {
+                if (neuron.Voltage != 0)
+                {
+                    neuron.FlushVoltage();
+                }
+            }
+        }
 
         private void ConnectAllBurstingNeuronstoNeuronssFiringLastcycle()
         {
@@ -1490,10 +1518,25 @@
 
         private void CompleteCleanUP()
         {
+            //DebugCheck();
             NeuronsFiringLastCycle.Clear();
             PredictedNeuronsfromLastCycle.Clear();
             PredictedNeuronsforThisCycle.Clear();
-            PredictedNeuronsForNextCycle.Clear();
+            PredictedNeuronsForNextCycle.Clear();            
+        }
+
+        private void DebugCheck()
+        {
+            foreach (var col in Columns)
+            {
+                foreach (var neuron in col.Neurons)
+                {
+                    if (neuron.Voltage != 0)
+                    {
+                        bool bp = true;    // if this hits , there are more clean up bugs in your code.
+                    }
+                }
+            }
         }
     
         private List<Neuron> GetSpikingNeuronList()
@@ -1840,13 +1883,30 @@
             }
         }
 
-        private void PreCyclePrep()
+        private void PreCyclePrep(ulong incomingCycle)
         {
+
+            if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES)
+            { 
+                foreach (var neuron in NeuronsFiringLastCycle)
+                {
+                    if (neuron.Voltage == 0)
+                    {
+                        throw new InvalidOperationException("If voltage is zero they should not be");
+                    }
+                }
+            }
+
             //Prepare all the neurons that are predicted 
             if (PredictedNeuronsForNextCycle.Count != 0 && NeuronsFiringThisCycle.Count != 0)
             {
                 Console.WriteLine(schemToLoad.ToString() + "Precycle Cleanup Error : _predictedNeuronsForNextCycle is not empty");
                 throw new Exception("PreCycle Cleanup Exception!!!");
+            }
+
+            if(incomingCycle < CycleNum)
+            {
+                throw new InvalidOperationException("BBM cannot be ahead of Cycle!");
             }
 
             if (CurrentiType.Equals(BlockCycle.CLEANUP))
