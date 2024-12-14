@@ -56,42 +56,45 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 throw new InvalidOperationException("Cannot generate a new Position with empty Object Snapshot");
             }
 
-            var matchingSensei = PickMostMatchingSensei(source);
-
-            if ( matchingSensei != null)
+            if (source != null)
             {
-                CurrentComparision = matchingSensei;
-            }
-            else
-            {
-                int matchCount = 0;
-                int max = source.sensLoc.Count-1;
+                var matchingSensei = PickMostMatchingSensei(source);
 
-                foreach (var sensei in ObjectSnapshot)
+                if (matchingSensei != null)
                 {
-                    foreach (var location in sensei.sensLoc.Keys)       //Match Only Keys
-                    {
-                        Position pos = Position.ConvertStringToPosition(location);
-                        
+                    CurrentComparision = matchingSensei;
+                }
+                else
+                {
+                    int matchCount = 0;
+                    int max = source.sensLoc.Count - 1;
 
-                        if (source.sensLoc.TryGetValue(pos.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
+                    foreach (var sensei in ObjectSnapshot)
+                    {
+                        foreach (var location in sensei.sensLoc.Keys)       //Match Only Keys
                         {
-                            matchCount++;
-                        }                       
-                        //compare sensei ID for further matching.
-                    }
+                            Position pos = Position.ConvertStringToPosition(location);
 
-                    if(matchCount == max)
-                    {
-                        CurrentComparision = sensei;
-                        break;
+
+                            if (source.sensLoc.TryGetValue(pos.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
+                            {
+                                matchCount++;
+                            }
+                            //compare sensei ID for further matching.
+                        }
+
+                        if (matchCount == max)
+                        {
+                            CurrentComparision = sensei;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (CurrentComparision != null)
-            {
-                return CurrentComparision;
+                if (CurrentComparision != null)
+                {
+                    return CurrentComparision;
+                }
             }
 
             if (_verifiedID == null || _verifiedID?.Count == 0)
@@ -106,7 +109,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return toReturn;
         }
 
-        private Sensation_Location PickMostMatchingSensei(Sensation_Location? source)
+        private Sensation_Location PickMostMatchingSensei(Sensation_Location source)
         {
             Sensation_Location toRet = null;
 

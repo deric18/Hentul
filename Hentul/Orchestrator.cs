@@ -109,7 +109,7 @@
 
         #endregion
 
-        private Orchestrator(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
+        private Orchestrator(int range, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
             if (range != 10)
@@ -146,23 +146,29 @@
 
             CycleNum = 0;
 
-            NMode = NetworkMode.TRAINING;
+            NMode = nMode;
 
-            for (int i = 0; i < NumBBMNeeded; i++)
+            if (ShouldInit)
             {
-                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.None);
+
+                for (int i = 0; i < NumBBMNeeded; i++)
+                {
+                    fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.None);
+                }
+
+                if (isMock)
+                    ImageIndex = mockImageIndex;
+                else
+                    ImageIndex = 0;
+
+                somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.None);
+
+                somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None);
+
+                LoadFOMnSOM();
             }
 
-            if (isMock)
-                ImageIndex = mockImageIndex;
-            else
-                ImageIndex = 0;
-
-            somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.None);
-
-            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None);
-
-            HCAccessor = new HippocampalComplex("Apple");
+            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -192,9 +198,7 @@
             {
                 new Position_SOM(7,1),
                 new Position_SOM(9,2)
-            };
-
-            LoadFOMnSOM();
+            };            
 
             filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
 
@@ -202,11 +206,11 @@
 
         }
 
-        public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = false)
+        public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
         {
             if (_orchestrator == null)
             {
-                _orchestrator = new Orchestrator(10, isMock, shouldInit);
+                _orchestrator = new Orchestrator(10, isMock, shouldInit, nMode);
             }
 
             return _orchestrator;

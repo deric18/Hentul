@@ -19,28 +19,31 @@
         public Sensation_Location()
         {
             sensLoc = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
-            Id = ComputeStringID();            
+            ComputeStringID();            
         }      
 
         //Used for Production.
         public Sensation_Location(Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
         {
             this.sensLoc = sensLoc;
-            Id = ComputeStringID();
+            ComputeStringID();
         }
 
         internal void RefreshID()
         {
-            Id = ComputeStringID();
+            ComputeStringID();
         }
 
         //Syntax ::  <Key / value[0].Key : value[0].Count>  
-        internal string ComputeStringID()
-        {
-            string toReturn = string.Empty;
+        public void ComputeStringID()
+        {            
+            if (sensLoc.Count == 0)
+            {
+                Id = "EMPTY";
+                return;
+            }
 
-            if(sensLoc.Count == 0 )            
-                return "EMPTY";
+            string toReturn = string.Empty;
 
             char delimeter1 = ':';
             char delimeter2 = '/';
@@ -61,7 +64,7 @@
             }
 
 
-            return toReturn;
+            Id = toReturn;
         }
 
 

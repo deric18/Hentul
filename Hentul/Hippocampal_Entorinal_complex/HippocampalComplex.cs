@@ -115,15 +115,16 @@
                     currentmatchingObject = matchingObjectList.FirstOrDefault();
 
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
-                    {
-                        if(currentIterationToConfirmation == 0)                        
-                            currentmatchingObject.GetNextSenseiToVerify(sensei);
+                    {                                            
+                        if(currentmatchingObject.Label.ToLower() == "watermelon")
+                        {
+                            bool bp1 = true;
+                        }
+
+                        currentmatchingObject.GetNextSenseiToVerify(sensei);
                         
                         if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                         {
-
-                            //Matched now continue verification of the object.
-                            currentmatchingObject.GetNextSenseiToVerify(sensei);
 
                             var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(currentmatchingObject.CurrentComparisionKeyIndex);                            
                             Position p = Position.ConvertStringToPosition(pos);
@@ -152,7 +153,7 @@
 
                                 currentIterationToConfirmation = 0;
 
-                                Position p = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify(sensei).sensLoc.Keys.FirstOrDefault());
+                                Position p = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
                                 Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
                                 //Perform Step 0 , Step 1
@@ -163,9 +164,11 @@
                                 //Move cursor to cache position and return empty , hand back control to form.cs
                                 Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
                                 objectLabel = null;
+                                ObjectState = RecognitionState.None;
                                 currentIterationToConfirmation = 0;
                                 currentmatchingObject.Clean();
                                 matchingObjectList.Clear();
+                                toReturn = null;
                                 break;
                             }
                         }
