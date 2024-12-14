@@ -49,7 +49,7 @@
             KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(11, activeBits3);
             KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits5);
 
-            Dictionary<string, KeyValuePair<int, List<Position_SOM>>> dict1 = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
 
             dict1.Add("111-888-0", kvp1);
             dict1.Add("234-456-0", kvp2);
@@ -110,7 +110,7 @@
             KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(54, activeBits4);
             KeyValuePair<int, List<Position_SOM>> kvp5 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits5);
 
-            Dictionary<string, KeyValuePair<int, List<Position_SOM>>> dict1 = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
 
             dict1.Add("4432-2163-0", kvp1);
             dict1.Add("2332-4463-0", kvp2);
@@ -119,13 +119,13 @@
 
             
 
-            Dictionary<string, KeyValuePair<int, List<Position_SOM>>> dict2 = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict2 = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
 
             dict2.Add("111-888-0", kvp1);      
             dict2.Add("234-456-0", kvp3);
             dict2.Add("567-343-0", kvp5);
 
-            Dictionary<string, KeyValuePair<int, List<Position_SOM>>> dict3 = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict3 = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
 
             dict3.Add("345-219-0", kvp2);
             dict3.Add("567-8963-0", kvp4);

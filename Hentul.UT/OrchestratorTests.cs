@@ -132,8 +132,7 @@
                     new Position_SOM(3,4)
                 });
 
-            Dictionary<string, KeyValuePair<int, List<Position_SOM>>> dict = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
-
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
 
             dict.Add(obj, kvp);
 

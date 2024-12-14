@@ -590,7 +590,7 @@
                 throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
             }
 
-            Sensation_Location sensation_Location = new Sensation_Location(new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>());
+            Sensation_Location sensation_Location = new Sensation_Location(new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>());
 
             if(sdr_SOM.ActiveBits.Count == 0)
                 return sensation_Location;

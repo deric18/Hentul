@@ -299,7 +299,6 @@
 
         private bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
         {
-            bool toReturn = false;
 
             if(currentmatchingObject.Label.ToLower() == "watermelon")
             {
@@ -314,16 +313,14 @@
 
             int withoutLocation = matchWithLocation.GetTotalMatchPercentage();
 
-            if (withLocation != 100 || withoutLocation != 100)
+            if (withLocation == 0 && withoutLocation == 0)
             {
-                toReturn = false;
+                return false;
             }
             else
             {
-                toReturn = true;
+                return true;
             }
-
-            return toReturn;
         }
 
         private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)

@@ -12,18 +12,18 @@
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
         /// Generally 4 or less
         /// </summary>
-        public Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
+        public SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
 
 
         // Used only for Mock Purposes
         public Sensation_Location()
         {
-            sensLoc = new Dictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            sensLoc = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
             ComputeStringID();            
         }      
 
         //Used for Production.
-        public Sensation_Location(Dictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
+        public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
         {
             this.sensLoc = sensLoc;
             ComputeStringID();
@@ -34,7 +34,7 @@
             ComputeStringID();
         }
 
-        //Syntax ::  <Key / value[0].Key : value[0].Count>  
+        //Syntax ::  <Key0 / value[0].Key : value[0].Count>  
         public void ComputeStringID()
         {            
             if (sensLoc.Count == 0)
@@ -51,16 +51,16 @@
 
             if (max == 1 || max == 2)
             {
-                toReturn = sensLoc.ElementAt(0).Key + delimeter2 + sensLoc.Values.ElementAt(0).Key.ToString() + sensLoc.Values.ElementAt(0).Value.Count.ToString() +
-                   sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
+                toReturn = sensLoc.ElementAt(0).Key + delimeter2 + sensLoc.Values.ElementAt(0).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(0).Value.Count.ToString() + delimeter2 +
+                   sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
             }
             else
             {
                 int mid = sensLoc.Count / 2;
                 
-                toReturn = sensLoc.ElementAt(0).Key + delimeter2 + sensLoc.Values.ElementAt(0).Key.ToString() + sensLoc.Values.ElementAt(0).Value.Count.ToString() +
-                           sensLoc.ElementAt(mid).Key + delimeter2 + sensLoc.Values.ElementAt(mid).Key.ToString() + sensLoc.Values.ElementAt(mid).Value.Count.ToString() +
-                           sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
+                toReturn = sensLoc.ElementAt(0).Key + delimeter2 + sensLoc.Values.ElementAt(0).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(0).Value.Count.ToString() + delimeter2 +
+                           sensLoc.ElementAt(mid).Key + delimeter2 + sensLoc.Values.ElementAt(mid).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(mid).Value.Count.ToString() + delimeter2 +
+                           sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
             }
 
 
