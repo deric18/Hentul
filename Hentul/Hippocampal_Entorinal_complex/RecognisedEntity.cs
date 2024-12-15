@@ -27,6 +27,13 @@ namespace Hentul.Hippocampal_Entorinal_complex
             }
         }
 
+        public int GetRandomSenseIndexFromRecognisedEntity()
+        {
+            Random rand = new Random();
+
+            return rand.Next(0, ObjectSnapshot.Count);
+        }
+
         public string Label { get; private set; }
 
         public RecognisedEntity(string name)
@@ -47,13 +54,31 @@ namespace Hentul.Hippocampal_Entorinal_complex
             CurrentComparision = null;
         }
 
-        public Sensation_Location GetNextSenseiToVerify(Sensation_Location? source = null)
+        public Sensation_Location PrepNextSenseiToVerify(Sensation_Location? source = null, Position posToVerify = null)
         {
             Sensation_Location toReturn = null;
 
             if (ObjectSnapshot.Count == 0)
             {
                 throw new InvalidOperationException("Cannot generate a new Position with empty Object Snapshot");
+            }
+
+            if(posToVerify != null)
+            {
+                //Extract this sensei from object snapshot for comparision exactly at this location.
+
+                foreach (var sensei in ObjectSnapshot)
+                {
+                    foreach (var location in sensei.sensLoc.Keys)       //Match Only Keys
+                    {
+                        if (source.sensLoc.TryGetValue(posToVerify.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
+                        {
+                            //Pos found copy sensei to currentComparision
+
+                            CurrentComparision = sensei;
+                        }
+                    }
+                }
             }
 
             if (source != null)
@@ -91,10 +116,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     }
                 }
 
-                if (CurrentComparision != null)
-                {
-                    return CurrentComparision;
-                }
+                
+            }
+
+            if (CurrentComparision != null)
+            {
+                return CurrentComparision;
             }
 
             if (_verifiedID == null || _verifiedID?.Count == 0)

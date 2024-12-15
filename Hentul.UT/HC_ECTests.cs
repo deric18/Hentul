@@ -16,7 +16,6 @@
             hc = orchestrator.HCAccessor;
         }
 
-
         [Test]
         public void TestProcessCurrentPatternForObjectPositiveTest()
         {

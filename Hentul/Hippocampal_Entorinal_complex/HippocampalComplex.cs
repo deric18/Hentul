@@ -115,22 +115,31 @@
                     currentmatchingObject = matchingObjectList.FirstOrDefault();
 
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
-                    {                                            
-                        if(currentmatchingObject.Label.ToLower() == "watermelon")
+                    {
+                        Position p = null;
+
+                        if (currentmatchingObject.Label.ToLower() == "watermelon")
                         {
                             bool bp1 = true;
                         }
 
-                        currentmatchingObject.GetNextSenseiToVerify(sensei);
+                        if (currentIterationToConfirmation == 0)
+                        {
+                            currentmatchingObject.PrepNextSenseiToVerify(sensei);
+                        }
+                        else if(currentIterationToConfirmation != 0 && p != null)
+                        {
+                            currentmatchingObject.PrepNextSenseiToVerify(sensei, p);
+                        }
                         
                         if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                         {
-
-                            var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(currentmatchingObject.CurrentComparisionKeyIndex);                            
-                            Position p = Position.ConvertStringToPosition(pos);
+                            var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
+                            var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(index);   //Must be ordered first highest X and lowest Y                             
+                            p = Position.ConvertStringToPosition(pos);
                             Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
-                            currentmatchingObject.IncrementCurrentComparisionKeyIndex();
+                            //currentmatchingObject.IncrementCurrentComparisionKeyIndex();
 
                             currentIterationToConfirmation++;
 
@@ -153,8 +162,8 @@
 
                                 currentIterationToConfirmation = 0;
 
-                                Position p = Position.ConvertStringToPosition(currentmatchingObject.GetNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
-                                Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
+                                Position posToMove = Position.ConvertStringToPosition(currentmatchingObject.PrepNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
+                                Orchestrator.MoveCursorToSpecificPosition(posToMove.X, posToMove.Y);
 
                                 //Perform Step 0 , Step 1
                                 sensei = ProcessStep1N2FromOrchestrator();

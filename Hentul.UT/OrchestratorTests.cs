@@ -683,7 +683,17 @@
         [Test, Ignore("Not Yet Implemented")]
         public void TestPixelToSensationAtLocationConversion()
         {
-            throw new NotImplementedException();    
+            Bitmap bp = new Bitmap(40, 20);
+
+            bp.SetPixel(34, 18, Color.White);
+            bp.SetPixel(34, 19, Color.White);
+            bp.SetPixel(35, 18, Color.White);
+            bp.SetPixel(35, 9, Color.White);
+
+
+            orchestrator.Mapper.ParseBitmap(bp);
+
+
         }
 
         [Test, Ignore("Not Yet Implemented")]

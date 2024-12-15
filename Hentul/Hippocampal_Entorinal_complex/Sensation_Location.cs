@@ -4,7 +4,6 @@
 
     public class Sensation_Location
     {
-
         public string Id { get; set; }
 
         /// <summary>
@@ -33,6 +32,7 @@
         {
             ComputeStringID();
         }
+
 
         //Syntax ::  <Key0 / value[0].Key : value[0].Count>  
         public void ComputeStringID()
@@ -66,7 +66,6 @@
 
             Id = toReturn;
         }
-
 
         public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position_SOM>> sensation)
         {
