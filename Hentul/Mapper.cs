@@ -645,7 +645,8 @@
             {
                 int LocationOffset = positions[0].X > 20 ? positions[0].Y * -1 : positions[0].Y;
 
-                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);       //Generating Unique Location String for Sensation_Location Object.
+                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);       
+                //Generating Unique Location String for Sensation_Location Object. BUG : Different location are getting stored for FOM / SOM and different is being sent to HC_EC Complex while prediciton
             }
 
             return toReturn;

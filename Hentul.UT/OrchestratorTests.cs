@@ -680,19 +680,77 @@
         }
 
 
-        [Test, Ignore("Not Yet Implemented")]
+        [Test, Description("To Test if we ever send the same locations from Mapper while predicting as opposed to Training.")]
         public void TestPixelToSensationAtLocationConversion()
         {
-            Bitmap bp = new Bitmap(40, 20);
+            int loc1X = 1254;
+            int loc1Y = 6578;
 
-            bp.SetPixel(34, 18, Color.White);
-            bp.SetPixel(34, 19, Color.White);
-            bp.SetPixel(35, 18, Color.White);
-            bp.SetPixel(35, 9, Color.White);
+            int loc2X = 7896;
+            int loc2Y = 1023;
+
+            Bitmap bp1 = new Bitmap(40, 20);
+
+            for (int i = 0; i < 40; i++) {
+                for (int j = 0; j < 20; j++) {
+                    bp1.SetPixel(i, j, Color.Black);
+                }
+            }
+
+            bp1.SetPixel(34, 18, Color.White);
+            bp1.SetPixel(34, 19, Color.White);
+            bp1.SetPixel(35, 18, Color.White);
+            bp1.SetPixel(35, 9, Color.White);
 
 
-            orchestrator.Mapper.ParseBitmap(bp);
+            Bitmap bp2 = new Bitmap(40, 20);
 
+            for (int i = 0; i < 40; i++)
+            {
+                for (int j = 0; j < 20; j++)
+                {
+                    bp2.SetPixel(i, j, Color.Black);
+                }
+            }
+
+            bp2.SetPixel(34, 18, Color.White);
+            bp2.SetPixel(34, 19, Color.White);
+            bp2.SetPixel(35, 18, Color.White);
+            bp2.SetPixel(35, 9, Color.White);
+
+            
+
+            orchestrator.Mapper.ParseBitmap(bp1);
+
+            orchestrator.point.X = loc1X;
+            orchestrator.point.Y = loc1Y;
+
+            orchestrator.ProcesStep1(bp1);
+
+            orchestrator.ProcessStep2();        
+
+            orchestrator.point.X = loc2X;
+            orchestrator.point.Y = loc2Y;
+
+            orchestrator.ProcesStep1(bp2);
+
+            orchestrator.ProcessStep2();
+
+
+            orchestrator.DoneWithTraining();
+
+            orchestrator.ChangeNetworkModeToPrediction();
+
+
+            orchestrator.point.X = loc1X;
+            orchestrator.point.Y = loc1Y;
+
+            orchestrator.ProcesStep1(bp1);
+
+            var pos = orchestrator.ProcessStep2();
+
+            Assert.AreEqual(pos.X, loc2X);
+            Assert.AreEqual(pos.Y, loc2Y); 
 
         }
 

@@ -1656,7 +1656,7 @@
             if (incomingPattern.InputPatternType.Equals(iType.SPATIAL))
             {
 
-                if(currentCycle <= CycleNum)
+                if(currentCycle <= CycleNum && currentCycle!= 0)
                 {
                     throw new InvalidOperationException("Invalid Cycle Number");
                 }

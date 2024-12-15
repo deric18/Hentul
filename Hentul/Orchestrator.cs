@@ -246,6 +246,9 @@
 
         #endregion
 
+        /// <summary>
+        /// Grabs Cursors Current Position and records pixels.
+        /// </summary>
         public void ProcessStep0()
         {
             CycleNum++;
@@ -276,6 +279,10 @@
             bmp.Save(filename, ImageFormat.Jpeg);
         }
 
+        /// <summary>
+        /// Takens in a bmp and preps and fires all FOM & SOM's.
+        /// </summary>
+        /// <param name="greyScalebmp"></param>
         public void ProcesStep1(Bitmap greyScalebmp)
         {
 
@@ -336,6 +343,10 @@
             #endregion
         }
 
+        /// <summary>
+        /// Stores Object sensei into FOM & SOM's during Training and Retrieves it during Prediciton.
+        /// </summary>
+        /// <returns>Next Position the mouse needs to be guided for succesful prediction</returns>
         public Position ProcessStep2()
         {
 
