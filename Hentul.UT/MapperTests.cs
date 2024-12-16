@@ -21,7 +21,8 @@
         [Test]
         public void TestGetPositionForActiveBit()
         {
-            // This is the fucking culprit , took so much of my fucking time. its not funny , squash this bug like a fucking cockroach.
+
+            
         }
     }
 }

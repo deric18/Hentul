@@ -347,7 +347,7 @@
         /// Stores Object sensei into FOM & SOM's during Training and Retrieves it during Prediciton.
         /// </summary>
         /// <returns>Next Position the mouse needs to be guided for succesful prediction</returns>
-        public Position ProcessStep2()
+        public Position ProcessStep2(bool isMock = false)
         {
 
             Position motorOutput = null;
@@ -387,12 +387,7 @@
                     motorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
                     firingSensei,
-                    predictedSensei
-                    );
-                }
-                else
-                {
-                    bool breakpoint = true;
+                    predictedSensei, isMock);
                 }
             }
 

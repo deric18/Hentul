@@ -34,6 +34,14 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return rand.Next(0, ObjectSnapshot.Count);
         }
 
+        public void SetSenseiToCurrentComparision(int index)
+        {
+            if(index < 0 || index >= ObjectSnapshot.Count)            
+                throw new InvalidOperationException("index cannot exceed objectSnapshot!");            
+
+            CurrentComparision = ObjectSnapshot[index];
+        }
+
         public string Label { get; private set; }
 
         public RecognisedEntity(string name)
@@ -50,7 +58,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public void Clean()
         {
-            _verifiedID.Clear();
+            if(_verifiedID != null)
+                _verifiedID?.Clear();
+
             CurrentComparision = null;
         }
 

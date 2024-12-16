@@ -675,7 +675,7 @@
             return toReturn;
         }
 
-        public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle)
+        public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
             List<Position_SOM> activeBits = new List<Position_SOM>();
             SDR_SOM toReturn = null;
@@ -684,14 +684,38 @@
             {
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
-
+            
             if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
             {
-                NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
+                if (ignoreZ == true)
+                {
+                    foreach(var neuron in NeuronsFiringLastCycle)
+                    {
+                        if (CheckForDuplicates(activeBits, neuron.NeuronID))
+                        {
+                            activeBits.Add(neuron.NeuronID);
+                        }
+                    }
+                }
+                else
+                {
+                    NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });                    
+                }
+
                 toReturn = new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
             }            
 
             return toReturn;
+        }
+
+        private bool CheckForDuplicates(List<Position_SOM> activeBits, Position_SOM neuronID)
+        {
+            if(activeBits.Any(pos => pos.X == neuronID.X && pos.Y == neuronID.Y))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void Pool(SDR_SOM poolingSDR)

@@ -82,7 +82,7 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public Position ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null)
+        public Position ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
         {
             string objectLabel = null;
             Position toReturn = null;
@@ -103,7 +103,6 @@
                     throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
 
-
                 matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
 
                 if (matchingObjectList.Count > 0)
@@ -114,10 +113,11 @@
 
                     currentmatchingObject = matchingObjectList.FirstOrDefault();
 
+                    Position p = null;
+
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
                     {
-                        Position p = null;
-
+                        
                         if (currentmatchingObject.Label.ToLower() == "watermelon")
                         {
                             bool bp1 = true;
@@ -135,8 +135,12 @@
                         if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                         {
                             var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
-                            var pos = currentmatchingObject.CurrentComparision.sensLoc.Keys.ElementAt(index);   //Must be ordered first highest X and lowest Y                             
-                            p = Position.ConvertStringToPosition(pos);
+                            p = currentmatchingObject.ObjectSnapshot[index].cursorPosition;     //Must be ordered first highest X and lowest Y
+                            currentmatchingObject.SetSenseiToCurrentComparision(index);                            
+
+                            if (isMock)
+                                return p;
+
                             Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
                             //currentmatchingObject.IncrementCurrentComparisionKeyIndex();
@@ -154,23 +158,18 @@
 
                             currentmatchingObject.Clean();
 
+                            p = null;
+
                             if (matchingObjectList.Count > 0)
                             {
-                                //Load next object and Init  
-
+                                //Repeat the whole loop with same input for next Object
                                 currentmatchingObject = matchingObjectList[0];
-
-                                currentIterationToConfirmation = 0;
-
-                                Position posToMove = Position.ConvertStringToPosition(currentmatchingObject.PrepNextSenseiToVerify().sensLoc.Keys.FirstOrDefault());
-                                Orchestrator.MoveCursorToSpecificPosition(posToMove.X, posToMove.Y);
-
-                                //Perform Step 0 , Step 1
-                                sensei = ProcessStep1N2FromOrchestrator();
+                                currentIterationToConfirmation = 0;                                
                             }
                             else
                             {
                                 //Move cursor to cache position and return empty , hand back control to form.cs
+
                                 Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
                                 objectLabel = null;
                                 ObjectState = RecognitionState.None;
@@ -183,9 +182,12 @@
                         }
                     }
 
-                    ObjectState = RecognitionState.Recognised;
-                    toReturn = new Position(int.MaxValue, int.MaxValue);
-                    objectLabel = currentmatchingObject.Label;
+                    if (currentIterationToConfirmation == NumberOfITerationsToConfirmation)
+                    {
+                        ObjectState = RecognitionState.Recognised;
+                        toReturn = new Position(int.MaxValue, int.MaxValue);
+                        objectLabel = currentmatchingObject.Label;
+                    }
                 }
             }
 

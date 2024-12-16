@@ -713,44 +713,34 @@
                 }
             }
 
-            bp2.SetPixel(34, 18, Color.White);
-            bp2.SetPixel(34, 19, Color.White);
-            bp2.SetPixel(35, 18, Color.White);
-            bp2.SetPixel(35, 9, Color.White);
-
-            
-
-            orchestrator.Mapper.ParseBitmap(bp1);
+            bp2.SetPixel(12, 14, Color.White);
+            bp2.SetPixel(13, 14, Color.White);
+            bp2.SetPixel(14, 15, Color.White);
+            bp2.SetPixel(15, 16, Color.White);            
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-
             orchestrator.ProcesStep1(bp1);
-
             orchestrator.ProcessStep2();        
+
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-
             orchestrator.ProcesStep1(bp2);
-
             orchestrator.ProcessStep2();
 
 
             orchestrator.DoneWithTraining();
-
             orchestrator.ChangeNetworkModeToPrediction();
 
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-
             orchestrator.ProcesStep1(bp1);
+            var pos = orchestrator.ProcessStep2(true);
 
-            var pos = orchestrator.ProcessStep2();
-
-            Assert.AreEqual(pos.X, loc2X);
-            Assert.AreEqual(pos.Y, loc2Y); 
+            Assert.AreEqual(loc2X, pos.X);
+            Assert.AreEqual(loc2Y, pos.Y); 
 
         }
 

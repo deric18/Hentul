@@ -1,6 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {    
     using FirstOrderMemory.Models;
+    using Common;
 
     public class Sensation_Location
     {
@@ -13,18 +14,29 @@
         /// </summary>
         public SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
 
+        public Position cursorPosition { get; private set; }
+
 
         // Used only for Mock Purposes
         public Sensation_Location()
         {
             sensLoc = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
             ComputeStringID();            
-        }      
+        }
 
-        //Used for Production.
         public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
         {
             this.sensLoc = sensLoc;
+            this.cursorPosition = null;
+            ComputeStringID();
+        }
+
+
+        //Used for Production.
+        public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc, Position cursorPos)
+        {
+            this.sensLoc = sensLoc;
+            this.cursorPosition = cursorPos;
             ComputeStringID();
         }
 

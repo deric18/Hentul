@@ -153,7 +153,7 @@
                      ObjectSnapshot = new List<Sensation_Location>
                      {
                         new Sensation_Location(dict1),
-                        new Sensation_Location(dict3)
+                        new Sensation_Location(dict3, new Position(345, 219))
                      }
                  }
              };           

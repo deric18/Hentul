@@ -415,7 +415,7 @@
             foreach (var kvp in Mappings)
             {
                 var bbmID = kvp.Key;
-                var posList = kvp.Value;               
+                var posList = kvp.Value;
 
                 var pixel1 = posList[0];
                 var pixel2 = posList[1];
@@ -576,12 +576,10 @@
 
 
         /// <summary>
-        /// Generates a reference frame for the sensation and the context under which it is being sensed currently 
-        /// for instance if is large object which needs multiple parses in one screen then it will adapt a reference frame of th object with boundary cells, grid cells only for that object
-        /// if its a whole bunch of objects in one room then it will adapt a reference frame of the whole room and  then start marking location of every object in the room with locations within the rooms boundary cells. similary same for the house or external .
+        /// Parses through all the active Bits and constructs a dictionary of <BBMID, List<Position_SOM>>  
         /// </summary>
-        /// <param name="sdr_SOM"></param>
-        /// <returns></returns>
+        /// <param name="sdr_SOM">Incoming SDR for SOM Layer</param>
+        /// <returns> A Sensaei that represents the felt Sensation at the location represented by the cursor.</returns>
         public Sensation_Location GetSensationLocationFromSDR(SDR_SOM sdr_SOM, Orchestrator.POINT point)
         {
             if (sdr_SOM.Length < 1000)
@@ -590,14 +588,16 @@
                 throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
             }
 
-            Sensation_Location sensation_Location = new Sensation_Location(new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>());
+            Sensation_Location sensation_Location = new Sensation_Location(new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>(), new Position(point.X, point.Y));
 
-            if(sdr_SOM.ActiveBits.Count == 0)
+            if (sdr_SOM.ActiveBits.Count == 0)
                 return sensation_Location;
 
             int iterator = 0;
 
             Position position = null;
+            KeyValuePair<int, List<Position_SOM>> keyValuePair = new KeyValuePair<int, List<Position_SOM>>();
+
 
             foreach (var pos in sdr_SOM.ActiveBits)
             {
@@ -609,33 +609,45 @@
                     continue;
                 }
 
-                position = GetPositionForActiveBit(point, pos.X);
+                position = GetPositionForActiveBit(point, pos.X);                
+
+                //position = GetPositionForBBMID(bbmID, point);
 
                 if (sensation_Location.sensLoc.TryGetValue(position?.ToString(), out KeyValuePair<int, List<Position_SOM>> kvp))
                 {
                     kvp.Value.Add(pos);
                 }
                 else
-                {
-                    if (position == null)
-                    {
-                        throw new InvalidOperationException("Poition should never be null");
-                    }
-                    else
-                    {
-                        KeyValuePair<int, List<Position_SOM>> sensation = new KeyValuePair<int, List<Position_SOM>>(
-                            bbmID,
-                            new List<Position_SOM>() { pos });
+                {                    
+                    KeyValuePair<int, List<Position_SOM>> sensation = new KeyValuePair<int, List<Position_SOM>>(
+                        bbmID,
+                        new List<Position_SOM>() { pos });
 
-                        sensation_Location.AddNewSensationAtThisLocation(position.ToString(), sensation);
-                    }
+                    sensation_Location.AddNewSensationAtThisLocation(position.ToString(), sensation);
                 }
             }
 
             return sensation_Location;
         }
 
-        private Position GetPositionForActiveBit(Orchestrator.POINT point, int posX)
+
+        public Position GetPositionForBBMID(int bbmID, Orchestrator.POINT point)
+        {
+            Position toReturn = null;
+
+            if (Mappings.TryGetValue(bbmID, out var positions))
+            {
+                int LocationOffset = positions[0].X > 20 ? positions[0].Y * -1 : positions[0].Y;
+
+                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);
+                //Generating Unique Location String for Sensation_Location Object. BUG : Different location are getting stored for FOM / SOM and different is being sent to HC_EC Complex while prediciton
+            }
+
+            return toReturn;
+        }
+
+
+        public Position GetPositionForActiveBit(Orchestrator.POINT point, int posX)
         {
             Position toReturn = null;
             Random random = new Random();
@@ -645,7 +657,7 @@
             {
                 int LocationOffset = positions[0].X > 20 ? positions[0].Y * -1 : positions[0].Y;
 
-                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);       
+                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);
                 //Generating Unique Location String for Sensation_Location Object. BUG : Different location are getting stored for FOM / SOM and different is being sent to HC_EC Complex while prediciton
             }
 
