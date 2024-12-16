@@ -187,6 +187,7 @@
                         ObjectState = RecognitionState.Recognised;
                         toReturn = new Position(int.MaxValue, int.MaxValue);
                         objectLabel = currentmatchingObject.Label;
+                        currentIterationToConfirmation = 0;
                     }
                 }
             }

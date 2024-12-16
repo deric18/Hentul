@@ -129,7 +129,7 @@
         private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
         private readonly int FOM_TOTAL_NEURON_CONNECTIONLIMIT;
         private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT;
-        private const int NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES = 3;
+        private const int NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP = 1;
 
 
         #endregion
@@ -680,7 +680,7 @@
             List<Position_SOM> activeBits = new List<Position_SOM>();
             SDR_SOM toReturn = null;
 
-            if (_firingBlacnkStreak > NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES && NeuronsFiringLastCycle.Count > 0)
+            if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
@@ -741,7 +741,7 @@
 
                 _firingBlacnkStreak++;
 
-                if(_firingBlacnkStreak > NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES && NeuronsFiringLastCycle.Count > 0)
+                if(_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
                 {
                     FlushAllNeuronsInList(NeuronsFiringLastCycle);
                     CompleteCleanUP();
@@ -1910,7 +1910,7 @@
         private void PreCyclePrep(ulong incomingCycle, iType itype)
         {
 
-            if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES)
+            if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP)
             { 
                 foreach (var neuron in NeuronsFiringLastCycle)
                 {
