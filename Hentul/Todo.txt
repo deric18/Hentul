@@ -1,5 +1,6 @@
-﻿-Set Up BBM Matching sensei capability for HCC -EC
+﻿-Finish using the predicted Sensei from L3B to predict and classify the currentMatching Object in HC-EC
 
-
-1. Finish Back Up and Restore.
-2. Finish Pooling.
+POOL & LABEL in L3A.
+- Pooling via Temporal input to L3A should be done via Temporal Location Signal , If the object is already recognised only then the temporal signal should be delivered
+-Even though Pooling layer construes to a stable pattern , the L3A layer still being a pooling layer doesnt not neccesarilly has a stable pattern , it has a composite pattern for every object
+and its entire function isto prevent bursting in incoming FOM Layers, it fires parts of its composite patterns based on current position on the object depolarising aspects of objects to the FOM's.

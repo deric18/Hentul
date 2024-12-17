@@ -1,7 +1,6 @@
 ﻿namespace SecondOrderMemoryUT
 {
-    using Common;
-    using SecondOrderMemory.BehaviourManagers;
+    using Common;    
     using SecondOrderMemory.Models;
 
     internal static class TestUtils

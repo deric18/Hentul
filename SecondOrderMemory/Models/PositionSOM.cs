@@ -1,8 +1,9 @@
 ﻿using Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SecondOrderMemory.Models
 {
-    public class Position_SOM : Position, IComparable
+    public class Position_SOM : Position, IEqualityComparer<Position_SOM>, IComparable<Position>
     {
         public char W { get; private set; }
 
@@ -42,20 +43,42 @@ namespace SecondOrderMemory.Models
         public new string ToString()
         {
             return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString() + "-" + W.ToString();
-        }
-      
-        public int CompareTo(object? obj1)
-        {
-            if (obj1.GetType() == typeof(Position_SOM))
-            {
-                Position_SOM obj = (Position_SOM)obj1;
+        }           
 
-                if (X + Y + Z > obj.X + obj.Y + obj.Z) return -1;
-                else if (obj.X + obj.Y + obj.Z < obj.X + obj.Y + obj.Z) return +1;
+        public bool Equals(Position_SOM? x, Position_SOM? y)
+        {
+            if (x == null || y == null)
+                return false;
+
+            return x.W == y.W && x.X == y.X && x.Y == y.Y && x.Z == y.Z;
+        }
+
+        public int GetHashCode([DisallowNull] Position_SOM obj)
+        {
+            return obj.W + obj.X + obj.Y + obj.Z;
+        }
+
+        public int CompareTo(Position other)
+        {
+            if (X > other.X)
+                return 1;
+            else
+            {
+                if (Y > other.Y)
+                    return 1;
                 else
-                    return 0;
+                {
+                    if (Z > other.Z)                    
+                        return 1;   
+                    else
+                    {
+                        if (X == other.X && Y == other.Y && Z == other.Z)
+                            return 0;
+                    }
+                }
             }
-            return 0;
+
+            return -1;
         }
     }
 }

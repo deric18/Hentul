@@ -1,4 +1,6 @@
-﻿namespace SecondOrderMemory.Models
+﻿using Common;
+
+namespace SecondOrderMemory.Models
 {
     public class Column
     {
@@ -7,23 +9,17 @@
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons) 
+        public Column(int x, int y, int numberOfNeurons, int BBMID) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position_SOM(x, y, i)));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BBMID));
             }            
             Init = 0;
         }
-
-
-
-        public void BurstFire()
-        {
-            Neurons.ForEach(x => x.Fire());
-        }
+        
 
         /// <summary>
         /// Fires the predicted neurons in the column , if there are no predicted neurons then it Bursts.
@@ -84,15 +80,26 @@
 
         internal bool PreCleanupCheck()
         {
-            return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).Count() > 0;
+            if(Neurons.Any(x => x.CurrentState == NeuronState.FIRING))
+            {
+                int breakpoint = 1;
+                return true;
+            }
+
+            return false;
         }
 
-        internal void PostCycleCleanup()
+        internal void PostCycleCleanup(bool cleanUpSpiking = false)
         {
-            var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
+            var firingNeurons = Neurons.Where( n => n.CurrentState != NeuronState.RESTING ).ToList();
+
+            if(cleanUpSpiking == false)
+            {
+                firingNeurons = firingNeurons.Where( n => n.CurrentState != NeuronState.SPIKING ).ToList();
+            }
 
             foreach (var neuron in firingNeurons)
-            {
+            {                
                 neuron.FlushVoltage();
             }
 
@@ -103,11 +110,6 @@
                     neuron.CleanUpContributersList();
                 }
             }
-        }
-
-        internal void PruneCycleRefresh()
-        {
-            this.Neurons.ForEach(neuron => neuron.Prune());
-        }
+        }        
     }
 }

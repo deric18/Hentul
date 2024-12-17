@@ -708,25 +708,14 @@
             return toReturn;
         }
 
-        private bool CheckForDuplicates(List<Position_SOM> activeBits, Position_SOM neuronID)
+        public void Label(string Label)
         {
-            if(activeBits.Any(pos => pos.X == neuronID.X && pos.Y == neuronID.Y))
+            if(Layer.Equals(LayerType.Layer_3A) == false)
             {
-                return false;
+                throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
 
-            return true;
-        }
-
-        public void Pool(SDR_SOM poolingSDR)
-        {
-            if (Layer.Equals(LayerType.Layer_3A) == false)
-            {
-                throw new InvalidOperationException("Only Layer 3A can Pool atm!");
-            }
-
-            // Record all the commonly firing neurons in every BBM and cache them for that specific pattern.
-
+            // Once this is called , its end of training , this is one composite pattern for the object.
         }
 
         public void FireBlank(ulong currentCycle)
@@ -750,6 +739,9 @@
         }
 
         #endregion
+
+
+        #region INIT METHOD
 
         private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type)
         {
@@ -828,19 +820,7 @@
 
             PredictedNeuronsForNextCycle.Clear();            
         }
-
-        private List<Neuron> ConvertDictToList(Dictionary<string, List<Neuron>> predictedNeuronsforLastCycle)
-        {
-            List<Neuron> toRet = new List<Neuron>();
-
-            foreach(var kvp in predictedNeuronsforLastCycle)
-            {
-                toRet.Add(GetNeuronFromString(kvp.Key));    
-            }
-
-            return toRet;
-        }
-
+        
         //Selective Clean Up Logic , Should never perform Full Clean up.
         private void PostCycleCleanup(iType type)
         {                       
@@ -1331,6 +1311,8 @@
             }
         }
 
+        #endregion
+
         #region INTERNAL METHODS
 
         private void FlushAllNeuronsInList(List<Neuron> list)
@@ -1604,6 +1586,28 @@
         #endregion
 
         #region PRIVATE METHODS
+
+        private List<Neuron> ConvertDictToList(Dictionary<string, List<Neuron>> predictedNeuronsforLastCycle)
+        {
+            List<Neuron> toRet = new List<Neuron>();
+
+            foreach (var kvp in predictedNeuronsforLastCycle)
+            {
+                toRet.Add(GetNeuronFromString(kvp.Key));
+            }
+
+            return toRet;
+        }
+
+        private bool CheckForDuplicates(List<Position_SOM> activeBits, Position_SOM neuronID)
+        {
+            if (activeBits.Any(pos => pos.X == neuronID.X && pos.Y == neuronID.Y))
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         private void BuildSequenceMemory()
         {

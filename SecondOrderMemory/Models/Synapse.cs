@@ -1,6 +1,4 @@
-﻿using SecondOrderMemory.BehaviourManagers;
-
-namespace SecondOrderMemory.Models
+﻿namespace SecondOrderMemory.Models
 {
     public class Synapse
     {
@@ -14,9 +12,9 @@ namespace SecondOrderMemory.Models
 
         public ConnectionType cType { get; private set; }
         
-        public UInt16 PredictiveHitCount { get; private set; }
+        public int PredictiveHitCount { get; private set; }
 
-        public UInt16 FiringHitCount { get; private set; }
+        public int FiringHitCount { get; private set; }
 
         private uint _strength {  get; set; } 
 
@@ -32,7 +30,7 @@ namespace SecondOrderMemory.Models
             if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
             {
                 IsActive = true;
-                PredictiveHitCount = SBBManager.DISTALNEUROPLASTICITY;
+                PredictiveHitCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
                 FiringHitCount = 0;
             }
             else
@@ -43,12 +41,23 @@ namespace SecondOrderMemory.Models
             }
         }
 
+        public void Print()
+        {
+            Console.WriteLine(" Axonal Neuron ID : " + AxonalNeuronId);
+            Console.WriteLine(" Dendronal Neuron ID : " + DendronalNeuronalId);
+            Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle);
+            Console.WriteLine(" Active : " +  ( IsActive ? "Yes" : "NO") );
+            Console.WriteLine(" Stringeth : " + _strength.ToString() );
+            Console.WriteLine(" Connection Type : " + cType.ToString());
+            Console.WriteLine(" Firing Hit Count : " + FiringHitCount.ToString() + " \n " ); 
+        }
+
         public uint GetStrength()
         {            
             return _strength;
         }
 
-        public void IncrementHitCount()
+        public void IncrementHitCount(ulong currentCycleNum)
         {
 
             if (DendronalNeuronalId.ToString().Equals("5-3-0-N") && AxonalNeuronId.ToString().Equals("0-2-0-N"))
@@ -57,21 +66,21 @@ namespace SecondOrderMemory.Models
                 breakpoint = true;
             }
 
-            if (PredictiveHitCount >= SBBManager.DISTALNEUROPLASTICITY) 
+            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
             {
                 if(IsActive == false) 
                     IsActive = true;
 
                 FiringHitCount++;
-
                 _strength++;
-                this.lastFiredCycle = SBBManager.CycleNum;
+
+                this.lastFiredCycle = currentCycleNum;
             }
             else
             {
                 PredictiveHitCount++;
 
-                this.lastPredictedCycle = SBBManager.CycleNum;
+                this.lastPredictedCycle = currentCycleNum;
             }
         }
     }

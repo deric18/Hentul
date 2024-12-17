@@ -11,26 +11,42 @@ namespace SecondOrderMemory.Models
             ActiveBits = activeBits;
         }
 
-        public bool IsUnionTo(SDR_SOM smallerSDR)
+
+        public void Sort()
+        {
+            ActiveBits.Sort();
+        }
+
+        public bool IsUnionTo(SDR_SOM smallerSDR, bool compareXandYonly = false, bool strictLengthCheck = false)
         {
             if (smallerSDR.ActiveBits == null)
                 throw new NullReferenceException();
 
-            if (Length != smallerSDR.Length || smallerSDR.Breadth != smallerSDR.Breadth || ActiveBits.Count < smallerSDR?.ActiveBits.Count)
-                return false;
-
-            foreach(var pos in smallerSDR.ActiveBits)
+            if (strictLengthCheck == true)
             {
-                if(ActiveBits.Where( B => B.X == pos.X && B.Y == pos.Y).Count() == 0)
-                {
+                if (Length != smallerSDR.Length || smallerSDR.Breadth != smallerSDR.Breadth || ActiveBits.Count < smallerSDR?.ActiveBits.Count)
                     return false;
+            }
+
+
+            foreach (var pos in smallerSDR.ActiveBits)
+            {
+                if (compareXandYonly == false)
+                {
+                    if (ActiveBits.Where(B => B.X == pos.X && B.Y == pos.Y && B.Z == pos.Z).Count() == 0)                    
+                        return false;                    
+                }
+                else if(compareXandYonly == true)
+                {
+                    if (ActiveBits.Where(B => B.X == pos.X && B.Y == pos.Y).Count() == 0)
+                        return false;
                 }
             }
 
             return true;
         }
 
-        public bool IsUnionTo(SDR_SOM smallerSDR, List<Position_SOM> exceptionList)
+        public bool IsUnionTo(SDR_SOM smallerSDR, List<Position_SOM> exceptionList, bool compareXandYonly = false)
         {
             if (smallerSDR.ActiveBits == null)
                 throw new NullReferenceException();

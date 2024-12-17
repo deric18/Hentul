@@ -90,6 +90,10 @@
 
         public string logfilename;
 
+        private List<string> objectlabellist { get; set; }
+
+        private int imageIndex { get; set; }
+
         public NetworkMode NMode { get; set; }
 
         List<int> firingFOM;
@@ -100,11 +104,6 @@
         List<Position_SOM> ONbits2;
         List<Position_SOM> ONbits3;
         List<Position_SOM> ONbits4;
-
-        private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
-        private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
-        private readonly int SOM_NUM_COLUMNS = Convert.ToInt32(ConfigurationManager.AppSettings["SOMNUMCOLUMNS"]);
-        private readonly int SOM_COLUMN_SIZE = Convert.ToInt32(ConfigurationManager.AppSettings["SOMCOLUMNSIZE"]);
 
 
         #endregion
@@ -169,6 +168,17 @@
             }
 
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
+
+            objectlabellist = new List<string>
+            {
+                "Apple",
+                "Ananas",
+                "Watermelon",
+                "JackFruit",
+                "Grapes"
+            };
+
+            imageIndex = 1;
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
@@ -299,9 +309,7 @@
 
             int whitecount = 0;
 
-
             // STEP 0 : Prep SDR.
-
             for (int i = 0; i < greyScalebmp.Width; i++)
             {
                 for (int j = 0; j < greyScalebmp.Height; j++)
@@ -315,12 +323,10 @@
 
 
             // STEP 1A : Fire all FOM's
-
             FireAllFOMs();
 
 
             // STEP 1B : Fire all L3B SOM's
-
             if (Mapper.somPositions.Count != 0)
             {
                 if (Mapper.somPositions.Count > 125)
@@ -329,10 +335,15 @@
                 }
 
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
+
+                List<Position_SOM> temporalBits = GetLocationSDR(point);
+                SDR_SOM temporalSignal = new SDR_SOM(10, 4, temporalBits, iType.TEMPORAL);
+                somBBM_L3A.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
             }
             else
             {
                 somBBM_L3B.FireBlank(CycleNum);
+                somBBM_L3A.FireBlank(CycleNum);
             }
 
 
@@ -341,6 +352,11 @@
             firingFOM.Clear();
 
             #endregion
+        }
+
+        private List<Position_SOM> GetLocationSDR(POINT point)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -354,9 +370,7 @@
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
-                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
-
-                somBBM_L3A.Pool(fom_SDR);
+                SDR_SOM fom_SDR = GetSdrSomFromFOMs();                
 
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
@@ -402,7 +416,7 @@
 
             SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
-            somBBM_L3A.Pool(fom_SDR);
+            //somBBM_L3A.Pool(fom_SDR);
 
             var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
@@ -420,6 +434,7 @@
         public void DoneWithTraining()
         {
             HCAccessor.DoneWithTraining();
+            somBBM_L3A.Label(objectlabellist[imageIndex++]);
         }
 
         internal Bitmap ConverToEdgedBitmap()

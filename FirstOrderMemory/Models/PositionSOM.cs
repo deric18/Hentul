@@ -58,7 +58,7 @@ namespace FirstOrderMemory.Models
             return obj.W + obj.X + obj.Y + obj.Z;
         }
 
-        public int CompareTo(Position? other)
+        public int CompareTo(Position other)
         {
             if (X > other.X)
                 return 1;

@@ -278,17 +278,17 @@ namespace SecondOrderMemoryUT
 
                 bbManager.Fire(sDR_SOMs[i]);
 
-                dendronalconnectionsBeforePruning = SBBManager.totalDendronalConnections;
+                dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
 
-                if (SBBManager.CycleNum > 74 && SBBManager.CycleNum % 25 == 0)
+                if (BlockBehaviourManager.CycleNum > 74 && BlockBehaviourManager.CycleNum % 25 == 0)
                 {
-                    dendronalconnectionsBeforePruning = SBBManager.totalDendronalConnections;
-                    postcheckCycle = SBBManager.CycleNum;
+                    dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
+                    postcheckCycle = BlockBehaviourManager.CycleNum;
                 }
 
-                if (SBBManager.CycleNum > 74 && SBBManager.CycleNum == postcheckCycle + 1)
+                if (BlockBehaviourManager.CycleNum > 74 && BlockBehaviourManager.CycleNum == postcheckCycle + 1)
                 {
-                    dendronalconnectionsAfterPruning = SBBManager.totalDendronalConnections;
+                    dendronalconnectionsAfterPruning = BlockBehaviourManager.totalDendronalConnections;
 
                     if (dendronalconnectionsBeforePruning >= dendronalconnectionsAfterPruning)
                     {

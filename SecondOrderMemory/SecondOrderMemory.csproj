@@ -12,22 +12,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schema Docs\OldSchema\AxonalSchema.xml">
+    <EmbeddedResource Include="Schema Docs\1K Club\AxonalSchema-SOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\OldSchema\ConnectorSchema.xml">
+    <EmbeddedResource Include="Schema Docs\1K Club\DendriticSchemaSOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Schema Docs\OldSchema\dendriticSchema.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 
 </Project>
