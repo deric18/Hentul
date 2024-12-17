@@ -171,7 +171,7 @@
                 {
                     var pos = new Position_SOM(rand.Next(0, 10), rand.Next(0, 10), rand.Next(0, 4));
 
-                    if (posList.Contains(pos) == false)
+                    if (posList.Any(p => p.X == pos.X && p.Y == pos.Y) == false)
                     {
                         posList.Add(pos);
                     }
@@ -183,7 +183,7 @@
                 {
                     var pos = new Position_SOM(rand.Next(0, 10), rand.Next(0, 4), rand.Next(0, 10));
 
-                    if (posList.Contains(pos) == false)
+                    if (posList.Any(p => p.X == pos.X && p.Y == pos.Y) == false)
                     {
                         posList.Add(pos);
                     }

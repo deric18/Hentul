@@ -1039,7 +1039,6 @@
                 }
             }
 
-
             PreviousiType = type;
         }
 
@@ -1062,9 +1061,9 @@
                     }
                 };
 
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();                
                 
-                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
+                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
                     if(Mode == LogMode.Trace)
@@ -1288,8 +1287,12 @@
                     //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
                 }
                 else
-                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
-                    // Anwer : The previous cycle was apical / temporal which deploarized this clumn to fire without bursting.
+                {   
+                    
+                    // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
+                    // Anwer : They were predicted but just not added to the list, it was somehow removed , need to track the culprit.
+
+
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
             }

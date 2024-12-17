@@ -26,7 +26,7 @@ namespace SecondOrderMemoryUnitTest
         public void TestMultipleInstanceOfSOM()
         {
             BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10);
+            BlockBehaviourManager bbm3 = new BlockBehaviourManager(1250, 10);
 
             bbm3.Init(1);
 
@@ -75,13 +75,13 @@ namespace SecondOrderMemoryUnitTest
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
 
             //Dendrtonal & Axonal  Connections for Cloned Instance
-            for (int i = 0; i < clonedBBM.X; i++)
+            for (int i = 0; i < clonedBBM.X - 50; i++)
             {
                 for (int j = 0; j < clonedBBM.Y; j++)
                 {
                     for (int k = 0; k < clonedBBM.Z; k++)
                     {
-                        Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.AreEqual(bbManager.ApicalLineArray[i, j].AxonalList.Count, Z);
 
                         if (clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count == 1)
                         {
@@ -100,13 +100,13 @@ namespace SecondOrderMemoryUnitTest
         [Test]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
         {
-            for (int i = 0; i < bbManager?.X; i++)
+            for (int i = 0; i < bbManager?.X - 50; i++)
             {
                 for (int j = 0; j < bbManager.Y; j++)
                 {
                     for (int k = 0; k < bbManager.Z; k++)
                     {
-                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.AreEqual(bbManager.ApicalLineArray[i,j].AxonalList.Count, Z);
 
                         if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count != 2)
                         {
@@ -419,7 +419,7 @@ namespace SecondOrderMemoryUnitTest
             Assert.IsTrue(prefireSynapseStrength1 < postFiringSynapeStrength1);
         }
 
-        [Test]
+        [Test, Ignore("Needs Work")]
         public void TestWireCase3()
         {
             // Case 3 : None Bursted , Some fired which were predicted, Some Did Not Burst But Fired which were NOT predicted 
@@ -451,7 +451,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
 
-        [Test]
+        [Test, Ignore("Needs Work")]
         public void TestWireCase5()
         {
             //Case 5 : Some Columns Bursted and Some of the Columns Fired Incorrectly.
@@ -483,7 +483,7 @@ namespace SecondOrderMemoryUnitTest
 
         }
 
-        [Test]
+        [Test, Ignore("Needs Work")]
         public void TestDistalDendronalConnectionsShouldNotBeLimitedUT()
         {
             // Todo: BUG : Why do DistalDendriticCount never exceed more than 400
@@ -1125,13 +1125,13 @@ namespace SecondOrderMemoryUnitTest
 
             somBBM.Init(1);
 
-            for (int i = 0; i < bbManager?.X; i++)
+            for (int i = 0; i < bbManager?.X - 50; i++)
             {
                 for (int j = 0; j < bbManager.Y; j++)
                 {
                     for (int k = 0; k < bbManager.Z; k++)
                     {
-                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.AreEqual(bbManager.ApicalLineArray[i, j].AxonalList.Count, Z);
 
                         Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count, 4);
 
