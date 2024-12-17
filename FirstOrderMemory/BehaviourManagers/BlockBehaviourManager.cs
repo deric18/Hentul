@@ -634,6 +634,22 @@
 
         private void Fire()
         {
+            if (CurrentiType == iType.SPATIAL)
+            {
+                foreach (var column in Columns)
+                {
+                    foreach (var neuron in column.Neurons)
+                    {
+                        if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
+                        {
+                            if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
+                            {
+                                NeuronsFiringThisCycle.Add(neuron);
+                            }
+                        }
+                    }
+                }
+            }
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
@@ -647,8 +663,10 @@
                 {
                     ProcessSpikeFromNeuron(GetNeuronFromString(synapse.AxonalNeuronId), GetNeuronFromString(synapse.DendronalNeuronalId), synapse.cType);
                 }
-            }
+            }            
         }
+
+
 
         public SDR_SOM GetPredictedSDRForNextCycle(ulong currentCycle = 1)
         {            
@@ -674,6 +692,7 @@
 
             return toReturn;
         }
+
 
         public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
@@ -846,7 +865,7 @@
                             }
                             foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
                             {
-                                if (synapse.DendronalNeuronalId != null)// && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId))
+                                if (synapse.DendronalNeuronalId != null)
                                 {
                                     var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
 
@@ -1270,6 +1289,7 @@
                 }
                 else
                 {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
+                    // Anwer : The previous cycle was apical / temporal which deploarized this clumn to fire without bursting.
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
                 }
             }
@@ -1740,10 +1760,7 @@
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
-            }
-
-           
-
+            }           
         }
 
         private void Prune()

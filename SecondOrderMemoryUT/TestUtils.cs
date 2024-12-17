@@ -198,41 +198,9 @@
         {
 
             //For Overlapping Temporal and Spatial Patterns , All that has to be done is to match the y-Coordiante.
+            Random rand = new Random();
 
-            if (layerType == LayerType.Layer_4)
-            {
-                Random rand = new Random();
-
-                List<Position_SOM> spatialPosList = new List<Position_SOM>()
-                {
-                    new Position_SOM(5, 2, 1),
-                    new Position_SOM(7, 1, 3),
-                    new Position_SOM(8, 2, 3),
-                    new Position_SOM(4, 0, 0)
-                };
-
-                List<Position_SOM> temporalPosList = new List<Position_SOM>()
-                {
-                    new Position_SOM(2, 1),
-                    new Position_SOM(1, 3),
-                    new Position_SOM(2, 3),
-                    new Position_SOM(0, 0)
-                };
-
-                if (inputPatternType == iType.TEMPORAL)
-                {
-                    return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
-                }
-                else
-                {
-                    return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
-                }
-            }
-            else
-            {
-                Random rand = new Random();
-
-                List<Position_SOM> spatialPosList = new List<Position_SOM>()
+            List<Position_SOM> spatialPosList = new List<Position_SOM>()
                 {
                     new Position_SOM(55, 2, 1),
                     new Position_SOM(21, 1, 3),
@@ -240,7 +208,7 @@
                     new Position_SOM(51, 9, 0)
                 };
 
-                List<Position_SOM> temporalPosList = new List<Position_SOM>()
+            List<Position_SOM> temporalPosList = new List<Position_SOM>()
                 {
                     new Position_SOM(2, 1),
                     new Position_SOM(1, 3),
@@ -248,17 +216,17 @@
                     new Position_SOM(9, 0)
                 };
 
-                if (inputPatternType == iType.TEMPORAL)
-                {
-                    return new SDR_SOM(10, 4, temporalPosList, inputPatternType);
-                }
-                else
-                {
-                    return new SDR_SOM(1250, 10, spatialPosList, inputPatternType);
-                }
+            if (inputPatternType == iType.TEMPORAL)
+            {
+                return new SDR_SOM(10, 4, temporalPosList, inputPatternType);
             }
+            else
+            {
+                return new SDR_SOM(1250, 10, spatialPosList, inputPatternType);
+            }
+
         }
-       
+
 
         internal static List<SDR_SOM> GenerateFixedRandomSDR_SOMs(int iterations, int minValue, int maxValue)
         {

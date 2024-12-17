@@ -1,31 +1,31 @@
 ﻿namespace FirstOrderMemoryUnitTest
 {
     using FirstOrderMemory.Models;
-    using FirstOrderMemory.Models.Encoders;
     using NUnit.Framework;
-
-    [TestClass]
+    using FirstOrderMemory.Models.Encoders;    
+    
     public class EncoderTest
     {
         ByteEncoder encoder;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             encoder = new ByteEncoder(100, 8);
         }
 
-        [TestMethod]
+        [Test]        
         public void TestBoolEncoderKeyConflict()
         {
-            BoolEncoder be = new BoolEncoder(100, 20);
+            BoolEncoder be = new BoolEncoder(100, 20);            
 
-            be.SetEncoderValues("1-8");
+            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => be.SetEncoderValues("1-8"));
 
-            Assert.Throws<InvalidOperationException>(() => be.SetEncoderValues("1-8"));
+            Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
+
         }
 
-        [TestMethod]
+      [Test]
         public void TestByteEncoder1()
         {
             byte toEncode1 = (byte)1;
@@ -43,7 +43,7 @@
             Assert.AreEqual(result1.ActiveBits.Count, result2.ActiveBits.Count);
         }
 
-        [TestMethod]
+      [Test]
         public void TestByteEncoder2()
         {           
 
@@ -57,7 +57,7 @@
 
         }
 
-        [TestMethod]
+      [Test]
         public void TestEncoderSparsity()
         {
 

@@ -3,15 +3,15 @@
     using Common;
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models;
-
-    [TestClass]
+    using NUnit.Framework;
+    
     public class PredictorTests
     {
         BlockBehaviourManager bbManager;
         int Numcolmns = 10;
         int Z = 4;
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             bbManager = new BlockBehaviourManager(Numcolmns, Numcolmns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.Trace, false);
@@ -20,7 +20,7 @@
 
         }        
 
-        [TestMethod]
+       [Test]
         public void TestSequenceMemoryCT()
         {
             // Project ABC Pattern 60 times and test C is predicted after B 31st time.
@@ -107,7 +107,7 @@
             }            
         }       
         
-        [TestMethod]
+      [Test]
         public void HighVoltagePredictedNeuronGetsPickedForFiringCT()
         {
             // HighVoltagePredictedNeuronGetsPickedForFiring from a Column

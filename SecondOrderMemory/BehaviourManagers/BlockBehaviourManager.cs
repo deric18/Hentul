@@ -745,7 +745,6 @@
 
         #endregion
 
-
         #region INIT METHOD
 
         private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type)
@@ -2235,11 +2234,7 @@
         {
             #region REAL Code                       
 
-            if ((X == 10 && Y == 10 && Z == 4))
-            {
-                schemToLoad = SchemaType.FOMSCHEMA;
-            }
-            else if (X == 1250 && Y == 10 && Z == 4)
+            if (X == 1250 && Y == 10 && Z == 4)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }
@@ -2253,13 +2248,9 @@
                 throw new InvalidOperationException("Schema Type Cannot be Invalid");
             }
 
-            if (schemToLoad == SchemaType.FOMSCHEMA)
+            if (schemToLoad == SchemaType.SOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchemaFOM.xml";
-            }
-            else if (schemToLoad == SchemaType.SOMSCHEMA)
-            {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
+                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
             }
 
             if (File.Exists(dendriteDocumentPath) == false)
@@ -2421,13 +2412,9 @@
             }
 
 
-            if (schemToLoad == SchemaType.FOMSCHEMA)
+            if (schemToLoad == SchemaType.SOMSCHEMA)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchemaFOM.xml";
-            }
-            else if (schemToLoad == SchemaType.SOMSCHEMA)
-            {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
+                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
             }
 
             if (!File.Exists(axonalDocumentPath))

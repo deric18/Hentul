@@ -1,10 +1,11 @@
-namespace SecondOrderMemoryUnitTest
-{    
-    using Common;    
+﻿namespace FirstOrderMemoryUnitTest
+{
+    using Common;        
+    using FirstOrderMemory.BehaviourManagers;
+    using FirstOrderMemory.Models;
     using NUnit.Framework;
-    using SecondOrderMemory.Models;    
     
-    public class SeconfOrderMemoryUnitTest
+    public class SecondOrderMemoryUnitTest
     {
         BlockBehaviourManager? bbManager;
         const int X = 1250;
@@ -81,7 +82,7 @@ namespace SecondOrderMemoryUnitTest
                 {
                     for (int k = 0; k < clonedBBM.Z; k++)
                     {
-                        Assert.That(clonedBBM.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.AreEqual(clonedBBM.ApicalLineArray.Length, 100);
 
                         if (clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count == 1)
                         {
@@ -106,7 +107,7 @@ namespace SecondOrderMemoryUnitTest
                 {
                     for (int k = 0; k < bbManager.Z; k++)
                     {
-                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.AreEqual(bbManager.ApicalLineArray.Length, 100);
 
                         if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count != 2)
                         {
@@ -147,7 +148,7 @@ namespace SecondOrderMemoryUnitTest
             Assert.IsTrue(firingNeuronList.ActiveBits[0].X == pos.X && firingNeuronList.ActiveBits[0].Y == pos.Y && firingNeuronList.ActiveBits[0].Z == (Z - 1));
         }
 
-        [Test]
+        [Test]        
         public void TestConnectTwoNeuronsOrIncrementStrengthAfterInitialzationShouldFail()
         {
             //Connect 2 random neuron distally and check if the connection exists!
@@ -249,7 +250,7 @@ namespace SecondOrderMemoryUnitTest
 
             uint neruon2PostFireStrength = value2.GetStrength();
 
-            Assert.AreEqual(1, neruon2PostFireStrength - neuron2StrengthPreFire);
+            Assert.AreEqual(1, (int)neruon2PostFireStrength - neuron2StrengthPreFire);
 
             Assert.AreEqual(neuron1StrengthPostFire, neuron1StrengthPreFire);
         }
@@ -326,7 +327,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
 
-        [Test   ]
+        [Test]
         public void TestWireCase1()
         {
             //Case 1 : All columns Bursted:
@@ -414,7 +415,7 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendronalNeuron2));
 
-            Assert.AreEqual(prefireSynapseStrength2, postFiringSynapeStrength2);
+            Assert.AreEqual((int)prefireSynapseStrength2, (int)postFiringSynapeStrength2);
 
             Assert.IsTrue(prefireSynapseStrength1 < postFiringSynapeStrength1);
         }
@@ -634,7 +635,7 @@ namespace SecondOrderMemoryUnitTest
                 currentStrength = postSynapse.GetStrength();
             }
 
-            Assert.AreEqual(0, previousStrength);
+            Assert.AreEqual(0, (int)previousStrength);
 
             Assert.AreEqual(currentStrength, previousStrength);
 
@@ -840,15 +841,8 @@ namespace SecondOrderMemoryUnitTest
 
             foreach (var pos in temporalSdr.ActiveBits)
             {
-                for (int i = 0; i < Y; i++)
+                foreach (var neuron in bbManager.Columns[pos.Y, pos.X].Neurons)
                 {
-                    Neuron neuron = bbManager.Columns[i, pos.X].Neurons[pos.Y];
-
-                    if (neuron.Voltage != 0)
-                    {
-                        bool bp = true;
-                    }
-
                     Assert.AreEqual(0, neuron.Voltage);
                 }
             }
@@ -929,15 +923,12 @@ namespace SecondOrderMemoryUnitTest
 
             foreach (var pos in temporalSdr.ActiveBits)
             {
-                for (int i = 0; i < Y; i++)
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
                 {
-                    Neuron neuron = bbManager.Columns[i, pos.X].Neurons[pos.Y];
-
                     if (neuron.Voltage != 0)
                     {
-                        bool bp = true;
+                        int breakpoint = 1;
                     }
-
                     Assert.AreEqual(0, neuron.Voltage);
                 }
             }
@@ -996,19 +987,16 @@ namespace SecondOrderMemoryUnitTest
 
             foreach (var pos in temporalSdr.ActiveBits)
             {
-                for (int i = 0; i < Y; i++)
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
                 {
-                    Neuron neuron = bbManager.Columns[i, pos.X].Neurons[pos.Y];
-
-                    if (neuron.Voltage != 0)
+                    if (neuron.Voltage != 0 && neuron.CurrentState == NeuronState.RESTING)
                     {
-                        bool bp = true;
+                        int breakpoint = 1;
                     }
-
                     Assert.AreEqual(0, neuron.Voltage);
+                    Assert.AreEqual(NeuronState.RESTING, neuron.CurrentState);
                 }
             }
-             
 
             foreach (var pos in apicalSdr.ActiveBits)
             {
@@ -1099,7 +1087,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.RestoreFromBackUp("1.xml");
 
-            Assert.DoesNotThrow(() => new Exception());
+            //Assert.DoesNotThrow(() => new Exception());
         }
 
         [Test]
@@ -1131,7 +1119,7 @@ namespace SecondOrderMemoryUnitTest
                 {
                     for (int k = 0; k < bbManager.Z; k++)
                     {
-                        Assert.That(bbManager.ApicalLineArray.Length, Is.EqualTo(100));
+                        Assert.AreEqual(bbManager.ApicalLineArray.Length, 100);
 
                         Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count, 4);
 
@@ -1195,7 +1183,7 @@ namespace SecondOrderMemoryUnitTest
 
             int breakpoin = 1;
 
-            Assert.Pass();
+            //Assert.Pass();
 
         }
 

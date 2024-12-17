@@ -10,7 +10,7 @@
     {
 
         internal static SDR_SOM AddOffsetToSDR(SDR_SOM sdr, int offset)
-        {            
+        {
             List<Position_SOM> posList = new List<Position_SOM>();
 
             foreach (var pos in sdr.ActiveBits)
@@ -19,19 +19,19 @@
                 {
                     throw new InvalidOperationException("Added offset could not exceed network Layer Length!");
                 }
-                
-                posList.Add(new Position_SOM(pos.X + offset * 100, pos.Y , 0));
+
+                posList.Add(new Position_SOM(pos.X + offset * 100, pos.Y, 0));
             }
 
             return new SDR_SOM(sdr.Length, sdr.Breadth, posList, sdr.InputPatternType);
         }
 
 
-        internal static SDR_SOM GetEmptySpatialPattern(List<Position_SOM> lastFirsingCells, int length, int breadth, iType iType, LayerType layerType) =>                    
-            new SDR_SOM(length, breadth, GetExclusivePositionList(lastFirsingCells, layerType), iType);        
+        internal static SDR_SOM GetEmptySpatialPattern(List<Position_SOM> lastFirsingCells, int length, int breadth, iType iType, LayerType layerType) =>
+            new SDR_SOM(length, breadth, GetExclusivePositionList(lastFirsingCells, layerType), iType);
 
 
-        public static  List<Neuron> ConvertStringListotNeuronalList(List<string> stringList, BlockBehaviourManager bbManager)
+        public static List<Neuron> ConvertStringListotNeuronalList(List<string> stringList, BlockBehaviourManager bbManager)
         {
             List<Neuron> neurons = new List<Neuron>();
 
@@ -39,7 +39,7 @@
             {
                 Neuron n = bbManager.GetNeuronFromString(str);
 
-                if(n.nType == NeuronType.NORMAL)
+                if (n.nType == NeuronType.NORMAL)
                     neurons.Add(n);
             }
 
@@ -53,7 +53,7 @@
             foreach (var str in stringList)
             {
                 var pos = Position_SOM.ConvertStringToPosition(str);
-                if(pos.W == 'N')
+                if (pos.W == 'N')
                     positionList.Add(pos);
             }
 
@@ -85,10 +85,10 @@
             {
                 x = rand.Next(0, maxX); y = rand.Next(0, maxY);
 
-                if(excludeX.Contains(x) == false && excludeY.Contains(y) == false)
+                if (excludeX.Contains(x) == false && excludeY.Contains(y) == false)
                 {
                     exlcudedPosList.Add(new Position_SOM(x, y));
-                }                
+                }
             }
 
             return exlcudedPosList;
@@ -97,7 +97,7 @@
         internal static Position_SOM GetSpatialAndTemporalOverlap(Position_SOM spatial, Position_SOM temporal)
         {
             return new Position_SOM(spatial.X, temporal.X, temporal.Y);
-        }        
+        }
 
         internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position_SOM pos) =>
             bbManager.Columns[pos.Z, pos.X].Neurons[pos.Y];
@@ -173,7 +173,7 @@
                 {
                     var pos = new Position_SOM(rand.Next(0, 10), rand.Next(0, 10), rand.Next(0, 4));
 
-                    if (posList.Contains(pos) == false)
+                    if (posList.Any(p => p.X == pos.X && p.Y == pos.Y) == false)
                     {
                         posList.Add(pos);
                     }
@@ -185,7 +185,7 @@
                 {
                     var pos = new Position_SOM(rand.Next(0, 10), rand.Next(0, 4), rand.Next(0, 10));
 
-                    if (posList.Contains(pos) == false)
+                    if (posList.Any(p => p.X == pos.X && p.Y == pos.Y) == false)
                     {
                         posList.Add(pos);
                     }
@@ -201,11 +201,9 @@
 
             //For Overlapping Temporal and Spatial Patterns , All that has to be done is to match the y-Coordiante.
 
-            if (layerType == LayerType.Layer_4)
-            {
-                Random rand = new Random();                
+            Random rand = new Random();
 
-                List<Position_SOM> spatialPosList = new List<Position_SOM>()
+            List<Position_SOM> spatialPosList = new List<Position_SOM>()
                 {
                     new Position_SOM(5, 2, 1),
                     new Position_SOM(7, 1, 3),
@@ -213,7 +211,7 @@
                     new Position_SOM(4, 0, 0)
                 };
 
-                List<Position_SOM> temporalPosList = new List<Position_SOM>()
+            List<Position_SOM> temporalPosList = new List<Position_SOM>()
                 {
                     new Position_SOM(2, 1),
                     new Position_SOM(1, 3),
@@ -221,43 +219,13 @@
                     new Position_SOM(0, 0)
                 };
 
-                if (inputPatternType == iType.TEMPORAL)
-                {
-                    return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
-                }
-                else
-                {
-                    return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
-                }
+            if (inputPatternType == iType.TEMPORAL)
+            {
+                return new SDR_SOM(10, 10, temporalPosList, inputPatternType);
             }
             else
             {
-                Random rand = new Random();                
-
-                List<Position_SOM> spatialPosList = new List<Position_SOM>()
-                {
-                    new Position_SOM(55, 2, 1),
-                    new Position_SOM(21, 1, 3),
-                    new Position_SOM(43, 8, 3),
-                    new Position_SOM(51, 9, 0)
-                };
-
-                List<Position_SOM> temporalPosList = new List<Position_SOM>()
-                {
-                    new Position_SOM(2, 1),
-                    new Position_SOM(1, 3),
-                    new Position_SOM(8, 3),
-                    new Position_SOM(9, 0)
-                };
-
-                if (inputPatternType == iType.TEMPORAL)
-                {
-                    return new SDR_SOM(10, 4, temporalPosList, inputPatternType);
-                }
-                else
-                {
-                    return new SDR_SOM(1250, 10, spatialPosList, inputPatternType);
-                }
+                return new SDR_SOM(10, 10, spatialPosList, inputPatternType);
             }
         }
 
@@ -372,10 +340,11 @@
         internal static SDR_SOM ConvertSpatialToTemporal(List<Position_SOM> possom, LayerType layer)
         {
             List<Position_SOM> posList = new List<Position_SOM>();
-            
-                foreach(var item in possom) {
-                    posList.Add(new Position_SOM(item.Y, item.Z));
-                }
+
+            foreach (var item in possom)
+            {
+                posList.Add(new Position_SOM(item.Y, item.Z));
+            }
 
             return new SDR_SOM(10, 4, posList, iType.TEMPORAL);
         }
@@ -386,11 +355,11 @@
 
             foreach (var column in bbManager.Columns)
             {
-                foreach( var neuron in column.Neurons)
+                foreach (var neuron in column.Neurons)
                 {
-                    foreach(var kvp in neuron.AxonalList)
+                    foreach (var kvp in neuron.AxonalList)
                     {
-                        if(kvp.Key == targetNeuron.NeuronID.ToString())
+                        if (kvp.Key == targetNeuron.NeuronID.ToString())
                         {
                             posList.Add(neuron.NeuronID);
                         }

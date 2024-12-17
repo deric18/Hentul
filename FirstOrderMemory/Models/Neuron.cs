@@ -151,7 +151,7 @@ namespace FirstOrderMemory.Models
 
         public void ProcessVoltage(int voltage, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
         {
-            if(NeuronID.ToString().Equals("55-2-1-N"))
+            if(NeuronID.ToString().Equals("2-4-0-N"))
             {
                 bool breakpoiunt = true;
             }

@@ -3,15 +3,14 @@
     using Common;
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models;
-
-    [TestClass]
+    using NUnit.Framework;
+    
     public class DetectorCircuitTest        
     {
         BlockBehaviourManager bbManager;
         int NumColumns = 10;
         int Z = 10;
 
-        [TestInitialize]
         public void SetUp()
         {
             bbManager = new BlockBehaviourManager(NumColumns, Z);
@@ -20,7 +19,7 @@
 
         }
 
-        [TestMethod]
+      [Test]
         public void DetectorTestCT()
         {
             //Create a a specific pattern and check how long it takes for the network to detect it.

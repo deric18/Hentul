@@ -86,7 +86,6 @@
 
         #endregion
 
-
         #region METHODSS
 
         public void ProcessCurrentState(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string fileName = null)
