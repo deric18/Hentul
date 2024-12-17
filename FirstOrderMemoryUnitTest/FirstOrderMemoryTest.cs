@@ -127,6 +127,24 @@ namespace FirstOrderMemoryUnitTest
         }
 
         [Test]
+        public void TestSequenceMemoryFireGetsIncludedNeuronsFiringThisCycle()
+        {
+            // Fire a sample Spatial Pattern , Depolarize a neuron to firing potential and see if it also fires.            
+
+            var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+
+            var extraNeuron = bbManager.Columns[2, 3].Neurons[2];            
+
+            extraNeuron.ProcessVoltage(150, 0, BlockBehaviourManager.LogMode.All);
+
+            bbManager.Fire(spatialSdr);
+
+            var firingPositions = bbManager.GetAllNeuronsFiringLatestCycle(1, true);
+
+            Assert.IsTrue(BBMUtils.CheckIfPositionListHasThisNeuron(firingPositions.ActiveBits, extraNeuron));
+        }
+
+        [Test]
         public void TestMaxVoltageDeplorizedNeuronAlwaysGetPicked()
         {
             var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization();
@@ -159,6 +177,7 @@ namespace FirstOrderMemoryUnitTest
             SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
 
             bbManager.Fire(sdr1, 1);
+
 
             
 
@@ -303,7 +322,6 @@ namespace FirstOrderMemoryUnitTest
             bbManager.Fire(temporalSDR1);
             bbManager.Fire(apicalSDR1);
             bbManager.Fire(sdr1, counter++);
-
             
             SDR_SOM temporalSDR2 = TestUtils.ConvertSpatialToTemporal(new List<Position_SOM>() { neuron2.GetMyTemporalPartner2() }, bbManager.Layer);
             SDR_SOM apicalSDR2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { neuron2.GetMyApicalPartner() }, iType.APICAL);
