@@ -3,7 +3,8 @@
     using Common;
     using System.Xml;
     using System.Linq;
-    using System;    
+    using System;
+    using System.ComponentModel;
 
     public class BlockBehaviourManager
     {
@@ -199,6 +200,11 @@
             schemToLoad = SchemaType.INVALID;
 
             WireCasesTracker = new ulong[5];
+
+            if(layertype == LayerType.Layer_4)
+            {
+                throw new InvalidEnumArgumentException("Cannot accept argument Layer 4 for SOM Model");
+            }
 
             this.Layer = layertype;
 
