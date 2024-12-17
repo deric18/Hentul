@@ -1,10 +1,9 @@
 ﻿namespace SecondOrderMemoryUnitTest
 {
     using Common;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using NUnit.Framework;
     using SecondOrderMemory.Models;
-
-    [TestClass]
+    
     public class SecondOrderMemoryTestsAdvanced
     {
 
@@ -14,7 +13,7 @@
         int Z = 4;
         Random rand1;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.Trace, true);
@@ -24,7 +23,7 @@
             rand1 = new Random();
         }
 
-        [TestMethod]
+        [Test]
         public void TestNeuronsFiringLastcycle()
         {
             var temporalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
@@ -48,7 +47,7 @@
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestNeuronsFiringThiscycle()
         {
             var temporalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
@@ -72,7 +71,7 @@
             }
         }
 
-        [TestMethod]
+        [Test]
         public void TestSOMIgnorePostCycleCleanupForSpikingNeuron()
         {
             //Get 2 Spiking Neurons in a SOM Layer in 2 completely distant BBM's and then fire the same pattern over and over till they both connect and have an active Synapse , if they dont after 5 firings then Algo fails            
@@ -153,7 +152,7 @@
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestSequenceMemory1()
         {
             // Project ABC Pattern 60 times and test C is predicted after B 31st time.
@@ -241,7 +240,7 @@
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestSequenceMemory2()
         {
             Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
@@ -276,7 +275,7 @@
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestTargetNeuronSpikesWithNeibhouringNeuronalFiring()
         {
             Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
@@ -303,7 +302,7 @@
             Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
         }
 
-        [TestMethod]
+        [Test]
         public void TestHowManyNeighbhoursNeedToFireBeforTargetNeuronFires()
         {
             // Fire a bunch of surrounding neurons near a target neuron and make sure it fire and check how many neurons are needed before it fires.
