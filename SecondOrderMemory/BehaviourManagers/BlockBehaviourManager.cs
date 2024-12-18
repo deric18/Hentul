@@ -640,6 +640,23 @@
         private void Fire()
         {
 
+            if (CurrentiType == iType.SPATIAL)
+            {
+                foreach (var column in Columns)
+                {
+                    foreach (var neuron in column.Neurons)
+                    {
+                        if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
+                        {
+                            if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
+                            {
+                                NeuronsFiringThisCycle.Add(neuron);
+                            }
+                        }
+                    }
+                }
+            }
+
             foreach (var neuron in NeuronsFiringThisCycle)
             {
                 //check if the synapse is active only then fire
@@ -2234,7 +2251,7 @@
         {
             #region REAL Code                       
 
-            if (X == 1250 && Y == 10 && Z == 4)
+            if (X == 1250 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }
@@ -2393,11 +2410,8 @@
 
             schemToLoad = SchemaType.INVALID;
 
-            if ((X == 10 && Y == 10 && Z == 4))
-            {
-                schemToLoad = SchemaType.FOMSCHEMA;
-            }
-            else if (X == 1250 && Y == 10 && Z == 4)
+           
+            if (X == 1250 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }

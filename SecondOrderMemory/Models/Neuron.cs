@@ -88,6 +88,8 @@
 
         #region METHODSS
 
+        #region FIRE & INIT
+
         public void ProcessCurrentState(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string fileName = null)
         {
             if( Voltage == 0)
@@ -236,6 +238,11 @@
         {
             File.AppendAllText(logfilename, logline + "\n");
         }
+
+
+        #endregion
+
+        #region CONNECTOR LOGIC
 
         private bool AddNewAxonalConnection(string key)
         {
@@ -446,6 +453,11 @@
             return ConnectionRemovalReturnType.HARDFALSE;
         }
 
+
+        #endregion
+
+        #region HELPER METHODS
+
         public int CompareTo(Neuron? other)
         {
             return this.Voltage > other.Voltage ? 10 : this.Voltage == other.Voltage ? 0 : (this.Voltage < other.Voltage) ? -1 : -1;
@@ -493,7 +505,11 @@
 
 
         #endregion
+
+        #endregion
     }
+
+    #region ENUMS
 
     public enum ConnectionType
     {
@@ -518,4 +534,6 @@
         HARDFALSE,
         SOFTFALSE
     }
+
+    #endregion
 }

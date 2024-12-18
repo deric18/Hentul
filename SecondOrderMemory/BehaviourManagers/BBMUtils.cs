@@ -26,6 +26,22 @@
             return toRet;
         }
 
+        public static bool CheckIfPositionListHasThisNeuron(List<Position_SOM> columnsThatBurst, Neuron neuron)
+        {
+            var index = false;
+
+            foreach (var x in columnsThatBurst)
+            {
+                if (x.X == neuron.NeuronID.X && x.Y == neuron.NeuronID.Y && x.Z == neuron.NeuronID.Z && x.W == neuron.NeuronID.W)
+                {
+                    index = true;
+                    break;
+                }
+            }
+
+            return index;
+        }
+
         public static bool CheckIfTwoNeuronsAreConnected(Neuron axonalNeuron, Neuron dendriticNeuron)
         {
             bool toRet = false;

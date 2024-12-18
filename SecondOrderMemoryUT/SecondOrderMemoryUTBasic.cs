@@ -9,7 +9,7 @@ namespace SecondOrderMemoryUnitTest
         BlockBehaviourManager? bbManager;
         const int X = 1250;
         const int Y = 10;
-        int Z = 4;
+        int Z = 5;
         Random rand1;
 
         [SetUp]
@@ -860,6 +860,24 @@ namespace SecondOrderMemoryUnitTest
                     Assert.AreEqual(0, neuron.Voltage);
                 }
             }
+        }
+
+        [Test]
+        public void TestSequenceMemoryFireGetsIncludedNeuronsFiringThisCycle()
+        {
+            // Fire a sample Spatial Pattern , Depolarize a neuron to firing potential and see if it also fires.            
+
+            var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
+
+            var extraNeuron = bbManager.Columns[2, 3].Neurons[2];
+
+            extraNeuron.ProcessVoltage(150, 0, BlockBehaviourManager.LogMode.All);
+
+            bbManager.Fire(spatialSdr);
+
+            var firingPositions = bbManager.GetAllNeuronsFiringLatestCycle(1, true);
+
+            Assert.IsTrue(BBMUtils.CheckIfPositionListHasThisNeuron(firingPositions.ActiveBits, extraNeuron));
         }
 
         [Test]

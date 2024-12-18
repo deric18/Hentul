@@ -277,7 +277,7 @@
         {
             bool toRet = false;
 
-            if (x == i && y == j && z == k || (z > Z))
+            if (x == 484 && y == 1 && z == 2 || (z > Z))
             {
                 int breakpoint = 1;
             }
@@ -288,6 +288,11 @@
                 Neuron neuron = col.Neurons[z];
 
                 toRet = neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+
+                if(toRet == false)
+                {
+                    int bp = 23;
+                }
 
                 IncrementProximalConnectionCount();
 
@@ -2254,7 +2259,7 @@
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
-            else if (X == 1250 && Y == 10 && Z == 4)
+            else if (X == 1250 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }
@@ -2336,8 +2341,6 @@
 
                         var proximalNodes = node.ChildNodes;
 
-                        //var neuronNodes = proximalNodes.Item(0)
-                        //    .SelectNodes("Neuron");
 
                         if (!(proximalNodes.Count == 4 || proximalNodes.Count == 2))
                         {
@@ -2367,8 +2370,8 @@
 
                             numDendriticConnectionCount++;
 
-                            if (numDendriticConnectionCount == 2)
-                                break;
+                            //if (numDendriticConnectionCount == 2)
+                            //    break;
                         }
 
                         string key = a.ToString() + "-" + b.ToString() + "-" + c.ToString();
@@ -2421,7 +2424,7 @@
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
-            else if (X == 1250 && Y == 10 && Z == 4)
+            else if (X == 1250 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
             }

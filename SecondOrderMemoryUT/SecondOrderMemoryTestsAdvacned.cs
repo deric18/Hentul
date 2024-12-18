@@ -10,7 +10,7 @@
         BlockBehaviourManager? bbManager;
         const int X = 1250;
         const int Y = 10;
-        int Z = 4;
+        int Z = 5;
         Random rand1;
 
         [SetUp]
