@@ -207,8 +207,8 @@
                 {
                     new Position_SOM(5, 2, 1),
                     new Position_SOM(7, 1, 3),
-                    new Position_SOM(8, 2, 3),
-                    new Position_SOM(4, 0, 0)
+                    new Position_SOM(8, 2, 2),
+                    new Position_SOM(4, 0, 4)
                 };
 
             List<Position_SOM> temporalPosList = new List<Position_SOM>()

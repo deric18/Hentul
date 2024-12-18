@@ -9,7 +9,7 @@
     {
         BlockBehaviourManager bbManager;
         int Numcolmns = 10;
-        int Z = 4;
+        int Z = 5;
 
         [SetUp]
         public void SetUp()
@@ -107,7 +107,7 @@
             }            
         }       
         
-      [Test]
+        [Test]
         public void HighVoltagePredictedNeuronGetsPickedForFiringCT()
         {
             // HighVoltagePredictedNeuronGetsPickedForFiring from a Column

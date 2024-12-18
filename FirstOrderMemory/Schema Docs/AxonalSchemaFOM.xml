@@ -801,7 +801,7 @@
   </AxonalConnection>
   <AxonalConnection X="4" Y="0" Z="0">
     <Neuron X="6" Y="7" Z="3" />
-    <Neuron X="7" Y="1" Z="1" />
+    <Neuron X="5" Y="1" Z="1" />
   </AxonalConnection>
   <AxonalConnection X="4" Y="0" Z="1">
     <Neuron X="6" Y="3" Z="3" />

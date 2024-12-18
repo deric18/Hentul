@@ -19,19 +19,19 @@
             bbManager.Init(1);            
         }
 
-      [Test]
+        [Test, Ignore("Needs work!")]
         public void TestHowManyPatternsCanOneFOMBlockRemember()
         {
             throw new NotImplementedException();
         }
 
-      [Test]
+        [Test, Ignore("Needs work!")]
         public void TestHowManyNeuronsCanWeDeleteBEforeNetworkForgets()
         {
             throw new NotImplementedException();
         }
 
-      [Test]
+        [Test, Ignore("Needs work!")]
         public void TestHowMuchNoiseCanBeIntroduced()
         {
             throw new NotImplementedException();
