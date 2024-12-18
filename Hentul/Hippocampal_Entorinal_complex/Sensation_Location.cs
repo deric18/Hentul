@@ -105,7 +105,7 @@
 
                 int currentCycleMatch1 = match1.GetTotalMatchPercentage();
 
-                int currentCycleMatch2 = match2.GetTotalMatchPercentage();
+                int currentCycleMatch2 = match2 != null ?  match2.GetTotalMatchPercentage() : 0;
 
                 if (currentCycleMatch1 == 100)
                 {
@@ -172,6 +172,9 @@
         /// <returns>a Percentage 100 if all the source sensations @ locations are also present int target , 0 if not and anyuthing in the middle of how much of a good match it was and parameters selected.</returns>        
         public static Match CompareSenseiPercentage(Sensation_Location sourceSensei, Sensation_Location targetSensei, bool includeBBM = true, bool includeLocation = true)
         {
+            if (sourceSensei == null)
+                return null;
+
             Match match = new Match(sourceSensei);
 
             if (sourceSensei?.sensLoc.Count == 0 || targetSensei?.sensLoc.Count == 0 || sourceSensei.sensLoc.Count != targetSensei.sensLoc.Count )
