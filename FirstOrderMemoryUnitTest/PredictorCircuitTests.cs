@@ -20,7 +20,7 @@
 
         }        
 
-       [Test]
+        [Test]
         public void TestSequenceMemoryCT()
         {
             // Project ABC Pattern 60 times and test C is predicted after B 31st time.
@@ -106,6 +106,7 @@
                 repCount++;
             }            
         }       
+
         
         [Test]
         public void HighVoltagePredictedNeuronGetsPickedForFiringCT()

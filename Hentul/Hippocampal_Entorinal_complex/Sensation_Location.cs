@@ -91,28 +91,35 @@
         }
 
 
-        public static int CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei, List<Sensation_Location> senseiList, bool includeBBM = true, bool includeLocation = true)
+        public static Tuple<int,int> CompareObjectSenseiAgainstListPercentage(Sensation_Location sensei1, List<Sensation_Location> senseiList, Sensation_Location sensei2 = null, bool includeBBM = true, bool includeLocation = true)
         {            
-            int maxMatch = 0;
+            int maxMatch1 = 0, maxMatch2 = 0;
 
-            Match match;
+            Match match1, match2;
 
             foreach (var item in senseiList)
             {
-                match = CompareSenseiPercentage(sensei, item, includeBBM, includeLocation);
+                match1 = CompareSenseiPercentage(sensei1, item, includeBBM, includeLocation);
 
-                int currentCycleMatch = match.GetTotalMatchPercentage();
+                match2 = CompareSenseiPercentage(sensei2, item, includeBBM, includeLocation);
 
-                if(currentCycleMatch == 100)
+                int currentCycleMatch1 = match1.GetTotalMatchPercentage();
+
+                int currentCycleMatch2 = match2.GetTotalMatchPercentage();
+
+                if (currentCycleMatch1 == 100)
                 {
                     int breakpoint = 10;
                 }
 
-                if (currentCycleMatch > maxMatch)
-                    maxMatch = currentCycleMatch;
+                if (currentCycleMatch1 > maxMatch1)
+                    maxMatch1 = currentCycleMatch1;
+
+                if (currentCycleMatch2 > maxMatch2)
+                    maxMatch2 = currentCycleMatch2;
             }
 
-            return maxMatch;
+            return new Tuple<int,int>(maxMatch1, maxMatch2);
         }
 
         public static string GetMatchingSenseiLocation(Sensation_Location sensei, List<Sensation_Location> senseiList)
@@ -361,24 +368,7 @@
                 }
             }
 
-        }
-
-        public static int CompareSenseilistAgainstListPercentage(List<Sensation_Location> sensei1ist1, List<Sensation_Location> sensei1ist2)
-        {
-            int matchPercentage = 0;
-
-            foreach (var item1 in sensei1ist1)
-            {
-                int match = CompareObjectSenseiAgainstListPercentage(item1, sensei1ist2);
-
-                if (match > matchPercentage)
-                {
-                    matchPercentage = match;
-                }
-            }
-
-            return matchPercentage;
-        }
+        }      
 
 
         public static bool CompareSenseiBool(List<Sensation_Location> sensei1ist, Sensation_Location sensei)

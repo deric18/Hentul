@@ -190,20 +190,41 @@ namespace Hentul.Hippocampal_Entorinal_complex
             CurrentComparision = sensloc;
 
             return sensloc;
-        }
+        }      
 
-        public int CheckPatternMatchPercentage(Sensation_Location sensei)
+        public int CheckPatternMatchPercentage(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {
-            int toReturn = 0;
+            Tuple<int, int> tuple;
 
-            toReturn = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, true, false);
+            tuple = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, predictedSensei, true, false);
 
-            if (toReturn == 0)
+            if (tuple.Item1 == 0)
             {
-                toReturn = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, true, true);
+                tuple = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, predictedSensei, true, true);
             }
 
-            return toReturn;
+            //if(tuple.Item1 > 0 && tuple.Item2 > 0)
+            //{
+            //    //PRedicted Sensei matche as well
+            //}
+            //else if(tuple.Item1 == 0 && tuple.Item2 == 0)
+            //{
+
+            //}
+            //else if (tuple.Item1 == 0 && tuple.Item2 > 0)
+            //{
+
+            //}
+            //else if( tuple.Item1 > 0 && tuple.Item2 == 0)
+            //{
+
+            //}
+            //else if(tuple.Item1 == 100 && tuple.Item2 == 100)
+            //{
+
+            //}
+
+            return tuple.Item1 + tuple.Item2;
         }
 
         public void DoneTraining()

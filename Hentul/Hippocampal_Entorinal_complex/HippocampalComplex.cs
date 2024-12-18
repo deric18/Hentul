@@ -103,7 +103,12 @@
                     throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
 
-                matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
+                if (prediction == null)
+                    matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
+                else
+                {
+                    matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
+                }
 
                 if (matchingObjectList.Count > 0)
                 {
@@ -117,7 +122,7 @@
 
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
                     {
-                        
+
                         if (currentmatchingObject.Label.ToLower() == "watermelon")
                         {
                             bool bp1 = true;
@@ -127,28 +132,36 @@
                         {
                             currentmatchingObject.PrepNextSenseiToVerify(sensei);
                         }
-                        else if(currentIterationToConfirmation != 0 && p != null)
+                        else if (currentIterationToConfirmation != 0 && p != null)
                         {
                             currentmatchingObject.PrepNextSenseiToVerify(sensei, p);
                         }
-                        
+
                         if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                         {
                             var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
-                            p = currentmatchingObject.ObjectSnapshot[index].cursorPosition;     //Must be ordered first highest X and lowest Y
-                            currentmatchingObject.SetSenseiToCurrentComparision(index);                            
+                            p = currentmatchingObject.ObjectSnapshot[index].cursorPosition;                     //Must be ordered first highest X and lowest Y
+                            currentmatchingObject.SetSenseiToCurrentComparision(index);
 
                             if (isMock)
                                 return p;
 
                             Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
+                            if (prediction != null)
+                            {
+                                bool breakpoint = true;
+                            }
+
                             //currentmatchingObject.IncrementCurrentComparisionKeyIndex();
 
                             currentIterationToConfirmation++;
 
                             //Perform Step 0 , Step 1
-                            sensei = ProcessStep1N2FromOrchestrator();
+                            Tuple<Sensation_Location, Sensation_Location> tuple = ProcessStep1N2FromOrchestrator();
+                            
+                            sensei = tuple.Item1;
+                            prediction = tuple.Item2;
                         }
                         else
                         {
@@ -164,7 +177,7 @@
                             {
                                 //Repeat the whole loop with same input for next Object
                                 currentmatchingObject = matchingObjectList[0];
-                                currentIterationToConfirmation = 0;                                
+                                currentIterationToConfirmation = 0;
                             }
                             else
                             {
@@ -300,7 +313,7 @@
 
         #region PRIVATE HELPER METHODS
 
-        private Sensation_Location ProcessStep1N2FromOrchestrator()
+        private Tuple<Sensation_Location, Sensation_Location> ProcessStep1N2FromOrchestrator()
         {
             var instance = Orchestrator.GetInstance();
             instance.ProcessStep0();
@@ -312,7 +325,7 @@
         private bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
         {
 
-            if(currentmatchingObject.Label.ToLower() == "watermelon")
+            if (currentmatchingObject.Label.ToLower() == "watermelon")
             {
                 bool bp = true;
             }
@@ -335,17 +348,24 @@
             }
         }
 
-        private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei)
+        private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {
-            List<RecognisedEntity> setAsideList = new List<RecognisedEntity>();
+            List<RecognisedEntity> setAsideList = null;
 
-            foreach (var obj in Objects.Values)
+            if (sensei.sensLoc.Count == 0)
             {
-                if (obj.CheckPatternMatchPercentage(sensei) != 0)
-                {
-                    setAsideList.Add(obj);
-                }
+                return setAsideList;
             }
+
+            setAsideList = new List<RecognisedEntity>();
+            
+                foreach (var obj in Objects.Values)
+                {
+                    if (obj.CheckPatternMatchPercentage(sensei, predictedSensei) != 0)
+                    {
+                        setAsideList.Add(obj);
+                    }
+                }                        
 
             return setAsideList;
         }

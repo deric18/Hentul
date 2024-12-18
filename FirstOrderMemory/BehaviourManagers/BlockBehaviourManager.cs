@@ -1738,11 +1738,13 @@
                     //Thread.Sleep(2000);
                 }
 
-                foreach (var input in incomingPattern.ActiveBits)
+                var posList = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits as List<Position_SOM>);
+
+                foreach (var input in posList)
                 {
-                    if (input.X >= X || input.Y >= Z)   //Verified!
+                    if (input.NeuronID.X >= X || input.NeuronID.Y >= Z)   //Verified!
                     {
-                        throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceeding bounds!");
+                        throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceding bounds!");
                     }
                 }
 

@@ -60,7 +60,7 @@
 
         public bool IsMock { get; private set; }
 
-        int NumColumns, Z;
+        int X, NumColumns, Z;
 
         public BlockBehaviourManager[] fomBBM { get; private set; }
 
@@ -69,6 +69,8 @@
         public BlockBehaviourManager somBBM_L3A { get; private set; }
 
         public HippocampalComplex HCAccessor { get; private set; }
+
+        public LocationEncoder locationEncoder { get; private set; }
 
         public int[] MockBlockNumFires { get; private set; }
 
@@ -137,11 +139,13 @@
 
             fomBBM = new BlockBehaviourManager[NumBBMNeeded];
 
+            X = 1250;
+            
             NumColumns = 10;
 
             IsMock = isMock;
 
-            Z = 4;
+            Z = 5;
 
             CycleNum = 0;
 
@@ -160,12 +164,14 @@
                 else
                     ImageIndex = 0;
 
-                somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.None);
+                somBBM_L3A = new BlockBehaviourManager(X, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.None);
 
-                somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None);
+                somBBM_L3B = new BlockBehaviourManager(X, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None);
 
                 LoadFOMnSOM();
             }
+
+            locationEncoder = new LocationEncoder(iType.TEMPORAL);
 
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
 
@@ -337,8 +343,10 @@
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
 
                 List<Position_SOM> temporalBits = GetLocationSDR(point);
-                SDR_SOM temporalSignal = new SDR_SOM(10, 4, temporalBits, iType.TEMPORAL);
-                somBBM_L3A.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
+                SDR_SOM temporalSignal = new SDR_SOM(NumColumns, Z, temporalBits, iType.TEMPORAL);
+                SDR_SOM spatialSignal = new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL);
+                somBBM_L3A.Fire(temporalSignal);
+                somBBM_L3A.Fire(spatialSignal, CycleNum);
             }
             else
             {
@@ -356,7 +364,7 @@
 
         private List<Position_SOM> GetLocationSDR(POINT point)
         {
-            throw new NotImplementedException();
+            return locationEncoder.Encode(point.X, point.Y);
         }
 
         /// <summary>
@@ -409,16 +417,17 @@
         }
 
 
-        public Sensation_Location ProcessStep2ForHC()
+        internal Tuple<Sensation_Location, Sensation_Location> ProcessStep2ForHC()
         {
 
-            Sensation_Location sensei = null;
+            Sensation_Location sensei = null, predictedSensei = null;
 
             SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
             //somBBM_L3A.Pool(fom_SDR);
 
             var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+            var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
 
             if (som_SDR != null)
             {
@@ -426,7 +435,12 @@
                 sensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
             }
 
-            return sensei;
+            if (predictedSDR != null)
+            {
+                predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
+            }
+
+            return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
         }
 
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();

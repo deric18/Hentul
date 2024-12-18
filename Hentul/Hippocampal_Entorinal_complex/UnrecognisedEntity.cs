@@ -39,9 +39,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 return true;
             }
 
-            int match = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, true, true);
+            Tuple<int,int> tuple = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, null, true, true);
 
-            if (match == 100)
+            if (tuple.Item1 == 100)
             {
                 if(MatchedSensations.TryGetValue(sensei.Id, out var locStrings))
                 {
@@ -54,7 +54,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     toReturn = true;
                 }
             }
-            else if (match != 100)
+            else if (tuple.Item1 != 100)
             {
                 ObjectSnapshot.Add(sensei);
                 toReturn = true;

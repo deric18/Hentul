@@ -683,11 +683,11 @@
         [Test, Description("To Test if we ever send the same locations from Mapper while predicting as opposed to Training.")]
         public void TestPixelToSensationAtLocationConversion()
         {
-            int loc1X = 1254;
-            int loc1Y = 6578;
+            int loc1X = 2333;
+            int loc1Y = 1200;
 
-            int loc2X = 7896;
-            int loc2Y = 1023;
+            int loc2X = 1250;
+            int loc2Y = 957;
 
             Bitmap bp1 = new Bitmap(40, 20);
 
