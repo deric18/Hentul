@@ -1742,7 +1742,7 @@
 
                 foreach (var input in posList)
                 {
-                    if (input.NeuronID.X >= X || input.NeuronID.Y >= Z)   //Verified!
+                    if (input.NeuronID.Y >= Y || input.NeuronID.Z >= Z)   //Verified!
                     {
                         throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceding bounds!");
                     }
