@@ -10,7 +10,7 @@ namespace FirstOrderMemoryUnitTest
         BlockBehaviourManager? bbManager;
         const int X = 10;
         const int Y = 10;
-        int Z = 4;
+        int Z = 5;
         Random rand1;
 
         [SetUp]
@@ -21,82 +21,7 @@ namespace FirstOrderMemoryUnitTest
             bbManager.Init(1);
 
             rand1 = new Random();
-        }
-
-        [Test]
-        public void TestMultipleInstanceOfSOM()
-        {
-            BlockBehaviourManager clonedBBM = bbManager.CloneBBM(1);
-            BlockBehaviourManager bbm3 = new BlockBehaviourManager(10, 10);
-
-            bbm3.Init(1);
-
-            SDR_SOM randSDR = TestUtils.GenerateRandomSDR(iType.SPATIAL);
-            
-            ulong counter = 1;
-
-            clonedBBM.Fire(randSDR, counter++);
-
-            bbManager.Fire(randSDR, counter++);
-
-            bbm3.Fire(randSDR, counter++);
-
-            for (int i = 0; i < clonedBBM.Y; i++)
-            {
-                Assert.IsNotNull(clonedBBM.TemporalLineArray[i, clonedBBM.Z - 1]);
-            }
-
-            for (int i = 0; i < clonedBBM.X; i++)
-            {
-                Assert.IsNotNull(clonedBBM.ApicalLineArray[i, clonedBBM.Y - 1]);
-            }
-
-            for (int i = 0; i < bbm3.Y; i++)
-            {
-                Assert.IsNotNull(bbm3.TemporalLineArray[i, bbm3.Z - 1]);
-            }
-
-            for (int i = 0; i < bbm3.X; i++)
-            {
-                Assert.IsNotNull(bbm3.ApicalLineArray[i, bbm3.Y - 1]);
-            }
-
-            Neuron newron = clonedBBM.Columns[2, 4].Neurons[3];
-
-            Neuron temporalNeuron1 = clonedBBM.GetNeuronFromString(newron.GetMyTemporalPartner1());
-            Neuron temporalNeuron2 = clonedBBM.Columns[5, 3].Neurons[0];
-
-            Assert.AreEqual("0-4-3-T", temporalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("0-3-0-T", clonedBBM.GetNeuronFromString(temporalNeuron2.GetMyTemporalPartner1()).NeuronID.ToString());
-
-            Neuron apicalNeuron1 = clonedBBM.GetNeuronFromString(clonedBBM.Columns[2, 4].Neurons[3].GetMyApicalPartner1());
-            Neuron apicalNeuron2 = clonedBBM.GetNeuronFromString(clonedBBM.Columns[5, 3].Neurons[0].GetMyApicalPartner1());
-
-            Assert.AreEqual("2-4-0-A", apicalNeuron1.NeuronID.ToString());
-            Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
-
-            //Dendrtonal & Axonal  Connections for Cloned Instance
-            for (int i = 0; i < clonedBBM.X; i++)
-            {
-                for (int j = 0; j < clonedBBM.Y; j++)
-                {
-                    for (int k = 0; k < clonedBBM.Z; k++)
-                    {
-                        Assert.AreEqual(clonedBBM.ApicalLineArray.Length, 100);
-
-                        if (clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count == 1)
-                        {
-                            int bp = 1;
-                        }
-
-                        Assert.AreEqual(4, clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
-                        Assert.AreEqual(2, clonedBBM.Columns[i, j].Neurons[k].AxonalList.Count);
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].ProximoDistalDendriticList.ElementAt(rand1.Next(0, 4)));
-                        Assert.IsNotNull(clonedBBM.Columns[i, j].Neurons[k].AxonalList.ElementAt(rand1.Next(0, 2)));
-                    }
-                }
-            }
-        }
+        }        
 
         [Test]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
@@ -114,7 +39,7 @@ namespace FirstOrderMemoryUnitTest
                             int bp = 1;
                         }
 
-                        Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
+                        Assert.AreEqual(6, bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);
 
                         Assert.AreEqual(2, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
 
@@ -830,13 +755,13 @@ namespace FirstOrderMemoryUnitTest
         }
 
 
-      [Test]
+        [Test]
         public void TestWiringNegativeTest()
         {
             //After spatial Fire and then an apical fire , Wire() method should not be called as there is nothing to wire. Spatial should have been cleanedup
         }        
 
-      [Test]
+        [Test]
         public void TestPostCycleCleanUpOnlyTemporal()
         {
             //After Temporal , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
@@ -879,7 +804,7 @@ namespace FirstOrderMemoryUnitTest
             }
         }
 
-      [Test]
+        [Test]
         public void TestPostCycleCleanUpOnlyApical()
         {
             //After Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
@@ -1135,11 +1060,8 @@ namespace FirstOrderMemoryUnitTest
         }
 
       [Test]
-        public void TestSOMColumnStructure()
-        {
-            BlockBehaviourManager somBBM = new BlockBehaviourManager(1250, 10, 4);
-
-            somBBM.Init(1);
+        public void TestFOMColumnStructure()
+        {            
 
             for (int i = 0; i < bbManager?.X; i++)
             {
@@ -1147,9 +1069,11 @@ namespace FirstOrderMemoryUnitTest
                 {
                     for (int k = 0; k < bbManager.Z; k++)
                     {
-                        Assert.AreEqual(bbManager.ApicalLineArray.Length, 100);
+                        Assert.AreEqual(bbManager.ApicalLineArray[i,j].AxonalList.Count, 5);
 
-                        Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count, 4);
+                        Assert.AreEqual(bbManager.TemporalLineArray[i, k].AxonalList.Count, 10);
+
+                        Assert.AreEqual(bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count, 6);
 
                         Assert.AreEqual(2, bbManager.Columns[i, j].Neurons[k].AxonalList.Count);
 

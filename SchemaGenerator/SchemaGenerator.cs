@@ -18,7 +18,7 @@ namespace SchemaGenerator
 
         Random rand;
 
-        public SchemaGenerator(int x = 1200, int y = 10, int z = 5, int numAxon = 2, int numDen = 4)
+        public SchemaGenerator(int x = 10, int y = 10, int z = 5, int numAxon = 2, int numDen = 4)
         {
             this.numX = x;
             this.numY = y;

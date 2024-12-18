@@ -2255,7 +2255,7 @@
         {
             #region REAL Code                       
 
-            if ((X == 10 && Y == 10 && Z == 4))
+            if ((X == 10 && Y == 10 && Z == 5))
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
@@ -2420,7 +2420,7 @@
 
             schemToLoad = SchemaType.INVALID;
 
-            if ((X == 10 && Y == 10 && Z == 4))
+            if (X == 10 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.FOMSCHEMA;
             }
