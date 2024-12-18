@@ -315,7 +315,7 @@
                 index++;
             }             
 
-            if (match.CheckMatchValidity() == false)
+            if (match.DidBBMGetChecked == false)
             {
                 ComputeBBMIDMisses(sourceSensei, targetSensei, match);
             }

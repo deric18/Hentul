@@ -373,7 +373,6 @@
         /// <returns>Next Position the mouse needs to be guided for succesful prediction</returns>
         public Position ProcessStep2(bool isMock = false)
         {
-
             Position motorOutput = null;
 
             if (NMode.Equals(NetworkMode.TRAINING))
@@ -410,12 +409,17 @@
                     CycleNum,
                     firingSensei,
                     predictedSensei, isMock);
+
+                    if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
+                    {
+                        // Object recognised! Now Send Pooling pattern to L3A so it prevents bursting.
+
+                    }
                 }
             }
 
             return motorOutput;
         }
-
 
         internal Tuple<Sensation_Location, Sensation_Location> ProcessStep2ForHC()
         {
