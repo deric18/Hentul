@@ -342,10 +342,8 @@
 
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
 
-                List<Position_SOM> temporalBits = GetLocationSDR(point);
-                SDR_SOM temporalSignal = new SDR_SOM(NumColumns, Z, temporalBits, iType.TEMPORAL);
-                SDR_SOM spatialSignal = new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL);
-                somBBM_L3A.Fire(temporalSignal);
+                
+                SDR_SOM spatialSignal = new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL);                
                 somBBM_L3A.Fire(spatialSignal, CycleNum);
             }
             else
@@ -419,6 +417,10 @@
                         // Get PreFiring Cells from L3A
                         // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
                         // Move cusor to the associated Position and Fire!.
+
+                        List<Position_SOM> temporalBits = GetLocationSDR(point);
+                        SDR_SOM temporalSignal = new SDR_SOM(NumColumns, Z, temporalBits, iType.TEMPORAL);
+                        somBBM_L3A.Fire(temporalSignal);
 
                     }
                 }
