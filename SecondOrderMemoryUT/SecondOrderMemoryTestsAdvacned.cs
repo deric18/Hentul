@@ -299,6 +299,8 @@
 
             bbManager.Fire(neighbhourSOM, counter++);
 
+            bbManager.Fire(neighbhourSOM, counter++);
+
             bbManager.Fire(sDR_SOM, counter++, false, true);
 
             Assert.AreEqual(NeuronState.SPIKING, targetNeuron.CurrentState);
