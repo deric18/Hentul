@@ -219,7 +219,6 @@
                 CurrentObject.Label = objectlabellist[imageIndex];
                 imageIndex++;
             }
-
         }
 
         public RecognisedEntity GetCurrentPredictedObject()

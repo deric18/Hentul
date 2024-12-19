@@ -176,7 +176,6 @@ namespace HentulWinforms
             }
         }
 
-
         public Orchestrator.POINT MoveRight(Orchestrator.POINT value)
         {
             value.X = value.X + numPixels * 2;

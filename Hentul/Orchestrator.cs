@@ -412,7 +412,13 @@
 
                     if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
                     {
-                        // Object recognised! Now Send Pooling pattern to L3A so it prevents bursting.
+                        // Object recognised! 
+                        // Get Next Coordinates the agent will goto from HC_EC
+                        // Depolarize temporal Signal on L3A
+                        // Pre-Fire L3A
+                        // Get PreFiring Cells from L3A
+                        // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
+                        // Move cusor to the associated Position and Fire!.
 
                     }
                 }
@@ -420,6 +426,7 @@
 
             return motorOutput;
         }
+
 
         internal Tuple<Sensation_Location, Sensation_Location> ProcessStep2ForHC()
         {
