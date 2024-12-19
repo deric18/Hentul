@@ -1476,14 +1476,23 @@
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
                 {
-                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
+                    var returnType = AxonalNeuron.RemoveAxonalConnection(DendriticNeuron);
+
+                    if(returnType == ConnectionRemovalReturnType.TRUE)
+                    {
+
+                    }
+                    else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
+                    {
+                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                        throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                    }
+                    else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                     {
                         Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
                         WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
                         throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());                        
-                    }
-
-                    throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());
+                    }                    
                 }
 
                 return true;
@@ -1902,11 +1911,23 @@
 
                         if (axonalNeuron.AxonalList.TryGetValue(prunableNeuron.NeuronID.ToString(), out var connection))
                         {
-                            if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == ConnectionRemovalReturnType.HARDFALSE)
+                            var returnType = axonalNeuron.RemoveAxonalConnection(prunableNeuron);
+
+                            if (returnType == ConnectionRemovalReturnType.TRUE)
                             {
-                                Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
-                                throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
+
                             }
+                            else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
+                            {
+                                WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                            }
+                            else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
+                            {
+                                Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
+                            }                           
                         }
                         else
                         {

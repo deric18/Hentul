@@ -408,7 +408,7 @@
                     motorOutput = HCAccessor.ProcessCurrentPatternForObject(
                     CycleNum,
                     firingSensei,
-                    predictedSensei, isMock);
+                    null, isMock);
 
                     if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
                     {

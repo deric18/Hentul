@@ -1,6 +1,8 @@
 ﻿
+
+using System.Security.Cryptography;
+
 /// Author : Deric Pinto
- 
 namespace Hentul.Hippocampal_Entorinal_complex
 {    
 
@@ -29,7 +31,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             foreach( var item in sensei.sensLoc.Values)
             {
-                if (item.Value.Count <= 1)
+                if (item.Value.Count <= 0)
                     return false;                                    
             }            
 
@@ -58,6 +60,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
             {
                 ObjectSnapshot.Add(sensei);
                 toReturn = true;
+            }
+
+            if(toReturn == false)
+            {
+                bool bp = true;
             }
 
             return toReturn;

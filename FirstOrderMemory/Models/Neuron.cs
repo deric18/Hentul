@@ -1,6 +1,7 @@
 ﻿using FirstOrderMemory.BehaviourManagers;
 using Common;
 using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+using System.Data;
 
 namespace FirstOrderMemory.Models
 {
@@ -270,8 +271,7 @@ namespace FirstOrderMemory.Models
                     return false;
                 }
                 else
-                {
-
+                {                    
                     AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));                    
 
                     return true;
@@ -381,6 +381,7 @@ namespace FirstOrderMemory.Models
 
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
                     WriteLogsToFile(" Total DistalDendritic Count : " + NeuronID.ToString(), filename);
+                    return false;
                     //Thread.Sleep(1000);
                 }
 
@@ -399,7 +400,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schema, bool IsActive = false)
+        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schemaType, bool IsActive = false)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -413,12 +414,19 @@ namespace FirstOrderMemory.Models
 
                 //synapse.IncrementHitCount();
 
-                Console.WriteLine(schema.ToString() + "INFO :: Axon already connected to Neuron");
+                Console.WriteLine(schemaType.ToString() + "INFO :: Axon already connected to Neuron");
 
                 return true;
             }
             else
             {
+                if ((AxonalList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
+                {
+                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
+                    Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
+                    return false;
+                    //Thread.Sleep(1000);
+                }
 
                 AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive));                
 
