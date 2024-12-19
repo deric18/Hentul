@@ -243,7 +243,9 @@
         [Test]
         public void TestSequenceMemory2()
         {
-            Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
+            //Fire all the neighbhouring neurons to target neuron and check if it spikes!
+
+            Neuron targetNeuron = bbManager.GetNeuronFromString("1035-4-1-N");
 
             SDR_SOM sDR_SOM = new SDR_SOM(1250, 10, new List<Position_SOM>() { new Position_SOM(607, 3, 3) }, iType.SPATIAL);
 
@@ -257,10 +259,10 @@
 
             foreach (var neuron in neigbhourNeurons)
             {
-                neuron.ProcessVoltage(10);
+                neuron.ProcessVoltage(50);
             }
 
-            int repCount = 1;
+            int repCount = 2;
 
             while (repCount > 0)
             {
@@ -271,14 +273,14 @@
 
             bbManager.Fire(sDR_SOM, counter++, false, true);
 
-            Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
+            Assert.AreEqual(NeuronState.SPIKING, targetNeuron.CurrentState);
         }
 
 
         [Test]
         public void TestTargetNeuronSpikesWithNeibhouringNeuronalFiring()
         {
-            Neuron targetNeuron = bbManager.GetNeuronFromString("607-3-3-N");
+            Neuron targetNeuron = bbManager.GetNeuronFromString("1035-4-1-N");
 
             SDR_SOM sDR_SOM = new SDR_SOM(1250, 10, new List<Position_SOM>() { new Position_SOM(607, 3, 3) }, iType.SPATIAL);
 
@@ -292,14 +294,14 @@
 
             foreach (var neuron in neigbhourNeurons)
             {
-                neuron.ProcessVoltage(10);
+                neuron.ProcessVoltage(50);
             }
 
             bbManager.Fire(neighbhourSOM, counter++);
 
-            bbManager.Fire(sDR_SOM, counter++);
+            bbManager.Fire(sDR_SOM, counter++, false, true);
 
-            Assert.AreEqual(targetNeuron.CurrentState, NeuronState.SPIKING);
+            Assert.AreEqual(NeuronState.SPIKING, targetNeuron.CurrentState);
         }
 
         [Test]

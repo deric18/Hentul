@@ -1094,7 +1094,6 @@
                         {                            
                             foreach (var contributingNeuron in contributingList)
                             {
-
                                 PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }

@@ -14,7 +14,7 @@
         [SetUp]
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(Numcolmns, Numcolmns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.Trace, false);
+            bbManager = new BlockBehaviourManager(Numcolmns, Numcolmns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.Trace, true);
 
             bbManager.Init(11);
 
@@ -28,6 +28,7 @@
             SDR_SOM patternA = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(0, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('A');
             SDR_SOM patternB = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(3, 1, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('B');
             SDR_SOM patternC = new SDR_SOM(10, 10, new List<Position_SOM> { new Position_SOM(5, 5, 1) }, iType.SPATIAL); //TestUtils.GetSDRFromPattern('C');
+
             SDR_SOM predictedSDR;
 
             int repCount = 0;
@@ -48,8 +49,7 @@
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternB, true, false));
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
                 }
-               
-                
+                               
                 if (repCount == 1)
                 {
                     bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A
@@ -61,7 +61,7 @@
 
                 if (repCount > wirecount)
                 {
-                    predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter);
+                    predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter++);
 
                     Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));                    
 

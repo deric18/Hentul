@@ -1066,7 +1066,7 @@
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
                 
-                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count == NumberOfColumnsThatFiredThisCycle)
+                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
                     if(Mode == LogMode.Trace)

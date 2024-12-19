@@ -55,14 +55,16 @@
             dict1.Add("234-456-0", kvp2);
             dict1.Add("567-343-0", kvp3);
 
-            Sensation_Location source = new Sensation_Location(dict1);
+            Position posexpected = new Position(111, 888);
+
+            Sensation_Location source = new Sensation_Location(dict1, posexpected);            
 
             hc.LoadMockObject(entities);
 
-            Position pos = hc.ProcessCurrentPatternForObject(1, source, null);
+            Position pos = hc.ProcessCurrentPatternForObject(1, source, null, true);
 
-            Assert.AreEqual(int.MaxValue, pos.X);
-            Assert.AreEqual(int.MaxValue, pos.Y);
+            Assert.AreEqual(posexpected.X, pos.X);
+            Assert.AreEqual(posexpected.Y, pos.Y);
 
         }
 
@@ -137,22 +139,22 @@
                  {
                      ObjectSnapshot = new List<Sensation_Location>
                      {
-                        new Sensation_Location(dict1),
-                        new Sensation_Location(dict2)
+                        new Sensation_Location(dict1, new Position(4432, 2163)),
+                        new Sensation_Location(dict2, new Position(111, 888))
                      }
                  },
                  new RecognisedEntity("Ananas")
                  {
                      ObjectSnapshot = new List<Sensation_Location>
                      {
-                        new Sensation_Location(dict2)
+                        new Sensation_Location(dict2, new Position(111, 888))
                      }
                  },
                  new RecognisedEntity("Watermelon")
                  {
                      ObjectSnapshot = new List<Sensation_Location>
                      {
-                        new Sensation_Location(dict1),
+                        new Sensation_Location(dict1, new Position(345, 219)),
                         new Sensation_Location(dict3, new Position(345, 219))
                      }
                  }

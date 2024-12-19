@@ -18,8 +18,8 @@ namespace FirstOrderMemory.Models
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
         public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
-		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 500;
-        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 700;
+		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 300;
+        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 600;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
