@@ -400,6 +400,35 @@
             return retList;
         }
 
+        internal static Dictionary<int, List<Position_SOM>> GetFOMEquivalentPositionsofSOM(List<Position_SOM> somBits)
+        {
+            if (somBits.Count == 0)
+                return null;
+            
+            Dictionary<int, List<Position_SOM>> retDict = new Dictionary<int, List<Position_SOM>>();
+
+            foreach (var pos in somBits)
+            {
+                int bbmID = pos.X / 10;
+
+                if (bbmID > 120 || bbmID < 0)
+                {
+                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+                }
+
+                if(retDict.TryGetValue(bbmID, out var posList))
+                {
+                    posList.Add(pos);
+                }
+                else
+                { 
+                    retDict.Add(bbmID, new List<Position_SOM>() { pos });
+                }
+            }
+
+            return retDict;
+        }
+
         public void ParseBitmap(Bitmap bitmap)
         {
             if (bitmap.Width != 40 || bitmap.Height != 20)
@@ -605,8 +634,7 @@
 
                 if (bbmID > 99 || bbmID < 0)
                 {
-                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
-                    continue;
+                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");                    
                 }
 
                 position = GetPositionForActiveBit(point, pos.X);                

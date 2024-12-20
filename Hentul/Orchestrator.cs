@@ -25,7 +25,6 @@
             public int Y;
         }
 
-
         #region DLLImport
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetCursorPos(out POINT lpPoint);
@@ -42,7 +41,6 @@
         [DllImport("User32.Dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
         #endregion
-
 
         #region CONSTRUCTOR 
 
@@ -297,8 +295,7 @@
 
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
-        /// </summary>
-        /// <param name="greyScalebmp"></param>
+        /// </summary>     
         public void ProcesStep1(Bitmap greyScalebmp)
         {
 
@@ -357,7 +354,6 @@
             #endregion
         }
        
-
         /// <summary>
         /// Stores Object sensei into FOM & SOM's during Training and Retrieves it during Prediciton.
         /// </summary>
@@ -425,9 +421,19 @@
             somBBM_L3A.Fire(apicalSignalSOM);
 
             var apicalSignalforFOM = new SDR_SOM(X, NumColumns, somBBM_L3A.PreFire(), iType.APICAL);
-            FireFOMsWithSDR(apicalSignalforFOM);
+            var flag1 = FireFOMsWithSDR(apicalSignalforFOM);
 
-            FireFOMsWithSDR(temporalSignalForPosition);
+            if(flag1 == false)
+            {
+                WriteLogsToFile(" ERROR :: APical signal Depolarization Failed!");
+            }
+
+            flag1 = FireFOMsWithSDR(temporalSignalForPosition);
+
+            if (flag1 == false)
+            {
+                WriteLogsToFile(" ERROR :: Temporal signal Depolarization Failed!");
+            }
 
             MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
             ProcessStep0();
@@ -436,15 +442,78 @@
 
             //Ensure no Bursting happened!
 
+            ulong burstCount = GetTotalBurstCountInFOMLayer();
+
             SDR_SOM fom_SDR = GetSdrSomFromFOMs();
             somBBM_L3A.Fire(fom_SDR, CycleNum);
 
         }
 
+        private ulong GetTotalBurstCountInFOMLayer()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        private bool FireFOMsWithSDR(SDR_SOM somSignal)
+        {
+            var spatialSignal = Mapper.GetFOMEquivalentPositionsofSOM(somSignal.ActiveBits);
+
+            if (spatialSignal == null)
+            {
+                WriteLogsToFile("Empty Polarizing Signal for FOM During Waaandering!!!");
+                return false;
+            }
+
+            bool flag = false;
+
+            foreach (var kvp in spatialSignal)
+            {
+                if (kvp.Value.Count > 0)
+                {
+                    SDR_SOM fomSDR = null;
+
+                    if (somSignal.InputPatternType.Equals(iType.TEMPORAL))
+                    {
+                        fomSDR = new SDR_SOM(NumColumns, Z, somSignal.ActiveBits, iType.TEMPORAL);
+                    }
+                    else if (somSignal.InputPatternType == iType.APICAL)
+                    {
+                        fomSDR = new SDR_SOM(NumColumns, NumColumns, somSignal.ActiveBits, iType.APICAL);
+                    }
+
+                    if (fomSDR != null)
+                    {
+                        fomBBM[kvp.Key].Fire(fomSDR);
+                        flag = true;
+                    }
+                }
+            }
+
+            return flag;
+        }
+
+
+        #region Helper Methods
+
         private List<Position_SOM> GetLocationSDR(Position position)
         {
             return locationEncoder.Encode(position.X, position.Y);
+        }               
+
+        internal Bitmap ConverToEdgedBitmap()
+        {
+            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
+
+            bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
+
+            var edgeImage = Cv2.ImRead(filename);
+            var imgdetect = new Mat();
+            Cv2.Canny(edgeImage, imgdetect, 50, 200);
+
+            return BitmapConverter.ToBitmap(imgdetect);
         }
+
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
         public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
@@ -474,24 +543,11 @@
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
         }
-        
+
         public void DoneWithTraining()
         {
             HCAccessor.DoneWithTraining();
             somBBM_L3A.Label(objectlabellist[imageIndex++]);
-        }       
-
-        internal Bitmap ConverToEdgedBitmap()
-        {
-            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
-
-            bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
-
-            var edgeImage = Cv2.ImRead(filename);
-            var imgdetect = new Mat();
-            Cv2.Canny(edgeImage, imgdetect, 50, 200);
-
-            return BitmapConverter.ToBitmap(imgdetect);
         }
 
         private void FireAllFOMs()
@@ -667,10 +723,7 @@
             throw new NullReferenceException(" FOM BBM returned empty position list ");
         }
 
-        private void FireFOMsWithSDR(SDR_SOM somSignal)
-        {
-
-        }
+        #endregion
 
         #region BIG MAN WORK
 
@@ -760,6 +813,8 @@
         }
 
         #endregion
+
+        #region Public Helper Methods
 
         public static void MoveCursorToSpecificPosition(int x, int y)
         {
@@ -906,6 +961,8 @@
         {
 
         }
+
+        #endregion
 
         #region Future Work
 
