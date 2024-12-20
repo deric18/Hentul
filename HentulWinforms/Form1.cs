@@ -132,6 +132,7 @@ namespace HentulWinforms
 
                             label_done.Text = "Object Recognised!";
                             label_done.Refresh();
+                            StartBurstAvoidance();
                             break;
                         }
 
@@ -174,6 +175,11 @@ namespace HentulWinforms
                     bool failedToPredict = true;
                 }               
             }
+        }
+
+        private void StartBurstAvoidance()
+        {
+            orchestrator.StartBurstAvoidanceWandering();
         }
 
         public Orchestrator.POINT MoveRight(Orchestrator.POINT value)

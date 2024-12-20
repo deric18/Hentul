@@ -110,7 +110,6 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         {
                             Position pos = Position.ConvertStringToPosition(location);
 
-
                             if (source.sensLoc.TryGetValue(pos.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
                             {
                                 matchCount++;
@@ -124,9 +123,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                             break;
                         }
                     }
-                }
-
-                
+                }                
             }
 
             if (CurrentComparision != null)
@@ -192,7 +189,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return sensloc;
         }      
 
-        public int CheckPatternMatchPercentage(Sensation_Location sensei, Sensation_Location predictedSensei = null)
+        public Tuple<int,int> CheckPatternMatchPercentage(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {
             Tuple<int, int> tuple;
 
@@ -224,7 +221,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             //}
 
-            return tuple.Item1 + tuple.Item2;
+            return tuple;
         }
 
         public void DoneTraining()

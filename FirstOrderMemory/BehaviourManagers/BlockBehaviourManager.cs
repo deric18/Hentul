@@ -75,7 +75,9 @@
 
         private bool IsBurstOnly;
 
-        private bool includeBurstLearning;
+        private bool includeSequenceLearning;
+        private bool includeBurstLearning2;
+        private bool includeBurstLearning4;
 
         private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
@@ -136,7 +138,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearning = false)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearningWireCase2 = false, bool includeBurstLearningWireCase4 = true, bool includeSequenceLearning = true)
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -215,7 +217,9 @@
 
             _firingBlacnkStreak = 0;
 
-            this.includeBurstLearning = includeBurstLearning;
+            this.includeBurstLearning2 = includeBurstLearningWireCase2;
+            this.includeBurstLearning4 = includeBurstLearningWireCase4;
+            this.includeSequenceLearning = includeSequenceLearning;
         }
 
         public void Init(int bbmID)
@@ -1099,7 +1103,9 @@
                         }
                     }
 
-                    BuildSequenceMemory();
+
+                    if (includeSequenceLearning)
+                        BuildSequenceMemory();
                 }
                 else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
                 {
@@ -1155,7 +1161,7 @@
                     //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
 
                     //Boost the Bursting neurons
-                    if(includeBurstLearning == true)
+                    if(includeBurstLearning2)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
@@ -1201,7 +1207,8 @@
                     }
 
                     //For the ones that were not predicted, perform sequence memory.
-                    BuildSequenceMemory();
+                    if(includeSequenceLearning)
+                        BuildSequenceMemory();
                 }
                 else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
@@ -1221,7 +1228,7 @@
                         Console.WriteLine("Wire Case 4 Picked Up!!");
                     }
 
-                    //if (includeBurstLearning == true)
+                    if (includeBurstLearning4 == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
@@ -1266,7 +1273,7 @@
                     }
 
                     //Boost All the Bursting Neurons
-                    if (includeBurstLearning == true)
+                    if (includeBurstLearning4 == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                     //Boost the Non Bursting Neurons
@@ -2542,6 +2549,11 @@
         {
             File.AppendAllText(logfilename, logline + "\n");
 
+        }
+
+        public List<Position_SOM PreFire()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

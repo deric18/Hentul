@@ -2,6 +2,7 @@
 {
 
     using Common;
+    using FirstOrderMemory.Models;
     using System.Xml;
 
     public class HippocampalComplex
@@ -27,7 +28,7 @@
 
         private RecognisedEntity currentmatchingObject;
 
-        private RecognitionState ObjectState;
+        public RecognitionState ObjectState { get; private set; }
 
         public int currentIterationToConfirmation;
         public int NumberOfITerationsToConfirmation { get; private set; }
@@ -103,12 +104,7 @@
                     throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
                 }
 
-                if (prediction == null)
-                    matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
-                else
-                {
-                    matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei);
-                }
+                matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);
 
                 if (matchingObjectList.Count > 0)
                 {
@@ -148,18 +144,10 @@
 
                             Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
 
-                            if (prediction != null)
-                            {
-                                bool breakpoint = true;
-                            }
-
-                            //currentmatchingObject.IncrementCurrentComparisionKeyIndex();
-
                             currentIterationToConfirmation++;
 
                             //Perform Step 0 , Step 1
                             Tuple<Sensation_Location, Sensation_Location> tuple = ProcessStep1N2FromOrchestrator();
-                            
                             sensei = tuple.Item1;
                             prediction = tuple.Item2;
                         }
@@ -231,6 +219,32 @@
             {
                 return null;
             }
+        }
+
+        internal Position GetNextLocationForWandering()
+        {
+            Position position = null;
+
+            if(ObjectState == RecognitionState.Recognised)
+            {
+                var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
+                position = currentmatchingObject.ObjectSnapshot[index].cursorPosition;                     //Must be ordered first highest X and lowest Y
+                currentmatchingObject.SetSenseiToCurrentComparision(index);
+            }
+
+            return position;
+        }
+
+        internal List<Position_SOM> GetNextSensationForWanderingPosition()
+        {
+            List<Position_SOM> sensation = null;
+
+            if (ObjectState == RecognitionState.Recognised)
+            {
+                sensation.AddRange(currentmatchingObject.CurrentComparision.GetActiveBitsFromSensation());
+            }
+
+            return sensation;
         }
 
         public NetworkMode GetCurrentNetworkMode() => networkMode;
@@ -356,14 +370,22 @@
             }
 
             setAsideList = new List<RecognisedEntity>();
-            
-                foreach (var obj in Objects.Values)
+            Tuple<int, int> tuple;
+
+            foreach (var obj in Objects.Values)
+            {
+                tuple = obj.CheckPatternMatchPercentage(sensei, predictedSensei);
+
+                if (tuple.Item1 != 0)
                 {
-                    if (obj.CheckPatternMatchPercentage(sensei, predictedSensei) != 0)
-                    {
-                        setAsideList.Add(obj);
-                    }
-                }                        
+                    setAsideList.Add(obj);
+                }
+                else if (tuple.Item2 != 0)
+                {
+                    // Adding object purely based on prediction is not a good idea.
+                    setAsideList.Add(obj);
+                }
+            }
 
             return setAsideList;
         }

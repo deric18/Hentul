@@ -50,9 +50,9 @@
 
         private int TotalBitsUsed { get; set; }
 
-        private uint LastValue_X { get; set; }
+        private int LastValue_X { get; set; }
 
-        private uint LastValue_Y { get; set; }
+        private int LastValue_Y { get; set; }
 
         private int maxValX { get; set; }
 
@@ -123,6 +123,8 @@
             int tens = 10;
             int offset = 3;
             string binary = Convert.ToString(numberX, 2);
+            LastValue_X = numberX;
+            LastValue_Y = numberY;
 
             for(int index = 0; index < binary.Length; index++)
             {

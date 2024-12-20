@@ -332,7 +332,7 @@
             FireAllFOMs();
 
 
-            // STEP 1B : Fire all L3B SOM's
+            // STEP 1B : Fire all L3B and L3A SOM's
             if (Mapper.somPositions.Count != 0)
             {
                 if (Mapper.somPositions.Count > 125)
@@ -342,9 +342,9 @@
 
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
 
-                
-                SDR_SOM spatialSignal = new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL);                
-                somBBM_L3A.Fire(spatialSignal, CycleNum);
+                         
+                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+                somBBM_L3A.Fire(fom_SDR, CycleNum);
             }
             else
             {
@@ -363,6 +363,12 @@
         private List<Position_SOM> GetLocationSDR(POINT point)
         {
             return locationEncoder.Encode(point.X, point.Y);
+        }
+
+
+        private List<Position_SOM> GetLocationSDR(Position position)
+        {
+            return locationEncoder.Encode(position.X, position.Y);
         }
 
         /// <summary>
@@ -418,10 +424,9 @@
                         // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
                         // Move cusor to the associated Position and Fire!.
 
-                        List<Position_SOM> temporalBits = GetLocationSDR(point);
-                        SDR_SOM temporalSignal = new SDR_SOM(NumColumns, Z, temporalBits, iType.TEMPORAL);
-                        somBBM_L3A.Fire(temporalSignal);
-
+                        //List<Position_SOM> temporalBits = GetLocationSDR(point);
+                        //SDR_SOM temporalSignal = new SDR_SOM(NumColumns, Z, temporalBits, iType.TEMPORAL);
+                        //somBBM_L3A.Fire(temporalSignal);
                     }
                 }
             }
@@ -429,6 +434,9 @@
             return motorOutput;
         }
 
+        public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
+
+        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
 
         internal Tuple<Sensation_Location, Sensation_Location> ProcessStep2ForHC()
         {
@@ -455,13 +463,43 @@
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
         }
-
-        public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
-
+        
         public void DoneWithTraining()
         {
             HCAccessor.DoneWithTraining();
             somBBM_L3A.Label(objectlabellist[imageIndex++]);
+        }
+
+        public void StartBurstAvoidanceWandering()
+        {
+            // Object recognised! 
+            // Get Next Coordinates the agent will goto from HC_EC
+            // Depolarize temporal Signal on L3A  for next iteration
+            // Depolarize Apical Signal on L3A for next iteration
+            // Pre-Fire L3A
+            // Get PreFiring Cells from L3A
+            // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
+            // Move cusor to the associated Position and Fire!.
+
+            Position nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
+            var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
+            somBBM_L3A.Fire(temporalSignalForPosition);
+
+            var apicalSignalSOM = new SDR_SOM(X, NumColumns, HCAccessor.GetNextSensationForWanderingPosition(), iType.APICAL);
+            somBBM_L3A.Fire(apicalSignalSOM);
+
+            var apicalSignalforFOM = new SDR_SOM(X, NumColumns, somBBM_L3A.PreFire(), iType.APICAL);
+            FireFOMsWithSDR(apicalSignalforFOM);
+
+            FireFOMsWithSDR(temporalSignalForPosition);
+
+            MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
+            ProcessStep0();
+            var edgedbmp = ConverToEdgedBitmap();
+            ProcesStep1(edgedbmp);
+
+            //Ensure no Bursting happened!
+
         }
 
         internal Bitmap ConverToEdgedBitmap()
@@ -476,6 +514,7 @@
 
             return BitmapConverter.ToBitmap(imgdetect);
         }
+
         private void FireAllFOMs()
         {
             foreach (var kvp in Mapper.FOMBBMIDS)
@@ -647,6 +686,12 @@
             }
 
             throw new NullReferenceException(" FOM BBM returned empty position list ");
+        }
+
+
+        private void FireFOMsWithSDR(SDR_SOM somSignal)
+        {
+
         }
 
         #region BIG MAN WORK
@@ -1173,7 +1218,7 @@
             }
 
             ReleaseDC(desk, dc);
-        }
+        }        
 
         #endregion
 

@@ -45,6 +45,19 @@
             ComputeStringID();
         }
 
+        public List<Position_SOM> GetActiveBitsFromSensation()
+        {
+            List<Position_SOM> activebits = null;
+
+            foreach (var kvp in sensLoc.Values)
+            {
+                activebits.AddRange(kvp.Value);         //No need to offset position with bbmId since this is a SOM sensation.
+                
+            }
+
+            return activebits;
+        }
+
 
         //Syntax ::  <Key0 / value[0].Key : value[0].Count>  
         public void ComputeStringID()
