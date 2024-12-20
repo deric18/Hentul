@@ -2551,9 +2551,25 @@
 
         }
 
-        public List<Position_SOM PreFire()
+        public List<Position_SOM> PreFire()
         {
-            throw new NotImplementedException();
+            List<Position_SOM> toRet = new List<Position_SOM>();
+
+            for (int i = 0; i < X; i++)
+            {
+                for (int j = 0; j < Y; j++)
+                {
+                    foreach (var neuron in Columns[i, j].Neurons)
+                    {
+                        if (neuron.Voltage > 49 || neuron.CurrentState == NeuronState.PREDICTED)
+                        {
+                            toRet.Add(neuron.NeuronID);
+                        }
+                    }
+                }
+            }
+
+            return toRet;
         }
 
         #endregion

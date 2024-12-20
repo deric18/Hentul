@@ -754,6 +754,13 @@ namespace FirstOrderMemoryUnitTest
             Assert.AreEqual(0, bbManager.GetNeuronFromPosition('n', 5, 1, 2).Voltage);
         }
 
+        [Test]
+        public void TestNeuronalConstantsAreconfiguredCorrectly()
+        {
+            Assert.IsTrue(Neuron.APICAL_NEURONAL_FIRE_VALUE - Neuron.MIN_DEPOLARIZE_FIRE_VALUE == 1);
+            Assert.IsTrue(Neuron.TEMPORAL_NEURON_FIRE_VALUE - Neuron.MIN_DEPOLARIZE_FIRE_VALUE == 1);
+            Assert.IsTrue(Neuron.APICAL_NEURONAL_FIRE_VALUE + Neuron.TEMPORAL_NEURON_FIRE_VALUE < Neuron.COMMON_NEURONAL_FIRE_VOLTAGE);
+        }
 
         [Test]
         public void TestWiringNegativeTest()

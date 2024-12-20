@@ -8,11 +8,35 @@ namespace Hentul.Hippocampal_Entorinal_complex
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
 
-        private List<string> _verifiedID;
+        private List<int> _visitedIndexes;
 
         public Sensation_Location CurrentComparision;
 
         public int CurrentComparisionKeyIndex { get; private set; }
+
+        public string Label { get; private set; }
+
+        public RecognisedEntity(string name)
+        {
+            Label = name;
+            ObjectSnapshot = new List<Sensation_Location>();
+            _visitedIndexes = new List<int>();
+        }
+
+        public RecognisedEntity(UnrecognisedEntity unrec)
+        {
+            Label = unrec.Label;
+            ObjectSnapshot = unrec.ObjectSnapshot;
+            _visitedIndexes = new List<int>();
+        }
+
+        public void Clean()
+        {
+            if (_visitedIndexes != null)
+                _visitedIndexes?.Clear();
+
+            CurrentComparision = null;
+        }
 
         public bool IncrementCurrentComparisionKeyIndex()
         {
@@ -31,7 +55,24 @@ namespace Hentul.Hippocampal_Entorinal_complex
         {
             Random rand = new Random();
 
-            return rand.Next(0, ObjectSnapshot.Count);
+            int index = rand.Next(0, ObjectSnapshot.Count);
+
+            bool flag = true;
+
+            if (_visitedIndexes.Contains(index))
+            {
+                while (flag)
+                {
+                    index = rand.Next(0, ObjectSnapshot.Count);
+
+                    if (_visitedIndexes.Contains(index) == false)
+                        flag = false;
+                }
+            }
+
+            _visitedIndexes.Add(index);
+
+            return index;
         }
 
         public void SetSenseiToCurrentComparision(int index)
@@ -40,29 +81,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 throw new InvalidOperationException("index cannot exceed objectSnapshot!");            
 
             CurrentComparision = ObjectSnapshot[index];
-        }
-
-        public string Label { get; private set; }
-
-        public RecognisedEntity(string name)
-        {
-            Label = name;
-            ObjectSnapshot = new List<Sensation_Location>();
-        }
-
-        public RecognisedEntity(UnrecognisedEntity unrec)
-        {
-            Label = unrec.Label;
-            ObjectSnapshot = unrec.ObjectSnapshot;            
-        }
-
-        public void Clean()
-        {
-            if(_verifiedID != null)
-                _verifiedID?.Clear();
-
-            CurrentComparision = null;
-        }
+        }       
 
         public Sensation_Location PrepNextSenseiToVerify(Sensation_Location? source = null, Position posToVerify = null)
         {
@@ -77,10 +96,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
             {
                 //Extract this sensei from object snapshot for comparision exactly at this location.
 
+                int index = 0;
+
                 foreach (var sensei in ObjectSnapshot)
-                {
+                {                    
                     foreach (var location in sensei.sensLoc.Keys)       //Match Only Keys
-                    {
+                    {                        
                         if (source.sensLoc.TryGetValue(posToVerify.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
                         {
                             //Pos found copy sensei to currentComparision
@@ -88,7 +109,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
                             CurrentComparision = sensei;
                         }
                     }
+
+                    index++;
                 }
+
+                _visitedIndexes.Add(index);
             }
 
             if (source != null)
@@ -131,14 +156,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 return CurrentComparision;
             }
 
-            if (_verifiedID == null || _verifiedID?.Count == 0)
+            if (_visitedIndexes == null || _visitedIndexes?.Count == 0)
             {
-                _verifiedID = new List<string>();
+                _visitedIndexes = new List<int>();
             }
 
-            toReturn = GetRandSenseiToVerify();
-
-            _verifiedID.Add(toReturn.Id);
+            toReturn = GetRandSenseiToVerify();            
 
             return toReturn;
         }
@@ -149,12 +172,22 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             source.ComputeStringID();
 
+            int index = 0;
+
             foreach (var sensei in ObjectSnapshot)
             {
                 if(source.Id == sensei.Id)
                 {
                     toRet = sensei;
+                    break;
                 }
+
+                index++;
+            }
+
+            if(index != ObjectSnapshot.Count)
+            {
+                _visitedIndexes.Add(index);
             }
 
             return toRet;
@@ -170,19 +203,18 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             var sensloc = ObjectSnapshot[index];
 
-            if (_verifiedID.Contains(sensloc.Id))
+            if (_visitedIndexes.Contains(index))
             {
                 while (flag)
                 {
-                    index = rand.Next(0, ObjectSnapshot.Count);
-                    sensloc = ObjectSnapshot[index];
+                    index = rand.Next(0, ObjectSnapshot.Count);                    
 
-                    if (_verifiedID.Contains(sensloc.Id) == false)
+                    if (_visitedIndexes.Contains(index) == false)
                         flag = false;
                 }
             }
 
-            _verifiedID.Add((string) sensloc.Id);
+            _visitedIndexes.Add(index);
 
             CurrentComparision = sensloc;
 

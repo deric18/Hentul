@@ -23,6 +23,7 @@ namespace FirstOrderMemory.Models
         public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 600;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
+        public static readonly int MIN_DEPOLARIZE_FIRE_VALUE = 39;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
         public static readonly int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
         public static readonly int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
