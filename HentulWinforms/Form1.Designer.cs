@@ -42,6 +42,7 @@ namespace HentulWinforms
             label1 = new Label();
             CycleLabel = new Label();
             labelBox = new TextBox();
+            wanderingButton = new Button();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -149,12 +150,23 @@ namespace HentulWinforms
             labelBox.Size = new Size(100, 23);
             labelBox.TabIndex = 11;
             // 
+            // wanderingButton
+            // 
+            wanderingButton.Location = new Point(380, 339);
+            wanderingButton.Name = "wanderingButton";
+            wanderingButton.Size = new Size(136, 23);
+            wanderingButton.TabIndex = 12;
+            wanderingButton.Text = "Start Wandering";
+            wanderingButton.UseVisualStyleBackColor = true;
+            wanderingButton.Click += wanderingButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(wanderingButton);
             Controls.Add(labelBox);
             Controls.Add(CycleLabel);
             Controls.Add(label1);
@@ -193,5 +205,6 @@ namespace HentulWinforms
         private Label label1;
         private Label CycleLabel;
         private TextBox labelBox;
+        private Button wanderingButton;
     }
 }

@@ -35,7 +35,7 @@
 
         public List<Position_SOM> ColumnsThatBurst { get; private set; }
 
-        private int NumberOfColumnsThatFiredThisCycle { get; set; }
+        private uint NumberOfColumnsThatFiredThisCycle { get; set; }
 
         private List<Neuron> temporalContributors { get; set; }
 
@@ -503,7 +503,7 @@
 
             _firingBlacnkStreak = 0;
 
-            NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
+            NumberOfColumnsThatFiredThisCycle = (uint)incomingPattern.ActiveBits.Count;
 
             switch (incomingPattern.InputPatternType)
             {
@@ -1927,7 +1927,7 @@
                             else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                             {
                                 WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
-                                throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                //throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
                             }
                             else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                             {
@@ -2572,6 +2572,8 @@
             return toRet;
         }
 
+        public uint GetTotalBurstCountInLastCycle() => NumberOfColumnsThatFiredThisCycle;
+        
         #endregion
 
         #region ENUMS

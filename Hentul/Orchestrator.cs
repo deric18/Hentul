@@ -442,16 +442,22 @@
 
             //Ensure no Bursting happened!
 
-            ulong burstCount = GetTotalBurstCountInFOMLayer();
+            uint burstCount = GetTotalBurstCountInFOMLayerInLastCycle();
 
             SDR_SOM fom_SDR = GetSdrSomFromFOMs();
             somBBM_L3A.Fire(fom_SDR, CycleNum);
-
         }
 
-        private ulong GetTotalBurstCountInFOMLayer()
+        private uint GetTotalBurstCountInFOMLayerInLastCycle()
         {
-            throw new NotImplementedException();
+            uint totalBurstCount = 0;
+
+            foreach(var fom in fomBBM)
+            {
+                totalBurstCount += fom.GetTotalBurstCountInLastCycle();
+            }
+
+            return totalBurstCount;
         }
 
 

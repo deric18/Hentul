@@ -20,13 +20,13 @@ namespace HentulWinforms
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
         Orchestrator.POINT RightTop = new Orchestrator.POINT();
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
-        Orchestrator.POINT RightBottom = new Orchestrator.POINT();        
+        Orchestrator.POINT RightBottom = new Orchestrator.POINT();
 
         public Form1()
         {
-            InitializeComponent();            
+            InitializeComponent();
             networkMode = NetworkMode.TRAINING;
-            
+
         }
 
         private void StartButton_Click(object sender, EventArgs e)
@@ -78,7 +78,7 @@ namespace HentulWinforms
 
                 if (networkMode.Equals(NetworkMode.TRAINING))
                 {
-                    
+
 
                     labelX.Text = value.X.ToString(); labelX.Refresh();
                     labelY.Text = value.Y.ToString(); labelY.Refresh();
@@ -123,7 +123,7 @@ namespace HentulWinforms
 
                     if (motorOutput != null)
                     {
-                        if(motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
+                        if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
                         {
                             //Object Recognised!
                             var obj = orchestrator.GetPredictedObject();
@@ -132,7 +132,7 @@ namespace HentulWinforms
 
                             label_done.Text = "Object Recognised!";
                             label_done.Refresh();
-                            StartBurstAvoidance();
+                            wanderingButton.Visible = true;
                             break;
                         }
 
@@ -145,8 +145,8 @@ namespace HentulWinforms
                         //Just Move the cursor to the next default position
                         orchestrator.MoveCursor(value);
                     }
-                    
-                }                
+
+                }
             }
 
             if (label_done.Text == "Finished Processing Image")
@@ -155,7 +155,7 @@ namespace HentulWinforms
                 {
                     if (imageIndex >= 3)
                     {
-                         //orchestrator.BackUp();
+                        //orchestrator.BackUp();
                         StartButton.Text = "Start Prediction";
                         StartButton.Refresh();
                         orchestrator.DoneWithTraining();
@@ -170,11 +170,16 @@ namespace HentulWinforms
                         StartButton.Refresh();
                     }
                 }
-                else if(networkMode == NetworkMode.PREDICTION) 
+                else if (networkMode == NetworkMode.PREDICTION)
                 {
                     bool failedToPredict = true;
-                }               
+                }
             }
+        }
+
+        private void wanderingButton_Click(object sender, EventArgs e)
+        {
+            StartBurstAvoidance();
         }
 
         private void StartBurstAvoidance()
@@ -250,6 +255,7 @@ namespace HentulWinforms
         {   //RT : 1575, LB : 1032
             LeftTop.X = 954; LeftTop.Y = 416; RightTop.X = 1596; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
             label_done.Text = "Ready";
+            wanderingButton.Visible = false;
         }
 
 
@@ -306,5 +312,7 @@ namespace HentulWinforms
         {
 
         }
+
+        
     }
 }

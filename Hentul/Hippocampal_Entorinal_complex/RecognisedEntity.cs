@@ -92,7 +92,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 throw new InvalidOperationException("Cannot generate a new Position with empty Object Snapshot");
             }
 
-            if(posToVerify != null)
+            if(posToVerify != null && source != null)
             {
                 //Extract this sensei from object snapshot for comparision exactly at this location.
 
