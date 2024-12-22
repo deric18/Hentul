@@ -520,7 +520,16 @@
 
         public void Restore(string filename)
         {
-            backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
+            if (Layer.Equals(LayerType.Layer_4))
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+            }
+            else
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+            }
+
+            backupDirectory += filename;
 
             char delimater = '|';
 
@@ -533,8 +542,26 @@
             {          
                 neuronList.Add(JsonConvert.DeserializeObject<Neuron>(str, new JsonConverter[] { neuronConverter }));
             }
+            
 
+            for (int i = 0; i < X; i++)
+            {
+                for (int j = 0; j < Y; j++)
+                {
+                    try
+                    {
+                        Columns[i, j] = new Column(i, j, Z, i, neuronList.Where(item => item.NeuronID.X == i && item.NeuronID.Y == j).ToList());                        
+                    }
+                    catch (Exception ex)
+                    {
+                        int breakpoint = 0;
+                    }
+                }
+            }
 
+            //ApicalLineArray
+
+            //TemporalLineArray.
         }
 
         #endregion

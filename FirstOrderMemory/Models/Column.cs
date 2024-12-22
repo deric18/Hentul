@@ -19,7 +19,14 @@ namespace FirstOrderMemory.Models
             }            
             Init = 0;
         }
-        
+
+        public Column(int x, int y, int numberOfNeurons, int BBMID, List<Neuron> Neurons)
+        {
+            this.Neurons = Neurons;
+            ColumnID = new Position_SOM(x, y, numberOfNeurons);  
+            Init = 0;
+        }
+
 
         /// <summary>
         /// Fires the predicted neurons in the column , if there are no predicted neurons then it Bursts.
