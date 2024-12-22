@@ -346,9 +346,9 @@
 
             Match matchinWithoutLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, currentmatchingObject.CurrentComparision, true, false);
 
-            int withLocation = matchinWithoutLocation.GetTotalMatchPercentage();
+            int withLocation = matchWithLocation != null ? matchWithLocation.GetTotalMatchPercentage() : 0;
 
-            int withoutLocation = matchWithLocation.GetTotalMatchPercentage();
+            int withoutLocation = matchinWithoutLocation != null ? matchinWithoutLocation.GetTotalMatchPercentage() : 0;
 
             if (withLocation == 0 && withoutLocation == 0)
             {

@@ -5,7 +5,9 @@
     using System.Xml;
     using System.Linq;
     using System;    
+    using Newtonsoft.Json;
 
+    [Serializable]
     public class BlockBehaviourManager
     {
         #region VARIABLES
@@ -423,7 +425,7 @@
 
         #region BACKUP & RESTORE
 
-        public void BackUp(string filename)
+        public void BackUp2(string filename)
         {
             var xmlDocument = new XmlDocument();
 
@@ -462,7 +464,6 @@
 
                             xmlDocument?.DocumentElement?.AppendChild(distalNode);
                         }
-
                     }
                 }
             }
@@ -470,11 +471,70 @@
             xmlDocument?.Save(backupDirectory + filename);
         }
 
-        public void RestoreFromBackUp(string filename)
+        public void BackUp(string filename)
         {
-            var xmlDocument = new XmlDocument();
+            if (Layer.Equals(LayerType.Layer_4))
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+            }
+            else
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+            }
 
-            xmlDocument.LoadXml(filename);
+            backupDirectory += filename;
+
+            char delimater = '|';
+            string commaLine = "\n";
+
+            string json= string.Empty;
+
+            NeuronConverter neuronConverter = new NeuronConverter();
+
+            foreach (var column in Columns)
+            {
+                foreach (var neuron in column.Neurons)
+                {
+                    json += JsonConvert.SerializeObject(neuron,new JsonConverter[] { neuronConverter });
+                    json += commaLine;
+                    json += delimater;
+                }                
+            }
+
+            foreach ( var neuron in TemporalLineArray)
+            {
+                json += JsonConvert.SerializeObject(neuron, new JsonConverter[] { neuronConverter });
+                json += commaLine;
+                json += delimater;
+            }
+
+            foreach (var neuron in ApicalLineArray)
+            {
+                json += JsonConvert.SerializeObject(neuron, new JsonConverter[] { neuronConverter });
+                json += commaLine;
+                json += delimater;
+            }
+
+            File.WriteAllText(backupDirectory, json);
+        }
+
+        public void Restore(string filename)
+        {
+            backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
+
+            char delimater = '|';
+
+            string[] jsonArray = File.ReadAllText(backupDirectory + filename).Split(delimater);
+
+            List<Neuron> neuronList = new List<Neuron>();
+            NeuronConverter neuronConverter = new NeuronConverter();
+
+            foreach (var str in jsonArray)
+            {          
+                neuronList.Add(JsonConvert.DeserializeObject<Neuron>(str, new JsonConverter[] { neuronConverter }));
+            }
+
+
         }
 
         #endregion

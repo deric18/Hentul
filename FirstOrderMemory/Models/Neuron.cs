@@ -1,16 +1,10 @@
-﻿using FirstOrderMemory.BehaviourManagers;
-using Common;
-using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
-using System.Data;
-
-namespace FirstOrderMemory.Models
+﻿namespace FirstOrderMemory.Models
 {
 
-    /// <summary>
-    /// Need to support 2 API's
-    /// 1.Fire()
-    /// 2.Wire()
-    /// </summary>
+    using FirstOrderMemory.BehaviourManagers;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using System.Text.Json.Serialization;
+   
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
         #region FLAGS
@@ -40,8 +34,6 @@ namespace FirstOrderMemory.Models
         private ulong redundantCounter = 0;
 
         public uint PruneCount { get; private set; }
-        
-        public Position BBMId { get; private set; }
 
         public Position_SOM NeuronID { get; private set; }
 
@@ -56,19 +48,18 @@ namespace FirstOrderMemory.Models
         /// </summary>
         public Dictionary<string, Synapse> AxonalList { get; private set; }
 
-
         /// <summary>
         /// Key is always Axonal Neuronal ID && Value is Synapse
         /// </summary>
-        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }                
+        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }
 
         public List<Segment>? Segments { get; private set; } = null;
 
         public NeuronState CurrentState { get; private set; }
 
         public int flag { get; set; }
-        
-        public int Voltage { get; private set; }
+
+        public int Voltage { get; private set; }       
 
         public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
@@ -83,6 +74,21 @@ namespace FirstOrderMemory.Models
             flag = 0;
             PruneCount = 0;
             lastSpikeCycleNum = 0;
+        }
+
+        [JsonConstructor]
+        public Neuron(uint pruneCount , string NeuronId, string nType , Dictionary<string, Synapse> proximoDistalDendriticList, Dictionary<string, Synapse> axonalList, string currentState, int voltage, int flag, uint lastspikecyclenum)
+        {
+            this.NeuronID = Position_SOM.ConvertStringToPosition(NeuronId);
+            this.nType = nType.Equals(NeuronType.NORMAL.ToString()) ? NeuronType.NORMAL : nType.Equals(NeuronType.TEMPORAL.ToString()) ? NeuronType.TEMPORAL : nType.Equals(NeuronType.APICAL.ToString()) ? NeuronType.APICAL : throw new InvalidCastException("Could Not convert Neuron NType to proper Enum!");
+            TAContributors = new Dictionary<string, char>();
+            ProximoDistalDendriticList = proximoDistalDendriticList;
+            AxonalList = axonalList;
+            CurrentState = currentState.Equals(NeuronState.RESTING.ToString()) ? NeuronState.RESTING : (currentState.Equals(NeuronState.FIRING.ToString()) ? NeuronState.FIRING : currentState.Equals(NeuronState.SPIKING.ToString()) ? NeuronState.SPIKING : throw new InvalidCastException("Could Not convert Neuron State!"));
+            Voltage = voltage;
+            this.flag = flag;
+            PruneCount = pruneCount;
+            lastSpikeCycleNum = lastspikecyclenum;
         }
 
         public void IncrementPruneCount() => PruneCount++;

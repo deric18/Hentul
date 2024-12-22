@@ -804,7 +804,7 @@
 
             //    //feed same pattern SOM BBM L3A
             //    SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
-            //    somBBM_L3A.Fire(Sdr_Som3A);
+            //    somBBM_L3Af.Fire(Sdr_Som3A);
 
             //    // init L3B to Apple
             //    SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
@@ -954,7 +954,10 @@
                 fomBBM[i].BackUp(i.ToString());
             }
 
-            somBBM_L3B.BackUp("SOM-1");
+            somBBM_L3B.BackUp("SOML3B");
+
+            somBBM_L3A.BackUp("SOML3A");
+
         }
 
 

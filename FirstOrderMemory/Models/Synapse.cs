@@ -54,6 +54,16 @@ namespace FirstOrderMemory.Models
             Console.WriteLine(" Firing Hit Count : " + FiringHitCount.ToString() + " \n " ); 
         }
 
+        public void SetDendronalID(string newdendronalID)
+        {
+            DendronalNeuronalId = newdendronalID;
+        }
+
+        public void SetAxonalID(string newAxonalID)
+        {
+            AxonalNeuronId = newAxonalID;
+        }
+
         public uint GetStrength()
         {            
             return _strength;

@@ -1018,7 +1018,7 @@
 
             bbManager.BackUp("1.xml");
 
-            bbManager.RestoreFromBackUp("1.xml");
+            bbManager.Restore("1.xml");
 
             //Assert.DoesNotThrow(() => new Exception());
         }       

@@ -1035,17 +1035,13 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [Test, Ignore("Not Yet Completely Implemented")]
+        [Test]
         public void TestBackUpAndRestore()
         {
-            Neuron axonalNeuronID = bbManager.Columns[0, 7].Neurons[3];
-            Neuron dendronalNeuronID = bbManager.Columns[1, 5].Neurons[2];
 
-            bbManager.ConnectTwoNeurons(axonalNeuronID, dendronalNeuronID, ConnectionType.DISTALDENDRITICNEURON);
+            //bbManager.BackUp("1.json");
 
-            bbManager.BackUp("1.xml");
-
-            bbManager.RestoreFromBackUp("1.xml");
+            bbManager.Restore("1.json");
 
             //Assert.DoesNotThrow(() => new Exception());
         }

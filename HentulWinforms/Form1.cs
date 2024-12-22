@@ -153,7 +153,7 @@ namespace HentulWinforms
             {
                 if (networkMode == NetworkMode.TRAINING)
                 {
-                    if (imageIndex >= 3)
+                    if (imageIndex >= 1)
                     {
                         //orchestrator.BackUp();
                         StartButton.Text = "Start Prediction";
