@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 namespace Hentul.Hippocampal_Entorinal_complex
 {    
 
-    public class UnrecognisedEntity : BaseObject
+    public class UnrecognisedEntity
     {
         public bool IsObjectIdentified { get; private set; }
 

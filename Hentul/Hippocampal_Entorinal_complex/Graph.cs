@@ -1,8 +1,7 @@
-﻿using Common;
-
-///Author : Deric Pinto
+﻿///Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
+    using Common;
     public class Graph
     {
         public Node Base { get; private set; }

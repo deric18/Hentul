@@ -1041,7 +1041,7 @@ namespace FirstOrderMemoryUnitTest
 
             //bbManager.BackUp("1.json");
 
-            bbManager.Restore("1.json");
+            var restorebbManager = BlockBehaviourManager.Restore("1.json", BlockBehaviourManager.LayerType.Layer_4);
 
             //Assert.DoesNotThrow(() => new Exception());
         }

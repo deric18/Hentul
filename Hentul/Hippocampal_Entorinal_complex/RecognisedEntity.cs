@@ -4,7 +4,7 @@ using FirstOrderMemory.Models;
 /// Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
-    public class RecognisedEntity : BaseObject
+    public class RecognisedEntity
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
 

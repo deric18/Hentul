@@ -1016,9 +1016,9 @@
 
             bbManager.ConnectTwoNeurons(axonalNeuronID, dendronalNeuronID, ConnectionType.DISTALDENDRITICNEURON);
 
-            bbManager.BackUp("1.xml");
+            bbManager.BackUp("1.json");
 
-            bbManager.Restore("1.xml");
+            BlockBehaviourManager.Restore("1.json", bbManager.Layer);
 
             //Assert.DoesNotThrow(() => new Exception());
         }       

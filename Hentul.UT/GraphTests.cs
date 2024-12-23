@@ -6,7 +6,7 @@ namespace Hentul.UT
 
     public class GraphTests
     {
-        Graph graph;
+        Graph graph = null;
 
         [SetUp]
         public void Setup()
