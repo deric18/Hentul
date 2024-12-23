@@ -518,24 +518,36 @@
             File.WriteAllText(backupDirectory, json);
         }
 
-        public void Restore(string filename)
+        public static BlockBehaviourManager Restore(string filename, LayerType layer)
         {
-            if (Layer.Equals(LayerType.Layer_4))
+            string backupDirectory;
+            int X, Y, Z;
+
+            if (layer.Equals(LayerType.Layer_4))
             {
                 backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+                X = 10; Y = 10; Z = 4;
+            }
+            else if (layer.Equals(LayerType.Layer_3A) || layer.Equals(LayerType.Layer_3B))
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+                X = 1250; Y = 10; Z = 4;
             }
             else
             {
-                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+                throw new InvalidOperationException("Invalid Data");
             }
 
             backupDirectory += filename;
+
+            BlockBehaviourManager bbManager = new BlockBehaviourManager(X, Y, Z, layer, LogMode.BurstOnly);
 
             char delimater = '|';
 
             string[] jsonArray = File.ReadAllText(backupDirectory + filename).Split(delimater);
 
             List<Neuron> neuronList = new List<Neuron>();
+
             NeuronConverter neuronConverter = new NeuronConverter();
 
             foreach (var str in jsonArray)
@@ -550,7 +562,8 @@
                 {
                     try
                     {
-                        Columns[i, j] = new Column(i, j, Z, i, neuronList.Where(item => item.NeuronID.X == i && item.NeuronID.Y == j).ToList());                        
+                        bbManager.Columns[i, j] = new Column(i, j, Z, i, neuronList.Where(item => item.NeuronID.X == i && item.NeuronID.Y == j && item.nType == NeuronType.NORMAL).ToList());
+                        bbManager.ApicalLineArray[i, j] = neuronList.FirstOrDefault( item => item.NeuronID.X == i && item.NeuronID.Y == j && item.NeuronID.W == 'A' && item.nType == NeuronType.APICAL);
                     }
                     catch (Exception ex)
                     {
@@ -559,9 +572,15 @@
                 }
             }
 
-            //ApicalLineArray
+            for (int i = 0; i < Y; i++)
+            {
+                for (int j = 0; j < Z; j++)
+                {
+                    bbManager.TemporalLineArray[i, j] = neuronList.FirstOrDefault(item => item.NeuronID.X == 0 && item.NeuronID.Y == i && item.NeuronID.Z == j && item.NeuronID.W == 'T' && item.nType == NeuronType.TEMPORAL);
+                }
+            }
 
-            //TemporalLineArray.
+            return bbManager;
         }
 
         #endregion

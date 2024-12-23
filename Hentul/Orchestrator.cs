@@ -968,7 +968,14 @@
 
         public void Restore()
         {
+            for (int i = 0; i < fomBBM.Length; i++)
+            {
+                fomBBM[i] = BlockBehaviourManager.Restore(i.ToString(), LayerType.Layer_4);
+            }
 
+            somBBM_L3B = BlockBehaviourManager.Restore("SOML3B", LayerType.Layer_3B);
+
+            somBBM_L3A = BlockBehaviourManager.Restore("SOML3A", LayerType.Layer_3A);
         }
 
         #endregion
