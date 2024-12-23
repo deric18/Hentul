@@ -5,7 +5,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
     public class Node
     {
-        public SortedDictionary<string, KeyValuePair<int, List<Position2D>>> Data { get; private set; }
+        public SortedDictionary<string, KeyValuePair<int, List<Position2D>>> Data { get; set; }
 
         public Position2D cursorPosition { get; private set; }
 

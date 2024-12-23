@@ -10,7 +10,7 @@
             Y = y;            
         }
 
-        public bool Equals(Position pos)
+        public bool Equals(Position2D pos)
         {
             return X == pos.X && Y == pos.Y;
         }

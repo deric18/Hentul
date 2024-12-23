@@ -8,9 +8,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public static Graph _graph;
 
-        private Graph() 
+        private Graph()
         {
-            Base = new Node(new Position2D(0,0), null);
+            Base = new Node(new Position2D(0, 0), null);
         }
 
         public static Graph GetInstance()
@@ -23,99 +23,84 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return _graph;
         }
 
-        public bool AddNewNode(Position2D pos, SortedDictionary<string, KeyValuePair<int, List<Position2D>>> data)
+        public bool AddNewNode(Position2D pos, SortedDictionary<string, KeyValuePair<int, List<Position2D>>> data, Node betterNode = null, bool speedUpY = false)
         {
-            if(pos == null || pos?.X <= 0 || pos?.Y <= 0) return false;
+            if (pos == null || pos?.X <= 0 || pos?.Y <= 0) return false;
 
-            if(data == null) return false;            
+            if (data == null) return false;            
 
-            Node newNode = null;
+            Node currentNode = ParseGraph(pos, betterNode, speedUpY);
 
-            Node currentNode = ParseGraph(pos);
-
-            if(currentNode == null)
+            if (currentNode == null ||  currentNode?.cursorPosition?.X != pos.X || currentNode?.cursorPosition?.Y != pos.Y)
             {
                 throw new InvalidOperationException("Bugs in Parsing Logic!!!");
             }
-                
-            if(currentNode.cursorPosition.X - pos.X == 1)
-            {
-                newNode = new Node(pos, data);
-                currentNode.Right = newNode;
-                newNode.Left = currentNode;
-            }
-            
-            if(currentNode.cursorPosition.Y - pos.Y == 1)
-            {
-                if(newNode == null)
-                {
-                    newNode = new Node(pos, data);
-                }
 
-                currentNode.Up = newNode;
-                newNode.Down = currentNode;
-                return true;
-            }
+            currentNode.Data = data;
 
-
-            return false;
+            return true;
         }
 
-        private Node ParseGraph(Position2D? pos)
+        private Node ParseGraph(Position2D? pos, Node currentNode = null, bool speedUpY = false)
         {
             int offsetX = pos.X;
             int offsetY = pos.Y;
 
-            Node currentNode = Base;
+            if (currentNode == null)
+                currentNode = _graph.Base;
 
-            while (offsetX > 0 || offsetY > 0)
+            int currentX = currentNode.cursorPosition.X;
+            int currentY = currentNode.cursorPosition.Y;
+
+            Node BaseNode = currentNode;
+
+            Node cacheNode = currentNode.Right;
+
+            for (int i = BaseNode.cursorPosition.X; i <= pos.X; i++)
             {
-                if (offsetX > 0)
+                if (i > BaseNode.cursorPosition.X)
                 {
-                    while(offsetX > 0)
+                    currentNode = cacheNode;
+                }
+
+                if (currentNode.Right == null)
+                {
+                    currentNode.Right = new Node(new Position2D(i + 1, currentNode.cursorPosition.Y));
+                    currentNode.Right.Left = currentNode;
+                    cacheNode = currentNode.Right;
+                }                                
+                else
+                {
+                    currentNode = currentNode.Right;
+                    cacheNode = currentNode;
+                }
+
+                if (speedUpY == false && currentNode.cursorPosition.Y != pos.Y)
+                {
+                    for (int j = BaseNode.cursorPosition.Y + 1; j <= pos.Y; j++)
                     {
-                        if(currentNode.Right != null)
+                        if (currentNode.Up == null)
                         {
-                            currentNode = currentNode.Right;
-                            offsetX--;
+                            currentNode.Up = new Node(new Position2D(i, j));
+                            currentNode.Up.Down = currentNode;
+                            currentNode = currentNode.Up;
                         }
                         else
                         {
-                            break;
+                            currentNode = currentNode.Up;
+
+                            if (currentNode.cursorPosition.Equals(pos))
+                            {
+                                return currentNode;
+                            }
                         }
                     }
-
-                    while(pos.X - offsetX > 0)
-                    {
-                        currentNode.Right = new Node(new Position2D(++offsetX, offsetY));
-                        currentNode.Right.Left = currentNode;
-                    }
                 }
+
                 
-                if (offsetY > 0)
-                {
-                    while (offsetY > 0)
-                    {
-                        if (currentNode.Down != null)
-                        {
-                            currentNode = currentNode.Down;
-                            offsetY--;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    while (pos.Y - offsetY > 0)
-                    {
-                        currentNode.Up = new Node(new Position2D(offsetX, ++offsetY));
-                        currentNode.Up.Down = currentNode;
-                    }
-                }
             }
-
-            return currentNode; 
+            
+            return currentNode;
         }
     }
 }
