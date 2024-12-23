@@ -66,7 +66,7 @@
 
         public BlockBehaviourManager somBBM_L3A { get; private set; }
 
-        public HippocampalComplex HCAccessor { get; private set; }
+        public HippocampalComplex2 HCAccessor { get; private set; }
 
         public LocationEncoder locationEncoder { get; private set; }
 
@@ -171,7 +171,7 @@
 
             locationEncoder = new LocationEncoder(iType.TEMPORAL);
 
-            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
+            HCAccessor = new HippocampalComplex2("Apple", isMock, nMode);
 
             objectlabellist = new List<string>
             {
@@ -958,6 +958,8 @@
 
             somBBM_L3A.BackUp("SOML3A");
 
+            HCAccessor.Backup();
+
         }
 
 
@@ -976,6 +978,8 @@
             somBBM_L3B = BlockBehaviourManager.Restore("SOML3B", LayerType.Layer_3B);
 
             somBBM_L3A = BlockBehaviourManager.Restore("SOML3A", LayerType.Layer_3A);
+
+            _orchestrator.HCAccessor = HippocampalComplex2.Restore();
         }
 
         #endregion

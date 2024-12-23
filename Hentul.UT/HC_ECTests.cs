@@ -7,7 +7,7 @@
     public class HC_ECTests
     {
         Orchestrator orchestrator;
-        HippocampalComplex hc;
+        HippocampalComplex2 hc;
 
         [SetUp]
         public void Setup()
