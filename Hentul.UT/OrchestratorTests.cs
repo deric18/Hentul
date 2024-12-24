@@ -168,6 +168,7 @@
             Sensation_Location sensei = new Sensation_Location(dict);
             orchestrator.HCAccessor.ProcessCurrentPatternForObject(1, sensei);
             orchestrator.DoneWithTraining();
+
             orchestrator.BackUp();
 
             if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
