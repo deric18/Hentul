@@ -951,12 +951,12 @@
         {
             for (int i = 0; i < fomBBM.Length; i++)
             {
-                fomBBM[i].BackUp(i.ToString());
+                fomBBM[i].BackUp(i.ToString() + ".json");
             }
 
-            somBBM_L3B.BackUp("SOML3B");
+            somBBM_L3B.BackUp("SOML3B.json");
 
-            somBBM_L3A.BackUp("SOML3A");
+            somBBM_L3A.BackUp("SOML3A.json");
 
             HCAccessor.Backup();
 

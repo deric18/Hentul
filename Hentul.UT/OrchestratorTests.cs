@@ -2,12 +2,13 @@
 {
     using Hentul;
     using Common;
-    using Hentul.Hippocampal_Entorinal_complex;    
+    using Hentul.Hippocampal_Entorinal_complex;
     using FirstOrderMemory.Models;
     using static Hentul.Orchestrator;
     using System.Drawing;
+    using System.IO;
 
-    public  class OrchestratorTests
+    public class OrchestratorTests
     {
         Orchestrator orchestrator;
         POINT point = new POINT();
@@ -45,9 +46,9 @@
                 1000,
                 10,
                 posList
-                );            
+                );
 
-            var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR( sdr, point);
+            var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR(sdr, point);
 
             int index = 0;
 
@@ -148,9 +149,93 @@
 
         }
 
+        [Test, Ignore("Takes too long")]
+        public void TestBackUp()
+        {
+            string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
+            string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+            string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+            string obj = "Apple";
+
+            KeyValuePair<int, List<Position_SOM>> kvp = new KeyValuePair<int, List<Position_SOM>>(1, new List<Position_SOM>()
+                {
+                    new Position_SOM(1,2),
+                    new Position_SOM(2,3),
+                    new Position_SOM(3,4)
+                });
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            dict.Add(obj, kvp);
+            Sensation_Location sensei = new Sensation_Location(dict);
+            orchestrator.HCAccessor.ProcessCurrentPatternForObject(1, sensei);
+            orchestrator.DoneWithTraining();
+            orchestrator.BackUp();
+
+            if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
+            {
+                Assert.Fail();
+            }
+            else
+            {
+                Assert.Pass();
+            }
+        }
+
+        [Test, Ignore("Takes too long")]
+        public void TestRestore()
+        {
+            string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
+            string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+            string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+
+            if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
+            {
+                Assert.Fail();
+            }
+
+            orchestrator.Restore();
+
+            foreach (var fom in orchestrator.fomBBM)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            if (fom.Columns[i, j] == null)
+                            {
+                                Assert.Fail();
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < 1000; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    if (orchestrator.somBBM_L3B.Columns[i, j] == null)
+                    {
+                        Assert.Fail();
+                    }
+                }
+            }
+
+            for (int i = 0; i < 1000; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    if (orchestrator.somBBM_L3A.Columns[i, j] == null)
+                    {
+                        Assert.Fail();
+                    }
+                }
+            }
+        }
+
         [Test, Description("Test all the Active bits under one BBM getss added to the ame BBM KVP.")]
         public void TestMapperGetSenseLocFromSDR_SOM1()
-        {            
+        {
             SDR_SOM sdr = new SDR_SOM(
                 1000,
                 10,
@@ -194,7 +279,7 @@
         [Test, Description("Tests GetLocationFromPosition method in the Code!")]
         public void TestMapperGetSenseLocFromSDR_SOM3()
         {
-            
+
             List<Position_SOM> posList = new List<Position_SOM>()
                 {
                     new Position_SOM(777, 10),
@@ -213,7 +298,7 @@
             point.Y = 899;
 
             var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR(sdr, point);
-            
+
 
             foreach (var kvp in sensloc.sensLoc)
             {
@@ -240,7 +325,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on Location for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForLocationIDOnly()
         {
-            
+
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -296,7 +381,7 @@
 
         [Test]
         public void TestCompareSenseiMatchPercentageNegativeTestForLocationIDOnly()
-        {            
+        {
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -353,21 +438,21 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on BBM ID for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMIDOnly()
         {
-            
+
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
-                        new Position_SOM(777, 10)                     
+                        new Position_SOM(777, 10)
                     };
             List<Position_SOM> activeBits2 = new List<Position_SOM>()
                     {
-                        new Position_SOM(555, 10)                        
+                        new Position_SOM(555, 10)
                     };
             List<Position_SOM> activeBits3 = new List<Position_SOM>()
-                    {                        
+                    {
                         new Position_SOM(111, 10)
                     };
             List<Position_SOM> activeBits4 = new List<Position_SOM>()
-                    {                        
+                    {
                         new Position_SOM(243, 10)
                     };
 
@@ -407,7 +492,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on BBM ID for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMIDOnly()
         {
-            
+
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -459,7 +544,7 @@
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationIDOnly()
-        {            
+        {
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -511,7 +596,7 @@
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationIDOnly()
-        {            
+        {
 
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
@@ -568,7 +653,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position List for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationID_PositionList()
         {
-            
+
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -625,7 +710,7 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position Lit for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationID_PositionList()
         {
-            
+
             List<Position_SOM> activeBits1 = new List<Position_SOM>()
                     {
                         new Position_SOM(777, 10)
@@ -691,8 +776,10 @@
 
             Bitmap bp1 = new Bitmap(40, 20);
 
-            for (int i = 0; i < 40; i++) {
-                for (int j = 0; j < 20; j++) {
+            for (int i = 0; i < 40; i++)
+            {
+                for (int j = 0; j < 20; j++)
+                {
                     bp1.SetPixel(i, j, Color.Black);
                 }
             }
@@ -716,12 +803,12 @@
             bp2.SetPixel(12, 14, Color.White);
             bp2.SetPixel(13, 14, Color.White);
             bp2.SetPixel(14, 15, Color.White);
-            bp2.SetPixel(15, 16, Color.White);            
+            bp2.SetPixel(15, 16, Color.White);
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
             orchestrator.ProcesStep1(bp1);
-            orchestrator.ProcessStep2();        
+            orchestrator.ProcessStep2();
 
 
             orchestrator.point.X = loc2X;
@@ -740,7 +827,7 @@
             var pos = orchestrator.ProcessStep2(true);
 
             Assert.AreEqual(loc2X, pos.X);
-            Assert.AreEqual(loc2Y, pos.Y); 
+            Assert.AreEqual(loc2Y, pos.Y);
 
         }
 
