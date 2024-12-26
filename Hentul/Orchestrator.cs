@@ -14,7 +14,8 @@
     using System.Drawing;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
-
+    using System.Diagnostics.Metrics;
+    using System.Reflection;
 
     public class Orchestrator
     {
@@ -405,39 +406,44 @@
         public void StartBurstAvoidanceWandering()
         {
             // Object recognised! 
-                                                                                    
+            int counter = 5;
 
-            Position nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                            // Get Next Coordinates the agent will goto from HC_EC
-
-            var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);    
-            somBBM_L3A.Fire(temporalSignalForPosition);                                                                         // Depolarize temporal Signal on L3A  for next iteration
-
-            var apicalSignalSOM = new SDR_SOM(X, NumColumns, HCAccessor.GetNextSensationForWanderingPosition(), iType.APICAL);  
-            somBBM_L3A.Fire(apicalSignalSOM);                                                                                   // Depolarize Apical Signal on L3A for next iteration
-
-            var apicalSignalforFOM = new SDR_SOM(X, NumColumns, somBBM_L3A.PreFire(), iType.APICAL);                            // Get PreFiring Cells from L3A
-            var flag1 = FireFOMsWithSDR(apicalSignalforFOM);
-
-            if(flag1 == false)           
-                WriteLogsToFile(" ERROR :: Apical signal Depolarization Failed! ");            
-            flag1 = FireFOMsWithSDR(temporalSignalForPosition);                                                                 // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
-            if (flag1 == false)            
-                WriteLogsToFile(" ERROR :: Temporal signal Depolarization Failed! ");            
-
-            MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);                                         // Move cusor to the associated Position and Fire!.
-            ProcessStep0();                                                                                                     
-            var edgedbmp = ConverToEdgedBitmap();                                                                                
-            ProcesStep1(edgedbmp);                                                                                              
-
-            //Ensure no Bursting happened!
-
-            uint burstCount = GetTotalBurstCountInFOMLayerInLastCycle();
-
-            if (burstCount != 0)
+            while (counter != 0)
             {
-                bool breakpoint = true;
-                WriteLogsToFile(" ERROR :: Burst Count :  " + burstCount.ToString());  
-            }            
+                Position nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                            // Get Next Coordinates the agent will goto from HC_EC
+
+                var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
+                somBBM_L3A.Fire(temporalSignalForPosition);                                                                         // Depolarize temporal Signal on L3A  for next iteration
+
+                var apicalSignalSOM = new SDR_SOM(X, NumColumns, HCAccessor.GetNextSensationForWanderingPosition(), iType.APICAL);
+                somBBM_L3A.Fire(apicalSignalSOM);                                                                                   // Depolarize Apical Signal on L3A for next iteration
+
+                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, somBBM_L3A.PreFire(), iType.APICAL);                            // Get PreFiring Cells from L3A
+                var flag1 = FireFOMsWithSDR(apicalSignalforFOM);
+
+                if (flag1 == false)
+                    WriteLogsToFile(" ERROR :: Apical signal Depolarization Failed! ");
+                flag1 = FireFOMsWithSDR(temporalSignalForPosition);                                                                 // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
+                if (flag1 == false)
+                    WriteLogsToFile(" ERROR :: Temporal signal Depolarization Failed! ");
+
+                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);                                         // Move cusor to the associated Position and Fire!.
+                ProcessStep0();
+                var edgedbmp = ConverToEdgedBitmap();
+                ProcesStep1(edgedbmp);
+
+                //Ensure no Bursting happened!
+
+                uint burstCount = GetTotalBurstCountInFOMLayerInLastCycle();
+
+                if (burstCount != 0)
+                {
+                    bool breakpoint = true;
+                    WriteLogsToFile(" ERROR :: Burst Count :  " + burstCount.ToString());
+                }
+
+                counter--;
+            }
         }
 
         private uint GetTotalBurstCountInFOMLayerInLastCycle()

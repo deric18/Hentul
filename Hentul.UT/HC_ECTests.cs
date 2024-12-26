@@ -68,6 +68,58 @@
 
         }
 
+        [Test]
+        public void TestVerifyObjectSensei()
+        {
+            List<RecognisedEntity> entities = GenerateRecognisedEntity();
+
+            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+                    {
+                        new Position_SOM(777, 10),
+                        new Position_SOM(222, 10),
+                        new Position_SOM(333, 10),
+                        new Position_SOM(444, 10)
+                    };
+
+            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+                    {
+                        new Position_SOM(111, 10),
+                        new Position_SOM(555, 10)
+                    };
+
+            List<Position_SOM> activeBits5 = new List<Position_SOM>()
+                    {
+                        new Position_SOM(243, 10),
+                        new Position_SOM(234, 4),
+                        new Position_SOM(464, 5),
+                        new Position_SOM(33, 66),
+                        new Position_SOM(22, 10)
+                    };
+
+            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(77, activeBits1);
+            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(11, activeBits3);
+            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits5);
+
+            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+
+            dict1.Add("111-888-0", kvp1);
+            dict1.Add("234-456-0", kvp2);
+            dict1.Add("567-343-0", kvp3);
+
+            Position posexpected = new Position(111, 888);
+
+            Sensation_Location source = new Sensation_Location(dict1, posexpected);
+
+            hc.LoadMockObject(entities);
+
+
+            Position pos = hc.ProcessCurrentPatternForObject(1, source, null, true);
+
+
+
+
+        }
+
 
         private List<RecognisedEntity> GenerateRecognisedEntity()
         {

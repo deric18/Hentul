@@ -154,12 +154,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             if (CurrentComparision != null)
             {
                 return CurrentComparision;
-            }
-
-            if (_visitedIndexes == null || _visitedIndexes?.Count == 0)
-            {
-                _visitedIndexes = new List<int>();
-            }
+            }            
 
             toReturn = GetRandSenseiToVerify();            
 

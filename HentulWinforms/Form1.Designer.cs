@@ -43,6 +43,8 @@ namespace HentulWinforms
             CycleLabel = new Label();
             labelBox = new TextBox();
             wanderingButton = new Button();
+            BackUp = new Button();
+            Restore = new Button();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -160,12 +162,34 @@ namespace HentulWinforms
             wanderingButton.UseVisualStyleBackColor = true;
             wanderingButton.Click += wanderingButton_Click;
             // 
+            // BackUp
+            // 
+            BackUp.Location = new Point(380, 654);
+            BackUp.Name = "BackUp";
+            BackUp.Size = new Size(136, 23);
+            BackUp.TabIndex = 13;
+            BackUp.Text = "Backup";
+            BackUp.UseVisualStyleBackColor = true;
+            BackUp.Click += BackUp_Click;
+            // 
+            // Restore
+            // 
+            Restore.Location = new Point(380, 704);
+            Restore.Name = "Restore";
+            Restore.Size = new Size(136, 23);
+            Restore.TabIndex = 14;
+            Restore.Text = "Restore";
+            Restore.UseVisualStyleBackColor = true;
+            Restore.Click += button1_Click_1;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(Restore);
+            Controls.Add(BackUp);
             Controls.Add(wanderingButton);
             Controls.Add(labelBox);
             Controls.Add(CycleLabel);
@@ -206,5 +230,7 @@ namespace HentulWinforms
         private Label CycleLabel;
         private TextBox labelBox;
         private Button wanderingButton;
+        private Button BackUp;
+        private Button Restore;
     }
 }

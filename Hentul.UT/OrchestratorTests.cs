@@ -61,6 +61,12 @@
         }
 
         [Test]
+        public void TestWanderingCursor()
+        {
+            orchestrator.StartBurstAvoidanceWandering();
+        }
+
+        [Test]
         public void TestMapperParseBitMap()
         {
             //Bitmap bp = new Bitmap("C:\\Users\\depint\\source\\repos\\Hentul\\Images\\testbmp.png");            

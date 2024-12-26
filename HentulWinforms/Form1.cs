@@ -5,8 +5,6 @@ namespace HentulWinforms
     using Hentul;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
-    using System.Diagnostics.Eventing.Reader;
-    using System.Drawing.Imaging;
 
     public partial class Form1 : Form
     {
@@ -15,12 +13,18 @@ namespace HentulWinforms
         readonly int numPixels = 10;
         int counter = 0;
         int imageIndex = 0;
+        int totalImagesToProcess = 1;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
         Orchestrator.POINT RightTop = new Orchestrator.POINT();
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
         Orchestrator.POINT RightBottom = new Orchestrator.POINT();
+
+
+        string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
+        string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+        string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
 
         public Form1()
         {
@@ -78,8 +82,6 @@ namespace HentulWinforms
 
                 if (networkMode.Equals(NetworkMode.TRAINING))
                 {
-
-
                     labelX.Text = value.X.ToString(); labelX.Refresh();
                     labelY.Text = value.Y.ToString(); labelY.Refresh();
 
@@ -153,14 +155,14 @@ namespace HentulWinforms
             {
                 if (networkMode == NetworkMode.TRAINING)
                 {
-                    if (imageIndex >= 1)
-                    {
-                        //orchestrator.BackUp();
+                    if (imageIndex >= totalImagesToProcess)
+                    {                        
                         StartButton.Text = "Start Prediction";
                         StartButton.Refresh();
                         orchestrator.DoneWithTraining();
                         networkMode = NetworkMode.PREDICTION;
                         orchestrator.ChangeNetworkModeToPrediction();
+                        BackUp.Visible = true;
                     }
                     else
                     {
@@ -243,19 +245,19 @@ namespace HentulWinforms
 
             label_done.Text = "Ready";
         }
-
-
-        private Orchestrator.POINT MoveUp(Orchestrator.POINT value)
-        {
-            value.X = value.Y - numPixels;
-            return value;
-        }
+        
 
         private void Form1_Load(object sender, EventArgs e)
         {   //RT : 1575, LB : 1032
             LeftTop.X = 954; LeftTop.Y = 416; RightTop.X = 1596; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
             label_done.Text = "Ready";
             wanderingButton.Visible = false;
+            BackUp.Visible = false;            
+
+            if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)            
+                Restore.Visible = false;            
+            else            
+                Restore.Visible = true;            
         }
 
 
@@ -313,6 +315,16 @@ namespace HentulWinforms
 
         }
 
-        
+        private void BackUp_Click(object sender, EventArgs e)
+        {
+            orchestrator.BackUp();
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            orchestrator = Orchestrator.GetInstance(false, false);
+
+            orchestrator.Restore();
+        }
     }
 }

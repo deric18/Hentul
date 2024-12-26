@@ -227,7 +227,7 @@
 
             if(ObjectState == RecognitionState.Recognised)
             {
-                var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
+                var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();                //Random Sensei 
                 position = currentmatchingObject.ObjectSnapshot[index].cursorPosition;                     //Must be ordered first highest X and lowest Y
                 currentmatchingObject.SetSenseiToCurrentComparision(index);
             }
@@ -237,7 +237,7 @@
 
         internal List<Position_SOM> GetNextSensationForWanderingPosition()
         {
-            List<Position_SOM> sensation = null;
+            List<Position_SOM> sensation = new List<Position_SOM>();
 
             if (ObjectState == RecognitionState.Recognised)
             {
@@ -348,9 +348,9 @@
                 bool bp = true;
             }
 
-            Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, currentmatchingObject.CurrentComparision, true, true);
+            Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, objectSensei, true, true);
 
-            Match matchinWithoutLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, currentmatchingObject.CurrentComparision, true, false);
+            Match matchinWithoutLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, objectSensei, true, false);
 
             int withLocation = matchWithLocation != null ? matchWithLocation.GetTotalMatchPercentage() : 0;
 

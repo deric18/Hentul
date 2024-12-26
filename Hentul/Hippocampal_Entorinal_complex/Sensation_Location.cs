@@ -7,6 +7,7 @@
     {
         public string Id { get; set; }
 
+        public static readonly string EMPTYID = "EMPTY";
         /// <summary>
         /// Key : Location on the Screen
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
@@ -47,7 +48,7 @@
 
         public List<Position_SOM> GetActiveBitsFromSensation()
         {
-            List<Position_SOM> activebits = null;
+            List<Position_SOM> activebits = new List<Position_SOM>();
 
             foreach (var kvp in sensLoc.Values)
             {
@@ -64,7 +65,7 @@
         {            
             if (sensLoc.Count == 0)
             {
-                Id = "EMPTY";
+                Id = EMPTYID;
                 return;
             }
 
@@ -190,15 +191,32 @@
 
             Match match = new Match(sourceSensei);
 
-            if (sourceSensei?.sensLoc.Count == 0 || targetSensei?.sensLoc.Count == 0 || sourceSensei.sensLoc.Count != targetSensei.sensLoc.Count )
+            if (sourceSensei?.sensLoc.Count == 0 || targetSensei?.sensLoc.Count == 0)
             {
                 return match;
             }
 
-            if ( sourceSensei.sensLoc.Keys.ElementAt(0) == "1188-503-0" && targetSensei.sensLoc.Keys.ElementAt(0) == "1168-503-0")
-            {
-                bool brekapoint = true;
-            }
+            //if(sourceSensei.sensLoc.Count != targetSensei.sensLoc.Count)
+            //{
+            //    if(sourceSensei.Id == EMPTYID)
+            //    {
+            //        sourceSensei.ComputeStringID();
+            //    }
+            //    if(targetSensei.Id == EMPTYID)
+            //    {
+            //        targetSensei.ComputeStringID();
+            //    }
+
+            //    if(sourceSensei.Id != targetSensei.Id)
+            //    {
+            //        return match;
+            //    }
+            //}
+
+            //if ( sourceSensei.sensLoc.Keys.ElementAt(0) == "1188-503-0" && targetSensei.sensLoc.Keys.ElementAt(0) == "1168-503-0")
+            //{
+            //    bool brekapoint = true;
+            //}
 
             int matchPercentage = 0;
             bool BBMChecked = false;
