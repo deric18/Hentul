@@ -874,7 +874,6 @@
 
         #endregion
 
-
         #region INIT METHOD
 
         private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type)

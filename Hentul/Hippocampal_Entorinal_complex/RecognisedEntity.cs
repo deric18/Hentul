@@ -8,6 +8,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
 
+        //Holds the indexes of all the objects in objectsnapshot which are needed for classfication of the object.
+        public RFrame frame { get; private set; }
+
+        public Position2D centerPosition { get; private set; }       
+
         private List<int> _visitedIndexes;
 
         public Sensation_Location CurrentComparision;
@@ -21,6 +26,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             Label = name;
             ObjectSnapshot = new List<Sensation_Location>();
             _visitedIndexes = new List<int>();
+            frame = null;
         }
 
         public RecognisedEntity(UnrecognisedEntity unrec)
@@ -28,6 +34,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             Label = unrec.Label;
             ObjectSnapshot = unrec.ObjectSnapshot;
             _visitedIndexes = new List<int>();
+            frame = null;
         }
 
         public void Clean()
@@ -36,6 +43,15 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 _visitedIndexes?.Clear();
 
             CurrentComparision = null;
+        }
+
+        public void DoneTraining()
+        {
+            foreach (var sensei in ObjectSnapshot)
+            {
+                sensei.RefreshID();
+            }
+            frame = new RFrame(ObjectSnapshot);
         }
 
         public bool IncrementCurrentComparisionKeyIndex()
@@ -102,7 +118,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 {                    
                     foreach (var location in sensei.sensLoc.Keys)       //Match Only Keys
                     {                        
-                        if (source.sensLoc.TryGetValue(posToVerify.ToString(), out KeyValuePair<int, List<Position_SOM>> _))
+                        if (source.CenterPosition == posToVerify)
                         {
                             //Pos found copy sensei to currentComparision
 
@@ -113,6 +129,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     index++;
                 }
 
+                CurrentComparisionKeyIndex = index;
                 _visitedIndexes.Add(index);
             }
 
@@ -249,15 +266,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             //}
 
             return tuple;
-        }
-
-        public void DoneTraining()
-        {
-            foreach(var sensei in ObjectSnapshot)
-            {
-                sensei.RefreshID();
-            }
-        }
+        }        
     }
 
 }

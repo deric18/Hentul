@@ -381,8 +381,7 @@
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
             {
-                // If any output from HC execute the location output if NOT then take the standar default output.
-                // 
+                // If any output from HC execute the location output if NOT then take the standar default output.                
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
                 var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
 

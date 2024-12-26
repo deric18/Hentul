@@ -676,7 +676,6 @@
             return toReturn;
         }
 
-
         public Position GetPositionForActiveBit(Orchestrator.POINT point, int posX)
         {
             Position toReturn = null;

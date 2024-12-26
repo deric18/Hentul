@@ -15,7 +15,7 @@
         /// </summary>
         public SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
 
-        public Position cursorPosition { get; private set; }
+        public Position CenterPosition { get; private set; }
 
 
         // Used only for Mock Purposes
@@ -28,7 +28,7 @@
         public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
         {
             this.sensLoc = sensLoc;
-            this.cursorPosition = null;
+            this.CenterPosition = null;
             ComputeStringID();
         }
 
@@ -37,7 +37,7 @@
         public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc, Position cursorPos)
         {
             this.sensLoc = sensLoc;
-            this.cursorPosition = cursorPos;
+            this.CenterPosition = cursorPos;
             ComputeStringID();
         }
 

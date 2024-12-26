@@ -22,9 +22,7 @@
 
         private List<RecognisedEntity> matchingObjectList;
 
-        private Position _cachedPosition;
-
-        private List<RecognisedEntity> rejectedObjectList;
+        private Position _cachedPosition;        
 
         private RecognisedEntity currentmatchingObject;
 
@@ -50,8 +48,7 @@
             isMock = Ismock;
             networkMode = nMode;
             NumberOfITerationsToConfirmation = 6;
-            matchingObjectList = new List<RecognisedEntity>();
-            rejectedObjectList = new List<RecognisedEntity>();
+            matchingObjectList = new List<RecognisedEntity>();            
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
             currentIterationToConfirmation = 0;
@@ -136,7 +133,7 @@
                         if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
                         {
                             var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
-                            p = currentmatchingObject.ObjectSnapshot[index].cursorPosition;                     //Must be ordered first highest X and lowest Y
+                            p = currentmatchingObject.ObjectSnapshot[index].CenterPosition;                     //Must be ordered first highest X and lowest Y
                             currentmatchingObject.SetSenseiToCurrentComparision(index);
 
                             if (isMock)
@@ -228,7 +225,7 @@
             if(ObjectState == RecognitionState.Recognised)
             {
                 var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();                //Random Sensei 
-                position = currentmatchingObject.ObjectSnapshot[index].cursorPosition;                     //Must be ordered first highest X and lowest Y
+                position = currentmatchingObject.ObjectSnapshot[index].CenterPosition;                     //Must be ordered first highest X and lowest Y
                 currentmatchingObject.SetSenseiToCurrentComparision(index);
             }
 

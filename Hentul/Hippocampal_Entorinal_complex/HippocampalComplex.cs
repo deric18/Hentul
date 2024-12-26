@@ -1,20 +1,29 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
-    using Common;
-    using FirstOrderMemory.Models;    
+    using Common;    
 
     public class HippocampalComplex
     {
-        Graph graphHandler;
+        Graph globalFrame;
 
         static HippocampalComplex _hippocalCampalAccesor;
+
+
+        private List<RecognisedEntity> matchingObjectList;
+
+        public Position[] BoundaryPositions { get; private set; }
 
         RecognitionState currentObjetState;
         private NetworkMode networkMode;
 
         private HippocampalComplex() 
         {
-            graphHandler = Graph.GetInstance();    
+            globalFrame = Graph.GetInstance();
+
+            matchingObjectList = new List<RecognisedEntity>();
+
+            networkMode = NetworkMode.TRAINING;
+            currentObjetState = RecognitionState.None;
         }
 
         public static HippocampalComplex GetInstance()
@@ -45,7 +54,7 @@
 
             bool sensationGotAdded = false;
 
-
+            // Once the sensation comes in ds
 
 
 

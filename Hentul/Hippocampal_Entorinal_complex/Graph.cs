@@ -102,5 +102,23 @@ namespace Hentul.Hippocampal_Entorinal_complex
             
             return currentNode;
         }
+
+        public bool LoadObjectFrame(RecognisedEntity entity)
+        {
+            bool success = false;
+
+            foreach(var item in entity.ObjectSnapshot)
+            {
+                foreach(var kvp in item.sensLoc)
+                {
+                    Position2D position = Position2D.ConvertStringToPosition(kvp.Key);
+
+                    var data = kvp.Value;
+                }
+            }
+
+            return success;
+        }
+
     }
 }
