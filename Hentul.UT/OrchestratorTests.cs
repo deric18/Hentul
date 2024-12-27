@@ -54,8 +54,8 @@
 
             foreach (var kvp in sensloc.sensLoc.Values)
             {
-                Assert.AreEqual(posList[index].X / 10, kvp.Key);
-                Assert.AreEqual(posList[index], kvp.Value[0]);
+                Assert.IsTrue(posList[index].X / 10 == kvp.Key);
+                Assert.IsTrue(posList[index].Equals(kvp.Value[0]));
                 index++;
             }
         }
@@ -132,14 +132,14 @@
         public void TestConvertUnrecognisedObjectToRecognisedObject()
         {
             string obj = "Apple";
-            KeyValuePair<int, List<Position_SOM>> kvp = new KeyValuePair<int, List<Position_SOM>>(1, new List<Position_SOM>()
+            KeyValuePair<int, List<Position2D>> kvp = new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>()
                 {
-                    new Position_SOM(1,2),
-                    new Position_SOM(2,3),
-                    new Position_SOM(3,4)
+                    new Position2D(1,2),
+                    new Position2D(2,3),
+                    new Position2D(3,4)
                 });
 
-            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
 
             dict.Add(obj, kvp);
 
@@ -163,13 +163,13 @@
             string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
             string obj = "Apple";
 
-            KeyValuePair<int, List<Position_SOM>> kvp = new KeyValuePair<int, List<Position_SOM>>(1, new List<Position_SOM>()
+            KeyValuePair<int, List<Position2D>> kvp = new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>()
                 {
-                    new Position_SOM(1,2),
-                    new Position_SOM(2,3),
-                    new Position_SOM(3,4)
+                    new Position2D(1,2),
+                    new Position2D(2,3),
+                    new Position2D(3,4)
                 });
-            SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
             dict.Add(obj, kvp);
             Sensation_Location sensei = new Sensation_Location(dict);
             orchestrator.HCAccessor.ProcessCurrentPatternForObject(1, sensei);
@@ -333,32 +333,28 @@
         public void TestCompareSenseiMatchPercentagePositiveTestForLocationIDOnly()
         {
 
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(7, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(5, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(1, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(4, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(7, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(5, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(1, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);
+            
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -367,14 +363,14 @@
             sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
             activeBits.AddRange(activeBits1);
             activeBits.AddRange(activeBits2);
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -389,32 +385,28 @@
         [Test]
         public void TestCompareSenseiMatchPercentageNegativeTestForLocationIDOnly()
         {
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(77, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(55, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(11, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
+            
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -423,14 +415,14 @@
             sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
-            activeBits.AddRange(activeBits1);
-            activeBits.AddRange(activeBits2);
-            activeBits.AddRange(activeBits3);
-            activeBits.AddRange(activeBits4);
+           activeBits.AddRange(activeBits1);
+           activeBits.AddRange(activeBits2);
+           activeBits.AddRange(activeBits3);
+           activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -446,32 +438,27 @@
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMIDOnly()
         {
 
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(77, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(55, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(11, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);           
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -480,14 +467,14 @@
             sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
-            activeBits.AddRange(activeBits1);
-            activeBits.AddRange(activeBits2);
-            activeBits.AddRange(activeBits3);
-            activeBits.AddRange(activeBits4);
+           activeBits.AddRange(activeBits1);
+           activeBits.AddRange(activeBits2);
+           activeBits.AddRange(activeBits3);
+           activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -500,32 +487,27 @@
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMIDOnly()
         {
 
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(1, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(2, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(3, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(4, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(1, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(2, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(3, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);            
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -534,14 +516,14 @@
             sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
             activeBits.AddRange(activeBits1);
             activeBits.AddRange(activeBits2);
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -552,33 +534,29 @@
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID for Positive Outcome!")]
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationIDOnly()
         {
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(77, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(55, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(11, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits4);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
 
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-
+            
             Sensation_Location sensei1 = new Sensation_Location();
 
             sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
@@ -586,14 +564,14 @@
             sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
             activeBits.AddRange(activeBits1);
             activeBits.AddRange(activeBits2);
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -605,32 +583,27 @@
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationIDOnly()
         {
 
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(1, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(2, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(3, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(4, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(1, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(2, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(3, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);            
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -639,14 +612,14 @@
             sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
             activeBits.AddRange(activeBits1);
             activeBits.AddRange(activeBits2);
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10,  Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -661,32 +634,27 @@
         public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationID_PositionList()
         {
 
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(77, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(55, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(11, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(24, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -695,14 +663,14 @@
             sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
             activeBits.AddRange(activeBits1);
             activeBits.AddRange(activeBits2);
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -718,33 +686,28 @@
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationID_PositionList()
         {
 
-            List<Position_SOM> activeBits1 = new List<Position_SOM>()
+            List<Position2D> activeBits1 = new List<Position2D>()
                     {
-                        new Position_SOM(777, 10)
+                        new Position2D(777, 10)
                     };
-            List<Position_SOM> activeBits2 = new List<Position_SOM>()
+            List<Position2D> activeBits2 = new List<Position2D>()
                     {
-                        new Position_SOM(555, 10)
+                        new Position2D(555, 10)
                     };
-            List<Position_SOM> activeBits3 = new List<Position_SOM>()
+            List<Position2D> activeBits3 = new List<Position2D>()
                     {
-                        new Position_SOM(111, 10)
+                        new Position2D(111, 10)
                     };
-            List<Position_SOM> activeBits4 = new List<Position_SOM>()
+            List<Position2D> activeBits4 = new List<Position2D>()
                     {
-                        new Position_SOM(243, 10)
+                        new Position2D(243, 10)
                     };
 
-            KeyValuePair<int, List<Position_SOM>> kvp1 = new KeyValuePair<int, List<Position_SOM>>(1, activeBits1);
-            KeyValuePair<int, List<Position_SOM>> kvp2 = new KeyValuePair<int, List<Position_SOM>>(2, activeBits2);
-            KeyValuePair<int, List<Position_SOM>> kvp3 = new KeyValuePair<int, List<Position_SOM>>(3, activeBits3);
-            KeyValuePair<int, List<Position_SOM>> kvp4 = new KeyValuePair<int, List<Position_SOM>>(4, activeBits4);
-
-            SDR_SOM activeSDR1 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR2 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR3 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-            SDR_SOM activeSDR4 = new SDR_SOM(1000, 10, activeBits1, iType.SPATIAL);
-
+            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(1, activeBits1);
+            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(2, activeBits2);
+            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(3, activeBits3);
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);
+         
             Sensation_Location sensei1 = new Sensation_Location();
 
             sensei1.AddNewSensationAtThisLocation(bPos1, kvp1);
@@ -752,14 +715,14 @@
             sensei1.AddNewSensationAtThisLocation(bPos3, kvp3);
             sensei1.AddNewSensationAtThisLocation(bPos4, kvp4);
 
-            List<Position_SOM> activeBits = new List<Position_SOM>();
+            List<Position2D> activeBits = new List<Position2D>();
 
             activeBits.AddRange(activeBits1);
             activeBits.AddRange(activeBits2);
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, activeBits, iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
 
@@ -815,13 +778,13 @@
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
             orchestrator.ProcesStep1(bp1);
-            orchestrator.ProcessStep2();
+            orchestrator.ProcessSDRForL3B();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
             orchestrator.ProcesStep1(bp2);
-            orchestrator.ProcessStep2();
+            orchestrator.ProcessSDRForL3B();
 
 
             orchestrator.DoneWithTraining();
@@ -831,11 +794,24 @@
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
             orchestrator.ProcesStep1(bp1);
-            var pos = orchestrator.ProcessStep2(true);
+            var pos = orchestrator.ProcessSDRForL3B(true);
 
             Assert.AreEqual(loc2X, pos.X);
             Assert.AreEqual(loc2Y, pos.Y);
 
+        }
+
+
+        private List<Position_SOM> Conver2DtoSOMList(List<Position2D> somList)
+        {
+            List<Position_SOM> toReturn = new List<Position_SOM>();
+
+            foreach (var item in somList)
+            {
+                toReturn.Add(new Position_SOM(item.X, item.Y));
+            }
+
+            return toReturn;
         }
 
         [Test, Ignore("Not Yet Implemented")]

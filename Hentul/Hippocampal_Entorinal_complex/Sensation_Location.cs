@@ -13,19 +13,19 @@
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
         /// Generally 4 or less
         /// </summary>
-        public SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc { get; private set; }
+        public SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sensLoc { get; private set; }
 
-        public Position CenterPosition { get; private set; }
+        public Position2D CenterPosition { get; private set; }
 
 
         // Used only for Mock Purposes
         public Sensation_Location()
         {
-            sensLoc = new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>();
+            sensLoc = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
             ComputeStringID();            
         }
 
-        public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc)
+        public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sensLoc)
         {
             this.sensLoc = sensLoc;
             this.CenterPosition = null;
@@ -34,7 +34,7 @@
 
 
         //Used for Production.
-        public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>> sensLoc, Position cursorPos)
+        public Sensation_Location(SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sensLoc, Position2D cursorPos)
         {
             this.sensLoc = sensLoc;
             this.CenterPosition = cursorPos;
@@ -46,9 +46,9 @@
             ComputeStringID();
         }
 
-        public List<Position_SOM> GetActiveBitsFromSensation()
+        public List<Position2D> GetActiveBitsFromSensation()
         {
-            List<Position_SOM> activebits = new List<Position_SOM>();
+            List<Position2D> activebits = new List<Position2D>();
 
             foreach (var kvp in sensLoc.Values)
             {
@@ -93,7 +93,7 @@
             Id = toReturn;
         }
 
-        public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position_SOM>> sensation)
+        public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position2D>> sensation)
         {
             if (!sensLoc.TryGetValue(location, out var kvp))
             {
@@ -158,7 +158,7 @@
             return "NO WTF";
         }
 
-        public static int ComparePositionListPercentage(List<Position_SOM> first, List<Position_SOM> second)
+        public static int ComparePositionListPercentage(List<Position2D> first, List<Position2D> second)
         {
             if (first.Count == 0 || second.Count == 0) return 0;
 
@@ -237,7 +237,7 @@
                             BBMChecked = true;
                             int bbmID = sourceLocationKvp.Value.Key;
 
-                            List<Position_SOM> sourceSOMs = sourceLocationKvp.Value.Value;
+                            List<Position2D> sourceSOMs = sourceLocationKvp.Value.Value;
 
                             var targetKvp = targetSensei.sensLoc.Values;
 
@@ -294,7 +294,7 @@
                     {
                         int bbmID = sourceLocationKvp.Value.Key;
 
-                        List<Position_SOM> sourceSOMs = sourceLocationKvp.Value.Value;
+                        List<Position2D> sourceSOMs = sourceLocationKvp.Value.Value;
 
                         var targetKvp = targetSensei.sensLoc.Values;
 
@@ -327,7 +327,7 @@
                     {
                         // includeBBM == false && includeLocation == false
 
-                        List<Position_SOM> sourceSOMs = sourceLocationKvp.Value.Value;
+                        List<Position2D> sourceSOMs = sourceLocationKvp.Value.Value;
 
                         var targetKvp = targetSensei.sensLoc.Values;
 
@@ -354,7 +354,7 @@
             return match;
         }
 
-        public static bool ComparePositionListBoolean(List<Position_SOM> first, List<Position_SOM> second)
+        public static bool ComparePositionListBoolean(List<Position2D> first, List<Position2D> second)
         {
             if (first.Count == 0 || second.Count == 0) return false;
 
@@ -379,7 +379,7 @@
             {
                 int bbmID = kvp.Key;
 
-                List<Position_SOM> sourceSOMs = kvp.Value;
+                List<Position2D> sourceSOMs = kvp.Value;
 
                 var targetKvp = targetSensei.sensLoc.Values;
 

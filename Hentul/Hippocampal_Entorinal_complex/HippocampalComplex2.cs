@@ -80,10 +80,11 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public Position ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
+        public Position2D ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
         {
             string objectLabel = null;
-            Position toReturn = null;
+            Position2D toReturn = null;
+            Sensation_Location orginalSensei = sensei;
 
             if (networkMode == NetworkMode.TRAINING)
             {
@@ -111,16 +112,10 @@
 
                     currentmatchingObject = matchingObjectList.FirstOrDefault();
 
-                    Position p = null;
+                    Position2D p = null;
 
                     while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
-                    {
-
-                        if (currentmatchingObject.Label.ToLower() == "watermelon")
-                        {
-                            bool bp1 = true;
-                        }
-
+                    {                     
                         if (currentIterationToConfirmation == 0)
                         {
                             currentmatchingObject.PrepNextSenseiToVerify(sensei);
@@ -130,11 +125,10 @@
                             currentmatchingObject.PrepNextSenseiToVerify(sensei, p);
                         }
 
-                        if (VerifyObjectSensei(sensei, currentmatchingObject.CurrentComparision))
+                        if (VerifyObjectSensei(sensei, currentmatchingObject?.CurrentComparision))                  //Need Better Object Verification Mechanism than just one parse before removing the object.
                         {
-                            var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        //Random Sensei 
-                            p = currentmatchingObject.ObjectSnapshot[index].CenterPosition;                     //Must be ordered first highest X and lowest Y
-                            currentmatchingObject.SetSenseiToCurrentComparision(index);
+                            var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        
+                            p = currentmatchingObject.ObjectSnapshot[index].CenterPosition;                                              
 
                             if (isMock)
                                 return p;
@@ -145,45 +139,34 @@
 
                             //Perform Step 0 , Step 1
                             Tuple<Sensation_Location, Sensation_Location> tuple = ProcessStep1N2FromOrchestrator();
+
+                            if(tuple.Item1 == null)
+                            {
+                                RemoveObjectNSetBackCache();
+                                sensei = orginalSensei;
+                                objectLabel = null;
+                                toReturn = null;
+                                p = null;                                                                
+                            }
+
                             sensei = tuple.Item1;
                             prediction = tuple.Item2;
                         }
                         else
                         {
                             //Dint match , Move onto next object if there is , if not then move back to the last position of the matchingobjectlist
-
-                            matchingObjectList.RemoveAt(GetMatchingObjectIndexFromList(matchingObjectList, currentmatchingObject));
-
-                            currentmatchingObject.Clean();
-
-                            p = null;
-
-                            if (matchingObjectList.Count > 0)
-                            {
-                                //Repeat the whole loop with same input for next Object
-                                currentmatchingObject = matchingObjectList[0];
-                                currentIterationToConfirmation = 0;
-                            }
-                            else
-                            {
-                                //Move cursor to cache position and return empty , hand back control to form.cs
-
-                                Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
-                                objectLabel = null;
-                                ObjectState = RecognitionState.None;
-                                currentIterationToConfirmation = 0;
-                                currentmatchingObject.Clean();
-                                matchingObjectList.Clear();
-                                toReturn = null;
-                                break;
-                            }
+                            RemoveObjectNSetBackCache();
+                            sensei = orginalSensei;
+                            objectLabel = null;
+                            toReturn = null;
+                            p = null;                            
                         }
                     }
 
                     if (currentIterationToConfirmation == NumberOfITerationsToConfirmation)
                     {
                         ObjectState = RecognitionState.Recognised;
-                        toReturn = new Position(int.MaxValue, int.MaxValue);
+                        toReturn = new Position2D(int.MaxValue, int.MaxValue);
                         objectLabel = currentmatchingObject.Label;
                         currentIterationToConfirmation = 0;
                     }
@@ -206,6 +189,30 @@
             }
         }
 
+        private void RemoveObjectNSetBackCache()
+        {            
+            currentmatchingObject.Clean();            
+
+            if (matchingObjectList.Count > 0)
+            {
+                //Repeat the whole loop with same input for next Object
+                matchingObjectList.RemoveAt(GetMatchingObjectIndexFromList(matchingObjectList, currentmatchingObject));
+                currentmatchingObject = matchingObjectList[0];
+                currentIterationToConfirmation = 0;
+            }
+            else
+            {
+                //Move cursor to cache position and return empty , hand back control to form.cs
+
+                Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
+                
+                ObjectState = RecognitionState.None;
+                currentIterationToConfirmation = 0;
+                currentmatchingObject.Clean();
+                matchingObjectList.Clear();                
+            }
+        }
+
         public RecognisedEntity GetCurrentPredictedObject()
         {
             if (ObjectState == RecognitionState.Recognised)
@@ -218,9 +225,9 @@
             }
         }
 
-        internal Position GetNextLocationForWandering()
+        internal Position2D GetNextLocationForWandering()
         {
-            Position position = null;
+            Position2D position = null;
 
             if(ObjectState == RecognitionState.Recognised)
             {
@@ -232,9 +239,9 @@
             return position;
         }
 
-        internal List<Position_SOM> GetNextSensationForWanderingPosition()
+        internal List<Position2D> GetNextSensationForWanderingPosition()
         {
-            List<Position_SOM> sensation = new List<Position_SOM>();
+            List<Position2D> sensation = new List<Position2D>();
 
             if (ObjectState == RecognitionState.Recognised)
             {
@@ -249,13 +256,21 @@
         public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
 
 
-        public void LoadMockObject(List<RecognisedEntity> mockrecgs)
+        public void LoadMockObject(List<RecognisedEntity> mockrecgs, bool doneTraining)
         {
             if (isMock == true)
             {
                 foreach (var obj in mockrecgs)
                 {
-                    Objects.Add(obj.Label, obj);
+                    Objects.Add(obj.Label, obj);                    
+                }
+
+                if (doneTraining)
+                {
+                    foreach (var obj in Objects.Values)
+                    {
+                        obj.DoneTraining();
+                    }
                 }
             }
         }
@@ -291,8 +306,7 @@
                             var xmlNode = xmlDocument.CreateElement("Position");
 
                             xmlNode.SetAttribute("X", positionItem.X.ToString());
-                            xmlNode.SetAttribute("Y", positionItem.Y.ToString());
-                            xmlNode.SetAttribute("Z", positionItem.Z.ToString());
+                            xmlNode.SetAttribute("Y", positionItem.Y.ToString());                            
 
                             sensationLocationElement.AppendChild(xmlNode);
                         }
@@ -334,16 +348,11 @@
             instance.ProcessStep0();
             var bmp = instance.ConverToEdgedBitmap();
             instance.ProcesStep1(bmp);
-            return instance.ProcessStep2ForHC();
+            return instance.GetSDRFromL3B();
         }
 
-        private bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
-        {
-
-            if (currentmatchingObject.Label.ToLower() == "watermelon")
-            {
-                bool bp = true;
-            }
+        internal static bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
+        {          
 
             Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, objectSensei, true, true);
 
@@ -353,13 +362,13 @@
 
             int withoutLocation = matchinWithoutLocation != null ? matchinWithoutLocation.GetTotalMatchPercentage() : 0;
 
-            if (withLocation == 0 && withoutLocation == 0)
+            if (withLocation >= 70 && withoutLocation >= 80)
             {
-                return false;
+                return true;
             }
             else
             {
-                return true;
+                return false;
             }
         }
 

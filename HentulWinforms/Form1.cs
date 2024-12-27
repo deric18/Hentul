@@ -99,7 +99,7 @@ namespace HentulWinforms
 
                     orchestrator.ProcesStep1(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
 
-                    orchestrator.ProcessStep2();    // Fire SOM per FOMS
+                    orchestrator.ProcessSDRForL3B();    // Fire SOM per FOMS
 
                     counter++;                      // Repeat!
 
@@ -121,7 +121,7 @@ namespace HentulWinforms
 
                     orchestrator.ProcesStep1(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
 
-                    var motorOutput = orchestrator.ProcessStep2();    // Fire SOM per FOMS
+                    var motorOutput = orchestrator.ProcessSDRForL3B();    // Fire SOM per FOMS
 
                     if (motorOutput != null)
                     {

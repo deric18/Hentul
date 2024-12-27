@@ -359,9 +359,9 @@
         /// Stores Object sensei into FOM & SOM's during Training and Retrieves it during Prediciton.
         /// </summary>
         /// <returns>Next Position the mouse needs to be guided for succesful prediction</returns>
-        public Position ProcessStep2(bool isMock = false)
+        public Position2D ProcessSDRForL3B(bool isMock = false)
         {
-            Position motorOutput = null;
+            Position2D motorOutput = null;
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
@@ -387,8 +387,7 @@
 
 
                 if (som_SDR != null)
-                {
-                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                {                    
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
@@ -409,12 +408,12 @@
 
             while (counter != 0)
             {
-                Position nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                            // Get Next Coordinates the agent will goto from HC_EC
+                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                            // Get Next Coordinates the agent will goto from HC_EC
 
                 var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
                 somBBM_L3A.Fire(temporalSignalForPosition);                                                                         // Depolarize temporal Signal on L3A  for next iteration
 
-                var apicalSignalSOM = new SDR_SOM(X, NumColumns, HCAccessor.GetNextSensationForWanderingPosition(), iType.APICAL);
+                var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
                 somBBM_L3A.Fire(apicalSignalSOM);                                                                                   // Depolarize Apical Signal on L3A for next iteration
 
                 var apicalSignalforFOM = new SDR_SOM(X, NumColumns, somBBM_L3A.PreFire(), iType.APICAL);                            // Get PreFiring Cells from L3A
@@ -443,6 +442,18 @@
 
                 counter--;
             }
+        }
+
+        private List<Position_SOM> Conver2DtoSOMList(List<Position2D> somList)
+        {
+            List<Position_SOM> toReturn = new List<Position_SOM>();
+
+            foreach (var item in somList)
+            {
+                toReturn.Add(new Position_SOM(item.X, item.Y));
+            }
+
+            return toReturn; 
         }
 
         private uint GetTotalBurstCountInFOMLayerInLastCycle()
@@ -499,7 +510,7 @@
 
         #region Helper Methods
 
-        private List<Position_SOM> GetLocationSDR(Position position)
+        private List<Position_SOM> GetLocationSDR(Position2D position)
         {
             return locationEncoder.Encode(position.X, position.Y);
         }               
@@ -521,12 +532,12 @@
 
         public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
 
-        internal Tuple<Sensation_Location, Sensation_Location> ProcessStep2ForHC()
+        internal Tuple<Sensation_Location, Sensation_Location> GetSDRFromL3B()
         {
 
             Sensation_Location sensei = null, predictedSensei = null;
 
-            SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+            //SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
             //somBBM_L3A.Pool(fom_SDR);
 
@@ -534,8 +545,7 @@
             var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
 
             if (som_SDR != null)
-            {
-                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+            {                
                 sensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
             }
 

@@ -617,15 +617,15 @@
                 throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
             }
 
-            Sensation_Location sensation_Location = new Sensation_Location(new SortedDictionary<string, KeyValuePair<int, List<Position_SOM>>>(), new Position(point.X, point.Y));
+            Sensation_Location sensation_Location = new Sensation_Location(new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>(), new Position2D(point.X, point.Y));
 
             if (sdr_SOM.ActiveBits.Count == 0)
                 return sensation_Location;
 
             int iterator = 0;
 
-            Position position = null;
-            KeyValuePair<int, List<Position_SOM>> keyValuePair = new KeyValuePair<int, List<Position_SOM>>();
+            Position2D position = null;
+            KeyValuePair<int, List<Position2D>> keyValuePair = new KeyValuePair<int, List<Position2D>>();
 
 
             foreach (var pos in sdr_SOM.ActiveBits)
@@ -643,15 +643,15 @@
 
                 //position = GetPositionForBBMID(bbmID, point);
 
-                if (sensation_Location.sensLoc.TryGetValue(position?.ToString(), out KeyValuePair<int, List<Position_SOM>> kvp))
+                if (sensation_Location.sensLoc.TryGetValue(position?.ToString(), out KeyValuePair<int, List<Position2D>> kvp))
                 {
-                    kvp.Value.Add(pos);
+                    kvp.Value.Add( new Position2D(pos.X, pos.Y));
                 }
                 else
                 {                    
-                    KeyValuePair<int, List<Position_SOM>> sensation = new KeyValuePair<int, List<Position_SOM>>(
+                    KeyValuePair<int, List<Position2D>> sensation = new KeyValuePair<int, List<Position2D>>(
                         bbmID,
-                        new List<Position_SOM>() { pos });
+                        new List<Position2D>() { new Position2D(pos.X, pos.Y) });
 
                     sensation_Location.AddNewSensationAtThisLocation(position.ToString(), sensation);
                 }
@@ -676,9 +676,9 @@
             return toReturn;
         }
 
-        public Position GetPositionForActiveBit(Orchestrator.POINT point, int posX)
+        public Position2D GetPositionForActiveBit(Orchestrator.POINT point, int posX)
         {
-            Position toReturn = null;
+            Position2D toReturn = null;
             Random random = new Random();
             int bbmID = posX / 10;
 
@@ -686,7 +686,7 @@
             {
                 int LocationOffset = positions[0].X > 20 ? positions[0].Y * -1 : positions[0].Y;
 
-                toReturn = new Position(point.X + LocationOffset, point.Y + LocationOffset);
+                toReturn = new Position2D(point.X + LocationOffset, point.Y + LocationOffset);
                 //Generating Unique Location String for Sensation_Location Object. BUG : Different location are getting stored for FOM / SOM and different is being sent to HC_EC Complex while prediciton
             }
 
