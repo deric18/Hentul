@@ -14,6 +14,7 @@
         public Position[] BoundaryPositions { get; private set; }
 
         RecognitionState currentObjetState;
+
         private NetworkMode networkMode;
 
         private HippocampalComplex() 

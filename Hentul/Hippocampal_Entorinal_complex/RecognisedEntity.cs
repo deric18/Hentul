@@ -1,9 +1,11 @@
-﻿using Common;
-using FirstOrderMemory.Models;
-
-/// Author : Deric Pinto
+﻿/// Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
+
+    using Common;
+    using FirstOrderMemory.Models;
+
+
     public class RecognisedEntity
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
@@ -11,7 +13,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         //Holds the indexes of all the objects in objectsnapshot which are needed for classfication of the object.
         public RFrame frame { get; private set; }
 
-        public Position2D centerPosition { get; private set; }       
+        public Position2D CenterPosition { get; private set; }       
 
         private List<int> _visitedIndexes;
 
