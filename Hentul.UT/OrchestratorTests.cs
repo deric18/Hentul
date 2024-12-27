@@ -144,10 +144,7 @@
             dict.Add(obj, kvp);
 
             Sensation_Location sensei = new Sensation_Location(dict);
-
-
-            orchestrator.HCAccessor.ProcessCurrentPatternForObject(1, sensei);
-
+            orchestrator.HCAccessor.AddNewSensationToObject(sensei);
 
             orchestrator.DoneWithTraining();
 
@@ -172,7 +169,7 @@
             SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
             dict.Add(obj, kvp);
             Sensation_Location sensei = new Sensation_Location(dict);
-            orchestrator.HCAccessor.ProcessCurrentPatternForObject(1, sensei);
+            orchestrator.HCAccessor.PredictObject(1, sensei);
             orchestrator.DoneWithTraining();
 
             orchestrator.BackUp();

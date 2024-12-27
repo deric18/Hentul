@@ -22,7 +22,7 @@
 
         private List<RecognisedEntity> matchingObjectList;
 
-        private Position _cachedPosition;        
+        private Position _cachedPosition;
 
         private RecognisedEntity currentmatchingObject;
 
@@ -48,7 +48,7 @@
             isMock = Ismock;
             networkMode = nMode;
             NumberOfITerationsToConfirmation = 6;
-            matchingObjectList = new List<RecognisedEntity>();            
+            matchingObjectList = new List<RecognisedEntity>();
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
             currentIterationToConfirmation = 0;
@@ -71,6 +71,20 @@
         #region PUBLIC API
 
 
+
+        public void AddNewSensationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
+        {
+            if (networkMode == NetworkMode.TRAINING)
+            {
+                // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.                
+
+                if (CurrentObject.AddNewSenei(sensei) == false)
+                {
+                    throw new InvalidOperationException(" Could Not Add New Sensei ! please Investigate your Shitty Code!");
+                }
+            }
+        }
+
         // Gets called by Orchestrator.
         /// <summary>
         /// Need to define specfic limits for 
@@ -80,98 +94,41 @@
         /// <param name="sensei"></param>
         /// <param name="prediction"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public Position2D ProcessCurrentPatternForObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
+        public Position2D PredictObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
         {
             string objectLabel = null;
             Position2D toReturn = null;
             Sensation_Location orginalSensei = sensei;
 
-            if (networkMode == NetworkMode.TRAINING)
+            if (networkMode != NetworkMode.PREDICTION)
             {
-                // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.                
-
-                if (CurrentObject.AddNewSenei(sensei) == false)
-                {
-                    throw new InvalidOperationException();
-                }
+                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
             }
-            else if (networkMode == NetworkMode.PREDICTION)
+
+            if (Objects.Count == 0)
             {
-                if (Objects.Count == 0)
+                throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
+            }
+
+
+            matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);
+
+            if (matchingObjectList.Count > 0)
+            {
+                _cachedPosition = Orchestrator.GetCurrentPointerPosition1();
+
+                ObjectState = RecognitionState.IsBeingVerified;                
+
+                foreach (var matchingObject in matchingObjectList)
                 {
-                    throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
-                }
-
-                matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);
-
-                if (matchingObjectList.Count > 0)
-                {
-                    _cachedPosition = Orchestrator.GetCurrentPointerPosition1();
-
-                    ObjectState = RecognitionState.IsBeingVerified;
-
-                    currentmatchingObject = matchingObjectList.FirstOrDefault();
-
-                    Position2D p = null;
-
-                    while (currentIterationToConfirmation < NumberOfITerationsToConfirmation)
-                    {                     
-                        if (currentIterationToConfirmation == 0)
-                        {
-                            currentmatchingObject.PrepNextSenseiToVerify(sensei);
-                        }
-                        else if (currentIterationToConfirmation != 0 && p != null)
-                        {
-                            currentmatchingObject.PrepNextSenseiToVerify(sensei, p);
-                        }
-
-                        if (VerifyObjectSensei(sensei, currentmatchingObject?.CurrentComparision))                  //Need Better Object Verification Mechanism than just one parse before removing the object.
-                        {
-                            var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();        
-                            p = currentmatchingObject.ObjectSnapshot[index].CenterPosition;                                              
-
-                            if (isMock)
-                                return p;
-
-                            Orchestrator.MoveCursorToSpecificPosition(p.X, p.Y);
-
-                            currentIterationToConfirmation++;
-
-                            //Perform Step 0 , Step 1
-                            Tuple<Sensation_Location, Sensation_Location> tuple = ProcessStep1N2FromOrchestrator();
-
-                            if(tuple.Item1 == null)
-                            {
-                                RemoveObjectNSetBackCache();
-                                sensei = orginalSensei;
-                                objectLabel = null;
-                                toReturn = null;
-                                p = null;                                                                
-                            }
-
-                            sensei = tuple.Item1;
-                            prediction = tuple.Item2;
-                        }
-                        else
-                        {
-                            //Dint match , Move onto next object if there is , if not then move back to the last position of the matchingobjectlist
-                            RemoveObjectNSetBackCache();
-                            sensei = orginalSensei;
-                            objectLabel = null;
-                            toReturn = null;
-                            p = null;                            
-                        }
-                    }
-
-                    if (currentIterationToConfirmation == NumberOfITerationsToConfirmation)
+                    if(matchingObject.Verify() == true)
                     {
+                        currentmatchingObject = matchingObject;
                         ObjectState = RecognitionState.Recognised;
-                        toReturn = new Position2D(int.MaxValue, int.MaxValue);
-                        objectLabel = currentmatchingObject.Label;
-                        currentIterationToConfirmation = 0;
+                        return new Position2D(int.MaxValue, int.MaxValue);
                     }
-                }
-            }
+                }               
+            }        
 
             return toReturn;
         }
@@ -190,8 +147,8 @@
         }
 
         private void RemoveObjectNSetBackCache()
-        {            
-            currentmatchingObject.Clean();            
+        {
+            currentmatchingObject.Clean();
 
             if (matchingObjectList.Count > 0)
             {
@@ -205,11 +162,11 @@
                 //Move cursor to cache position and return empty , hand back control to form.cs
 
                 Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
-                
+
                 ObjectState = RecognitionState.None;
                 currentIterationToConfirmation = 0;
                 currentmatchingObject.Clean();
-                matchingObjectList.Clear();                
+                matchingObjectList.Clear();
             }
         }
 
@@ -229,7 +186,7 @@
         {
             Position2D position = null;
 
-            if(ObjectState == RecognitionState.Recognised)
+            if (ObjectState == RecognitionState.Recognised)
             {
                 var index = currentmatchingObject.GetRandomSenseIndexFromRecognisedEntity();                //Random Sensei 
                 position = currentmatchingObject.ObjectSnapshot[index].CenterPosition;                     //Must be ordered first highest X and lowest Y
@@ -262,7 +219,7 @@
             {
                 foreach (var obj in mockrecgs)
                 {
-                    Objects.Add(obj.Label, obj);                    
+                    Objects.Add(obj.Label, obj);
                 }
 
                 if (doneTraining)
@@ -306,7 +263,7 @@
                             var xmlNode = xmlDocument.CreateElement("Position");
 
                             xmlNode.SetAttribute("X", positionItem.X.ToString());
-                            xmlNode.SetAttribute("Y", positionItem.Y.ToString());                            
+                            xmlNode.SetAttribute("Y", positionItem.Y.ToString());
 
                             sensationLocationElement.AppendChild(xmlNode);
                         }
@@ -352,7 +309,7 @@
         }
 
         internal static bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
-        {          
+        {
 
             Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, objectSensei, true, true);
 
@@ -483,9 +440,9 @@
     }
 
     public enum RecognitionState
-    {
-        None,
-        IsBeingVerified,
-        Recognised
-    }
+{
+    None,
+    IsBeingVerified,
+    Recognised
+}
 }

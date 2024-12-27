@@ -28,7 +28,7 @@
 
 
         [Test]
-        public void TestProcessCurrentPatternForObjectPositiveTest()
+        public void TestPredictObjectPositiveTest()
         {
             List<RecognisedEntity> entities = GenerateRecognisedEntity();
 
@@ -71,7 +71,7 @@
 
             hc.LoadMockObject(entities, false);
 
-            Position2D pos = hc.ProcessCurrentPatternForObject(1, source, null, true);
+            Position2D pos = hc.PredictObject(1, source, null, true);
 
             Assert.AreEqual(posexpected.X, pos.X);
             Assert.AreEqual(posexpected.Y, pos.Y);
@@ -123,7 +123,7 @@
             hc.LoadMockObject(entities, true);
 
 
-            Position2D pos = hc.ProcessCurrentPatternForObject(1, source, null, true);
+            Position2D pos = hc.PredictObject(1, source, null, true);
 
 
 

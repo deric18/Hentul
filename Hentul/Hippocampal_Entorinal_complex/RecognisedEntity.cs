@@ -258,6 +258,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             var sensloc = ObjectSnapshot[index];
 
+            if(_visitedIndexes.Count == ObjectSnapshot.Count)
+            {
+                throw new InvalidOperationException("Cannot generate Random Sensation with these filters!");
+            }
+
             if (_visitedIndexes.Contains(index))
             {
                 while (flag)

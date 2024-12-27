@@ -374,9 +374,7 @@
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
-                    HCAccessor.ProcessCurrentPatternForObject(
-                       CycleNum,
-                       firingSensei);
+                    HCAccessor.AddNewSensationToObject(firingSensei);
                 }
             }
             else if (NMode.Equals(NetworkMode.PREDICTION))
@@ -391,10 +389,7 @@
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
-                    motorOutput = HCAccessor.ProcessCurrentPatternForObject(
-                    CycleNum,
-                    firingSensei,
-                    null, isMock);                    
+                    motorOutput = HCAccessor.PredictObject(CycleNum,firingSensei,null, isMock);
                 }
             }
 
