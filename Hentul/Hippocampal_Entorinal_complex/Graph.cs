@@ -9,11 +9,21 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public Node Base { get; private set; }
 
+        public uint RightCount { get; private set; }
+
+        public uint UpCount { get; private set; }
+
+
+        public uint TotalCount { get; private set; }
+
         public static Graph _graph;
 
         private Graph()
         {
             Base = new Node(new Position2D(0, 0), null);
+            RightCount = 0;
+            UpCount = 0;
+            TotalCount = 0;
         }
 
         public static Graph GetInstance()
@@ -29,33 +39,21 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         #endregion
 
-        #region PUBLIC API
+        #region PUBLIC API        
 
-        public bool AddNewNode(Position2D pos, SortedDictionary<string, KeyValuePair<int, List<Position2D>>> data, Node betterNode = null, bool speedUpY = false)
+        public List<Position2D> GetDiferentiablePositionBetweenObjects(RecognisedEntity first, RecognisedEntity second)
         {
-            if (pos == null || pos?.X <= 0 || pos?.Y <= 0) return false;
+            List<Position2D> toReturn;
 
-            if (data == null) return false;            
+            List<Position2D> firstList, secondList;
 
-            Node currentNode = ParseGraph(pos, betterNode, speedUpY);
+            firstList = GetAllPositionsForLabel(first.Label);
 
-            if (currentNode == null ||  currentNode?.cursorPosition?.X != pos.X || currentNode?.cursorPosition?.Y != pos.Y)
-            {
-                throw new InvalidOperationException("Bugs in Parsing Logic!!!");
-            }
+            secondList = GetAllPositionsForLabel(second.Label);
 
-            currentNode.Data = data;
+            toReturn = Position2D.RemoveSecondFromFirst(firstList, secondList);
 
-            return true;
-        }
-
-
-        public void LightUpObjects(List<RecognisedEntity> entites)
-        {
-            foreach(var entity in entites)
-            {
-                LightUpObject(entity);
-            }
+            return toReturn;
         }
 
         public void GetFavouritePositionsForObject(RecognisedEntity entity)
@@ -63,19 +61,26 @@ namespace Hentul.Hippocampal_Entorinal_complex
             throw new NotImplementedException();
         }
 
-        public List<Position2D> GetDiferentiablePositionBetweenObjects(RecognisedEntity  first, RecognisedEntity second)
+        public bool LightUpObject(RecognisedEntity entity)
         {
-            throw new NotImplementedException();
-        }
+            if (entity.ObjectSnapshot?.Count == 0)
+                return false;
 
-        public List<Position2D> GetUnioun()
-        {
-            throw new NotImplementedException();
-        }
+            List<Position2D> posList = new List<Position2D>();
 
-        public List<Position2D> GetIntersection()
-        {
-            throw new NotImplementedException();
+            foreach (var item in entity.ObjectSnapshot)
+            {
+                foreach (var kvpKey in item.sensLoc.Keys)
+                {
+                    Position2D position = Position2D.ConvertStringToPosition(kvpKey);
+
+                    posList.Add(position);
+                }
+            }
+
+            SetAllPositionsForLabel(posList, entity.Label);
+
+            return true;
         }
 
         public List<Position2D> LoadObjectFrame(RecognisedEntity entity)
@@ -96,15 +101,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             return listPositions;
         }
-
+       
         #endregion
 
-        #region PRIVATE METHODS
 
-        private void LightUpObject(RecognisedEntity entity)
-        {
-
-        }
+        #region PRIVATE METHODS       
 
         private Node ParseGraph(Position2D? pos, Node currentNode = null, bool speedUpY = false)
         {
@@ -165,7 +166,79 @@ namespace Hentul.Hippocampal_Entorinal_complex
             
             return currentNode;
         }
-                        
+
+        private List<Position2D> GetAllPositionsForLabel(string label)
+        {
+            if (label == null || label == string.Empty)
+                return null;
+
+            if(_graph.Base == null)
+            {
+                throw new InvalidDataException("Base cannot be null!");
+            }
+
+            Node current = this.Base;
+
+            List<Position2D> retList= new List<Position2D> ();
+
+            for( int i = 0; i < RightCount; i++)
+            {
+                for(int j = 0; j < UpCount; i++)
+                {
+                    if(current.Flags.Contains(label))
+                    {
+                        retList.Add(new Position2D(i, j));
+                    }
+
+                    current = current.Up;
+                }
+
+                current = current.Right;
+            }            
+
+            return retList;
+        }
+
+        private bool SetAllPositionsForLabel(List<Position2D> posList, string label)
+        {
+            if (label == null || label == string.Empty)
+                throw new InvalidOperationException("Label cannot be null`");
+
+            if (_graph.Base == null)
+            {
+                throw new InvalidDataException("Base cannot be null!");
+            }
+
+            int count = 0;            
+            Node current = this.Base;
+
+            foreach (var pos in posList)
+            {
+                Node nodetoLitUp = ParseGraph(pos);
+
+                if(nodetoLitUp.LiteUpNode(label))
+                {
+                    count++;
+                }
+            }
+
+            return count == posList.Count;
+        }
+
+        public bool AddNewNode(Position2D pos, Node betterNode = null, bool speedUpY = false)
+        {
+            if (pos == null || pos?.X <= 0 || pos?.Y <= 0) return false;
+
+            Node currentNode = ParseGraph(pos, betterNode, speedUpY);
+
+            if (currentNode == null || currentNode?.cursorPosition?.X != pos.X || currentNode?.cursorPosition?.Y != pos.Y)
+            {
+                throw new InvalidOperationException("Bugs in Parsing Logic!!!");
+            }
+
+            return true;
+        }
+
 
         #endregion
 

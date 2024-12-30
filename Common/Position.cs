@@ -38,23 +38,6 @@
             }
 
             return new Position(x, y, z);
-        }
-
-        //public static Position ConvertStringToPosition(string key)
-        //{
-        //    var parts = key.Split('-');
-        //    int x = Convert.ToInt32(parts[0]);
-        //    int y = Convert.ToInt32(parts[1]);
-        //    int z = Convert.ToInt32(parts[2]);
-
-        //    return new Position(x, y, z);
-        //}
-
-
-
-        //public static string ConvertIKJtoString(int i, int j, int k)
-        //{
-        //    return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
-        //}
+        }               
     }
 }

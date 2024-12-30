@@ -6,7 +6,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
     public class Node
     {
         //<Object Label/ ID , KeyValuePair<BBMID, List<Position2D> ActiveColumns>>
-        public SortedDictionary<string, KeyValuePair<int, List<Position2D>>> Data { get; set; }
+        public HashSet<string> Flags { get; private set; }
 
         public Position2D cursorPosition { get; private set; }
 
@@ -21,7 +21,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public Node() 
         {
-            Data = null;
+            Flags = null;
             cursorPosition = null;
             Left = null;
             Right = null;
@@ -29,9 +29,13 @@ namespace Hentul.Hippocampal_Entorinal_complex
             Down = null;
         }
 
+        public bool CheckNode(string label) => Flags.Contains(label);
+
+        public bool LiteUpNode(string label) => Flags.Add(label);
+
         public Node(Position2D pos)
         {
-            Data = null;
+            Flags = new HashSet<string>();
             cursorPosition = pos;
             Left = null;
             Right = null;
@@ -41,7 +45,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public Node(Position2D cursorPos, SortedDictionary<string, KeyValuePair<int, List<Position2D>>> data)
         {
-            this.Data = data;
+            Flags = new HashSet<string>();
             this.cursorPosition = cursorPos;
             Left = null;
             Right = null;

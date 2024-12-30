@@ -24,7 +24,7 @@ namespace Hentul.UT
                 {"1-2", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
             };
 
-            Assert.IsTrue(graph.AddNewNode(posToAdd, dict));
+            Assert.IsTrue(graph.AddNewNode(posToAdd));
 
             Assert.AreEqual(1, graph.Base.Right.Up.cursorPosition.X);
             Assert.AreEqual(1, graph.Base.Right.Up.cursorPosition.Y);
@@ -34,22 +34,12 @@ namespace Hentul.UT
         public void TestAddGraphNode2()
         {
             Position2D posToAdd = new Position2D(10, 10);
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>()
-            {
-                {"1-2", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
-            };
 
-
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict2 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>()
-            {
-                {"5-5", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
-            };
-
-            graph.AddNewNode(posToAdd, dict1);      //Create graph for (10,10)
+            graph.AddNewNode(posToAdd);      //Create graph for (10,10)
 
 
             Position2D nextPos = new Position2D(5, 10); //Create graph for (5, 10)
-            graph.AddNewNode(nextPos, dict2);
+            graph.AddNewNode(nextPos);
 
             Node currenNode = graph.Base;
             while (currenNode.cursorPosition.X != nextPos.X)
@@ -61,7 +51,6 @@ namespace Hentul.UT
 
             while (currenNode.cursorPosition.Y != nextPos.Y) { currenNode = currenNode.Up; }
             Assert.AreEqual(currenNode.cursorPosition.Y, nextPos.Y);
-            Assert.AreEqual(currenNode.Data.Keys.ElementAt(0), dict2.Keys.ElementAt(0));
         }
 
         [Test]
@@ -73,7 +62,7 @@ namespace Hentul.UT
                 {"1-2", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
             };
 
-            graph.AddNewNode(posToAdd, dict);
+            graph.AddNewNode(posToAdd);
 
             Node currenNode = graph.Base;
             while (currenNode.cursorPosition.X < posToAdd.X)
