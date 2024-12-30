@@ -75,6 +75,27 @@ namespace Hentul.UT
 
             while (currenNode.cursorPosition.Y < posToAdd.Y) { currenNode = currenNode.Up; }
             Assert.AreEqual(posToAdd.Y, currenNode.cursorPosition.Y);
-        }        
+        }
+
+
+        [Test]
+        public void TestLiteUpObject()
+        {
+
+        }
+
+
+        [Test]
+        public void TestUnloadObject()
+        {
+
+        }
+
+
+        [Test]
+        public void TestGetDiferentiablePositionBetweenObjects()
+        {
+
+        }
     }
 }
