@@ -328,6 +328,11 @@
             // STEP 1A : Fire all FOM's
             FireAllFOMs();
 
+            if(point.X == 1324 && point.Y == 426)
+            {
+                bool breakpoint = true;
+            }
+
             // STEP 1B : Fire all L3B and L3A SOM's
             if (Mapper.somPositions.Count != 0)
             {
@@ -395,6 +400,34 @@
 
             return motorOutput;
         }
+
+
+        internal Tuple<Sensation_Location, Sensation_Location> GetSDRFromL3B()
+        {
+
+            Sensation_Location sensei = null, predictedSensei = null;
+
+            //SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+
+            //somBBM_L3A.Pool(fom_SDR);
+
+            var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+            var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
+
+            if (som_SDR != null)
+            {
+                sensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+            }
+
+            if (predictedSDR != null)
+            {
+                predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
+            }
+
+            return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
+        }
+
+
 
         public void StartBurstAvoidanceWandering()
         {
@@ -525,32 +558,7 @@
 
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
-        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
-
-        internal Tuple<Sensation_Location, Sensation_Location> GetSDRFromL3B()
-        {
-
-            Sensation_Location sensei = null, predictedSensei = null;
-
-            //SDR_SOM fom_SDR = GetSdrSomFromFOMs();
-
-            //somBBM_L3A.Pool(fom_SDR);
-
-            var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-            var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
-
-            if (som_SDR != null)
-            {                
-                sensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
-            }
-
-            if (predictedSDR != null)
-            {
-                predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
-            }
-
-            return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
-        }
+        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;        
 
         public void DoneWithTraining()
         {
@@ -917,6 +925,12 @@
         {
             NMode = NetworkMode.PREDICTION;
             HCAccessor.SetNetworkModeToPrediction();
+        }
+
+        public void ChangeNetworkModeToTraining()
+        {
+            NMode = NetworkMode.TRAINING;
+            HCAccessor.SetNetworkModeToTraining();
         }
 
         private void PrintMoreBlockVitals()

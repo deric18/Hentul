@@ -30,34 +30,8 @@ namespace Hentul.UT
             Assert.AreEqual(1, graph.Base.Right.Up.cursorPosition.Y);
         }
 
-
         [Test]
         public void TestAddGraphNode2()
-        {
-            Position2D posToAdd = new Position2D(9, 9);
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>()
-            {
-                {"1-2", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
-            };
-
-            graph.AddNewNode(posToAdd, dict);
-
-            Node currenNode = graph.Base;
-            while (currenNode.Right.Right != null)
-            {
-                currenNode = currenNode.Right;
-            }
-            Assert.AreEqual(currenNode.cursorPosition.X, posToAdd.X);
-
-
-            while (currenNode.Up != null) { currenNode = currenNode.Up; }
-            Assert.AreEqual(currenNode.cursorPosition.Y, posToAdd.Y);
-        }
-
-
-
-        [Test, Ignore(" code feature not even being used!")]
-        public void TestAddGraphNode3()
         {
             Position2D posToAdd = new Position2D(10, 10);
             SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>()
@@ -71,7 +45,7 @@ namespace Hentul.UT
                 {"5-5", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
             };
 
-            graph.AddNewNode(posToAdd, dict1);      //Create ggraph for (10,10)
+            graph.AddNewNode(posToAdd, dict1);      //Create graph for (10,10)
 
 
             Position2D nextPos = new Position2D(5, 10); //Create graph for (5, 10)
@@ -89,5 +63,29 @@ namespace Hentul.UT
             Assert.AreEqual(currenNode.cursorPosition.Y, nextPos.Y);
             Assert.AreEqual(currenNode.Data.Keys.ElementAt(0), dict2.Keys.ElementAt(0));
         }
+
+        [Test]
+        public void TestAddGraphNode3()
+        {
+            Position2D posToAdd = new Position2D(9, 9);
+            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>()
+            {
+                {"1-2", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
+            };
+
+            graph.AddNewNode(posToAdd, dict);
+
+            Node currenNode = graph.Base;
+            while (currenNode.cursorPosition.X < posToAdd.X)
+            {
+                currenNode = currenNode.Right;
+            }
+
+            Assert.AreEqual(posToAdd.X, currenNode.cursorPosition.X);
+
+
+            while (currenNode.cursorPosition.Y < posToAdd.Y) { currenNode = currenNode.Up; }
+            Assert.AreEqual(posToAdd.Y, currenNode.cursorPosition.Y);
+        }        
     }
 }

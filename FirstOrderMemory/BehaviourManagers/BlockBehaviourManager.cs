@@ -39,6 +39,8 @@
 
         private uint NumberOfColumnsThatFiredThisCycle { get; set; }
 
+        private uint NumberOfColumnsThatBurstLastCycle { get; set; }
+
         private List<Neuron> temporalContributors { get; set; }
 
         private List<Neuron> apicalContributors { get; set; }
@@ -144,6 +146,8 @@
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
+
+            this.NumberOfColumnsThatBurstLastCycle = 0;
 
             CycleNum = 0;
 
@@ -730,6 +734,7 @@
                     //Thread.Sleep(2000);
                 }
 
+                NumberOfColumnsThatBurstLastCycle = (uint)ColumnsThatBurst.Count;
             }
 
             Fire();
@@ -1312,7 +1317,7 @@
                     }
 
                     //For the ones that were not predicted, perform sequence memory.
-                    if(includeSequenceLearning)
+                    if(Layer.Equals(LayerType.Layer_4) ? false : includeSequenceLearning)
                         BuildSequenceMemory();
                 }
                 else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
@@ -1333,7 +1338,7 @@
                         Console.WriteLine("Wire Case 4 Picked Up!!");
                     }
 
-                    if (includeBurstLearning4 == true)
+                    if (Layer.Equals(LayerType.Layer_4) ? false : includeBurstLearning4) 
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
@@ -1378,7 +1383,7 @@
                     }
 
                     //Boost All the Bursting Neurons
-                    if (includeBurstLearning4 == true)
+                    if (Layer.Equals(LayerType.Layer_4) ? false : includeBurstLearning4)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                     //Boost the Non Bursting Neurons
@@ -2108,6 +2113,8 @@
                         }
                     }
             }
+
+            NumberOfColumnsThatBurstLastCycle = 0;
 
             NumberOfColumnsThatFiredThisCycle = 0;
 

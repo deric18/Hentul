@@ -4,6 +4,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
     using Common;
     public class Graph
     {
+
+        #region COSNTRUCTORS 
+
         public Node Base { get; private set; }
 
         public static Graph _graph;
@@ -23,6 +26,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return _graph;
         }
 
+
+        #endregion
+
+        #region PUBLIC API
+
         public bool AddNewNode(Position2D pos, SortedDictionary<string, KeyValuePair<int, List<Position2D>>> data, Node betterNode = null, bool speedUpY = false)
         {
             if (pos == null || pos?.X <= 0 || pos?.Y <= 0) return false;
@@ -39,6 +47,49 @@ namespace Hentul.Hippocampal_Entorinal_complex
             currentNode.Data = data;
 
             return true;
+        }
+
+
+        public void LightUpObjects(List<RecognisedEntity> entites)
+        {
+            foreach(var entity in entites)
+            {
+                LightUpObject(entity);
+            }
+        }
+
+        public List<Position2D> GetUnioun()
+        { }
+
+        public List<Position2D> GetIntersection()
+        { }
+
+        public List<Position2D> LoadObjectFrame(RecognisedEntity entity)
+        {
+            List<Position2D> listPositions = new List<Position2D>();
+
+            foreach (var item in entity.ObjectSnapshot)
+            {
+                foreach (var kvp in item.sensLoc)
+                {
+                    Position2D position = Position2D.ConvertStringToPosition(kvp.Key);
+
+                    listPositions.Add(position);
+
+                    var data = kvp.Value;
+                }
+            }
+
+            return listPositions;
+        }
+
+        #endregion
+
+        #region PRIVATE METHODS
+
+        private void LightUpObject(RecognisedEntity entity)
+        {
+
         }
 
         private Node ParseGraph(Position2D? pos, Node currentNode = null, bool speedUpY = false)
@@ -68,7 +119,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     currentNode.Right = new Node(new Position2D(i + 1, currentNode.cursorPosition.Y));
                     currentNode.Right.Left = currentNode;
                     cacheNode = currentNode.Right;
-                }                                
+                }
                 else
                 {
                     currentNode = currentNode.Right;
@@ -96,29 +147,13 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         }
                     }
                 }
-
-                
             }
             
             return currentNode;
         }
+                        
 
-        public bool LoadObjectFrame(RecognisedEntity entity)
-        {
-            bool success = false;
-
-            foreach(var item in entity.ObjectSnapshot)
-            {
-                foreach(var kvp in item.sensLoc)
-                {
-                    Position2D position = Position2D.ConvertStringToPosition(kvp.Key);
-
-                    var data = kvp.Value;
-                }
-            }
-
-            return success;
-        }
+        #endregion
 
     }
 }

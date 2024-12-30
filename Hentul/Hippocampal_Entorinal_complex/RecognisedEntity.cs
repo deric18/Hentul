@@ -2,9 +2,7 @@
 namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;
-    using FirstOrderMemory.Models;
-
+    using Common;    
 
     public class RecognisedEntity
     {
@@ -23,6 +21,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public string Label { get; private set; }
 
+        private string failureReportfileName;
+
         public RecognisedEntity(string name)
         {
             Label = name;
@@ -37,6 +37,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             ObjectSnapshot = unrec.ObjectSnapshot;
             _visitedIndexes = new List<int>();
             frame = null;
+            failureReportfileName = "C:\\Users\\depint\\source\\repos\\Hentul\\failureReport.txt";
         }
 
         public void Clean()
@@ -57,7 +58,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             frame = new RFrame(ObjectSnapshot);
         }
 
-        public bool Verify(Sensation_Location sensei = null, uint iterationToConfirmation = 6)
+        public bool Verify(Sensation_Location sensei = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
             if(ObjectSnapshot?.Count == 0)
             {
@@ -70,7 +71,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
             {
                 throw new InvalidOperationException("Orchestrator Instance cannot be null!");
             }
-            if( frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) == ObjectSnapshot.Count)
+
+            
+            if ( frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
             {
                 throw new InvalidOperationException("RFrame cannot be Empty!");
             }
@@ -86,21 +89,40 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         var newSensei = ObjectSnapshot[j];
                         var newPos = newSensei.CenterPosition;
 
-                        Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
-                        instance.ProcessStep0();
-                        var bmp = instance.ConverToEdgedBitmap();
-                        instance.ProcesStep1(bmp);
+
+                        if (isMock == false)
+                        {
+                            if (Label == "JackFruit")
+                            {
+                                bool breakpoint = true;
+                            }
+
+                            Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
+                            instance.ProcessStep0();
+                            var bmp = instance.ConverToEdgedBitmap();
+                            instance.ProcesStep1(bmp);
+                        }                  
+                        
                         var tuple = instance.GetSDRFromL3B();
 
                         if (tuple.Item1 == null)
                             return false;
 
-                        if(HippocampalComplex2.VerifyObjectSensei(tuple.Item1, newSensei) == false)
+                        
+                        if(HippocampalComplex2.VerifyObjectSensei(tuple.Item1, newSensei, Label, failureReportfileName) == false)
                         {
                             return false;
                         }
+
+                        confirmations++;
+                        if(confirmations == iterationToConfirmation)
+                        {
+                            return true;
+                        }
                     }
                 }
+
+                return true;
             }
 
             return true;
@@ -182,8 +204,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     }
 
                     index++;
-                }
-               
+                }               
             }
 
             if (source != null)

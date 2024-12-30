@@ -1,8 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;
-    using FirstOrderMemory.Models;
+    using Common;    
     using System.Xml;
 
     public class HippocampalComplex2
@@ -29,9 +28,10 @@
         public RecognitionState ObjectState { get; private set; }
 
         public int currentIterationToConfirmation;
+
         public int NumberOfITerationsToConfirmation { get; private set; }
 
-        private string backupDir;
+        private string backupDir;        
 
         private List<string> objectlabellist;
 
@@ -51,8 +51,7 @@
             matchingObjectList = new List<RecognisedEntity>();
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
-            currentIterationToConfirmation = 0;
-
+            currentIterationToConfirmation = 0;            
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
             objectlabellist = new List<string>
             {
@@ -121,14 +120,25 @@
 
                 foreach (var matchingObject in matchingObjectList)
                 {
+                    if(matchingObject.Label == "JackFruit")
+                    {
+                        bool breakpoint = true;
+                    }
+
                     if(matchingObject.Verify() == true)
                     {
                         currentmatchingObject = matchingObject;
                         ObjectState = RecognitionState.Recognised;
                         return new Position2D(int.MaxValue, int.MaxValue);
                     }
+                    else
+                    {
+                        Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
+                    }
                 }               
-            }        
+            }
+
+            toReturn = new Position2D(int.MinValue, int.MinValue);
 
             return toReturn;
         }
@@ -146,29 +156,7 @@
             }
         }
 
-        private void RemoveObjectNSetBackCache()
-        {
-            currentmatchingObject.Clean();
-
-            if (matchingObjectList.Count > 0)
-            {
-                //Repeat the whole loop with same input for next Object
-                matchingObjectList.RemoveAt(GetMatchingObjectIndexFromList(matchingObjectList, currentmatchingObject));
-                currentmatchingObject = matchingObjectList[0];
-                currentIterationToConfirmation = 0;
-            }
-            else
-            {
-                //Move cursor to cache position and return empty , hand back control to form.cs
-
-                Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
-
-                ObjectState = RecognitionState.None;
-                currentIterationToConfirmation = 0;
-                currentmatchingObject.Clean();
-                matchingObjectList.Clear();
-            }
-        }
+        
 
         public RecognisedEntity GetCurrentPredictedObject()
         {
@@ -308,7 +296,7 @@
             return instance.GetSDRFromL3B();
         }
 
-        internal static bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei)
+        internal static bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei, string label = null, string filename = null)
         {
 
             Match matchWithLocation = Sensation_Location.CompareSenseiPercentage(sourceSensei, objectSensei, true, true);
@@ -319,15 +307,45 @@
 
             int withoutLocation = matchinWithoutLocation != null ? matchinWithoutLocation.GetTotalMatchPercentage() : 0;
 
-            if (withLocation >= 70 && withoutLocation >= 80)
+
+            #region LOG
+
+            if (label != null && filename != null)
+            {
+                string logs = string.Empty;
+
+                logs += ("Object : " + label);
+                logs += "withLocation : " + withLocation + " withoutLocaiton : " + withoutLocation + "\n";
+
+                if(sourceSensei.Id != Sensation_Location.EMPTYID)
+                {
+                    sourceSensei.ComputeStringID();                    
+                }
+
+                logs += "source sensei ID : <Position ID[0] : BBM ID[0] / sensloc Count[0] " + sourceSensei.Id + "\n";
+                logs += "Object Sensei ID : <Position ID[0] : BBM ID[0] / sensloc Count[0] " + objectSensei.Id + "\n";
+
+                logs += "Result :: " + ( withLocation >= 50 && withoutLocation >= 50 ? "SUCCESS" : "FAILURE" + "\n");
+
+                File.WriteAllText(filename, logs);
+            }
+
+            #endregion
+
+            if (withLocation >= 50 && withoutLocation >= 50)
             {
                 return true;
             }
             else
             {
+                if(label == "Ananas" || label == "JackFruit")
+                {
+                    bool breakpoint = false;
+                }
                 return false;
             }
         }
+       
 
         private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {
@@ -388,6 +406,12 @@
         public void SetNetworkModeToTraining()
         {
             networkMode = NetworkMode.TRAINING;
+
+            if (CurrentObject == null)
+            {
+                CurrentObject = new UnrecognisedEntity();
+                CurrentObject.Label = objectlabellist[imageIndex++];
+            }
         }
 
         public void SetNetworkModeToPrediction()

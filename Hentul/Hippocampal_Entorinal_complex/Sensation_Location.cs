@@ -8,6 +8,7 @@
         public string Id { get; set; }
 
         public static readonly string EMPTYID = "EMPTY";
+
         /// <summary>
         /// Key : Location on the Screen
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
@@ -70,8 +71,6 @@
             }
 
             string toReturn = string.Empty;
-
-            char delimeter1 = ':';
             char delimeter2 = '/';
             int max = sensLoc.Count;
 
@@ -88,7 +87,6 @@
                            sensLoc.ElementAt(mid).Key + delimeter2 + sensLoc.Values.ElementAt(mid).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(mid).Value.Count.ToString() + delimeter2 +
                            sensLoc.ElementAt(max - 1).Key + delimeter2 + sensLoc.Values.ElementAt(max - 1).Key.ToString() + delimeter2 + sensLoc.Values.ElementAt(max - 1).Value.Count.ToString();
             }
-
 
             Id = toReturn;
         }

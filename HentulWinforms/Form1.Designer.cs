@@ -45,6 +45,7 @@ namespace HentulWinforms
             wanderingButton = new Button();
             BackUp = new Button();
             Restore = new Button();
+            train_another_object = new Button();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -71,7 +72,7 @@ namespace HentulWinforms
             // labelX
             // 
             labelX.AutoSize = true;
-            labelX.Location = new Point(398, 508);
+            labelX.Location = new Point(723, 521);
             labelX.Name = "labelX";
             labelX.Size = new Size(39, 15);
             labelX.TabIndex = 2;
@@ -80,7 +81,7 @@ namespace HentulWinforms
             // labelY
             // 
             labelY.AutoSize = true;
-            labelY.Location = new Point(499, 508);
+            labelY.Location = new Point(853, 521);
             labelY.Name = "labelY";
             labelY.Size = new Size(39, 15);
             labelY.TabIndex = 3;
@@ -108,7 +109,7 @@ namespace HentulWinforms
             // ObjectLabel
             // 
             ObjectLabel.AutoSize = true;
-            ObjectLabel.Location = new Point(1105, 521);
+            ObjectLabel.Location = new Point(209, 26);
             ObjectLabel.Name = "ObjectLabel";
             ObjectLabel.Size = new Size(70, 15);
             ObjectLabel.TabIndex = 7;
@@ -182,12 +183,23 @@ namespace HentulWinforms
             Restore.UseVisualStyleBackColor = true;
             Restore.Click += button1_Click_1;
             // 
+            // train_another_object
+            // 
+            train_another_object.Location = new Point(380, 402);
+            train_another_object.Name = "train_another_object";
+            train_another_object.Size = new Size(136, 23);
+            train_another_object.TabIndex = 15;
+            train_another_object.Text = "Train Another Object";
+            train_another_object.UseVisualStyleBackColor = true;
+            train_another_object.Click += train_another_object_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(train_another_object);
             Controls.Add(Restore);
             Controls.Add(BackUp);
             Controls.Add(wanderingButton);
@@ -232,5 +244,6 @@ namespace HentulWinforms
         private Button wanderingButton;
         private Button BackUp;
         private Button Restore;
+        private Button train_another_object;
     }
 }

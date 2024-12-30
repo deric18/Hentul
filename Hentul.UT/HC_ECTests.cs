@@ -10,6 +10,7 @@
         HippocampalComplex2 hc;
         Random rand = new Random();
         List<string> objectlabellist = new List<string>();
+        int objectLabelIndex;
 
         [SetUp]
         public void Setup()
@@ -24,6 +25,7 @@
                 "JackFruit",
                 "Grapes"
             };
+            objectLabelIndex = 0;
         }
 
 
@@ -141,7 +143,7 @@
 
             RecognisedEntity entity = entities[0];            
 
-            entity.Verify();
+            entity.Verify(null, true, 6);
             
 
         }
@@ -153,8 +155,11 @@
 
         private string GenerateRandomObjectLabels()
         {
-
-            return objectlabellist[rand.Next(0, 6)];
+            if(objectLabelIndex > objectlabellist.Count)
+            {
+                throw new InvalidOperationException();
+            }
+            return objectlabellist[objectLabelIndex++];
         }
 
         private List<RecognisedEntity> GenerateRandomEntities(int num)
@@ -168,7 +173,9 @@
                 entity = new RecognisedEntity(GenerateRandomObjectLabels());
 
                 for(int j = 0; j< 10; j++)
-                    entity.ObjectSnapshot.Add(GenerateRandomSenation());                
+                    entity.ObjectSnapshot.Add(GenerateRandomSenation());      
+                
+                recEnList.Add(entity);
             }
 
             return recEnList;

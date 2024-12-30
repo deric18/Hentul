@@ -13,7 +13,7 @@ namespace HentulWinforms
         readonly int numPixels = 10;
         int counter = 0;
         int imageIndex = 0;
-        int totalImagesToProcess = 1;
+        int totalImagesToProcess = 3;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -30,7 +30,7 @@ namespace HentulWinforms
         {
             InitializeComponent();
             networkMode = NetworkMode.TRAINING;
-
+            train_another_object.Visible = false;
         }
 
         private void StartButton_Click(object sender, EventArgs e)
@@ -74,6 +74,7 @@ namespace HentulWinforms
                             {
                                 label_done.Text = "Finished Processing Image";
                                 label_done.Refresh();
+                                train_another_object.Visible = true;
                                 break;
                             }
                         }
@@ -134,7 +135,14 @@ namespace HentulWinforms
 
                             label_done.Text = "Object Recognised!";
                             label_done.Refresh();
+                            train_another_object.Visible = true;
                             wanderingButton.Visible = true;
+                            break;
+                        }
+                        else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
+                        {
+                            label_done.Text = "Object Could Not be Recognised!";
+                            label_done.Refresh();
                             break;
                         }
 
@@ -146,6 +154,8 @@ namespace HentulWinforms
                     {
                         //Just Move the cursor to the next default position
                         orchestrator.MoveCursor(value);
+                        //label_done.Text = "Finished Processing Image";
+                        //break;
                     }
 
                 }
@@ -155,8 +165,10 @@ namespace HentulWinforms
             {
                 if (networkMode == NetworkMode.TRAINING)
                 {
-                    if (imageIndex >= totalImagesToProcess)
-                    {                        
+                    //imageIndex++;
+
+                    if (imageIndex == totalImagesToProcess)
+                    {
                         StartButton.Text = "Start Prediction";
                         StartButton.Refresh();
                         orchestrator.DoneWithTraining();
@@ -245,19 +257,19 @@ namespace HentulWinforms
 
             label_done.Text = "Ready";
         }
-        
+
 
         private void Form1_Load(object sender, EventArgs e)
         {   //RT : 1575, LB : 1032
             LeftTop.X = 954; LeftTop.Y = 416; RightTop.X = 1596; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
             label_done.Text = "Ready";
             wanderingButton.Visible = false;
-            BackUp.Visible = false;            
+            BackUp.Visible = false;
 
-            if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)            
-                Restore.Visible = false;            
-            else            
-                Restore.Visible = true;            
+            if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
+                Restore.Visible = false;
+            else
+                Restore.Visible = true;
         }
 
 
@@ -325,6 +337,14 @@ namespace HentulWinforms
             orchestrator = Orchestrator.GetInstance(false, false);
 
             orchestrator.Restore();
+        }
+
+        private void train_another_object_Click(object sender, EventArgs e)
+        {
+            totalImagesToProcess++;
+            networkMode = NetworkMode.PREDICTION;
+            orchestrator.ChangeNetworkModeToPrediction();
+            StartButton_Click(sender, e);
         }
     }
 }

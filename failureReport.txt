@@ -1,0 +1,1 @@
+Object : WatermelonwithLocation : 68 withoutLocaiton : 68source sensei ID : <Position ID[0] : BBM ID[0] / sensloc Count[0] EMPTYObject Sensei ID : <Position ID[0] : BBM ID[0] / sensloc Count[0] 1278-488/59/20/1296-506/0/46/1314-524/9/10Result :: SUCCESS
