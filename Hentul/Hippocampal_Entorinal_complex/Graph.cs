@@ -44,7 +44,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         #region PUBLIC API        
 
-        public List<Position2D> GetDiferentiablePositionBetweenObjects(RecognisedEntity first, RecognisedEntity second)
+        public List<Position2D> GetOnlyFirstDifferential(RecognisedEntity first, RecognisedEntity second)
         {
             List<Position2D> toReturn;
 
@@ -113,13 +113,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             return true;
         }
-       
-        #endregion
 
-
-        #region PRIVATE METHODS       
-
-        private Node ParseGraph(Position2D? pos, Node currentNode = null, bool speedUpY = false)
+        public Node GetNode(Position2D? pos, Node currentNode = null, bool speedUpY = false)
         {
             int offsetX = pos.X;
             int offsetY = pos.Y;
@@ -175,9 +170,15 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     }
                 }
             }
-            
+
             return currentNode;
         }
+
+        #endregion
+
+
+        #region PRIVATE METHODS       
+
 
         private List<Position2D> GetAllPositionsForLabel(string label)
         {
@@ -226,7 +227,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             foreach (var pos in posList)
             {
-                Node nodetoLitUp = ParseGraph(pos);
+                Node nodetoLitUp = GetNode(pos);
 
                 if(nodetoLitUp.LiteUpNode(label))
                 {
@@ -252,7 +253,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             foreach (var pos in posList)
             {
-                Node nodetoLitUp = ParseGraph(pos);
+                Node nodetoLitUp = GetNode(pos);
 
                 if (nodetoLitUp.UnloadLabel(label))
                 {
@@ -267,7 +268,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         {
             if (pos == null || pos?.X <= 0 || pos?.Y <= 0) return false;
 
-            Node currentNode = ParseGraph(pos, betterNode, speedUpY);
+            Node currentNode = GetNode(pos, betterNode, speedUpY);
 
             if (currentNode == null || currentNode?.cursorPosition?.X != pos.X || currentNode?.cursorPosition?.Y != pos.Y)
             {

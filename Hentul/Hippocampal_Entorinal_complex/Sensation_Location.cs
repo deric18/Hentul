@@ -5,6 +5,9 @@
 
     public class Sensation_Location
     {
+
+
+        #region MEMBER & CONSTRUCTORS
         public string Id { get; set; }
 
         public static readonly string EMPTYID = "EMPTY";
@@ -46,6 +49,8 @@
         {
             ComputeStringID();
         }
+
+        #endregion
 
         public List<Position2D> GetActiveBitsFromSensation()
         {

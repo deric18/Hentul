@@ -57,10 +57,6 @@ namespace Hentul.UT
         public void TestAddGraphNode3()
         {
             Position2D posToAdd = new Position2D(9, 9);
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>()
-            {
-                {"1-2", new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>() {}) }
-            };
 
             graph.AddNewNode(posToAdd);
 
@@ -81,20 +77,78 @@ namespace Hentul.UT
         [Test]
         public void TestLiteUpObject()
         {
+            Position2D posToAdd = new Position2D(9, 9);
 
+            graph.AddNewNode(posToAdd);
+
+            RecognisedEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
+
+            bool status = graph.LightUpObject(entity);
+
+            Assert.IsTrue(status);
+            
+            foreach(var sensei in entity.ObjectSnapshot)
+            {
+                foreach (var senseloc in sensei.sensLoc)
+                {
+                    Node node = graph.GetNode(Position2D.ConvertStringToPosition(senseloc.Key));
+
+                    Assert.IsTrue(node.Flags.Contains(entity.Label));
+                }
+            }
         }
-
 
         [Test]
         public void TestUnloadObject()
         {
+            Position2D posToAdd = new Position2D(9, 9);
 
+            graph.AddNewNode(posToAdd);
+
+            RecognisedEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
+
+            bool status = graph.LightUpObject(entity);
+
+            Assert.IsTrue(status);
+
+            List<Position2D> posList = new List<Position2D>();
+
+            graph.UnloadObject(entity);
+
+            foreach (var sensei in entity.ObjectSnapshot)
+            {
+                foreach (var senseloc in sensei.sensLoc)
+                {                    
+                    Assert.IsTrue(graph.GetNode(Position2D.ConvertStringToPosition(senseloc.Key)).Flags.Contains(entity.Label) == false);
+                }
+            }                        
         }
 
 
         [Test]
         public void TestGetDiferentiablePositionBetweenObjects()
         {
+            List<RecognisedEntity> recgEntities = TestUtils.GenerateRandomEntities(2);
+
+            RecognisedEntity first = recgEntities.ElementAt(0);
+
+            RecognisedEntity second = recgEntities.ElementAt(1);
+
+
+            bool status1 = graph.LightUpObject(first);
+
+            Assert.IsTrue(status1);
+
+            bool status2 = graph.LightUpObject(second);
+
+            Assert.IsTrue(status2);
+
+            var posList = graph.GetOnlyFirstDifferential(first, second);
+
+            foreach(var pos in posList)
+            {
+                Assert.IsTrue(graph.GetNode(pos).Flags.Contains(first.Label) == false);
+            }
 
         }
     }

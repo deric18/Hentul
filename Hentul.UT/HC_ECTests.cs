@@ -17,15 +17,7 @@
         {
             orchestrator = Orchestrator.GetInstance(true, false, NetworkMode.PREDICTION);
             hc = orchestrator.HCAccessor;
-            objectlabellist = new List<string>
-            {
-                "Apple",
-                "Ananas",
-                "Watermelon",
-                "JackFruit",
-                "Grapes"
-            };
-            objectLabelIndex = 0;
+           
         }
 
 
@@ -137,7 +129,7 @@
         [Test]
         public void TestVerify()
         {
-            List<RecognisedEntity> entities = GenerateRandomEntities(4);
+            List<RecognisedEntity> entities = TestUtils.GenerateRandomEntities(4);
 
             hc.LoadMockObject(entities, true);
 
@@ -152,82 +144,8 @@
         {
             return entity.ObjectSnapshot[rand.Next(0, entity.ObjectSnapshot.Count)];
         }
-
-        private string GenerateRandomObjectLabels()
-        {
-            if(objectLabelIndex > objectlabellist.Count)
-            {
-                throw new InvalidOperationException();
-            }
-            return objectlabellist[objectLabelIndex++];
-        }
-
-        private List<RecognisedEntity> GenerateRandomEntities(int num)
-        {
-            List<RecognisedEntity> recEnList = new List<RecognisedEntity>();
-
-            RecognisedEntity entity;
-
-            for (int i = 0; i < num; i++)
-            {
-                entity = new RecognisedEntity(GenerateRandomObjectLabels());
-
-                for(int j = 0; j< 10; j++)
-                    entity.ObjectSnapshot.Add(GenerateRandomSenation());      
-                
-                recEnList.Add(entity);
-            }
-
-            return recEnList;
-        }
-
-        private Sensation_Location GenerateRandomSenation()
-        {            
-
-            Position2D cursorPos = new Position2D(rand.Next(0, 2000), rand.Next(0, 2000));
-
-            KeyValuePair<int, List<Position2D>> kvp = GenerateNewKeyValuePair();
-
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sdict = GenerateRandomDictionary(cursorPos);
-
-            return  new Sensation_Location(sdict, cursorPos);
-        }
-
-        private SortedDictionary<string, KeyValuePair<int, List<Position2D>>> GenerateRandomDictionary(Position2D pos2d, int numEntries = 15)
-        {            
-            
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sDict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
-
-            for (int i = 0; i < numEntries; i++)
-            {
-                sDict.Add(GetNewRandPos2d().ToString(), GenerateNewKeyValuePair());
-            }
-
-            return sDict;
-        }
-
-        private KeyValuePair<int, List<Position2D>> GenerateNewKeyValuePair(int numKvps = 1)
-        {            
-            List<Position2D> list = GenerateRandomPositionList();
-            KeyValuePair<int, List<Position2D>> kvp = new KeyValuePair<int, List<Position2D>>(rand.Next(0,99), GenerateRandomPositionList());            
-            
-            return kvp;
-        }
-
-        private List<Position2D> GenerateRandomPositionList(int numPos = 3)
-        {            
-            List<Position2D> randPosList = new List<Position2D>();
-            
-            for(int i=0; i < numPos; i++)
-            {
-                randPosList.Add(new Position2D(rand.Next(0, 2000), rand.Next(0, 2000)));
-            }
-
-            return randPosList;
-        }
-
-        private Position2D GetNewRandPos2d() => new Position2D(rand.Next(0, 2000), rand.Next(0, 2000));
-
+        
+        
         private List<RecognisedEntity> GenerateRecognisedEntity()
         {
             List<Position2D> activeBits1 = new List<Position2D>()
