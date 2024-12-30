@@ -58,11 +58,25 @@ namespace Hentul.Hippocampal_Entorinal_complex
             }
         }
 
+        public void GetFavouritePositionsForObject(RecognisedEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<Position2D> GetDiferentiablePositionBetweenObjects(RecognisedEntity  first, RecognisedEntity second)
+        {
+            throw new NotImplementedException();
+        }
+
         public List<Position2D> GetUnioun()
-        { }
+        {
+            throw new NotImplementedException();
+        }
 
         public List<Position2D> GetIntersection()
-        { }
+        {
+            throw new NotImplementedException();
+        }
 
         public List<Position2D> LoadObjectFrame(RecognisedEntity entity)
         {
