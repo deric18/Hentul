@@ -33,6 +33,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public bool LiteUpNode(string label) => Flags.Add(label);
 
+        public bool UnloadLabel(string label) => Flags.Remove(label);
+
         public Node(Position2D pos)
         {
             Flags = new HashSet<string>();

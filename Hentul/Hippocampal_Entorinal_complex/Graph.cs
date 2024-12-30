@@ -18,9 +18,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public static Graph _graph;
 
+        public List<string> CurrentLabels { get; private set; }
+
         private Graph()
         {
             Base = new Node(new Position2D(0, 0), null);
+            CurrentLabels = new List<string>();
             RightCount = 0;
             UpCount = 0;
             TotalCount = 0;
@@ -80,26 +83,35 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             SetAllPositionsForLabel(posList, entity.Label);
 
+            if (CurrentLabels.Contains(entity.Label) == false)
+                CurrentLabels.Add(entity.Label);
+
             return true;
         }
 
-        public List<Position2D> LoadObjectFrame(RecognisedEntity entity)
+        public bool UnloadObject(RecognisedEntity entity)
         {
-            List<Position2D> listPositions = new List<Position2D>();
+            if (entity.ObjectSnapshot?.Count == 0 || entity.Label == string.Empty)
+                return false;
+
+            List<Position2D> posList = new List<Position2D>();
 
             foreach (var item in entity.ObjectSnapshot)
             {
-                foreach (var kvp in item.sensLoc)
+                foreach (var kvpKey in item.sensLoc.Keys)
                 {
-                    Position2D position = Position2D.ConvertStringToPosition(kvp.Key);
+                    Position2D position = Position2D.ConvertStringToPosition(kvpKey);
 
-                    listPositions.Add(position);
-
-                    var data = kvp.Value;
+                    posList.Add(position);
                 }
             }
 
-            return listPositions;
+            UnloadPositionsForLabel(posList, entity.Label);
+
+            if (CurrentLabels.Contains(entity.Label) == false)
+                CurrentLabels.Add(entity.Label);
+
+            return true;
         }
        
         #endregion
@@ -217,6 +229,32 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 Node nodetoLitUp = ParseGraph(pos);
 
                 if(nodetoLitUp.LiteUpNode(label))
+                {
+                    count++;
+                }
+            }
+
+            return count == posList.Count;
+        }
+
+        private bool UnloadPositionsForLabel(List<Position2D> posList, string label)
+        {
+            if (label == null || label == string.Empty)
+                throw new InvalidOperationException("Label cannot be null`");
+
+            if (_graph.Base == null)
+            {
+                throw new InvalidDataException("Base cannot be null!");
+            }
+
+            int count = 0;
+            Node current = this.Base;
+
+            foreach (var pos in posList)
+            {
+                Node nodetoLitUp = ParseGraph(pos);
+
+                if (nodetoLitUp.UnloadLabel(label))
                 {
                     count++;
                 }
