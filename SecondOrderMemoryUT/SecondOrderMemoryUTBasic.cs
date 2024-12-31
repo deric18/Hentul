@@ -34,9 +34,13 @@ namespace SecondOrderMemoryUnitTest
                     {
                         Assert.AreEqual(bbManager.ApicalLineArray[i,j].AxonalList.Count, Z);
 
-                        if (bbManager.Columns[i, j].Neurons[k].AxonalList.Count != 2)
+                        if (bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count != 4)
                         {
                             int bp = 1;
+                        }
+                        else
+                        {
+                            
                         }
 
                         Assert.AreEqual(4, bbManager.Columns[i, j].Neurons[k].ProximoDistalDendriticList.Count);

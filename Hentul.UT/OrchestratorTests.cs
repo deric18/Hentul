@@ -169,7 +169,7 @@
             SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
             dict.Add(obj, kvp);
             Sensation_Location sensei = new Sensation_Location(dict);
-            orchestrator.HCAccessor.PredictObject(1, sensei);
+            orchestrator.HCAccessor.PredictObject(sensei);
             orchestrator.DoneWithTraining();
 
             orchestrator.BackUp();

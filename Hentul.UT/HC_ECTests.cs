@@ -65,7 +65,7 @@
 
             hc.LoadMockObject(entities, false);
 
-            Position2D pos = hc.PredictObject(1, source, null, true);
+            Position2D pos = hc.PredictObject(source, null, true);
 
             Assert.AreEqual(posexpected.X, pos.X);
             Assert.AreEqual(posexpected.Y, pos.Y);
@@ -117,7 +117,7 @@
             hc.LoadMockObject(entities, true);
 
 
-            Position2D pos = hc.PredictObject(1, source, null, true);
+            Position2D pos = hc.PredictObject(source, null, true);
 
 
 

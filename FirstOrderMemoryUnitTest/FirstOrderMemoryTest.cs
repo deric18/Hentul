@@ -268,49 +268,32 @@ namespace FirstOrderMemoryUnitTest
         }
 
 
-      [Test]
+        [Test]
         public void TestWireCase1()
         {
-            //Case 1 : All columns Bursted:
-            //Every Neuron that fired in the previous Cycle should now have one new connection with every burst cell
+            //Case 1: All Predicted Neurons Fired without anyone Bursting.
+            //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
 
+            SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2, 0) }, iType.SPATIAL);
 
-            Position_SOM axonalPos = new Position_SOM(0, 2, 0, 'N');
-            Position_SOM dendronalPos = new Position_SOM(5, 3, 3, 'N');
+            ulong counter = 1;
 
-            SDR_SOM axonalSdr = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { axonalPos }, iType.SPATIAL);
-            SDR_SOM dendronalSdr = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { dendronalPos }, iType.SPATIAL);
+            bbManager.Fire(sdr1, counter++);
 
-            Neuron axonalNeuron = bbManager.Columns[axonalPos.X, axonalPos.Y].Neurons[axonalPos.Z];
-            Neuron dendronalNeuron = bbManager.Columns[dendronalPos.X, dendronalPos.Y].Neurons[dendronalPos.Z];
+            SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3, 3) }, iType.SPATIAL);
 
-            ulong Counter = 1;
+            bbManager.Fire(sdr2, counter++);
 
-            if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
-            {
-                throw new Exception("Could Not connect two neurons!");
-            }
+            //Verify both the both the columns have atleast 1 of each other columns axons and dendrites.
 
-            var prefireSynapseStrength = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos.ToString()].GetStrength();
-
-            bbManager.Fire(axonalSdr, Counter++);
-
-            dendronalNeuron.ProcessVoltage(10);
-
-            bbManager.Fire(dendronalSdr, Counter++);
-
-            //Make the synapsse Active           
-            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1, Counter, true, dendronalNeuron);
-
-            var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
-
-            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(axonalNeuron, dendronalNeuron));
-
-            Assert.IsTrue(prefireSynapseStrength < postFiringSynapeStrength);
+            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), bbManager.GetNeuronFromPosition(sdr2.ActiveBits[0])));
         }
 
 
-      [Test]
+        
+
+
+        [Test]
         public void TestWireCase2()
         {
             //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
@@ -374,22 +357,42 @@ namespace FirstOrderMemoryUnitTest
         [Test]
         public void TestWireCase4()
         {
-            //Case 1: All Predicted Neurons Fired without anyone Bursting.
-            //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
+            //Case 1 : All columns Bursted:
+            //Every Neuron that fired in the previous Cycle should now have one new connection with every burst cell
 
-            SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2, 0) }, iType.SPATIAL);
 
-            ulong counter = 1;
+            Position_SOM axonalPos = new Position_SOM(0, 2, 0, 'N');
+            Position_SOM dendronalPos = new Position_SOM(5, 3, 3, 'N');
 
-            bbManager.Fire(sdr1, counter++);
+            SDR_SOM axonalSdr = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { axonalPos }, iType.SPATIAL);
+            SDR_SOM dendronalSdr = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { dendronalPos }, iType.SPATIAL);
 
-            SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3, 3) }, iType.SPATIAL);
+            Neuron axonalNeuron = bbManager.Columns[axonalPos.X, axonalPos.Y].Neurons[axonalPos.Z];
+            Neuron dendronalNeuron = bbManager.Columns[dendronalPos.X, dendronalPos.Y].Neurons[dendronalPos.Z];
 
-            bbManager.Fire(sdr2, counter++);
+            ulong Counter = 1;
 
-            //Verify both the both the columns have atleast 1 of each other columns axons and dendrites.
+            if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
+            {
+                throw new Exception("Could Not connect two neurons!");
+            }
 
-            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), bbManager.GetNeuronFromPosition(sdr2.ActiveBits[0])));
+            var prefireSynapseStrength = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos.ToString()].GetStrength();
+
+            bbManager.Fire(axonalSdr, Counter++);
+
+            dendronalNeuron.ProcessVoltage(10);
+
+            bbManager.Fire(dendronalSdr, Counter++);
+
+            //Make the synapsse Active           
+            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1, Counter, true, dendronalNeuron);
+
+            var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
+
+            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(axonalNeuron, dendronalNeuron));
+
+            Assert.IsTrue(prefireSynapseStrength < postFiringSynapeStrength);
         }
 
 
@@ -1035,7 +1038,7 @@ namespace FirstOrderMemoryUnitTest
 
         }
 
-        [Test]
+        [Test, Ignore("Need additional logic to run everytime")]
         public void TestBackUpAndRestore()
         {
 

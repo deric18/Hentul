@@ -73,6 +73,8 @@
 
         private uint num_continuous_burst;
 
+        private uint NumberOfColumnsThatBurstLastCycle;
+
         private bool IsBurstOnly;
 
         private bool includeBurstLearning;
@@ -138,6 +140,7 @@
 
         public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearning = false)
         {
+            this.NumberOfColumnsThatBurstLastCycle = 0;
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
 
@@ -532,6 +535,8 @@
                                 num_continuous_burst++;
 
                                 TotalBurstFire++;
+
+                                NumberOfColumnsThatBurstLastCycle++;
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
@@ -738,6 +743,25 @@
             }
 
             // Once this is called , its end of training , this is one composite pattern for the object.
+        }
+
+        public List<Position_SOM> PreFire()
+        {
+            List<Position_SOM> toRet = new List<Position_SOM>();
+            for (int i = 0; i < X; i++)
+            {
+                for (int j = 0; j < Y; j++)
+                {
+                    foreach (var neuron in Columns[i, j].Neurons)
+                    {
+                        if (neuron.Voltage > 49 || neuron.CurrentState == NeuronState.PREDICTED)
+                        {
+                            toRet.Add(neuron.NeuronID);
+                        }
+                    }
+                }
+            }
+            return toRet;
         }
 
         public void FireBlank(ulong currentCycle)
@@ -1396,16 +1420,7 @@
         }
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
-        {            
-            //if (cType == ConnectionType.DISTALDENDRITICNEURON)
-            //{
-            //    if(DendriticNeuron.NeuronID.X == 2 && DendriticNeuron.NeuronID.Y == 8 && DendriticNeuron.NeuronID.Z == 5 && AxonalNeuron.NeuronID.X == 5 && AxonalNeuron.NeuronID.Y == 1 && AxonalNeuron.NeuronID.Z == 4)
-            //    {
-            //        bool breakpoint = false;
-            //        breakpoint = true;
-            //    }
-            //}
-
+        {           
             //Check & Bounds
             if (AxonalNeuron == null || DendriticNeuron == null)
             {
@@ -1432,15 +1447,16 @@
             }
 
 
+
             //Check For OverConnecting Neurons
-            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) &&  ( (DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA)))
+            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT )
             {
                 Console.WriteLine("WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
                 WriteLogsToFile(" WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
 
                 PruneSingleNeuron(DendriticNeuron);
 
-                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA))
+                if (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA)
                 {
                     Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
                     WriteLogsToFile("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
@@ -1452,9 +1468,9 @@
 
 
             //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
-            bool IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
+            ConnectionRemovalReturnType IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
 
-            if (IsAxonalConnectionSuccesful)
+            if (IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.HARDFALSE)
             {
                 bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, logfilename, cType, IsActive);
 
@@ -1470,24 +1486,35 @@
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
                 {
-                    if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
-                    {
-                        Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());                        
-                    }
+                    var returnType = AxonalNeuron.RemoveAxonalConnection(DendriticNeuron);
 
-                    throw new InvalidOperationException(" ERROR :: ConnectoTwoNeurons :: Axonal Connection added but unable to add Dendritic Connection for Neuron " + DendriticNeuron.ToString());
+                    if (returnType == ConnectionRemovalReturnType.TRUE)
+                    {
+                    }
+                    else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
+                    {
+                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                        throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                    }
+                    else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
+                    {
+                        if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
+                        {
+                            Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                            WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                            throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
+                        }
+                    }
                 }
 
                 return true;
             }
-            else
+            else if(IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.SOFTFALSE)
             {
-
+                //Need investigation as why the same connection is tried twice
             }
 
-            return false;
+            return false;            
         }
 
         public bool CheckifBothNeuronsAreSameOrintheSameColumn(Neuron neuron1, Neuron neuron2) =>
@@ -1714,8 +1741,8 @@
 
                 foreach (var pos in incomingPattern.ActiveBits)
                 {
-                    if(pos.W == 'W')
-                    {                        
+                    if (pos.W == 'W')
+                    {
                         WriteLogsToFile("EXCEPTION :: ValidateInput :: Incoming input has temporal and apical positions whil input Pattern Type is spatial");
                         throw new InvalidCastException("Incoming input has temporal and apical positions whil input Pattern Type is spatial");
                     }
@@ -1731,11 +1758,13 @@
                     //Thread.Sleep(2000);
                 }
 
-                foreach (var input in incomingPattern.ActiveBits)
+                var posList = TransformTemporalCoordinatesToSpatialCoordinates(incomingPattern.ActiveBits as List<Position_SOM>);
+
+                foreach (var input in posList)
                 {
-                    if (input.X >= X || input.Y >= Z)   //Verified!
+                    if (input.NeuronID.Y >= Y || input.NeuronID.Z >= Z)   //Verified!
                     {
-                        throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceeding bounds!");
+                        throw new InvalidOperationException("EXCEPTION :: Invalid Data for Temporal Pattern exceding bounds!");
                     }
                 }
 
@@ -1897,11 +1926,27 @@
 
                         if (axonalNeuron.AxonalList.TryGetValue(prunableNeuron.NeuronID.ToString(), out var connection))
                         {
-                            if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == ConnectionRemovalReturnType.HARDFALSE)
-                            {
-                                Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
-                                throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
-                            }
+                            var returnType = axonalNeuron.RemoveAxonalConnection(prunableNeuron);
+
+                            if (returnType == ConnectionRemovalReturnType.TRUE)
+                                if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == ConnectionRemovalReturnType.HARDFALSE)
+                                {
+                                    {
+                                        Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
+                                        throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
+                                    }
+                                }
+                                else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
+                                {
+                                    WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                    //throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                }
+                                else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
+                                {
+                                    Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                    WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                    throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
+                                }
                         }
                         else
                         {
@@ -1970,6 +2015,8 @@
                         }
                     }
             }
+
+            NumberOfColumnsThatBurstLastCycle = 0;
 
             NumberOfColumnsThatFiredThisCycle = 0;
 
@@ -2141,8 +2188,12 @@
             // T : (x,y, z) => (0,y,x)
             // Dont make any changes without understanding this Co mpletely !! Burned hands 
 
+            int counter = 0;
+
             for (int i = 0; i < Y; i++)
             {
+                counter = 0;
+
                 for (int j = 0; j < Z; j++)
                 {
 
@@ -2153,7 +2204,8 @@
                     {
                         try
                         {
-                            ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL);
+                            ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true);
+                            counter++;
                         }
                         catch (Exception e)
                         {
@@ -2165,6 +2217,8 @@
                     }
                 }
             }
+
+            int breakpoint = 1;
         }
 
         public void AddNeuronListToNeuronsFiringThisCycleList(List<Neuron> neuronToAddList)
@@ -2198,7 +2252,7 @@
 
                     for (int k = 0; k < Z; k++)
                     {
-                        if(ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL) == false)
+                        if(ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == false)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
@@ -2498,6 +2552,7 @@
                 }
             }
         }
+
 
         private void WriteLogsToFile(string logline)
         {

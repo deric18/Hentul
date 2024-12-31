@@ -394,7 +394,7 @@
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
-                    motorOutput = HCAccessor.PredictObject(CycleNum,firingSensei,null, isMock);
+                    motorOutput = HCAccessor.PredictObject(firingSensei,null, isMock);
                 }
             }
 

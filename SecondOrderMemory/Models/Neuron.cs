@@ -3,6 +3,7 @@
 
     using static SecondOrderMemory.Models.BlockBehaviourManager;
     using Common;
+    using System.Data;
 
     /// <summary>
     /// Need to support 2 API's
@@ -328,11 +329,6 @@
         public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
         {
 
-            //if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
-            //{
-            //    bool bp = true;
-            //}
-
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
@@ -378,33 +374,23 @@
             }
             else
             {
-                if ((ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
+                if (ProximoDistalDendriticList.Count >= 1000)
                 {
 
-                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
-                    WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString(), filename);
+                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
+                    WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count, filename);
 
-                    Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
-                    WriteLogsToFile(" Total DistalDendritic Count : " + NeuronID.ToString(), filename);
                     //Thread.Sleep(1000);
                 }
 
-
-
                 ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive));                
-                
-                
-                if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
-                {
-                    BlockBehaviourManager.totalDendronalConnections++;                    
-                }
-
+                                                
                 return true;
             }            
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schema, bool IsActive = false)
+        public ConnectionRemovalReturnType AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schemaType, bool IsActive = false)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -418,16 +404,24 @@
 
                 //synapse.IncrementHitCount();
 
-                Console.WriteLine(schema.ToString() + "INFO :: Axon already connected to Neuron");
+                Console.WriteLine(schemaType.ToString() + "INFO :: Axon already connected to Neuron");
 
-                return true;
+                return ConnectionRemovalReturnType.SOFTFALSE;
             }
             else
             {
 
+                if (ntype.Equals(NeuronType.NORMAL) && ( AxonalList.Count >= 400 || ProximoDistalDendriticList.Count >= 1000))
+                {
+                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
+                    Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
+                    return ConnectionRemovalReturnType.SOFTFALSE;
+                    //Thread.Sleep(1000);
+                }
+
                 AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive));                
 
-                return true;
+                return ConnectionRemovalReturnType.TRUE;
             }
         }
 
@@ -528,7 +522,7 @@
         NORMAL
     }
 
-    internal enum ConnectionRemovalReturnType
+    public enum ConnectionRemovalReturnType
     {
         TRUE,
         HARDFALSE,

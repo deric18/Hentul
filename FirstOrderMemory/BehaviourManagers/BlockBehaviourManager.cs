@@ -722,6 +722,7 @@
                         throw new InvalidOperationException("Invalid Input Pattern Type");
                     }
             }
+
             if (IsBurstOnly)
             {
                 if (BurstCache.Count == 0)
@@ -1338,7 +1339,7 @@
                         Console.WriteLine("Wire Case 4 Picked Up!!");
                     }
 
-                    if (Layer.Equals(LayerType.Layer_4) ? false : includeBurstLearning4) 
+                    if (includeBurstLearning4) 
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
@@ -1383,7 +1384,7 @@
                     }
 
                     //Boost All the Bursting Neurons
-                    if (Layer.Equals(LayerType.Layer_4) ? false : includeBurstLearning4)
+                    if (includeBurstLearning4)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                     //Boost the Non Bursting Neurons
@@ -1606,9 +1607,12 @@
                     }
                     else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                     {
-                        Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                        throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());                        
+                        if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
+                        {
+                            Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                            WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                            throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
+                        }
                     }                    
                 }
 

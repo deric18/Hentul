@@ -9,6 +9,8 @@
 
         #region  VARIABLES & CONSTRUCTORS
 
+        public Graph Graph { get; private set; }
+
         public Dictionary<string, RecognisedEntity> Objects { get; private set; }
 
         public UnrecognisedEntity? CurrentObject { get; private set; }
@@ -41,7 +43,7 @@
 
         public HippocampalComplex2(string firstLabel, bool Ismock = false, NetworkMode nMode = NetworkMode.TRAINING)
         {
-
+            Graph = Graph.GetInstance();
             Objects = new Dictionary<string, RecognisedEntity>();
             CurrentObject = new UnrecognisedEntity();
             CurrentObject.Label = firstLabel;
@@ -70,7 +72,6 @@
         #region PUBLIC API
 
 
-
         public void AddNewSensationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
         {
             if (networkMode == NetworkMode.TRAINING)
@@ -83,17 +84,8 @@
                 }
             }
         }
-
-        // Gets called by Orchestrator.
-        /// <summary>
-        /// Need to define specfic limits for 
-        /// 1. object sensei count
-        /// 2. Number of cycles 
-        /// </summary>
-        /// <param name="sensei"></param>
-        /// <param name="prediction"></param>
-        /// <exception cref="InvalidOperationException"></exception>
-        public Position2D PredictObject(ulong cycleNum, Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
+        
+        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
         {
             string objectLabel = null;
             Position2D toReturn = null;
@@ -143,6 +135,20 @@
             return toReturn;
         }
 
+        public Position2D PredictObject2(Sensation_Location sensei, Sensation_Location? prediction, List<string> predictedObjects)
+        {
+            string objectLabel = null;
+            Position2D toReturn = null;
+            Sensation_Location orginalSensei = sensei;
+
+            //Check graph for the list labels SOM Layer is suspecting for , if more than 2 
+
+
+
+
+            return toReturn;
+        }
+
         public void DoneWithTraining()
         {
             ConvertUnrecognisedObjectToRecognisedObject();
@@ -156,8 +162,8 @@
             }
         }
 
-        
 
+        #region UTILITY & MOCK 
         public RecognisedEntity GetCurrentPredictedObject()
         {
             if (ObjectState == RecognitionState.Recognised)
@@ -221,6 +227,11 @@
         }
 
         #endregion
+
+        #endregion
+
+
+
 
         #region BACKUP & RESTORE
 
@@ -464,9 +475,9 @@
     }
 
     public enum RecognitionState
-{
-    None,
-    IsBeingVerified,
-    Recognised
-}
+    {
+        None,
+        IsBeingVerified,
+        Recognised
+    }
 }
