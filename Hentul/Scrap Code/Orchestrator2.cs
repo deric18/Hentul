@@ -79,7 +79,7 @@ namespace Hentul
 
             for (int i = 0; i < numBBMNeededForFOM; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(10, 10, 10, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManager(10, 10, 10, LayerType.Layer_4, LogMode.BurstOnly);
             }
 
             somL3a = new BlockBehaviourManager(x1, 10, 4);

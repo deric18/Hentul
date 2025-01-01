@@ -2,21 +2,17 @@
 {
     using FirstOrderMemory.Models;
     using FirstOrderMemory.BehaviourManagers;
-    using System.Configuration;
-    using System.Diagnostics;
-    using Common;
-    using FirstOrderMemory.Models.Encoders;
+    using SecondOrderMemory.Models;    
+    using Common;    
     using System.Runtime.InteropServices;
     using System;
     using Hentul.Hippocampal_Entorinal_complex;
-    using System.Drawing.Imaging;
-    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using System.Drawing.Imaging;    
     using System.Drawing;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
-    using System.Diagnostics.Metrics;
-    using System.Reflection;
-
+    using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;
     public class Orchestrator
     {
 
@@ -61,11 +57,11 @@
 
         int X, NumColumns, Z;
 
-        public BlockBehaviourManager[] fomBBM { get; private set; }
+        public FBBM[] fomBBM { get; private set; }
 
-        public BlockBehaviourManager somBBM_L3B { get; private set; }
+        public SBBM somBBM_L3B { get; private set; }
 
-        public BlockBehaviourManager somBBM_L3A { get; private set; }
+        public SBBM somBBM_L3A { get; private set; }
 
         public HippocampalComplex2 HCAccessor { get; private set; }
 
@@ -136,7 +132,7 @@
                 throw new InvalidDataException("Number Of FOMM BBMs needed should always be 100, it throws off SOM Schema of 1250" + range.ToString());
             }
 
-            fomBBM = new BlockBehaviourManager[NumBBMNeeded];
+            fomBBM = new FBBM[NumBBMNeeded];
 
             X = 1250;
             
@@ -155,7 +151,7 @@
 
                 for (int i = 0; i < NumBBMNeeded; i++)
                 {
-                    fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.None);
+                    fomBBM[i] = new FBBM(NumColumns, NumColumns, Z, LayerType.Layer_4, Common.LogMode.None);
                 }
 
                 if (isMock)
@@ -163,9 +159,9 @@
                 else
                     ImageIndex = 0;
 
-                somBBM_L3A = new BlockBehaviourManager(X, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.None);
+                somBBM_L3A = new SBBM(X, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
 
-                somBBM_L3B = new BlockBehaviourManager(X, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None);
+                somBBM_L3B = new SBBM(X, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
 
                 LoadFOMnSOM();
             }
@@ -230,6 +226,7 @@
 
             return _orchestrator;
         }
+
         public void LoadFOMnSOM()
         {
 
@@ -303,9 +300,7 @@
             SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
             SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
 
-            #region STEP 1
-
-            BlockBehaviourManager fom;
+            #region STEP 1            
 
             Mapper.ParseBitmap(greyScalebmp);
 
@@ -988,12 +983,12 @@
         {
             for (int i = 0; i < fomBBM.Length; i++)
             {
-                fomBBM[i] = BlockBehaviourManager.Restore(i.ToString(), LayerType.Layer_4);
+                fomBBM[i] = FBBM.Restore(i.ToString(), LayerType.Layer_4);
             }
 
-            somBBM_L3B = BlockBehaviourManager.Restore("SOML3B", LayerType.Layer_3B);
+            somBBM_L3B = SBBM.Restore("SOML3B", LayerType.Layer_3B);
 
-            somBBM_L3A = BlockBehaviourManager.Restore("SOML3A", LayerType.Layer_3A);
+            somBBM_L3A = SBBM.Restore("SOML3A", LayerType.Layer_3A);
 
             _orchestrator.HCAccessor = HippocampalComplex2.Restore();
         }

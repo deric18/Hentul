@@ -1,0 +1,26 @@
+﻿namespace Common
+{
+    public enum LayerType
+    {
+        Layer_4,
+        Layer_3A,
+        Layer_3B,
+        UNKNOWN
+    }
+
+    public enum SchemaType
+    {
+        FOMSCHEMA,
+        SOMSCHEMA,
+        INVALID
+    }
+
+    public enum LogMode
+    {
+        All,
+        Trace,
+        BurstOnly,
+        Info,
+        None,
+    }
+}

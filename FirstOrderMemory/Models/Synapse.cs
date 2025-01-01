@@ -5,11 +5,17 @@ namespace FirstOrderMemory.Models
     public class Synapse
     {
         public Guid Id { get; private set; }
+
+        public string SupportedLabels { get; private set; }
+
         public string AxonalNeuronId { get; private set; }
+
         public string DendronalNeuronalId { get; private set; }
+
         public ulong lastFiredCycle {  get; private set; }
 
         public ulong lastPredictedCycle { get; private set; }
+
         public bool IsActive { get; private set; }
 
         public ConnectionType cType { get; private set; }
@@ -20,7 +26,8 @@ namespace FirstOrderMemory.Models
 
         private uint _strength {  get; set; } 
 
-        public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong lastFiredCycle, uint strength, ConnectionType cType, bool isActive = false)
+
+        public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong lastFiredCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
             Id = Guid.NewGuid();
             AxonalNeuronId = axonalNeuronId;
@@ -40,6 +47,11 @@ namespace FirstOrderMemory.Models
                 IsActive = isActive;
                 PredictiveHitCount = 1;
                 FiringHitCount = 0;
+            }
+
+            if(objectLabel != null)
+            {
+                SupportedLabels =  objectLabel;
             }
         }
 

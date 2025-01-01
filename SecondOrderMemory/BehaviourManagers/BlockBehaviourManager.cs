@@ -5,6 +5,8 @@
     using System.Linq;
     using System;
     using System.ComponentModel;
+    using System.Text.Json.Serialization;
+    using Newtonsoft.Json;
 
     public class BlockBehaviourManager
     {
@@ -104,10 +106,14 @@
 
         private bool IgnorePostCycleCleanUp;
 
+        public NetworkMode NetWorkMode { get; private set; }
+
+        public string CurrentObjectLabel { get; private set; }
+
         #endregion
 
         #region CONSTANTS
-        
+
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
@@ -138,7 +144,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearning = false)
+        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, string objectLabel = null, bool includeBurstLearning = false)
         {
             this.NumberOfColumnsThatBurstLastCycle = 0;
 
@@ -224,6 +230,23 @@
             _firingBlacnkStreak = 0;
 
             this.includeBurstLearning = includeBurstLearning;
+
+            NetWorkMode = NetworkMode.TRAINING;
+
+            CurrentObjectLabel = objectLabel;
+        }
+
+        public void BeginTraining(string Label)
+        {
+            NetWorkMode = NetworkMode.TRAINING;
+            CurrentObjectLabel = Label;
+        }
+
+
+        public void DoneTraining()
+        {
+            NetWorkMode = NetworkMode.PREDICTION;
+            CurrentObjectLabel = null;
         }
 
         public void Init(int bbmID)
@@ -469,11 +492,69 @@
             xmlDocument?.Save(backupDirectory + filename);
         }
 
-        public void RestoreFromBackUp(string filename)
+        public static BlockBehaviourManager Restore(string filename, LayerType layer)
         {
-            var xmlDocument = new XmlDocument();
+            string backupDirectory;
+            int X, Y, Z;
 
-            xmlDocument.LoadXml(filename);
+            if (layer.Equals(LayerType.Layer_4))
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+                X = 10; Y = 10; Z = 4;
+            }
+            else if (layer.Equals(LayerType.Layer_3A) || layer.Equals(LayerType.Layer_3B))
+            {
+                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+                X = 1250; Y = 10; Z = 4;
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid Data");
+            }
+
+            backupDirectory += filename;
+
+            BlockBehaviourManager bbManager = new BlockBehaviourManager(X, Y, Z, layer, LogMode.BurstOnly);
+
+            char delimater = '|';
+
+            string[] jsonArray = File.ReadAllText(backupDirectory + filename).Split(delimater);
+
+            List<Neuron> neuronList = new List<Neuron>();
+
+            //NeuronConverter neuronConverter = new NeuronConverter();
+
+            //foreach (var str in jsonArray)
+            //{
+            //    neuronList.Add(JsonConvert.DeserializeObject<Neuron>(str, new JsonConverter[] { neuronConverter }));
+            //}
+
+
+            //for (int i = 0; i < X; i++)
+            //{
+            //    for (int j = 0; j < Y; j++)
+            //    {
+            //        try
+            //        {
+            //            bbManager.Columns[i, j] = new Column(i, j, Z, i, neuronList.Where(item => item.NeuronID.X == i && item.NeuronID.Y == j && item.nType == NeuronType.NORMAL).ToList());
+            //            bbManager.ApicalLineArray[i, j] = neuronList.FirstOrDefault(item => item.NeuronID.X == i && item.NeuronID.Y == j && item.NeuronID.W == 'A' && item.nType == NeuronType.APICAL);
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            int breakpoint = 0;
+            //        }
+            //    }
+            //}
+
+            //for (int i = 0; i < Y; i++)
+            //{
+            //    for (int j = 0; j < Z; j++)
+            //    {
+            //        bbManager.TemporalLineArray[i, j] = neuronList.FirstOrDefault(item => item.NeuronID.X == 0 && item.NeuronID.Y == i && item.NeuronID.Z == j && item.NeuronID.W == 'T' && item.nType == NeuronType.TEMPORAL);
+            //    }
+            //}
+
+            return bbManager;
         }
 
         #endregion
@@ -2188,15 +2269,10 @@
             // T : (x,y, z) => (0,y,x)
             // Dont make any changes without understanding this Co mpletely !! Burned hands 
 
-            int counter = 0;
-
             for (int i = 0; i < Y; i++)
             {
-                counter = 0;
-
                 for (int j = 0; j < Z; j++)
                 {
-
                     if (this.TemporalLineArray[i, j] == null)
                         this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BBMID, NeuronType.TEMPORAL);
 
@@ -2205,7 +2281,6 @@
                         try
                         {
                             ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true);
-                            counter++;
                         }
                         catch (Exception e)
                         {
@@ -2217,8 +2292,6 @@
                     }
                 }
             }
-
-            int breakpoint = 1;
         }
 
         public void AddNeuronListToNeuronsFiringThisCycleList(List<Neuron> neuronToAddList)
@@ -2562,21 +2635,7 @@
 
         #endregion
 
-        #region ENUMS
-        public enum LayerType
-        {
-            Layer_4,
-            Layer_3A,
-            Layer_3B,
-            UNKNOWN
-        }
-
-        public enum SchemaType
-        {
-            FOMSCHEMA,
-            SOMSCHEMA,
-            INVALID
-        }
+        #region ENUMS    
 
         public enum BlockCycle
         {
@@ -2585,16 +2644,7 @@
             POLOARIZED,
             FIRING,
             CLEANUP
-        }
-
-        public enum LogMode
-        {
-            All,
-            Trace,
-            BurstOnly,            
-            Info,
-            None,
-        }
+        }        
 
         #endregion
     }

@@ -16,7 +16,7 @@ namespace FirstOrderMemoryUnitTest
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.None, true);
+            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_4, LogMode.None, true);
 
             bbManager.Init(1);
 
@@ -60,7 +60,7 @@ namespace FirstOrderMemoryUnitTest
 
             var extraNeuron = bbManager.Columns[2, 3].Neurons[2];            
 
-            extraNeuron.ProcessVoltage(150, 0, BlockBehaviourManager.LogMode.All);
+            extraNeuron.ProcessVoltage(150, 0, LogMode.All);
 
             bbManager.Fire(spatialSdr);
 
@@ -1044,7 +1044,7 @@ namespace FirstOrderMemoryUnitTest
 
             //bbManager.BackUp("1.json");
 
-            var restorebbManager = BlockBehaviourManager.Restore("1.json", BlockBehaviourManager.LayerType.Layer_4);
+            var restorebbManager = BlockBehaviourManager.Restore("1.json", LayerType.Layer_4);
 
             //Assert.DoesNotThrow(() => new Exception());
         }

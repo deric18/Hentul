@@ -1,12 +1,10 @@
-﻿using Common;
-
-namespace FirstOrderMemory.Models
+﻿namespace Common
 {
     public class SDR_SOM : SDR
     {
         public new List<Position_SOM> ActiveBits;
 
-        public SDR_SOM(int length, int breadth, List<Position_SOM> activeBits, iType type = iType.SPATIAL) : base(length,breadth, type)
+        public SDR_SOM(int length, int breadth, List<Position_SOM> activeBits, iType type = iType.SPATIAL) : base(length, breadth, type)
         {
             ActiveBits = activeBits;
         }
@@ -33,10 +31,10 @@ namespace FirstOrderMemory.Models
             {
                 if (compareXandYonly == false)
                 {
-                    if (ActiveBits.Where(B => B.X == pos.X && B.Y == pos.Y && B.Z == pos.Z).Count() == 0)                    
-                        return false;                    
+                    if (ActiveBits.Where(B => B.X == pos.X && B.Y == pos.Y && B.Z == pos.Z).Count() == 0)
+                        return false;
                 }
-                else if(compareXandYonly == true)
+                else if (compareXandYonly == true)
                 {
                     if (ActiveBits.Where(B => B.X == pos.X && B.Y == pos.Y).Count() == 0)
                         return false;
@@ -56,9 +54,9 @@ namespace FirstOrderMemory.Models
 
             List<Position_SOM> activeBitsListWithoutExceptions = new List<Position_SOM>();
 
-            foreach(var item in ActiveBits)
+            foreach (var item in ActiveBits)
             {
-                if(!exceptionList.Where(x => x.X == item.X && x.Y == item.Y).Any())
+                if (!exceptionList.Where(x => x.X == item.X && x.Y == item.Y).Any())
                 {
                     activeBitsListWithoutExceptions.Add(item);
                 }
@@ -66,7 +64,7 @@ namespace FirstOrderMemory.Models
 
             foreach (var pos in smallerSDR.ActiveBits)
             {
-                               
+
                 if (activeBitsListWithoutExceptions.Where(B => B.X == pos.X && B.Y == pos.Y).Count() == 0)       // I  CHECK THE ENTIRE COLUMN FOR THIS PATTERN
                 {
                     return false;

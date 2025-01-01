@@ -1,12 +1,10 @@
 ﻿namespace Hentul
-{
-    using FirstOrderMemory.Models;
+{    
     using FirstOrderMemory.BehaviourManagers;
     using System.Configuration;
     using System.Diagnostics;
     using Common;
-    using FirstOrderMemory.Models.Encoders;
-    using SixLabors.ImageSharp;
+    using Common;
     using System.Drawing;
 
     internal class Orchestrator3
@@ -102,7 +100,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4 ,BlockBehaviourManager.LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, LayerType.Layer_4 , Common.LogMode.BurstOnly);
             }
 
             if (isMock)

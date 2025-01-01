@@ -41,7 +41,7 @@
 
         public int NumBBMNeeded { get; private set; }
 
-        private bool LogMode { get; set; }
+        private bool LogMode1 { get; set; }
 
         public bool IsMock { get; private set; }
 
@@ -111,7 +111,7 @@
 
             numPixelsProcessedPerBBM = 20;
 
-            LogMode = false;
+            LogMode1 = false;
 
             double numerator = (2 * NumPixelsToProcessPerBlock) * (2 * NumPixelsToProcessPerBlock);
 
@@ -150,7 +150,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, BlockBehaviourManager.LayerType.Layer_4, BlockBehaviourManager.LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, LayerType.Layer_4, LogMode.BurstOnly);
             } 
             
             if (isMock)

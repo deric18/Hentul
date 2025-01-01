@@ -1,7 +1,6 @@
 ﻿namespace Hentul.UT
-{
-    using FirstOrderMemory.Models;
-
+{    
+    using Common;
     public class LocationNPositions
     {
         public List<Position_SOM>  Positions { get; private set; }

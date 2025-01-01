@@ -15,7 +15,7 @@ namespace SecondOrderMemoryUnitTest
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None, true);
+            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true);
 
             bbManager.Init(1);
 
@@ -801,7 +801,7 @@ namespace SecondOrderMemoryUnitTest
 
             var extraNeuron = bbManager.Columns[2, 3].Neurons[2];
 
-            extraNeuron.ProcessVoltage(150, 0, BlockBehaviourManager.LogMode.All);
+            extraNeuron.ProcessVoltage(150, 0, LogMode.All);
 
             bbManager.Fire(spatialSdr);
 
@@ -1045,7 +1045,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.BackUp("1.xml");
 
-            bbManager.RestoreFromBackUp("1.xml");
+            BlockBehaviourManager.Restore("1.xml", bbManager.Layer);
 
             Assert.DoesNotThrow(() => new Exception());
         }

@@ -1,15 +1,14 @@
-﻿using Common;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace FirstOrderMemory.Models
+namespace Common
 {
     public class Position_SOM : Position, IEqualityComparer<Position_SOM>, IComparable<Position>
     {
         public char W { get; private set; }
 
-        public Position_SOM(int x, int y, int z = 0, char w = 'N'): base(x, y, z)
+        public Position_SOM(int x, int y, int z = 0, char w = 'N') : base(x, y, z)
         {
-            W = w;           
+            W = w;
         }
 
         public static new Position_SOM ConvertStringToPosition(string key)
@@ -43,7 +42,7 @@ namespace FirstOrderMemory.Models
         public new string ToString()
         {
             return X.ToString() + "-" + Y.ToString() + "-" + Z.ToString() + "-" + W.ToString();
-        }           
+        }
 
         public bool Equals(Position_SOM? x, Position_SOM? y)
         {
@@ -68,8 +67,8 @@ namespace FirstOrderMemory.Models
                     return 1;
                 else
                 {
-                    if (Z > other.Z)                    
-                        return 1;   
+                    if (Z > other.Z)
+                        return 1;
                     else
                     {
                         if (X == other.X && Y == other.Y && Z == other.Z)

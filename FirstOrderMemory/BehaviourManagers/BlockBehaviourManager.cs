@@ -10,8 +10,7 @@
     [Serializable]
     public class BlockBehaviourManager
     {
-        #region VARIABLES
-        public LayerType Layer { get; private set; }
+        #region VARIABLES        
 
         public ulong CycleNum { get; private set; }
 
@@ -107,11 +106,13 @@
         private uint _firingBlacnkStreak;
 
         private bool IgnorePostCycleCleanUp;
+        
+        public LayerType Layer { get; private set; }        
 
         #endregion
 
         #region CONSTANTS
-        
+
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
@@ -297,7 +298,7 @@
 
                 Neuron neuron = col.Neurons[z];
 
-                toRet = neuron.InitProximalConnectionForDendriticConnection(i, j, k);
+                toRet = neuron.InitProximalDendriticConnection(i, j, k);
 
                 if(toRet == false)
                 {
@@ -327,6 +328,7 @@
 
             return toRet;
         }
+       
 
         public BlockBehaviourManager CloneBBM(int x)
         {
@@ -776,8 +778,6 @@
             {
                 //check if the synapse is active only then fire
 
-                //Console.WriteLine(" Firing Neuron : " + neuron.NeuronID.ToString());
-
                 neuron.Fire(CycleNum, Mode, logfilename);
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)
@@ -786,8 +786,6 @@
                 }
             }            
         }
-
-
 
         public SDR_SOM GetPredictedSDRForNextCycle(ulong currentCycle = 1)
         {            
@@ -2693,21 +2691,7 @@
         #endregion
 
         #region ENUMS
-        public enum LayerType
-        {
-            Layer_4,
-            Layer_3A,
-            Layer_3B,
-            UNKNOWN
-        }
-
-        public enum SchemaType
-        {
-            FOMSCHEMA,
-            SOMSCHEMA,
-            INVALID
-        }
-
+        
         public enum BlockCycle
         {
             INITIALIZATION,
@@ -2715,16 +2699,7 @@
             POLOARIZED,
             FIRING,
             CLEANUP
-        }
-
-        public enum LogMode
-        {
-            All,
-            Trace,
-            BurstOnly,            
-            Info,
-            None,
-        }
+        }      
 
         #endregion
     }

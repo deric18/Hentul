@@ -1,7 +1,9 @@
 ﻿namespace FirstOrderMemory.Models
 {
+    using Common;
+
     public class Segment
-    {
+    {        
         //Todo: Implement segment into BBM.
         private const uint PRE_SYNAPTIC_STRENGTH = 1;
         private const uint MAX_POST_SYNAPTIC_STRENGTH = 10;

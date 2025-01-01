@@ -16,7 +16,7 @@
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.None, true);
+            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_3B, LogMode.None, true);
 
             bbManager.Init(1);
 

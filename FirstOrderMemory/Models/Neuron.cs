@@ -1,6 +1,6 @@
 ﻿namespace FirstOrderMemory.Models
 {
-
+    using Common;
     using FirstOrderMemory.BehaviourManagers;
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
     using System.Text.Json.Serialization;
@@ -60,6 +60,7 @@
         public int flag { get; set; }
 
         public int Voltage { get; private set; }       
+
 
         public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
@@ -225,7 +226,7 @@
             throw new InvalidOperationException();
         }
         
-        public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
+        public bool InitProximalDendriticConnection(int i, int j, int k)
         {                        
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
             return AddNewProximalDendriticConnection(key);
@@ -246,6 +247,9 @@
         {
             File.AppendAllText(logfilename, logline + "\n");
         }
+
+
+        #region Schema Based Connections
 
         private bool AddNewAxonalConnection(string key)
         {
@@ -326,8 +330,12 @@
             }            
         }
 
+        #endregion
+
+        #region Wiring
+
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
         {
 
             //if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
@@ -368,10 +376,10 @@
 
                         return true;
                     }
-                }
-                
+                }                
             }
                         
+            // Increment Hit Count!
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
                 synapse.IncrementHitCount(CycleNum);
@@ -380,7 +388,7 @@
             }
             else
             {
-                if ((ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
+                if (nTypeSource.Equals(NeuronType.NORMAL) && (ProximoDistalDendriticList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA))
                 {
 
                     Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
@@ -407,7 +415,7 @@
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schemaType, bool IsActive = false)
+        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, SchemaType schemaType, bool IsActive = false)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -427,7 +435,7 @@
             }
             else
             {
-                if ((AxonalList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
+                if ((AxonalList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA))
                 {
                     Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
@@ -440,6 +448,9 @@
                 return true;
             }
         }
+
+
+        #endregion
 
         internal ConnectionRemovalReturnType RemoveAxonalConnection(Neuron dendronalNeuron)
         {

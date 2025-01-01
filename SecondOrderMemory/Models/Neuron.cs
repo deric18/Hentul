@@ -1,9 +1,6 @@
 ﻿namespace SecondOrderMemory.Models
 {
-
-    using static SecondOrderMemory.Models.BlockBehaviourManager;
-    using Common;
-    using System.Data;
+    using Common;    
 
     /// <summary>
     /// Need to support 2 API's
@@ -326,7 +323,7 @@
         }
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
         {
 
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
@@ -390,7 +387,7 @@
         }
 
         //Gets called for the axonal end of the neuron
-        public ConnectionRemovalReturnType AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schemaType, bool IsActive = false)
+        public ConnectionRemovalReturnType AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, SchemaType schemaType, bool IsActive = false)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))

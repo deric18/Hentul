@@ -2,6 +2,7 @@
 {
     using FirstOrderMemory.BehaviourManagers;
     using NUnit.Framework;
+    using Common;
     
     public class NetworkTestUT
     {
@@ -14,7 +15,7 @@
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, BlockBehaviourManager.LayerType.Layer_4);
+            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_4);
 
             bbManager.Init(1);            
         }

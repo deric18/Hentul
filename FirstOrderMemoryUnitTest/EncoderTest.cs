@@ -1,8 +1,8 @@
 ﻿namespace FirstOrderMemoryUnitTest
-{
-    using FirstOrderMemory.Models;
+{    
     using NUnit.Framework;
-    using FirstOrderMemory.Models.Encoders;    
+    using FirstOrderMemory.Models.Encoders;
+    using Common;
     
     public class EncoderTest
     {
