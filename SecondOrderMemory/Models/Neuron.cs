@@ -32,11 +32,12 @@
 
         #region VARIABLES && CONSTRUCTORS
 
+
         private ulong redundantCounter = 0;
 
         public uint PruneCount { get; private set; }
         
-        public Position BBMId { get; private set; }
+        public int BBMId { get; private set; }
 
         public Position_SOM NeuronID { get; private set; }
 
@@ -49,13 +50,13 @@
         /// <summary>
         /// Key is always Dendronal Neurons ID && Value is Synapse
         /// </summary>
-        public Dictionary<string, Synapse> AxonalList { get; private set; }
+        public Dictionary<Tuple<string,string>, Synapse> AxonalList { get; private set; }
 
 
         /// <summary>
         /// Key is always Axonal Neuronal ID && Value is Synapse
         /// </summary>
-        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }                
+        public Dictionary<Tuple<string,string>, Synapse> ProximoDistalDendriticList { get; private set; }                
 
         //public List<Segment>? Segments { get; private set; } = null;
 
@@ -67,12 +68,12 @@
 
         public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
-            NeuronID = neuronId;            
-            BBMId = BBMId;
+            NeuronID = neuronId;
+            this.BBMId = BBMId;
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();            
-            ProximoDistalDendriticList = new Dictionary<string, Synapse>();
-            AxonalList = new Dictionary<string, Synapse>();
+            ProximoDistalDendriticList = new Dictionary<Tuple<string, string>, Synapse>();
+            AxonalList = new Dictionary<Tuple<string, string>, Synapse>();
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
             flag = 0;
@@ -242,6 +243,9 @@
 
         #region CONNECTOR LOGIC
 
+
+        #region SCHEMA BASED CONNECTIONS
+
         private bool AddNewAxonalConnection(string key)
         {
             try
@@ -289,7 +293,7 @@
             return true;
         }
 
-        private bool AddNewProximalDendriticConnection(string key)        
+        private bool AddNewProximalDendriticConnection(string key)
         {
             try
             {
@@ -321,6 +325,10 @@
                 int bp = 1;
             }            
         }
+
+        #endregion
+
+        #region Wiring Connector Logic
 
         //Gets Called for Dendritic End of the Neuron
         public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
@@ -444,6 +452,7 @@
             return ConnectionRemovalReturnType.HARDFALSE;
         }
 
+        #endregion
 
         #endregion
 

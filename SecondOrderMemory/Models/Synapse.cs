@@ -3,22 +3,28 @@
     public class Synapse
     {
         public Guid Id { get; private set; }
-        public string AxonalNeuronId { get; private set; }
-        public string DendronalNeuronalId { get; private set; }
-        public ulong lastFiredCycle {  get; private set; }
 
-        public ulong lastPredictedCycle { get; private set; }
-        public bool IsActive { get; private set; }
+        public HashSet<string> SupportedLabels { get; private set; }
+
+        public string AxonalNeuronId { get; private set; }
+
+        public string DendronalNeuronalId { get; private set; }
+
+        public Dictionary<string, ulong> lastFiredCycle {  get; private set; }
+
+        public Dictionary<string,ulong> lastPredictedCycle { get; private set; }
+
+        public Dictionary<string, bool> IsActive { get; private set; }
 
         public ConnectionType cType { get; private set; }
         
-        public int PredictiveHitCount { get; private set; }
+        public Dictionary<string, int> PredictiveHitCount { get; private set; }
 
-        public int FiringHitCount { get; private set; }
+        public Dictionary<string, int> FiringHitCount { get; private set; }
 
-        private uint _strength {  get; set; } 
+        private Dictionary<string, uint> _strength {  get; set; } 
 
-        public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong lastFiredCycle, uint strength, ConnectionType cType, bool isActive = false)
+        public Synapse(string axonalNeuronId, string dendriticNeuronId, Dictionary<string, ulong> lastFiredCycle, Dictionary<string, uint> strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
             Id = Guid.NewGuid();
             AxonalNeuronId = axonalNeuronId;
@@ -29,15 +35,20 @@
             this.cType = cType;
             if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
             {
-                IsActive = true;
-                PredictiveHitCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
-                FiringHitCount = 0;
+                IsActive = new Dictionary<string, bool>();
+                PredictiveHitCount = new Dictionary<string, int>();
+                FiringHitCount = new Dictionary<string, int>();
             }
             else
             {
-                IsActive = isActive;
-                PredictiveHitCount = 1;
-                FiringHitCount = 0;
+                IsActive = new Dictionary<string, bool>();
+                PredictiveHitCount = new Dictionary<string, int>();
+                FiringHitCount = new Dictionary<string, int>();
+            }
+
+            if (objectLabel != null)
+            {
+                SupportedLabels = new HashSet<string>() { objectLabel };
             }
         }
 
@@ -45,19 +56,24 @@
         {
             Console.WriteLine(" Axonal Neuron ID : " + AxonalNeuronId);
             Console.WriteLine(" Dendronal Neuron ID : " + DendronalNeuronalId);
-            Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle);
-            Console.WriteLine(" Active : " +  ( IsActive ? "Yes" : "NO") );
-            Console.WriteLine(" Stringeth : " + _strength.ToString() );
-            Console.WriteLine(" Connection Type : " + cType.ToString());
-            Console.WriteLine(" Firing Hit Count : " + FiringHitCount.ToString() + " \n " ); 
+
+            foreach (var label in SupportedLabels)
+            {
+                Console.WriteLine("Label : " + label);                
+                Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle[label]);
+                Console.WriteLine(" Active : " + (IsActive[label] ? "Yes" : "NO"));
+                Console.WriteLine(" Stringeth : " + _strength[label].ToString());
+                Console.WriteLine(" Connection Type : " + cType.ToString());
+                Console.WriteLine(" Firing Hit Count : " + FiringHitCount[label].ToString() + " \n ");
+            }
         }
 
-        public uint GetStrength()
+        public uint GetStrength(string label)
         {            
-            return _strength;
+            return _strength[label];
         }
 
-        public void IncrementHitCount(ulong currentCycleNum)
+        public void IncrementHitCount(ulong currentCycleNum, string label)
         {
 
             if (DendronalNeuronalId.ToString().Equals("5-3-0-N") && AxonalNeuronId.ToString().Equals("0-2-0-N"))
@@ -66,21 +82,23 @@
                 breakpoint = true;
             }
 
-            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
+            if (PredictiveHitCount.TryGetValue(label, out var predictivehitcount))
             {
-                if(IsActive == false) 
-                    IsActive = true;
+                if (predictivehitcount >= BlockBehaviourManager.DISTALNEUROPLASTICITY)
+                {
+                    if(IsActive[label] == false)
+                        IsActive[label] = true;
 
-                FiringHitCount++;
-                _strength++;
+                    FiringHitCount[label]++;
 
-                this.lastFiredCycle = currentCycleNum;
-            }
-            else
-            {
-                PredictiveHitCount++;
+                    _strength[label]++;
 
-                this.lastPredictedCycle = currentCycleNum;
+                    lastFiredCycle[label]++;
+                }
+                else
+                {
+                    PredictiveHitCount[label]++;
+                }
             }
         }
     }

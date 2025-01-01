@@ -238,10 +238,14 @@
 
         public void BeginTraining(string Label)
         {
+            if(Label == null | Label == string.Empty)
+            {
+                throw new InvalidDataException("Label cannot be empty!");
+            }
+
             NetWorkMode = NetworkMode.TRAINING;
             CurrentObjectLabel = Label;
         }
-
 
         public void DoneTraining()
         {
@@ -710,7 +714,7 @@
 
             Fire();
 
-            if (CurrentiType == iType.SPATIAL || IsCurrentApical || IsCurrentTemporal)
+            if (NetWorkMode.Equals(NetworkMode.TRAINING) && ( CurrentiType == iType.SPATIAL || IsCurrentApical || IsCurrentTemporal))
             {
                 Wire();
             }

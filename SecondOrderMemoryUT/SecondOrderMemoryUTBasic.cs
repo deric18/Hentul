@@ -94,13 +94,30 @@ namespace SecondOrderMemoryUnitTest
             Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
 
         }
-
+        
         public void TestFire()
         {
+            Dictionary<Tuple<string, string>, List<string>> dict = new Dictionary<Tuple<string, string>, List<string>>();
 
-            //Need to do this hack : as in the first cycle there are no predicted neurons
-            //bbManager.AddtoPredictedNeuronFromLastCycleMock(neuron2, neuron1);
+            Tuple<string, string> tuple = new Tuple<string, string>("first", "second");
+            List<string> val = new List<string>() { "Values" };
+            dict.Add(tuple, val);
+
+            if(dict.TryGetValue(tuple, out _))
+            {
+                bool breakpoint = true;
+            }
+
+            Tuple<string, string> tuple1 = new Tuple<string, string>("first", "Second");
+
+            if (dict.TryGetValue(tuple1, out _))
+            {
+                bool breakpoint = true;
+            }
+
+            int bp = 1;
         }
+
 
         [Test]
         public void TestAddNeuronListToNeuronsFiringThisCycleList()
