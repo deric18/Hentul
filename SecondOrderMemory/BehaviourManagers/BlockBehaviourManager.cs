@@ -1,12 +1,10 @@
 ﻿namespace SecondOrderMemory.Models
-{    
+{
     using Common;
     using System.Xml;
     using System.Linq;
     using System;
     using System.ComponentModel;
-    using System.Text.Json.Serialization;
-    using Newtonsoft.Json;
 
     public class BlockBehaviourManager
     {
@@ -210,7 +208,7 @@
 
             WireCasesTracker = new ulong[5];
 
-            if(layertype == LayerType.Layer_4)
+            if (layertype == LayerType.Layer_4)
             {
                 throw new InvalidEnumArgumentException("Cannot accept argument Layer 4 for SOM Model");
             }
@@ -238,7 +236,7 @@
 
         public void BeginTraining(string Label)
         {
-            if(Label == null | Label == string.Empty)
+            if (Label == null | Label == string.Empty)
             {
                 throw new InvalidDataException("Label cannot be empty!");
             }
@@ -576,7 +574,7 @@
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
         public void Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
-        {            
+        {
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 
@@ -650,7 +648,7 @@
                     }
                 case iType.TEMPORAL:
                     {
-                        IsCurrentTemporal = true;                        
+                        IsCurrentTemporal = true;
 
                         CurrentiType = incomingPattern.InputPatternType;
 
@@ -669,7 +667,7 @@
                         break;
                     }
                 case iType.APICAL:
-                    {                        
+                    {
                         CurrentiType = incomingPattern.InputPatternType;
 
                         IsCurrentApical = true;
@@ -714,7 +712,7 @@
 
             Fire();
 
-            if (NetWorkMode.Equals(NetworkMode.TRAINING) && ( CurrentiType == iType.SPATIAL || IsCurrentApical || IsCurrentTemporal))
+            if (NetWorkMode.Equals(NetworkMode.TRAINING) && (CurrentiType == iType.SPATIAL || IsCurrentApical || IsCurrentTemporal))
             {
                 Wire();
             }
@@ -725,7 +723,7 @@
                 PostCycleCleanup(incomingPattern.InputPatternType);
 
             ValidateNetwork();
-        }      
+        }
 
         private void Fire()
         {
@@ -763,9 +761,9 @@
         }
 
         public SDR_SOM GetPredictedSDRForNextCycle(ulong currentCycle = 1)
-        {            
+        {
             SDR_SOM toReturn = null;
-            
+
 
             if (currentCycle - CycleNum == 1 && NeuronsFiringLastCycle.Count != 0)
             {
@@ -796,12 +794,12 @@
             {
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
-            
+
             if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
             {
                 if (ignoreZ == true)
                 {
-                    foreach(var neuron in NeuronsFiringLastCycle)
+                    foreach (var neuron in NeuronsFiringLastCycle)
                     {
                         if (CheckForDuplicates(activeBits, neuron.NeuronID))
                         {
@@ -811,18 +809,18 @@
                 }
                 else
                 {
-                    NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });                    
+                    NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
                 }
 
                 toReturn = new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
-            }            
+            }
 
             return toReturn;
         }
 
         public void Label(string Label)
         {
-            if(Layer.Equals(LayerType.Layer_3A) == false)
+            if (Layer.Equals(LayerType.Layer_3A) == false)
             {
                 throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
@@ -856,17 +854,17 @@
                 throw new InvalidOperationException("This should never happen");
             }
             else
-            {                
+            {
                 CycleNum = currentCycle;
 
                 _firingBlacnkStreak++;
 
-                if(_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+                if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
                 {
                     FlushAllNeuronsInList(NeuronsFiringLastCycle);
                     CompleteCleanUP();
                 }
-            }           
+            }
         }
 
         #endregion
@@ -881,9 +879,9 @@
             {
                 Console.WriteLine(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
                 WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
-            }            
+            }
 
-            if (CurrentiType == iType.SPATIAL)      
+            if (CurrentiType == iType.SPATIAL)
             {
                 NeuronsFiringLastCycle.Clear();
 
@@ -894,7 +892,7 @@
                         NeuronsFiringLastCycle.Add(neuron);
 
                 }
-                
+
             }
 
             /*  Clean Up Policy : 
@@ -906,9 +904,9 @@
                 // Perform a mutual exclusive list between NeuronsPredictedForThisCycle , NeuronsFiringThisCycle for cleanup
 
                 var predictedList = ConvertDictToList(PredictedNeuronsforThisCycle);
-                var neuronsThatWerePredictedButDidNotFire = BBMUtils.PerformLeftOuterJoinBetweenTwoLists( predictedList, NeuronsFiringLastCycle);
+                var neuronsThatWerePredictedButDidNotFire = BBMUtils.PerformLeftOuterJoinBetweenTwoLists(predictedList, NeuronsFiringLastCycle);
 
-                foreach(var cleanUpNeuron in neuronsThatWerePredictedButDidNotFire)
+                foreach (var cleanUpNeuron in neuronsThatWerePredictedButDidNotFire)
                 {
                     if (cleanUpNeuron.NeuronID.ToString() == "2-1-3-N")
                     {
@@ -928,11 +926,11 @@
                     WriteLogsToFile("WARNING :: PrepNetworkForNextcycle :: Ignoring Clean Up of Stale voltage Clean Up!!!");
                 }
             }
-            
+
             PredictedNeuronsfromLastCycle.Clear();
 
-            foreach( var kvp in PredictedNeuronsforThisCycle )            
-                PredictedNeuronsfromLastCycle.Add(kvp.Key, kvp.Value);            
+            foreach (var kvp in PredictedNeuronsforThisCycle)
+                PredictedNeuronsfromLastCycle.Add(kvp.Key, kvp.Value);
 
             PredictedNeuronsforThisCycle.Clear();
 
@@ -948,14 +946,14 @@
                 //Console.ReadKey();
             }
 
-            PredictedNeuronsForNextCycle.Clear();            
+            PredictedNeuronsForNextCycle.Clear();
         }
-        
+
         //Selective Clean Up Logic , Should never perform Full Clean up.
         private void PostCycleCleanup(iType type)
-        {                       
+        {
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
-            if ( ( PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL) ) && CurrentiType.Equals(iType.SPATIAL))
+            if ((PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL)) && CurrentiType.Equals(iType.SPATIAL))
             {
                 if (TemporalCycleCache.Count == 1)
                 {
@@ -1021,7 +1019,7 @@
                                     {
                                         neuronToCleanUp.FlushVoltage();
                                     }
-                                    else if(neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                    else if (neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
                                         Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
                                     }
@@ -1037,7 +1035,7 @@
                     Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
-                
+
             }
 
 
@@ -1099,12 +1097,12 @@
                 //    }
                 //}
 
-            }            
+            }
 
             // Case 4: Clean Up Stale Spiking Neurons
             // BUG : If the neuron did fire this cycle as well and it is still spiking then it should be allowed to stay spiking 
             foreach (var neuron in GetSpikingNeuronList())
-            {                
+            {
                 if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
                 {
                     neuron.CheckSpikingFlush(CycleNum);
@@ -1114,7 +1112,7 @@
 
             NeuronsFiringThisCycle.Clear();
 
-            ColumnsThatBurst.Clear();                             
+            ColumnsThatBurst.Clear();
 
             //Every 50 Cycles Prune unused and under Firing Connections
             if (CycleNum >= 100 && CycleNum % 50 == 0)
@@ -1159,7 +1157,7 @@
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
             if (CurrentiType.Equals(iType.SPATIAL))
-            {                
+            {
 
                 List<Neuron> predictedNeuronList = new List<Neuron>();
 
@@ -1174,11 +1172,11 @@
                 };
 
                 var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-                
+
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
                 {
                     //Case 1: All Predicted Neurons Fired without anyone Bursting.
-                    if(Mode == LogMode.Trace)
+                    if (Mode == LogMode.Trace)
                     {
                         Console.WriteLine("Wire Case 1 Picked Up!!");
                     }
@@ -1198,7 +1196,7 @@
                         contributingList = new List<Neuron>();
 
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {                            
+                        {
                             foreach (var contributingNeuron in contributingList)
                             {
 
@@ -1263,14 +1261,14 @@
                     //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
 
                     //Boost the Bursting neurons
-                    if(includeBurstLearning == true)
+                    if (includeBurstLearning == true)
                         ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
 
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
                 else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
                 {
                     // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
-                    
+
                     // Strengthen the ones which fired correctly 
                     List<Neuron> contributingList;
 
@@ -1321,7 +1319,7 @@
                     //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
                     //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
                     //BUG 2: TotalNumberOfDistalConnections always get limited to 400
-                    
+
                     WireCasesTracker[3]++;
 
                     if (Mode == LogMode.Trace)
@@ -1330,7 +1328,7 @@
                     }
 
                     //if (includeBurstLearning == true)
-                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+                    ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
@@ -1388,10 +1386,8 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    if ( ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
-                                    {
+                                    if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
                                         throw new InvalidOperationException("Unable to Connect two neurons!");
-                                    }
                             }
                         }
                     }
@@ -1400,7 +1396,7 @@
                 }
                 else
                 {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
-                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!!");
+                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!! Need ENumification of Wire Cases!!!");
                 }
             }
             else if (IsCurrentTemporal)
@@ -1505,8 +1501,9 @@
         }
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
-        {           
+        {
             //Check & Bounds
+            if (NetWorkMode != NetworkMode.TRAINING) return false;
             if (AxonalNeuron == null || DendriticNeuron == null)
             {
                 return false;
@@ -1534,7 +1531,7 @@
 
 
             //Check For OverConnecting Neurons
-            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT )
+            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT)
             {
                 Console.WriteLine("WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
                 WriteLogsToFile(" WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
@@ -1551,9 +1548,8 @@
             }
 
 
-
             //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
-            ConnectionRemovalReturnType IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
+            ConnectionRemovalReturnType IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), CurrentObjectLabel, AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
 
             if (IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.HARDFALSE)
             {
@@ -1568,6 +1564,7 @@
                 {
                     Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
                     WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    return true;
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
                 {
@@ -1575,6 +1572,7 @@
 
                     if (returnType == ConnectionRemovalReturnType.TRUE)
                     {
+                        //Do Nothing just return false below.
                     }
                     else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                     {
@@ -1583,23 +1581,19 @@
                     }
                     else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                     {
-                        if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
-                        {
-                            Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                            WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                            throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
-                        }
+                        Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                        WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                        throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
                     }
                 }
-
-                return true;
             }
-            else if(IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.SOFTFALSE)
+            else if (IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.SOFTFALSE)
             {
                 //Need investigation as why the same connection is tried twice
+                WriteLogsToFile(" ERROR :: ConnectTwoNeurons :::: Could not ADD new Dendronal Connection to the Neuron and return a Soft False! Dendronal Neuron ID : " + DendriticNeuron.NeuronID + " Layer Type :" + Layer.ToString());
             }
 
-            return false;            
+            return false;
         }
 
         public bool CheckifBothNeuronsAreSameOrintheSameColumn(Neuron neuron1, Neuron neuron2) =>
@@ -1653,7 +1647,7 @@
             }
 
             return GetNeuronFromPosition(nType, x, y, z);
-        }       
+        }
 
         private void CompleteCleanUP()
         {
@@ -1661,7 +1655,7 @@
             NeuronsFiringLastCycle.Clear();
             PredictedNeuronsfromLastCycle.Clear();
             PredictedNeuronsforThisCycle.Clear();
-            PredictedNeuronsForNextCycle.Clear();            
+            PredictedNeuronsForNextCycle.Clear();
         }
 
         private void DebugCheck()
@@ -1677,7 +1671,7 @@
                 }
             }
         }
-    
+
         private List<Neuron> GetSpikingNeuronList()
         {
             List<Neuron> spikingNeuronList = new List<Neuron>();
@@ -1700,11 +1694,11 @@
         {
             List<Position_SOM> spikingNeurons = new List<Position_SOM>();
 
-            foreach(var col in Columns)
+            foreach (var col in Columns)
             {
-                foreach(var neuron in col.Neurons)
+                foreach (var neuron in col.Neurons)
                 {
-                    if(neuron.CurrentState == NeuronState.SPIKING)
+                    if (neuron.CurrentState == NeuronState.SPIKING)
                     {
                         spikingNeurons.Add(neuron.NeuronID);
                     }
@@ -1749,7 +1743,7 @@
                 foreach (var dendronalNeuron in NeuronsFiringThisCycle)
                 {
                     if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
-                        if(ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                        if (ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
                         {
                             throw new InvalidOperationException("Could Not connect two neuron!");
                         }
@@ -1759,7 +1753,7 @@
 
         private void ValidateNetwork()
         {
-            
+
             if (PredictedNeuronsForNextCycle.Count >= (0.1 * X * Y * Z))
             {
                 Console.WriteLine(schemToLoad.ToString() + " ERROR :: Too many Predictions for the size of the network ");
@@ -1792,7 +1786,7 @@
                 throw new InvalidOperationException("Incoming Pattern cannot be empty");
             }
 
-            if ( (PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
+            if ((PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
             {
                 throw new InvalidDataException(" Input Validated Failed :: Network cannot proces simulateneous same pattern types");
             }
@@ -1804,9 +1798,9 @@
 
                 for (int j = 0; j < incomingPattern.ActiveBits.Count; j++)
                 {
-                    if(i != j)
+                    if (i != j)
                     {
-                        if(incomingPattern.ActiveBits[j].X == x && incomingPattern.ActiveBits[j].Y == y)
+                        if (incomingPattern.ActiveBits[j].X == x && incomingPattern.ActiveBits[j].Y == y)
                         {
                             throw new InvalidDataException("Cannot house the same Row and Column Number twice in one SDR! Please Check Your Input!");
                         }
@@ -1817,7 +1811,7 @@
             if (incomingPattern.InputPatternType.Equals(iType.SPATIAL))
             {
 
-                if(currentCycle <= CycleNum && currentCycle!= 0)
+                if (currentCycle <= CycleNum && currentCycle != 0)
                 {
                     throw new InvalidOperationException("Invalid Cycle Number");
                 }
@@ -1863,7 +1857,7 @@
                     WriteLogsToFile("ERROR :: Fire() :::: Trying to Add Apical Pattern to a Valid cache Item!" + PrintBlockDetailsSingleLine());
                     //Thread.Sleep(2000);
                 }
-                
+
                 foreach (var pos in incomingPattern.ActiveBits)
                 {
                     if (pos.X > X || pos.Y > Y || pos.Z > Z)
@@ -1877,7 +1871,7 @@
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
             }
 
-           
+
 
         }
 
@@ -1903,7 +1897,7 @@
 
                         var distalDendriticList = neuron.ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.IsActive == false);
 
-                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT) ) && distalDendriticList.Count() < 0.5 * neuron.ProximoDistalDendriticList.Count)
+                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && distalDendriticList.Count() < 0.5 * neuron.ProximoDistalDendriticList.Count)
                         {
                             WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + neuron.NeuronID.ToString());
                             OverConnectedInShortInterval.Add(neuron);
@@ -1917,7 +1911,7 @@
                                 if (DremoveList == null)
                                 {
                                     DremoveList = new List<string>();
-                                }                                
+                                }
 
                                 //Remove Corresponding Connected Axonal Neuron
                                 var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
@@ -1931,7 +1925,7 @@
                                         Console.WriteLine(" EXCEPTION : Could not remove connected Axonal Neuron");
                                         throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
                                     }
-                                    else if(result == ConnectionRemovalReturnType.SOFTFALSE)
+                                    else if (result == ConnectionRemovalReturnType.SOFTFALSE)
                                     {
                                         DremoveList.Add(kvp.Key);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
                                         if (Mode == LogMode.All || Mode == LogMode.Info)
@@ -1984,27 +1978,22 @@
                 List<string> DremoveList = null;
                 List<string> AremoveList = null;
 
-                var distalDendriticList = prunableNeuron.ProximoDistalDendriticList.Values.Where(x =>
-                        x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) &&
-                        x.IsActive == false &&                                                
-                        (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
+                bool anyStaleConnections = prunableNeuron.CheckForPrunableConnections(CycleNum);
 
-                if ( ( prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT )) && distalDendriticList.Count() < 0.1 * prunableNeuron.ProximoDistalDendriticList.Count)
+                if ((prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && anyStaleConnections)
                 {
                     WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
                     OverConnectedInShortInterval.Add(prunableNeuron);
-                }                
+                }
 
                 //Remove only connected Distal Dendritic connections
-                if (distalDendriticList.Count() != 0)
+                if (anyStaleConnections)
                 {
                     foreach (var kvp in prunableNeuron.ProximoDistalDendriticList)
                     {
                         //Remove Distal Dendrite from Neuron
                         if (DremoveList == null)
                             DremoveList = new List<string>();
-
-                        DremoveList.Add(kvp.Key);
 
                         //Remove Corresponding Connected Axonal Neuron
                         var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
@@ -2014,24 +2003,20 @@
                             var returnType = axonalNeuron.RemoveAxonalConnection(prunableNeuron);
 
                             if (returnType == ConnectionRemovalReturnType.TRUE)
-                                if (axonalNeuron.RemoveAxonalConnection(prunableNeuron) == ConnectionRemovalReturnType.HARDFALSE)
-                                {
-                                    {
-                                        Console.WriteLine(" ERROR : Could not remove connected Axonal Neuron");
-                                        throw new InvalidOperationException(" Couldnt find the prunning axonal connection on the deleted dendritic connection while Prunning");
-                                    }
-                                }
-                                else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
-                                {
-                                    WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
-                                    //throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
-                                }
-                                else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
-                                {
-                                    Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                                    WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                                    throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
-                                }
+                            {
+                                DremoveList.Add(kvp.Key);
+                            }
+                            else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
+                            {
+                                WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                //throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                            }
+                            else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
+                            {
+                                Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
+                            }
                         }
                         else
                         {
@@ -2066,7 +2051,7 @@
         {
 
             if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP)
-            { 
+            {
                 foreach (var neuron in NeuronsFiringLastCycle)
                 {
                     if (neuron.Voltage == 0)
@@ -2083,7 +2068,7 @@
                 throw new Exception("PreCycle Cleanup Exception!!!");
             }
 
-            if(itype.Equals(iType.SPATIAL) && incomingCycle < CycleNum)
+            if (itype.Equals(iType.SPATIAL) && incomingCycle < CycleNum)
             {
                 throw new InvalidOperationException("BBM cannot be ahead of Cycle!");
             }
@@ -2190,7 +2175,7 @@
         private void PrintBlockDetails()
         {
             Console.WriteLine("BBM ID : " + BBMID);
-        }      
+        }
 
         private List<Neuron> AntiUniounWithNeuronsFiringThisCycle(List<Neuron> burstList)
         {
@@ -2329,7 +2314,7 @@
 
                     for (int k = 0; k < Z; k++)
                     {
-                        if(ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == false)
+                        if (ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == false)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
@@ -2541,7 +2526,7 @@
 
             schemToLoad = SchemaType.INVALID;
 
-           
+
             if (X == 1250 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA;
@@ -2630,7 +2615,6 @@
             }
         }
 
-
         private void WriteLogsToFile(string logline)
         {
             File.AppendAllText(logfilename, logline + "\n");
@@ -2648,7 +2632,7 @@
             POLOARIZED,
             FIRING,
             CLEANUP
-        }        
+        }
 
         #endregion
     }

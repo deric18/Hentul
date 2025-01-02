@@ -2,6 +2,7 @@
 {
     public class Synapse
     {
+        private const string NONDISTAL = "DEFAULT";
         public Guid Id { get; private set; }
 
         public HashSet<string> SupportedLabels { get; private set; }
@@ -22,34 +23,85 @@
 
         public Dictionary<string, int> FiringHitCount { get; private set; }
 
-        private Dictionary<string, uint> _strength {  get; set; } 
+        private Dictionary<string, uint> _strength {  get; set; }        
 
-        public Synapse(string axonalNeuronId, string dendriticNeuronId, Dictionary<string, ulong> lastFiredCycle, Dictionary<string, uint> strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
+        public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
             Id = Guid.NewGuid();
             AxonalNeuronId = axonalNeuronId;
             DendronalNeuronalId = dendriticNeuronId;
-            this.lastFiredCycle = lastFiredCycle;
-            this.lastPredictedCycle = lastFiredCycle;
-            this._strength = strength;
-            this.cType = cType;
-            if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
+
+            if (objectLabel == null)    //Schema Based Connection
             {
+                if (cType == ConnectionType.DISTALDENDRITICNEURON)
+                {
+                    throw new InvalidOperationException("Cannot create Distal Dendritic Connection as a Schema Based Connection! Need an Object Label to create a Distal Dendritic Connection!");
+                }
+
+                SupportedLabels = new HashSet<string>();
+
+                this.lastFiredCycle = new Dictionary<string, ulong>();
+
+                this.lastPredictedCycle = new Dictionary<string, ulong>();
+
+                this._strength = new Dictionary<string, uint>();
+
                 IsActive = new Dictionary<string, bool>();
+
+                IsActive.Add(NONDISTAL, true);
+
                 PredictiveHitCount = new Dictionary<string, int>();
+
                 FiringHitCount = new Dictionary<string, int>();
+
+                this.cType = cType;
             }
-            else
+            else                        // Object Based Connection
             {
+                if (cType != ConnectionType.DISTALDENDRITICNEURON)
+                {
+                    throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
+                }
+
+                SupportedLabels = new HashSet<string>() { objectLabel };
+
+                this.lastFiredCycle = new Dictionary<string, ulong>();
+                this.lastFiredCycle.Add(objectLabel, currentCycle);
+
+                this.lastPredictedCycle = new Dictionary<string, ulong>();
+                this.lastPredictedCycle.Add(objectLabel, currentCycle);
+
+                this._strength = new Dictionary<string, uint>();
+                this._strength.Add(objectLabel, strength);
+
                 IsActive = new Dictionary<string, bool>();
+                IsActive.Add(objectLabel, false);
+
                 PredictiveHitCount = new Dictionary<string, int>();
+                PredictiveHitCount.Add(objectLabel, 0);
+
                 FiringHitCount = new Dictionary<string, int>();
+                FiringHitCount.Add(objectLabel, 0);
+
+                this.cType = cType;                                                                      
+            }
+        }
+
+        public bool IsMultiSynapse => SupportedLabels.Count > 1;
+
+        internal bool AnyStale(ulong currentCycle)
+        {
+            if(cType == ConnectionType.DISTALDENDRITICNEURON)
+            {
+                if (IsActive.Values.Where(x => x == false).Any() == false)
+                    return true;
+
+                //if(lastFiredCycle.Values( x => currentCycle - 1000 >= x ).Any() == false) 
+                //    return true;
+
             }
 
-            if (objectLabel != null)
-            {
-                SupportedLabels = new HashSet<string>() { objectLabel };
-            }
+            return false;
         }
 
         public void Print()

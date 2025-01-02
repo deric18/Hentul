@@ -1,5 +1,6 @@
 ﻿namespace SecondOrderMemory.Models
 {
+    using System.Collections.Generic;
     using Common;    
 
     /// <summary>
@@ -50,13 +51,13 @@
         /// <summary>
         /// Key is always Dendronal Neurons ID && Value is Synapse
         /// </summary>
-        public Dictionary<Tuple<string,string>, Synapse> AxonalList { get; private set; }
+        public Dictionary<string, Synapse> AxonalList { get; private set; }
 
 
         /// <summary>
         /// Key is always Axonal Neuronal ID && Value is Synapse
         /// </summary>
-        public Dictionary<Tuple<string,string>, Synapse> ProximoDistalDendriticList { get; private set; }                
+        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }                
 
         //public List<Segment>? Segments { get; private set; } = null;
 
@@ -72,8 +73,8 @@
             this.BBMId = BBMId;
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();            
-            ProximoDistalDendriticList = new Dictionary<Tuple<string, string>, Synapse>();
-            AxonalList = new Dictionary<Tuple<string, string>, Synapse>();
+            ProximoDistalDendriticList = new Dictionary<string, Synapse>();
+            AxonalList = new Dictionary<string, Synapse>();
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
             flag = 0;
@@ -331,7 +332,7 @@
         #region Wiring Connector Logic
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
+        public bool AddToDistalList(string axonalNeuronId, string objectLabel, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
         {
 
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
@@ -349,7 +350,7 @@
                     {
                         Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
-                        synapse1.IncrementHitCount(CycleNum);
+                        synapse1.IncrementHitCount(CycleNum, objectLabel);
 
                         return true;
 
@@ -358,11 +359,11 @@
                     {
                         if (cType.Equals(ConnectionType.TEMPRORAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.TEMPRORAL, true));
                         }
                         else if (cType.Equals(ConnectionType.APICAL))
                         {
-                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL));
+                            ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.APICAL, true));
                         }                        
 
                         return true;
@@ -373,7 +374,7 @@
                         
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
-                synapse.IncrementHitCount(CycleNum);
+                synapse.IncrementHitCount(CycleNum, objectLabel);
 
                 return true;
             }
@@ -395,7 +396,7 @@
         }
 
         //Gets called for the axonal end of the neuron
-        public ConnectionRemovalReturnType AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, SchemaType schemaType, bool IsActive = false)
+        public ConnectionRemovalReturnType AddtoAxonalList(string key, string objectLabel, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, SchemaType schemaType, bool IsActive = false)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -503,11 +504,25 @@
             return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
 
+        internal bool CheckForPrunableConnections(ulong currentCycle)
+        {            
+
+            foreach(var val in ProximoDistalDendriticList.Values)
+            {
+                if(val.AnyStale(currentCycle))
+                {
+                    return true;
+                }
+            }            
+
+            return false;
+        }
+
 
         #endregion
 
         #endregion
-    }
+    };
 
     #region ENUMS
 

@@ -74,6 +74,16 @@ namespace FirstOrderMemory.Models
             return _strength;
         }
 
+        internal bool AnyStale(ulong currentCycle)
+        {
+            if (cType == ConnectionType.DISTALDENDRITICNEURON)
+            {
+                return IsActive;                
+            }
+
+            return false;
+        }
+
         public void IncrementHitCount(ulong currentCycleNum)
         {
 

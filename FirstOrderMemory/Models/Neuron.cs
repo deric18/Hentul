@@ -1,8 +1,7 @@
 ﻿namespace FirstOrderMemory.Models
 {
     using Common;
-    using FirstOrderMemory.BehaviourManagers;
-    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using FirstOrderMemory.BehaviourManagers;    
     using System.Text.Json.Serialization;
    
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
@@ -517,6 +516,20 @@
         internal bool DidItContribute(Neuron temporalContributor)
         {
             return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
+        }
+
+        internal bool CheckForPrunableConnections(ulong currentCycle)
+        {
+
+            foreach (var val in ProximoDistalDendriticList.Values)
+            {
+                if (val.AnyStale(currentCycle))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
 

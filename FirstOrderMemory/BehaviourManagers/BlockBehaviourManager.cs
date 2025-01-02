@@ -130,7 +130,7 @@
         private const int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         private const int AXONAL_CONNECTION = 1;
         private int TOTAL_ALLOWED_BURST_PER_CLEANUP = 1;
-        private const uint PRUNE_THRESHOLD = 10;
+        public const uint PRUNE_THRESHOLD = 10;
         private const uint PRUNE_STRENGTH = 1;
         private readonly int FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
         private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
@@ -1589,6 +1589,7 @@
                 {
                     Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
                     WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    return true;
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
                 {
@@ -1612,13 +1613,12 @@
                             throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
                         }
                     }                    
-                }
-
-                return true;
+                }                
             }
-            else
+            else if (IsAxonalConnectionSuccesful == false)
             {
-
+                //Need investigation as why the same connection is tried twice
+                WriteLogsToFile(" ERROR :: ConnectTwoNeurons :::: Could not ADD new Dendronal Connection to the Neuron and return a Soft False! Dendronal Neuron ID : " + DendriticNeuron.NeuronID + " Layer Type :" + Layer.ToString());
             }
 
             return false;
@@ -2003,19 +2003,20 @@
                 List<string> DremoveList = null;
                 List<string> AremoveList = null;
 
-                var distalDendriticList = prunableNeuron.ProximoDistalDendriticList.Values.Where(x =>
-                        x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) &&
-                        x.IsActive == false &&                                                
-                        (CycleNum - Math.Max(x.lastFiredCycle, x.lastPredictedCycle)) > PRUNE_THRESHOLD);
+                bool staleSynapses = prunableNeuron.CheckForPrunableConnections(CycleNum);
 
-                if ( ( prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT )) && distalDendriticList.Count() < 0.1 * prunableNeuron.ProximoDistalDendriticList.Count)
+                if ( ( prunableNeuron.ProximoDistalDendriticList.Count > SOMLTOTAL_NEURON_CONNECTIONLIMIT) && staleSynapses)
                 {
                     WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
                     OverConnectedInShortInterval.Add(prunableNeuron);
                 }                
+                else
+                {
+                    return;
+                }
 
                 //Remove only connected Distal Dendritic connections
-                if (distalDendriticList.Count() != 0)
+                if (staleSynapses)
                 {
                     foreach (var kvp in prunableNeuron.ProximoDistalDendriticList)
                     {
