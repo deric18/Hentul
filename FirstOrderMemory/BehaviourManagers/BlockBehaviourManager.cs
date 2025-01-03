@@ -6,8 +6,7 @@
     using System.Linq;
     using System;    
     using Newtonsoft.Json;
-
-    [Serializable]
+    
     public class BlockBehaviourManager
     {
         #region VARIABLES        
@@ -1585,10 +1584,14 @@
                     TotalDistalDendriticConnections++;
                 }
 
-                if (IsDendronalConnectionSuccesful && (Mode == LogMode.All || Mode == LogMode.Info))
+                if (IsDendronalConnectionSuccesful)
                 {
-                    Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
-                    WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    if ((Mode == LogMode.All || Mode == LogMode.Info))
+                    {
+                        Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                        WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    }
+
                     return true;
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 

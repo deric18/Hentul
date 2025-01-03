@@ -4,7 +4,7 @@
     using System.Xml;
     using System.Linq;
     using System;
-    using System.ComponentModel;
+    using System.ComponentModel;    
 
     public class BlockBehaviourManager
     {
@@ -108,6 +108,8 @@
 
         public string CurrentObjectLabel { get; private set; }
 
+        private HashSet<string> SuspectedLabels { get; set; }
+
         #endregion
 
         #region CONSTANTS
@@ -117,6 +119,7 @@
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
         public static int DISTALNEUROPLASTICITY = 5;
         public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;
+        public static readonly string DEFAULT_SYNAPSE = "NONDISTAL";
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
@@ -232,6 +235,8 @@
             NetWorkMode = NetworkMode.TRAINING;
 
             CurrentObjectLabel = objectLabel;
+
+            SuspectedLabels = new HashSet<string>();
         }
 
         public void BeginTraining(string Label)
@@ -1503,7 +1508,10 @@
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
         {
             //Check & Bounds
-            if (NetWorkMode != NetworkMode.TRAINING) return false;
+            if (NetWorkMode != NetworkMode.TRAINING)
+            {
+                return false;
+            }
             if (AxonalNeuron == null || DendriticNeuron == null)
             {
                 return false;
@@ -1528,7 +1536,10 @@
                 return false;
             }
 
-
+            if (cType == ConnectionType.DISTALDENDRITICNEURON && CurrentObjectLabel == null || CurrentObjectLabel == string.Empty)
+            {
+                return false;
+            }
 
             //Check For OverConnecting Neurons
             if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.nType.Equals(NeuronType.NORMAL) && DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT)
@@ -1553,17 +1564,21 @@
 
             if (IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.HARDFALSE)
             {
-                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), DendriticNeuron.nType, CycleNum, schemToLoad, logfilename, cType, IsActive);
+                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), CurrentObjectLabel, DendriticNeuron.nType, CycleNum, schemToLoad, logfilename, cType, IsActive);
 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
                 {
                     TotalDistalDendriticConnections++;
                 }
 
-                if (IsDendronalConnectionSuccesful && (Mode == LogMode.All || Mode == LogMode.Info))
+                if (IsDendronalConnectionSuccesful)
                 {
-                    Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
-                    WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    if ((Mode == LogMode.All || Mode == LogMode.Info))
+                    {
+                        Console.WriteLine("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                        WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
+                    }
+
                     return true;
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
@@ -1895,15 +1910,15 @@
                         List<string> DremoveList = null;
                         List<string> AremoveList = null;
 
-                        var distalDendriticList = neuron.ProximoDistalDendriticList.Values.Where(x => x.cType.Equals(ConnectionType.DISTALDENDRITICNEURON) && x.IsActive == false);
+                        bool HasStale = neuron.CheckForPrunableConnections(CycleNum);
 
-                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && distalDendriticList.Count() < 0.5 * neuron.ProximoDistalDendriticList.Count)
+                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && HasStale)
                         {
                             WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + neuron.NeuronID.ToString());
                             OverConnectedInShortInterval.Add(neuron);
                         }
 
-                        if (distalDendriticList.Count() != 0)
+                        if (HasStale)
                         {
                             foreach (var kvp in neuron.ProximoDistalDendriticList)
                             {
@@ -2092,9 +2107,11 @@
 
             IsBurstOnly = false;
 
+            SuspectedLabels.Clear();
+
         }
 
-        private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
+        private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, Dictionary<string, ConnectionType> cType)
         {
 
             if (targetNeuron.NeuronID.ToString().Equals("607-3-3-N"))
@@ -2105,16 +2122,16 @@
             //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.            
             AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron);
 
-            if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
+            if (cType[DEFAULT_SYNAPSE].Equals(ConnectionType.TEMPRORAL) || cType[DEFAULT_SYNAPSE].Equals(ConnectionType.APICAL))
             {
                 if (!targetNeuron.TAContributors.TryGetValue(sourceNeuron.NeuronID.ToString(), out char w))
                 {
-                    if (cType.Equals(ConnectionType.TEMPRORAL))
+                    if (cType[DEFAULT_SYNAPSE].Equals(ConnectionType.TEMPRORAL))
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'T');
                         targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
                     }
-                    else if (cType.Equals(ConnectionType.APICAL))
+                    else if (cType[DEFAULT_SYNAPSE].Equals(ConnectionType.APICAL))
                     {
                         targetNeuron.TAContributors.Add(sourceNeuron.NeuronID.ToString(), 'A');
                         targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
@@ -2122,9 +2139,9 @@
                 }
                 else
                 {
-                    if (cType.Equals(ConnectionType.TEMPRORAL))
+                    if (cType[DEFAULT_SYNAPSE].Equals(ConnectionType.TEMPRORAL))
                         targetNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
-                    else if (cType.Equals(ConnectionType.APICAL))
+                    else if (cType[DEFAULT_SYNAPSE].Equals(ConnectionType.APICAL))
                         targetNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
 
                     #region Removed Code [Potential Bug OR Feature
@@ -2139,9 +2156,38 @@
             }
             else if (targetNeuron.ProximoDistalDendriticList.TryGetValue(sourceNeuron.NeuronID.ToString(), out var synapse))
             {
-                if (synapse.IsActive)       //Process Voltage only if the synapse is active otherwise Increment HitCount.
+                if (NetWorkMode == NetworkMode.TRAINING && (CurrentObjectLabel == null || CurrentObjectLabel == string.Empty))
+                    throw new InvalidOperationException("Object Label Cannot be empty During Training Mode!");
+
+                ProcessSpikeAsPer(synapse, targetNeuron);
+
+                if (NetWorkMode.Equals(NetworkMode.PREDICTION))
                 {
-                    switch (synapse.cType)
+                    foreach (var label in synapse.SupportedLabels)
+                        SuspectedLabels.Add(label);
+                }
+            }
+            else if (cType[DEFAULT_SYNAPSE].Equals(ConnectionType.AXONTONEURON))
+            {
+                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
+            }
+            else
+            {
+                Console.WriteLine(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
+                WriteLogsToFile(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
+                PrintBlockDetails();
+                throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
+            }
+        }
+
+        private void ProcessSpikeAsPer(Synapse synapse, Neuron targetNeuron)
+        {
+
+            if (synapse.IsMultiSynapse)
+            {
+                if (synapse.IsActive)       //Process Voltage only if the synapse is active.
+                {
+                    switch (synapse.cType[CurrentObjectLabel])
                     {
                         case ConnectionType.DISTALDENDRITICNEURON:
                             targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
@@ -2159,16 +2205,23 @@
                 //    synapse.IncrementHitCount();
                 //}
             }
-            else if (cType.Equals(ConnectionType.AXONTONEURON))
-            {
-                targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
-            }
             else
             {
-                Console.WriteLine(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
-                WriteLogsToFile(schemToLoad.ToString() + "ProcessSpikeFromNeuron() :::: ERROR :: One of the Neurons is not connected to the other neuron Source : " + sourceNeuron.NeuronID + " Target Neuron : " + targetNeuron.NeuronID);
-                PrintBlockDetails();
-                throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
+                if (synapse.IsActive)       //Process Voltage only if the synapse is active.
+                {
+                    switch (synapse.cType[DEFAULT_SYNAPSE])
+                    {
+                        case ConnectionType.DISTALDENDRITICNEURON:
+                            targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
+                            break;
+                        case ConnectionType.PROXIMALDENDRITICNEURON:
+                            targetNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
+                            break;
+                        case ConnectionType.NMDATONEURON:
+                            targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                            break;
+                    }
+                }
             }
         }
 
@@ -2221,7 +2274,7 @@
 
                 //Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
 
-                synapse.IncrementHitCount(CycleNum);
+                synapse.IncrementHitCount(CycleNum, CurrentObjectLabel);
             }
         }
 
@@ -2267,17 +2320,12 @@
 
                     for (int k = 0; k < X; k++)
                     {
-                        try
-                        {
-                            ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.ToString());
 
-                            var item1 = TemporalLineArray[j, i] as Neuron;
-                            var item2 = Columns[k, i].Neurons[j] as Neuron;
+                        if (ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true) == false)
+                        {
+                            throw new InvalidOperationException("Unable to connect two neurons!");
                         }
+
                     }
                 }
             }

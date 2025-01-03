@@ -1,8 +1,8 @@
 ﻿namespace SecondOrderMemory.Models
 {
     public class Synapse
-    {
-        private const string NONDISTAL = "DEFAULT";
+    {                
+
         public Guid Id { get; private set; }
 
         public HashSet<string> SupportedLabels { get; private set; }
@@ -15,15 +15,15 @@
 
         public Dictionary<string,ulong> lastPredictedCycle { get; private set; }
 
-        public Dictionary<string, bool> IsActive { get; private set; }
+        public bool IsActive { get; private set; }
 
-        public ConnectionType cType { get; private set; }
+        public Dictionary<string, ConnectionType> cType { get; private set; }
         
         public Dictionary<string, int> PredictiveHitCount { get; private set; }
 
         public Dictionary<string, int> FiringHitCount { get; private set; }
 
-        private Dictionary<string, uint> _strength {  get; set; }        
+        private Dictionary<string, uint> _strength {  get; set; }
 
         public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
@@ -46,15 +46,14 @@
 
                 this._strength = new Dictionary<string, uint>();
 
-                IsActive = new Dictionary<string, bool>();
-
-                IsActive.Add(NONDISTAL, true);
+                IsActive = true;                
 
                 PredictiveHitCount = new Dictionary<string, int>();
 
                 FiringHitCount = new Dictionary<string, int>();
 
-                this.cType = cType;
+                this.cType = new Dictionary<string, ConnectionType>();
+                this.cType.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, cType);
             }
             else                        // Object Based Connection
             {
@@ -74,8 +73,7 @@
                 this._strength = new Dictionary<string, uint>();
                 this._strength.Add(objectLabel, strength);
 
-                IsActive = new Dictionary<string, bool>();
-                IsActive.Add(objectLabel, false);
+                IsActive = false;                
 
                 PredictiveHitCount = new Dictionary<string, int>();
                 PredictiveHitCount.Add(objectLabel, 0);
@@ -83,26 +81,16 @@
                 FiringHitCount = new Dictionary<string, int>();
                 FiringHitCount.Add(objectLabel, 0);
 
-                this.cType = cType;                                                                      
+                this.cType = new Dictionary<string, ConnectionType>();
+                this.cType.Add(objectLabel, cType);
             }
         }
+
+        internal bool IsSynapseActive()  => IsActive;
 
         public bool IsMultiSynapse => SupportedLabels.Count > 1;
 
-        internal bool AnyStale(ulong currentCycle)
-        {
-            if(cType == ConnectionType.DISTALDENDRITICNEURON)
-            {
-                if (IsActive.Values.Where(x => x == false).Any() == false)
-                    return true;
-
-                //if(lastFiredCycle.Values( x => currentCycle - 1000 >= x ).Any() == false) 
-                //    return true;
-
-            }
-
-            return false;
-        }
+        internal bool AnyStale(ulong currentCycle) => IsActive;        
 
         public void Print()
         {
@@ -113,17 +101,15 @@
             {
                 Console.WriteLine("Label : " + label);                
                 Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle[label]);
-                Console.WriteLine(" Active : " + (IsActive[label] ? "Yes" : "NO"));
+                Console.WriteLine(" Active : " + ( IsActive ? "Yes" : "NO"));
                 Console.WriteLine(" Stringeth : " + _strength[label].ToString());
                 Console.WriteLine(" Connection Type : " + cType.ToString());
                 Console.WriteLine(" Firing Hit Count : " + FiringHitCount[label].ToString() + " \n ");
             }
         }
 
-        public uint GetStrength(string label)
-        {            
-            return _strength[label];
-        }
+        public uint GetStrength(string label) =>        
+            _strength.TryGetValue(label, out var strength) ? strength : 0;
 
         public void IncrementHitCount(ulong currentCycleNum, string label)
         {
@@ -138,8 +124,8 @@
             {
                 if (predictivehitcount >= BlockBehaviourManager.DISTALNEUROPLASTICITY)
                 {
-                    if(IsActive[label] == false)
-                        IsActive[label] = true;
+                    if(IsActive == false)
+                        IsActive = true;
 
                     FiringHitCount[label]++;
 

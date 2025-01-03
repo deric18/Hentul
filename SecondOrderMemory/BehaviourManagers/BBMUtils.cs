@@ -49,20 +49,7 @@
             if (axonalNeuron.AxonalList.TryGetValue(dendriticNeuron.NeuronID.ToString(), out Synapse synapse))
             {
                 toRet = true;
-            }
-
-            if(toRet == true)
-            {
-
-                if(dendriticNeuron.ProximoDistalDendriticList.TryGetValue(axonalNeuron.NeuronID.ToString(), out var synapse1) == false)
-                {
-                    if (synapse.cType != ConnectionType.AXONTONEURON)       //Its a scheam thing Todo : fix the Schema thing ( Not really sure if scheam should be fixed ) 
-                    {
-                        Console.WriteLine(" ERROR :: CheckIfTwoNeuronsAreConnected ::: Axon is connected but Dendrite is NOT Connected . Structure is Compromised!");
-                        throw new NotImplementedException("Axon is connected but Dendrite is NOT Connected . Structure is Compromised!");                                                
-                    }
-                }               
-            }
+            }           
             
             return toRet;
         }

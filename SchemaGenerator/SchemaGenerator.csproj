@@ -11,4 +11,8 @@
     <Folder Include="Schemas\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FirstOrderMemoryUnitTest\FirstOrderMemoryUnitTest.csproj" />
+  </ItemGroup>
+
 </Project>
