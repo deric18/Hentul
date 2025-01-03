@@ -117,7 +117,7 @@
         public int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
-        public static int DISTALNEUROPLASTICITY = 5;
+        public static uint DISTALNEUROPLASTICITY = 5;
         public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;
         public static readonly string DEFAULT_SYNAPSE = "NONDISTAL";
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
@@ -717,7 +717,7 @@
 
             Fire();
 
-            if (NetWorkMode.Equals(NetworkMode.TRAINING) && (CurrentiType == iType.SPATIAL || IsCurrentApical || IsCurrentTemporal))
+            if (NetWorkMode.Equals(NetworkMode.TRAINING) && CurrentiType == iType.SPATIAL)
             {
                 Wire();
             }
@@ -1203,9 +1203,8 @@
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                         {
                             foreach (var contributingNeuron in contributingList)
-                            {
-
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
+                            {                                
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE); 
                             }
                         }
                     }
@@ -1252,7 +1251,7 @@
                             {
                                 //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
                             }
                         }
                         else
@@ -1306,7 +1305,7 @@
                             {
                                 //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
 
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE); 
                             }
                         }
                     }
@@ -1370,7 +1369,7 @@
                                     Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
                                     WriteLogsToFile("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
 
-                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron);
+                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron, lastcycleneuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE); 
                                 }
                             }
                         }
@@ -1417,7 +1416,7 @@
                         {
                             if (neuron.DidItContribute(temporalContributor))
                             {
-                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron);
+                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron, DEFAULT_SYNAPSE);
                             }
                         }
                     }
@@ -1435,7 +1434,7 @@
                     {
                         if (neuron.DidItContribute(apicalContributor))
                         {
-                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron);
+                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron, DEFAULT_SYNAPSE);
                         }
                     }
                 }
@@ -2114,7 +2113,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, Dictionary<string, ConnectionType> cType)
         {
 
-            if (targetNeuron.NeuronID.ToString().Equals("607-3-3-N"))
+            if (targetNeuron.NeuronID.ToString().Equals("2-3-3-N"))
             {
                 bool breakpoint = false;
             }
@@ -2255,7 +2254,7 @@
             PramoteCorrectlyPredictedDendronal(GetNeuronFromString(neuron.GetMyApicalPartner1()), neuron);
         }
 
-        public void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron)
+        public void PramoteCorrectlyPredictedDendronal(Neuron contributingNeuron, Neuron targetNeuron, string label = null)
         {
             // BUG: Axonal synapses are not being incremented as the dendronal ones are.!
 
@@ -2273,8 +2272,9 @@
                 }
 
                 //Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
+                if (label == null) label = CurrentObjectLabel;
 
-                synapse.IncrementHitCount(CycleNum, CurrentObjectLabel);
+                synapse.IncrementHitCount(CycleNum, label);
             }
         }
 

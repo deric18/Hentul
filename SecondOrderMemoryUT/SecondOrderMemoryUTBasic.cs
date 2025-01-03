@@ -345,7 +345,7 @@ namespace SecondOrderMemoryUnitTest
             var prefireSynapseStrength1 = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos1.ToString()].GetStrength(testObjectLabel);
             var prefireSynapseStrength2 = 1;
 
-            RepeatCycle(axonalNeuron, dendronalNeuron1, (int)BlockBehaviourManager.DISTALNEUROPLASTICITY - 1);
+            RepeatCycle(axonalNeuron, dendronalNeuron1, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1);
 
             bbManager.Fire(axonalSdr, Counter++);
 
@@ -688,7 +688,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
-                previousStrength = preSynapse.GetStrength(testObjectLabel);
+                previousStrength = preSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
             }
 
             bbManager.Fire(apicalInputPattern, 1, true, true);
@@ -699,7 +699,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
-                currentStrength = postSynapse.GetStrength(testObjectLabel);
+                currentStrength = postSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
             }
 
             Assert.IsTrue(currentStrength > previousStrength);
@@ -1020,9 +1020,9 @@ namespace SecondOrderMemoryUnitTest
             }
         }
 
-        private void RepeatCycle(Neuron axonalNeuron, Neuron dendronalNeuron, int repeat, ulong counter = 1)
+        private void RepeatCycle(Neuron axonalNeuron, Neuron dendronalNeuron, uint repeat, ulong counter = 1)
         {
-            for (int i = 0; i < repeat; i++)
+            for (uint i = 0; i < repeat; i++)
                 bbManager.PramoteCorrectlyPredictedDendronal(axonalNeuron, dendronalNeuron);
         }
 
@@ -1109,12 +1109,12 @@ namespace SecondOrderMemoryUnitTest
             }
         }
 
-        public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount, ulong counter = 1, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
+        public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, uint repCount, ulong counter = 1, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
         {
 
             if (ShouldDepolarize == false)
             {
-                for (int i = 0; i < repCount; i++)
+                for (uint i = 0; i < repCount; i++)
                 {
 
                     bbManager.Fire(axonalNeurondr, counter++);
@@ -1124,7 +1124,7 @@ namespace SecondOrderMemoryUnitTest
             }
             else
             {
-                for (int i = 0; i < repCount; i++)
+                for (uint i = 0; i < repCount; i++)
                 {
                     bbManager.Fire(axonalNeurondr, counter++);
 

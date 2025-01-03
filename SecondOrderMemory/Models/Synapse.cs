@@ -19,9 +19,9 @@
 
         public Dictionary<string, ConnectionType> cType { get; private set; }
         
-        public Dictionary<string, int> PredictiveHitCount { get; private set; }
+        public Dictionary<string, uint> PredictiveHitCount { get; private set; }
 
-        public Dictionary<string, int> FiringHitCount { get; private set; }
+        public Dictionary<string, uint> FiringHitCount { get; private set; }
 
         private Dictionary<string, uint> _strength {  get; set; }
 
@@ -41,16 +41,21 @@
                 SupportedLabels = new HashSet<string>();
 
                 this.lastFiredCycle = new Dictionary<string, ulong>();
+                lastFiredCycle.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
 
                 this.lastPredictedCycle = new Dictionary<string, ulong>();
+                lastPredictedCycle.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
 
                 this._strength = new Dictionary<string, uint>();
+                _strength.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
 
-                IsActive = true;                
+                IsActive = true;
 
-                PredictiveHitCount = new Dictionary<string, int>();
+                PredictiveHitCount = new Dictionary<string, uint>();
+                PredictiveHitCount.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, BlockBehaviourManager.DISTALNEUROPLASTICITY);
 
-                FiringHitCount = new Dictionary<string, int>();
+                FiringHitCount = new Dictionary<string, uint>();
+                FiringHitCount.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
 
                 this.cType = new Dictionary<string, ConnectionType>();
                 this.cType.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, cType);
@@ -75,15 +80,58 @@
 
                 IsActive = false;                
 
-                PredictiveHitCount = new Dictionary<string, int>();
+                PredictiveHitCount = new Dictionary<string, uint>();
                 PredictiveHitCount.Add(objectLabel, 0);
 
-                FiringHitCount = new Dictionary<string, int>();
+                FiringHitCount = new Dictionary<string, uint>();
                 FiringHitCount.Add(objectLabel, 0);
 
                 this.cType = new Dictionary<string, ConnectionType>();
                 this.cType.Add(objectLabel, cType);
             }
+        }
+
+        internal bool AddNewDistalSynapse(ulong currentCycle, ConnectionType cType, string objectLabel, uint strength = 0, bool isActive = false)
+        {            
+            if (cType != ConnectionType.DISTALDENDRITICNEURON || objectLabel == string.Empty)
+            {
+                throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
+            }
+
+            bool sucess = false;
+
+            if (SupportedLabels.Add(objectLabel) == false)
+                return false;
+            
+            if(lastFiredCycle.TryGetValue(objectLabel, out var _) == false) 
+                this.lastFiredCycle.Add(objectLabel, currentCycle);
+            else
+            {
+                return false;
+            }
+
+            if (lastPredictedCycle.TryGetValue(objectLabel, out var _) == false)
+                this.lastPredictedCycle.Add(objectLabel, currentCycle);
+            else
+            { return false; }
+
+            if (_strength.TryGetValue(objectLabel, out var _))
+                this._strength.Add(objectLabel, strength);
+            else
+            { return false; }
+
+            if (PredictiveHitCount.TryGetValue(objectLabel, out var _) == false)
+                PredictiveHitCount.Add(objectLabel, 0);
+            else { return false; }
+
+            if (FiringHitCount.TryGetValue(objectLabel, out var _) == false)
+                FiringHitCount.Add(objectLabel, 0);
+            else
+            { return false; }
+
+            this.cType.Add(objectLabel, cType);
+
+            return true;
         }
 
         internal bool IsSynapseActive()  => IsActive;
@@ -114,10 +162,9 @@
         public void IncrementHitCount(ulong currentCycleNum, string label)
         {
 
-            if (DendronalNeuronalId.ToString().Equals("5-3-0-N") && AxonalNeuronId.ToString().Equals("0-2-0-N"))
-            {
-                bool breakpoint = false;
-                breakpoint = true;
+            if (DendronalNeuronalId.ToString().Equals("2-3-3-N"))
+            { 
+                bool breakpoint = false; 
             }
 
             if (PredictiveHitCount.TryGetValue(label, out var predictivehitcount))

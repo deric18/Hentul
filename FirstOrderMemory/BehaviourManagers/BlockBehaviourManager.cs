@@ -2131,7 +2131,7 @@
         private void ProcessSpikeFromNeuron(Neuron sourceNeuron, Neuron targetNeuron, ConnectionType cType = ConnectionType.PROXIMALDENDRITICNEURON)
         {
 
-            if (targetNeuron.NeuronID.ToString().Equals("607-3-3-N"))
+            if (targetNeuron.NeuronID.ToString().Equals("2-3-3-N"))
             {
                 bool breakpoint = false;
             }
