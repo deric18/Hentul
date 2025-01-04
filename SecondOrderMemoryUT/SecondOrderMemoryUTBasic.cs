@@ -184,9 +184,11 @@ namespace SecondOrderMemoryUnitTest
 
             ulong counter = 1;
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
+            neuron1.ProcessVoltage(10, counter, LogMode.BurstOnly);
+
+            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 1; i++)
             {
-                bbManager.Fire(sdr1, counter++);
+                bbManager.Fire(sdr1, counter++);                
 
                 bbManager.Fire(sdr2, counter++);
             }
@@ -322,7 +324,7 @@ namespace SecondOrderMemoryUnitTest
         public void TestWireCase2()
         {
             //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
-            //All Burswting neurons should create one new dendronal connection with previously fired neurons and the correctly fired neuron should be strengthed decently.
+            //All Burswting neurons should create one new dendronal connection with previously fired neurons and the correctly fired neuron should be strengthed correspondingly.
 
             Position_SOM axonalPos = new Position_SOM(0, 2, 0, 'N');
             Position_SOM dendronalPos1 = new Position_SOM(5, 3, 3, 'N');
@@ -613,7 +615,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
-                previousStrength = preSynapse.GetStrength(testObjectLabel);
+                previousStrength = preSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
             }
 
             bbManager.Fire(temporalInputPattern, 1, false, true);
@@ -624,12 +626,10 @@ namespace SecondOrderMemoryUnitTest
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
-                currentStrength = postSynapse.GetStrength(testObjectLabel);
+                currentStrength = postSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
             }
 
-            overlapNeuron.ProcessVoltage(120);
-
-            Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuron.NeuronID.ToString());
+            overlapNeuron.ProcessVoltage(120);            
 
             Assert.IsTrue(currentStrength > previousStrength);
 

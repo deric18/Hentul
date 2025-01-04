@@ -5,7 +5,7 @@
 
         public Guid Id { get; private set; }
 
-        public HashSet<string> SupportedLabels { get; private set; }
+        public HashSet<string> SupportedLabels { get; private set; }                // Holdss only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
 
         public string AxonalNeuronId { get; private set; }
 
@@ -17,7 +17,7 @@
 
         public bool IsActive { get; private set; }
 
-        public Dictionary<string, ConnectionType> cType { get; private set; }
+        public Dictionary<string, ConnectionType> cType { get; private set; }       
         
         public Dictionary<string, uint> PredictiveHitCount { get; private set; }
 
@@ -62,7 +62,7 @@
             }
             else                        // Object Based Connection
             {
-                if (cType != ConnectionType.DISTALDENDRITICNEURON)
+                if (!(cType == ConnectionType.DISTALDENDRITICNEURON || cType == ConnectionType.AXONTONEURON))
                 {
                     throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
                 }
@@ -162,7 +162,7 @@
         public void IncrementHitCount(ulong currentCycleNum, string label)
         {
 
-            if (DendronalNeuronalId.ToString().Equals("2-3-3-N"))
+            if (DendronalNeuronalId.ToString().Equals("55-2-1-N"))
             { 
                 bool breakpoint = false; 
             }
