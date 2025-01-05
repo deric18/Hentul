@@ -59,7 +59,7 @@
 
         public uint totalProximalConnections;
 
-        public static uint totalDendronalConnections;
+        public static uint totalDendronalConnections;        
 
         public uint TotalDistalDendriticConnections;
 
@@ -350,93 +350,7 @@
 
             return toRet;
         }
-
-        public BlockBehaviourManager CloneBBM(int x)
-        {
-            BlockBehaviourManager blockBehaviourManager;
-
-            blockBehaviourManager = new BlockBehaviourManager(X, Y, Z);
-
-            blockBehaviourManager.Init(x);
-
-            blockBehaviourManager.Init(blockBehaviourManager.BBMID);
-
-            return blockBehaviourManager;
-
-            #region Cache Code for Connector
-
-            //try
-            //{
-            //    for (int i = 0; i < blockBehaviourManager.Y; i++)
-            //    {
-            //        for (int j = 0; j < blockBehaviourManager.Y; j++)
-            //        {
-            //            for (int k = 0; k < blockBehaviourManager.Columns[0, 0].Neurons.Count; k++)
-            //            {
-            //                //Proximal Dendritic Connections
-            //                Neuron presynapticNeuron, postSynapticNeuron;
-
-            //                for (int l = 0; l < Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.Count; l++)
-            //                {
-            //                    var synapse = Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.ElementAt(l);
-
-            //                    if (synapse != null)
-            //                    {
-            //                        if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
-            //                        {
-            //                            postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
-
-            //                            if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
-            //                            {
-            //                                Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
-            //                            }
-            //                        }
-            //                    }
-            //                    else
-            //                    {
-            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-            //                    }
-            //                }
-
-
-            //                //Axonal Connections
-            //                for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
-            //                {
-            //                    var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
-
-            //                    if (synapse != null)
-            //                    {
-            //                        if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
-            //                        {
-            //                            presynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.AxonalNeuronId);
-            //                            postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
-
-            //                            if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
-            //                            {
-            //                                Console.WriteLine("Could Not Clone Axonal Connection Properly!!!");
-            //                            }
-            //                        }
-            //                    }
-            //                    else
-            //                    {
-            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    blockBehaviourManager.GenerateTemporalLines();
-
-            //    blockBehaviourManager.GenerateApicalLines();
-            //}
-            //catch (Exception e)
-            //{
-            //    throw;
-            //}
-
-            #endregion
-        }
+      
 
         public void IncrementDistalDendronalConnection()
         {
@@ -1922,17 +1836,17 @@
                         List<string> DremoveList = null;
                         List<string> AremoveList = null;
 
-                        bool HasStale = neuron.CheckForPrunableConnections(CycleNum);
+                        var staleConnections = neuron.CheckForPrunableConnections(CycleNum);
 
-                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && HasStale)
+                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && staleConnections.Count != 0)
                         {
                             WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + neuron.NeuronID.ToString());
                             OverConnectedInShortInterval.Add(neuron);
                         }
 
-                        if (HasStale)
+                        if (staleConnections.Count != 0)
                         {
-                            foreach (var kvp in neuron.ProximoDistalDendriticList)
+                            foreach (var synapse in staleConnections)
                             {
                                 //Remove Distal Dendrite from Neuron
                                 if (DremoveList == null)
@@ -1941,12 +1855,16 @@
                                 }
 
                                 //Remove Corresponding Connected Axonal Neuron
-                                var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
+                                var axonalNeuron = GetNeuronFromString(synapse.AxonalNeuronId);
 
                                 if (axonalNeuron.AxonalList.TryGetValue(neuron.NeuronID.ToString(), out var connection))
                                 {
                                     var result = axonalNeuron.RemoveAxonalConnection(neuron);
 
+                                    if (result == ConnectionRemovalReturnType.TRUE)
+                                    {
+                                        DremoveList.Add(synapse.AxonalNeuronId);
+                                    }
                                     if (result == ConnectionRemovalReturnType.HARDFALSE)
                                     {
                                         Console.WriteLine(" EXCEPTION : Could not remove connected Axonal Neuron");
@@ -1954,12 +1872,10 @@
                                     }
                                     else if (result == ConnectionRemovalReturnType.SOFTFALSE)
                                     {
-                                        DremoveList.Add(kvp.Key);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
-                                        if (Mode == LogMode.All || Mode == LogMode.Info)
-                                        {
-                                            Console.WriteLine("INFO :: Removing Inactive Synapse AxonalNeuron : " + axonalNeuron.NeuronID + "Dendroanl Neuron : " + kvp.Key);
-                                            WriteLogsToFile("INFO :: Removing Inactive Synapse AxonalNeuron : " + axonalNeuron.NeuronID + "Dendroanl Neuron : " + kvp.Key);
-                                        }
+                                        DremoveList.Add(synapse.AxonalNeuronId);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
+
+                                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                        throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons! Should Never Happen!");
                                     }
                                 }
                                 else
@@ -2004,25 +1920,25 @@
                 List<string> DremoveList = null;
                 List<string> AremoveList = null;
 
-                bool anyStaleConnections = prunableNeuron.CheckForPrunableConnections(CycleNum);
+                var staleConnections = prunableNeuron.CheckForPrunableConnections(CycleNum);
 
-                if ((prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && anyStaleConnections)
+                if ((prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && staleConnections.Count != 0)
                 {
                     WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
                     OverConnectedInShortInterval.Add(prunableNeuron);
                 }
 
                 //Remove only connected Distal Dendritic connections
-                if (anyStaleConnections)
+                if (staleConnections.Count != 0)
                 {
-                    foreach (var kvp in prunableNeuron.ProximoDistalDendriticList)
+                    foreach (var synapse in staleConnections)
                     {
                         //Remove Distal Dendrite from Neuron
                         if (DremoveList == null)
                             DremoveList = new List<string>();
 
                         //Remove Corresponding Connected Axonal Neuron
-                        var axonalNeuron = GetNeuronFromString(kvp.Value.AxonalNeuronId);
+                        var axonalNeuron = GetNeuronFromString(synapse.AxonalNeuronId);
 
                         if (axonalNeuron.AxonalList.TryGetValue(prunableNeuron.NeuronID.ToString(), out var connection))
                         {
@@ -2030,17 +1946,17 @@
 
                             if (returnType == ConnectionRemovalReturnType.TRUE)
                             {
-                                DremoveList.Add(kvp.Key);
+                                DremoveList.Add(synapse.AxonalNeuronId);
                             }
                             else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                             {
                                 WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
-                                //throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                                throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons! Should Never Happen!");
                             }
                             else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                             {
-                                Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                                WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                                Console.WriteLine(" ERROR :: Axonal Connection Does Not Exist But Dendronal Connection Does! ");
+                                WriteLogsToFile(" ERROR :: Axonal Connection Does Not Exist But Dendronal Connection Does! ");
                                 throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
                             }
                         }

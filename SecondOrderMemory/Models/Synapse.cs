@@ -93,7 +93,7 @@
 
         internal bool AddNewDistalSynapse(ulong currentCycle, ConnectionType cType, string objectLabel, uint strength = 0, bool isActive = false)
         {            
-            if (cType != ConnectionType.DISTALDENDRITICNEURON || objectLabel == string.Empty)
+            if (cType != ConnectionType.DISTALDENDRITICNEURON  || objectLabel == string.Empty)
             {
                 throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
             }
@@ -137,8 +137,7 @@
         internal bool IsSynapseActive()  => IsActive;
 
         public bool IsMultiSynapse => SupportedLabels.Count > 1;
-
-        internal bool AnyStale(ulong currentCycle) => IsActive;        
+        
 
         public void Print()
         {

@@ -1070,22 +1070,6 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [Test]
-        public void TestSOMBBMCloneUT()
-        {
-            BlockBehaviourManager bbm2 = bbManager.CloneBBM(0);
-
-            bbManager.Columns[3, 3].Neurons[3].flag = 1;
-
-            Assert.AreNotEqual(bbManager.Columns[3, 3].Neurons[3].flag, bbm2.Columns[3, 3].Neurons[3].flag);
-
-            Assert.AreEqual(bbm2.Columns[0, 1].Neurons.Count, bbManager.Columns[0, 1].Neurons.Count);
-
-            Assert.IsTrue(bbm2.GetNeuronFromString(bbm2.Columns[3, 2].Neurons[2].GetMyTemporalPartner1()).NeuronID.Equals(bbManager.GetNeuronFromString(bbManager.Columns[3, 2].Neurons[2].GetMyTemporalPartner1()).NeuronID));
-
-            Assert.AreEqual(4, bbm2.Columns[3, 3].Neurons[3].flag);
-        }
-
-        [Test]
         public void TestSOMColumnStructure()
         {           
             for (int i = 0; i < bbManager?.X - 50; i++)

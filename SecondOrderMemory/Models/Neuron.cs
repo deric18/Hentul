@@ -476,7 +476,7 @@
             if (AxonalList.TryGetValue(dendronalNeuron.NeuronID.ToString(), out var synapse))
             {
 
-                if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
+                if (synapse.cType.Equals(ConnectionType.AXONTONEURON_SCHEMA))
                 {
                     Console.WriteLine(" WARNING :: RemoveAxonalConnection :: Cannot Remove Schema Based Axonal Connections");
                     //Thread.Sleep(5000);
@@ -544,18 +544,19 @@
             return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
 
-        internal bool CheckForPrunableConnections(ulong currentCycle)
+        internal List<Synapse> CheckForPrunableConnections(ulong currentCycle)
         {
+            List<Synapse> staleConnections = new List<Synapse>();
 
-            foreach (var val in ProximoDistalDendriticList.Values)
+            foreach (var kvp in ProximoDistalDendriticList)
             {
-                if (val.AnyStale(currentCycle))
+                if (kvp.Value.IsSynapseActive() == false)
                 {
-                    return true;
+                    staleConnections.Add(kvp.Value);
                 }
             }
 
-            return false;
+            return staleConnections;
         }
 
 

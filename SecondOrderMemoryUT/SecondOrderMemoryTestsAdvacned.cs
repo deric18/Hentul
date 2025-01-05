@@ -166,7 +166,7 @@
             SDR_SOM predictedSDR;
 
             int repCount = 0;
-            int wirecount = 20;
+            int wirecount = 10;
             ulong counter = 1;
 
             while (repCount != 60)
@@ -183,21 +183,28 @@
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
                 }
 
-
-                if (repCount == 1)
-                {
-                    bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A
-                }
-                else
-                {
-                    bbManager.Fire(patternB, counter++);
-                }
+                bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A               
 
                 if (repCount > wirecount)
                 {
+
+                    if(repCount == 32)
+                    {
+                        int bp1 = 1;
+                    }
+
                     predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter);
 
-                    Assert.IsTrue(predictedSDR.IsUnionTo(patternC, true));
+                    bool c = predictedSDR.IsUnionTo(patternC, true);
+                    
+                    if(c == false)
+                    {
+                        bool breakpoint = true;
+
+                        var Neuron = bbManager.GetNeuronFromPosition(patternC.ActiveBits[0]);
+                    }
+
+                    Assert.IsTrue(c);
 
                     bool b = predictedSDR.IsUnionTo(patternA, new List<Position_SOM>() { new Position_SOM(0, 1, 3) });
 
