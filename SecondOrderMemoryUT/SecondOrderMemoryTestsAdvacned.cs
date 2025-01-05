@@ -12,13 +12,16 @@
         const int Y = 10;
         int Z = 5;
         Random rand1;
+        string testObjectLabel = "RandomObject 1";
 
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_3B, LogMode.Trace, null, true);
+            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_3B, LogMode.BurstOnly, testObjectLabel, true);
 
             bbManager.Init(1);
+
+            bbManager.BeginTraining(testObjectLabel);
 
             rand1 = new Random();
         }
@@ -163,7 +166,7 @@
             SDR_SOM predictedSDR;
 
             int repCount = 0;
-            int wirecount = 10;
+            int wirecount = 20;
             ulong counter = 1;
 
             while (repCount != 60)
@@ -189,7 +192,6 @@
                 {
                     bbManager.Fire(patternB, counter++);
                 }
-
 
                 if (repCount > wirecount)
                 {

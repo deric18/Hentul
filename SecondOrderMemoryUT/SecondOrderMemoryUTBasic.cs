@@ -310,7 +310,7 @@ namespace SecondOrderMemoryUnitTest
             bbManager.Fire(dendronalSdr, Counter++);
 
             //Make the synapsse Active           
-            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1, Counter, true, dendronalNeuron);
+            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY, Counter, true, dendronalNeuron);
 
             var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength(testObjectLabel);
 
@@ -347,12 +347,11 @@ namespace SecondOrderMemoryUnitTest
             var prefireSynapseStrength1 = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos1.ToString()].GetStrength(testObjectLabel);
             var prefireSynapseStrength2 = 1;
 
-            RepeatCycle(axonalNeuron, dendronalNeuron1, BlockBehaviourManager.DISTALNEUROPLASTICITY - 1);
+            RepeatCycle(axonalNeuron, dendronalNeuron1, BlockBehaviourManager.DISTALNEUROPLASTICITY);
 
             bbManager.Fire(axonalSdr, Counter++);
 
-
-            //Make the synapsse Active                       
+            //Make the synapsse Active
             //RepeatCycle(axonalSdr, dendronalSdr, )
 
             dendronalNeuron1.ProcessVoltage(10);

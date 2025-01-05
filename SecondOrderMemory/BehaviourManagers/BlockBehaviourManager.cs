@@ -77,7 +77,7 @@
 
         private bool IsBurstOnly;
 
-        private bool includeBurstLearning;
+        private bool includeBurstLearning145;
 
         private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
 
@@ -230,7 +230,7 @@
 
             _firingBlacnkStreak = 0;
 
-            this.includeBurstLearning = includeBurstLearning;
+            this.includeBurstLearning145 = includeBurstLearning;
 
             NetWorkMode = NetworkMode.TRAINING;
 
@@ -872,6 +872,296 @@
             }
         }
 
+        private void Wire()
+        {
+            //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
+
+            bool allowSequenceMemoryWireCase1 = true;
+            includeBurstLearning145 = true;
+            bool allowSequenceMemoryWireCase3 = true;
+
+            if (CurrentiType.Equals(iType.SPATIAL))
+            {
+
+                List<Neuron> predictedNeuronList = new List<Neuron>();
+
+                foreach (var item in PredictedNeuronsforThisCycle.Keys)
+                {
+                    var neuronToAdd = GetNeuronFromString(item);
+
+                    if (neuronToAdd != null)
+                    {
+                        predictedNeuronList.Add(neuronToAdd);
+                    }
+                };
+
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+
+                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
+                {
+                    //Case 1: All Predicted Neurons Fired without anyone Bursting.
+                    if (Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 1 Picked Up!!");
+                    }
+
+                    WireCasesTracker[0]++;
+
+                    if (Mode == LogMode.All || Mode == LogMode.Info)
+                    {
+                        Console.WriteLine(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
+                        WriteLogsToFile(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
+                    }
+
+                    List<Neuron> contributingList;
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        contributingList = new List<Neuron>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
+                            }
+                        }
+                    }
+
+                    if (allowSequenceMemoryWireCase1)
+                        BuildSequenceMemory();
+                }
+                else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
+                {
+                    //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
+                    //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
+                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
+
+                    //Boost the few correctly predicted neurons
+
+                    WireCasesTracker[1]++;
+
+                    if (Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 2 Picked Up!!");
+                    }
+
+                    List<Neuron> contributingList;
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        //if correctlyPredictedNeuron is also present in ColumnsThatBurst then remove it from the list ColumnsThatBurst , leads to double Wiring!!!
+                        int index = BBMUtils.CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
+
+                        if (index != -1 && index < ColumnsThatBurst.Count)
+                        {
+                            ColumnsThatBurst.RemoveAt(index);
+                        }
+
+                        contributingList = new List<Neuron>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
+                            }
+                        }
+                        else
+                        {
+                            WriteLogsToFile("WIRE WARNING :: coorectly predicted Neuron does not exist in PredictedNeuronsforThisCycle. CorrectlyPredicted Neuron :" + correctlyPredictedNeuron.NeuronID.ToString());
+                        }
+                    }
+
+                    //Bug : Boosting should not juice the same neurons!
+
+                    //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
+
+                    //Boost the Bursting neurons
+                    if (includeBurstLearning145 == true)
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+
+                }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
+                else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
+                {
+                    // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
+
+                    // Strengthen the ones which fired correctly 
+                    List<Neuron> contributingList;
+
+                    WireCasesTracker[2]++;
+
+                    if (Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 3 Picked Up!!");
+                    }
+
+                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
+                    {
+                        Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                        WriteLogsToFile(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
+                        //Thread.Sleep(1000);
+                    }
+
+                    foreach (var correctlyPredictedNeuron in correctPredictionList)
+                    {
+                        contributingList = new List<Neuron>();
+
+                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
+                        {
+                            if (contributingList?.Count == 0)
+                            {
+                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
+                            }
+
+                            foreach (var contributingNeuron in contributingList)
+                            {
+                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
+
+                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
+                            }
+                        }
+                    }
+
+                    //For the ones that were not predicted, perform sequence memory.
+                    if (allowSequenceMemoryWireCase3)
+                        BuildSequenceMemory();
+                }
+                else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
+                {
+                    //Case 4 : All columns Bursted: highly likely first fire or totally new pattern coming in :
+                    //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
+                    //         Todo : If in the middle of the cycle(atleast 10,000 cycles ) then Need to do something new.
+
+
+                    //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
+                    //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
+                    //BUG 2: TotalNumberOfDistalConnections always get limited to 400
+
+                    WireCasesTracker[3]++;
+
+                    if (Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 4 Picked Up!!");
+                    }
+
+                    if (includeBurstLearning145)
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+                }
+                else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
+                {
+
+                    //Case 5 : None of the predicted Neurons did Fire and some also did BURST and some of them did Fire that were not added to the prediction list.
+                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
+                    //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
+
+                    //Bug : Somehow all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
+
+                    WireCasesTracker[4]++;
+
+                    if (Mode == LogMode.Trace)
+                    {
+                        Console.WriteLine("Wire Case 5 Picked Up!!");
+                    }
+
+                    List<Neuron> burstList = new List<Neuron>();
+
+                    foreach (var item in ColumnsThatBurst)
+                    {
+                        burstList.AddRange(Columns[item.X, item.Y].Neurons);
+                    }
+
+                    //Throw if any of the neurons that fired last cycle even though connected did not deploarize
+                    if (CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
+                    {
+                        foreach (var neuron in burstList)
+                        {
+                            foreach (var lastcycleneuron in NeuronsFiringLastCycle)
+                            {
+                                if (neuron.Equals(lastcycleneuron) && BBMUtils.CheckIfTwoNeuronsAreConnected(lastcycleneuron, neuron))
+                                {
+                                    Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
+                                    WriteLogsToFile("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
+
+                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron, lastcycleneuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
+                                }
+                            }
+                        }
+                    }
+
+                    //Boost All the Bursting Neurons
+                    if (includeBurstLearning145 == true)
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+
+                    //Boost the Non Bursting Neurons
+
+                    var firingNeurons = AntiUniounWithNeuronsFiringThisCycle(burstList);
+
+                    if (firingNeurons.Count != 0)
+                    {
+                        foreach (var dendriticNeuron in firingNeurons)
+                        {
+                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
+                            {
+                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
+                                    if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                                        throw new InvalidOperationException("Unable to Connect two neurons!");
+                            }
+                        }
+                    }
+
+                    //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
+                }
+                else
+                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
+                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!! Need ENumification of Wire Cases!!!");
+                }
+            }
+            else if (IsCurrentTemporal)
+            {
+                CurrentiType = iType.TEMPORAL;
+
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+                foreach (var neuron in NeuronsFiringThisCycle)
+                {
+                    if (neuron.nType.Equals(NeuronType.NORMAL))
+                    {
+                        foreach (var temporalContributor in temporalContributors)
+                        {
+                            if (neuron.DidItContribute(temporalContributor))
+                            {
+                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron, DEFAULT_SYNAPSE);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (IsCurrentApical)
+            {
+                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
+
+                CurrentiType = iType.APICAL;
+
+                foreach (var neuron in NeuronsFiringThisCycle)
+                {
+                    foreach (var apicalContributor in apicalContributors)
+                    {
+                        if (neuron.DidItContribute(apicalContributor))
+                        {
+                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron, DEFAULT_SYNAPSE);
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region INIT METHOD
@@ -1114,6 +1404,24 @@
                 }
             }
 
+            if (Mode != LogMode.None)
+            {
+                // Log Neurons which dint get picked up for firing despite potential higher voltage.
+                foreach (var column in Columns)
+                {
+                    foreach (var neuron in column.Neurons)
+                    {
+                        if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) && neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE)
+                        {
+                            if (Mode != LogMode.None)
+                            {
+                                Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                                WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
+                            }
+                        }
+                    }
+                }
+            }
 
             NeuronsFiringThisCycle.Clear();
 
@@ -1131,315 +1439,12 @@
                 TotalPredictionFires = 0;
             }
 
-            IsBurstOnly = false;
-
-            if (Mode != LogMode.None)
-            {
-                // Check for Stale Votlage Clean Up 
-                foreach (var neuronList in PredictedNeuronsforThisCycle)
-                {
-
-                    var neuron = GetNeuronFromString(neuronList.Key);
-
-                    if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && NeuronsFiringThisCycle.Contains(neuron) == false)
-                    {
-                        if (Mode != LogMode.None)
-                        {
-                            Console.WriteLine(" ERROR :: " + Layer.ToString() + " Neuron ID : " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                            WriteLogsToFile(" ERROR:: " + Layer.ToString() + " Neuron ID: " + neuron.NeuronID.ToString() + "  has a Higher Voltage than actual firing Voltage but did not get picked up for firing  ");
-                        }
-                        //Thread.Sleep(3000);
-                    }
-                }
-            }
-
+            IsBurstOnly = false;            
 
             PreviousiType = type;
         }
 
-        private void Wire()
-        {
-            //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
-
-            if (CurrentiType.Equals(iType.SPATIAL))
-            {
-
-                List<Neuron> predictedNeuronList = new List<Neuron>();
-
-                foreach (var item in PredictedNeuronsforThisCycle.Keys)
-                {
-                    var neuronToAdd = GetNeuronFromString(item);
-
-                    if (neuronToAdd != null)
-                    {
-                        predictedNeuronList.Add(neuronToAdd);
-                    }
-                };
-
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
-
-                if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
-                {
-                    //Case 1: All Predicted Neurons Fired without anyone Bursting.
-                    if (Mode == LogMode.Trace)
-                    {
-                        Console.WriteLine("Wire Case 1 Picked Up!!");
-                    }
-
-                    WireCasesTracker[0]++;
-
-                    if (Mode == LogMode.All || Mode == LogMode.Info)
-                    {
-                        Console.WriteLine(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
-                        WriteLogsToFile(" EVENT :: Wire CASE 3 just Occured Count : " + WireCasesTracker[0].ToString());
-                    }
-
-                    List<Neuron> contributingList;
-
-                    foreach (var correctlyPredictedNeuron in correctPredictionList)
-                    {
-                        contributingList = new List<Neuron>();
-
-                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            foreach (var contributingNeuron in contributingList)
-                            {
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
-                            }
-                        }
-                    }
-
-                    BuildSequenceMemory();
-                }
-                else if (ColumnsThatBurst.Count != 0 && correctPredictionList.Count != 0)
-                {
-                    //Case 2 :  Few Correctly Fired, Few Bursted  : Strengthen the Correctly Fired Neurons
-                    //          For Correctly Predicted : Pramote Correctly Predicted Synapses. 
-                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
-
-                    //Boost the few correctly predicted neurons
-
-                    WireCasesTracker[1]++;
-
-                    if (Mode == LogMode.Trace)
-                    {
-                        Console.WriteLine("Wire Case 2 Picked Up!!");
-                    }
-
-                    List<Neuron> contributingList;
-
-                    foreach (var correctlyPredictedNeuron in correctPredictionList)
-                    {
-                        //if correctlyPredictedNeuron is also present in ColumnsThatBurst then remove it from the list ColumnsThatBurst , leads to double Wiring!!!
-                        int index = BBMUtils.CheckIfPositionListHasThisPosition(ColumnsThatBurst, correctlyPredictedNeuron.NeuronID);
-
-                        if (index != -1 && index < ColumnsThatBurst.Count)
-                        {
-                            ColumnsThatBurst.RemoveAt(index);
-                        }
-
-                        contributingList = new List<Neuron>();
-
-                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            if (contributingList?.Count == 0)
-                            {
-                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                            }
-
-                            foreach (var contributingNeuron in contributingList)
-                            {
-                                //Position.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
-                            }
-                        }
-                        else
-                        {
-                            WriteLogsToFile("WIRE WARNING :: coorectly predicted Neuron does not exist in PredictedNeuronsforThisCycle. CorrectlyPredicted Neuron :" + correctlyPredictedNeuron.NeuronID.ToString());
-                        }
-                    }
-
-                    //Bug : Boosting should not juice the same neurons!
-
-                    //Todo : Need to revisit this stratergy of connecting all the boosted neurons.
-
-                    //Boost the Bursting neurons
-                    if (includeBurstLearning == true)
-                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
-
-                }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
-                else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
-                {
-                    // Case 3 : None Bursted , Some Fired which were NOT predicted , Some fired which were predicted
-
-                    // Strengthen the ones which fired correctly 
-                    List<Neuron> contributingList;
-
-                    WireCasesTracker[2]++;
-
-                    if (Mode == LogMode.Trace)
-                    {
-                        Console.WriteLine("Wire Case 3 Picked Up!!");
-                    }
-
-                    if (Mode.Equals(LogMode.All) || Mode.Equals(LogMode.Info))
-                    {
-                        Console.WriteLine(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
-                        WriteLogsToFile(" EVENT :: PARTIAL ERROR CASE : Wire CASE 3 just Occured Count : " + WireCasesTracker[2].ToString());
-                        //Thread.Sleep(1000);
-                    }
-
-                    foreach (var correctlyPredictedNeuron in correctPredictionList)
-                    {
-                        contributingList = new List<Neuron>();
-
-                        if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
-                        {
-                            if (contributingList?.Count == 0)
-                            {
-                                throw new Exception("Wire : This should never Happen!! Contributing List should not be empty");
-                            }
-
-                            foreach (var contributingNeuron in contributingList)
-                            {
-                                //fPosition.ConvertStringPosToNeuron(contributingNeuron).PramoteCorrectPredictionAxonal(correctlyPredictedNeuron);
-
-                                PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron, contributingNeuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
-                            }
-                        }
-                    }
-
-                    //For the ones that were not predicted, perform sequence memory.
-                    BuildSequenceMemory();
-                }
-                else if (ColumnsThatBurst.Count == NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
-                {
-                    //Case 4 : All columns Bursted: highly likely first fire or totally new pattern coming in :
-                    //         If firing early cycle, then just wire 1 Distal Syanpse to all the neurons that fired last cycle and 1 random connection.
-                    //         Todo : If in the middle of the cycle(atleast 10,000 cycles ) then Need to do something new.
-
-
-                    //BUG 1: NeuronsFiredLastCycle = 10 when last cycle was a Burst Cycle and if this cycle is a Burst cycle then the NeuronsFiringThisCycle will be 10 as well , that leads to 100 new distal connections , not healthy.
-                    //Feature : Synapses will be marked InActive on Creation and eventually marked Active once the PredictiveCount increases.
-                    //BUG 2: TotalNumberOfDistalConnections always get limited to 400
-
-                    WireCasesTracker[3]++;
-
-                    if (Mode == LogMode.Trace)
-                    {
-                        Console.WriteLine("Wire Case 4 Picked Up!!");
-                    }
-
-                    //if (includeBurstLearning == true)
-                    ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
-                }
-                else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
-                {
-
-                    //Case 5 : None of the predicted Neurons did Fire and some also did BURST and some of them did Fire that were not added to the prediction list.
-                    //          For Bursted             : Analyse did anybody contribute to the column and dint burst ? if nobody contributed then do Wire 1 Distal Synapses with all the neurons that fired last cycle                   
-                    //          For Fired               : The Fired Neurons did not burst because some neurons deplolarized it in the last cycle , connect to all the neurons that contributed to its Firing.
-
-                    //Bug : Somehow all the neurons in the column have the same voltage , but none of them are added to the PredictedNeuronsForThisCycle List from last firing Cycle.
-
-                    WireCasesTracker[4]++;
-
-                    if (Mode == LogMode.Trace)
-                    {
-                        Console.WriteLine("Wire Case 5 Picked Up!!");
-                    }
-
-                    List<Neuron> burstList = new List<Neuron>();
-
-                    foreach (var item in ColumnsThatBurst)
-                    {
-                        burstList.AddRange(Columns[item.X, item.Y].Neurons);
-                    }
-
-                    //Throw if any of the neurons that fired last cycle even though connected did not deploarize
-                    if (CheckIfNeuronGetsAnyContributionsLastCycle(burstList))
-                    {
-                        foreach (var neuron in burstList)
-                        {
-                            foreach (var lastcycleneuron in NeuronsFiringLastCycle)
-                            {
-                                if (neuron.Equals(lastcycleneuron) && BBMUtils.CheckIfTwoNeuronsAreConnected(lastcycleneuron, neuron))
-                                {
-                                    Console.WriteLine("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
-                                    WriteLogsToFile("Exception : Wire() :: Neurons That Fire Together are not Wiring Together" + PrintBlockDetailsSingleLine());
-
-                                    PramoteCorrectlyPredictedDendronal(lastcycleneuron, neuron, lastcycleneuron.nType == NeuronType.NORMAL ? CurrentObjectLabel : DEFAULT_SYNAPSE);
-                                }
-                            }
-                        }
-                    }
-
-                    //Boost All the Bursting Neurons
-                    if (includeBurstLearning == true)
-                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
-
-                    //Boost the Non Bursting Neurons
-
-                    var firingNeurons = AntiUniounWithNeuronsFiringThisCycle(burstList);
-
-                    if (firingNeurons.Count != 0)
-                    {
-                        foreach (var dendriticNeuron in firingNeurons)
-                        {
-                            foreach (var axonalNeuron in NeuronsFiringLastCycle)
-                            {
-                                if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
-                                        throw new InvalidOperationException("Unable to Connect two neurons!");
-                            }
-                        }
-                    }
-
-                    //May be some voltage on this column was not cleaned up from last cycle somehow or may be its because of the Synapse Not Active Logic i put few weeks back because of PredictedNeuronsList Getting overloaded to 400. now its reducded to 60 per cycle.
-                }
-                else
-                {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
-                    throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!! Need ENumification of Wire Cases!!!");
-                }
-            }
-            else if (IsCurrentTemporal)
-            {
-                CurrentiType = iType.TEMPORAL;
-
-                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-                foreach (var neuron in NeuronsFiringThisCycle)
-                {
-                    if (neuron.nType.Equals(NeuronType.NORMAL))
-                    {
-                        foreach (var temporalContributor in temporalContributors)
-                        {
-                            if (neuron.DidItContribute(temporalContributor))
-                            {
-                                PramoteCorrectlyPredictedDendronal(temporalContributor, neuron, DEFAULT_SYNAPSE);
-                            }
-                        }
-                    }
-                }
-            }
-            else if (IsCurrentApical)
-            {
-                //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-
-                CurrentiType = iType.APICAL;
-
-                foreach (var neuron in NeuronsFiringThisCycle)
-                {
-                    foreach (var apicalContributor in apicalContributors)
-                    {
-                        if (neuron.DidItContribute(apicalContributor))
-                        {
-                            PramoteCorrectlyPredictedDendronal(apicalContributor, neuron, DEFAULT_SYNAPSE);
-                        }
-                    }
-                }
-            }
-        }
+        
 
         #endregion
 
@@ -1561,7 +1566,7 @@
             //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.
             ConnectionRemovalReturnType IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), CurrentObjectLabel, AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
 
-            if (IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.HARDFALSE)
+            if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.TRUE)
             {
                 bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), CurrentObjectLabel, DendriticNeuron.nType, CycleNum, schemToLoad, logfilename, cType, IsActive);
 
@@ -1587,6 +1592,7 @@
                     if (returnType == ConnectionRemovalReturnType.TRUE)
                     {
                         //Do Nothing just return false below.
+                        return true;
                     }
                     else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                     {
@@ -1601,10 +1607,17 @@
                     }
                 }
             }
-            else if (IsAxonalConnectionSuccesful != ConnectionRemovalReturnType.SOFTFALSE)
+            else if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.HARDFALSE)
             {
                 //Need investigation as why the same connection is tried twice
-                WriteLogsToFile(" ERROR :: ConnectTwoNeurons :::: Could not ADD new Dendronal Connection to the Neuron and return a Soft False! Dendronal Neuron ID : " + DendriticNeuron.NeuronID + " Layer Type :" + Layer.ToString());
+                WriteLogsToFile(" ERROR :: ConnectTwoNeurons :::: Could not ADD new Dendronal Connection to the Neuron and return a HArd False! Dendronal Neuron ID : " + DendriticNeuron.NeuronID + " Layer Type :" + Layer.ToString());
+                throw new InvalidOperationException("HARD FALSE eStablishing new Axonal Connection!");                
+            }
+            else if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.SOFTFALSE)
+            {
+                //Need investigation as why the same connection is tried twice : No need to investigate
+                WriteLogsToFile(" ERROR :: ConnectTwoNeurons ::::Another Failed Attempt at adding a redundant Connection Dendronal Neuron ID :  " + DendriticNeuron.NeuronID + " Axonal Neuron ID : " + AxonalNeuron.NeuronID + " Layer Type :" + Layer.ToString());
+                return true;
             }
 
             return false;
@@ -1953,8 +1966,7 @@
                                 {
                                     if (Mode.Equals(LogMode.None) == false)
                                     {
-                                        Console.WriteLine("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
-                                        WriteLogsToFile("WARNING :::: PRUNE():: Axonal Neuron does not contain Same synapse from Dendronal Neuron for Prunning!");
+                                        //Axonal is not connected dendronal via regular connection ! Potential Scehma Based Neuronal Prune ! Ignore!!.
                                     }
                                 }
 
@@ -2309,6 +2321,7 @@
                     if (this.TemporalLineArray[i, j] == null)
                         this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BBMID, NeuronType.TEMPORAL);
 
+
                     for (int k = 0; k < X; k++)
                     {
 
@@ -2316,7 +2329,6 @@
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
-
                     }
                 }
             }
@@ -2356,7 +2368,7 @@
                         if (ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == false)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
-                        }
+                        }                        
                     }
                 }
             }

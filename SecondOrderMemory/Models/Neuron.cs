@@ -270,7 +270,7 @@
         public void InitAxonalConnectionForConnector(int i, int j, int k)
         {
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
-            AddNewAxonalConnection(key);
+            AddNewAxonalConnection(key, ConnectionType.AXONTONEURON_SCHEMA);
         }
 
         internal void CleanUpContributersList()
@@ -291,12 +291,12 @@
 
         #region SCHEMA BASED CONNECTIONS
 
-        private bool AddNewAxonalConnection(string key)
+        internal bool AddNewAxonalConnection(string key, ConnectionType cType)
         {
-            if (key == "0-0-1")
-            {
-                int bp2 = 1;
-            }
+            //if (key == "0-0-1")
+            //{
+            //    int bp2 = 1;
+            //}
 
             this.flag++;
 
@@ -304,14 +304,7 @@
             {
                 throw new InvalidOperationException("Canot connect neuron to itself");
             }
-
-            if (AxonalList == null || AxonalList.Count == 0)
-            {
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));
-
-                return true;
-            }
-
+            
             if (AxonalList.TryGetValue(key, out var synapse))
             {
                 Console.WriteLine("ERROR :: SOM :: AddNewAxonalConnection : Connection Already Added Counter : " + redundantCounter.ToString(), ++redundantCounter);
@@ -321,7 +314,7 @@
             else
             {
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, 0, cType, true));
 
                 return true;
             }
@@ -358,7 +351,7 @@
         #region Wiring Connector Logic
 
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, string objectLabel, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
+        public bool AddToDistalList(string axonalNeuronId, string objectLabel, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType cType, bool IsActive = false)
         {
 
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
@@ -372,14 +365,23 @@
                 if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
                 {
 
-                    if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
+                    if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
                     {
                         Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
 
-                        synapse1.IncrementHitCount(CycleNum, objectLabel);
+                        if(synapse.SupportedLabels.Contains(objectLabel))
+                        {
+                            synapse.IncrementHitCount(CycleNum, objectLabel);
 
-                        return true;
+                            return true;
 
+                        }
+                        else
+                        {
+                            synapse.AddNewDistalSynapse(CycleNum, cType, objectLabel);
+
+                            return true;
+                        }
                     }
                     else
                     {
@@ -398,9 +400,9 @@
 
             }
 
-            if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
+            if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
             {
-                synapse.IncrementHitCount(CycleNum, objectLabel);
+                synapse1.IncrementHitCount(CycleNum, objectLabel);
 
                 return true;
             }
@@ -431,9 +433,19 @@
 
             if (AxonalList.TryGetValue(key, out var synapse))
             {                
-                Console.WriteLine(schemaType.ToString() + "INFO :: Axon already connected to Neuron");
+                if(synapse.SupportedLabels.Contains(objectLabel))
+                {
+                    Console.WriteLine(schemaType.ToString() + "INFO :: Axon already connected to Neuron");
 
-                return ConnectionRemovalReturnType.SOFTFALSE;
+                    return ConnectionRemovalReturnType.SOFTFALSE;
+                }
+                else
+                {
+                    synapse.AddNewDistalSynapse(CycleNum, connectionType, objectLabel);
+
+                    return ConnectionRemovalReturnType.TRUE;
+                }
+                
             }
             else
             {
@@ -446,7 +458,14 @@
                     //Thread.Sleep(1000);
                 }
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive, objectLabel));
+                if (connectionType == ConnectionType.APICAL || connectionType == ConnectionType.TEMPRORAL)
+                {
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, true));
+                }
+                else
+                {
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive, objectLabel));
+                }
 
                 return ConnectionRemovalReturnType.TRUE;
             }
@@ -549,6 +568,7 @@
 
     public enum ConnectionType
     {
+        AXONTONEURON_SCHEMA,
         AXONTONEURON,
         PROXIMALDENDRITICNEURON,
         DISTALDENDRITICNEURON,

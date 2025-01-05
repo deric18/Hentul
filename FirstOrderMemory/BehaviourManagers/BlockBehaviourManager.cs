@@ -1117,11 +1117,6 @@
                 }
             }
 
-
-            NeuronsFiringThisCycle.Clear();
-
-            ColumnsThatBurst.Clear();                             
-
             //Every 50 Cycles Prune unused and under Firing Connections
             if (CycleNum >= 100 && CycleNum % 50 == 0)
             {
@@ -1133,6 +1128,10 @@
                 TotalBurstFire = 0;
                 TotalPredictionFires = 0;
             }
+
+            NeuronsFiringThisCycle.Clear();
+
+            ColumnsThatBurst.Clear();                                         
 
             IsBurstOnly = false;
 
