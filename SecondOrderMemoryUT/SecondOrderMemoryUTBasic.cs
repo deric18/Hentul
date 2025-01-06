@@ -164,7 +164,7 @@ namespace SecondOrderMemoryUnitTest
             var neuron1 = bbManager.Columns[0, 2].Neurons[0];
             var neuron2 = bbManager.Columns[5, 3].Neurons[0];
 
-            if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.AXONTONEURON))     //intentionally creating an inactive snapse to test out DISTALNEUROPLATICITY cycle.
+            if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))     //intentionally creating an inactive snapse to test out DISTALNEUROPLATICITY cycle.
             {
                 throw new InvalidProgramException("Could Not Connect 2 Neurons");
             }
@@ -178,9 +178,9 @@ namespace SecondOrderMemoryUnitTest
                 throw new InvalidOperationException("Could not get relavent Synapses!");
             }
 
-            uint neuron1StrengthPreFire = neuron1Synapse.GetStrength(testObjectLabel);
+            uint neuron1StrengthPreFire = neuron1Synapse.GetStrength();
 
-            uint neuron2StrengthPreFire = neuron2Synapse.GetStrength(testObjectLabel);
+            uint neuron2StrengthPreFire = neuron2Synapse.GetStrength();
 
             ulong counter = 1;
 
@@ -197,9 +197,9 @@ namespace SecondOrderMemoryUnitTest
 
             _ = neuron2.ProximoDistalDendriticList.TryGetValue(neuron1.NeuronID.ToString(), out Synapse value2);
 
-            uint neuron1StrengthPostFire = value1.GetStrength(testObjectLabel);
+            uint neuron1StrengthPostFire = value1.GetStrength();
 
-            uint neruon2PostFireStrength = value2.GetStrength(testObjectLabel);
+            uint neruon2PostFireStrength = value2.GetStrength();
 
             Assert.AreEqual(1, neruon2PostFireStrength - neuron2StrengthPreFire);
 
@@ -301,7 +301,7 @@ namespace SecondOrderMemoryUnitTest
                 throw new Exception("Could Not connect two neurons!");
             }
 
-            var prefireSynapseStrength = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos.ToString()].GetStrength(testObjectLabel);
+            var prefireSynapseStrength = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos.ToString()].GetStrength();
 
             bbManager.Fire(axonalSdr, Counter++);
 
@@ -312,7 +312,7 @@ namespace SecondOrderMemoryUnitTest
             //Make the synapsse Active           
             RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY, Counter, true, dendronalNeuron);
 
-            var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength(testObjectLabel);
+            var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
 
             Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(axonalNeuron, dendronalNeuron));
 
@@ -344,7 +344,7 @@ namespace SecondOrderMemoryUnitTest
                 throw new Exception("Could Not connect two neurons!");
             }
 
-            var prefireSynapseStrength1 = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos1.ToString()].GetStrength(testObjectLabel);
+            var prefireSynapseStrength1 = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos1.ToString()].GetStrength();
             var prefireSynapseStrength2 = 1;
 
             RepeatCycle(axonalNeuron, dendronalNeuron1, BlockBehaviourManager.DISTALNEUROPLASTICITY);
@@ -358,8 +358,8 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(dendronalSdr, Counter++);
 
-            var postFiringSynapeStrength1 = bbManager.GetNeuronFromPosition(dendronalPos1).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength(testObjectLabel);
-            var postFiringSynapeStrength2 = bbManager.GetNeuronFromPosition(dendronalPos2).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength(testObjectLabel);
+            var postFiringSynapeStrength1 = bbManager.GetNeuronFromPosition(dendronalPos1).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
+            var postFiringSynapeStrength2 = bbManager.GetNeuronFromPosition(dendronalPos2).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
 
             Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(axonalNeuron, dendronalNeuron1));
 
@@ -432,6 +432,15 @@ namespace SecondOrderMemoryUnitTest
             Assert.AreEqual("0-4-3-T", temporalNeuron1.NeuronID.ToString());
             Assert.AreEqual("0-3-2-T", bbManager.GetNeuronFromString(temporalNeuron2.GetMyTemporalPartner1()).NeuronID.ToString());
 
+        }
+
+        [Test]
+        public void TestTemporalLines2()
+        {
+            foreach (var neuron in bbManager.TemporalLineArray)
+            {
+                Assert.AreEqual(neuron.AxonalList.Count, X);
+            }
         }
 
         [Test, Ignore("Needs Work")]
@@ -569,7 +578,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(temporalposition.ToString(), out Synapse preSynapse))
             {
-                previousStrength = preSynapse.GetStrength(testObjectLabel);
+                previousStrength = preSynapse.GetStrength();
             }
 
             bbManager.Fire(temporalInputPattern, 1, true, true);
@@ -582,7 +591,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(temporalposition.ToString(), value: out Synapse postSynapse))
             {
-                currentStrength = postSynapse.GetStrength(testObjectLabel);
+                currentStrength = postSynapse.GetStrength();
             }
 
             Assert.AreEqual(0, previousStrength);
@@ -614,7 +623,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
-                previousStrength = preSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
+                previousStrength = preSynapse.GetStrength();
             }
 
             bbManager.Fire(temporalInputPattern, 1, false, true);
@@ -625,7 +634,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse postSynapse))
             {
-                currentStrength = postSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
+                currentStrength = postSynapse.GetStrength();
             }
 
             overlapNeuron.ProcessVoltage(120);            
@@ -636,7 +645,7 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [Test]
-        public void TestApicalLineUT()
+        public void TestApicalLineUT1()
         {
 
             Neuron apicalNeuron1 = bbManager.GetNeuronFromString(bbManager.Columns[2, 4].Neurons[3].GetMyApicalPartner1());
@@ -646,6 +655,15 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.AreEqual("2-4-0-A", apicalNeuron1.NeuronID.ToString());
             Assert.AreEqual("5-3-0-A", apicalNeuron2.NeuronID.ToString());
+        }
+
+        [Test]
+        public void TestApicalLineUT2()
+        {
+            foreach(var neuron in  bbManager.ApicalLineArray)
+            {
+                Assert.AreEqual(neuron.AxonalList.Count, Z);
+            }
         }
 
         [Test]
@@ -687,7 +705,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), out Synapse preSynapse))
             {
-                previousStrength = preSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
+                previousStrength = preSynapse.GetStrength();
             }
 
             bbManager.Fire(apicalInputPattern, 1, true, true);
@@ -698,7 +716,7 @@ namespace SecondOrderMemoryUnitTest
 
             if (normalNeuron.ProximoDistalDendriticList.TryGetValue(apicalNeuron.NeuronID.ToString(), value: out Synapse postSynapse))
             {
-                currentStrength = postSynapse.GetStrength(BlockBehaviourManager.DEFAULT_SYNAPSE);
+                currentStrength = postSynapse.GetStrength();
             }
 
             Assert.IsTrue(currentStrength > previousStrength);

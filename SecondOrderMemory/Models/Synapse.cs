@@ -1,7 +1,7 @@
 ﻿namespace SecondOrderMemory.Models
 {
     public class Synapse
-    {                
+    {
 
         public Guid Id { get; private set; }
 
@@ -11,25 +11,38 @@
 
         public string DendronalNeuronalId { get; private set; }
 
-        public Dictionary<string, ulong> lastFiredCycle {  get; private set; }
+        public ulong lastFiredCycle { get; private set; }
 
-        public Dictionary<string,ulong> lastPredictedCycle { get; private set; }
+        public ulong lastPredictedCycle { get; private set; }
 
         public bool IsActive { get; private set; }
 
-        public Dictionary<string, ConnectionType> cType { get; private set; }       
-        
-        public Dictionary<string, uint> PredictiveHitCount { get; private set; }
+        public ConnectionType cType { get; private set; }
 
-        public Dictionary<string, uint> FiringHitCount { get; private set; }
+        public uint PredictiveHitCount { get; private set; }
 
-        private Dictionary<string, uint> _strength {  get; set; }
+        public uint FiringHitCount { get; private set; }
+
+        private uint _strength { get; set; }
 
         public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
             Id = Guid.NewGuid();
             AxonalNeuronId = axonalNeuronId;
             DendronalNeuronalId = dendriticNeuronId;
+            this.lastFiredCycle = currentCycle;
+
+            this.lastPredictedCycle = currentCycle;
+
+            this._strength = strength;
+
+            this.IsActive = isActive;
+
+            PredictiveHitCount = isActive ? BlockBehaviourManager.DISTALNEUROPLASTICITY : 0;
+
+            FiringHitCount = 0;
+
+            this.cType = cType;
 
             if (objectLabel == null)    //Schema Based Connection
             {
@@ -40,104 +53,23 @@
 
                 SupportedLabels = new HashSet<string>();
 
-                this.lastFiredCycle = new Dictionary<string, ulong>();
-                lastFiredCycle.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
-
-                this.lastPredictedCycle = new Dictionary<string, ulong>();
-                lastPredictedCycle.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
-
-                this._strength = new Dictionary<string, uint>();
-                _strength.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
-
-                IsActive = true;
-
-                PredictiveHitCount = new Dictionary<string, uint>();
-                PredictiveHitCount.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, BlockBehaviourManager.DISTALNEUROPLASTICITY);
-
-                FiringHitCount = new Dictionary<string, uint>();
-                FiringHitCount.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, 0);
-
-                this.cType = new Dictionary<string, ConnectionType>();
-                this.cType.Add(BlockBehaviourManager.DEFAULT_SYNAPSE, cType);
             }
             else                        // Object Based Connection
             {
-                if (!(cType == ConnectionType.DISTALDENDRITICNEURON || cType == ConnectionType.AXONTONEURON))
+                if (cType != ConnectionType.DISTALDENDRITICNEURON)
                 {
                     throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
                 }
 
                 SupportedLabels = new HashSet<string>() { objectLabel };
-
-                this.lastFiredCycle = new Dictionary<string, ulong>();
-                this.lastFiredCycle.Add(objectLabel, currentCycle);
-
-                this.lastPredictedCycle = new Dictionary<string, ulong>();
-                this.lastPredictedCycle.Add(objectLabel, currentCycle);
-
-                this._strength = new Dictionary<string, uint>();
-                this._strength.Add(objectLabel, strength);
-
-                IsActive = false;                
-
-                PredictiveHitCount = new Dictionary<string, uint>();
-                PredictiveHitCount.Add(objectLabel, 0);
-
-                FiringHitCount = new Dictionary<string, uint>();
-                FiringHitCount.Add(objectLabel, 0);
-
-                this.cType = new Dictionary<string, ConnectionType>();
-                this.cType.Add(objectLabel, cType);
             }
         }
 
-        internal bool AddNewDistalSynapse(ulong currentCycle, ConnectionType cType, string objectLabel, uint strength = 0, bool isActive = false)
-        {            
-            if (cType != ConnectionType.DISTALDENDRITICNEURON  || objectLabel == string.Empty)
-            {
-                throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
-            }
+        internal bool IsSynapseActive() => IsActive;
 
-            bool sucess = false;
+        public bool IsMultiObjectSupported => SupportedLabels.Count > 1;
 
-            if (SupportedLabels.Add(objectLabel) == false)
-                return false;
-            
-            if(lastFiredCycle.TryGetValue(objectLabel, out var _) == false) 
-                this.lastFiredCycle.Add(objectLabel, currentCycle);
-            else
-            {
-                return false;
-            }
-
-            if (lastPredictedCycle.TryGetValue(objectLabel, out var _) == false)
-                this.lastPredictedCycle.Add(objectLabel, currentCycle);
-            else
-            { return false; }
-
-            if (_strength.TryGetValue(objectLabel, out var _))
-                this._strength.Add(objectLabel, strength);
-            else
-            { return false; }
-
-            if (PredictiveHitCount.TryGetValue(objectLabel, out var _) == false)
-                PredictiveHitCount.Add(objectLabel, 0);
-            else { return false; }
-
-            if (FiringHitCount.TryGetValue(objectLabel, out var _) == false)
-                FiringHitCount.Add(objectLabel, 0);
-            else
-            { return false; }
-
-            this.cType.Add(objectLabel, cType);
-
-            return true;
-        }
-
-        internal bool IsSynapseActive()  => IsActive;
-
-        public bool IsMultiSynapse => SupportedLabels.Count > 1;
-        
+        public void AddNewObjectLabel(string label) => SupportedLabels.Add(label);
 
         public void Print()
         {
@@ -146,43 +78,39 @@
 
             foreach (var label in SupportedLabels)
             {
-                Console.WriteLine("Label : " + label);                
-                Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle[label]);
-                Console.WriteLine(" Active : " + ( IsActive ? "Yes" : "NO"));
-                Console.WriteLine(" Stringeth : " + _strength[label].ToString());
+                Console.WriteLine("Label : " + label);
+                Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle);
+                Console.WriteLine(" Active : " + (IsActive ? "Yes" : "NO"));
+                Console.WriteLine(" Stringeth : " + _strength.ToString());
                 Console.WriteLine(" Connection Type : " + cType.ToString());
-                Console.WriteLine(" Firing Hit Count : " + FiringHitCount[label].ToString() + " \n ");
+                Console.WriteLine(" Firing Hit Count : " + FiringHitCount + " \n ");
             }
         }
 
-        public uint GetStrength(string label) =>        
-            _strength.TryGetValue(label, out var strength) ? strength : 0;
+        public uint GetStrength() => _strength;
 
-        public void IncrementHitCount(ulong currentCycleNum, string label)
+        public void IncrementHitCount(ulong currentCycleNum)
         {
 
             if (DendronalNeuronalId.ToString().Equals("55-2-1-N"))
-            { 
-                bool breakpoint = false; 
+            {
+                bool breakpoint = false;
             }
 
-            if (PredictiveHitCount.TryGetValue(label, out var predictivehitcount))
+            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY)
             {
-                if (predictivehitcount >= BlockBehaviourManager.DISTALNEUROPLASTICITY)
-                {
-                    if(IsActive == false)
-                        IsActive = true;
+                if (IsActive == false)
+                    IsActive = true;
 
-                    FiringHitCount[label]++;
+                FiringHitCount++;
 
-                    _strength[label]++;
+                _strength++;
 
-                    lastFiredCycle[label]++;
-                }
-                else
-                {
-                    PredictiveHitCount[label]++;
-                }
+                lastFiredCycle++;
+            }
+            else
+            {
+                PredictiveHitCount++;
             }
         }
     }

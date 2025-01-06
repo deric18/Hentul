@@ -27,6 +27,40 @@
         }
 
         [Test]
+        public void CheckAllNeuronsNonDistalConnectionsAreActive()
+        {
+            foreach (var column in bbManager.Columns)
+            {
+                foreach (var neuron in column.Neurons)
+                {
+                    foreach (var connection in neuron.ProximoDistalDendriticList)
+                    {
+                        if (connection.Value.cType != ConnectionType.DISTALDENDRITICNEURON)
+                        {
+                            Assert.IsTrue(connection.Value.IsActive);
+                        }
+                        else
+                        {
+                            Assert.IsFalse(connection.Value.IsActive);
+                        }
+                    }
+
+                    foreach(var connection in neuron.AxonalList)
+                    {
+                        if(connection.Value.cType != ConnectionType.DISTALDENDRITICNEURON)
+                        {
+                            Assert.IsTrue(connection.Value.IsActive);
+                        }
+                        else
+                        {
+                            Assert.IsFalse(connection.Value.IsActive);
+                        }
+                    }
+                }
+            }
+        }
+
+        [Test]
         public void TestNeuronsFiringLastcycle()
         {
             var temporalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
@@ -271,7 +305,7 @@
                 neuron.ProcessVoltage(50);
             }
 
-            int repCount = 2;
+            int repCount = 3;
 
             while (repCount > 0)
             {
