@@ -108,7 +108,7 @@
 
         public string CurrentObjectLabel { get; private set; }
 
-        private HashSet<string> SuspectedLabels { get; set; }
+        private HashSet<string> SupportedLabels { get; set; }
 
         #endregion
 
@@ -235,7 +235,7 @@
 
             CurrentObjectLabel = objectLabel;
 
-            SuspectedLabels = new HashSet<string>();
+            SupportedLabels = new HashSet<string>();
         }
 
         public void BeginTraining(string Label)
@@ -740,7 +740,7 @@
                 if (NetWorkMode.Equals(NetworkMode.PREDICTION))
                 {
                     foreach (var label in synapse.SupportedLabels)
-                        SuspectedLabels.Add(label);
+                        SupportedLabels.Add(label);
                 }
             }
             else
@@ -833,14 +833,19 @@
             return toReturn;
         }
 
-        public void Label(string Label)
+        public List<string> GetSupportedLabels()
         {
             if (Layer.Equals(LayerType.Layer_3A) == false)
             {
                 throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
 
-            // Once this is called , its end of training , this is one composite pattern for the object.
+            if(NetWorkMode != NetworkMode.PREDICTION)
+            {
+                throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
+            }            
+
+            return SupportedLabels.ToList();
         }
 
         public List<Position_SOM> PreFire()
@@ -2150,7 +2155,7 @@
 
             IsBurstOnly = false;
 
-            SuspectedLabels.Clear();
+            SupportedLabels.Clear();
 
         }
 

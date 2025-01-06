@@ -369,6 +369,13 @@
 
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
+                List<string> potentialObjectLabels = somBBM_L3B.GetSupportedLabels();
+
+                if(potentialObjectLabels.Count > 0)
+                {
+
+                }
+
                 if (som_SDR != null)
                 {
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
