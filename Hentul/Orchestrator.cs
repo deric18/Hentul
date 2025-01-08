@@ -1,9 +1,6 @@
 ﻿namespace Hentul
 {
-    using FirstOrderMemory.Models;
-    using FirstOrderMemory.BehaviourManagers;
-    using SecondOrderMemory.Models;    
-    using Common;    
+        using Common;    
     using System.Runtime.InteropServices;
     using System;
     using Hentul.Hippocampal_Entorinal_complex;
@@ -12,7 +9,8 @@
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
-    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;
+    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;    
+
     public class Orchestrator
     {
 
@@ -86,6 +84,8 @@
         public string filename;
 
         public string logfilename;
+
+        public LogMode logMode;
 
         private List<string> objectlabellist { get; set; }
 
@@ -213,7 +213,9 @@
 
             filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
 
-            logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
+            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+
+            logMode = Common.LogMode.BurstOnly;
 
         }
 
@@ -336,8 +338,10 @@
                     WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
                 }
 
+                // L3B fire
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
                          
+                //L3A fire
                 SDR_SOM fom_SDR = GetSdrSomFromFOMs();
                 somBBM_L3A.Fire(fom_SDR, CycleNum);
             }
@@ -365,16 +369,9 @@
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
-                SDR_SOM fom_SDR = GetSdrSomFromFOMs();                
+                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-
-                List<string> potentialObjectLabels = somBBM_L3B.GetSupportedLabels();
-
-                if(potentialObjectLabels.Count > 0)
-                {
-
-                }
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);               
 
                 if (som_SDR != null)
                 {
@@ -396,11 +393,25 @@
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
-                    motorOutput = HCAccessor.PredictObject(firingSensei,null, isMock);
+                    List<string> potentialObjectLabels = somBBM_L3B.GetSupportedLabels();
+
+                    if (potentialObjectLabels.Count > 0)
+                    {
+                        motorOutput = HCAccessor.PredictObject(firingSensei, null, potentialObjectLabels, isMock);
+                    }
+
+                    motorOutput = HCAccessor.PredictObject(firingSensei, null, null, isMock);
                 }
             }
-
             return motorOutput;
+        }
+
+        public void DoneWithTraining()
+        {
+            NMode = NetworkMode.PREDICTION;
+            HCAccessor.DoneWithTraining();
+            somBBM_L3B.DoneTraining();
+            somBBM_L3A.DoneTraining();
         }
 
 
@@ -428,8 +439,6 @@
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
         }
-
-
 
         public void StartBurstAvoidanceWandering()
         {
@@ -483,7 +492,7 @@
                 toReturn.Add(new Position_SOM(item.X, item.Y));
             }
 
-            return toReturn; 
+            return toReturn;         
         }
 
         private uint GetTotalBurstCountInFOMLayerInLastCycle()
@@ -561,13 +570,7 @@
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
         public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;        
-
-        public void DoneWithTraining()
-        {
-            HCAccessor.DoneWithTraining();
-            somBBM_L3A.Label(objectlabellist[imageIndex++]);
-        }
-
+       
         private void FireAllFOMs()
         {
             foreach (var kvp in Mapper.FOMBBMIDS)
@@ -730,9 +733,25 @@
 
             foreach (var fomID in firingFOM)
             {
-                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllNeuronsFiringLatestCycle(CycleNum).ActiveBits, fomID));
+                posList.AddRange(Mapper.GetSOMEquivalentPositionsofFOM(fomBBM[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
 
+
+            if(logMode == Common.LogMode.BurstOnly)
+            {
+                int count = 0;
+                foreach (var fomID in firingFOM)
+                {
+                    count += fomBBM[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
+                }                
+
+                if(count == fomBBM.Count() * Z)
+                {
+                    WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
+                }
+                
+            }
+            
             if (posList != null || posList.Count != 0)
             {
                 return new SDR_SOM(1250, 10, posList, iType.SPATIAL);

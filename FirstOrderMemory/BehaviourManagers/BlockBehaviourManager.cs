@@ -845,6 +845,33 @@
             return toReturn;
         }
 
+        public SDR_SOM GetAllColumnsBurstingLatestCycle(ulong currentCycle)
+        {
+            List<Position_SOM> activeBits = new List<Position_SOM>();
+            SDR_SOM toReturn = null;
+
+            if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+            {
+                throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
+            }
+
+            if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
+            {
+                foreach (var neuron in NeuronsFiringLastCycle)
+                {
+                    if (CheckForDuplicates(activeBits, neuron.NeuronID))
+                    {
+                        activeBits.Add(neuron.NeuronID);
+                    }
+                }
+
+                
+            }
+
+            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
+
+        }
+
         public void Label(string Label)
         {
             if(Layer.Equals(LayerType.Layer_3A) == false)

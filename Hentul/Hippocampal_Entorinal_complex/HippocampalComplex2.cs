@@ -1,7 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;    
+    using Common;
     using System.Xml;
 
     public class HippocampalComplex2
@@ -33,7 +33,7 @@
 
         public int NumberOfITerationsToConfirmation { get; private set; }
 
-        private string backupDir;        
+        private string backupDir;
 
         private List<string> objectlabellist;
 
@@ -53,7 +53,7 @@
             matchingObjectList = new List<RecognisedEntity>();
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
-            currentIterationToConfirmation = 0;            
+            currentIterationToConfirmation = 0;
             backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
             objectlabellist = new List<string>
             {
@@ -84,8 +84,8 @@
                 }
             }
         }
-        
-        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
+
+        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, List<string> predictedLabels = null, bool isMock = false)
         {
             string objectLabel = null;
             Position2D toReturn = null;
@@ -101,23 +101,57 @@
                 throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
             }
 
+            if (predictedLabels.Count != 0)          // if there is a prediction load it to graph and suggest next location for verification. Avoid traditional pipeline.
+            {
+                RecognisedEntity entity1 = null;
+                RecognisedEntity entity2 = null;
+                List<Position2D> posList = null;
 
-            matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);
+
+                if (predictedLabels.Count == 1)
+                {
+                    entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
+                    Graph.LightUpObject(entity1);
+                }
+                else if (predictedLabels.Count == 2)
+                {
+                    entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
+                    entity2 = GetRecognisedEntityFromList(predictedLabels[1]);
+
+                    Graph.LightUpObject(entity1);
+                    Graph.LightUpObject(entity2);
+
+
+                    posList = Graph.GetOnlyFirstDifferential(entity1, entity2);
+                }
+                else
+                {
+                    // cant load more than 2 objects on to graph for now.
+                    bool breakpoint = true;
+                }
+
+
+
+
+            }
+
+
+            matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);        // Traditional Pipeline.
 
             if (matchingObjectList.Count > 0)
             {
                 _cachedPosition = Orchestrator.GetCurrentPointerPosition1();
 
-                ObjectState = RecognitionState.IsBeingVerified;                
+                ObjectState = RecognitionState.IsBeingVerified;
 
                 foreach (var matchingObject in matchingObjectList)
                 {
-                    if(matchingObject.Label == "JackFruit")
+                    if (matchingObject.Label == "JackFruit")
                     {
                         bool breakpoint = true;
                     }
 
-                    if(matchingObject.Verify() == true)
+                    if (matchingObject.Verify() == true)
                     {
                         currentmatchingObject = matchingObject;
                         ObjectState = RecognitionState.Recognised;
@@ -127,12 +161,32 @@
                     {
                         Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
                     }
-                }               
+                }
             }
 
             toReturn = new Position2D(int.MinValue, int.MinValue);
 
             return toReturn;
+        }
+
+        private RecognisedEntity GetRecognisedEntityFromList(string label)
+        {
+            if (Objects.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot Predict with 0 Trained Objects!");
+            }
+
+            RecognisedEntity matchedEntity = null;
+
+            foreach (var kvp in Objects)
+            {
+                if (kvp.Key.ToLower().Equals(label.ToLower()))
+                {
+                    matchedEntity = kvp.Value;
+                }
+            }
+
+            return matchedEntity;
         }
 
         public Position2D PredictObject2(Sensation_Location sensei, Sensation_Location? prediction, List<string> predictedObjects)
@@ -164,6 +218,7 @@
 
 
         #region UTILITY & MOCK 
+
         public RecognisedEntity GetCurrentPredictedObject()
         {
             if (ObjectState == RecognitionState.Recognised)
@@ -328,15 +383,15 @@
                 logs += ("Object : " + label);
                 logs += "withLocation : " + withLocation + " withoutLocaiton : " + withoutLocation + "\n";
 
-                if(sourceSensei.Id != Sensation_Location.EMPTYID)
+                if (sourceSensei.Id != Sensation_Location.EMPTYID)
                 {
-                    sourceSensei.ComputeStringID();                    
+                    sourceSensei.ComputeStringID();
                 }
 
                 logs += "source sensei ID : <Position ID[0] : BBM ID[0] / sensloc Count[0] " + sourceSensei.Id + "\n";
                 logs += "Object Sensei ID : <Position ID[0] : BBM ID[0] / sensloc Count[0] " + objectSensei.Id + "\n";
 
-                logs += "Result :: " + ( withLocation >= 50 && withoutLocation >= 50 ? "SUCCESS" : "FAILURE" + "\n");
+                logs += "Result :: " + (withLocation >= 50 && withoutLocation >= 50 ? "SUCCESS" : "FAILURE" + "\n");
 
                 File.WriteAllText(filename, logs);
             }
@@ -349,14 +404,14 @@
             }
             else
             {
-                if(label == "Ananas" || label == "JackFruit")
+                if (label == "Ananas" || label == "JackFruit")
                 {
                     bool breakpoint = false;
                 }
                 return false;
             }
         }
-       
+
 
         private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {

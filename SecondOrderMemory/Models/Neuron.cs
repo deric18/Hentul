@@ -275,11 +275,10 @@
             File.AppendAllText(logfilename, logline + "\n");
         }
 
-
         #endregion
 
-        #region CONNECTOR LOGIC
 
+        #region CONNECTOR LOGIC
 
         #region SCHEMA BASED CONNECTIONS
 

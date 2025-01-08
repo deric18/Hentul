@@ -61,6 +61,12 @@
         }
 
         [Test]
+        public void TestDifferentRandomObjectTraining()
+        {
+            // Train on a bunch of random patterns for object 1 , change to prediction , update another object train on the new object , run prediction for object 1 and then 2 see if return correct labels.
+        }
+
+        [Test]
         public void TestNeuronsFiringLastcycle()
         {
             var temporalSdrBbm1 = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.TEMPORAL, bbManager.Layer);
