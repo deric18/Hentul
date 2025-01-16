@@ -20,9 +20,8 @@
            
         }
 
-
         [Test]
-        public void TestPredictObjectPositiveTest()
+        public void TestPredictObject1PositiveTest()
         {
             List<RecognisedEntity> entities = GenerateRecognisedEntity();
 
@@ -65,7 +64,7 @@
 
             hc.LoadMockObject(entities, false);
 
-            Position2D pos = hc.PredictObject(source, null, null, true);
+            Position2D pos = hc.PredictObject(source, null, true);
 
             Assert.AreEqual(posexpected.X, pos.X);
             Assert.AreEqual(posexpected.Y, pos.Y);
@@ -117,7 +116,7 @@
             hc.LoadMockObject(entities, true);
 
 
-            Position2D pos = hc.PredictObject(source, null, null, true);
+            Position2D pos = hc.PredictObject(source, null, true);
 
         }
 
@@ -134,6 +133,30 @@
 
             entity.Verify(null, true, 6);
             
+
+        }
+
+
+        [Test]
+        public void TestPreditObject2PositiveTest()
+        {
+            List<RecognisedEntity> entities = TestUtils.GenerateRandomEntities(4);
+
+            hc.LoadMockObject(entities, true);
+
+
+            Sensation_Location sensei = entities[1].ObjectSnapshot.ElementAt(2);
+            Sensation_Location prediction = entities[1].ObjectSnapshot.ElementAt(3);
+
+            List<string> labelList = new List<string>();
+
+            labelList.Add(entities[1].Label);
+            labelList.Add(entities[0].Label);
+
+            List<Position2D> positions = hc.PredictObject2(sensei, prediction, labelList);
+
+
+            Assert.IsTrue(positions.Count != 0);
 
         }
 

@@ -8,7 +8,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         //<Object Label/ ID , KeyValuePair<BBMID, List<Position2D> ActiveColumns>>
         public HashSet<string> Flags { get; private set; }
 
-        public Position2D cursorPosition { get; private set; }
+        public Position2D PixelCordinates { get; private set; }
 
         public Node Left { get; set; }
 
@@ -22,7 +22,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public Node() 
         {
             Flags = null;
-            cursorPosition = null;
+            PixelCordinates = null;
             Left = null;
             Right = null;
             Up = null;
@@ -38,7 +38,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public Node(Position2D pos)
         {
             Flags = new HashSet<string>();
-            cursorPosition = pos;
+            PixelCordinates = pos;
             Left = null;
             Right = null;
             Up = null;
@@ -48,7 +48,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public Node(Position2D cursorPos, SortedDictionary<string, KeyValuePair<int, List<Position2D>>> data)
         {
             Flags = new HashSet<string>();
-            this.cursorPosition = cursorPos;
+            this.PixelCordinates = cursorPos;
             Left = null;
             Right = null;
             Up = null;

@@ -101,7 +101,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                             instance.ProcessStep0();
                             var bmp = instance.ConverToEdgedBitmap();
                             instance.ProcesStep1(bmp);
-                        }                  
+                        }
                         
                         var tuple = instance.GetSDRFromL3B();
 

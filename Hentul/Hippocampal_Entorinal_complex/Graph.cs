@@ -8,13 +8,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
         #region COSNTRUCTORS 
 
         public Node Base { get; private set; }
-
-        public uint RightCount { get; private set; }
-
-        public uint UpCount { get; private set; }
-
-
+        
         public uint TotalCount { get; private set; }
+
+        public uint MaxRight { get; private set; }
+
+        public uint MaxUp { get; private set; }
 
         public static Graph _graph;
 
@@ -23,10 +22,10 @@ namespace Hentul.Hippocampal_Entorinal_complex
         private Graph()
         {
             Base = new Node(new Position2D(0, 0), null);
-            CurrentLabels = new List<string>();
-            RightCount = 0;
-            UpCount = 0;
+            CurrentLabels = new List<string>();            
             TotalCount = 0;
+            MaxRight = 0;
+            MaxUp = 0;
         }
 
         public static Graph GetInstance()
@@ -44,7 +43,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         #region PUBLIC API        
 
-        public List<Position2D> GetOnlyFirstDifferential(RecognisedEntity first, RecognisedEntity second)
+        public List<Position2D> CompareTwoObjects(RecognisedEntity first, RecognisedEntity second)
         {
             List<Position2D> toReturn;
 
@@ -54,14 +53,26 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             secondList = GetAllPositionsForLabel(second.Label);
 
+            if (firstList.Count == 0 || secondList.Count == 0)
+            {
+                int bp = 1;
+                throw new InvalidOperationException("Incapable of Doing some of the lame Stuff!!");
+            }
+
             toReturn = Position2D.RemoveSecondFromFirst(firstList, secondList);
 
             return toReturn;
         }
 
-        public void GetFavouritePositionsForObject(RecognisedEntity entity)
+        public List<Position2D> GetFavouritePositionsForObject(RecognisedEntity entity)
         {
+            List<Position2D> favouritePositions = new List<Position2D>();
+
+
             throw new NotImplementedException();
+
+
+            return favouritePositions;
         }
 
         public bool LightUpObject(RecognisedEntity entity)
@@ -81,7 +92,10 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 }
             }
 
-            SetAllPositionsForLabel(posList, entity.Label);
+            if(!SetAllPositionsForLabel(posList, entity.Label))
+            {
+                throw new InvalidOperationException("Unable to Lite Up all the objects!");
+            }
 
             if (CurrentLabels.Contains(entity.Label) == false)
                 CurrentLabels.Add(entity.Label);
@@ -122,25 +136,27 @@ namespace Hentul.Hippocampal_Entorinal_complex
             if (currentNode == null)
                 currentNode = _graph.Base;
 
-            int currentX = currentNode.cursorPosition.X;
-            int currentY = currentNode.cursorPosition.Y;
+            int currentX = currentNode.PixelCordinates.X;
+            int currentY = currentNode.PixelCordinates.Y;
 
             Node BaseNode = currentNode;
 
             Node cacheNode = currentNode.Right;
 
-            for (int i = BaseNode.cursorPosition.X; i <= pos.X; i++)
+            for (int i = BaseNode.PixelCordinates.X; i <= pos.X; i++)
             {
-                if (i > BaseNode.cursorPosition.X)
+                if (i > BaseNode.PixelCordinates.X)
                 {
                     currentNode = cacheNode;
                 }
 
                 if (currentNode.Right == null)
                 {
-                    currentNode.Right = new Node(new Position2D(i + 1, currentNode.cursorPosition.Y));
+                    currentNode.Right = new Node(new Position2D(i + 1, currentNode.PixelCordinates.Y));
                     currentNode.Right.Left = currentNode;
                     cacheNode = currentNode.Right;
+                    TotalCount++;
+                    MaxRight++;
                 }
                 else
                 {
@@ -148,21 +164,24 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     cacheNode = currentNode;
                 }
 
-                if (speedUpY == false && currentNode.cursorPosition.Y != pos.Y)
+                if (speedUpY == false && currentNode.PixelCordinates.Y != pos.Y)
                 {
-                    for (int j = BaseNode.cursorPosition.Y + 1; j <= pos.Y; j++)
+                    for (int j = BaseNode.PixelCordinates.Y + 1; j <= pos.Y; j++)
                     {
                         if (currentNode.Up == null)
                         {
                             currentNode.Up = new Node(new Position2D(i, j));
                             currentNode.Up.Down = currentNode;
                             currentNode = currentNode.Up;
+                            TotalCount++;
+                            if (currentNode.PixelCordinates.Y > MaxUp)
+                                MaxUp = (uint)currentNode.PixelCordinates.Y;
                         }
                         else
                         {
                             currentNode = currentNode.Up;
 
-                            if (currentNode.cursorPosition.Equals(pos))
+                            if (currentNode.PixelCordinates.Equals(pos))
                             {
                                 return currentNode;
                             }
@@ -185,6 +204,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
             if (label == null || label == string.Empty)
                 return null;
 
+            if(!CurrentLabels.Contains(label))
+                   throw new InvalidOperationException("Supplied Label is not learned!");                                       
+
             if(_graph.Base == null)
             {
                 throw new InvalidDataException("Base cannot be null!");
@@ -194,20 +216,25 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             List<Position2D> retList= new List<Position2D> ();
 
-            for( int i = 0; i < RightCount; i++)
+            for( int i = 0; current.Right != null; i++)
             {
-                for(int j = 0; j < UpCount; i++)
+                Node cacheBase = current;
+
+                for(int j = 0; current.Up != null; i++)
                 {
-                    if(current.Flags.Contains(label))
+                    if(current != null &&  current.Flags.Contains(label))
                     {
-                        retList.Add(new Position2D(i, j));
+                        retList.Add(current.PixelCordinates);
                     }
 
-                    current = current.Up;
+                    if (current.Up == null)
+                        break;
+                    else
+                         current = current.Up;
                 }
 
-                current = current.Right;
-            }            
+                current = cacheBase.Right;
+            }
 
             return retList;
         }
@@ -227,9 +254,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             foreach (var pos in posList)
             {
-                Node nodetoLitUp = GetNode(pos);
+                Node nodetoLiteUp = GetNode(pos);
 
-                if(nodetoLitUp.LiteUpNode(label))
+                if(nodetoLiteUp.LiteUpNode(label))
                 {
                     count++;
                 }
@@ -270,7 +297,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             Node currentNode = GetNode(pos, betterNode, speedUpY);
 
-            if (currentNode == null || currentNode?.cursorPosition?.X != pos.X || currentNode?.cursorPosition?.Y != pos.Y)
+            if (currentNode == null || currentNode?.PixelCordinates?.X != pos.X || currentNode?.PixelCordinates?.Y != pos.Y)
             {
                 throw new InvalidOperationException("Bugs in Parsing Logic!!!");
             }

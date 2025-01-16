@@ -26,8 +26,8 @@ namespace Hentul.UT
 
             Assert.IsTrue(graph.AddNewNode(posToAdd));
 
-            Assert.AreEqual(1, graph.Base.Right.Up.cursorPosition.X);
-            Assert.AreEqual(1, graph.Base.Right.Up.cursorPosition.Y);
+            Assert.AreEqual(1, graph.Base.Right.Up.PixelCordinates.X);
+            Assert.AreEqual(1, graph.Base.Right.Up.PixelCordinates.Y);
         }
 
         [Test]
@@ -42,15 +42,15 @@ namespace Hentul.UT
             graph.AddNewNode(nextPos);
 
             Node currenNode = graph.Base;
-            while (currenNode.cursorPosition.X != nextPos.X)
+            while (currenNode.PixelCordinates.X != nextPos.X)
             {
                 currenNode = currenNode.Right;
             }
-            Assert.AreEqual(currenNode.cursorPosition.X, nextPos.X);
+            Assert.AreEqual(currenNode.PixelCordinates.X, nextPos.X);
 
 
-            while (currenNode.cursorPosition.Y != nextPos.Y) { currenNode = currenNode.Up; }
-            Assert.AreEqual(currenNode.cursorPosition.Y, nextPos.Y);
+            while (currenNode.PixelCordinates.Y != nextPos.Y) { currenNode = currenNode.Up; }
+            Assert.AreEqual(currenNode.PixelCordinates.Y, nextPos.Y);
         }
 
         [Test]
@@ -61,16 +61,16 @@ namespace Hentul.UT
             graph.AddNewNode(posToAdd);
 
             Node currenNode = graph.Base;
-            while (currenNode.cursorPosition.X < posToAdd.X)
+            while (currenNode.PixelCordinates.X < posToAdd.X)
             {
                 currenNode = currenNode.Right;
             }
 
-            Assert.AreEqual(posToAdd.X, currenNode.cursorPosition.X);
+            Assert.AreEqual(posToAdd.X, currenNode.PixelCordinates.X);
 
 
-            while (currenNode.cursorPosition.Y < posToAdd.Y) { currenNode = currenNode.Up; }
-            Assert.AreEqual(posToAdd.Y, currenNode.cursorPosition.Y);
+            while (currenNode.PixelCordinates.Y < posToAdd.Y) { currenNode = currenNode.Up; }
+            Assert.AreEqual(posToAdd.Y, currenNode.PixelCordinates.Y);
         }
 
 
@@ -143,7 +143,7 @@ namespace Hentul.UT
 
             Assert.IsTrue(status2);
 
-            var posList = graph.GetOnlyFirstDifferential(first, second);
+            var posList = graph.CompareTwoObjects(first, second);
 
             foreach(var pos in posList)
             {

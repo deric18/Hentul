@@ -85,7 +85,71 @@
             }
         }
 
-        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, List<string> predictedLabels = null, bool isMock = false)
+        public List<Position2D> PredictObject2(Sensation_Location sensei, Sensation_Location? predictionU, List<string> predictedLabels, bool isMock = false)
+        {
+            // Get predicted Labels 
+
+            string objectLabel = null;
+            List<Position2D> toReturn = null;
+            Sensation_Location orginalSensei = sensei;
+
+            if (networkMode != NetworkMode.PREDICTION)
+            {
+                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
+            }
+
+            if (Objects.Count == 0)
+            {
+                throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
+            }
+            if (predictedLabels.Count == 0)
+            {
+                throw new InvalidOperationException("predictedLabels cannot be empty");
+            }
+
+            // if there is a prediction load it to graph and suggest next location for verification. Avoid traditional pipeline.            
+            RecognisedEntity entity1 = null;
+            RecognisedEntity entity2 = null;
+            List<Position2D> posList = null;
+
+
+            if (predictedLabels.Count == 1)
+            {
+
+
+                entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
+                Graph.LightUpObject(entity1);
+
+                toReturn = Graph.GetFavouritePositionsForObject(entity1);
+            }
+            else if (predictedLabels.Count == 2)
+            {
+                entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
+                entity2 = GetRecognisedEntityFromList(predictedLabels[1]);
+
+                Graph.LightUpObject(entity1);
+                Graph.LightUpObject(entity2);
+
+                toReturn = Graph.CompareTwoObjects(entity1, entity2);
+            }
+            else
+            {
+                // cant load more than 2 objects on to graph for now.
+                bool breakpoint = true;
+
+            }
+
+            if (toReturn == null)
+            {
+
+                throw new InvalidOperationException("Object does not have any Position on Grid ! Should Never Happen!");
+            }
+
+
+            return toReturn;
+        }
+
+        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
         {
             string objectLabel = null;
             Position2D toReturn = null;
@@ -100,41 +164,6 @@
             {
                 throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
             }
-
-            if (predictedLabels.Count != 0)          // if there is a prediction load it to graph and suggest next location for verification. Avoid traditional pipeline.
-            {
-                RecognisedEntity entity1 = null;
-                RecognisedEntity entity2 = null;
-                List<Position2D> posList = null;
-
-
-                if (predictedLabels.Count == 1)
-                {
-                    entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
-                    Graph.LightUpObject(entity1);
-                }
-                else if (predictedLabels.Count == 2)
-                {
-                    entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
-                    entity2 = GetRecognisedEntityFromList(predictedLabels[1]);
-
-                    Graph.LightUpObject(entity1);
-                    Graph.LightUpObject(entity2);
-
-
-                    posList = Graph.GetOnlyFirstDifferential(entity1, entity2);
-                }
-                else
-                {
-                    // cant load more than 2 objects on to graph for now.
-                    bool breakpoint = true;
-                }
-
-
-
-
-            }
-
 
             matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);        // Traditional Pipeline.
 
@@ -167,7 +196,7 @@
             toReturn = new Position2D(int.MinValue, int.MinValue);
 
             return toReturn;
-        }
+        }       //Traditional Pipeline
 
         private RecognisedEntity GetRecognisedEntityFromList(string label)
         {
@@ -188,20 +217,7 @@
 
             return matchedEntity;
         }
-
-        public Position2D PredictObject2(Sensation_Location sensei, Sensation_Location? prediction, List<string> predictedObjects)
-        {
-            string objectLabel = null;
-            Position2D toReturn = null;
-            Sensation_Location orginalSensei = sensei;
-
-            //Check graph for the list labels SOM Layer is suspecting for , if more than 2 
-
-
-
-
-            return toReturn;
-        }
+        
 
         public void DoneWithTraining()
         {
@@ -284,8 +300,6 @@
         #endregion
 
         #endregion
-
-
 
 
         #region BACKUP & RESTORE

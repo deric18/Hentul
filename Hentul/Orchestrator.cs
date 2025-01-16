@@ -366,6 +366,7 @@
         public Position2D ProcessSDRForL3B(bool isMock = false)
         {
             Position2D motorOutput = null;
+            List<Position2D> positionToConfirm = new List<Position2D>();
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
@@ -397,10 +398,10 @@
 
                     if (potentialObjectLabels.Count > 0)
                     {
-                        motorOutput = HCAccessor.PredictObject(firingSensei, null, potentialObjectLabels, isMock);
+                        positionToConfirm = HCAccessor.PredictObject2(firingSensei, predictedSensei, potentialObjectLabels, isMock);
                     }
 
-                    motorOutput = HCAccessor.PredictObject(firingSensei, null, null, isMock);
+                    motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock);
                 }
             }
             return motorOutput;
@@ -507,6 +508,21 @@
             return totalBurstCount;
         }
 
+        public uint ConfirmPatternToL3A(Position2D position, List<Position2D> expectations)
+        {
+            uint totalBurstCount = 0;
+
+
+            return totalBurstCount;
+        }
+
+        public uint ConfirmPatternToL3B(Position2D position, List<Position2D> expectations)
+        {
+            uint totalBurstCount = 0;
+
+
+            return totalBurstCount;
+        }
 
         private bool FireFOMsWithSDR(SDR_SOM somSignal)
         {

@@ -96,6 +96,8 @@
             Id = toReturn;
         }
 
+
+
         public bool AddNewSensationAtThisLocation(string location, KeyValuePair<int, List<Position2D>> sensation)
         {
             if (!sensLoc.TryGetValue(location, out var kvp))
@@ -406,7 +408,6 @@
             }
 
         }      
-
 
         public static bool CompareSenseiBool(List<Sensation_Location> sensei1ist, Sensation_Location sensei)
         {
