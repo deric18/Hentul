@@ -181,6 +181,55 @@
         }
 
 
+
+        public static Match CompareSensationsSimple(Sensation_Location sourceS, Sensation_Location targetS)
+        {
+            if (sourceS == null || targetS == null)
+                return null;
+
+            Match match = new Match(sourceS);
+            int index = 0;
+
+            foreach (var item in sourceS.sensLoc)
+            {
+
+                if (targetS.sensLoc.TryGetValue(item.Key, out var targetKvpValue))
+                {
+                    match.IncrementLocationIDMatch();
+
+                    if (CompareKVPStrict(item.Value, targetKvpValue))
+                    {
+                        match.IncrementPositionIDMatch(index);
+                    }
+                }
+
+                index++;
+            }
+
+            return match;
+        }
+
+
+        private static bool CompareKVPStrict(KeyValuePair<int, List<Position2D>> kvp1, KeyValuePair<int, List<Position2D>> kvp2)
+        {
+            bool success = false;
+
+            if (kvp1.Key == kvp2.Key)
+            {
+                foreach (var pos in kvp1.Value)
+                {
+                    if (!kvp2.Value.Contains(pos))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return success;
+        }
+
         /// <summary>
         ///  Compares two sensation_location Objects 
         /// </summary>
@@ -200,29 +249,7 @@
             {
                 return match;
             }
-
-            //if(sourceSensei.sensLoc.Count != targetSensei.sensLoc.Count)
-            //{
-            //    if(sourceSensei.Id == EMPTYID)
-            //    {
-            //        sourceSensei.ComputeStringID();
-            //    }
-            //    if(targetSensei.Id == EMPTYID)
-            //    {
-            //        targetSensei.ComputeStringID();
-            //    }
-
-            //    if(sourceSensei.Id != targetSensei.Id)
-            //    {
-            //        return match;
-            //    }
-            //}
-
-            //if ( sourceSensei.sensLoc.Keys.ElementAt(0) == "1188-503-0" && targetSensei.sensLoc.Keys.ElementAt(0) == "1168-503-0")
-            //{
-            //    bool brekapoint = true;
-            //}
-
+            
             int matchPercentage = 0;
             bool BBMChecked = false;
             int index = 0;

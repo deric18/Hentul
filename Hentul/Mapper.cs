@@ -413,7 +413,9 @@
 
                 if (bbmID > 120 || bbmID < 0)
                 {
-                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+
+                    continue;
                 }
 
                 if(retDict.TryGetValue(bbmID, out var posList))

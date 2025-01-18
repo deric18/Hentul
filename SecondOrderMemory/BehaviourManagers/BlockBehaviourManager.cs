@@ -249,7 +249,7 @@
             CurrentObjectLabel = Label;
         }
 
-        public void DoneTraining()
+        public void ChangeNetworkModeToPrediction()
         {
             NetWorkMode = NetworkMode.PREDICTION;
             CurrentObjectLabel = null;
@@ -835,7 +835,7 @@
 
         public List<string> GetSupportedLabels()
         {
-            if (Layer.Equals(LayerType.Layer_3A) == false)
+            if (Layer.Equals(LayerType.Layer_3B) == false)
             {
                 throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
@@ -843,7 +843,7 @@
             if(NetWorkMode != NetworkMode.PREDICTION)
             {
                 throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
-            }            
+            }
 
             return SupportedLabels.ToList();
         }
@@ -851,13 +851,14 @@
         public List<Position_SOM> PreFire()
         {
             List<Position_SOM> toRet = new List<Position_SOM>();
+
             for (int i = 0; i < X; i++)
             {
                 for (int j = 0; j < Y; j++)
                 {
                     foreach (var neuron in Columns[i, j].Neurons)
                     {
-                        if (neuron.Voltage > 49 || neuron.CurrentState == NeuronState.PREDICTED)
+                        if (neuron.Voltage >= 90)
                         {
                             toRet.Add(neuron.NeuronID);
                         }
@@ -892,7 +893,7 @@
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
             bool allowSequenceMemoryWireCase1 = true;
-            includeBurstLearning145 = true;
+            includeBurstLearning145 = false;
             bool allowSequenceMemoryWireCase3 = true;
 
             if (CurrentiType.Equals(iType.SPATIAL))
@@ -1126,7 +1127,7 @@
                             foreach (var axonalNeuron in NeuronsFiringLastCycle)
                             {
                                 if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalNeuron, dendriticNeuron) == false)
-                                    if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                                    if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
                                         throw new InvalidOperationException("Unable to Connect two neurons!");
                             }
                         }
@@ -1487,7 +1488,7 @@
                     {
                         if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
                         {
-                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
                             {
                                 throw new InvalidOperationException("Unable to connect neurons!");
                             }
@@ -1525,18 +1526,18 @@
             return true;
         }
 
-        public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
+        public ConnectionRemovalReturnType ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
         {
 
             #region Verification
 
             if (NetWorkMode != NetworkMode.TRAINING)
             {
-                return false;
+                return ConnectionRemovalReturnType.SOFTFALSE;
             }
             if (AxonalNeuron == null || DendriticNeuron == null)
             {
-                return false;
+                return ConnectionRemovalReturnType.SOFTFALSE;
             }
             else if (CurrentiType != iType.NONE && (AxonalNeuron.nType.Equals(NeuronType.TEMPORAL) || AxonalNeuron.nType.Equals(NeuronType.APICAL)))
             {
@@ -1548,23 +1549,23 @@
                 Console.WriteLine("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());     // No Same Column Connections 
                 WriteLogsToFile("Error :: ConnectTwoNeurons :: Cannot Connect Neuron to itself! Block Id : " + PrintBlockDetailsSingleLine() + " Neuron ID : " + AxonalNeuron.NeuronID.ToString());
                 //Thread.Sleep(2000);                                                                                                                                                      //throw new InvalidDataException("ConnectTwoNeurons: Cannot connect Neuron to Itself!");
-                return false;
+                return ConnectionRemovalReturnType.SOFTFALSE;
             }
             else if (AxonalNeuron.nType.Equals(DendriticNeuron.nType) && AxonalNeuron.NeuronID.Equals(DendriticNeuron.NeuronID))                                                      // No Selfing               
             {
                 Console.WriteLine("ERROR :: ConnectTwoNeurons() :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
                 WriteLogsToFile("ERROR :: ConnectTwoNeurons() :: Cannot connect neurons in the same Column [NO SELFING] " + PrintBlockDetailsSingleLine());
-                return false;
+                return ConnectionRemovalReturnType.SOFTFALSE;
             }
 
             if (cType == ConnectionType.DISTALDENDRITICNEURON && (CurrentObjectLabel == null || CurrentObjectLabel == string.Empty))
             {
-                return false;
+                return ConnectionRemovalReturnType.SOFTFALSE;
             }
 
             #endregion
 
-            bool success = false;
+            ConnectionRemovalReturnType success = ConnectionRemovalReturnType.HARDFALSE;
 
             if (cType == ConnectionType.TEMPRORAL || cType == ConnectionType.APICAL)
             {
@@ -1590,12 +1591,12 @@
                 }
 
                 success = CheckNConnectTwoNeurons(AxonalNeuron, DendriticNeuron, cType, false);
-            }
+            }           
 
             return success;
         }
 
-        private bool CheckNConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
+        private ConnectionRemovalReturnType CheckNConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
         {
             ConnectionRemovalReturnType IsAxonalConnectionSuccesful;
             //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.           
@@ -1618,7 +1619,7 @@
                         WriteLogsToFile("INFO :: Added new Distal Connection between two Neurons :: A: " + AxonalNeuron.NeuronID.ToString() + " D : " + DendriticNeuron.NeuronID.ToString());
                     }
 
-                    return true;
+                    return ConnectionRemovalReturnType.TRUE;
                 }
                 else if (IsDendronalConnectionSuccesful == false)//If dendronal connection did not succeed then the structure is compromised 
                 {
@@ -1627,7 +1628,7 @@
                     if (returnType == ConnectionRemovalReturnType.TRUE)
                     {
                         //Do Nothing just return false below.
-                        return true;
+                        return ConnectionRemovalReturnType.TRUE;
                     }
                     else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                     {
@@ -1652,10 +1653,10 @@
             {
                 //Need investigation as why the same connection is tried twice : No need to investigate
                 WriteLogsToFile(" ERROR :: ConnectTwoNeurons ::::Another Failed Attempt at adding a redundant Connection Dendronal Neuron ID :  " + DendriticNeuron.NeuronID + " Axonal Neuron ID : " + AxonalNeuron.NeuronID + " Layer Type :" + Layer.ToString());
-                return true;
+                return ConnectionRemovalReturnType.TRUE;
             }
 
-            return false;
+            return ConnectionRemovalReturnType.TRUE;
         }
 
         public bool CheckifBothNeuronsAreSameOrintheSameColumn(Neuron neuron1, Neuron neuron2) =>
@@ -1805,7 +1806,7 @@
                 foreach (var dendronalNeuron in NeuronsFiringThisCycle)
                 {
                     if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
-                        if (ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == false)
+                        if (ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Could Not connect two neuron!");
                         }
@@ -1995,8 +1996,7 @@
                                     {
                                         DremoveList.Add(synapse.AxonalNeuronId);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
 
-                                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
-                                        throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons! Should Never Happen!");
+                                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons :: Layer :::: " + Layer.ToString());                                        
                                     }
                                 }
                                 else
@@ -2256,7 +2256,7 @@
                     for (int k = 0; k < X; k++)
                     {
 
-                        if (ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true) == false)
+                        if (ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
@@ -2296,7 +2296,7 @@
 
                     for (int k = 0; k < Z; k++)
                     {
-                        if (ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == false)
+                        if (ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }

@@ -78,7 +78,7 @@ namespace FirstOrderMemory.Models
         {
             if (cType == ConnectionType.DISTALDENDRITICNEURON)
             {
-                return IsActive;                
+                return IsActive == false;                
             }
 
             return false;

@@ -164,7 +164,7 @@ namespace SecondOrderMemoryUnitTest
             var neuron1 = bbManager.Columns[0, 2].Neurons[0];
             var neuron2 = bbManager.Columns[5, 3].Neurons[0];
 
-            if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))     //intentionally creating an inactive snapse to test out DISTALNEUROPLATICITY cycle.
+            if (bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)     //intentionally creating an inactive snapse to test out DISTALNEUROPLATICITY cycle.
             {
                 throw new InvalidProgramException("Could Not Connect 2 Neurons");
             }
@@ -296,7 +296,7 @@ namespace SecondOrderMemoryUnitTest
 
             ulong Counter = 1;
 
-            if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
+            if (bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
             {
                 throw new Exception("Could Not connect two neurons!");
             }
@@ -339,7 +339,7 @@ namespace SecondOrderMemoryUnitTest
 
             ulong Counter = 1;
 
-            if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron1, ConnectionType.DISTALDENDRITICNEURON))
+            if (bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron1, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
             {
                 throw new Exception("Could Not connect two neurons!");
             }
@@ -482,7 +482,7 @@ namespace SecondOrderMemoryUnitTest
 
             ulong counter = 1;
 
-            if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))
+            if (bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
             {
                 throw new Exception("Could Not connect two neurons!");
             }

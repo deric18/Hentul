@@ -84,7 +84,7 @@
                 }
             }
         }
-
+        
         public List<Position2D> PredictObject2(Sensation_Location sensei, Sensation_Location? predictionU, List<string> predictedLabels, bool isMock = false)
         {
             // Get predicted Labels 
@@ -115,8 +115,6 @@
 
             if (predictedLabels.Count == 1)
             {
-
-
                 entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
                 Graph.LightUpObject(entity1);
 
@@ -131,22 +129,23 @@
                 Graph.LightUpObject(entity2);
 
                 toReturn = Graph.CompareTwoObjects(entity1, entity2);
+
+                if(toReturn.Count > 0)
+                {
+                    return toReturn;
+                }
+                else
+                {
+                    return null;    
+                }
             }
             else
             {
                 // cant load more than 2 objects on to graph for now.
                 bool breakpoint = true;
-
             }
 
-            if (toReturn == null)
-            {
-
-                throw new InvalidOperationException("Object does not have any Position on Grid ! Should Never Happen!");
-            }
-
-
-            return toReturn;
+            return null;
         }
 
         public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
@@ -180,7 +179,7 @@
                         bool breakpoint = true;
                     }
 
-                    if (matchingObject.Verify() == true)
+                    if (matchingObject.Verify(null, isMock) == true)
                     {
                         currentmatchingObject = matchingObject;
                         ObjectState = RecognitionState.Recognised;
@@ -425,6 +424,14 @@
                 return false;
             }
         }
+
+        internal static bool VerifyObjectSensationAtLocationssInterSectionPolicy(Sensation_Location sourceS, Sensation_Location targetS)
+        {
+            Match match = Sensation_Location.CompareSensationsSimple(sourceS, targetS);
+
+            return match.GetTotalMatchPercentage() > 50 ? true : false;
+        }
+
 
 
         private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)

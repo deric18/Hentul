@@ -323,12 +323,7 @@
             }
 
             // STEP 1A : Fire all FOM's
-            FireAllFOMs();
-
-            if(point.X == 1324 && point.Y == 426)
-            {
-                bool breakpoint = true;
-            }
+            FireAllFOMs();            
 
             // STEP 1B : Fire all L3B and L3A SOM's
             if (Mapper.somPositions.Count != 0)
@@ -376,6 +371,12 @@
 
                 if (som_SDR != null)
                 {
+
+                    if (point.X == 1348 && point.Y == 410)
+                    {
+                        bool breakpoint = true;
+                    }
+
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
@@ -396,25 +397,26 @@
 
                     List<string> potentialObjectLabels = somBBM_L3B.GetSupportedLabels();
 
-                    if (potentialObjectLabels.Count > 0)
-                    {
-                        positionToConfirm = HCAccessor.PredictObject2(firingSensei, predictedSensei, potentialObjectLabels, isMock);
-                    }
-
-                    motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock);
+                    
+                    motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock);                    
                 }
             }
             return motorOutput;
         }
 
         public void DoneWithTraining()
+        {            
+            HCAccessor.DoneWithTraining();           
+        }
+
+        public void ChangeNetworkToPredictionMode()
         {
             NMode = NetworkMode.PREDICTION;
             HCAccessor.DoneWithTraining();
-            somBBM_L3B.DoneTraining();
-            somBBM_L3A.DoneTraining();
+            HCAccessor.SetNetworkModeToPrediction();
+            somBBM_L3B.ChangeNetworkModeToPrediction();
+            somBBM_L3A.ChangeNetworkModeToPrediction();
         }
-
 
         internal Tuple<Sensation_Location, Sensation_Location> GetSDRFromL3B()
         {
@@ -962,6 +964,8 @@
         {
             NMode = NetworkMode.PREDICTION;
             HCAccessor.SetNetworkModeToPrediction();
+            somBBM_L3B.ChangeNetworkModeToPrediction();
+            somBBM_L3A.ChangeNetworkModeToPrediction();
         }
 
         public void ChangeNetworkModeToTraining()

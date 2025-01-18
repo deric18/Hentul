@@ -518,23 +518,18 @@
             return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
 
-        internal bool CheckForPrunableConnections(ulong currentCycle)
+        
+        internal List<Synapse> CheckForPrunableConnections(ulong currentCycle)
         {
+            List<Synapse> staleConnections = ProximoDistalDendriticList.Values.Where(x => x.cType == ConnectionType.DISTALDENDRITICNEURON && x.IsActive == false).ToList();
 
-            foreach (var val in ProximoDistalDendriticList.Values)
-            {
-                if (val.AnyStale(currentCycle))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return staleConnections;
         }
+    }
 
 
         #endregion
-    }
+ }
 
     public enum ConnectionType
     {
@@ -559,4 +554,3 @@
         HARDFALSE,
         SOFTFALSE
     }
-}

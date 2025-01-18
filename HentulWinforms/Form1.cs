@@ -5,6 +5,7 @@ namespace HentulWinforms
     using Hentul;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
+    using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
     public partial class Form1 : Form
     {
@@ -13,7 +14,7 @@ namespace HentulWinforms
         readonly int numPixels = 10;
         int counter = 0;
         int imageIndex = 0;
-        int totalImagesToProcess = 3;
+        int totalImagesToProcess = 1;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -165,21 +166,20 @@ namespace HentulWinforms
             {
                 if (networkMode == NetworkMode.TRAINING)
                 {
-                    //imageIndex++;
+                    imageIndex++;
 
                     if (imageIndex == totalImagesToProcess)
-                    {
-                        StartButton.Text = "Start Prediction";
+                    {                        
+                        StartButton.Text = "Tet Classification Algo";
                         StartButton.Refresh();
-                        orchestrator.DoneWithTraining();
-                        networkMode = NetworkMode.PREDICTION;
-                        orchestrator.ChangeNetworkModeToPrediction();
+                        orchestrator.ChangeNetworkToPredictionMode();
+                        networkMode = NetworkMode.PREDICTION;                        
                         BackUp.Visible = true;
+                        orchestrator.MoveCursor(LeftTop);
                     }
                     else
                     {
-                        orchestrator.DoneWithTraining();
-                        imageIndex++;
+                        orchestrator.DoneWithTraining();                        
                         StartButton.Text = "Start Another Image";
                         StartButton.Refresh();
                     }

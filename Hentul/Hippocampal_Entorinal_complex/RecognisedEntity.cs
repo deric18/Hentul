@@ -2,7 +2,7 @@
 namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;    
+    using Common;
 
     public class RecognisedEntity
     {
@@ -46,7 +46,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 _visitedIndexes?.Clear();
 
             CurrentComparision = null;
-            CurrentComparisionKeyIndex = 0; 
+            CurrentComparisionKeyIndex = 0;
         }
 
         public void DoneTraining()
@@ -60,20 +60,20 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public bool Verify(Sensation_Location sensei = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
-            if(ObjectSnapshot?.Count == 0)
+            if (ObjectSnapshot?.Count == 0)
             {
                 throw new InvalidOperationException("Snapshot cannot be empty");
-            }            
-            
+            }
+
             Orchestrator instance = Orchestrator.GetInstance();
 
-            if(instance == null)
+            if (instance == null)
             {
                 throw new InvalidOperationException("Orchestrator Instance cannot be null!");
             }
 
-            
-            if ( frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
+
+            if (frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
             {
                 throw new InvalidOperationException("RFrame cannot be Empty!");
             }
@@ -82,40 +82,47 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             for (int i = 0; i < frame?.DisplacementTable?.GetLength(0); i++)
             {
-                for(int j=0; j < frame?.DisplacementTable?.GetLength(1); j++)
+                for (int j = 0; j < frame?.DisplacementTable?.GetLength(1); j++)
                 {
-                    if( i != j)
+                    if (i != j)
                     {
                         var newSensei = ObjectSnapshot[j];
                         var newPos = newSensei.CenterPosition;
 
-
-                        if (isMock == false)
+                        if (newPos.X == 1364 && newPos.Y == 426)
                         {
-                            if (Label == "JackFruit")
-                            {
-                                bool breakpoint = true;
-                            }
-
-                            Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
-                            instance.ProcessStep0();
-                            var bmp = instance.ConverToEdgedBitmap();
-                            instance.ProcesStep1(bmp);
+                            bool breakpoint = true;
                         }
-                        
+
+                        if (isMock)
+                        {
+                            return true;
+                        }
+                        if (Label == "JackFruit")
+                        {
+                            bool breakpoint = true;
+                        }
+
+
+                        Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
+                        instance.ProcessStep0();
+                        var bmp = instance.ConverToEdgedBitmap();
+                        instance.ProcesStep1(bmp);
+
                         var tuple = instance.GetSDRFromL3B();
 
                         if (tuple.Item1 == null)
                             return false;
 
-                        
-                        if(HippocampalComplex2.VerifyObjectSensei(tuple.Item1, newSensei, Label, failureReportfileName) == false)
+
+                        if (!(HippocampalComplex2.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false || HippocampalComplex2.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
                         {
                             return false;
                         }
 
                         confirmations++;
-                        if(confirmations == iterationToConfirmation)
+
+                        if (confirmations == iterationToConfirmation)
                         {
                             return true;
                         }
@@ -204,7 +211,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     }
 
                     index++;
-                }               
+                }
             }
 
             if (source != null)
@@ -235,7 +242,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         index++;
                     }
                 }
-            }            
+            }
 
             toReturn = GetRandSenseiToVerify();
 
@@ -279,7 +286,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             var sensloc = ObjectSnapshot[index];
 
-            if(_visitedIndexes.Count == ObjectSnapshot.Count)
+            if (_visitedIndexes.Count == ObjectSnapshot.Count)
             {
                 throw new InvalidOperationException("Cannot generate Random Sensation with these filters!");
             }

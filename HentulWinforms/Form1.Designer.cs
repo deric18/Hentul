@@ -159,7 +159,7 @@ namespace HentulWinforms
             wanderingButton.Name = "wanderingButton";
             wanderingButton.Size = new Size(136, 23);
             wanderingButton.TabIndex = 12;
-            wanderingButton.Text = "Start Wandering";
+            wanderingButton.Text = "Test Burst Prevention Algo";
             wanderingButton.UseVisualStyleBackColor = true;
             wanderingButton.Click += wanderingButton_Click;
             // 
