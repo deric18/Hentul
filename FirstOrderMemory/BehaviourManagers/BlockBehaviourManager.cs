@@ -2689,7 +2689,7 @@
         {
             List<Position_SOM> toRet = new List<Position_SOM>();
 
-            for (int i = 0; i < X; i++)
+            for (int i = 0; i < 999; i++)
             {
                 for (int j = 0; j < Y; j++)
                 {

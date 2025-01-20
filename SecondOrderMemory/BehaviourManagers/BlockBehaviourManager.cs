@@ -9,6 +9,7 @@
     public class BlockBehaviourManager
     {
         #region VARIABLES
+
         public LayerType Layer { get; private set; }
 
         public ulong CycleNum { get; private set; }
@@ -71,10 +72,6 @@
 
         public uint totalAxonalConnections;
 
-        private uint num_continuous_burst;
-
-        private uint NumberOfColumnsThatBurstLastCycle;
-
         private bool IsBurstOnly;
 
         private bool includeBurstLearning145;
@@ -109,6 +106,10 @@
         public string CurrentObjectLabel { get; private set; }
 
         private HashSet<string> SupportedLabels { get; set; }
+
+        private uint NumberOfColumnsThatBurstLastCycle { get;  set; }
+
+        private uint num_continuous_burst;
 
         #endregion
 
@@ -355,6 +356,7 @@
         {
             TotalDistalDendriticConnections++;
         }
+
 
         public void DecrementDistalDendronalConnection()
         {
@@ -643,6 +645,7 @@
             ValidateNetwork();
         }
 
+
         private void Fire()
         {
 
@@ -674,6 +677,7 @@
                 }
             }
         }
+
 
         private void ProcessSpikeFromNeuron(Synapse synapse)
         {
@@ -752,6 +756,7 @@
             }
         }
 
+
         private void ProcessSpikeAsPer(Synapse synapse, Neuron targetNeuron)
         {
 
@@ -774,6 +779,7 @@
             //    synapse.IncrementHitCount();
             //}            
         }
+
 
         public SDR_SOM GetPredictedSDRForNextCycle(ulong currentCycle = 1)
         {
@@ -799,6 +805,7 @@
 
             return toReturn;
         }
+
 
         public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
@@ -848,8 +855,9 @@
             return SupportedLabels.ToList();
         }
 
-        public List<Position_SOM> PreFire()
+        public List<Position_SOM> GetAllPredictedNeurons()
         {
+
             List<Position_SOM> toRet = new List<Position_SOM>();
 
             for (int i = 0; i < X; i++)
@@ -862,10 +870,39 @@
                         {
                             toRet.Add(neuron.NeuronID);
                         }
+
+                       
                     }
                 }
             }
+
+
             return toRet;
+        }
+
+        public List<Position_SOM> GetAllFiringNeurons()
+        {
+            List<Position_SOM> firingList = new List<Position_SOM>();
+
+            List<Position_SOM> toRet = new List<Position_SOM>();
+
+            for (int i = 0; i < X; i++)
+            {
+                for (int j = 0; j < Y; j++)
+                {
+                    foreach (var neuron in Columns[i, j].Neurons)
+                    {                        
+
+                        if (neuron.Voltage >= 100 || neuron.CurrentState == NeuronState.FIRING)
+                        {
+                            firingList.Add(neuron.NeuronID);
+                        }
+                    }
+                }
+            }
+
+
+            return firingList;
         }
 
         public void FireBlank(ulong currentCycle)

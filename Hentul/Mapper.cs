@@ -418,13 +418,20 @@
                     continue;
                 }
 
-                if(retDict.TryGetValue(bbmID, out var posList))
+                Position_SOM newPos = null;
+
+                if (pos.X >= 10 && pos.X <= 99)
+                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z);
+                else if (pos.X > 99 && pos.X <= 999)
+                    newPos = new Position_SOM(pos.X % 100, pos.Y, pos.Z);
+
+                if (retDict.TryGetValue(bbmID, out var posList))
                 {
-                    posList.Add(pos);
+                    posList.Add(newPos);
                 }
                 else
                 { 
-                    retDict.Add(bbmID, new List<Position_SOM>() { pos });
+                    retDict.Add(bbmID, new List<Position_SOM>() { newPos });
                 }
             }
 

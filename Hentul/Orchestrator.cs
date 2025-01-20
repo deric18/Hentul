@@ -450,40 +450,87 @@
 
             while (counter != 0)
             {
-                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                            // Get Next Coordinates the agent will goto from HC_EC
+                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                     
 
-                var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
-                somBBM_L3A.Fire(temporalSignalForPosition);                                                                         // Depolarize temporal Signal on L3A  for next iteration
+                var allPreditedList1 = somBBM_L3A.GetAllPredictedNeurons();
+
+                var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
+
+                //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
+                //somBBM_L3A.Fire(temporalSignalForPosition);                                                                      
 
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
-                somBBM_L3A.Fire(apicalSignalSOM);                                                                                   // Depolarize Apical Signal on L3A for next iteration
+                somBBM_L3A.Fire(apicalSignalSOM);                                                                           
 
-                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, somBBM_L3A.PreFire(), iType.APICAL);                            // Get PreFiring Cells from L3A
+
+                var allPreditedList2 = somBBM_L3A.GetAllPredictedNeurons();
+
+                var appFiringList2 = somBBM_L3A.GetAllFiringNeurons();
+                                
+
+                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);                                         
+                ProcessStep0();
+                var edgedbmp1 = ConverToEdgedBitmap();
+                ProcesStep1ForFOMOnly(edgedbmp1);
+
+                ulong preBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
+
+
+
+                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, appFiringList2, iType.APICAL);                            
                 var flag1 = FireFOMsWithSDR(apicalSignalforFOM);
 
-                if (flag1 == false)
-                    WriteLogsToFile(" ERROR :: Apical signal Depolarization Failed! ");
-                flag1 = FireFOMsWithSDR(temporalSignalForPosition);                                                                 // Use them to depolarize L4 Apically and use the same corresponding temporal signal as well.
-                if (flag1 == false)
-                    WriteLogsToFile(" ERROR :: Temporal signal Depolarization Failed! ");
-
-                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);                                         // Move cusor to the associated Position and Fire!.
+                
                 ProcessStep0();
-                var edgedbmp = ConverToEdgedBitmap();
-                ProcesStep1(edgedbmp);
+                var edgedbmp2 = ConverToEdgedBitmap();
+                ProcesStep1ForFOMOnly(edgedbmp2);
+                
+                uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
 
                 //Ensure no Bursting happened!
-
-                uint burstCount = GetTotalBurstCountInFOMLayerInLastCycle();
-
-                if (burstCount != 0)
-                {
-                    bool breakpoint = true;
-                    WriteLogsToFile(" ERROR :: Burst Count :  " + burstCount.ToString());
-                }
+                
 
                 counter--;
             }
+        }
+
+        /// <summary>
+        /// Takens in a bmp and preps and fires all FOM & SOM's.
+        /// </summary>     
+        public void ProcesStep1ForFOMOnly(Bitmap greyScalebmp)
+        {
+
+            SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
+            SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
+
+            #region STEP 1            
+
+            Mapper.ParseBitmap(greyScalebmp);
+
+            List<Position_SOM> somPosition = new List<Position_SOM>();
+
+            int whitecount = 0;
+
+            // STEP 0 : Prep SDR.
+            for (int i = 0; i < greyScalebmp.Width; i++)
+            {
+                for (int j = 0; j < greyScalebmp.Height; j++)
+                {
+                    if (Mapper.testBmpCoverage[i, j] == false)
+                    {
+                        whitecount++;
+                    }
+                }
+            }
+
+            // STEP 1A : Fire all FOM's
+            FireAllFOMs();           
+
+            Mapper.clean();
+            whitecount = 0;
+            firingFOM.Clear();
+
+            #endregion
         }
 
         private List<Position_SOM> Conver2DtoSOMList(List<Position2D> somList)
@@ -546,16 +593,21 @@
 
                     if (somSignal.InputPatternType.Equals(iType.TEMPORAL))
                     {
-                        fomSDR = new SDR_SOM(NumColumns, Z, somSignal.ActiveBits, iType.TEMPORAL);
+                        fomSDR = new SDR_SOM(NumColumns, Z, kvp.Value, iType.TEMPORAL);
                     }
                     else if (somSignal.InputPatternType == iType.APICAL)
                     {
-                        fomSDR = new SDR_SOM(NumColumns, NumColumns, somSignal.ActiveBits, iType.APICAL);
+                        fomSDR = new SDR_SOM(NumColumns, NumColumns, kvp.Value, iType.APICAL);
                     }
+
+                    
 
                     if (fomSDR != null)
                     {
+                        RemoveDuplictaeEntries(ref fomSDR);
+
                         fomBBM[kvp.Key].Fire(fomSDR);
+
                         flag = true;
                     }
                 }
@@ -567,10 +619,25 @@
 
         #region Helper Methods
 
-        private List<Position_SOM> GetLocationSDR(Position2D position)
+        private void RemoveDuplictaeEntries(ref SDR_SOM sdr_SOM)
         {
-            return locationEncoder.Encode(position.X, position.Y);
-        }               
+            for (int i = 0; i < sdr_SOM.ActiveBits.Count; i++)
+            {
+                int x = sdr_SOM.ActiveBits[i].X;
+                int y = sdr_SOM.ActiveBits[i].Y;
+
+                for (int j = 0; j < sdr_SOM.ActiveBits.Count; j++)
+                {
+                    if (i != j)
+                    {
+                        if (sdr_SOM.ActiveBits[j].X == x && sdr_SOM.ActiveBits[j].Y == y)
+                        {
+                            sdr_SOM.ActiveBits.RemoveAt(j);
+                        }
+                    }
+                }
+            }
+        }
 
         internal Bitmap ConverToEdgedBitmap()
         {
