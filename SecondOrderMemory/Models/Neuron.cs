@@ -504,11 +504,11 @@
 
             if (cycleNum - lastSpikeCycleNum > 1)
             {
-                FlushVoltage();
+                FlushVoltage(cycleNum);
             }
         }
 
-        internal void FlushVoltage()
+        internal void FlushVoltage(ulong cycleNum)
         {
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             if (NeuronID.ToString().Equals("607-3-3-N"))
@@ -517,7 +517,7 @@
             }
 
             Voltage = 0;
-            ProcessCurrentState(555);
+            ProcessCurrentState(cycleNum);
         }
 
         internal bool DidItContribute(Neuron temporalContributor)

@@ -369,7 +369,7 @@
         private Tuple<Sensation_Location, Sensation_Location> ProcessStep1N2FromOrchestrator()
         {
             var instance = Orchestrator.GetInstance();
-            instance.ProcessStep0();
+            instance.Read();
             var bmp = instance.ConverToEdgedBitmap();
             instance.ProcesStep1(bmp);
             return instance.GetSDRFromL3B();

@@ -89,7 +89,7 @@ namespace HentulWinforms
 
                     orchestrator.MoveCursor(value);
 
-                    orchestrator.ProcessStep0();        //Grab Image             
+                    orchestrator.Read();        //Grab Image             
 
                     CurrentImage.Image = orchestrator.bmp;
 
@@ -111,7 +111,7 @@ namespace HentulWinforms
                 }
                 else if (networkMode.Equals(NetworkMode.PREDICTION))
                 {
-                    orchestrator.ProcessStep0();        //Grab Image
+                    orchestrator.Read();        //Grab Image
 
                     CurrentImage.Image = orchestrator.bmp;
 
@@ -245,7 +245,7 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            orchestrator.ProcessStep0();
+            orchestrator.Read();
 
             CurrentImage.Image = orchestrator.bmp;
 

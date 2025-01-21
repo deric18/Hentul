@@ -1264,7 +1264,7 @@
                     }
 
 
-                    cleanUpNeuron.FlushVoltage();
+                    cleanUpNeuron.FlushVoltage(CycleNum);
                 }
 
             }
@@ -1330,7 +1330,7 @@
 
                                     if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
-                                        neuronToCleanUp.FlushVoltage();
+                                        neuronToCleanUp.FlushVoltage(CycleNum);
                                     }
                                 }
                             }
@@ -1367,7 +1367,7 @@
 
                                     if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
-                                        neuronToCleanUp.FlushVoltage();
+                                        neuronToCleanUp.FlushVoltage(CycleNum);
                                     }
                                     else if (neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
@@ -1408,7 +1408,7 @@
 
                             if (neuronToCleanUp.Voltage != 0)
                             {
-                                neuronToCleanUp.FlushVoltage();
+                                neuronToCleanUp.FlushVoltage(CycleNum);
                             }
                             else
                             {
@@ -1430,7 +1430,7 @@
                 {
                     //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
                     if (neuron.CurrentState != NeuronState.SPIKING)
-                        neuron.FlushVoltage();
+                        neuron.FlushVoltage(CycleNum);
                 }
 
                 // Alternative approach bit more sophisticated but buggy.
@@ -1511,7 +1511,7 @@
             {
                 if (neuron.Voltage != 0)
                 {
-                    neuron.FlushVoltage();
+                    neuron.FlushVoltage(CycleNum);
                 }
             }
         }
@@ -1756,10 +1756,23 @@
 
             WriteLogsToFile(" WARNING :: CompleteCleanUp() ::  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
 
+            foreach (var col in Columns)
+            {
+                foreach (var neuron in col.Neurons)
+                {
+                    if (neuron.Voltage != 0 || neuron.CurrentState != NeuronState.RESTING)
+                    {
+                        neuron.FlushVoltage(CycleNum);
+                    }
+                }
+            }
+
             NeuronsFiringLastCycle.Clear();
             PredictedNeuronsfromLastCycle.Clear();
             PredictedNeuronsforThisCycle.Clear();
             PredictedNeuronsForNextCycle.Clear();
+            apicalContributors.Clear();
+            temporalContributors.Clear();
         }
 
         private void DebugCheck()
@@ -1888,14 +1901,23 @@
             {
                 Console.WriteLine("EXCEPTION :: Incoming Pattern cannot be empty");
                 WriteLogsToFile("EXCEPTION :: Incoming Pattern cannot be empty" + PrintBlockDetailsSingleLine());
-                return false;
+                throw new InvalidOperationException(" Incoming Pattern cannot be empty!");
             }
 
             if ((PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
             {
-                WriteLogsToFile("EXCEPTION :: ValidateInput() ::  Cannot Process same depolarizing Inputs Simultaneously! " + PrintBlockDetailsSingleLine());
-                CompleteCleanUP();
-                return false;
+                if (CycleNum < currentCycle)
+                {
+                    ApicalCycleCache.Clear();
+                    TemporalCycleCache.Clear();
+                    CompleteCleanUP();
+                }
+                else
+                {
+                    WriteLogsToFile("EXCEPTION :: ValidateInput() ::  Cannot Process same depolarizing Inputs Simultaneously! " + PrintBlockDetailsSingleLine());
+                    //CompleteCleanUP();
+                    throw new InvalidOperationException("Cannot Process same depolarizing Inputs Simultaneously!");
+                }
             }
 
             for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
@@ -1961,7 +1983,7 @@
 
                                             if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                             {
-                                                neuronToCleanUp.FlushVoltage();
+                                                neuronToCleanUp.FlushVoltage(CycleNum);
                                             }
                                         }
                                     }
@@ -2002,7 +2024,7 @@
 
                                             if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                             {
-                                                neuronToCleanUp.FlushVoltage();
+                                                neuronToCleanUp.FlushVoltage(currentCycle);
                                             }
                                             else if (neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                             {

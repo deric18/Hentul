@@ -96,7 +96,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
 
                         Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
-                        instance.ProcessStep0();
+                        instance.Read();
                         var bmp = instance.ConverToEdgedBitmap();
                         instance.ProcesStep1(bmp);
 
@@ -140,29 +140,25 @@ namespace Hentul.Hippocampal_Entorinal_complex
         }
 
         public int GetRandomSenseIndexFromRecognisedEntity()
-        {
-            Random rand = new Random();
-
-            int index = rand.Next(0, ObjectSnapshot.Count);
-
+        {            
             bool flag = true;
 
-            if (_visitedIndexes.Contains(index))
+            if (_visitedIndexes.Contains(CurrentComparisionKeyIndex))
             {
                 while (flag)
                 {
-                    index = rand.Next(0, ObjectSnapshot.Count);
+                    CurrentComparisionKeyIndex++;
 
-                    if (_visitedIndexes.Contains(index) == false)
+                    if (_visitedIndexes.Contains(CurrentComparisionKeyIndex) == false)
                         flag = false;
                 }
             }
 
-            _visitedIndexes.Add(index);
+            _visitedIndexes.Add(CurrentComparisionKeyIndex);
 
-            SetSenseiToCurrentComparision(index);
+            SetSenseiToCurrentComparision(CurrentComparisionKeyIndex);
 
-            return index;
+            return CurrentComparisionKeyIndex;
         }
 
         public void SetSenseiToCurrentComparision(int index)

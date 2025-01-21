@@ -87,29 +87,6 @@ namespace SecondOrderMemory.Models
             }
 
             return false;
-        }
-
-        internal void PostCycleCleanup(bool cleanUpSpiking = false)
-        {
-            var firingNeurons = Neurons.Where( n => n.CurrentState != NeuronState.RESTING ).ToList();
-
-            if(cleanUpSpiking == false)
-            {
-                firingNeurons = firingNeurons.Where( n => n.CurrentState != NeuronState.SPIKING ).ToList();
-            }
-
-            foreach (var neuron in firingNeurons)
-            {                
-                neuron.FlushVoltage();
-            }
-
-            foreach (var neuron in Neurons)
-            {
-                if (neuron.TAContributors.Count > 0)
-                {
-                    neuron.CleanUpContributersList();
-                }
-            }
-        }        
+        }      
     }
 }

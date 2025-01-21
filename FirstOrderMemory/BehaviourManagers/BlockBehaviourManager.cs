@@ -102,7 +102,7 @@
         public List<Neuron> OverConnectedOffenderList { get; private set; }
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
 
-        private uint _firingBlacnkStreak;
+        private uint _firingBlanckStreak;
 
         private bool IgnorePostCycleCleanUp;
         
@@ -221,7 +221,7 @@
 
             IgnorePostCycleCleanUp = false;
 
-            _firingBlacnkStreak = 0;
+            _firingBlanckStreak = 0;
 
             this.includeBurstLearning2 = includeBurstLearningWireCase2;
             this.includeBurstLearning4 = includeBurstLearningWireCase4;
@@ -523,10 +523,10 @@
             if (ignorePrecyclePrep == false)
                 PreCyclePrep(currentCycle, incomingPattern.InputPatternType);
 
-            if (!ValidateInput(incomingPattern, currentCycle))
-                return false;
+            if (ValidateInput(incomingPattern, currentCycle) == false)
+                throw new InvalidOperationException("Input Validation Failed!");
 
-            _firingBlacnkStreak = 0;
+            _firingBlanckStreak = 0;
 
             NumberOfColumnsThatFiredThisCycle = (uint)incomingPattern.ActiveBits.Count;
 
@@ -612,6 +612,11 @@
                         CurrentiType = incomingPattern.InputPatternType;
 
                         IsCurrentApical = true;
+
+                        if (BBMID == 30)
+                        {
+                            int breakpoint = 1;
+                        }
 
                         List<Neuron> apicalLineNeurons = new List<Neuron>();
 
@@ -733,7 +738,7 @@
             List<Position_SOM> activeBits = new List<Position_SOM>();
             SDR_SOM toReturn = null;
 
-            if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+            if (_firingBlanckStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
@@ -766,7 +771,7 @@
             List<Position_SOM> activeBits = new List<Position_SOM>();
             SDR_SOM toReturn = null;
 
-            if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+            if (_firingBlanckStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
@@ -808,9 +813,9 @@
             {                
                 CycleNum = currentCycle;
 
-                _firingBlacnkStreak++;
+                _firingBlanckStreak++;
 
-                if(_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+                if(_firingBlanckStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
                 {
                     FlushAllNeuronsInList(NeuronsFiringLastCycle);
                     CompleteCleanUP();
@@ -865,7 +870,7 @@
                     }
 
 
-                    cleanUpNeuron.FlushVoltage();
+                    cleanUpNeuron.FlushVoltage(CycleNum);
                 }
 
             }
@@ -931,7 +936,7 @@
 
                                     if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
-                                        neuronToCleanUp.FlushVoltage();
+                                        neuronToCleanUp.FlushVoltage(CycleNum);
                                     }
                                 }
                             }
@@ -968,7 +973,7 @@
 
                                     if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
-                                        neuronToCleanUp.FlushVoltage();
+                                        neuronToCleanUp.FlushVoltage(CycleNum);
                                     }
                                     else if(neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                     {
@@ -1009,7 +1014,7 @@
 
                             if (neuronToCleanUp.Voltage != 0)
                             {
-                                neuronToCleanUp.FlushVoltage();
+                                neuronToCleanUp.FlushVoltage(CycleNum);
                             }
                             else
                             {
@@ -1031,7 +1036,7 @@
                 {
                     //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
                     if (neuron.CurrentState != NeuronState.SPIKING)
-                        neuron.FlushVoltage();
+                        neuron.FlushVoltage(CycleNum);
                 }
 
                 // Alternative approach bit more sophisticated but buggy.
@@ -1072,9 +1077,7 @@
                 TotalPredictionFires = 0;
             }
 
-            NeuronsFiringThisCycle.Clear();
-
-            ColumnsThatBurst.Clear();                                         
+            NeuronsFiringThisCycle.Clear();                                                     
 
             IsBurstOnly = false;
 
@@ -1405,7 +1408,7 @@
             {
                 if (neuron.Voltage != 0)
                 {
-                    neuron.FlushVoltage();
+                    neuron.FlushVoltage(CycleNum);
                 }
             }
         }
@@ -1625,10 +1628,26 @@
         private void CompleteCleanUP()
         {
             //DebugCheck();
+
+            WriteLogsToFile(" WARNING :: CompleteCleanUp() ::  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
+
+            foreach (var col in Columns)
+            {
+                foreach (var neuron in col.Neurons)
+                {
+                    if (neuron.Voltage != 0 || neuron.CurrentState != NeuronState.RESTING)
+                    {
+                        neuron.FlushVoltage(CycleNum);
+                    }
+                }
+            }
+
             NeuronsFiringLastCycle.Clear();
             PredictedNeuronsfromLastCycle.Clear();
             PredictedNeuronsforThisCycle.Clear();
-            PredictedNeuronsForNextCycle.Clear();            
+            PredictedNeuronsForNextCycle.Clear();
+            apicalContributors.Clear();
+            temporalContributors.Clear();
         }
 
         private void DebugCheck()
@@ -1757,14 +1776,23 @@
             {
                 Console.WriteLine("EXCEPTION :: Incoming Pattern cannot be empty");
                 WriteLogsToFile("EXCEPTION :: Incoming Pattern cannot be empty" + PrintBlockDetailsSingleLine());
-                return false;
+                throw new InvalidOperationException("Incoming Pattern cannot be empty!");
             }
 
             if ((PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
             {
-                WriteLogsToFile("EXCEPTION :: ValidateInput() ::  Cannot Process same depolarizing Inputs Simultaneously! " + PrintBlockDetailsSingleLine());
-                CompleteCleanUP();
-                return false;
+                if (CycleNum < currentCycle)
+                {
+                    ApicalCycleCache.Clear();
+                    TemporalCycleCache.Clear();
+                    CompleteCleanUP();
+                }
+                else
+                {
+                    WriteLogsToFile("EXCEPTION :: ValidateInput() ::  Cannot Process same depolarizing Inputs Simultaneously! " + PrintBlockDetailsSingleLine());
+                    //CompleteCleanUP();
+                    throw new InvalidOperationException("Cannot Process same depolarizing Inputs Simultaneously!");
+                }
             }
 
             for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
@@ -1829,7 +1857,7 @@
 
                                             if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                             {
-                                                neuronToCleanUp.FlushVoltage();
+                                                neuronToCleanUp.FlushVoltage(currentCycle);
                                             }
                                         }
                                     }
@@ -1871,7 +1899,7 @@
 
                                             if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                             {
-                                                neuronToCleanUp.FlushVoltage();
+                                                neuronToCleanUp.FlushVoltage(currentCycle);
                                             }
                                             else if (neuronToCleanUp.CurrentState != NeuronState.SPIKING)
                                             {
@@ -2111,7 +2139,7 @@
         private void PreCyclePrep(ulong incomingCycle, iType itype)
         {
 
-            if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP)
+            if (incomingCycle - CycleNum > 1 && _firingBlanckStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP)
             { 
                 foreach (var neuron in NeuronsFiringLastCycle)
                 {
@@ -2146,6 +2174,8 @@
                         }
                     }
             }
+
+            ColumnsThatBurst.Clear();
 
             NumberOfColumnsThatBurstLastCycle = 0;
 
@@ -2724,9 +2754,20 @@
                 return 0;
             }
 
-            return NumberOfColumnsThatBurstLastCycle;
+            return (uint)ColumnsThatBurst.Count;
         }
         
+        public Tuple<int, List<Position_SOM>> GetBurstingColumnsInLastCycle(ulong currentCycle)
+        {            
+            if (currentCycle != CycleNum || ColumnsThatBurst.Count == 0)
+            {
+                return null;
+            }
+
+            return new Tuple<int, List<Position_SOM>>(BBMID, ColumnsThatBurst);
+        }
+
+
         #endregion
 
         #region ENUMS
