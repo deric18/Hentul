@@ -2709,7 +2709,15 @@
             return toRet;
         }
 
-        public uint GetTotalBurstCountInLastCycle() => NumberOfColumnsThatFiredThisCycle;
+        public uint GetTotalBurstCountInLastCycle(ulong currentCycle)
+        {
+            if(currentCycle != CycleNum)
+            {
+                return 0;
+            }
+
+            return NumberOfColumnsThatBurstLastCycle;
+        }
         
         #endregion
 

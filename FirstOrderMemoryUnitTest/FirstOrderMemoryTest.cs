@@ -700,9 +700,7 @@ namespace FirstOrderMemoryUnitTest
             Assert.IsTrue(currentStrength > previousStrength);
 
             Assert.IsTrue(Neuron.COMMON_NEURONAL_FIRE_VOLTAGE < apicalNeuron.Voltage);
-        }
-
-       c
+        }       
 
         [Test]
         public void TestTemporalnApicalnSpatialFire()

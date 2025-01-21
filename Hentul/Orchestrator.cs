@@ -1,16 +1,15 @@
 ﻿namespace Hentul
 {
-    using Common;    
+    using Common;
     using System.Runtime.InteropServices;
     using System;
     using Hentul.Hippocampal_Entorinal_complex;
-    using System.Drawing.Imaging;    
+    using System.Drawing.Imaging;
     using System.Drawing;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
-    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;
-    using SixLabors.ImageSharp.Formats;
+    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;    
 
     public class Orchestrator
     {
@@ -101,7 +100,7 @@
         List<Position_SOM> ONbits1;
         List<Position_SOM> ONbits2;
         List<Position_SOM> ONbits3;
-        List<Position_SOM> ONbits4;        
+        List<Position_SOM> ONbits4;
 
         #endregion
 
@@ -135,7 +134,7 @@
             fomBBM = new FBBM[NumBBMNeeded];
 
             X = 1250;
-            
+
             NumColumns = 10;
 
             IsMock = isMock;
@@ -209,7 +208,7 @@
             {
                 new Position_SOM(7,1),
                 new Position_SOM(9,2)
-            };            
+            };
 
             filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
@@ -288,10 +287,10 @@
 
             Graphics g = Graphics.FromImage(bmp);
 
-            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);            
+            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
 
-            if(isMock == false)
-            bmp.Save(filename, ImageFormat.Jpeg);
+            if (isMock == false)
+                bmp.Save(filename, ImageFormat.Jpeg);
         }
 
         /// <summary>
@@ -324,7 +323,7 @@
             }
 
             // STEP 1A : Fire all FOM's
-            FireAllFOMs();            
+            FireAllFOMs();
 
             // STEP 1B : Fire all L3B and L3A SOM's
             if (Mapper.somPositions.Count != 0)
@@ -336,7 +335,7 @@
 
                 // L3B fire
                 somBBM_L3B.Fire(new SDR_SOM(1250, 10, Mapper.somPositions, iType.SPATIAL), CycleNum);
-                         
+
                 //L3A fire
                 SDR_SOM fom_SDR = GetSdrSomFromFOMs();
                 somBBM_L3A.Fire(fom_SDR, CycleNum);
@@ -354,8 +353,8 @@
 
             #endregion
         }
-       
-        
+
+
         public Position2D ProcessSDRForL3B(bool isMock = false, uint iterationsToConfirmation = 10)
         {
             Position2D motorOutput = null;
@@ -365,7 +364,7 @@
             {
                 SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);               
+                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
                 if (som_SDR != null)
                 {
@@ -376,7 +375,7 @@
                     //}
 
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
                     HCAccessor.AddNewSensationToObject(firingSensei);
                 }
@@ -389,7 +388,7 @@
 
 
                 if (som_SDR != null)
-                {                    
+                {
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
@@ -410,8 +409,8 @@
         }
 
         public void DoneWithTraining()
-        {            
-            HCAccessor.DoneWithTraining();           
+        {
+            HCAccessor.DoneWithTraining();
         }
 
         public void ChangeNetworkToPredictionMode()
@@ -455,46 +454,59 @@
 
             // Object recognised! 
             int counter = 5;
+            int breakpoint = 1;
 
             while (counter != 0)
             {
-                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                     
-                
+                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
+
                 var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
-                                                                    
+
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
-                somBBM_L3A.Fire(apicalSignalSOM);                                                                           
+                somBBM_L3A.Fire(apicalSignalSOM);
                 
-                var appFiringList2 = somBBM_L3A.GetAllFiringNeurons();
-                
-                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);                                         
-                ProcessStep0();
-                var edgedbmp1 = ConverToEdgedBitmap();
-                FireFOMWithoutCleanup(edgedbmp1);
-
-
-                var pattern1 = apicalSignalSOM.ActiveBits;
-
-                var pattern2 = Mapper.somPositions;
-
-                bool result =  CompareTwoPositionLists(pattern1, pattern2);
-
-                ulong preBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
-
-                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, appFiringList2, iType.APICAL);               //Fire FOMS with APICAL input   
-                var flag1 = FireFOMsWithSDR(apicalSignalforFOM);
-
 
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
                 ProcessStep0();
-                var edgedbmp2 = ConverToEdgedBitmap();
-                FireFOMWithoutCleanup(edgedbmp2);
-                
-                uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
+                var edgedbmp = ConverToEdgedBitmap();
 
+                GetSOMPatternGoingIntoFOMs(edgedbmp);
+                var pattern1 = apicalSignalSOM.ActiveBits;
+                var pattern2 = Mapper.somPositions;
+                bool result = CompareTwoPositionLists(pattern1, pattern2);
+                if(result == false)                                   
+                    breakpoint = 1;                
+                
+                //CycleNum++;
+                                
+                //ProcesStep1(edgedbmp);
+                //ulong preBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
+
+                CycleNum++;
+
+                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, pattern2, iType.APICAL);               //Fire FOMS with APICAL input   
+                FireFOMsWithSDR(apicalSignalforFOM);
+                FireFOMOnlyWithbmp(edgedbmp);
+
+                uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
                 //Ensure no Bursting happened!                
+
+                CycleNum++;
+                Mapper.clean();
                 counter--;
             }
+        }
+
+        private void FireFOMOnlyWithbmp(Bitmap greyScalebmp)
+        {
+                        
+            Mapper.ParseBitmap(greyScalebmp);            
+           
+            FireAllFOMs();
+
+            Mapper.clean();            
+            firingFOM.Clear();
+
         }
 
         private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)
@@ -523,32 +535,150 @@
                 index++;
             }
 
-            if (matchCount == pattern1.Count)
-            {
-                //Success Matched
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
+            return matchCount == pattern2.Count;
         }
 
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
         /// </summary>     
-        public void FireFOMWithoutCleanup(Bitmap greyScalebmp)
+        public void GetSOMPatternGoingIntoFOMs(Bitmap greyScalebmp)
         {
 
             Mapper.ParseBitmap(greyScalebmp);
-                        
-            FireAllFOMs();           
 
-            //Mapper.clean();            
-            firingFOM.Clear();
-            
-        }        
+            foreach (var kvp in Mapper.FOMBBMIDS)
+            {
+                switch (kvp.Key)
+                {
+                    case MAPPERCASE.ALL:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOTHREEE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREEFOUR:
+                        {
+
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);                                
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.FOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);                                
+                            }
+                        }
+                        break;
+                    default:
+                        {
+                            throw new NotImplementedException();
+                        }
+                }
+
+            }
+        }
 
         private List<Position_SOM> Conver2DtoSOMList(List<Position2D> somList)
         {
@@ -559,36 +689,21 @@
                 toReturn.Add(new Position_SOM(item.X, item.Y));
             }
 
-            return toReturn;         
+            return toReturn;
         }
 
-        private uint GetTotalBurstCountInFOMLayerInLastCycle()
+        private uint GetTotalBurstCountInFOMLayerInLastCycle(ulong cycleNum)
         {
             uint totalBurstCount = 0;
 
-            foreach(var fom in fomBBM)
+            foreach (var fom in fomBBM)
             {
-                totalBurstCount += fom.GetTotalBurstCountInLastCycle();
+                totalBurstCount += fom.GetTotalBurstCountInLastCycle(cycleNum);
             }
 
             return totalBurstCount;
         }
-
-        public uint ConfirmPatternToL3A(Position2D position, List<Position2D> expectations)
-        {
-            uint totalBurstCount = 0;
-
-
-            return totalBurstCount;
-        }
-
-        public uint ConfirmPatternToL3B(Position2D position, List<Position2D> expectations)
-        {
-            uint totalBurstCount = 0;
-
-
-            return totalBurstCount;
-        }
+   
 
         private bool FireFOMsWithSDR(SDR_SOM somSignal)
         {
@@ -617,7 +732,7 @@
                         fomSDR = new SDR_SOM(NumColumns, NumColumns, kvp.Value, iType.APICAL);
                     }
 
-                    
+
 
                     if (fomSDR != null && kvp.Key < 100)
                     {
@@ -644,7 +759,7 @@
 
             foreach (var pos1 in sdr_SOM.ActiveBits)
             {
-                if(newActiveBitsList.Where(item => item.X == pos1.X && item.Y == pos1.Y).Count() == 0)
+                if (newActiveBitsList.Where(item => item.X == pos1.X && item.Y == pos1.Y).Count() == 0)
                 {
                     newActiveBitsList.Add(pos1);
                 }
@@ -691,7 +806,7 @@
         }
 
         public Bitmap ConverToEdgedBitmap2()
-        {            
+        {
 
             //bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
 
@@ -704,8 +819,8 @@
 
         public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
-        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;        
-       
+        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
+
         private void FireAllFOMs()
         {
             foreach (var kvp in Mapper.FOMBBMIDS)
@@ -856,6 +971,7 @@
             }
         }
 
+
         private SDR_SOM GetSdrSomFromFOMs()
         {
             if (firingFOM.Count == 0)
@@ -872,21 +988,21 @@
             }
 
 
-            if(logMode == Common.LogMode.BurstOnly)
+            if (logMode == Common.LogMode.BurstOnly)
             {
                 int count = 0;
                 foreach (var fomID in firingFOM)
                 {
                     count += fomBBM[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
-                }                
+                }
 
-                if(count == fomBBM.Count() * Z)
+                if (count == fomBBM.Count() * Z)
                 {
                     WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
                 }
-                
+
             }
-            
+
             if (posList != null || posList.Count != 0)
             {
                 return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
@@ -1447,7 +1563,7 @@
             }
 
             ReleaseDC(desk, dc);
-        }        
+        }
 
         #endregion
 
