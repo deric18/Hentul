@@ -327,94 +327,7 @@
 
             return toRet;
         }
-       
-
-        public BlockBehaviourManager CloneBBM(int x)
-        {
-            BlockBehaviourManager blockBehaviourManager;
-
-            blockBehaviourManager = new BlockBehaviourManager(X, Y, Z);
-
-            blockBehaviourManager.Init(x);
-
-            blockBehaviourManager.Init(blockBehaviourManager.BBMID);
-
-            return blockBehaviourManager;
-
-            #region Cache Code for Connector
-
-            //try
-            //{
-            //    for (int i = 0; i < blockBehaviourManager.Y; i++)
-            //    {
-            //        for (int j = 0; j < blockBehaviourManager.Y; j++)
-            //        {
-            //            for (int k = 0; k < blockBehaviourManager.Columns[0, 0].Neurons.Count; k++)
-            //            {
-            //                //Proximal Dendritic Connections
-            //                Neuron presynapticNeuron, postSynapticNeuron;
-
-            //                for (int l = 0; l < Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.Count; l++)
-            //                {
-            //                    var synapse = Columns[i, j].Neurons[k].ProximoDistalDendriticList.Values.ElementAt(l);
-
-            //                    if (synapse != null)
-            //                    {
-            //                        if (synapse.cType.Equals(ConnectionType.PROXIMALDENDRITICNEURON))
-            //                        {
-            //                            postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
-
-            //                            if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.PROXIMALDENDRITICNEURON))
-            //                            {
-            //                                Console.WriteLine("Could Not Clone Distal Connection Properly!!!");
-            //                            }
-            //                        }
-            //                    }
-            //                    else
-            //                    {
-            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-            //                    }
-            //                }
-
-
-            //                //Axonal Connections
-            //                for (int l = 0; l < Columns[i, j].Neurons[k].AxonalList.Values.Count; l++)
-            //                {
-            //                    var synapse = Columns[i, j].Neurons[k].AxonalList.Values.ElementAt(l);
-
-            //                    if (synapse != null)
-            //                    {
-            //                        if (synapse.cType.Equals(ConnectionType.AXONTONEURON))
-            //                        {
-            //                            presynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.AxonalNeuronId);
-            //                            postSynapticNeuron = blockBehaviourManager.GetNeuronFromString(synapse.DendronalNeuronalId);
-
-            //                            if (!blockBehaviourManager.ConnectTwoNeurons(presynapticNeuron, postSynapticNeuron, ConnectionType.AXONTONEURON))
-            //                            {
-            //                                Console.WriteLine("Could Not Clone Axonal Connection Properly!!!");
-            //                            }
-            //                        }
-            //                    }
-            //                    else
-            //                    {
-            //                        throw new InvalidOperationException("Synapse Came Up Empty in Clone Logic");
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    blockBehaviourManager.GenerateTemporalLines();
-
-            //    blockBehaviourManager.GenerateApicalLines();
-            //}
-            //catch (Exception e)
-            //{
-            //    throw;
-            //}
-
-            #endregion
-        }
+            
 
         public void IncrementDistalDendronalConnection()
         {
@@ -1037,8 +950,8 @@
                     {
                         if (CycleNum - kvp.Key > 3)
                         {
-                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
-                            WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                            Console.WriteLine("ERROR :: PostCycleCleanUp :: Apical Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
+                            WriteLogsToFile("ERROR :: PostCycleCleanUp :: Apical Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
                             throw new InvalidOperationException("Apical Cache is older than Spatial Pattern");
                         }
 
@@ -1067,7 +980,7 @@
                 }
                 else if (ApicalCycleCache.Count > 1)
                 {
-                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: TemporalCycle Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
+                    Console.WriteLine("ERROR :: PostCycleCleanUp() :: Apical Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
                     throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
                 }
                 
@@ -1867,8 +1780,8 @@
 
             if (incomingPattern.InputPatternType.Equals(iType.SPATIAL))
             {
-
-                if(currentCycle <= CycleNum && currentCycle!= 0)
+                
+                if (currentCycle <= CycleNum && currentCycle != 0)
                 {
                     throw new InvalidOperationException("Invalid Cycle Number");
                 }
@@ -1877,15 +1790,105 @@
 
                 foreach (var pos in incomingPattern.ActiveBits)
                 {
-                    if(pos.W == 'W')
-                    {                        
+                    if (pos.W == 'W')
+                    {
                         WriteLogsToFile("EXCEPTION :: ValidateInput :: Incoming input has temporal and apical positions whil input Pattern Type is spatial");
                         throw new InvalidCastException("Incoming input has temporal and apical positions whil input Pattern Type is spatial");
                     }
                 }
-            }
 
-            if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
+                if (PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL))
+                {
+                    bool cachceCleanup = false;
+
+                    if (TemporalCycleCache.Count == 1)
+                    {
+                        foreach (var kvp in TemporalCycleCache)
+                        {
+                            if (CycleNum - kvp.Key > 3)
+                            {
+                                Console.WriteLine("ERROR :: ValidateInput  :: Temporal Cached Pattern is older than Spatial Pattern! Temporal Miss , Cleaning Up Deolarized Neurons" + PrintBlockDetailsSingleLine());
+                                WriteLogsToFile("ERROR :: ValidateInput :: Temporal Cached Pattern is older than Spatial Pattern! Temporal Miss , Cleaning Up Deolarized Neurons" + PrintBlockDetailsSingleLine());
+
+                                cachceCleanup = true;
+
+                                foreach (var pos in kvp.Value)
+                                {                                   
+                                    //BUG : if the neuron is depolarized from a previous sequence memory fire from a neiughbhouring neuron , cleaning up this would clean up that voltage as well!
+                                    foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
+                                    {
+                                        if (synapse.DendronalNeuronalId != null)
+                                        {
+                                            var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
+
+                                            if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                            {
+                                                neuronToCleanUp.FlushVoltage();
+                                            }
+                                        }
+                                    }
+                                }
+                            }                            
+                        }
+                        
+                        if(cachceCleanup)
+                            TemporalCycleCache.Clear();
+                    }
+                    else if (TemporalCycleCache.Count > 1)
+                    {
+                        Console.WriteLine("ERROR :: ValidateInput() :: TemporalCycle Cache count is more than 1 , It should always be 1" + PrintBlockDetailsSingleLine());
+
+                        throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
+                    }
+
+
+                    cachceCleanup = false;
+
+                    if (ApicalCycleCache.Count == 1)
+                    {
+                        foreach (var kvp in ApicalCycleCache)
+                        {
+                            if (CycleNum - kvp.Key > 3)
+                            {
+                                Console.WriteLine("ERROR :: ValidateInput :: Apical Cached Pattern is older than Spatial Pattern! APCIAL MISSS :: Cleaning Up Depolarized Neurons " + PrintBlockDetailsSingleLine());
+                                WriteLogsToFile("ERROR :: ValidateInput :: Apical Cached Pattern is older than Spatial Pattern! APCIAL MISSS :: Cleaning Up Depolarized  " + PrintBlockDetailsSingleLine());
+
+                                cachceCleanup = true;
+                                //BUG : if the neuron is depolarized from a previous sequence memory fire from a neiughbhouring neuron , cleaning up this would clean up that voltage as well!
+                                foreach (var pos in kvp.Value)
+                                {
+                                    foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
+                                    {
+                                        if (synapse.DendronalNeuronalId != null) // && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
+                                        {
+                                            var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
+
+                                            if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                            {
+                                                neuronToCleanUp.FlushVoltage();
+                                            }
+                                            else if (neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                            {
+                                                Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
+                                            }
+                                        }
+                                    }
+                                }
+                            }                            
+                        }
+
+                        if (cachceCleanup)                            
+                            ApicalCycleCache.Clear();
+                    }
+                    else if (ApicalCycleCache.Count > 1)
+                    {
+                        Console.WriteLine("ERROR :: PostCycleCleanUp() :: Apical Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
+                        throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
+                    }
+
+                }
+            }
+            else if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
             {
                 if (TemporalCycleCache.Count != 0)
                 {
@@ -1926,7 +1929,7 @@
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
-            }           
+            }          
         }
 
         private void Prune()

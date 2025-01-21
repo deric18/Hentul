@@ -72,6 +72,18 @@
         }
 
         [Test]
+        public void TestCode()
+        {
+            int x = 99;
+
+            var result = x % 10;
+
+
+            int bp = 1;
+
+        }
+
+        [Test]
         public void TestVerifyObjectSensei()
         {
             List<RecognisedEntity> entities = GenerateRecognisedEntity();

@@ -107,7 +107,7 @@
 
         private HashSet<string> SupportedLabels { get; set; }
 
-        private uint NumberOfColumnsThatBurstLastCycle { get;  set; }
+        private uint NumberOfColumnsThatBurstLastCycle { get; set; }
 
         private uint num_continuous_burst;
 
@@ -119,7 +119,7 @@
         public int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;
         public static uint DISTALNEUROPLASTICITY = 5;
-        public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;        
+        public static int NUMBER_OF_CLEANUP_CYCLES_TO_PRESERVE_TALE_VOLTAGE = 1;
         private const int PROXIMAL_CONNECTION_STRENGTH = 1000;
         private const int TEMPORAL_CONNECTION_STRENGTH = 100;
         private const int APICAL_CONNECTION_STRENGTH = 100;
@@ -699,25 +699,25 @@
             if (synapse.cType == ConnectionType.TEMPRORAL)
             {
                 if (!dendronalNeuron.TAContributors.TryGetValue(axonalNeuron.NeuronID.ToString(), out char w))
-                {                    
-                        dendronalNeuron.TAContributors.Add(axonalNeuron.NeuronID.ToString(), 'T');
-                        dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);      
+                {
+                    dendronalNeuron.TAContributors.Add(axonalNeuron.NeuronID.ToString(), 'T');
+                    dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
                 }
                 else
-                {                    
-                        dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
+                {
+                    dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
                 }
             }
             else if (synapse.cType == ConnectionType.APICAL)
             {
                 if (!dendronalNeuron.TAContributors.TryGetValue(axonalNeuron.NeuronID.ToString(), out char w))
-                {                   
-                        dendronalNeuron.TAContributors.Add(axonalNeuron.NeuronID.ToString(), 'A');
-                        dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);                    
+                {
+                    dendronalNeuron.TAContributors.Add(axonalNeuron.NeuronID.ToString(), 'A');
+                    dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
                 }
                 else
-                {                   
-                        dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                {
+                    dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
 
                     #region Removed Code [Potential Bug OR Feature
                     //if (cType.Equals(ConnectionType.TEMPRORAL))
@@ -847,7 +847,7 @@
                 throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
 
-            if(NetWorkMode != NetworkMode.PREDICTION)
+            if (NetWorkMode != NetworkMode.PREDICTION)
             {
                 throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
             }
@@ -871,7 +871,7 @@
                             toRet.Add(neuron.NeuronID);
                         }
 
-                       
+
                     }
                 }
             }
@@ -891,7 +891,7 @@
                 for (int j = 0; j < Y; j++)
                 {
                     foreach (var neuron in Columns[i, j].Neurons)
-                    {                        
+                    {
 
                         if (neuron.Voltage >= 100 || neuron.CurrentState == NeuronState.FIRING)
                         {
@@ -930,7 +930,7 @@
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
             bool allowSequenceMemoryWireCase1 = true;
-            includeBurstLearning145 = false;
+            //includeBurstLearning145 = false;
             bool allowSequenceMemoryWireCase3 = true;
 
             if (CurrentiType.Equals(iType.SPATIAL))
@@ -975,7 +975,7 @@
                         if (PredictedNeuronsforThisCycle.TryGetValue(correctlyPredictedNeuron.NeuronID.ToString(), out contributingList))
                         {
                             foreach (var contributingNeuron in contributingList)
-                            {                                
+                            {
                                 PramoteCorrectlyPredictedDendronal(contributingNeuron, correctlyPredictedNeuron);
                             }
                         }
@@ -1213,7 +1213,7 @@
                     }
                 }
             }
-        }      
+        }
 
 
         #endregion
@@ -1628,7 +1628,7 @@
                 }
 
                 success = CheckNConnectTwoNeurons(AxonalNeuron, DendriticNeuron, cType, false);
-            }           
+            }
 
             return success;
         }
@@ -1926,8 +1926,99 @@
                         throw new InvalidCastException("Incoming input has temporal and apical positions whil input Pattern Type is spatial");
                     }
                 }
-            }
 
+
+                if (PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL))
+                {
+                    bool cachceCleanup = false;
+
+                    if (TemporalCycleCache.Count == 1)
+                    {
+                        foreach (var kvp in TemporalCycleCache)
+                        {
+                            if (CycleNum - kvp.Key > 3)
+                            {
+                                Console.WriteLine("ERROR :: ValidateInput  :: Temporal Cached Pattern is older than Spatial Pattern! Temporal Miss , Cleaning Up Deolarized Neurons" + PrintBlockDetailsSingleLine());
+                                WriteLogsToFile("ERROR :: ValidateInput :: Temporal Cached Pattern is older than Spatial Pattern! Temporal Miss , Cleaning Up Deolarized Neurons" + PrintBlockDetailsSingleLine());
+
+                                cachceCleanup = true;
+
+                                foreach (var pos in kvp.Value)
+                                {
+                                    //BUG : if the neuron is depolarized from a previous sequence memory fire from a neiughbhouring neuron , cleaning up this would clean up that voltage as well!
+                                    foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
+                                    {
+                                        if (synapse.DendronalNeuronalId != null)
+                                        {
+                                            var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
+
+                                            if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                            {
+                                                neuronToCleanUp.FlushVoltage();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (cachceCleanup)
+                            TemporalCycleCache.Clear();
+                    }
+                    else if (TemporalCycleCache.Count > 1)
+                    {
+                        Console.WriteLine("ERROR :: ValidateInput() :: TemporalCycle Cache count is more than 1 , It should always be 1" + PrintBlockDetailsSingleLine());
+
+                        throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
+                    }
+
+                    cachceCleanup = false;
+
+                    if (ApicalCycleCache.Count == 1)
+                    {
+                        foreach (var kvp in ApicalCycleCache)
+                        {
+                            if (CycleNum - kvp.Key > 3)
+                            {
+                                Console.WriteLine("ERROR :: ValidateInput :: Apical Cached Pattern is older than Spatial Pattern! APCIAL MISSS :: Cleaning Up Depolarized Neurons " + PrintBlockDetailsSingleLine());
+                                WriteLogsToFile("ERROR :: ValidateInput :: Apical Cached Pattern is older than Spatial Pattern! APCIAL MISSS :: Cleaning Up Depolarized  " + PrintBlockDetailsSingleLine());
+                                cachceCleanup = true;
+
+                                //BUG : if the neuron is depolarized from a previous sequence memory fire from a neiughbhouring neuron , cleaning up this would clean up that voltage as well!
+                                foreach (var pos in kvp.Value)
+                                {
+                                    foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
+                                    {
+                                        if (synapse.DendronalNeuronalId != null) // && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, synapse.DendronalNeuronalId) == false)
+                                        {
+                                            var neuronToCleanUp = GetNeuronFromString(synapse.DendronalNeuronalId);
+
+                                            if (neuronToCleanUp.Voltage != 0 && neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                            {
+                                                neuronToCleanUp.FlushVoltage();
+                                            }
+                                            else if (neuronToCleanUp.CurrentState != NeuronState.SPIKING)
+                                            {
+                                                Console.WriteLine("WARNING :: PostCycleCleanUp ::: Tried to clean up a neuron which was not depolarized!!! " + PrintBlockDetailsSingleLine());
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+
+                        if (cachceCleanup)
+                            ApicalCycleCache.Clear();
+                    }
+                    else if (ApicalCycleCache.Count > 1)
+                    {
+                        Console.WriteLine("ERROR :: PostCycleCleanUp() :: Apical Cache count is more than 1 , It should always be 1 " + PrintBlockDetailsSingleLine());
+                        throw new InvalidOperationException("TemporalCycle Cache Size should always be 1");
+                    }
+
+                }
+            }
             if (incomingPattern.InputPatternType.Equals(iType.TEMPORAL))
             {
                 if (TemporalCycleCache.Count != 0)
@@ -1970,9 +2061,6 @@
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
             }
-
-
-
         }
 
         private void Prune()
@@ -2033,7 +2121,7 @@
                                     {
                                         DremoveList.Add(synapse.AxonalNeuronId);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
 
-                                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons :: Layer :::: " + Layer.ToString());                                        
+                                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons :: Layer :::: " + Layer.ToString());
                                     }
                                 }
                                 else

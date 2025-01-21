@@ -3,7 +3,8 @@
     using Hentul;
     using Common;
     using Hentul.Hippocampal_Entorinal_complex;
-    using FirstOrderMemory.Models;
+    using OpenCvSharp;
+    using OpenCvSharp.Extensions;
     using static Hentul.Orchestrator;
     using System.Drawing;
     using System.IO;
@@ -61,8 +62,62 @@
         }
 
         [Test]
+        public void TestRemoveDuplicateEntries()
+        {
+            List<Position_SOM> list = new List<Position_SOM>()
+            {
+                new Position_SOM(44,33,0),
+                new Position_SOM(44,33,0),
+                new Position_SOM(22,33,0),
+                new Position_SOM(22,33,0),
+                new Position_SOM(10,33,0),
+                new Position_SOM(10,33,0)
+            };
+
+            SDR_SOM sdr = new SDR_SOM(10, 10, list, iType.SPATIAL);
+
+            orchestrator.RemoveDuplicateEntries(ref sdr);
+
+            Assert.AreEqual(3, sdr.ActiveBits.Count);
+        }
+
+        [Test]
         public void TestWanderingCursor()
         {
+            List<Position2D> cursorPositions = new List<Position2D>()
+            {
+                new Position2D( 1346, 456),
+                new Position2D( 1043, 629),
+                new Position2D( 1279, 620),
+                new Position2D( 1498, 612)
+            };
+
+            foreach (var position in cursorPositions)
+            {
+                Orchestrator.SetCursorPos(position.X, position.Y);                
+
+                orchestrator.ProcessStep0(true);
+                var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
+                orchestrator.ProcesStep1(edgedbmp1);
+                orchestrator.ProcessSDRForL3B();
+
+            }
+
+
+            orchestrator.DoneWithTraining();
+            orchestrator.ChangeNetworkModeToPrediction();
+
+            Orchestrator.SetCursorPos(cursorPositions[0].X, cursorPositions[0].Y);
+
+            orchestrator.ProcessStep0();
+            var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
+            orchestrator.ProcesStep1(edgedbmp2);
+            var result = orchestrator.ProcessSDRForL3B(true, 4);
+
+            Assert.AreEqual(result.X, int.MaxValue);
+            Assert.AreEqual(result.Y, int.MaxValue);
+
+
             orchestrator.StartBurstAvoidanceWandering();
         }
 

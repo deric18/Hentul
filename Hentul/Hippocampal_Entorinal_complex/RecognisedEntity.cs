@@ -92,16 +92,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         if (newPos.X == 1364 && newPos.Y == 426)
                         {
                             bool breakpoint = true;
-                        }
-
-                        if (isMock)
-                        {
-                            return true;
-                        }
-                        if (Label == "JackFruit")
-                        {
-                            bool breakpoint = true;
-                        }
+                        }                      
 
 
                         Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);

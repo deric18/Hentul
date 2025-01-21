@@ -400,6 +400,20 @@
             return retList;
         }
 
+        internal static List<Position_SOM> GetFOMEquivalentPositionsofSOM(List<Position_SOM> oNbitsFOM, int bbmID)
+        {
+            List<Position_SOM> retList = new List<Position_SOM>();
+            Position_SOM newPosition;
+
+            foreach (var pos in oNbitsFOM)
+            {
+                newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
+                retList.Add(newPosition);
+            }
+
+            return retList;
+        }
+
         internal static Dictionary<int, List<Position_SOM>> GetFOMEquivalentPositionsofSOM(List<Position_SOM> somBits)
         {
             if (somBits.Count == 0)
@@ -420,10 +434,17 @@
 
                 Position_SOM newPos = null;
 
-                if (pos.X >= 10 && pos.X <= 99)
-                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z);
-                else if (pos.X > 99 && pos.X <= 999)
-                    newPos = new Position_SOM(pos.X % 100, pos.Y, pos.Z);
+                if (pos.X < 10)
+                    newPos = new Position_SOM(pos.X, pos.Y, pos.Z);
+                else
+                {
+                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z); 
+                }
+
+                if(newPos.X >= 10)
+                {
+                    int breakpoint = 10;
+                }
 
                 if (retDict.TryGetValue(bbmID, out var posList))
                 {

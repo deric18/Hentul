@@ -97,7 +97,59 @@ namespace SecondOrderMemoryUnitTest
             Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
 
         }
-        
+
+        [Test]
+        public void TestStaleApicalVoltageGetsCleanedUp()
+        {
+            //After Temporal && Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.
+
+            var apicalSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.APICAL);
+            var spatialSdr = TestUtils.GenerateSpecificSDRForTemporalWiring(iType.SPATIAL, bbManager.Layer);
+            ulong counter = 1;
+
+
+            var predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+
+            bbManager.Fire(apicalSdr, 1);
+
+            predictedNeurons = bbManager.PredictedNeuronsforThisCycle.Keys.ToList();
+
+            Assert.AreEqual(apicalSdr.ActiveBits.Count * bbManager.Z, predictedNeurons.Count);
+
+            foreach (var pos in apicalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.PREDICTED);
+                    Assert.AreNotEqual(0, neuron.Voltage);
+                }
+            }
+
+            bbManager.Fire(spatialSdr, 7);
+
+            Assert.AreEqual(4, bbManager.TotalBurstFire);
+
+            foreach (var pos in apicalSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+
+            foreach (var pos in spatialSdr.ActiveBits)
+            {
+                foreach (var neuron in bbManager.Columns[pos.X, pos.Y].Neurons)
+                {
+                    Assert.AreEqual(neuron.CurrentState, NeuronState.RESTING);
+                    Assert.AreEqual(0, neuron.Voltage);
+                }
+            }
+        }
+
+
         public void TestFire()
         {
             Dictionary<Tuple<string, string>, List<string>> dict = new Dictionary<Tuple<string, string>, List<string>>();
@@ -723,6 +775,7 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.IsTrue(Neuron.COMMON_NEURONAL_FIRE_VOLTAGE < apicalNeuron.Voltage);
         }
+       
 
         [Test]
         public void TestTemporalnApicalnSpatialFire()

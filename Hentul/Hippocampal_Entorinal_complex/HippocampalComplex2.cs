@@ -148,7 +148,7 @@
             return null;
         }
 
-        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false)
+        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
             string objectLabel = null;
             Position2D toReturn = null;
@@ -179,7 +179,7 @@
                         bool breakpoint = true;
                     }
 
-                    if (matchingObject.Verify(null, isMock) == true)
+                    if (matchingObject.Verify(null, isMock, iterationToConfirmation) == true)
                     {
                         currentmatchingObject = matchingObject;
                         ObjectState = RecognitionState.Recognised;

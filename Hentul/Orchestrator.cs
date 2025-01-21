@@ -1,6 +1,6 @@
 ﻿namespace Hentul
 {
-        using Common;    
+    using Common;    
     using System.Runtime.InteropServices;
     using System;
     using Hentul.Hippocampal_Entorinal_complex;
@@ -9,7 +9,8 @@
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
-    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;    
+    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;
+    using SixLabors.ImageSharp.Formats;
 
     public class Orchestrator
     {
@@ -100,8 +101,7 @@
         List<Position_SOM> ONbits1;
         List<Position_SOM> ONbits2;
         List<Position_SOM> ONbits3;
-        List<Position_SOM> ONbits4;
-
+        List<Position_SOM> ONbits4;        
 
         #endregion
 
@@ -211,7 +211,7 @@
                 new Position_SOM(9,2)
             };            
 
-            filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
+            filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
             logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
 
@@ -263,7 +263,7 @@
         /// <summary>
         /// Grabs Cursors Current Position and records pixels.
         /// </summary>
-        public void ProcessStep0()
+        public void ProcessStep0(bool isMock = false)
         {
             CycleNum++;
 
@@ -288,8 +288,9 @@
 
             Graphics g = Graphics.FromImage(bmp);
 
-            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
+            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);            
 
+            if(isMock == false)
             bmp.Save(filename, ImageFormat.Jpeg);
         }
 
@@ -354,11 +355,8 @@
             #endregion
         }
        
-        /// <summary>
-        /// Stores Object sensei into FOM & SOM's during Training and Retrieves it during Prediciton.
-        /// </summary>
-        /// <returns>Next Position the mouse needs to be guided for succesful prediction</returns>
-        public Position2D ProcessSDRForL3B(bool isMock = false)
+        
+        public Position2D ProcessSDRForL3B(bool isMock = false, uint iterationsToConfirmation = 10)
         {
             Position2D motorOutput = null;
             List<Position2D> positionToConfirm = new List<Position2D>();
@@ -372,13 +370,13 @@
                 if (som_SDR != null)
                 {
 
-                    if (point.X == 1348 && point.Y == 410)
-                    {
-                        bool breakpoint = true;
-                    }
+                    //if (point.X == 1348 && point.Y == 410)
+                    //{
+                    //    bool breakpoint = true;
+                    //}
 
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
                     HCAccessor.AddNewSensationToObject(firingSensei);
                 }
@@ -397,10 +395,17 @@
 
                     List<string> potentialObjectLabels = somBBM_L3B.GetSupportedLabels();
 
-                    
-                    motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock);                    
+                    if (isMock)
+                    {
+                        motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock, iterationsToConfirmation);
+                    }
+                    else
+                    {
+                        motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock);
+                    }
                 }
             }
+
             return motorOutput;
         }
 
@@ -445,93 +450,105 @@
 
         public void StartBurstAvoidanceWandering()
         {
+            //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
+            //somBBM_L3A.Fire(temporalSignalForPosition);  
+
             // Object recognised! 
             int counter = 5;
 
             while (counter != 0)
             {
                 Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();                                     
-
-                var allPreditedList1 = somBBM_L3A.GetAllPredictedNeurons();
-
+                
                 var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
-
-                //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
-                //somBBM_L3A.Fire(temporalSignalForPosition);                                                                      
-
+                                                                    
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
                 somBBM_L3A.Fire(apicalSignalSOM);                                                                           
-
-
-                var allPreditedList2 = somBBM_L3A.GetAllPredictedNeurons();
-
+                
                 var appFiringList2 = somBBM_L3A.GetAllFiringNeurons();
-                                
-
+                
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);                                         
                 ProcessStep0();
                 var edgedbmp1 = ConverToEdgedBitmap();
-                ProcesStep1ForFOMOnly(edgedbmp1);
+                FireFOMWithoutCleanup(edgedbmp1);
+
+
+                var pattern1 = apicalSignalSOM.ActiveBits;
+
+                var pattern2 = Mapper.somPositions;
+
+                bool result =  CompareTwoPositionLists(pattern1, pattern2);
 
                 ulong preBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
 
-
-
-                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, appFiringList2, iType.APICAL);                            
+                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, appFiringList2, iType.APICAL);               //Fire FOMS with APICAL input   
                 var flag1 = FireFOMsWithSDR(apicalSignalforFOM);
 
-                
+
+                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
                 ProcessStep0();
                 var edgedbmp2 = ConverToEdgedBitmap();
-                ProcesStep1ForFOMOnly(edgedbmp2);
+                FireFOMWithoutCleanup(edgedbmp2);
                 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
 
-                //Ensure no Bursting happened!
-                
-
+                //Ensure no Bursting happened!                
                 counter--;
             }
+        }
+
+        private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)
+        {
+            int breakpint = 1;
+
+            pattern1.Sort();
+
+            pattern2.Sort();
+
+            List<int> unmatchedIndex = new List<int>();
+            int bp2 = 1;
+
+            int matchCount = 0;
+            int index = 0;
+
+            foreach (var item in pattern2)
+            {
+                if (pattern1.Where(x => x.X == item.X && x.Y == item.Y && x.Z == item.Z).Count() != 0)
+                    matchCount++;
+                else
+                {
+                    unmatchedIndex.Add(index);
+                }
+
+                index++;
+            }
+
+            if (matchCount == pattern1.Count)
+            {
+                //Success Matched
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
         /// </summary>     
-        public void ProcesStep1ForFOMOnly(Bitmap greyScalebmp)
+        public void FireFOMWithoutCleanup(Bitmap greyScalebmp)
         {
 
-            SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
-            SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
-
-            #region STEP 1            
-
             Mapper.ParseBitmap(greyScalebmp);
-
-            List<Position_SOM> somPosition = new List<Position_SOM>();
-
-            int whitecount = 0;
-
-            // STEP 0 : Prep SDR.
-            for (int i = 0; i < greyScalebmp.Width; i++)
-            {
-                for (int j = 0; j < greyScalebmp.Height; j++)
-                {
-                    if (Mapper.testBmpCoverage[i, j] == false)
-                    {
-                        whitecount++;
-                    }
-                }
-            }
-
-            // STEP 1A : Fire all FOM's
+                        
             FireAllFOMs();           
 
-            Mapper.clean();
-            whitecount = 0;
+            //Mapper.clean();            
             firingFOM.Clear();
-
-            #endregion
-        }
+            
+        }        
 
         private List<Position_SOM> Conver2DtoSOMList(List<Position2D> somList)
         {
@@ -602,9 +619,9 @@
 
                     
 
-                    if (fomSDR != null)
+                    if (fomSDR != null && kvp.Key < 100)
                     {
-                        RemoveDuplictaeEntries(ref fomSDR);
+                        RemoveDuplicateEntries(ref fomSDR);
 
                         fomBBM[kvp.Key].Fire(fomSDR);
 
@@ -619,31 +636,64 @@
 
         #region Helper Methods
 
-        private void RemoveDuplictaeEntries(ref SDR_SOM sdr_SOM)
+        public void RemoveDuplicateEntries(ref SDR_SOM sdr_SOM)
         {
-            for (int i = 0; i < sdr_SOM.ActiveBits.Count; i++)
-            {
-                int x = sdr_SOM.ActiveBits[i].X;
-                int y = sdr_SOM.ActiveBits[i].Y;
+            int i = 0, j = 0;
+            List<int> indexsToRemove = new List<int>();
+            List<Position_SOM> newActiveBitsList = new List<Position_SOM>();
 
-                for (int j = 0; j < sdr_SOM.ActiveBits.Count; j++)
+            foreach (var pos1 in sdr_SOM.ActiveBits)
+            {
+                if(newActiveBitsList.Where(item => item.X == pos1.X && item.Y == pos1.Y).Count() == 0)
                 {
-                    if (i != j)
-                    {
-                        if (sdr_SOM.ActiveBits[j].X == x && sdr_SOM.ActiveBits[j].Y == y)
-                        {
-                            sdr_SOM.ActiveBits.RemoveAt(j);
-                        }
-                    }
+                    newActiveBitsList.Add(pos1);
                 }
             }
+
+            sdr_SOM.ActiveBits = newActiveBitsList;
         }
 
-        internal Bitmap ConverToEdgedBitmap()
-        {
-            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
-            bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
+        public Bitmap ConverToEdgedBitmap()
+        {
+            Bitmap newBitmap = new Bitmap(bmp.Width, bmp.Height);
+
+            //get a graphics object from the new image
+            using (Graphics g = Graphics.FromImage(newBitmap))
+            {
+
+                //create the grayscale ColorMatrix
+                ColorMatrix colorMatrix = new ColorMatrix(
+                   new float[][]
+                   {
+             new float[] {.3f, .3f, .3f, 0, 0},
+             new float[] {.59f, .59f, .59f, 0, 0},
+             new float[] {.11f, .11f, .11f, 0, 0},
+             new float[] {0, 0, 0, 1, 0},
+             new float[] {0, 0, 0, 0, 1}
+                   });
+
+                //create some image attributes
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+
+                    //set the color matrix attribute
+                    attributes.SetColorMatrix(colorMatrix);
+
+                    //draw the original image on the new image
+                    //using the grayscale color matrix
+                    g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+
+            return newBitmap;
+        }
+
+        public Bitmap ConverToEdgedBitmap2()
+        {            
+
+            //bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
 
             var edgeImage = Cv2.ImRead(filename);
             var imgdetect = new Mat();
