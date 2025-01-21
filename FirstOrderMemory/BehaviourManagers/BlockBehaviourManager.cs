@@ -515,7 +515,7 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
-        public void Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
+        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {            
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
@@ -523,7 +523,8 @@
             if (ignorePrecyclePrep == false)
                 PreCyclePrep(currentCycle, incomingPattern.InputPatternType);
 
-            ValidateInput(incomingPattern, currentCycle);
+            if (!ValidateInput(incomingPattern, currentCycle))
+                return false;
 
             _firingBlacnkStreak = 0;
 
@@ -665,6 +666,8 @@
                 PostCycleCleanup(incomingPattern.InputPatternType);
 
             ValidateNetwork();
+
+            return true;
         }      
 
         private void Fire()
@@ -1748,17 +1751,20 @@
             }
         }
 
-        private void ValidateInput(SDR_SOM incomingPattern, ulong currentCycle)
+        private bool ValidateInput(SDR_SOM incomingPattern, ulong currentCycle)
         {
             if (incomingPattern.ActiveBits.Count == 0)
             {
                 Console.WriteLine("EXCEPTION :: Incoming Pattern cannot be empty");
-                throw new InvalidOperationException("Incoming Pattern cannot be empty");
+                WriteLogsToFile("EXCEPTION :: Incoming Pattern cannot be empty" + PrintBlockDetailsSingleLine());
+                return false;
             }
 
-            if ( (PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
+            if ((PreviousiType.Equals(iType.APICAL) && incomingPattern.InputPatternType == iType.APICAL) || (PreviousiType.Equals(iType.TEMPORAL) && incomingPattern.InputPatternType == iType.TEMPORAL))
             {
-                throw new InvalidDataException(" Input Validated Failed :: Network cannot proces simulateneous same pattern types");
+                WriteLogsToFile("EXCEPTION :: ValidateInput() ::  Cannot Process same depolarizing Inputs Simultaneously! " + PrintBlockDetailsSingleLine());
+                CompleteCleanUP();
+                return false;
             }
 
             for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
@@ -1929,7 +1935,9 @@
                 }
 
                 ApicalCycleCache.Add(CycleNum, incomingPattern.ActiveBits);
-            }          
+            }
+
+            return true;
         }
 
         private void Prune()

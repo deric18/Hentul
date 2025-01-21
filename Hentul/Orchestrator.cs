@@ -483,17 +483,18 @@
                 //ulong preBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle();
 
                 CycleNum++;
-
-                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, pattern2, iType.APICAL);               //Fire FOMS with APICAL input   
+                int totalPos = pattern2.Count;
+                var apicalSignalforFOM = new SDR_SOM(X, NumColumns, pattern1, iType.APICAL);               //Fire FOMS with APICAL input   
                 FireFOMsWithSDR(apicalSignalforFOM);
+
                 FireFOMOnlyWithbmp(edgedbmp);
 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
                 //Ensure no Bursting happened!                
 
-                CycleNum++;
-                Mapper.clean();
+                CycleNum++;                
                 counter--;
+                Mapper.clean();
             }
         }
 
