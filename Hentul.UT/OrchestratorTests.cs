@@ -124,7 +124,7 @@
             Assert.AreEqual(result.Y, int.MaxValue);
 
 
-            var arr = orchestrator.StartBurstAvoidanceWandering();
+            var arr = orchestrator.StartBurstAvoidanceWandering(5);
 
 
             int bp = 1;

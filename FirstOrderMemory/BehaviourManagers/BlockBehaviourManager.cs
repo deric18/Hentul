@@ -518,10 +518,10 @@
         public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
         {
 
-            if (BBMID == 53 || BBMID == 64)
-            {
-                bool b1p = true;
-            }
+            //if (BBMID == 53 || BBMID == 64)
+            //{
+            //    bool b1p = true;
+            //}
             
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 

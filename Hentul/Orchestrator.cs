@@ -299,38 +299,16 @@
         public void ProcesStep1(Bitmap greyScalebmp)
         {
 
-            SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
-            SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
-
-            #region STEP 1            
-
             Mapper.ParseBitmap(greyScalebmp);
-
-            List<Position_SOM> somPosition = new List<Position_SOM>();
-
-            int whitecount = 0;
-
-            // STEP 0 : Prep SDR.
-            //for (int i = 0; i < greyScalebmp.Width; i++)
-            //{
-            //    for (int j = 0; j < greyScalebmp.Height; j++)
-            //    {
-            //        if (Mapper.testBmpCoverage[i, j] == false)
-            //        {
-            //            whitecount++;
-            //        }
-            //    }
-            //}
-
-            // STEP 1A : Fire all FOM's
+         
             FireAllFOMs();
-
-            // STEP 1B : Fire all L3B and L3A SOM's
+            
             if (Mapper.somPositions.Count != 0)
             {
                 if (Mapper.somPositions.Count > 125)
                 {
                     WriteLogsToFile("Layer 3B : SomPosition Write count " + Mapper.somPositions.Count);
+                    bool breakpoint = true;
                 }
 
                 // L3B fire
@@ -346,12 +324,8 @@
                 somBBM_L3A.FireBlank(CycleNum);
             }
 
-
-            Mapper.clean();
-            //whitecount = 0;
-            firingFOM.Clear();
-
-            #endregion
+            Mapper.clean();            
+            firingFOM.Clear();            
         }
 
 
@@ -447,13 +421,13 @@
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
         }
 
-        public List<uint> StartBurstAvoidanceWandering()
+        public List<uint> StartBurstAvoidanceWandering(int totalWanders = 5)
         {
             //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
             //somBBM_L3A.Fire(temporalSignalForPosition);  
 
             // Object recognised! 
-            int counter = 5;
+            int counter = totalWanders;
             int breakpoint = 1;
 
             List<uint> burstCache = new List<uint>();
@@ -465,12 +439,11 @@
 
                 Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
 
-                var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
+                //var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
 
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
-                somBBM_L3A.Fire(apicalSignalSOM, CycleNum);
+                //somBBM_L3A.Fire(apicalSignalSOM, CycleNum);
                 
-
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
                 Read();
                 var edgedbmp = ConverToEdgedBitmap();
@@ -483,20 +456,16 @@
                 
                 //bool result = CompareTwoPositionLists(hcSignal, fomSignal);
                 //if(result == false)
-                //    breakpoint = 1;
-
-                CycleNum++;
+                //    breakpoint = 1;                
                 //int totalPos = fomSignal.Count;
-
                 var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
 
                 
-
                 BiasFOM(apicalSignalFOM);
+                ParseNFireBitmap(edgedbmp);
 
-                Mapper.ParseBitmap(edgedbmp);
-
-                FireAllFOMs();
+                Mapper.clean();
+                firingFOM.Clear();
 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
 
@@ -519,8 +488,6 @@
 
                 CycleNum++;
                 counter--;
-                Mapper.clean();
-                firingFOM.Clear();
             }
 
             return burstCache;
@@ -694,7 +661,6 @@
                             throw new NotImplementedException();
                         }
                 }
-
             }
         }
 
