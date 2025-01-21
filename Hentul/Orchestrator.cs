@@ -311,16 +311,16 @@
             int whitecount = 0;
 
             // STEP 0 : Prep SDR.
-            for (int i = 0; i < greyScalebmp.Width; i++)
-            {
-                for (int j = 0; j < greyScalebmp.Height; j++)
-                {
-                    if (Mapper.testBmpCoverage[i, j] == false)
-                    {
-                        whitecount++;
-                    }
-                }
-            }
+            //for (int i = 0; i < greyScalebmp.Width; i++)
+            //{
+            //    for (int j = 0; j < greyScalebmp.Height; j++)
+            //    {
+            //        if (Mapper.testBmpCoverage[i, j] == false)
+            //        {
+            //            whitecount++;
+            //        }
+            //    }
+            //}
 
             // STEP 1A : Fire all FOM's
             FireAllFOMs();
@@ -348,7 +348,7 @@
 
 
             Mapper.clean();
-            whitecount = 0;
+            //whitecount = 0;
             firingFOM.Clear();
 
             #endregion
@@ -460,6 +460,9 @@
 
             while (counter != 0)
             {
+                if (counter == 2)
+                    breakpoint = 3;
+
                 Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
 
                 var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
@@ -487,8 +490,7 @@
 
                 var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
 
-                if (counter == 2)
-                    breakpoint = 3;
+                
 
                 BiasFOM(apicalSignalFOM);
 

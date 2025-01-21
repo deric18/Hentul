@@ -282,6 +282,7 @@
                     {
 
                         positionstoAdd.AddRange(ONbits1FOM);
+                        positionstoAdd.AddRange(ONbits2FOM);
 
                         somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
                         somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
@@ -365,7 +366,7 @@
                 case MAPPERCASE.THREE:
                     {
 
-                        positionstoAdd.AddRange(ONbits4FOM);
+                        positionstoAdd.AddRange(ONbits3FOM);
 
                         somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
 

@@ -516,8 +516,13 @@
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
         public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
-        {            
-            // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
+        {
+
+            if (BBMID == 53 || BBMID == 64)
+            {
+                bool b1p = true;
+            }
+            
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 
             if (ignorePrecyclePrep == false)
@@ -613,10 +618,10 @@
 
                         IsCurrentApical = true;
 
-                        if (BBMID == 30)
-                        {
-                            int breakpoint = 1;
-                        }
+                        //if (BBMID == 30)
+                        //{
+                        //    int breakpoint = 1;
+                        //}
 
                         List<Neuron> apicalLineNeurons = new List<Neuron>();
 

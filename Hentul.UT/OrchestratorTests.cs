@@ -95,6 +95,11 @@
 
             foreach (var position in cursorPositions)
             {
+                if (position.X == 1498)
+                {
+                    bool bp1 = true;
+                }
+
                 Orchestrator.SetCursorPos(position.X, position.Y);                
 
                 orchestrator.Read(true);
