@@ -28,6 +28,8 @@
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsforThisCycle { get; private set; }
 
+        public Dictionary<string, List<Neuron>> NeuronFiringNextCycle { get; private set; }
+
         public List<Neuron> NeuronsFiringThisCycle { get; private set; }
 
         public List<Neuron> NeuronsFiringLastCycle { get; private set; }
@@ -107,6 +109,8 @@
 
         private HashSet<string> SupportedLabels { get; set; }
 
+        private uint neruonMissedinNeuronsFiringThisCycleCount;
+
         private uint NumberOfColumnsThatBurstLastCycle { get; set; }
 
         private uint num_continuous_burst;
@@ -174,6 +178,8 @@
 
             PredictedNeuronsForNextCycle = new Dictionary<string, List<Neuron>>();
 
+            NeuronFiringNextCycle = new Dictionary<string, List<Neuron>>();
+
             NeuronsFiringThisCycle = new List<Neuron>();
 
             NeuronsFiringLastCycle = new List<Neuron>();
@@ -235,6 +241,8 @@
             CurrentObjectLabel = objectLabel;
 
             SupportedLabels = new HashSet<string>();
+
+            neruonMissedinNeuronsFiringThisCycleCount = 0;
         }
 
         public void BeginTraining(string Label)
@@ -658,6 +666,14 @@
                         {
                             if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                             {
+                                if (Mode >= LogMode.BurstOnly)
+                                {
+                                    WriteLogsToFile("ERROR :: Neuron in the network was in firing state was missed and adding it back now! Missed Count : " + neruonMissedinNeuronsFiringThisCycleCount.ToString());
+
+                                    neruonMissedinNeuronsFiringThisCycleCount++;
+                                }
+
+
                                 NeuronsFiringThisCycle.Add(neuron);
                             }
                         }
@@ -688,11 +704,7 @@
             if (dendronalNeuron.NeuronID.ToString().Equals("1035-4-1-N"))
             {
                 bool breakpoint = false;
-            }
-
-
-            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.            
-            AddPredictedNeuronForNextCycle(dendronalNeuron, axonalNeuron);
+            }            
 
 
             if (synapse.cType == ConnectionType.TEMPRORAL)
@@ -753,6 +765,9 @@
                 PrintBlockDetails();
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
+
+            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.                                
+            AddPredictedNeuronForNextCycle(dendronalNeuron, axonalNeuron);           
         }
 
 
@@ -1539,7 +1554,7 @@
             return "  BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString();
         }
 
-        public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
+        public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
         {
             List<Neuron> contributingList = new List<Neuron>();
 
@@ -1549,17 +1564,27 @@
             //    int breakpoint = 1;
             //}
 
-            //Need to check if the synapse is active and only then add it to the list            
-            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+            //Need to check if the synapse is active and only then add it to the list
+            if (predictedNeuron.CurrentState == NeuronState.PREDICTED)
             {
-                contributingList.Add(contributingNeuron);
+                if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+                {
+                    contributingList.Add(contributingNeuron);
+                }
+                else
+                {
+                    PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+                }
             }
-            else
+            else if(predictedNeuron.CurrentState == NeuronState.FIRING || predictedNeuron.CurrentState == NeuronState.SPIKING)
             {
-                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+                NeuronsFiringThisCycle.Add(predictedNeuron);             
             }
-
-            return true;
+            else 
+            {
+                WriteLogsToFile(" EXCEPTION :: AddPredictedNeuronForNextCycle :: Cannot Add Neuron to Predicted List when its in RESTING state!");
+                throw new InvalidOperationException(" EXCEPTION :: AddPredictedNeuronForNextCycle :: Cannot Add Neuron to Predicted List when its in RESTING state!");
+            }            
         }
 
         public ConnectionRemovalReturnType ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
@@ -2302,6 +2327,25 @@
                         }
                     }
             }
+
+            //if (NeuronFiringNextCycle.Count != 0)
+            //{
+            //    foreach (var kvp in NeuronFiringNextCycle)
+            //    {
+            //        var neuron = GetNeuronFromString(kvp.Key);
+
+            //        if (neuron.CurrentState == NeuronState.FIRING || neuron.CurrentState == NeuronState.SPIKING)
+            //        {
+            //            NeuronsFiringThisCycle.Add(neuron);
+            //        }
+            //        else
+            //        {
+            //            throw new InvalidOperationException("Neuron is cleaned up after it was added to the postFireList ! Needs investigation");
+            //        }
+            //    }
+
+            //    NeuronFiringNextCycle.Clear();
+            //}
 
             NumberOfColumnsThatBurstLastCycle = 0;
 
