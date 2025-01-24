@@ -1443,7 +1443,7 @@
             return "  BBM ID : " + BBMID.ToString() + " Layer Type : " + Layer.ToString();
         }
 
-        public bool AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
+        public void AddPredictedNeuronForNextCycle(Neuron predictedNeuron, Neuron contributingNeuron)
         {
             List<Neuron> contributingList = new List<Neuron>();
 
@@ -1454,16 +1454,26 @@
             //}
 
             //Need to check if the synapse is active and only then add it to the list            
-            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+            if (predictedNeuron.CurrentState == NeuronState.PREDICTED)
             {
-                contributingList.Add(contributingNeuron);
+                if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
+                {
+                    contributingList.Add(contributingNeuron);
+                }
+                else
+                {
+                    PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+                }
+            }
+            else if (predictedNeuron.CurrentState == NeuronState.FIRING || predictedNeuron.CurrentState == NeuronState.SPIKING)
+            {
+                NeuronsFiringThisCycle.Add(predictedNeuron);
             }
             else
             {
-                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
+                WriteLogsToFile(" EXCEPTION :: AddPredictedNeuronForNextCycle :: Cannot Add Neuron to Predicted List when its in RESTING state!");
+                throw new InvalidOperationException(" EXCEPTION :: AddPredictedNeuronForNextCycle :: Cannot Add Neuron to Predicted List when its in RESTING state!");
             }
-
-            return true;
         }
 
         public bool ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
@@ -2200,8 +2210,7 @@
                 bool breakpoint = false;
             }
 
-            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.            
-            AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron);
+            //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.                        
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
             {
@@ -2268,6 +2277,8 @@
                 PrintBlockDetails();
                 throw new InvalidOperationException("ProcessSpikeFromNeuron : Trying to Process Spike from Neuron which is not connected to this Neuron");
             }
+
+            AddPredictedNeuronForNextCycle(targetNeuron, sourceNeuron);
         }
 
         private void PrintBlockDetails()
