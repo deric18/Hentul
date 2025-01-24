@@ -427,7 +427,7 @@
             //somBBM_L3A.Fire(temporalSignalForPosition);  
 
             // Object recognised! 
-            int counter = totalWanders;
+            int counter = totalWanders > 0 ? HCAccessor.GetObjectTotalSensationCount() :  totalWanders;
             int breakpoint = 1;
 
             List<uint> burstCache = new List<uint>();

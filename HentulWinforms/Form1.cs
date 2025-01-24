@@ -198,7 +198,7 @@ namespace HentulWinforms
 
         private void StartBurstAvoidance()
         {
-            orchestrator.StartBurstAvoidanceWandering(15);
+            orchestrator.StartBurstAvoidanceWandering(100);
         }
 
         public Orchestrator.POINT MoveRight(Orchestrator.POINT value)

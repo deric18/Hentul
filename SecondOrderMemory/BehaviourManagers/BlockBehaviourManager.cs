@@ -135,8 +135,7 @@
         private const uint PRUNE_THRESHOLD = 10;
         private const uint PRUNE_STRENGTH = 1;
         private readonly int FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
-        private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
-        private readonly int FOM_TOTAL_NEURON_CONNECTIONLIMIT;
+        private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;        
         private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT;
         private const int NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP = 1;
 
@@ -219,9 +218,8 @@
             this.Layer = layertype;
 
             FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.1 * x * y * Z);
-            SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);
-            FOM_TOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
-            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
+            SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);            
+            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.25 * x * y * Z);
 
             OverConnectedOffenderList = new List<Neuron>();
             OverConnectedInShortInterval = new List<Neuron>();
@@ -2116,7 +2114,7 @@
 
                         var staleConnections = neuron.CheckForPrunableConnections(CycleNum);
 
-                        if ((neuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && staleConnections.Count != 0)
+                        if ((neuron.ProximoDistalDendriticList.Count > SOMLTOTAL_NEURON_CONNECTIONLIMIT) && staleConnections.Count != 0)
                         {
                             WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + neuron.NeuronID.ToString());
                             OverConnectedInShortInterval.Add(neuron);
@@ -2199,7 +2197,7 @@
 
                 var staleConnections = prunableNeuron.CheckForPrunableConnections(CycleNum);
 
-                if ((prunableNeuron.ProximoDistalDendriticList.Count > (Layer.Equals(LayerType.Layer_4) ? FOM_TOTAL_NEURON_CONNECTIONLIMIT : SOMLTOTAL_NEURON_CONNECTIONLIMIT)) && staleConnections.Count != 0)
+                if ((prunableNeuron.ProximoDistalDendriticList.Count > SOMLTOTAL_NEURON_CONNECTIONLIMIT ) && staleConnections.Count != 0)
                 {
                     WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
                     OverConnectedInShortInterval.Add(prunableNeuron);

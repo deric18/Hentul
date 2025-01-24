@@ -18,9 +18,9 @@
     public enum LogMode
     {
         All,
-        Trace,
-        BurstOnly,
         Info,
+        Trace,
+        BurstOnly,        
         None,
     }
 }

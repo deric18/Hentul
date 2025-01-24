@@ -164,7 +164,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public void SetSenseiToCurrentComparision(int index)
         {
             if (index < 0 || index >= ObjectSnapshot.Count)
-                throw new InvalidOperationException("index cannot exceed objectSnapshot!");
+            {
+                _visitedIndexes.Clear();
+                CurrentComparisionKeyIndex = 0;
+                return;
+            }
 
             CurrentComparision = ObjectSnapshot[index];
         }

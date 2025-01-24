@@ -16,8 +16,7 @@
         public void Setup()
         {
             orchestrator = Orchestrator.GetInstance(true, false, NetworkMode.PREDICTION);
-            hc = orchestrator.HCAccessor;
-           
+            hc = orchestrator.HCAccessor;           
         }
 
         [Test]
@@ -143,9 +142,7 @@
 
             RecognisedEntity entity = entities[0];            
 
-            entity.Verify(null, true, 6);
-            
-
+            entity.Verify(null, true, 6);            
         }
 
 
@@ -167,9 +164,7 @@
 
             List<Position2D> positions = hc.PredictObject2(sensei, prediction, labelList);
 
-
             Assert.IsTrue(positions.Count != 0);
-
         }
 
         private Sensation_Location GrabRandomSenseiFromEntity(RecognisedEntity entity)

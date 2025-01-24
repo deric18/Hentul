@@ -213,8 +213,8 @@
 
             FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.1 * x * y * Z);
             SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);
-            FOM_TOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
-            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.1 * x * y * Z);
+            FOM_TOTAL_NEURON_CONNECTIONLIMIT = (int)(0.25 * x * y * Z);
+            SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.25 * x * y * Z);
 
             OverConnectedOffenderList = new List<Neuron>();
             OverConnectedInShortInterval = new List<Neuron>();
@@ -825,7 +825,7 @@
                     FlushAllNeuronsInList(NeuronsFiringLastCycle);
                     CompleteCleanUP();
                 }
-            }           
+            }
         }
 
         #endregion
@@ -900,10 +900,10 @@
                 PredictedNeuronsforThisCycle[kvp.Key] = kvp.Value;
             }
 
-            if (PredictedNeuronsForNextCycle.Count >= (0.2 * X * Y * Z))
+            if (PredictedNeuronsForNextCycle.Count >= (0.5 * X * Y * Z))
             {
-                Console.WriteLine("WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size" + PrintBlockDetailsSingleLine());
-                WriteLogsToFile("WARNING :: Total Number of Predicted Neurons should not exceed more than 10% of Network size" + PrintBlockDetailsSingleLine());
+                Console.WriteLine("TRACE :: Total Number of Predicted Neurons should not exceed more than 50% of Network size" + PrintBlockDetailsSingleLine());
+                WriteLogsToFile("TRACE :: Total Number of Predicted Neurons should not exceed more than 50% of Network size" + PrintBlockDetailsSingleLine());
                 //Console.ReadKey();
             }
 
@@ -1504,7 +1504,7 @@
 
 
             //Check For OverConnecting Neurons
-            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) &&  ( (DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA)))
+            if (AxonalNeuron.nType.Equals(NeuronType.NORMAL) &&  ( (DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) ))
             {
                 Console.WriteLine("WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
                 WriteLogsToFile(" WARNING :: ConnectTwoNeurons :::: Neuron inelgible to  have any more Connections ! Auto Selected for Pruning Process " + PrintBlockDetailsSingleLine());
@@ -1513,8 +1513,8 @@
 
                 if ((DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA))
                 {
-                    Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
-                    WriteLogsToFile("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
+                    Console.WriteLine("ERROR :: ConnectTwoNeurons :::: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
+                    WriteLogsToFile("ERROR :: ConnectTwoNeurons :::: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
                     //Thread.Sleep(1000);
                     OverConnectedOffenderList.Add(DendriticNeuron);
                 }
@@ -1554,15 +1554,16 @@
                     }
                     else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                     {
-                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
-                        throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");
+                        //if (Mode <= LogMode.BurstOnly)
+                            //WriteLogsToFile(" TRACE :: ConnectTwoNeurons ::  Attempting to Remove Schema invoked AXON TO NEURON Connection while connecting two Neurons Schema connections are cuh , this is not an error");
+                        //throw new InvalidOperationException("Attempting to Remove Schema invoked AXON TO NEURON Connection while connecting two Neurons");
                     }
                     else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                     {
                         if (AxonalNeuron.RemoveAxonalConnection(DendriticNeuron) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             Console.WriteLine(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
-                            WriteLogsToFile(" ERROR :: Axonal Connection Succeded but Distal Connection Failed! ");
+                            WriteLogsToFile(" ERROR :: ConnectTwoNeurons :: Axonal Connection Succeded but Distal Connection Failed! ");
                             throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
                         }
                     }                    
@@ -1633,8 +1634,8 @@
         private void CompleteCleanUP()
         {
             //DebugCheck();
-
-            WriteLogsToFile(" WARNING :: CompleteCleanUp() ::  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
+            if(Mode == LogMode.All || Mode == LogMode.Info || Mode == LogMode.Trace)
+                WriteLogsToFile(" INFO :: CompleteCleanUp() ::  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
 
             foreach (var col in Columns)
             {
@@ -2030,7 +2031,7 @@
                                     else if (result == ConnectionRemovalReturnType.SOFTFALSE)
                                     {
                                         DremoveList.Add(synapse.AxonalNeuronId);           //Done this way as C# does not allow to change entities it is iterating over in foreach loop above. line :1613.
-                                        WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons :: Layer ::::" + Layer.ToString());                                        
+                                        WriteLogsToFile(" ERROR :: PRUNE :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons :: Layer ::::" + Layer.ToString());                                        
                                     }
                                 }
                                 else
@@ -2112,12 +2113,13 @@
                             }
                             else if (returnType == ConnectionRemovalReturnType.SOFTFALSE)
                             {
-                                WriteLogsToFile(" ERROR :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");                                
+                                //if(Mode <= LogMode.BurstOnly)
+                                 //   WriteLogsToFile(" ERROR :: PRUNESINGGLENEURON :: Attempting to Remove Schema invoked AXON TO NEURON Connection while connection two Neurons");                                
                             }
                             else if (returnType == ConnectionRemovalReturnType.HARDFALSE)
                             {
                                 Console.WriteLine(" ERROR :: Axonal Connection Does Not Exist But Dendronal Connection Does! ");
-                                WriteLogsToFile(" ERROR :: Axonal Connection Does Not Exist But Dendronal Connection Does! ");
+                                WriteLogsToFile(" ERROR :: PRUNESINGLENEURON :: Axonal Connection Does Not Exist But Dendronal Connection Does! ");
                                 throw new InvalidOperationException("Neuronal Network Structure Is Compromised ! Cannot pursue any further Layer Type :: " + Layer.ToString() + " BBM ID : " + BBMID.ToString());
                             }
                         }

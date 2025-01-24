@@ -246,6 +246,8 @@
             }
         }
 
+        public int GetObjectTotalSensationCount() => currentmatchingObject.ObjectSnapshot.Count;
+
         internal Position2D GetNextLocationForWandering()
         {
             Position2D position = null;

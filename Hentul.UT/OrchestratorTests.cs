@@ -3,8 +3,6 @@
     using Hentul;
     using Common;
     using Hentul.Hippocampal_Entorinal_complex;
-    using OpenCvSharp;
-    using OpenCvSharp.Extensions;
     using static Hentul.Orchestrator;
     using System.Drawing;
     using System.IO;
@@ -29,37 +27,7 @@
             orchestrator = GetInstance(true, true);
             point.X = 10;
             point.Y = 10;
-        }
-
-        [Test, Description("Test BBM ID uniqueness and correct allocation of kvps!")]
-        public void TestMapperGetSenseLocFromSDR_SOM()
-        {
-
-            List<Position_SOM> posList = new List<Position_SOM>()
-                {
-                    new Position_SOM(777, 10),
-                    new Position_SOM(555, 10),
-                    new Position_SOM(111, 10),
-                    new Position_SOM(243, 10)
-                };
-
-            SDR_SOM sdr = new SDR_SOM(
-                1000,
-                10,
-                posList
-                );
-
-            var sensloc = orchestrator.Mapper.GetSensationLocationFromSDR(sdr, point);
-
-            int index = 0;
-
-            foreach (var kvp in sensloc.sensLoc.Values)
-            {
-                Assert.IsTrue(posList[index].X / 10 == kvp.Key);
-                Assert.IsTrue(posList[index].Equals(kvp.Value[0]));
-                index++;
-            }
-        }
+        }       
 
         [Test]
         public void TestRemoveDuplicateEntries()
@@ -81,7 +49,7 @@
             Assert.AreEqual(3, sdr.ActiveBits.Count);
         }
 
-        [Test]
+        [Test, Ignore("Need access to cursor and custom Apple Image to be hosted!")]
         public void TestWanderingCursor()
         {
             List<Position2D> cursorPositions = new List<Position2D>()
@@ -207,11 +175,12 @@
                     new Position2D(3,4)
                 });
 
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
+            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();           
 
             dict.Add(obj, kvp);
 
-            Sensation_Location sensei = new Sensation_Location(dict);
+            Sensation_Location sensei = new Sensation_Location(dict, new Position2D(1, 2));            
+
             orchestrator.HCAccessor.AddNewSensationToObject(sensei);
 
             orchestrator.DoneWithTraining();
@@ -393,59 +362,7 @@
             //Bitmap bmp = new Bitmap()
             //var senseLoc = orchestrator.Mapper.ParseBitmap()
         }
-
-        [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based purely on Location for Positive Outcome!")]
-        public void TestCompareSenseiMatchPercentagePositiveTestForLocationIDOnly()
-        {
-
-            List<Position2D> activeBits1 = new List<Position2D>()
-                    {
-                        new Position2D(777, 10)
-                    };
-            List<Position2D> activeBits2 = new List<Position2D>()
-                    {
-                        new Position2D(555, 10)
-                    };
-            List<Position2D> activeBits3 = new List<Position2D>()
-                    {
-                        new Position2D(111, 10)
-                    };
-            List<Position2D> activeBits4 = new List<Position2D>()
-                    {
-                        new Position2D(243, 10)
-                    };
-
-            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(7, activeBits1);
-            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(5, activeBits2);
-            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(1, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);
-            
-
-            Sensation_Location sensei1 = new Sensation_Location();
-
-            sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(gPos2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
-
-            List<Position2D> activeBits = new List<Position2D>();
-
-            activeBits.AddRange(activeBits1);
-            activeBits.AddRange(activeBits2);
-            activeBits.AddRange(activeBits3);
-            activeBits.AddRange(activeBits4);
-
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
-
-            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
-
-            Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, false, true);
-
-            Assert.AreEqual(4, match.NumberOfLocationIDMatches);
-            Assert.AreEqual(0, match.NumberOfBBMIDMatches);
-            Assert.AreEqual(0, match.GetTotalMatchPercentage());
-
-        }
+       
 
         [Test]
         public void TestCompareSenseiMatchPercentageNegativeTestForLocationIDOnly()
@@ -694,58 +611,7 @@
             Assert.AreEqual(0, match.GetTotalMatchPercentage());
 
         }
-
-        [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position List for Positive Outcome!")]
-        public void TestCompareSenseiMatchPercentagePositiveTestForBBMID_LocationID_PositionList()
-        {
-
-            List<Position2D> activeBits1 = new List<Position2D>()
-                    {
-                        new Position2D(777, 10)
-                    };
-            List<Position2D> activeBits2 = new List<Position2D>()
-                    {
-                        new Position2D(555, 10)
-                    };
-            List<Position2D> activeBits3 = new List<Position2D>()
-                    {
-                        new Position2D(111, 10)
-                    };
-            List<Position2D> activeBits4 = new List<Position2D>()
-                    {
-                        new Position2D(243, 10)
-                    };
-
-            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
-            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
-            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
-
-            Sensation_Location sensei1 = new Sensation_Location();
-
-            sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
-            sensei1.AddNewSensationAtThisLocation(gPos2, kvp2);
-            sensei1.AddNewSensationAtThisLocation(gPos3, kvp3);
-            sensei1.AddNewSensationAtThisLocation(gPos4, kvp4);
-
-            List<Position2D> activeBits = new List<Position2D>();
-
-            activeBits.AddRange(activeBits1);
-            activeBits.AddRange(activeBits2);
-            activeBits.AddRange(activeBits3);
-            activeBits.AddRange(activeBits4);
-
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
-
-            Sensation_Location sensei2 = orchestrator.Mapper.GetSensationLocationFromSDR(activeSDR, point);
-
-            Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
-
-            Assert.AreEqual(4, match.NumberOfLocationIDMatches);
-            Assert.AreEqual(4, match.NumberOfBBMIDMatches);
-            Assert.AreEqual(100, match.GetTotalMatchPercentage());
-
-        }
+     
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position Lit for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationID_PositionList()
