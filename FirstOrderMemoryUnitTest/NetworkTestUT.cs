@@ -7,7 +7,7 @@
     public class NetworkTestUT
     {
 
-        BlockBehaviourManager? bbManager;
+        BlockBehaviourManagerFOM? bbManager;
         const int X = 10;
         const int Y = 10;
         int Z = 4;        
@@ -15,7 +15,7 @@
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_4);
+            bbManager = new BlockBehaviourManagerFOM(X, Y, Z, LayerType.Layer_4);
 
             bbManager.Init(1);            
         }

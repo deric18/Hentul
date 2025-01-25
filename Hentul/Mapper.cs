@@ -5,7 +5,7 @@
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Collections.Generic;
     using System.Drawing;
-    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
 
     public class Mapper
     {

@@ -4,7 +4,7 @@
     using FirstOrderMemory.Models;
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models.Encoders;
-    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
 
     internal static class TestUtils
     {
@@ -31,7 +31,7 @@
             new SDR_SOM(length, breadth, GetExclusivePositionList(lastFirsingCells, layerType), iType);
 
 
-        public static List<Neuron> ConvertStringListotNeuronalList(List<string> stringList, BlockBehaviourManager bbManager)
+        public static List<Neuron> ConvertStringListotNeuronalList(List<string> stringList, BlockBehaviourManagerFOM bbManager)
         {
             List<Neuron> neurons = new List<Neuron>();
 
@@ -99,7 +99,7 @@
             return new Position_SOM(spatial.X, temporal.X, temporal.Y);
         }
 
-        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManager bbManager, Position_SOM pos) =>
+        internal static Neuron GetSpatialNeuronFromTemporalCoordinate(BlockBehaviourManagerFOM bbManager, Position_SOM pos) =>
             bbManager.Columns[pos.Z, pos.X].Neurons[pos.Y];
 
 
@@ -349,7 +349,7 @@
             return new SDR_SOM(10, 4, posList, iType.TEMPORAL);
         }
 
-        internal static List<Position_SOM> FindNeuronalPositionThatAreConnectedToTargetNeuron(Neuron targetNeuron, BlockBehaviourManager bbManager)
+        internal static List<Position_SOM> FindNeuronalPositionThatAreConnectedToTargetNeuron(Neuron targetNeuron, BlockBehaviourManagerFOM bbManager)
         {
             List<Position_SOM> posList = new List<Position_SOM>();
 
@@ -370,7 +370,7 @@
             return posList;
         }
 
-        internal static List<Neuron> ConvertPosListotNeuronalList(List<Position_SOM> connectedPos, BlockBehaviourManager bbManager)
+        internal static List<Neuron> ConvertPosListotNeuronalList(List<Position_SOM> connectedPos, BlockBehaviourManagerFOM bbManager)
         {
             List<Neuron> neuronList = new List<Neuron>();
 

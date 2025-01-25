@@ -17,7 +17,7 @@
 
         public int range;
 
-        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[] fomBBM { get; private set; }
+        public FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM[] fomBBM { get; private set; }
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -31,11 +31,11 @@
             this.range = range;
             this.ColorMap = new Color[range, range];
 
-            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager[range];
+            fomBBM = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM[range];
 
-            fomBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 1);
-            fomBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 2);
-            fomBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManager(10, 3);
+            fomBBM[0] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM(10, 1);
+            fomBBM[1] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM(10, 2);
+            fomBBM[2] = new FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM(10, 3);
 
             Init();
         }

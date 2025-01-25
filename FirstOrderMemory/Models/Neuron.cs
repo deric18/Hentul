@@ -11,14 +11,14 @@
         public static readonly int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
-        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 100;
+        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 150;
 		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 300;
         public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 600;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
         public static readonly int MIN_DEPOLARIZE_FIRE_VALUE = 39;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
-        public static readonly int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        public static readonly int PROXIMAL_VOLTAGE_SPIKE_VALUE = 60;
         public static readonly int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         public static readonly int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         public static readonly uint AXONAL_CONNECTION = 1;
@@ -406,7 +406,7 @@
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
-                    BlockBehaviourManager.totalDendronalConnections++;                    
+                    BlockBehaviourManagerFOM.totalDendronalConnections++;                    
                 }
 
                 return true;

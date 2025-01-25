@@ -8,8 +8,8 @@
     using System.Drawing;
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
-    using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
-    using SBBM = SecondOrderMemory.Models.BlockBehaviourManager;    
+    using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
+    using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;    
 
     public class Orchestrator
     {

@@ -38,7 +38,7 @@
 
             this.IsActive = isActive;
 
-            PredictiveHitCount = isActive ? BlockBehaviourManager.DISTALNEUROPLASTICITY : 0;
+            PredictiveHitCount = isActive ? BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY : 0;
 
             FiringHitCount = 0;
 
@@ -97,7 +97,7 @@
                 bool breakpoint = false;
             }
 
-            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY)
+            if (PredictiveHitCount >= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY)
             {
                 if (IsActive == false)
                     IsActive = true;

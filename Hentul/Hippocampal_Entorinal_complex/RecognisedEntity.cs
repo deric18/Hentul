@@ -8,6 +8,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
 
+        public List<Position2D> FavouritePositions { get; set; }
+
         //Holds the indexes of all the objects in objectsnapshot which are needed for classfication of the object.
         public RFrame frame { get; private set; }
 
@@ -27,6 +29,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         {
             Label = name;
             ObjectSnapshot = new List<Sensation_Location>();
+            FavouritePositions = new List<Position2D>();
             _visitedIndexes = new List<int>();
             frame = null;
         }
@@ -58,6 +61,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             frame = new RFrame(ObjectSnapshot);
         }
 
+        // For legacy Verification Purpose
         public bool Verify(Sensation_Location sensei = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
             if (ObjectSnapshot?.Count == 0)

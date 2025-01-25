@@ -7,7 +7,7 @@
     public class SecondOrderMemoryTestsAdvanced
     {
 
-        BlockBehaviourManager? bbManager;
+        BlockBehaviourManagerSOM? bbManager;
         const int X = 1250;
         const int Y = 10;
         int Z = 5;
@@ -17,7 +17,7 @@
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_3B, LogMode.BurstOnly, testObjectLabel, true);
+            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3B, LogMode.BurstOnly, testObjectLabel, true);
 
             bbManager.Init(1);
 
@@ -75,7 +75,7 @@
 
             ulong counter = 1;
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 10; i++)
+            for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY + 10; i++)
             {
 
                 bbManager.Fire(temporalSdrBbm1);      //Deplarize temporal
@@ -99,7 +99,7 @@
 
             ulong counter = 1;
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 10; i++)
+            for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY + 10; i++)
             {
 
                 bbManager.Fire(temporalSdrBbm1);      //Deplarize temporal
@@ -131,7 +131,7 @@
 
             ulong counter = 1;
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 10; i++)
+            for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY + 10; i++)
             {
                 if (i == 2)
                 {

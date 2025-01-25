@@ -6,7 +6,7 @@
     using System;
     using System.ComponentModel;
 
-    public class BlockBehaviourManager
+    public class BlockBehaviourManagerSOM
     {
         #region VARIABLES
 
@@ -139,7 +139,7 @@
         private const uint PRUNE_THRESHOLD = 10;
         private const uint PRUNE_STRENGTH = 1;
         private readonly int FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
-        private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;        
+        private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
         private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT;
         private const int NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP = 1;
 
@@ -148,7 +148,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManager(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, string objectLabel = null, bool includeBurstLearning = false)
+        public BlockBehaviourManagerSOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, string objectLabel = null, bool includeBurstLearning = false)
         {
             this.NumberOfColumnsThatBurstLastCycle = 0;
 
@@ -224,7 +224,7 @@
             this.Layer = layertype;
 
             FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.1 * x * y * Z);
-            SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);            
+            SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);
             SOMLTOTAL_NEURON_CONNECTIONLIMIT = (int)(0.25 * x * y * Z);
 
             OverConnectedOffenderList = new List<Neuron>();
@@ -420,7 +420,7 @@
             xmlDocument?.Save(backupDirectory + filename);
         }
 
-        public static BlockBehaviourManager Restore(string filename, LayerType layer)
+        public static BlockBehaviourManagerSOM Restore(string filename, LayerType layer)
         {
             string backupDirectory;
             int X, Y, Z;
@@ -442,7 +442,7 @@
 
             backupDirectory += filename;
 
-            BlockBehaviourManager bbManager = new BlockBehaviourManager(X, Y, Z, layer, LogMode.BurstOnly);
+            BlockBehaviourManagerSOM bbManager = new BlockBehaviourManagerSOM(X, Y, Z, layer, LogMode.BurstOnly);
 
             char delimater = '|';
 
@@ -639,8 +639,8 @@
 
             Fire();
 
-            if (NetWorkMode.Equals(NetworkMode.TRAINING) && CurrentiType == iType.SPATIAL)            
-                Wire();            
+            if (NetWorkMode.Equals(NetworkMode.TRAINING) && CurrentiType == iType.SPATIAL)
+                Wire();
 
             PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
 
@@ -658,6 +658,26 @@
 
             if (CurrentiType == iType.SPATIAL)
             {
+                foreach (var neuroString in PredictedNeuronsforThisCycle.Keys)
+                {
+                    var neuron = GetNeuronFromString(neuroString);
+
+                    if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
+                    {
+                        if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
+                        {
+                            if (Mode < LogMode.BurstOnly)
+                            {
+                                WriteLogsToFile("INFO :: Neuron in the Predicted List was in firing state. Adding it back now! Missed Count : " + PrintBlockDetailsSingleLine());
+
+                                neruonMissedinNeuronsFiringThisCycleCount++;
+                            }
+
+                            NeuronsFiringThisCycle.Add(neuron);
+                        }
+                    }
+                }
+
                 foreach (var column in Columns)
                 {
                     foreach (var neuron in column.Neurons)
@@ -666,15 +686,9 @@
                         {
                             if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                             {
-                                if (Mode >= LogMode.BurstOnly)
-                                {
-                                    WriteLogsToFile("ERROR :: Neuron in the network was in firing state was missed and adding it back now! Missed Count : " + neruonMissedinNeuronsFiringThisCycleCount.ToString());
-
-                                    neruonMissedinNeuronsFiringThisCycleCount++;
-                                }
-
-
                                 NeuronsFiringThisCycle.Add(neuron);
+
+                                WriteLogsToFile("ERROR :: Neuron in the Network was in firing state. Adding it back now! Missed Count : " + neruonMissedinNeuronsFiringThisCycleCount.ToString() + PrintBlockDetailsSingleLine());
                             }
                         }
                     }
@@ -683,7 +697,6 @@
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-
                 neuron.Fire(CycleNum, Mode, logfilename);
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)
@@ -704,7 +717,7 @@
             if (dendronalNeuron.NeuronID.ToString().Equals("1035-4-1-N"))
             {
                 bool breakpoint = false;
-            }            
+            }
 
 
             if (synapse.cType == ConnectionType.TEMPRORAL)
@@ -767,7 +780,7 @@
             }
 
             //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.                                
-            AddPredictedNeuronForNextCycle(dendronalNeuron, axonalNeuron);           
+            AddPredictedNeuronForNextCycle(dendronalNeuron, axonalNeuron);
         }
 
 
@@ -1558,33 +1571,16 @@
         {
             List<Neuron> contributingList = new List<Neuron>();
 
-            //If bursting then 
-            //if (predictedNeuron.NeuronID.X == 5 && predictedNeuron.NeuronID.Y == 5 && predictedNeuron.NeuronID.Z == 3)
-            //{
-            //    int breakpoint = 1;
-            //}
+            //Without RESTING State no new connections will be done.
 
-            //Need to check if the synapse is active and only then add it to the list
-            if (predictedNeuron.CurrentState == NeuronState.PREDICTED)
+            if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
             {
-                if (PredictedNeuronsForNextCycle.Count > 0 && PredictedNeuronsForNextCycle.TryGetValue(predictedNeuron.NeuronID.ToString(), out contributingList))
-                {
-                    contributingList.Add(contributingNeuron);
-                }
-                else
-                {
-                    PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
-                }
+                contributingList.Add(contributingNeuron);
             }
-            else if(predictedNeuron.CurrentState == NeuronState.FIRING || predictedNeuron.CurrentState == NeuronState.SPIKING)
+            else
             {
-                NeuronsFiringThisCycle.Add(predictedNeuron);             
+                PredictedNeuronsForNextCycle.Add(predictedNeuron.NeuronID.ToString(), new List<Neuron>() { contributingNeuron });
             }
-            else 
-            {
-                WriteLogsToFile(" EXCEPTION :: AddPredictedNeuronForNextCycle :: Cannot Add Neuron to Predicted List when its in RESTING state!");
-                throw new InvalidOperationException(" EXCEPTION :: AddPredictedNeuronForNextCycle :: Cannot Add Neuron to Predicted List when its in RESTING state!");
-            }            
         }
 
         public ConnectionRemovalReturnType ConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
@@ -1776,8 +1772,8 @@
         private void CompleteCleanUP()
         {
             //DebugCheck();
-
-            WriteLogsToFile(" WARNING :: CompleteCleanUp() ::  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
+            if(Mode <= LogMode.BurstOnly) 
+                WriteLogsToFile(" TRACE :: CompleteCleanUp() :: Module was predicted but never Fired! May be Pooling Layers Need to update there pattern!  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
 
             foreach (var col in Columns)
             {
@@ -2196,7 +2192,7 @@
                                 {
                                     neuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
 
-                                    BlockBehaviourManager.totalDendronalConnections--;
+                                    BlockBehaviourManagerSOM.totalDendronalConnections--;
                                 }
                             }
                         }
@@ -2222,7 +2218,7 @@
 
                 var staleConnections = prunableNeuron.CheckForPrunableConnections(CycleNum);
 
-                if ((prunableNeuron.ProximoDistalDendriticList.Count > SOMLTOTAL_NEURON_CONNECTIONLIMIT ) && staleConnections.Count != 0)
+                if ((prunableNeuron.ProximoDistalDendriticList.Count > SOMLTOTAL_NEURON_CONNECTIONLIMIT) && staleConnections.Count != 0)
                 {
                     WriteLogsToFile(" PRUNE ERROR : Neuron is connecting too much , need to debug and see why these many connection requests are coming in the first place!" + prunableNeuron.NeuronID.ToString());
                     OverConnectedInShortInterval.Add(prunableNeuron);
@@ -2279,7 +2275,7 @@
                         {
                             prunableNeuron.ProximoDistalDendriticList.Remove(DremoveList[k]);
 
-                            BlockBehaviourManager.totalDendronalConnections--;
+                            BlockBehaviourManagerSOM.totalDendronalConnections--;
                         }
                     }
                 }
@@ -2702,7 +2698,7 @@
             //    return;
             //}
 
-            #endregion            
+            #endregion
 
             schemToLoad = SchemaType.INVALID;
 

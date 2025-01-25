@@ -58,11 +58,11 @@ namespace Hentul
 
         private Bitmap bmp;
 
-        public BlockBehaviourManager[] fomBBM { get; private set; }
+        public BlockBehaviourManagerFOM[] fomBBM { get; private set; }
 
-        public BlockBehaviourManager somL3a { get; private set; }
+        public BlockBehaviourManagerFOM somL3a { get; private set; }
 
-        public BlockBehaviourManager somL3b { get; private set; }
+        public BlockBehaviourManagerFOM somL3b { get; private set; }
 
         public Orchestrator2(Position position)
         {
@@ -79,11 +79,11 @@ namespace Hentul
 
             for (int i = 0; i < numBBMNeededForFOM; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(10, 10, 10, LayerType.Layer_4, LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManagerFOM(10, 10, 10, LayerType.Layer_4, LogMode.BurstOnly);
             }
 
-            somL3a = new BlockBehaviourManager(x1, 10, 4);
-            somL3b = new BlockBehaviourManager(x1, 10, 4);
+            somL3a = new BlockBehaviourManagerFOM(x1, 10, 4);
+            somL3b = new BlockBehaviourManagerFOM(x1, 10, 4);
 
             ImageList = AddAllTheFruits();
 

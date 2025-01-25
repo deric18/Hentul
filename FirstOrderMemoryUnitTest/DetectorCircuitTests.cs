@@ -7,13 +7,13 @@
     
     public class DetectorCircuitTest        
     {
-        BlockBehaviourManager bbManager;
+        BlockBehaviourManagerFOM bbManager;
         int NumColumns = 10;
         int Z = 10;
 
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(NumColumns, Z);
+            bbManager = new BlockBehaviourManagerFOM(NumColumns, Z);
 
             bbManager.Init(1);
 

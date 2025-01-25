@@ -25,9 +25,9 @@
 
         public Dictionary<int, List<Position_SOM>> Buckets;
 
-        public BlockBehaviourManager[] fomBBM { get; private set; }
+        public BlockBehaviourManagerFOM[] fomBBM { get; private set; }
 
-        public BlockBehaviourManager somBBM { get; private set; }
+        public BlockBehaviourManagerFOM somBBM { get; private set; }
 
         public int[] MockBlockNumFires { get; private set; }
 
@@ -84,11 +84,11 @@
 
             NumBBMNeeded = (int)value;
 
-            fomBBM = new BlockBehaviourManager[NumBBMNeeded];
+            fomBBM = new BlockBehaviourManagerFOM[NumBBMNeeded];
 
             int x1 = 10 * NumBBMNeeded;
 
-            somBBM = new BlockBehaviourManager(x1, 10, 4);
+            somBBM = new BlockBehaviourManagerFOM(x1, 10, 4);
 
             NumColumns = 10;
 
@@ -100,7 +100,7 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i] = new BlockBehaviourManager(NumColumns, NumColumns, Z, LayerType.Layer_4 , Common.LogMode.BurstOnly);
+                fomBBM[i] = new BlockBehaviourManagerFOM(NumColumns, NumColumns, Z, LayerType.Layer_4 , Common.LogMode.BurstOnly);
             }
 
             if (isMock)

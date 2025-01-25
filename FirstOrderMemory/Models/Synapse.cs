@@ -37,7 +37,7 @@ namespace FirstOrderMemory.Models
             if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
             {
                 IsActive = true;
-                PredictiveHitCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
+                PredictiveHitCount = BlockBehaviourManagerFOM.DISTALNEUROPLASTICITY;
                 FiringHitCount = 0;
             }
             else
@@ -93,7 +93,7 @@ namespace FirstOrderMemory.Models
                 breakpoint = true;
             }
 
-            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
+            if (PredictiveHitCount >= BlockBehaviourManagerFOM.DISTALNEUROPLASTICITY) 
             {
                 if(IsActive == false) 
                     IsActive = true;

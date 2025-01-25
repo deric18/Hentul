@@ -6,7 +6,7 @@ namespace SecondOrderMemoryUnitTest
     
     public class SeconfOrderMemoryUnitTest
     {
-        BlockBehaviourManager? bbManager;
+        BlockBehaviourManagerSOM? bbManager;
         string testObjectLabel = "RandomObject 1";
         const int X = 1250;
         const int Y = 10;
@@ -16,7 +16,7 @@ namespace SecondOrderMemoryUnitTest
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true);
+            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true);
 
             bbManager.Init(1);
 
@@ -238,7 +238,7 @@ namespace SecondOrderMemoryUnitTest
 
             neuron1.ProcessVoltage(10, counter, LogMode.BurstOnly);
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY + 1; i++)
+            for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY + 1; i++)
             {
                 bbManager.Fire(sdr1, counter++);                
 
@@ -362,7 +362,7 @@ namespace SecondOrderMemoryUnitTest
             bbManager.Fire(dendronalSdr, Counter++);
 
             //Make the synapsse Active           
-            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManager.DISTALNEUROPLASTICITY, Counter, true, dendronalNeuron);
+            RepeatCycle(axonalSdr, dendronalSdr, BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY, Counter, true, dendronalNeuron);
 
             var postFiringSynapeStrength = bbManager.GetNeuronFromPosition(dendronalPos).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
 
@@ -399,7 +399,7 @@ namespace SecondOrderMemoryUnitTest
             var prefireSynapseStrength1 = bbManager.GetNeuronFromPosition(axonalPos).AxonalList[dendronalPos1.ToString()].GetStrength();
             var prefireSynapseStrength2 = 1;
 
-            RepeatCycle(axonalNeuron, dendronalNeuron1, BlockBehaviourManager.DISTALNEUROPLASTICITY);
+            RepeatCycle(axonalNeuron, dendronalNeuron1, BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY);
 
             bbManager.Fire(axonalSdr, Counter++);
 
@@ -507,11 +507,11 @@ namespace SecondOrderMemoryUnitTest
             for (int i = 0; i < sDR_SOMs.Count; i++)
             {
 
-                dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
+                dendronalconnectionsBeforePruning = BlockBehaviourManagerSOM.totalDendronalConnections;
 
                 bbManager.Fire(sDR_SOMs[i]);
 
-                dendronalconnectionsAfterPruning = BlockBehaviourManager.totalDendronalConnections;
+                dendronalconnectionsAfterPruning = BlockBehaviourManagerSOM.totalDendronalConnections;
 
                 //Assert.IsTrue(dendronalconnectionsBeforePruning > dendronalconnectionsAfterPruning);
             }
@@ -539,7 +539,7 @@ namespace SecondOrderMemoryUnitTest
                 throw new Exception("Could Not connect two neurons!");
             }
 
-            for (int i = 0; i < BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
+            for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY; i++)
             {
                 Console.WriteLine("repcount : " + i.ToString());
 
@@ -548,7 +548,7 @@ namespace SecondOrderMemoryUnitTest
                 Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
 
-            for (int i = 0; i <= BlockBehaviourManager.DISTALNEUROPLASTICITY; i++)
+            for (int i = 0; i <= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY; i++)
             {
                 Console.WriteLine("repcount : " + i.ToString());
 
@@ -589,17 +589,17 @@ namespace SecondOrderMemoryUnitTest
 
                 bbManager.Fire(sDR_SOMs[i]);
 
-                dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
+                dendronalconnectionsBeforePruning = BlockBehaviourManagerSOM.totalDendronalConnections;
 
                 if (bbManager.CycleNum > 74 && bbManager.CycleNum % 25 == 0)
                 {
-                    dendronalconnectionsBeforePruning = BlockBehaviourManager.totalDendronalConnections;
+                    dendronalconnectionsBeforePruning = BlockBehaviourManagerSOM.totalDendronalConnections;
                     postcheckCycle = bbManager.CycleNum;
                 }
 
                 if (bbManager.CycleNum > 74 && bbManager.CycleNum == postcheckCycle + 1)
                 {
-                    dendronalconnectionsAfterPruning = BlockBehaviourManager.totalDendronalConnections;
+                    dendronalconnectionsAfterPruning = BlockBehaviourManagerSOM.totalDendronalConnections;
 
                     if (dendronalconnectionsBeforePruning >= dendronalconnectionsAfterPruning)
                     {
@@ -1135,7 +1135,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.BackUp("1.xml");
 
-            BlockBehaviourManager.Restore("1.xml", bbManager.Layer);
+            BlockBehaviourManagerSOM.Restore("1.xml", bbManager.Layer);
 
             Assert.DoesNotThrow(() => new Exception());
         }

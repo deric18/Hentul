@@ -147,7 +147,8 @@ namespace Hentul.UT
 
             foreach(var pos in posList)
             {
-                Assert.IsTrue(graph.GetNode(pos).Flags.Contains(first.Label) == false);
+                Assert.AreEqual(graph.GetNode(pos).Flags.Count , 1);
+                Assert.IsTrue(graph.GetNode(pos).Flags.Contains(first.Label));
             }
 
         }

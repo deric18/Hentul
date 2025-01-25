@@ -141,7 +141,7 @@
             }
             else
             {
-                // cant load more than 2 objects on to graph for now.
+                // cant load more than 2 objects on to graph Currently!.
                 bool breakpoint = true;
             }
 
@@ -221,6 +221,8 @@
         public void DoneWithTraining()
         {
             ConvertUnrecognisedObjectToRecognisedObject();
+
+
 
             CurrentObject = new UnrecognisedEntity();
 
@@ -486,11 +488,7 @@
 
             return index;
         }
-
-        private void UpdateCurrenttPosition(Position pos)
-        {
-            CurrentPosition = pos;
-        }
+  
 
         public void SetNetworkModeToTraining()
         {
@@ -507,22 +505,7 @@
         {
             networkMode = NetworkMode.PREDICTION;
         }
-
-
-        private void ConvertUnrecognisedObjectToRecognisedObject(string label)
-        {
-            if (CurrentObject.ObjectSnapshot.Count == 0)
-            {
-                throw new InvalidOperationException("Cannot Transform empty object!");
-            }
-
-            RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
-
-            Objects.Add(label, newObject);
-
-            CurrentObject = new UnrecognisedEntity();
-        }
-
+       
 
         private void ConvertUnrecognisedObjectToRecognisedObject()
         {
@@ -543,12 +526,7 @@
 
             Objects.Add(newObject.Label, newObject);
         }
-
-        private void FinishedProcessingImage()
-        {
-            //Store object into list and move on to next object
-        }
-
+      
         #endregion        
     }
 

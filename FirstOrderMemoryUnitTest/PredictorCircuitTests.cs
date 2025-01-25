@@ -7,14 +7,14 @@
     
     public class PredictorTests
     {
-        BlockBehaviourManager bbManager;
+        BlockBehaviourManagerFOM bbManager;
         int Numcolmns = 10;
         int Z = 5;
 
         [SetUp]
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(Numcolmns, Numcolmns, Z, LayerType.Layer_4, LogMode.Trace, true);
+            bbManager = new BlockBehaviourManagerFOM(Numcolmns, Numcolmns, Z, LayerType.Layer_4, LogMode.Trace, true);
 
             bbManager.Init(11);
 

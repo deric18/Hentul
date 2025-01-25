@@ -64,16 +64,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return toReturn;
         }
 
-        public List<Position2D> GetFavouritePositionsForObject(RecognisedEntity entity)
-        {
-            List<Position2D> favouritePositions = new List<Position2D>();
-
-
-            throw new NotImplementedException();
-
-
-            return favouritePositions;
-        }
+        public List<Position2D> GetFavouritePositionsForObject(RecognisedEntity entity) => entity.FavouritePositions;                    
 
         public bool LightUpObject(RecognisedEntity entity)
         {
