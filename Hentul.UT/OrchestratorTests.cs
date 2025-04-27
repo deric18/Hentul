@@ -72,8 +72,8 @@
 
                 orchestrator.Read(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
-                orchestrator.ProcesStep1(edgedbmp1);
-                orchestrator.ProcessSDRForL3B();
+                orchestrator.FireAll(edgedbmp1);
+                orchestrator.TrainHC();
 
             }
 
@@ -85,8 +85,8 @@
 
             orchestrator.Read();
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
-            orchestrator.ProcesStep1(edgedbmp2);
-            var result = orchestrator.ProcessSDRForL3B(true, 4);
+            orchestrator.FireAll(edgedbmp2);
+            var result = orchestrator.Predict_HC(true, 4);
 
             Assert.AreEqual(result.X, int.MaxValue);
             Assert.AreEqual(result.Y, int.MaxValue);
@@ -708,14 +708,14 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.ProcesStep1(bp1);
-            orchestrator.ProcessSDRForL3B();
+            orchestrator.FireAll(bp1);
+            orchestrator.TrainHC();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-            orchestrator.ProcesStep1(bp2);
-            orchestrator.ProcessSDRForL3B();
+            orchestrator.FireAll(bp2);
+            orchestrator.TrainHC();
 
 
             orchestrator.DoneWithTraining();
@@ -724,8 +724,8 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.ProcesStep1(bp1);
-            var pos = orchestrator.ProcessSDRForL3B(true);
+            orchestrator.FireAll(bp1);
+            var pos = orchestrator.Predict_HC(true);
 
             Assert.AreEqual(loc2X, pos.X);
             Assert.AreEqual(loc2Y, pos.Y);

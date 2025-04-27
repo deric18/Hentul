@@ -7,7 +7,7 @@
     public class HC_ECTests
     {
         Orchestrator orchestrator;
-        HippocampalComplex2 hc;
+        HippocampalComplex hc;
         Random rand = new Random();
         List<string> objectlabellist = new List<string>();
         int objectLabelIndex;
@@ -162,7 +162,7 @@
             labelList.Add(entities[1].Label);
             labelList.Add(entities[0].Label);
 
-            List<Position2D> positions = hc.PredictObject2(sensei, prediction, labelList);
+            List<Position2D> positions = hc.PredictObject(sensei, prediction, labelList);
 
             Assert.IsTrue(positions.Count != 0);
         }

@@ -652,7 +652,6 @@
             return true;
         }
 
-
         private void Fire()
         {
 
@@ -705,7 +704,6 @@
                 }
             }
         }
-
 
         private void ProcessSpikeFromNeuron(Synapse synapse)
         {
@@ -783,7 +781,6 @@
             AddPredictedNeuronForNextCycle(dendronalNeuron, axonalNeuron);
         }
 
-
         private void ProcessSpikeAsPer(Synapse synapse, Neuron targetNeuron)
         {
 
@@ -806,7 +803,6 @@
             //    synapse.IncrementHitCount();
             //}            
         }
-
 
         public SDR_SOM GetPredictedSDRForNextCycle(ulong currentCycle = 1)
         {
@@ -832,7 +828,6 @@
 
             return toReturn;
         }
-
 
         public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
@@ -1241,7 +1236,6 @@
                 }
             }
         }
-
 
         #endregion
 

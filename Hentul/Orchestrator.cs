@@ -61,7 +61,7 @@
 
         public SBBM somBBM_L3A { get; private set; }
 
-        public HippocampalComplex2 HCAccessor { get; private set; }
+        public HippocampalComplex HCAccessor { get; private set; }
 
         public LocationEncoder locationEncoder { get; private set; }
 
@@ -167,7 +167,7 @@
 
             locationEncoder = new LocationEncoder(iType.TEMPORAL);
 
-            HCAccessor = new HippocampalComplex2("Apple", isMock, nMode);
+            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
 
             objectlabellist = new List<string>
             {
@@ -296,7 +296,7 @@
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
         /// </summary>     
-        public void ProcesStep1(Bitmap greyScalebmp)
+        public void FireAll(Bitmap greyScalebmp)
         {
 
             Mapper.ParseBitmap(greyScalebmp);
@@ -329,10 +329,8 @@
         }
 
 
-        public Position2D ProcessSDRForL3B(bool isMock = false, uint iterationsToConfirmation = 10)
-        {
-            Position2D motorOutput = null;
-            List<Position2D> positionToConfirm = new List<Position2D>();
+        public void TrainHC()
+        {                        
 
             if (NMode.Equals(NetworkMode.TRAINING))
             {
@@ -354,7 +352,18 @@
                     HCAccessor.AddNewSensationToObject(firingSensei);
                 }
             }
-            else if (NMode.Equals(NetworkMode.PREDICTION))
+            else
+            {
+                throw new InvalidOperationException("INVALID State MAnagement!");
+            }
+        }
+
+        public Position2D Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
+        {
+            Position2D motorOutput = null;
+            List<Position2D> positionToConfirm = new List<Position2D>();
+
+            if (NMode.Equals(NetworkMode.PREDICTION))
             {
                 // If any output from HC execute the location output if NOT then take the standar default output.                
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
@@ -366,15 +375,22 @@
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
                     var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
 
-                    List<string> potentialObjectLabels = somBBM_L3B.GetSupportedLabels();
+                    List<string> predictedLabels = somBBM_L3B.GetSupportedLabels();
 
-                    if (isMock)
+                    if (legacyPipeline)
                     {
                         motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock, iterationsToConfirmation);
                     }
                     else
                     {
-                        motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock);
+                        if (predictedSensei != null)
+                        {
+                            var positionsToConfirm  = HCAccessor.PredictObject(firingSensei, predictedSensei, predictedLabels, isMock);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Should Not Happen in PRediction Mode");
+                        }
                     }
                 }
             }
@@ -1276,7 +1292,7 @@
 
             somBBM_L3A = SBBM.Restore("SOML3A", LayerType.Layer_3A);
 
-            _orchestrator.HCAccessor = HippocampalComplex2.Restore();
+            _orchestrator.HCAccessor = HippocampalComplex.Restore();
         }
 
         #endregion

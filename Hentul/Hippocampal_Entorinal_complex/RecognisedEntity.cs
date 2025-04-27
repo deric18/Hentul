@@ -102,7 +102,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
                         instance.Read();
                         var bmp = instance.ConverToEdgedBitmap();
-                        instance.ProcesStep1(bmp);
+                        instance.FireAll(bmp);
 
                         var tuple = instance.GetSDRFromL3B();
 
@@ -110,7 +110,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                             return false;
 
 
-                        if (!(HippocampalComplex2.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false || HippocampalComplex2.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
+                        if (!(HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false || HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
                         {
                             return false;
                         }
