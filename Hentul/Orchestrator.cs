@@ -339,22 +339,20 @@
                 var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
 
                 if (som_SDR != null)
-                {
-
-                    //if (point.X == 1348 && point.Y == 410)
-                    //{
-                    //    bool breakpoint = true;
-                    //}
+                {                   
 
                     //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                     var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
 
-                    HCAccessor.AddNewSensationToObject(firingSensei);
+                    if(HCAccessor.AddNewSensationToObject(firingSensei) == false)
+                    {
+                        throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
+                    }
                 }
             }
             else
             {
-                throw new InvalidOperationException("INVALID State MAnagement!");
+                throw new InvalidOperationException("INVALID State Management!");
             }
         }
 
@@ -379,13 +377,13 @@
 
                     if (legacyPipeline)
                     {
-                        motorOutput = HCAccessor.PredictObject(firingSensei, null, isMock, iterationsToConfirmation);
+                        motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
                     }
                     else
                     {
                         if (predictedSensei != null)
                         {
-                            var positionsToConfirm  = HCAccessor.PredictObject(firingSensei, predictedSensei, predictedLabels, isMock);
+                            var positionsToConfirm  = HCAccessor.StoreObjectInGraph(firingSensei, predictedSensei, isMock);
                         }
                         else
                         {

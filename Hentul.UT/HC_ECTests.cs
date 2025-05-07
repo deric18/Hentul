@@ -63,7 +63,7 @@
 
             hc.LoadMockObject(entities, true);
 
-            Position2D pos = hc.PredictObject(source, null, true);
+            Position2D pos = hc.VerifyObject(source, null, true);
 
             Assert.AreEqual(posexpected.X, pos.X);
             Assert.AreEqual(posexpected.Y, pos.Y);
@@ -127,7 +127,7 @@
             hc.LoadMockObject(entities, true);
 
 
-            Position2D pos = hc.PredictObject(source, null, true);
+            Position2D pos = hc.VerifyObject(source, null, true);
 
         }
 
@@ -162,7 +162,7 @@
             labelList.Add(entities[1].Label);
             labelList.Add(entities[0].Label);
 
-            List<Position2D> positions = hc.PredictObject(sensei, prediction, labelList);
+            List<Position2D> positions = hc.StoreObjectInGraph(sensei, prediction);
 
             Assert.IsTrue(positions.Count != 0);
         }

@@ -2,6 +2,10 @@
 namespace Hentul.Hippocampal_Entorinal_complex
 {
     using Common;
+
+    /// <summary>
+    /// A (0,0) Co-oridnate based Graph Quad Tree.
+    /// </summary>
     public class Graph
     {
 
@@ -66,7 +70,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public List<Position2D> GetFavouritePositionsForObject(RecognisedEntity entity) => entity.FavouritePositions;                    
 
-        public bool LightUpObject(RecognisedEntity entity)
+        public bool LoadObject(RecognisedEntity entity)
         {
             if (entity.ObjectSnapshot?.Count == 0)
                 return false;
@@ -189,7 +193,6 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         #region PRIVATE METHODS       
 
-
         private List<Position2D> GetAllPositionsForLabel(string label)
         {
             if (label == null || label == string.Empty)
@@ -295,7 +298,6 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             return true;
         }
-
 
         #endregion
 

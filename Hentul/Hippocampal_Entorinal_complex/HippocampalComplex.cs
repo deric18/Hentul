@@ -71,94 +71,22 @@
 
         #region PUBLIC API
 
+        #region PREDICTION 
 
-        public void AddNewSensationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
+
+
+        public bool AddNewSensationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
         {
             if (networkMode == NetworkMode.TRAINING)
-            {
-                // Keep storing <Location , ActiveBit> -> KVPs under CurrentObject.                
-
-                if (CurrentObject.AddNewSenei(sensei) == false)
-                {
-                    throw new InvalidOperationException(" Could Not Add New Sensei ! please Investigate your Shitty Code!");
-                }
-            }
-        }
-        
-
-        /// <summary>
-        /// Uses Graph to predict object and store them
-        /// </summary>
-        /// <param name="sensei"></param>
-        /// <param name="predictionU"></param>
-        /// <param name="predictedLabels"></param>
-        /// <param name="isMock"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public List<Position2D> PredictObject(Sensation_Location sensei, Sensation_Location? predictionU, List<string> predictedLabels, bool isMock = false)
-        {
-            // Get predicted Labels 
-
-            string objectLabel = null;
-            List<Position2D> toReturn = null;
-            Sensation_Location orginalSensei = sensei;
-
-            if (networkMode != NetworkMode.PREDICTION)
-            {
-                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
+            {                
+                // Need to include logic for what object is currently being sensed and 
+                return CurrentObject.AddNewSenei(sensei);
             }
 
-            if (Objects.Count == 0)
-            {
-                throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
-            }
-            if (predictedLabels.Count == 0)
-            {
-                throw new InvalidOperationException("predictedLabels cannot be empty");
-            }
-
-            // if there is a prediction load it to graph and suggest next location for verification. Avoid traditional pipeline.            
-            RecognisedEntity entity1 = null;
-            RecognisedEntity entity2 = null;
-            List<Position2D> posList = null;
-
-
-            if (predictedLabels.Count == 1)
-            {
-                entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
-                Graph.LightUpObject(entity1);
-
-                toReturn = Graph.GetFavouritePositionsForObject(entity1);
-            }
-            else if (predictedLabels.Count == 2)
-            {
-                entity1 = GetRecognisedEntityFromList(predictedLabels[0]);
-                entity2 = GetRecognisedEntityFromList(predictedLabels[1]);
-
-                Graph.LightUpObject(entity1);
-                Graph.LightUpObject(entity2);
-
-                toReturn = Graph.CompareTwoObjects(entity1, entity2);
-
-                if(toReturn.Count > 0)
-                {
-                    return toReturn;
-                }
-                else
-                {
-                    return null;    
-                }
-            }
-            else
-            {
-                // cant load more than 2 objects on to graph Currently!.
-                bool breakpoint = true;
-            }
-
-            return null;
+            return false;   
         }
 
-        public Position2D PredictObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false, uint iterationToConfirmation = 10)
+        public Position2D VerifyObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
             string objectLabel = null;
             Position2D toReturn = null;
@@ -207,6 +135,27 @@
             return toReturn;
         }       //Traditional Pipeline
 
+        /// Uses Graph to predict object and store them                
+        public List<Position2D> StoreObjectInGraph(Sensation_Location sensei, Sensation_Location? predictionU, bool isMock = false)
+        {
+            // Get predicted Labels 
+
+            string objectLabel = null;
+            List<Position2D> toReturn = null;
+            Sensation_Location orginalSensei = sensei;
+
+            if (networkMode != NetworkMode.PREDICTION)
+            {
+                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
+            }
+
+            // Use Verify Method to verify incoming object.
+            // 
+
+            return null;
+        }
+
+
         private RecognisedEntity GetRecognisedEntityFromList(string label)
         {
             if (Objects.Count == 0)
@@ -219,6 +168,7 @@
             foreach (var kvp in Objects)
             {
                 if (kvp.Key.ToLower().Equals(label.ToLower()))
+
                 {
                     matchedEntity = kvp.Value;
                 }
@@ -226,7 +176,8 @@
 
             return matchedEntity;
         }
-        
+
+        #endregion
 
         public void DoneWithTraining()
         {
@@ -544,10 +495,14 @@
         #endregion        
     }
 
+    #region ENUMS
+
     public enum RecognitionState
     {
         None,
         IsBeingVerified,
         Recognised
     }
+
+    #endregion
 }

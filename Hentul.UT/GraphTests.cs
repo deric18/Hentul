@@ -83,7 +83,7 @@ namespace Hentul.UT
 
             RecognisedEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
 
-            bool status = graph.LightUpObject(entity);
+            bool status = graph.LoadObject(entity);
 
             Assert.IsTrue(status);
             
@@ -107,7 +107,7 @@ namespace Hentul.UT
 
             RecognisedEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
 
-            bool status = graph.LightUpObject(entity);
+            bool status = graph.LoadObject(entity);
 
             Assert.IsTrue(status);
 
@@ -135,11 +135,11 @@ namespace Hentul.UT
             RecognisedEntity second = recgEntities.ElementAt(1);
 
 
-            bool status1 = graph.LightUpObject(first);
+            bool status1 = graph.LoadObject(first);
 
             Assert.IsTrue(status1);
 
-            bool status2 = graph.LightUpObject(second);
+            bool status2 = graph.LoadObject(second);
 
             Assert.IsTrue(status2);
 
