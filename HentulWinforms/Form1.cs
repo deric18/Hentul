@@ -101,7 +101,7 @@ namespace HentulWinforms
 
                     orchestrator.FireAll(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
 
-                    orchestrator.TrainHC();    // Fire SOM per FOMS
+                    orchestrator.AddNewSensationToHC();    // Fire SOM per FOMS
 
                     counter++;                      // Repeat!
 
@@ -123,7 +123,7 @@ namespace HentulWinforms
 
                     orchestrator.FireAll(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
 
-                    var motorOutput = orchestrator.Predict_HC();    // Fire SOM per FOMS
+                    var motorOutput = orchestrator.Verify_Predict_HC();    // Fire SOM per FOMS
 
                     if (motorOutput != null)
                     {

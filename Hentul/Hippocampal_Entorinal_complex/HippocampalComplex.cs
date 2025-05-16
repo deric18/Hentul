@@ -71,8 +71,7 @@
 
         #region PUBLIC API
 
-        #region PREDICTION 
-
+        #region PREDICTION
 
 
         public bool AddNewSensationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)

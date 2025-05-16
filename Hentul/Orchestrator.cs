@@ -9,7 +9,7 @@
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
-    using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;    
+    using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
     public class Orchestrator
     {
@@ -259,9 +259,7 @@
 
         #endregion
 
-        /// <summary>
-        /// Grabs Cursors Current Position and records pixels.
-        /// </summary>
+        /// Grabs Cursors Current Position and records pixels.        
         public void Read(bool isMock = false)
         {
             CycleNum++;
@@ -293,16 +291,14 @@
                 bmp.Save(filename, ImageFormat.Jpeg);
         }
 
-        /// <summary>
-        /// Takens in a bmp and preps and fires all FOM & SOM's.
-        /// </summary>     
+        /// Takes in a bmp and preps and fires all FOM & SOM's.
         public void FireAll(Bitmap greyScalebmp)
         {
 
             Mapper.ParseBitmap(greyScalebmp);
-         
+
             FireAllFOMs();
-            
+
             if (Mapper.somPositions.Count != 0)
             {
                 if (Mapper.somPositions.Count > 125)
@@ -324,71 +320,71 @@
                 somBBM_L3A.FireBlank(CycleNum);
             }
 
-            Mapper.clean();            
-            firingFOM.Clear();            
+            Mapper.clean();
+            firingFOM.Clear();
         }
 
+        //Trains the new object on to HC
+        public void AddNewSensationToHC()
+        {
 
-        public void TrainHC()
-        {                        
-
-            if (NMode.Equals(NetworkMode.TRAINING))
-            {
-                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
-
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-
-                if (som_SDR != null)
-                {                   
-
-                    //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
-
-                    if(HCAccessor.AddNewSensationToObject(firingSensei) == false)
-                    {
-                        throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
-                    }
-                }
-            }
-            else
+            if (!NMode.Equals(NetworkMode.TRAINING))
             {
                 throw new InvalidOperationException("INVALID State Management!");
             }
+
+            SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+
+            var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+
+            if (som_SDR != null)
+            {
+
+                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+
+                if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
+                {
+                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
+                }
+            }
         }
 
-        public Position2D Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
+        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
         {
             Position2D motorOutput = null;
             List<Position2D> positionToConfirm = new List<Position2D>();
 
-            if (NMode.Equals(NetworkMode.PREDICTION))
+            if (!NMode.Equals(NetworkMode.PREDICTION))
             {
-                // If any output from HC execute the location output if NOT then take the standar default output.                
-                var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
-                var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
+                throw new InvalidOperationException("Invalid State Managemnt!");
+            }
+
+            // If any output from HC execute the location output if NOT then take the standar default output.                
+            var som_SDR = somBBM_L3B.GetAllNeuronsFiringLatestCycle(CycleNum);
+            var predictedSDR = somBBM_L3B.GetPredictedSDRForNextCycle(CycleNum + 1);
 
 
-                if (som_SDR != null)
+            if (som_SDR != null)
+            {
+                var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
+                var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
+
+                List<string> predictedLabels = somBBM_L3B.GetSupportedLabels();
+
+                if (legacyPipeline)
                 {
-                    var firingSensei = Mapper.GetSensationLocationFromSDR(som_SDR, point);
-                    var predictedSensei = Mapper.GetSensationLocationFromSDR(predictedSDR, point);
-
-                    List<string> predictedLabels = somBBM_L3B.GetSupportedLabels();
-
-                    if (legacyPipeline)
+                    motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
+                }
+                else
+                {
+                    if (predictedSensei != null)
                     {
-                        motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
+                        var positionsToConfirm = HCAccessor.StoreObjectInGraph(firingSensei, predictedSensei, isMock);
                     }
                     else
                     {
-                        if (predictedSensei != null)
-                        {
-                            var positionsToConfirm  = HCAccessor.StoreObjectInGraph(firingSensei, predictedSensei, isMock);
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Should Not Happen in PRediction Mode");
-                        }
+                        throw new InvalidOperationException("Should Not Happen in PRediction Mode");
                     }
                 }
             }
@@ -441,7 +437,7 @@
             //somBBM_L3A.Fire(temporalSignalForPosition);  
 
             // Object recognised! 
-            int counter = totalWanders > 0 ? HCAccessor.GetObjectTotalSensationCount() :  totalWanders;
+            int counter = totalWanders > 0 ? HCAccessor.GetObjectTotalSensationCount() : totalWanders;
             int breakpoint = 1;
 
             List<uint> burstCache = new List<uint>();
@@ -453,28 +449,18 @@
 
                 Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
 
-                //var appFiringList1 = somBBM_L3A.GetAllFiringNeurons();
 
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
-                //somBBM_L3A.Fire(apicalSignalSOM, CycleNum);
-                
+
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
                 Read();
                 var edgedbmp = ConverToEdgedBitmap();
 
-                //ParseNFireBitmap(edgedbmp);
-                //var fomSignal = Mapper.somPositions;
-                //Mapper.clean();
-                //firingFOM.Clear();
                 var apicalSignal = apicalSignalSOM.ActiveBits;
-                
-                //bool result = CompareTwoPositionLists(hcSignal, fomSignal);
-                //if(result == false)
-                //    breakpoint = 1;                
-                //int totalPos = fomSignal.Count;
+
                 var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
 
-                
+
                 BiasFOM(apicalSignalFOM);
                 ParseNFireBitmap(edgedbmp);
 
@@ -483,21 +469,21 @@
 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
 
-                if(postBiasBurstCount > 0)
+                if (postBiasBurstCount > 0)
                 {
                     Dictionary<int, List<Position_SOM>> dict = new Dictionary<int, List<Position_SOM>>();
 
-                    foreach(var fom in fomBBM)
+                    foreach (var fom in fomBBM)
                     {
                         Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
-                        
-                        if(tuple != null)
+
+                        if (tuple != null)
                             dict.Add(tuple.Item1, tuple.Item2);
                     }
 
                     breakpoint = 2;
                 }
-                
+
                 burstCache.Add(postBiasBurstCount);
 
                 CycleNum++;
@@ -553,7 +539,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
                             }
                         }
                         break;
@@ -561,7 +547,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
                             }
                         }
                         break;
@@ -578,7 +564,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
                             }
                         }
                         break;
@@ -586,7 +572,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
                             }
                         }
                         break;
@@ -594,7 +580,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
                             }
                         }
                         break;
@@ -602,7 +588,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
                             }
                         }
                         break;
@@ -610,7 +596,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
                             }
                         }
                         break;
@@ -618,7 +604,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
                             }
                         }
                         break;
@@ -626,7 +612,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                             }
                         }
                         break;
@@ -634,7 +620,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
                             }
                         }
                         break;
@@ -642,7 +628,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
                             }
                         }
                         break;
@@ -650,7 +636,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
                             }
                         }
                         break;
@@ -658,7 +644,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
                             }
                         }
                         break;
@@ -666,7 +652,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);                                
+                                Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
                             }
                         }
                         break;
@@ -838,7 +824,7 @@
                             foreach (var bbmID in kvp.Value)
                             {
                                 var poses = Mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
-                                fomBBM[bbmID].Fire( poses, CycleNum);
+                                fomBBM[bbmID].Fire(poses, CycleNum);
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -1307,11 +1293,7 @@
             throw new NotImplementedException();
         }
 
-
         #region PRIVATE HELPER METHODS
-
-
-
 
         private void GetPixelsAsPerScope()
         {
@@ -1339,22 +1321,6 @@
                     }
             }
         }
-
-        private void GetNarrowcopePixelValues()
-        {
-
-        }
-
-        private void GetObjectScopePixelValues()
-        {
-
-        }
-
-        private void GetBroaderScopeValues()
-        {
-
-        }
-
 
         private VisionScope GetScope()
         {
