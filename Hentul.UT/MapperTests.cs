@@ -8,13 +8,13 @@
     {
 
         Orchestrator orchestrator;
-        Mapper mapper;
+        PixelEncoder mapper;
 
         [SetUp]
         public void Setup()
         {
             orchestrator = Orchestrator.GetInstance(true, false, NetworkMode.PREDICTION);
-            mapper = orchestrator.Mapper;
+            mapper = orchestrator.pEncoder;
         }
 
 

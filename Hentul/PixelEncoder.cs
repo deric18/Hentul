@@ -7,9 +7,13 @@
     using System.Drawing;
     using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
 
-    public class Mapper
+    /// <summary>
+    /// Maps all the Bits to there respective BBMIDs.
+    /// </summary>
+    public class PixelEncoder
     {
         public int NumBBM { get; private set; }
+
         public int NumPixels { get; private set; }
 
         public int NumPixelsPerBBM { get; private set; }
@@ -46,7 +50,7 @@
 
         public int WIDTH { get; private set; }
 
-        public Mapper(int numBBM, int numPixels)
+        public PixelEncoder(int numBBM, int numPixels)
         {
             if (numBBM != 100 || numPixels != 400)
             {
@@ -206,6 +210,7 @@
                 {   99  , new Position[4] { new Position (  38  ,   18  ), new Position( 38  ,   19  ), new Position(    39  ,   18  ), new Position(    39  ,   9   ) } }
                 };
         }
+
 
         public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, int bbmID)
         {
@@ -472,6 +477,7 @@
             testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
 
             //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
+
             foreach (var kvp in Mappings)
             {
                 var bbmID = kvp.Key;
