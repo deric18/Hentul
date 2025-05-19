@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography.X509Certificates;
+using Common;
 
 namespace Hentul
 {
-    internal class CharEncoder
+    public class CharEncoder
     {
+        public CharEncoder()
+        {
+                        
+        }
+
+        public SDR_SOM Encode(char ch)
+        {
+
+        }
     }
 }

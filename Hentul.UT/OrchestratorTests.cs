@@ -70,7 +70,7 @@
 
                 Orchestrator.SetCursorPos(position.X, position.Y);                
 
-                orchestrator.Read(true);
+                orchestrator.RecordPixels(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
                 orchestrator.FireAll(edgedbmp1);
                 orchestrator.AddNewSensationToHC();
@@ -83,7 +83,7 @@
 
             Orchestrator.SetCursorPos(cursorPositions[0].X, cursorPositions[0].Y);
 
-            orchestrator.Read();
+            orchestrator.RecordPixels();
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
             orchestrator.FireAll(edgedbmp2);
             var result = orchestrator.Verify_Predict_HC(true, 4);

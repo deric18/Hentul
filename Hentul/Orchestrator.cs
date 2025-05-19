@@ -262,7 +262,7 @@
         #region Public API
 
         /// Grabs Cursors Current Position and records pixels.        
-        public void Read(bool isMock = false)
+        public void RecordPixels(bool isMock = false)
         {
             CycleNum++;
 
@@ -299,7 +299,7 @@
 
             pEncoder.ParseBitmap(greyScalebmp);
 
-            FireAllFOMs();
+            FireFOMs();
 
             if (pEncoder.somPositions.Count != 0)
             {
@@ -452,13 +452,14 @@
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
 
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
-                Read();
+
+                RecordPixels();
+
                 var edgedbmp = ConverToEdgedBitmap();
 
                 var apicalSignal = apicalSignalSOM.ActiveBits;
 
                 var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
-
 
                 BiasFOM(apicalSignalFOM);
 
@@ -495,36 +496,7 @@
 
         #endregion
 
-        #region Private Methods
-
-        private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)
-        {
-            int breakpint = 1;
-
-            pattern1.Sort();
-
-            pattern2.Sort();
-
-            List<int> unmatchedIndex = new List<int>();
-            int bp2 = 1;
-
-            int matchCount = 0;
-            int index = 0;
-
-            foreach (var item in pattern2)
-            {
-                if (pattern1.Where(x => x.X == item.X && x.Y == item.Y && x.Z == item.Z).Count() != 0)
-                    matchCount++;
-                else
-                {
-                    unmatchedIndex.Add(index);
-                }
-
-                index++;
-            }
-
-            return matchCount == pattern2.Count;
-        }
+        #region Private Methods        
 
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
@@ -679,6 +651,7 @@
             return toReturn;
         }
 
+
         private uint GetTotalBurstCountInFOMLayerInLastCycle(ulong cycleNum)
         {
             uint totalBurstCount = 0;
@@ -743,81 +716,8 @@
 
         #region Helper Methods
 
-        public void RemoveDuplicateEntries(ref SDR_SOM sdr_SOM)
-        {
-            int i = 0, j = 0;
-            List<int> indexsToRemove = new List<int>();
-            List<Position_SOM> newActiveBitsList = new List<Position_SOM>();
-
-            foreach (var pos1 in sdr_SOM.ActiveBits)
-            {
-                if (newActiveBitsList.Where(item => item.X == pos1.X && item.Y == pos1.Y).Count() == 0)
-                {
-                    newActiveBitsList.Add(pos1);
-                }
-                else
-                {
-                    int breakpoint = 1;
-                }
-            }
-
-            sdr_SOM.ActiveBits = newActiveBitsList;
-        }
-
-
-        public Bitmap ConverToEdgedBitmap()
-        {
-            Bitmap newBitmap = new Bitmap(bmp.Width, bmp.Height);
-
-            //get a graphics object from the new image
-            using (Graphics g = Graphics.FromImage(newBitmap))
-            {
-
-                //create the grayscale ColorMatrix
-                ColorMatrix colorMatrix = new ColorMatrix(
-                   new float[][]
-                   {
-             new float[] {.3f, .3f, .3f, 0, 0},
-             new float[] {.59f, .59f, .59f, 0, 0},
-             new float[] {.11f, .11f, .11f, 0, 0},
-             new float[] {0, 0, 0, 1, 0},
-             new float[] {0, 0, 0, 0, 1}
-                   });
-
-                //create some image attributes
-                using (ImageAttributes attributes = new ImageAttributes())
-                {
-
-                    //set the color matrix attribute
-                    attributes.SetColorMatrix(colorMatrix);
-
-                    //draw the original image on the new image
-                    //using the grayscale color matrix
-                    g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height),
-                                0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
-                }
-            }
-
-            return newBitmap;
-        }
-
-        public Bitmap ConverToEdgedBitmap2()
-        {
-
-            //bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
-
-            var edgeImage = Cv2.ImRead(filename);
-            var imgdetect = new Mat();
-            Cv2.Canny(edgeImage, imgdetect, 50, 200);
-
-            return BitmapConverter.ToBitmap(imgdetect);
-        }
-
-        public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
-
-        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
-
-        private void FireAllFOMs()
+               
+        private void FireFOMs()
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
             {
@@ -828,7 +728,7 @@
                             foreach (var bbmID in kvp.Value)
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
-                                fomBBM[bbmID].Fire(poses, CycleNum);
+                                fomBBM[bbmID].Fire(poses, CycleNum); ; 
                                 firingFOM.Add(bbmID);
                             }
                         }
@@ -982,6 +882,66 @@
             }
         }
 
+        public void RemoveDuplicateEntries(ref SDR_SOM sdr_SOM)
+        {
+            int i = 0, j = 0;
+            List<int> indexsToRemove = new List<int>();
+            List<Position_SOM> newActiveBitsList = new List<Position_SOM>();
+
+            foreach (var pos1 in sdr_SOM.ActiveBits)
+            {
+                if (newActiveBitsList.Where(item => item.X == pos1.X && item.Y == pos1.Y).Count() == 0)
+                {
+                    newActiveBitsList.Add(pos1);
+                }
+                else
+                {
+                    int breakpoint = 1;
+                }
+            }
+
+            sdr_SOM.ActiveBits = newActiveBitsList;
+        }
+
+        public Bitmap ConverToEdgedBitmap()
+        {
+            Bitmap newBitmap = new Bitmap(bmp.Width, bmp.Height);
+
+            //get a graphics object from the new image
+            using (Graphics g = Graphics.FromImage(newBitmap))
+            {
+
+                //create the grayscale ColorMatrix
+                ColorMatrix colorMatrix = new ColorMatrix(
+                   new float[][]
+                   {
+                     new float[] {.3f, .3f, .3f, 0, 0},
+                     new float[] {.59f, .59f, .59f, 0, 0},
+                     new float[] {.11f, .11f, .11f, 0, 0},
+                     new float[] {0, 0, 0, 1, 0},
+                     new float[] {0, 0, 0, 0, 1}
+                   });
+
+                //create some image attributes
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+
+                    //set the color matrix attribute
+                    attributes.SetColorMatrix(colorMatrix);
+
+                    //draw the original image on the new image
+                    //using the grayscale color matrix
+                    g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+
+            return newBitmap;
+        }
+
+        public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
+
+        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
 
         private SDR_SOM GetSdrSomFromFOMs()
         {
@@ -1020,6 +980,35 @@
             }
 
             throw new NullReferenceException(" FOM BBM returned empty position list ");
+        }
+
+        private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)
+        {
+            int breakpint = 1;
+
+            pattern1.Sort();
+
+            pattern2.Sort();
+
+            List<int> unmatchedIndex = new List<int>();
+            int bp2 = 1;
+
+            int matchCount = 0;
+            int index = 0;
+
+            foreach (var item in pattern2)
+            {
+                if (pattern1.Where(x => x.X == item.X && x.Y == item.Y && x.Z == item.Z).Count() != 0)
+                    matchCount++;
+                else
+                {
+                    unmatchedIndex.Add(index);
+                }
+
+                index++;
+            }
+
+            return matchCount == pattern2.Count;
         }
 
         #endregion

@@ -604,6 +604,8 @@
             }
         }
 
+
+        //Populates the appropriate BBM ID to the Mappere Case as per the pixel data.
         private void CheckNInsert(Dictionary<MAPPERCASE, List<int>> dict, int bbmID, MAPPERCASE mapperCase)
         {
             if (dict == null)
