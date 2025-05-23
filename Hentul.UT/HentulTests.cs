@@ -18,8 +18,6 @@ namespace Hentul.UT
         {
             rand = new Random();
         }
-
-
        
 
         [Test, Ignore("Needs Work!")]
@@ -83,7 +81,46 @@ namespace Hentul.UT
             //Create SDR
             //Compare Pixel Value with SDR Values.
         }
-        
+
+        [Test]
+        public void TestCharacterEncodings()
+        {
+            char[] carr = new char[]
+            {
+                'A',
+                'B',
+                'C',
+                'D',
+                'E',
+                'F',
+                'G',
+                'H',
+                'I',
+                'J',
+                'K',
+                'L',
+                'M',
+                'N',
+                'O',
+                'P',
+                'Q',
+                'R',
+                'S',
+                'T',
+                'U',
+                'V',
+                'W',
+                'X',
+                'Y',
+                'Z'
+            };
+
+            foreach(var character in carr)
+            {                
+                string bitString = Convert.ToString(character - 64, 2).PadLeft(8, '0'); // Ensuring 8-bit representation
+                Console.WriteLine( character + " " + bitString);
+            }
+        }
 
         [Test, Ignore("Used as Needed ! Not an actual Test!")]
         public void TestCodeChange()
