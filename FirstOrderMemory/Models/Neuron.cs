@@ -387,7 +387,7 @@
             }
             else
             {
-                if (nTypeSource.Equals(NeuronType.NORMAL) && (ProximoDistalDendriticList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA))
+                if (nTypeSource.Equals(NeuronType.NORMAL) && (ProximoDistalDendriticList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA_VISION))
                 {
 
                     Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
@@ -434,7 +434,7 @@
             }
             else
             {
-                if ((AxonalList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA))
+                if ((AxonalList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA_VISION))
                 {
                     Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);

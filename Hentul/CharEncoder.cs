@@ -17,9 +17,9 @@
 
         public Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>> Mappings { get; private set; }
         
-        public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
+        public List<KeyValuePair<int, MAPPERCASE>> FOMBBMIDS { get; private set; }
 
-        public Dictionary<MAPPERCASE, List<int>> SOMBBMIDS { get; private set; }
+        public List<KeyValuePair<int, MAPPERCASE>> SOMBBMIDS { get; private set; }
 
         List<Position_SOM> ONbits1FOM;
         List<Position_SOM> ONbits2FOM;
@@ -104,8 +104,14 @@
 
         public void Encode(char ch)
         {
-            SDR_SOM sdr = new SDR_SOM(10, 10, new List<Position_SOM>());
+            if(Mappings.TryGetValue(ch - 64, out List<KeyValuePair<int, MAPPERCASE>> bbm_mapperCases))
+            {
+                FOMBBMIDS = bbm_mapperCases;
+                SOMBBMIDS = bbm_mapperCases;
+                return;
+            }
             
-        }
+            throw new InvalidOperationException("Invalid Character passed! Mappings does not exists for : " + ch);
+        }       
     }
 }

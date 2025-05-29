@@ -1632,7 +1632,7 @@
 
                     PruneSingleNeuron(DendriticNeuron);
 
-                    if (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA)
+                    if (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA_VISION)
                     {
                         Console.WriteLine("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
                         WriteLogsToFile("ERROR :: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
@@ -2539,7 +2539,7 @@
 
             if (X == 1250 && Y == 10 && Z == 5)
             {
-                schemToLoad = SchemaType.SOMSCHEMA;
+                schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
 
             XmlDocument document = new XmlDocument();
@@ -2551,7 +2551,7 @@
                 throw new InvalidOperationException("Schema Type Cannot be Invalid");
             }
 
-            if (schemToLoad == SchemaType.SOMSCHEMA)
+            if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
             }
@@ -2699,7 +2699,7 @@
 
             if (X == 1250 && Y == 10 && Z == 5)
             {
-                schemToLoad = SchemaType.SOMSCHEMA;
+                schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
 
             XmlDocument document = new XmlDocument();
@@ -2712,7 +2712,7 @@
             }
 
 
-            if (schemToLoad == SchemaType.SOMSCHEMA)
+            if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
                 axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
             }

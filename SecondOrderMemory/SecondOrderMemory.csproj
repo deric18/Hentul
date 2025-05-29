@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Schema Docs\1K Club\Text\AxonalSchemaSOM.xml" />
+    <None Remove="Schema Docs\1K Club\Text\DendriticSchemaSOM.xml" />
     <None Remove="Schema Docs\ConnectorSchema.xml" />
     <None Remove="Schema Docs\dendriticSchema.json" />
   </ItemGroup>
@@ -15,14 +17,20 @@
     <EmbeddedResource Include="Schema Docs\1K Club\AxonalSchema-SOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\1K Club\AxonalSchema-SOM1.xml">
+    <EmbeddedResource Include="Schema Docs\1K Club\4 Connections\AxonalSchema-SOM1.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Schema Docs\1K Club\DendriticSchemaSOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\1K Club\DendriticSchemaSOM1.xml">
+    <EmbeddedResource Include="Schema Docs\1K Club\4 Connections\DendriticSchemaSOM1.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Schema Docs\1K Club\Text\AxonalSchemaSOM.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Schema Docs\1K Club\Text\DendriticSchemaSOM.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 

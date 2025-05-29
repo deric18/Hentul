@@ -235,7 +235,7 @@
 
             orchestrator.Restore();
 
-            foreach (var fom in orchestrator.fomBBM)
+            foreach (var fom in orchestrator.fomBBMV)
             {
                 for (int i = 0; i < 100; i++)
                 {
@@ -255,7 +255,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3B.Columns[i, j] == null)
+                    if (orchestrator.somBBM_L3BV.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -266,7 +266,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3A.Columns[i, j] == null)
+                    if (orchestrator.somBBM_L3AV.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }

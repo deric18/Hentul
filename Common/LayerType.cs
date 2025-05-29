@@ -11,7 +11,8 @@
     public enum SchemaType
     {
         FOMSCHEMA,
-        SOMSCHEMA,
+        SOMSCHEMA_VISION,
+        SOMSCHEMA_TEXT,
         INVALID
     }
 

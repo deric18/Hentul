@@ -46,6 +46,8 @@ namespace HentulWinforms
             BackUp = new Button();
             Restore = new Button();
             train_another_object = new Button();
+            textBox1 = new TextBox();
+            label2 = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -193,12 +195,32 @@ namespace HentulWinforms
             train_another_object.UseVisualStyleBackColor = true;
             train_another_object.Click += train_another_object_Click;
             // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(1475, 112);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(100, 23);
+            textBox1.TabIndex = 16;
+            textBox1.TextChanged += textBox1_TextChanged;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(1320, 116);
+            label2.Name = "label2";
+            label2.Size = new Size(95, 15);
+            label2.TabIndex = 17;
+            label2.Text = "Enter Icon Name";
+            label2.Click += label2_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(label2);
+            Controls.Add(textBox1);
             Controls.Add(train_another_object);
             Controls.Add(Restore);
             Controls.Add(BackUp);
@@ -245,5 +267,7 @@ namespace HentulWinforms
         private Button BackUp;
         private Button Restore;
         private Button train_another_object;
+        private TextBox textBox1;
+        private Label label2;
     }
 }

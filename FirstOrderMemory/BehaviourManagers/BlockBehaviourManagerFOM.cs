@@ -1507,7 +1507,7 @@
 
                 PruneSingleNeuron(DendriticNeuron);
 
-                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA))
+                if ((DendriticNeuron.ProximoDistalDendriticList.Count >= FOM_TOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.FOMSCHEMA) || (DendriticNeuron.ProximoDistalDendriticList.Count >= SOMLTOTAL_NEURON_CONNECTIONLIMIT && schemToLoad == SchemaType.SOMSCHEMA_VISION))
                 {
                     Console.WriteLine("ERROR :: ConnectTwoNeurons :::: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
                     WriteLogsToFile("ERROR :: ConnectTwoNeurons :::: Neuronal Distal Dendritic Connection is not reducing even after pruning!!!");
@@ -2473,7 +2473,7 @@
             }
             else if (X == 1250 && Y == 10 && Z == 5)
             {
-                schemToLoad = SchemaType.SOMSCHEMA;
+                schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
 
             XmlDocument document = new XmlDocument();
@@ -2489,7 +2489,7 @@
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchemaFOM.xml";
             }
-            else if (schemToLoad == SchemaType.SOMSCHEMA)
+            else if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
             }
@@ -2638,7 +2638,7 @@
             }
             else if (X == 1250 && Y == 10 && Z == 5)
             {
-                schemToLoad = SchemaType.SOMSCHEMA;
+                schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
 
             XmlDocument document = new XmlDocument();
@@ -2655,7 +2655,7 @@
             {
                 axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchemaFOM.xml";
             }
-            else if (schemToLoad == SchemaType.SOMSCHEMA)
+            else if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
                 axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
             }

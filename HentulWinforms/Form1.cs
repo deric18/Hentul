@@ -169,17 +169,17 @@ namespace HentulWinforms
                     imageIndex++;
 
                     if (imageIndex == totalImagesToProcess)
-                    {                        
+                    {
                         StartButton.Text = "Tet Classification Algo";
                         StartButton.Refresh();
                         orchestrator.ChangeNetworkToPredictionMode();
-                        networkMode = NetworkMode.PREDICTION;                        
+                        networkMode = NetworkMode.PREDICTION;
                         BackUp.Visible = true;
                         orchestrator.MoveCursor(LeftTop);
                     }
                     else
                     {
-                        orchestrator.DoneWithTraining();                        
+                        orchestrator.DoneWithTraining();
                         StartButton.Text = "Start Another Image";
                         StartButton.Refresh();
                     }
@@ -345,6 +345,17 @@ namespace HentulWinforms
             networkMode = NetworkMode.PREDICTION;
             orchestrator.ChangeNetworkModeToPrediction();
             StartButton_Click(sender, e);
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            var text = textBox1.Text;
+            //orchestrator.
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
