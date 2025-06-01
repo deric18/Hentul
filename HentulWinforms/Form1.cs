@@ -357,5 +357,12 @@ namespace HentulWinforms
         {
 
         }
+
+        private void button1_Click_2(object sender, EventArgs e)
+        {
+            var text = textBox1.Text;
+            orchestrator.AddNewCharacterSensationToHC(text);
+
+        }
     }
 }

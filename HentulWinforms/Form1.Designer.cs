@@ -48,6 +48,7 @@ namespace HentulWinforms
             train_another_object = new Button();
             textBox1 = new TextBox();
             label2 = new Label();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -213,12 +214,23 @@ namespace HentulWinforms
             label2.Text = "Enter Icon Name";
             label2.Click += label2_Click;
             // 
+            // button1
+            // 
+            button1.Location = new Point(1475, 177);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 18;
+            button1.Text = "Send It";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click_2;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(button1);
             Controls.Add(label2);
             Controls.Add(textBox1);
             Controls.Add(train_another_object);
@@ -269,5 +281,6 @@ namespace HentulWinforms
         private Button train_another_object;
         private TextBox textBox1;
         private Label label2;
+        private Button button1;
     }
 }

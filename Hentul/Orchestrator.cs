@@ -351,12 +351,20 @@
             }
         }
 
-        public void AddNewCharacterSensationToHC()
+        public void AddNewCharacterSensationToHC(string text)
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
             {
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
+
+            if (text.Length > 1)
+                throw new InvalidOperationException("Currently I can only Process 1 character per click!");
+
+
+            char ch = text[0];
+
+            cEncoder.Encode(ch);
 
             FireFOMsT();
 
