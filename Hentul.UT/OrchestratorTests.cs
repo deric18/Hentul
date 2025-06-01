@@ -72,8 +72,8 @@
 
                 orchestrator.RecordPixels(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
-                orchestrator.FireAll(edgedbmp1);
-                orchestrator.AddNewSensationToHC();
+                orchestrator.FireAll_V(edgedbmp1);
+                orchestrator.AddNewVisualSensationToHC();
 
             }
 
@@ -85,7 +85,7 @@
 
             orchestrator.RecordPixels();
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
-            orchestrator.FireAll(edgedbmp2);
+            orchestrator.FireAll_V(edgedbmp2);
             var result = orchestrator.Verify_Predict_HC(true, 4);
 
             Assert.AreEqual(result.X, int.MaxValue);
@@ -255,7 +255,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3BV.Columns[i, j] == null)
+                    if (orchestrator.somBBM_L3B_V.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -266,7 +266,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3AV.Columns[i, j] == null)
+                    if (orchestrator.somBBM_L3A_V.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -708,14 +708,14 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.FireAll(bp1);
-            orchestrator.AddNewSensationToHC();
+            orchestrator.FireAll_V(bp1);
+            orchestrator.AddNewVisualSensationToHC();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-            orchestrator.FireAll(bp2);
-            orchestrator.AddNewSensationToHC();
+            orchestrator.FireAll_V(bp2);
+            orchestrator.AddNewVisualSensationToHC();
 
 
             orchestrator.DoneWithTraining();
@@ -724,7 +724,7 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.FireAll(bp1);
+            orchestrator.FireAll_V(bp1);
             var pos = orchestrator.Verify_Predict_HC(true);
 
             Assert.AreEqual(loc2X, pos.X);

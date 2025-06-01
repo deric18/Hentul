@@ -6,8 +6,6 @@
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
     using System.Drawing;
-    using OpenCvSharp;
-    using OpenCvSharp.Extensions;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
@@ -59,15 +57,15 @@
 
         public FBBM[] fomBBMV { get; private set; }
 
-        public SBBM somBBM_L3BV { get; private set; }
+        public SBBM somBBM_L3B_V { get; private set; }
 
-        public SBBM somBBM_L3AV { get; private set; }
+        public SBBM somBBM_L3A_V { get; private set; }
 
         public FBBM[] fomBBMT { get; private set; }
 
-        public SBBM somBBM_L3BT { get; private set; }
+        public SBBM somBBM_L3B_T { get; private set; }
 
-        public SBBM somBBM_L3AT { get; private set; }
+        public SBBM somBBM_L3A_T { get; private set; }
 
 
         public HippocampalComplex HCAccessor { get; private set; }
@@ -102,9 +100,13 @@
 
         public NetworkMode NMode { get; set; }
 
-        List<int> firingFOM;
+        List<int> firingFOM_V;
+
+        List<int> firingFOM_T;
 
         public PixelEncoder pEncoder { get; private set; }
+
+        public CharEncoder cEncoder { get; private set; }
 
         #endregion
 
@@ -164,13 +166,13 @@
                 else
                     ImageIndex = 0;
 
-                somBBM_L3AV = new SBBM(X, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
+                somBBM_L3A_V = new SBBM(X, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
 
-                somBBM_L3BV = new SBBM(X, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
+                somBBM_L3B_V = new SBBM(X, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
 
-                somBBM_L3AT = new SBBM(200, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
+                somBBM_L3A_T = new SBBM(200, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
 
-                somBBM_L3BT = new SBBM(200, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
+                somBBM_L3B_T = new SBBM(200, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
 
                 Init();
             }
@@ -192,9 +194,11 @@
 
             MockBlockNumFires = new int[NumBBMNeededV];
 
-            firingFOM = new List<int>();
+            firingFOM_V = new List<int>();
 
-            pEncoder = new PixelEncoder(NumBBMNeededV, BlockSize);            
+            pEncoder = new PixelEncoder(NumBBMNeededV, BlockSize);
+
+            cEncoder = new CharEncoder();
 
             filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
@@ -239,13 +243,13 @@
 
             Console.WriteLine("Initing SOM Instance now ... \n");
 
-            somBBM_L3AV.Init(1);
+            somBBM_L3A_V.Init(1);
 
-            somBBM_L3BV.Init(1);
+            somBBM_L3B_V.Init(1);
 
-            somBBM_L3AT.Init(1);
+            somBBM_L3A_T.Init(1);
 
-            somBBM_L3BT.Init(1);
+            somBBM_L3B_T.Init(1);
 
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
 
@@ -289,12 +293,12 @@
         }
 
         /// Takes in a bmp and preps and fires all FOM & SOM's.
-        public void FireAll(Bitmap greyScalebmp)
+        public void FireAll_V(Bitmap greyScalebmp)
         {
 
             pEncoder.ParseBitmap(greyScalebmp);
 
-            FireFOMs();
+            FireFOMsV();
 
             if (pEncoder.somPositions.Count != 0)
             {
@@ -305,24 +309,24 @@
                 }
 
                 // L3B fire
-                somBBM_L3BV.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), CycleNum);
+                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), CycleNum);
 
                 //L3A fire
                 SDR_SOM fom_SDR = GetSdrSomFromFOMs();
-                somBBM_L3AV.Fire(fom_SDR, CycleNum);
+                somBBM_L3A_V.Fire(fom_SDR, CycleNum);
             }
             else
             {
-                somBBM_L3BV.FireBlank(CycleNum);
-                somBBM_L3AV.FireBlank(CycleNum);
+                somBBM_L3B_V.FireBlank(CycleNum);
+                somBBM_L3A_V.FireBlank(CycleNum);
             }
 
             pEncoder.clean();
-            firingFOM.Clear();
+            firingFOM_V.Clear();
         }
 
         //Trains the new object on to HC
-        public void AddNewSensationToHC()
+        public void AddNewVisualSensationToHC()
         {
 
             if (!NMode.Equals(NetworkMode.TRAINING))
@@ -332,7 +336,7 @@
 
             SDR_SOM fom_SDR = GetSdrSomFromFOMs();
 
-            var som_SDR = somBBM_L3BV.GetAllNeuronsFiringLatestCycle(CycleNum);
+            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
 
             if (som_SDR != null)
             {
@@ -347,6 +351,40 @@
             }
         }
 
+        public void AddNewCharacterSensationToHC()
+        {
+            if (!NMode.Equals(NetworkMode.TRAINING))
+            {
+                throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
+            }
+
+            FireFOMsT();
+
+            if (cEncoder.somPositions.Count != 0)
+            {
+                if (cEncoder.somPositions.Count > 125)
+                {
+                    WriteLogsToFile("Layer 3B : SomPosition Write count " + cEncoder.somPositions.Count);
+                    bool breakpoint = true;
+                }
+
+                // L3B fire
+                somBBM_L3B_T.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), CycleNum);
+
+                // L3A fire
+                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+                somBBM_L3A_T.Fire(fom_SDR, CycleNum);
+            }
+            else
+            {
+                somBBM_L3B_T.FireBlank(CycleNum);
+                somBBM_L3A_T.FireBlank(CycleNum);
+            }
+
+            cEncoder.Clean();
+            firingFOM_T.Clear();
+        }
+
         public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
         {
             Position2D motorOutput = null;
@@ -358,8 +396,8 @@
             }
 
             // If any output from HC execute the location output if NOT then take the standar default output.                
-            var som_SDR = somBBM_L3BV.GetAllNeuronsFiringLatestCycle(CycleNum);
-            var predictedSDR = somBBM_L3BV.GetPredictedSDRForNextCycle(CycleNum + 1);
+            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
+            var predictedSDR = somBBM_L3B_V.GetPredictedSDRForNextCycle(CycleNum + 1);
 
 
             if (som_SDR != null)
@@ -367,7 +405,7 @@
                 var firingSensei = pEncoder.GetSensationLocationFromSDR(som_SDR, point);
                 var predictedSensei = pEncoder.GetSensationLocationFromSDR(predictedSDR, point);
 
-                List<string> predictedLabels = somBBM_L3BV.GetSupportedLabels();
+                List<string> predictedLabels = somBBM_L3B_V.GetSupportedLabels();
 
                 if (legacyPipeline)
                 {
@@ -399,8 +437,8 @@
             NMode = NetworkMode.PREDICTION;
             HCAccessor.DoneWithTraining();
             HCAccessor.SetNetworkModeToPrediction();
-            somBBM_L3BV.ChangeNetworkModeToPrediction();
-            somBBM_L3AV.ChangeNetworkModeToPrediction();
+            somBBM_L3B_V.ChangeNetworkModeToPrediction();
+            somBBM_L3A_V.ChangeNetworkModeToPrediction();
         }
 
         //Gets the current SDR and next cycle predited SDR from classifier layer
@@ -409,8 +447,8 @@
 
             Sensation_Location sensei = null, predictedSensei = null;
 
-            var som_SDR = somBBM_L3BV.GetAllNeuronsFiringLatestCycle(CycleNum);
-            var predictedSDR = somBBM_L3BV.GetPredictedSDRForNextCycle(CycleNum + 1);
+            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
+            var predictedSDR = somBBM_L3B_V.GetPredictedSDRForNextCycle(CycleNum + 1);
 
             if (som_SDR != null)
             {
@@ -461,7 +499,7 @@
                 ParseNFireBitmap(edgedbmp);
 
                 pEncoder.clean();
-                firingFOM.Clear();
+                firingFOM_V.Clear();
 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
 
@@ -711,8 +749,8 @@
 
         #region Helper Methods
 
-               
-        private void FireFOMs()
+
+        private void FireFOMsV()
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
             {
@@ -723,8 +761,8 @@
                             foreach (var bbmID in kvp.Value)
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum); ; 
-                                firingFOM.Add(bbmID);
+                                fomBBMV[bbmID].Fire(poses, CycleNum);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -734,7 +772,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -745,7 +783,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -755,7 +793,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -765,7 +803,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -775,7 +813,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -785,7 +823,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -795,7 +833,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -805,7 +843,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -815,7 +853,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -825,7 +863,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -835,7 +873,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -845,7 +883,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -855,7 +893,7 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
@@ -865,13 +903,138 @@
                             {
                                 var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
                                 fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM.Add(bbmID);
+                                firingFOM_V.Add(bbmID);
                             }
                         }
                         break;
                     default:
                         {
                             throw new NotImplementedException();
+                        }
+                }
+            }
+        }
+
+
+        private void FireFOMsT()
+        {
+            int bbmID = 0;
+
+            foreach (var kvp in cEncoder.FOMBBMIDS)
+            {
+                bbmID = kvp.Key;
+
+                switch (kvp.Value)
+                {
+                    case MAPPERCASE.ALL:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, kvp.Key);
+                            fomBBMT[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOTHREEE:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREEFOUR:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOFOUR:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREEFOUR:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONETWO:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREE:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONEFOUR:
+                        {
+
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREE:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.TWOFOUR:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.THREEFOUR:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.ONE:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.TWO:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.THREE:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    case MAPPERCASE.FOUR:
+                        {
+                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
+                            fomBBMV[bbmID].Fire(poses, CycleNum);
+                            firingFOM_T.Add(bbmID);
+                        }
+                        break;
+                    default:
+                        {
+                            throw new InvalidOperationException("Invalid Mapper Case!!");
                         }
                 }
             }
@@ -940,7 +1103,7 @@
 
         private SDR_SOM GetSdrSomFromFOMs()
         {
-            if (firingFOM.Count == 0)
+            if (firingFOM_V.Count == 0)
             {
                 int exception = 1;
             }
@@ -948,7 +1111,7 @@
             // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
             List<Position_SOM> posList = new List<Position_SOM>();
 
-            foreach (var fomID in firingFOM)
+            foreach (var fomID in firingFOM_V)
             {
                 posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
@@ -958,7 +1121,7 @@
             {
                 int count = 0;
 
-                foreach (var fomID in firingFOM)
+                foreach (var fomID in firingFOM_V)
                 {
                     count += fomBBMV[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
                 }
@@ -1192,8 +1355,8 @@
         {
             NMode = NetworkMode.PREDICTION;
             HCAccessor.SetNetworkModeToPrediction();
-            somBBM_L3BV.ChangeNetworkModeToPrediction();
-            somBBM_L3AV.ChangeNetworkModeToPrediction();
+            somBBM_L3B_V.ChangeNetworkModeToPrediction();
+            somBBM_L3A_V.ChangeNetworkModeToPrediction();
         }
 
         public void ChangeNetworkModeToTraining()
@@ -1239,9 +1402,9 @@
                 fomBBMV[i].BackUp(i.ToString() + ".json");
             }
 
-            somBBM_L3BV.BackUp("SOML3B.json");
+            somBBM_L3B_V.BackUp("SOML3B.json");
 
-            somBBM_L3AV.BackUp("SOML3A.json");
+            somBBM_L3A_V.BackUp("SOML3A.json");
 
             HCAccessor.Backup();
 
@@ -1260,9 +1423,9 @@
                 fomBBMV[i] = FBBM.Restore(i.ToString(), LayerType.Layer_4);
             }
 
-            somBBM_L3BV = SBBM.Restore("SOML3B", LayerType.Layer_3B);
+            somBBM_L3B_V = SBBM.Restore("SOML3B", LayerType.Layer_3B);
 
-            somBBM_L3AV = SBBM.Restore("SOML3A", LayerType.Layer_3A);
+            somBBM_L3A_V = SBBM.Restore("SOML3A", LayerType.Layer_3A);
 
             _orchestrator.HCAccessor = HippocampalComplex.Restore();
         }
