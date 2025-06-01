@@ -218,11 +218,11 @@ namespace HentulWinforms
             // 
             button1.Location = new Point(1475, 177);
             button1.Name = "button1";
-            button1.Size = new Size(75, 23);
+            button1.Size = new Size(108, 23);
             button1.TabIndex = 18;
-            button1.Text = "Send It";
+            button1.Text = "Train Words";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click_2;
+            button1.Click += button1_Click_3;
             // 
             // Form1
             // 

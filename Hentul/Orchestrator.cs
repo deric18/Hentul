@@ -141,6 +141,8 @@
 
             fomBBMV = new FBBM[NumBBMNeededV];
 
+            fomBBMT = new FBBM[NumBBMNeededT];
+
             X = 1250;
 
             NumColumns = 10;
@@ -159,6 +161,11 @@
                 for (int i = 0; i < NumBBMNeededV; i++)
                 {
                     fomBBMV[i] = new FBBM(NumColumns, NumColumns, Z, LayerType.Layer_4, Common.LogMode.None);
+                }
+
+                for (int i = 0; i < NumBBMNeededT; i++)
+                {
+                    fomBBMT[i] = new FBBM(NumColumns, NumColumns, Z, LayerType.Layer_4, Common.LogMode.None);
                 }
 
                 if (isMock)
@@ -195,6 +202,8 @@
             MockBlockNumFires = new int[NumBBMNeededV];
 
             firingFOM_V = new List<int>();
+
+            firingFOM_T = new List<int>();
 
             pEncoder = new PixelEncoder(NumBBMNeededV, BlockSize);
 
@@ -292,7 +301,7 @@
                 bmp.Save(filename, ImageFormat.Jpeg);
         }
 
-        /// Takes in a bmp and preps and fires all FOM & SOM's.
+        /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
         public void FireAll_V(Bitmap greyScalebmp)
         {
 
@@ -312,7 +321,7 @@
                 somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), CycleNum);
 
                 //L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+                SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
                 somBBM_L3A_V.Fire(fom_SDR, CycleNum);
             }
             else
@@ -321,48 +330,19 @@
                 somBBM_L3A_V.FireBlank(CycleNum);
             }
 
-            pEncoder.clean();
+            pEncoder.Clean();
             firingFOM_V.Clear();
         }
 
-        //Trains the new object on to HC
-        public void AddNewVisualSensationToHC()
+        /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
+        public void FireAll_T(char ch)
         {
 
-            if (!NMode.Equals(NetworkMode.TRAINING))
+            if (ch < 65 || ch > 90)
             {
-                throw new InvalidOperationException("INVALID State Management!");
+                throw new InvalidOperationException("Character is not a valid Upper Case Letter!");
+
             }
-
-            SDR_SOM fom_SDR = GetSdrSomFromFOMs();
-
-            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
-
-            if (som_SDR != null)
-            {
-
-                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = pEncoder.GetSensationLocationFromSDR(som_SDR, point);
-
-                if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
-                {
-                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
-                }
-            }
-        }
-
-        public void AddNewCharacterSensationToHC(string text)
-        {
-            if (!NMode.Equals(NetworkMode.TRAINING))
-            {
-                throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
-            }
-
-            if (text.Length > 1)
-                throw new InvalidOperationException("Currently I can only Process 1 character per click!");
-
-
-            char ch = text[0];
 
             cEncoder.Encode(ch);
 
@@ -380,7 +360,7 @@
                 somBBM_L3B_T.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), CycleNum);
 
                 // L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMs();
+                SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
                 somBBM_L3A_T.Fire(fom_SDR, CycleNum);
             }
             else
@@ -391,6 +371,54 @@
 
             cEncoder.Clean();
             firingFOM_T.Clear();
+        }
+
+        //Trains the new object on to HC
+        public void AddNewVisualSensationToHC()
+        {
+            if (!NMode.Equals(NetworkMode.TRAINING))
+            {
+                throw new InvalidOperationException("INVALID State Management!");
+            }
+
+            SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
+
+            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
+
+            if (som_SDR != null)
+            {
+                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                var firingSensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+
+                if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
+                {
+                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
+                }
+            }
+        }
+
+        public void AddNewCharacterSensationToHC()
+        {
+            if (!NMode.Equals(NetworkMode.TRAINING))
+            {
+                throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
+            }
+
+            SDR_SOM fom_SDR = GetSdrSomFromFOMsT();
+
+            var som_SDR = somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(CycleNum);
+
+            if (som_SDR != null)
+            {
+                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                var firingSensei = cEncoder.GetSenseiFromSDR_T(som_SDR, point);
+
+                if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
+                {
+                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
+                }
+            }
+
         }
 
         public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
@@ -410,8 +438,8 @@
 
             if (som_SDR != null)
             {
-                var firingSensei = pEncoder.GetSensationLocationFromSDR(som_SDR, point);
-                var predictedSensei = pEncoder.GetSensationLocationFromSDR(predictedSDR, point);
+                var firingSensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+                var predictedSensei = pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
 
                 List<string> predictedLabels = somBBM_L3B_V.GetSupportedLabels();
 
@@ -460,12 +488,12 @@
 
             if (som_SDR != null)
             {
-                sensei = pEncoder.GetSensationLocationFromSDR(som_SDR, point);
+                sensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
             }
 
             if (predictedSDR != null)
             {
-                predictedSensei = pEncoder.GetSensationLocationFromSDR(predictedSDR, point);
+                predictedSensei = pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
             }
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
@@ -506,7 +534,7 @@
 
                 ParseNFireBitmap(edgedbmp);
 
-                pEncoder.clean();
+                pEncoder.Clean();
                 firingFOM_V.Clear();
 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
@@ -757,7 +785,6 @@
 
         #region Helper Methods
 
-
         private void FireFOMsV()
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
@@ -922,7 +949,6 @@
                 }
             }
         }
-
 
         private void FireFOMsT()
         {
@@ -1109,7 +1135,7 @@
 
         public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
 
-        private SDR_SOM GetSdrSomFromFOMs()
+        private SDR_SOM GetSdrSomFromFOMsV()
         {
             if (firingFOM_V.Count == 0)
             {
@@ -1143,6 +1169,45 @@
             if (posList != null || posList.Count != 0)
             {
                 return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
+            }
+
+            throw new NullReferenceException(" FOM BBM returned empty position list ");
+        }
+
+        private SDR_SOM GetSdrSomFromFOMsT()
+        {
+            if (firingFOM_T.Count == 0)
+            {
+                int exception = 1;
+            }
+
+            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
+            List<Position_SOM> posList = new List<Position_SOM>();
+
+            foreach (var fomID in firingFOM_T)
+            {
+                posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+            }
+
+
+            if (logMode == Common.LogMode.BurstOnly)
+            {
+                int count = 0;
+
+                foreach (var fomID in firingFOM_T)
+                {
+                    count += fomBBMT[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
+                }
+
+                if (count == fomBBMT.Count() * Z)
+                {
+                    WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
+                }
+            }
+
+            if (posList != null || posList.Count != 0)
+            {
+                return new SDR_SOM(200, 10, posList, iType.SPATIAL);
             }
 
             throw new NullReferenceException(" FOM BBM returned empty position list ");

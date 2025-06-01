@@ -2541,6 +2541,10 @@
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
+            else if(X == 200 && Y == 10 && Z == 5)
+            {
+                schemToLoad = SchemaType.SOMSCHEMA_TEXT;
+            }
 
             XmlDocument document = new XmlDocument();
 
@@ -2554,6 +2558,10 @@
             if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
+            }
+            else if(schemToLoad == SchemaType.SOMSCHEMA_TEXT)
+            {
+                dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\Hentul\\\\SecondOrderMemory\\\\Schema Docs\\\\1K Club\\\\Text\\\\DendriticSchemaSOM.xml";
             }
 
             if (File.Exists(dendriteDocumentPath) == false)
@@ -2701,6 +2709,10 @@
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
+            else if(X == 200 &&  Y == 10 && Z == 5)
+            {
+                schemToLoad = SchemaType.SOMSCHEMA_TEXT;
+            }
 
             XmlDocument document = new XmlDocument();
 
@@ -2715,6 +2727,10 @@
             if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
                 axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
+            }
+            else if (schemToLoad == SchemaType.SOMSCHEMA_TEXT)
+            {
+                axonalDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\Hentul\\\\SecondOrderMemory\\\\Schema Docs\\\\1K Club\\\\Text\\\\AxonalSchemaSOM.xml";
             }
 
             if (!File.Exists(axonalDocumentPath))

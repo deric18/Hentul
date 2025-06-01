@@ -348,21 +348,35 @@ namespace HentulWinforms
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            var text = textBox1.Text;
-            //orchestrator.
-        }
+        { }
 
         private void label2_Click(object sender, EventArgs e)
+        { }        
+
+        private void button1_Click_3(object sender, EventArgs e)
         {
+            List<string> wordsToTrain = new List<string>()
+            {
+                "MyComputer",
+                "RecycleBin",
+                "GitBash",
+                "QBSStudio",
+                "Hentul"
+            };
 
-        }
 
-        private void button1_Click_2(object sender, EventArgs e)
-        {
-            var text = textBox1.Text;
-            orchestrator.AddNewCharacterSensationToHC(text);
+            foreach (var word in wordsToTrain)
+            {
+                orchestrator.ChangeNetworkModeToTraining();
 
+                foreach (var ch in word)
+                {
+                    orchestrator.FireAll_T(ch);
+                    orchestrator.AddNewCharacterSensationToHC();
+                }
+
+                orchestrator.DoneWithTraining();
+            }
         }
     }
 }

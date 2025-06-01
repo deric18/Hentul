@@ -182,8 +182,6 @@
         {
             ConvertUnrecognisedObjectToRecognisedObject();
 
-
-
             CurrentObject = new UnrecognisedEntity();
 
             if (CurrentObject.Label == string.Empty)

@@ -633,7 +633,7 @@
         private bool CheckIfColorIsBlack(Color color)
             => (color.R < 10 && color.G < 10 && color.B < 10);
 
-        public void clean()
+        public void Clean()
         {
             FOMBBMIDS.Clear();
             SOMBBMIDS.Clear();
@@ -648,7 +648,7 @@
         /// </summary>
         /// <param name="sdr_SOM">Incoming SDR for SOM Layer</param>
         /// <returns> A Sensaei that represents the felt Sensation at the location represented by the cursor.</returns>
-        public Sensation_Location GetSensationLocationFromSDR(SDR_SOM sdr_SOM, Orchestrator.POINT point)
+        public Sensation_Location GetSenseiFromSDR_V(SDR_SOM sdr_SOM, Orchestrator.POINT point)
         {
             if (sdr_SOM.Length < 1000)
             {
@@ -664,8 +664,8 @@
             int iterator = 0;
 
             Position2D position = null;
-            KeyValuePair<int, List<Position2D>> keyValuePair = new KeyValuePair<int, List<Position2D>>();
 
+            KeyValuePair<int, List<Position2D>> keyValuePair = new KeyValuePair<int, List<Position2D>>();
 
             foreach (var pos in sdr_SOM.ActiveBits)
             {
@@ -673,12 +673,12 @@
 
                 if (bbmID > 99 || bbmID < 0)
                 {
-                    // BUG : need to figgure out why SOM can have 1000 active bit
+                    // BUG : need to figure out why SOM can have 1000 active bit
                     //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");                    
                     continue;
                 }
 
-                position = GetPositionForActiveBit(point, pos.X);                
+                position = GetPositionForActiveBit(point, pos.X);
 
                 //position = GetPositionForBBMID(bbmID, point);
 
@@ -688,6 +688,56 @@
                 }
                 else
                 {                    
+                    KeyValuePair<int, List<Position2D>> sensation = new KeyValuePair<int, List<Position2D>>(
+                        bbmID,
+                        new List<Position2D>() { new Position2D(pos.X, pos.Y) });
+
+                    sensation_Location.AddNewSensationAtThisLocation(position.ToString(), sensation);
+                }
+            }
+
+            return sensation_Location;
+        }
+
+        public Sensation_Location GetSenseiFromSDR_T(SDR_SOM sdr_SOM, Orchestrator.POINT point)
+        {
+            if (sdr_SOM.Length < 200)
+            {
+                int exception = 1;
+                throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
+            }
+
+            Sensation_Location sensation_Location = new Sensation_Location(new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>(), new Position2D(point.X, point.Y));
+
+            if (sdr_SOM.ActiveBits.Count == 0)
+                return sensation_Location;
+
+            int iterator = 0;
+
+            Position2D position = null;
+            KeyValuePair<int, List<Position2D>> keyValuePair = new KeyValuePair<int, List<Position2D>>();
+
+            foreach (var pos in sdr_SOM.ActiveBits)
+            {
+                int bbmID = pos.X / 10;
+
+                if (bbmID > 99 || bbmID < 0)
+                {
+                    // BUG : need to figure out why SOM can have 1000 active bit
+                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");                    
+                    continue;
+                }
+
+                position = GetPositionForActiveBit(point, pos.X);
+
+                //position = GetPositionForBBMID(bbmID, point);
+
+                if (sensation_Location.sensLoc.TryGetValue(position?.ToString(), out KeyValuePair<int, List<Position2D>> kvp))
+                {
+                    kvp.Value.Add(new Position2D(pos.X, pos.Y));
+                }
+                else
+                {
                     KeyValuePair<int, List<Position2D>> sensation = new KeyValuePair<int, List<Position2D>>(
                         bbmID,
                         new List<Position2D>() { new Position2D(pos.X, pos.Y) });

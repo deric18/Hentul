@@ -35,6 +35,7 @@
             NumBBMPerChar = 4;            
             FOMBBMIDS = new();
             SOMBBMIDS = new();
+            somPositions = new();
 
             PerformMappings();
 
@@ -108,6 +109,7 @@
 
         public void Encode(char ch)
         {
+            
             if(Mappings.TryGetValue(ch - 64, out List<KeyValuePair<int, MAPPERCASE>> bbm_mapperCases))
             {
                 FOMBBMIDS = bbm_mapperCases;
