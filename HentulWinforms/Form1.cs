@@ -372,6 +372,8 @@ namespace HentulWinforms
                 foreach (var ch in word)
                 {
                     orchestrator.FireAll_T(ch);
+
+                    var sensation  = 
                     orchestrator.AddNewCharacterSensationToHC();
                 }
 

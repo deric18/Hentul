@@ -4,7 +4,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
     using Common;
 
-    public class RecognisedEntity
+    public class RecognisedVisualEntity : Entity
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
 
@@ -25,7 +25,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         private string failureReportfileName;
 
-        public RecognisedEntity(string name)
+        public RecognisedVisualEntity(string name)
         {
             Label = name;
             ObjectSnapshot = new List<Sensation_Location>();
@@ -34,7 +34,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             frame = null;
         }
 
-        public RecognisedEntity(UnrecognisedEntity unrec)
+        public RecognisedVisualEntity(UnrecognisedEntity unrec)
         {
             Label = unrec.Label;
             ObjectSnapshot = unrec.ObjectSnapshot;

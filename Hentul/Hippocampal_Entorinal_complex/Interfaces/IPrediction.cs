@@ -4,7 +4,7 @@
 
     public interface IPrediction
     {
-        public RecognisedEntity Predict(Sensation_Location sensation_location,
+        public RecognisedVisualEntity Predict(Sensation_Location sensation_location,
                                         List<string> predictedLabels,
                                         Sensation_Location? nextPrediction);   
     }

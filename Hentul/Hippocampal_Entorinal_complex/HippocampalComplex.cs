@@ -11,7 +11,7 @@
 
         public Graph Graph { get; private set; }
 
-        public Dictionary<string, RecognisedEntity> Objects { get; private set; }
+        public Dictionary<string, RecognisedVisualEntity> Objects { get; private set; }
 
         public UnrecognisedEntity? CurrentObject { get; private set; }
 
@@ -21,11 +21,11 @@
 
         private NetworkMode networkMode;
 
-        private List<RecognisedEntity> matchingObjectList;
+        private List<RecognisedVisualEntity> matchingObjectList;
 
         private Position _cachedPosition;
 
-        private RecognisedEntity currentmatchingObject;
+        private RecognisedVisualEntity currentmatchingObject;
 
         public RecognitionState ObjectState { get; private set; }
 
@@ -44,13 +44,13 @@
         public HippocampalComplex(string firstLabel, bool Ismock = false, NetworkMode nMode = NetworkMode.TRAINING)
         {
             Graph = Graph.GetInstance();
-            Objects = new Dictionary<string, RecognisedEntity>();
+            Objects = new Dictionary<string, RecognisedVisualEntity>();
             CurrentObject = new UnrecognisedEntity();
             CurrentObject.Label = firstLabel;
             isMock = Ismock;
             networkMode = nMode;
             NumberOfITerationsToConfirmation = 6;
-            matchingObjectList = new List<RecognisedEntity>();
+            matchingObjectList = new List<RecognisedVisualEntity>();
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
             currentIterationToConfirmation = 0;
@@ -74,7 +74,7 @@
         #region PREDICTION
 
 
-        public bool AddNewSensationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
+        public bool AddNewSensationLocationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
         {
             if (networkMode == NetworkMode.TRAINING)
             {                
@@ -83,6 +83,17 @@
             }
 
             return false;   
+        }
+
+        public bool AddNewSensationToObject(Sensation sensation, Sensation_Location? prediction = null)
+        {
+            if (networkMode == NetworkMode.TRAINING)
+            {
+                // Need to include logic for what object is currently being sensed and 
+                return CurrentObject.AddNewSenei(sensation);
+            }
+
+            return false;
         }
 
         public Position2D VerifyObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false, uint iterationToConfirmation = 10)
@@ -155,14 +166,14 @@
         }
 
 
-        private RecognisedEntity GetRecognisedEntityFromList(string label)
+        private RecognisedVisualEntity GetRecognisedEntityFromList(string label)
         {
             if (Objects.Count == 0)
             {
                 throw new InvalidOperationException("Cannot Predict with 0 Trained Objects!");
             }
 
-            RecognisedEntity matchedEntity = null;
+            RecognisedVisualEntity matchedEntity = null;
 
             foreach (var kvp in Objects)
             {
@@ -194,7 +205,7 @@
 
         #region UTILITY & MOCK 
 
-        public RecognisedEntity GetCurrentPredictedObject()
+        public RecognisedVisualEntity GetCurrentPredictedObject()
         {
             if (ObjectState == RecognitionState.Recognised)
             {
@@ -239,7 +250,7 @@
         public bool IsObjectIdentified => CurrentObject == null ? false : CurrentObject.IsObjectIdentified;
 
 
-        public void LoadMockObject(List<RecognisedEntity> mockrecgs, bool doneTraining)
+        public void LoadMockObject(List<RecognisedVisualEntity> mockrecgs, bool doneTraining)
         {
             if (isMock == true)
             {
@@ -328,16 +339,16 @@
 
         #region PRIVATE HELPER METHODS        
 
-        private List<RecognisedEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
+        private List<RecognisedVisualEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {
-            List<RecognisedEntity> potentialMatches = null;
+            List<RecognisedVisualEntity> potentialMatches = null;
 
             if (sensei.sensLoc.Count == 0)
             {
                 return potentialMatches;
             }
 
-            potentialMatches = new List<RecognisedEntity>();
+            potentialMatches = new List<RecognisedVisualEntity>();
             Tuple<int, int> tuple;
 
             foreach (var obj in Objects.Values)
@@ -372,7 +383,7 @@
                 imageIndex++;
             }
 
-            RecognisedEntity newObject = new RecognisedEntity(CurrentObject);
+            RecognisedVisualEntity newObject = new RecognisedVisualEntity(CurrentObject);
 
             newObject.DoneTraining();
 
@@ -448,7 +459,7 @@
             return match.GetTotalMatchPercentage() > 50 ? true : false;
         }
 
-        private int GetMatchingObjectIndexFromList(List<RecognisedEntity> matchingList, RecognisedEntity matchingObject)
+        private int GetMatchingObjectIndexFromList(List<RecognisedVisualEntity> matchingList, RecognisedVisualEntity matchingObject)
         {
             if (matchingList?.Count == 0 || matchingObject == null)
             {

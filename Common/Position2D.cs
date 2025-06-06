@@ -4,6 +4,9 @@
     {
         public int X { get; private set; }
         public int Y { get; private set; }
+
+        public Position2D() { }
+
         public Position2D(int x, int y, int z = 0)
         {
             X = x;

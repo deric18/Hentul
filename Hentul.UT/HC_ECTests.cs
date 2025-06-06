@@ -22,7 +22,7 @@
         [Test]
         public void TestPredictObject1PositiveTest()
         {
-            List<RecognisedEntity> entities = GenerateRecognisedEntity();
+            List<RecognisedVisualEntity> entities = GenerateRecognisedEntity();
 
             List<Position2D> activeBits1 = new List<Position2D>()
                     {
@@ -85,7 +85,7 @@
         [Test]
         public void TestVerifyObjectSensei()
         {
-            List<RecognisedEntity> entities = GenerateRecognisedEntity();
+            List<RecognisedVisualEntity> entities = GenerateRecognisedEntity();
 
             List<Position2D> activeBits1 = new List<Position2D>()
                     {
@@ -136,11 +136,11 @@
         [Test]
         public void TestVerify()
         {
-            List<RecognisedEntity> entities = TestUtils.GenerateRandomEntities(4);
+            List<RecognisedVisualEntity> entities = TestUtils.GenerateRandomEntities(4);
 
             hc.LoadMockObject(entities, true);
 
-            RecognisedEntity entity = entities[0];            
+            RecognisedVisualEntity entity = entities[0];            
 
             entity.Verify(null, true, 6);            
         }
@@ -149,7 +149,7 @@
         [Test, Ignore("Needs a lot more Work")]
         public void TestPreditObject2PositiveTest()
         {
-            List<RecognisedEntity> entities = TestUtils.GenerateRandomEntities(4);
+            List<RecognisedVisualEntity> entities = TestUtils.GenerateRandomEntities(4);
 
             hc.LoadMockObject(entities, true);
 
@@ -167,13 +167,13 @@
             Assert.IsTrue(positions.Count != 0);
         }
 
-        private Sensation_Location GrabRandomSenseiFromEntity(RecognisedEntity entity)
+        private Sensation_Location GrabRandomSenseiFromEntity(RecognisedVisualEntity entity)
         {
             return entity.ObjectSnapshot[rand.Next(0, entity.ObjectSnapshot.Count)];
         }
         
         
-        private List<RecognisedEntity> GenerateRecognisedEntity()
+        private List<RecognisedVisualEntity> GenerateRecognisedEntity()
         {
             List<Position2D> activeBits1 = new List<Position2D>()
                     {
@@ -237,9 +237,9 @@
             dict3.Add("567-8963-0", kvp4);
             dict3.Add("345-4567-0", kvp1);
 
-            List<RecognisedEntity> recgs = new List<RecognisedEntity>()
+            List<RecognisedVisualEntity> recgs = new List<RecognisedVisualEntity>()
              {
-                 new RecognisedEntity("Banana")
+                 new RecognisedVisualEntity("Banana")
                  {
                      ObjectSnapshot = new List<Sensation_Location>
                      {
@@ -247,14 +247,14 @@
                         new Sensation_Location(dict2, new Position2D(111, 888))
                      }
                  },
-                 new RecognisedEntity("Ananas")
+                 new RecognisedVisualEntity("Ananas")
                  {
                      ObjectSnapshot = new List<Sensation_Location>
                      {
                         new Sensation_Location(dict2, new Position2D(111, 888))
                      }
                  },
-                 new RecognisedEntity("Watermelon")
+                 new RecognisedVisualEntity("Watermelon")
                  {
                      ObjectSnapshot = new List<Sensation_Location>
                      {

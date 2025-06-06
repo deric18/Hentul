@@ -1,6 +1,7 @@
 ﻿namespace Hentul
 {
     using Common;
+    using Hentul.Hippocampal_Entorinal_complex;
 
     /// <summary>
     /// An Encoder typically takes in human readable input like a pixel value or character in this case and converts it into a machine readable input format like SDR
@@ -118,6 +119,42 @@
             }
             
             throw new InvalidOperationException("Invalid Character passed! Mappings does not exists for : " + ch);
+        }
+
+        public Sensation GetSenseiFromSDR_T(SDR_SOM sdr_SOM)
+        {
+            if (sdr_SOM.Length < 200)
+            {
+                int exception = 1;
+                throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
+            }
+
+            Sensation sensation = new();
+
+            if (sdr_SOM.ActiveBits.Count == 0)
+                return sensation;
+
+            int iterator = 0;
+
+            Position2D position = null;
+
+            KeyValuePair<int, List<Position2D>> keyValuePair = new KeyValuePair<int, List<Position2D>>();
+
+            foreach (var pos in sdr_SOM.ActiveBits)
+            {
+                int bbmID = pos.X / 10;
+
+                if (bbmID > 4 || bbmID < 0)
+                {
+                    // BUG : need to figure out why SOM can have 1000 active bit
+                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+                }
+                                
+
+
+            }
+
+            return sensation;
         }
 
         public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, int bbmID)

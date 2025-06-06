@@ -47,7 +47,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         #region PUBLIC API        
 
-        public List<Position2D> CompareTwoObjects(RecognisedEntity first, RecognisedEntity second)
+        public List<Position2D> CompareTwoObjects(RecognisedVisualEntity first, RecognisedVisualEntity second)
         {
             List<Position2D> toReturn;
 
@@ -68,9 +68,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return toReturn;
         }
 
-        public List<Position2D> GetFavouritePositionsForObject(RecognisedEntity entity) => entity.FavouritePositions;                    
+        public List<Position2D> GetFavouritePositionsForObject(RecognisedVisualEntity entity) => entity.FavouritePositions;                    
 
-        public bool LoadObject(RecognisedEntity entity)
+        public bool LoadObject(RecognisedVisualEntity entity)
         {
             if (entity.ObjectSnapshot?.Count == 0)
                 return false;
@@ -98,7 +98,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return true;
         }
 
-        public bool UnloadObject(RecognisedEntity entity)
+        public bool UnloadObject(RecognisedVisualEntity entity)
         {
             if (entity.ObjectSnapshot?.Count == 0 || entity.Label == string.Empty)
                 return false;

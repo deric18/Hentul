@@ -44,7 +44,7 @@ namespace Hentul
 
         public Position PlaceCell { get; private set; }
 
-        Dictionary<string, RecognisedEntity> Objects { get; set; }
+        Dictionary<string, RecognisedVisualEntity> Objects { get; set; }
 
         public HCCState State { get; set; }
 
@@ -66,7 +66,7 @@ namespace Hentul
 
         public Orchestrator2(Position position)
         {
-            Objects = new Dictionary<string, RecognisedEntity>();
+            Objects = new Dictionary<string, RecognisedVisualEntity>();
             PlaceCell = position;
             BoundaryCells = new Position[4];
 

@@ -18,15 +18,15 @@ namespace Hentul.UT
 
         static int objectLabelIndex = 0;
 
-        public static List<RecognisedEntity> GenerateRandomEntities(int num)
+        public static List<RecognisedVisualEntity> GenerateRandomEntities(int num)
         {
-            List<RecognisedEntity> recEnList = new List<RecognisedEntity>();
+            List<RecognisedVisualEntity> recEnList = new List<RecognisedVisualEntity>();
 
-            RecognisedEntity entity;
+            RecognisedVisualEntity entity;
 
             for (int i = 0; i < num; i++)
             {
-                entity = new RecognisedEntity(GenerateRandomObjectLabels());
+                entity = new RecognisedVisualEntity(GenerateRandomObjectLabels());
 
                 for (int j = 0; j < 10; j++)
                     entity.ObjectSnapshot.Add(GenerateRandomSenation());

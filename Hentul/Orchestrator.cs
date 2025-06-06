@@ -390,7 +390,7 @@
                 //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
                 var firingSensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
 
-                if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
+                if (HCAccessor.AddNewSensationLocationToObject(firingSensei) == false)
                 {
                     throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
                 }
@@ -411,14 +411,13 @@
             if (som_SDR != null)
             {
                 //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = cEncoder.GetSenseiFromSDR_T(som_SDR, point);
+                var firingSensei = cEncoder.GetSenseiFromSDR_T(som_SDR);
 
                 if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
                 {
                     throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
                 }
             }
-
         }
 
         public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
@@ -1131,7 +1130,7 @@
             return newBitmap;
         }
 
-        public RecognisedEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
+        public RecognisedVisualEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
         public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
 

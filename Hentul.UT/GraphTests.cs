@@ -81,7 +81,7 @@ namespace Hentul.UT
 
             graph.AddNewNode(posToAdd);
 
-            RecognisedEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
+            RecognisedVisualEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
 
             bool status = graph.LoadObject(entity);
 
@@ -105,7 +105,7 @@ namespace Hentul.UT
 
             graph.AddNewNode(posToAdd);
 
-            RecognisedEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
+            RecognisedVisualEntity entity = TestUtils.GenerateRandomEntities(1).ElementAt(0);
 
             bool status = graph.LoadObject(entity);
 
@@ -128,11 +128,11 @@ namespace Hentul.UT
         [Test]
         public void TestGetDiferentiablePositionBetweenObjects()
         {
-            List<RecognisedEntity> recgEntities = TestUtils.GenerateRandomEntities(2);
+            List<RecognisedVisualEntity> recgEntities = TestUtils.GenerateRandomEntities(2);
 
-            RecognisedEntity first = recgEntities.ElementAt(0);
+            RecognisedVisualEntity first = recgEntities.ElementAt(0);
 
-            RecognisedEntity second = recgEntities.ElementAt(1);
+            RecognisedVisualEntity second = recgEntities.ElementAt(1);
 
 
             bool status1 = graph.LoadObject(first);

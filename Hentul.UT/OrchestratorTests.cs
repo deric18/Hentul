@@ -207,7 +207,7 @@
 
             Sensation_Location sensei = new Sensation_Location(dict, new Position2D(1, 2));            
 
-            orchestrator.HCAccessor.AddNewSensationToObject(sensei);
+            orchestrator.HCAccessor.AddNewSensationLocationToObject(sensei);
 
             orchestrator.DoneWithTraining();
 
