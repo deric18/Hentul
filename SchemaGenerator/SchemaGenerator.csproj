@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FirstOrderMemoryUnitTest\FirstOrderMemoryUnitTest.csproj" />
   </ItemGroup>
 

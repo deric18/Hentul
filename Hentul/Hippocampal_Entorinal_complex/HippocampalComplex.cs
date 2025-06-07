@@ -74,23 +74,24 @@
         #region PREDICTION
 
 
-        public bool AddNewSensationLocationToObject(Sensation_Location sensei, Sensation_Location? prediction = null)
+        public bool AddNewSensationLocationToObject(Sensation_Location sensei)
         {
-            if (networkMode == NetworkMode.TRAINING)
-            {                
-                // Need to include logic for what object is currently being sensed and 
-                return CurrentObject.AddNewSenei(sensei);
+            if (CurrentObject.sType == SenseType.SenseOnly)
+            {
+                throw new InvalidOperationException(" Cannot add a Sense Location to a Sense Only Object !");
             }
 
-            return false;   
+            // Need to include logic for what object is currently being sensed and
+            return CurrentObject.AddNewSenei(sensei);            
         }
 
-        public bool AddNewSensationToObject(Sensation sensation, Sensation_Location? prediction = null)
+        public bool AddNewSensationToObject(Sensation sensation)
         {
             if (networkMode == NetworkMode.TRAINING)
             {
                 // Need to include logic for what object is currently being sensed and 
-                return CurrentObject.AddNewSenei(sensation);
+
+                return CurrentObject.AddNewSensationToObject(sensation);
             }
 
             return false;

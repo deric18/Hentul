@@ -370,11 +370,8 @@ namespace HentulWinforms
                 orchestrator.ChangeNetworkModeToTraining();
 
                 foreach (var ch in word)
-                {
-                    orchestrator.FireAll_T(ch);
-
-                    var sensation  = 
-                    orchestrator.AddNewCharacterSensationToHC();
+                {                    
+                    orchestrator.AddNewCharacterSensationToHC(ch);
                 }
 
                 orchestrator.DoneWithTraining();

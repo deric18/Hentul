@@ -1,7 +1,6 @@
 ﻿namespace Hentul.UT
 {
-    using Hentul.Hippocampal_Entorinal_complex;
-    using FirstOrderMemory.Models;
+    using Hentul.Hippocampal_Entorinal_complex;    
     using Common;
 
     public class HC_ECTests
@@ -165,12 +164,7 @@
             List<Position2D> positions = hc.StoreObjectInGraph(sensei, prediction);
 
             Assert.IsTrue(positions.Count != 0);
-        }
-
-        private Sensation_Location GrabRandomSenseiFromEntity(RecognisedVisualEntity entity)
-        {
-            return entity.ObjectSnapshot[rand.Next(0, entity.ObjectSnapshot.Count)];
-        }
+        }       
         
         
         private List<RecognisedVisualEntity> GenerateRecognisedEntity()

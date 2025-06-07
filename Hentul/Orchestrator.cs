@@ -335,7 +335,7 @@
         }
 
         /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
-        public void FireAll_T(char ch)
+        internal void FireAll_T(char ch)
         {
 
             if (ch < 65 || ch > 90)
@@ -397,12 +397,14 @@
             }
         }
 
-        public void AddNewCharacterSensationToHC()
+        public void AddNewCharacterSensationToHC(char ch)
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
             {
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
+
+            FireAll_T(ch);
 
             SDR_SOM fom_SDR = GetSdrSomFromFOMsT();
 
