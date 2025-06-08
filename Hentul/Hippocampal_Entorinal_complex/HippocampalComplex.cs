@@ -392,7 +392,7 @@
 
         private void ConvertUnrecognisedObjectToRecognisedObject()
         {
-            if (CurrentObject.ObjectSnapshot.Count == 0)
+            if (CurrentObject.ObjectSnapshot.Count == 0 && CurrentObject.Sensations.Count == 0)
             {
                 throw new InvalidOperationException("Cannot Transform empty object!");
             }

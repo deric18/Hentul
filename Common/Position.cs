@@ -38,6 +38,22 @@
             }
 
             return new Position(x, y, z);
-        }               
+        }
+
+        public static Position2D ConvertStringToPosition2D(string posString)
+        {
+            var parts = posString.Split('-');
+
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);            
+            char nType = 'N';
+
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
+
+            return new Position2D(x, y);
+        }
     }
 }

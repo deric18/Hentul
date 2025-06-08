@@ -130,7 +130,7 @@
 
             NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
 
-            NumBBMNeededT = 2; //
+            NumBBMNeededT = 2; //Number of BBMS needed for processing one character
 
             bool b = NumBBMNeededV % 1 != 0;
 
@@ -301,7 +301,7 @@
                 bmp.Save(filename, ImageFormat.Jpeg);
         }
 
-        /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
+        /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void FireAll_V(Bitmap greyScalebmp)
         {
 
@@ -332,46 +332,7 @@
 
             pEncoder.Clean();
             firingFOM_V.Clear();
-        }
-
-        /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
-        internal void FireAll_T(char ch)
-        {
-
-            if (ch < 65 || ch > 90)
-            {
-                throw new InvalidOperationException("Character is not a valid Upper Case Letter!");
-
-            }
-
-            cEncoder.Encode(ch);
-
-            FireFOMsT();
-
-            if (cEncoder.somPositions.Count != 0)
-            {
-                if (cEncoder.somPositions.Count > 125)
-                {
-                    WriteLogsToFile("Layer 3B : SomPosition Write count " + cEncoder.somPositions.Count);
-                    bool breakpoint = true;
-                }
-
-                // L3B fire
-                somBBM_L3B_T.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), CycleNum);
-
-                // L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
-                somBBM_L3A_T.Fire(fom_SDR, CycleNum);
-            }
-            else
-            {
-                somBBM_L3B_T.FireBlank(CycleNum);
-                somBBM_L3A_T.FireBlank(CycleNum);
-            }
-
-            cEncoder.Clean();
-            firingFOM_T.Clear();
-        }
+        }        
 
         //Trains the new object on to HC
         public void AddNewVisualSensationToHC()
@@ -395,6 +356,10 @@
                     throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
                 }
             }
+            else
+            {
+                throw new InvalidOperationException(" som_SDR should not be null!");
+            }
         }
 
         public void AddNewCharacterSensationToHC(char ch)
@@ -404,9 +369,7 @@
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
 
-            FireAll_T(ch);
-
-            SDR_SOM fom_SDR = GetSdrSomFromFOMsT();
+            FireAll_T(ch);            
 
             var som_SDR = somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(CycleNum);
 
@@ -419,6 +382,10 @@
                 {
                     throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
                 }
+            }
+            else
+            {
+                throw new InvalidOperationException("som_SDR should not be null!");
             }
         }
 
@@ -567,6 +534,44 @@
         #endregion
 
         #region Private Methods        
+
+        /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
+        internal void FireAll_T(char ch)
+        {
+
+            if (ch < 65 || ch > 90)
+            {
+                throw new InvalidOperationException("Character is not a valid Upper Case Letter!");
+            }
+
+            cEncoder.Encode(ch);
+
+            FireFOMsT();
+
+            if (cEncoder.somPositions.Count != 0)
+            {
+                if (cEncoder.somPositions.Count > 2)
+                {
+                    WriteLogsToFile("Layer 3B : SomPosition Write count " + cEncoder.somPositions.Count);
+                    bool breakpoint = true;
+                }
+
+                // L3B fire
+                somBBM_L3B_T.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), CycleNum);
+
+                // L3A fire
+                SDR_SOM fom_SDR = GetSdrSomFromFOMsT();
+                somBBM_L3A_T.Fire(fom_SDR, CycleNum);
+            }
+            else
+            {
+                somBBM_L3B_T.FireBlank(CycleNum);
+                somBBM_L3A_T.FireBlank(CycleNum);
+            }
+
+            cEncoder.Clean();
+            firingFOM_T.Clear();
+        }
 
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
@@ -966,6 +971,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, kvp.Key);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONETWOTHREEE:
@@ -973,6 +979,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
                         }
                         break;
                     case MAPPERCASE.TWOTHREEFOUR:
@@ -980,6 +987,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONETWOFOUR:
@@ -987,6 +995,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONETHREEFOUR:
@@ -994,6 +1003,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONETWO:
@@ -1001,6 +1011,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONETHREE:
@@ -1008,6 +1019,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONEFOUR:
@@ -1016,6 +1028,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.TWOTHREE:
@@ -1023,6 +1036,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
                         }
                         break;
                     case MAPPERCASE.TWOFOUR:
@@ -1030,6 +1044,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.THREEFOUR:
@@ -1037,6 +1052,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.ONE:
@@ -1044,6 +1060,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
                         }
                         break;
                     case MAPPERCASE.TWO:
@@ -1051,6 +1068,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
                         }
                         break;
                     case MAPPERCASE.THREE:
@@ -1058,6 +1076,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
                         }
                         break;
                     case MAPPERCASE.FOUR:
@@ -1065,6 +1084,7 @@
                             var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
+                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
                         }
                         break;
                     default:
@@ -1187,7 +1207,7 @@
 
             foreach (var fomID in firingFOM_T)
             {
-                posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+                posList.AddRange(CharEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
 
 
@@ -1206,12 +1226,12 @@
                 }
             }
 
-            if (posList != null || posList.Count != 0)
+            if (posList.Count != 0)
             {
                 return new SDR_SOM(200, 10, posList, iType.SPATIAL);
             }
 
-            throw new NullReferenceException(" FOM BBM returned empty position list ");
+            throw new InvalidOperationException(" FOM BBM returned empty position list ");
         }
 
         private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)

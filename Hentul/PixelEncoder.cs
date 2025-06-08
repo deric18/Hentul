@@ -39,8 +39,7 @@
 
 
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
-
-        public Dictionary<MAPPERCASE, List<int>> SOMBBMIDS { get; private set; }
+        
 
         public List<Position_SOM> somPositions;
 
@@ -89,8 +88,7 @@
 
             somPositions = new List<Position_SOM>();
 
-            FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
-            SOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
+            FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();            
 
             Xoffset = -1;
             YOffset = -1;
@@ -507,8 +505,7 @@
 
                 if (check1 && check2 && check3 && check4)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ALL);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);                    
                 }
                 else if (check1 && check2 && check3 && check4 == false)
                 {
@@ -517,85 +514,60 @@
                         bool breakpoint = true;
                     }
 
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);                    
                 }
                 else if (check1 && check2 && check4 && check3 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);                    
                 }
                 else if (check1 && check3 && check4 && check2 == false)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
+                    
                 }
                 else if (check2 && check3 && check4 && check1 == false)                     //3's
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);                    
                 }
                 else if (check1 && check2 && check3 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);                    
                 }
                 else if (check1 && check3 && check2 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);                    
                 }
                 else if (check4 && check3 && check2 == false && check1 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);                    
                 }
                 else if (check4 && check1 && check2 == false && check3 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);                    
                 }
                 else if (check4 && check2 && check3 == false && check1 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);                    
                 }
                 else if (check2 && check3 && check4 == false && check1 == false)            //2's
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);                    
                 }
                 else if (check1 && check2 == false && check3 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.ONE);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);                    
                 }
                 else if (check2 && check1 == false && check3 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.TWO);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);                    
                 }
                 else if (check3 && check1 == false && check2 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.THREE);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);                    
                 }
                 else if (check4 && check1 == false && check2 == false && check3 == false)    //1's
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);
-
-                    CheckNInsert(SOMBBMIDS, bbmID, MAPPERCASE.FOUR);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);                    
                 }
                 else
                 {
@@ -635,8 +607,7 @@
 
         public void Clean()
         {
-            FOMBBMIDS.Clear();
-            SOMBBMIDS.Clear();
+            FOMBBMIDS.Clear();            
             somPositions.Clear();
             Xoffset = -1;
             YOffset = -1;

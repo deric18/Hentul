@@ -743,8 +743,7 @@
 
         public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
-            List<Position_SOM> activeBits = new List<Position_SOM>();
-            SDR_SOM toReturn = null;
+            List<Position_SOM> activeBits = new List<Position_SOM>();            
 
             if (_firingBlanckStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
@@ -766,12 +765,10 @@
                 else
                 {
                     NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
-                }
-
-                toReturn = new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
+                }                
             }
 
-            return toReturn;
+            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL); ;
         }
 
         public SDR_SOM GetAllColumnsBurstingLatestCycle(ulong currentCycle)

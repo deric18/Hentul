@@ -19,9 +19,7 @@
 
         public Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>> Mappings { get; private set; }
         
-        public List<KeyValuePair<int, MAPPERCASE>> FOMBBMIDS { get; private set; }
-
-        public List<KeyValuePair<int, MAPPERCASE>> SOMBBMIDS { get; private set; }
+        public List<KeyValuePair<int, MAPPERCASE>> FOMBBMIDS { get; private set; }        
 
         public List<Position_SOM> somPositions;
 
@@ -34,8 +32,7 @@
         public CharEncoder()
         {
             NumBBMPerChar = 4;            
-            FOMBBMIDS = new();
-            SOMBBMIDS = new();
+            FOMBBMIDS = new();            
             somPositions = new();
 
             PerformMappings();
@@ -113,8 +110,7 @@
             
             if(Mappings.TryGetValue(ch - 64, out List<KeyValuePair<int, MAPPERCASE>> bbm_mapperCases))
             {
-                FOMBBMIDS = bbm_mapperCases;
-                SOMBBMIDS = bbm_mapperCases;
+                FOMBBMIDS = bbm_mapperCases;                
                 return;
             }
             
@@ -157,7 +153,7 @@
             return sensation;
         }
 
-        public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, int bbmID)
+        public SDR_SOM GenerateSDR_SOMForMapperCase(MAPPERCASE mappercase, int bbmID)
         {
             var positionstoAdd = new List<Position_SOM>();
 
@@ -353,8 +349,7 @@
 
         public void Clean()
         {
-            FOMBBMIDS.Clear();
-            SOMBBMIDS.Clear();
+            FOMBBMIDS.Clear();            
             somPositions.Clear();            
         }
     }

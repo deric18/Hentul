@@ -53,6 +53,8 @@
 
                 orchestrator.DoneWithTraining();
             }
+
+            Assert.AreEqual(orchestrator.HCAccessor.Objects.Count, 4);
         }
 
         [Test]
@@ -369,7 +371,7 @@
 
             foreach (var kvp in sensloc.sensLoc)
             {
-                Position p = Position.ConvertStringToPosition(kvp.Key);
+                Position2D p = Position.ConvertStringToPosition2D(kvp.Key);
 
 
                 int x = GetXFromBBM_ID(kvp.Value.Key) > 20 ? point.X - GetYFromBBM_ID(kvp.Value.Key) : point.X + GetYFromBBM_ID(kvp.Value.Key);
@@ -755,7 +757,6 @@
 
             Assert.AreEqual(loc2X, pos.X);
             Assert.AreEqual(loc2Y, pos.Y);
-
         }
 
 

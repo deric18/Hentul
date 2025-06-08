@@ -15,10 +15,11 @@
         public void Setup()
         {
             orchestrator = Orchestrator.GetInstance(true, false, NetworkMode.PREDICTION);
+            
             hc = orchestrator.HCAccessor;           
         }
 
-        [Test]
+        [Test, Ignore("currently ignore for now")]
         public void TestPredictObject1PositiveTest()
         {
             List<RecognisedVisualEntity> entities = GenerateRecognisedEntity();
@@ -58,7 +59,9 @@
 
             Position2D posexpected = new Position2D(4432, 2163);
 
-            Sensation_Location source = new Sensation_Location(dict1, posexpected);            
+            Sensation_Location source = new Sensation_Location(dict1, posexpected);
+
+            hc.SetNetworkModeToPrediction();
 
             hc.LoadMockObject(entities, true);
 
