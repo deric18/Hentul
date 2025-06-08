@@ -334,15 +334,13 @@
             firingFOM_V.Clear();
         }        
 
-        //Trains the new object on to HC
+        //Stores the new object on to HC
         public void AddNewVisualSensationToHC()
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
             {
                 throw new InvalidOperationException("INVALID State Management!");
-            }
-
-            SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
+            }            
 
             var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
 
@@ -362,6 +360,8 @@
             }
         }
 
+
+        //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
         public void AddNewCharacterSensationToHC(char ch)
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
@@ -533,7 +533,7 @@
 
         #region Private Methods        
 
-        /// Fires L4 and L3B wiht the same input and output of L4 -> L3A
+        /// Fires L4 and L3B with the same input and output of L4 -> L3A
         internal void FireAll_T(char ch)
         {
 
@@ -966,123 +966,107 @@
                 {
                     case MAPPERCASE.ALL:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, kvp.Key);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID); 
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONETWOTHREEE:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID); 
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.TWOTHREEFOUR:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONETWOFOUR:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONETHREEFOUR:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONETWO:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONETHREE:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONEFOUR:
                         {
-
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.TWOTHREE:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.TWOFOUR:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
                             firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                         }
                         break;
                     case MAPPERCASE.THREEFOUR:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.ONE:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.TWO:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.THREE:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     case MAPPERCASE.FOUR:
                         {
-                            var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
+                            var poses = cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
                             fomBBMT[bbmID].Fire(poses, CycleNum);
-                            firingFOM_T.Add(bbmID);
-                            cEncoder.GenerateSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
+                            firingFOM_T.Add(bbmID);                            
                         }
                         break;
                     default:
@@ -1185,12 +1169,12 @@
                 }
             }
 
-            if (posList != null || posList.Count != 0)
+            if (posList == null || posList.Count == 0)
             {
-                return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
+                throw new NullReferenceException(" FOM BBM returned empty position list ");
             }
-
-            throw new NullReferenceException(" FOM BBM returned empty position list ");
+            
+            return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
         }
 
         private SDR_SOM GetSdrSomFromFOMsT()

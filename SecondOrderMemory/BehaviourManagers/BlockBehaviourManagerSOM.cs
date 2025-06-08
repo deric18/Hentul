@@ -838,6 +838,9 @@
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
 
+            if (NeuronsFiringLastCycle.Count == 0)
+                throw new InvalidOperationException("SOM Layer did not fire Last cycle! Check your stupid dumb Code");
+
             if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
             {
                 if (ignoreZ == true)
@@ -854,11 +857,6 @@
                 {
                     NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
                 }                
-            }
-
-            if (activeBits.Count == 0)
-            {
-                throw new InvalidOperationException("WARNING :: Active Bits Should not be Zero");
             }
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);

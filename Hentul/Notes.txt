@@ -1,29 +1,3 @@
-﻿1. Second Order memory will provide context for the context of the incoming pattern.
-2. Both order of memories provide an excellent mechanism for storing patterns and predicting intelligence.
-3. Associative memory works like a graph between different regions of the broader network.
-
-
-
-
-Questions:
-1. How to assemble location into the system ? (sensory motor inference).
-2. Also the motor signal from the motor cortex.
-
-
-
-
-
-THOUGHTS TO KEPP I NMIND :
-1. First Order memory is specifically designed to understand highly repetitive patterns and bubble the ones that are highly rep[petitive for higher layers to make sense of.
-2. Neocortex is the slow brain , it takes hours to days for new synapes to form and consistent effort on the same task to learn the pattern , The hippocampal complex on the other hand is a fast learning system , it can learn things quickly
-but it cannot store all the learning for longer term it can store for short term.
-
-
-
-
-
-
-
-
-Todo : 
+﻿Todo : 
 1. Narrow vs Broad Vision [ Pupil Dilation ]  ? Take a stab at this later.
+2. Need Mapping layers between character & Pixel Sensations post Classification.
