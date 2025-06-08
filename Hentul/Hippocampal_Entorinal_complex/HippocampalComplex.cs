@@ -76,6 +76,9 @@
 
         public bool AddNewSensationLocationToObject(Sensation_Location sensei)
         {
+            if (CurrentObject.sType == SenseType.Unknown)
+                CurrentObject.sType = SenseType.SenseNLocation;
+
             if (CurrentObject.sType == SenseType.SenseOnly)
             {
                 throw new InvalidOperationException(" Cannot add a Sense Location to a Sense Only Object !");
@@ -89,7 +92,22 @@
         {
             if (networkMode == NetworkMode.TRAINING)
             {
+                if(CurrentObject == null)
+                {
+                    Console.WriteLine("First Time adding new Sensation to the Object! Initialising new Object");
+                    CurrentObject = new UnrecognisedEntity();
+                    CurrentObject.Label = string.Empty;                    
+                    CurrentObject.sType = SenseType.SenseOnly;                    
+                }
+
+                if (CurrentObject.sType == SenseType.Unknown)
+                    CurrentObject.sType = SenseType.SenseOnly;
+
                 // Need to include logic for what object is currently being sensed and 
+                if (CurrentObject.sType != SenseType.SenseOnly)
+                {
+                    throw new InvalidOperationException("Cannot add SenseOnly Sensation to a non Sense only Object!");
+                }
 
                 return CurrentObject.AddNewSensationToObject(sensation);
             }
@@ -199,6 +217,7 @@
             if (CurrentObject.Label == string.Empty)
             {
                 CurrentObject.Label = objectlabellist[imageIndex];
+                CurrentObject.sType = SenseType.Unknown;
                 imageIndex++;
             }
         }

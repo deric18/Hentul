@@ -164,8 +164,37 @@
             List<Position2D> positions = hc.StoreObjectInGraph(sensei, prediction);
 
             Assert.IsTrue(positions.Count != 0);
-        }       
-        
+        }
+
+        [Test]
+        public void TestAddingDuplicateSensationOnlyFails()
+        {
+            var newSensation = GenerateNewSensationforTextualObject(2);
+
+            orchestrator.ChangeNetworkModeToTraining();
+
+
+
+            Assert.IsTrue(hc.AddNewSensationToObject(newSensation));
+
+            Assert.IsFalse(hc.AddNewSensationToObject(newSensation));
+        }
+
+        private Sensation GenerateNewSensationforTextualObject(int maxBBM, int numPositions = 4)
+        {
+            Random rand = new Random();            
+            List<Position2D> posList = new();
+
+
+            for (int i = 0; i < numPositions; i++)
+            {
+                posList.Add(new Position2D(rand.Next(10), rand.Next(10)));
+            }
+
+            Sensation newSensation = new Sensation(maxBBM, posList);
+
+            return newSensation;
+        }
         
         private List<RecognisedVisualEntity> GenerateRecognisedEntity()
         {

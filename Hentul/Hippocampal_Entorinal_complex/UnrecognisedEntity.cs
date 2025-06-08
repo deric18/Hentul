@@ -27,6 +27,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             Label = string.Empty;
             ObjectSnapshot = new List<Sensation_Location>();
             MatchedSensations = new Dictionary<string, List<string>>();
+            Sensations = new();
             sType = SenseType.Unknown;
         }
 
