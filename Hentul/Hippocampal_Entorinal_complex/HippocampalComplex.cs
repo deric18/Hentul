@@ -90,25 +90,8 @@
 
         public bool AddNewSensationToObject(Sensation sensation)
         {
-            if (networkMode == NetworkMode.TRAINING)
-            {
-                if(CurrentObject == null)
-                {
-                    Console.WriteLine("First Time adding new Sensation to the Object! Initialising new Object");
-                    CurrentObject = new UnrecognisedEntity();
-                    CurrentObject.Label = string.Empty;                    
-                    CurrentObject.sType = SenseType.SenseOnly;                    
-                }
-
-                if (CurrentObject.sType == SenseType.Unknown)
-                    CurrentObject.sType = SenseType.SenseOnly;
-
-                // Need to include logic for what object is currently being sensed and 
-                if (CurrentObject.sType != SenseType.SenseOnly)
-                {
-                    throw new InvalidOperationException("Cannot add SenseOnly Sensation to a non Sense only Object!");
-                }
-
+            if(ValidateTInput(sensation))
+            { 
                 return CurrentObject.AddNewSensationToObject(sensation);
             }
 
@@ -358,6 +341,37 @@
 
 
         #region PRIVATE HELPER METHODS        
+
+        private bool ValidateTInput(Sensation sensation)
+        {
+            if (networkMode == NetworkMode.TRAINING)
+            {
+                if (sensation.Positions.Count == 0)
+                {
+                    throw new InvalidOperationException("Sensation cannot be empty!");
+                }
+
+                if (CurrentObject == null)
+                {
+                    Console.WriteLine("First Time adding new Sensation to the Object! Initialising new Object");
+                    CurrentObject = new UnrecognisedEntity();
+                    CurrentObject.Label = string.Empty;
+                    CurrentObject.sType = SenseType.SenseOnly;
+                }
+
+                if (CurrentObject.sType == SenseType.Unknown)
+                    CurrentObject.sType = SenseType.SenseOnly;
+
+                // Need to include logic for what object is currently being sensed and 
+                if (CurrentObject.sType != SenseType.SenseOnly)
+                {
+                    throw new InvalidOperationException("Cannot add SenseOnly Sensation to a non Sense only Object!");
+                }
+
+            }
+
+            return true;
+        }
 
         private List<RecognisedVisualEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {

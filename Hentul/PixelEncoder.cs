@@ -640,11 +640,11 @@
             {
                 int bbmID = pos.X / 10;
 
-                if (bbmID > 99 || bbmID < 0)
+                if (bbmID > 125 || bbmID < 0)
                 {
                     // BUG : need to figure out why SOM can have 1000 active bit
-                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");                    
-                    continue;
+                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");                    
+                    //continue;
                 }
 
                 position = GetPositionForActiveBit(point, pos.X);

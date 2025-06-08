@@ -31,8 +31,8 @@
 
         public CharEncoder()
         {
-            NumBBMPerChar = 4;            
-            FOMBBMIDS = new();            
+            NumBBMPerChar = 4;
+            FOMBBMIDS = new();
             somPositions = new();
 
             PerformMappings();
@@ -66,48 +66,47 @@
         {
             Mappings = new Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>>
             {
-                {   1   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE) } },         //A
-                {   2   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWO) } },         //B
-                {   3   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETWO) } },      //C
-                {   4   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.THREE) } },       //D
-                {   5   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETHREE) } },    //E
-                {   6   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWOTHREE) } },    //F
-                {   7   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETWOTHREEE) } },//G
-                {   8   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.FOUR) } },        //H
-                {   9   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONEFOUR) } },     //I
-                {   10   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWOFOUR) } },    //J    
-                {   11   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETWOFOUR) } }, //K
-                {   12   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.THREEFOUR) } },  //L
-                {   13   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETHREEFOUR) } },//M
-                {   14   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWOTHREEFOUR)} },//N
-                {   15   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ALL) } },        //O
-                {   16   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE) } },        //P                
-                {   17   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                       new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWO) } },        //Q
-                {   18   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                       new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWO)} },         //R
-                {   19   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                       new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETWO) }},      //S
-                {   20   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                       new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.THREE)} },       //T
-                {   21   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                      new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETHREE)} },     //U
-                {   22   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                      new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWOTHREE)} },     //V
-                {   23  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                      new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONETWOTHREEE)} }, //W
-                {   24  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                      new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.FOUR)} },         //X
-                {   25  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                      new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONEFOUR)} },      //Y
-                {   26  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(2, MAPPERCASE.ONE),
-                                                                      new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.TWOFOUR) } }      //Z
+                {   1   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONE) } },         //A
+                {   2   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWO) } },         //B
+                {   3   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETWO) } },      //C
+                {   4   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.THREE) } },       //D
+                {   5   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETHREE) } },    //E
+                {   6   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWOTHREE) } },    //F
+                {   7   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETWOTHREEE) } },//G
+                {   8   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.FOUR) } },        //H
+                {   9   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONEFOUR) } },     //I
+                {   10   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWOFOUR) } },    //J    
+                {   11   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETWOFOUR) } }, //K
+                {   12   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.THREEFOUR) } },  //L
+                {   13   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETHREEFOUR) } },//M
+                {   14   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWOTHREEFOUR)} },//N
+                {   15   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ALL) } },        //O
+                {   16   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE) } },        //P                
+                {   17   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                       new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWO) } },        //Q
+                {   18   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                       new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWO)} },         //R
+                {   19   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                       new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETWO) }},      //S
+                {   20   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                       new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.THREE)} },       //T
+                {   21   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                      new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETHREE)} },     //U
+                {   22   , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                      new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWOTHREE)} },     //V
+                {   23  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                      new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONETWOTHREEE)} }, //W
+                {   24  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                      new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.FOUR)} },         //X
+                {   25  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                      new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.ONEFOUR)} },      //Y
+                {   26  , new List<KeyValuePair<int, MAPPERCASE>>() { new KeyValuePair<int, MAPPERCASE>(1, MAPPERCASE.ONE),
+                                                                      new KeyValuePair<int, MAPPERCASE>(0, MAPPERCASE.TWOFOUR) } }      //Z
             };
         }
 
         public void Encode(char ch)
-        {
-            
+        {            
             if(Mappings.TryGetValue(ch - 64, out List<KeyValuePair<int, MAPPERCASE>> bbm_mapperCases))
             {
                 FOMBBMIDS = bbm_mapperCases;                
@@ -120,34 +119,28 @@
         public Sensation GetSenseiFromSDR_T(SDR_SOM sdr_SOM)
         {
             if (sdr_SOM.Length < 200)
-            {
-                int exception = 1;
+            {                
                 throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
             }
-
-            Sensation sensation = new();
-
+            
             if (sdr_SOM.ActiveBits.Count == 0)
-                return sensation;
+            {
+                throw new InvalidOperationException(" sdr_SOM has not Active bits!");
+            }
 
-            int iterator = 0;
-
-            Position2D position = null;
-
-            KeyValuePair<int, List<Position2D>> keyValuePair = new KeyValuePair<int, List<Position2D>>();
+            Sensation sensation = new();            
 
             foreach (var pos in sdr_SOM.ActiveBits)
             {
-                int bbmID = pos.X / 10;
+                int bbmID = pos.X / 100;
 
-                if (bbmID > 4 || bbmID < 0)
+                if (bbmID > 1 || bbmID < 0)
                 {
                     // BUG : need to figure out why SOM can have 1000 active bit
                     throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
                 }
-                                
 
-
+                sensation.Positions.Add(pos);
             }
 
             return sensation;

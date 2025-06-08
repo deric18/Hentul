@@ -790,8 +790,6 @@
                         activeBits.Add(neuron.NeuronID);
                     }
                 }
-
-
             }
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);

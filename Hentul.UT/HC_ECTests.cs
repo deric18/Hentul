@@ -186,12 +186,12 @@
         private Sensation GenerateNewSensationforTextualObject(int maxBBM, int numPositions = 4)
         {
             Random rand = new Random();            
-            List<Position2D> posList = new();
+            List<Position_SOM> posList = new();
 
 
             for (int i = 0; i < numPositions; i++)
             {
-                posList.Add(new Position2D(rand.Next(10), rand.Next(10)));
+                posList.Add(new Position_SOM(rand.Next(10), rand.Next(10)));
             }
 
             Sensation newSensation = new Sensation(maxBBM, posList);

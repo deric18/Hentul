@@ -831,8 +831,7 @@
 
         public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
-            List<Position_SOM> activeBits = new List<Position_SOM>();
-            SDR_SOM toReturn = null;
+            List<Position_SOM> activeBits = new List<Position_SOM>();            
 
             if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
@@ -854,12 +853,15 @@
                 else
                 {
                     NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
-                }
-
-                toReturn = new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
+                }                
             }
 
-            return toReturn;
+            if (activeBits.Count == 0)
+            {
+                throw new InvalidOperationException("WARNING :: Active Bits Should not be Zero");
+            }
+
+            return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }
 
         public List<string> GetSupportedLabels()
