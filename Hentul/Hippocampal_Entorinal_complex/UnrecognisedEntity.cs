@@ -45,13 +45,12 @@ namespace Hentul.Hippocampal_Entorinal_complex
             {
                 if (sense.CheckForRepetition(sensation))
                 {
-                    return false;
+                    Sensations.Add(sensation);
+                    return true;
                 }
-            }
+            }            
 
-            Sensations.Add(sensation);
-
-            return true;
+            return false;
         }
 
         public bool AddNewSenei(Sensation_Location sensei)
