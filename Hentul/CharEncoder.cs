@@ -17,7 +17,7 @@
 
         public int NumBBMPerChar { get; private set; }
 
-        public Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>> Mappings { get; private set; }
+        private  Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>> Mappings { get; set; }
         
         public List<KeyValuePair<int, MAPPERCASE>> FOMBBMIDS { get; private set; }        
 
@@ -106,10 +106,10 @@
         }
 
         public void Encode(char ch)
-        {            
-            if(Mappings.TryGetValue(ch - 64, out List<KeyValuePair<int, MAPPERCASE>> bbm_mapperCases))
+        {
+            if(Mappings.TryGetValue(ch - 64, out var listkvp))
             {
-                FOMBBMIDS = bbm_mapperCases;                
+                FOMBBMIDS = listkvp;
                 return;
             }
             
@@ -341,8 +341,7 @@
         }
 
         public void Clean()
-        {
-            FOMBBMIDS.Clear();            
+        {            
             somPositions.Clear();            
         }
     }

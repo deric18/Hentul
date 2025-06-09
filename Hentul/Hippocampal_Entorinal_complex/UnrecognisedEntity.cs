@@ -43,7 +43,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         {            
             foreach(var sense in Sensations)
             {
-                if (sense.Equals(sensation))
+                if (sense.CheckForRepetition(sensation))
                 {
                     return false;
                 }

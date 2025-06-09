@@ -387,6 +387,7 @@
             }
         }
 
+
         public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
         {
             Position2D motorOutput = null;
@@ -556,6 +557,10 @@
 
                 // L3A fire
                 SDR_SOM fom_SDR = GetSdrSomFromFOMsT();
+
+                if (fom_SDR.ActiveBits.Count == 0)
+                    throw new InvalidOperationException("L4 returned empty SDR for L3A!");
+
                 somBBM_L3A_T.Fire(fom_SDR, CycleNum);
             }
             else
@@ -953,6 +958,9 @@
 
         private void FireFOMsT()
         {
+            if (cEncoder.FOMBBMIDS.Count == 0)
+                throw new InvalidOperationException("Orchestrator :: FireFOMsT :: Encoding Error :: FOMBBMIDs cannot be empty!");
+
             int bbmID = 0;
 
             foreach (var kvp in cEncoder.FOMBBMIDS)

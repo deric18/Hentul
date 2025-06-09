@@ -45,9 +45,17 @@
             foreach (var word in wordsToTrain)
             {
                 orchestrator.ChangeNetworkModeToTraining();
+                int charcount = 0;
 
                 foreach (var ch in word)
                 {
+                    charcount++;
+
+                    if (charcount == 5)
+                    {
+                        bool breakpoint = true;
+                    }
+
                     orchestrator.AddNewCharacterSensationToHC(ch);
                 }
 

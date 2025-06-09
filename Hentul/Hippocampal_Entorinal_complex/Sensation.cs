@@ -20,11 +20,11 @@ namespace Hentul.Hippocampal_Entorinal_complex
             this.Positions = positions;
         }
 
-        public bool Equals(Sensation? obj)
+        public bool CheckForRepetition(Sensation? obj)
         {
-            if(this.Positions.Except(obj.Positions).Any()) return false;
+            if(Positions.Except(obj.Positions).Any()) return true;
 
-            return true;
+            return false;
         }
 
     }
