@@ -34,9 +34,9 @@ namespace Common
             return i.ToString() + "-" + j.ToString() + "-" + k.ToString();
         }
 
-        public bool Equals(Position_SOM pos)
+        public bool Equals(Position_SOM pos, bool checkXNYOnly = false)
         {
-            return X == pos.X && Y == pos.Y && Z == pos.Z && W == pos.W;
+            return checkXNYOnly ? ( X == pos.X && Y == pos.Y ) : ( X == pos.X && Y == pos.Y && Z == pos.Z && W == pos.W );
         }
 
         public new string ToString()

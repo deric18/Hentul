@@ -20,12 +20,32 @@ namespace Hentul.Hippocampal_Entorinal_complex
             this.Positions = positions;
         }
 
-        public bool CheckForRepetition(Sensation? obj)
+        /// <summary>
+        /// Return true  if both sensations are same else false.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public bool CheckForRepetition(Sensation obj)
         {
-            if(Positions.Except(obj.Positions).Any()) return true;
+            if (Positions.Count == obj.Positions.Count)
+            {
+                int count = 0;
 
+                foreach (var item in obj.Positions)
+                {
+                    if (Positions.Contains(item) == false)
+                        break;
+
+                    count++;
+                }
+
+                if (count == obj.Positions.Count)
+                {
+                    return true;
+                }
+            }
+                        
             return false;
         }
-
     }
 }

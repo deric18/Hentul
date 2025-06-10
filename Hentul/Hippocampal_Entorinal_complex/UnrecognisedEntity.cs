@@ -40,15 +40,33 @@ namespace Hentul.Hippocampal_Entorinal_complex
         }
 
         private bool AddNewSensation(Sensation sensation)
-        {            
+        {   
+            if(Sensations.Count == 0)
+            {
+                Sensations.Add(sensation);
+                return true;
+            }
+
+
+            bool flag = true;
+
+
             foreach(var sense in Sensations)
             {
                 if (sense.CheckForRepetition(sensation))
                 {
-                    Sensations.Add(sensation);
-                    return true;
+                    flag = false;
+                    break;
                 }
-            }            
+            }
+
+
+            if (flag)
+            {
+                Sensations.Add(sensation);
+                return true;
+            }
+
 
             return false;
         }

@@ -191,11 +191,18 @@
 
         #endregion
 
-        public void DoneWithTraining()
+        public void DoneWithTraining(string label = "")
         {
             ConvertUnrecognisedObjectToRecognisedObject();
 
             CurrentObject = new UnrecognisedEntity();
+
+            if (label != "")
+            {
+                CurrentObject.Label = label;
+                CurrentObject.sType = SenseType.Unknown;
+                return;
+            }
 
             if (CurrentObject.Label == string.Empty)
             {

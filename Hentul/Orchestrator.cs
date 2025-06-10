@@ -369,7 +369,7 @@
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
 
-            FireAll_T(ch);            
+            FireAll_T(ch);
 
             var som_SDR = somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(CycleNum);
 
@@ -430,9 +430,9 @@
             return motorOutput;
         }
 
-        public void DoneWithTraining()
+        public void DoneWithTraining(string label = "")
         {
-            HCAccessor.DoneWithTraining();
+            HCAccessor.DoneWithTraining(label);
         }
 
         public void ChangeNetworkToPredictionMode()

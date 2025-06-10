@@ -38,9 +38,12 @@
                 "RECYCLEBIN",
                 "GITBASH",
                 "QBSSTUDIO",
-                "HENTUL"
+                "HENTUL",
+                ""
             };
 
+            int count = 0;
+            int index = 0;
 
             foreach (var word in wordsToTrain)
             {
@@ -59,7 +62,11 @@
                     orchestrator.AddNewCharacterSensationToHC(ch);
                 }
 
-                orchestrator.DoneWithTraining();
+                count++;
+
+                index = (count > wordsToTrain.Count - 1) ? wordsToTrain.Count - 1 : count;
+
+                orchestrator.DoneWithTraining(wordsToTrain[index]);
             }
 
             Assert.AreEqual(orchestrator.HCAccessor.Objects.Count, 4);
