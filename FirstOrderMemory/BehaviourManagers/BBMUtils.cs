@@ -3,6 +3,7 @@
     using FirstOrderMemory.Models;
     using System.Collections.Generic;
     using System.Linq;
+    using Common;
 
 
     public static class BBMUtils
@@ -71,6 +72,24 @@
             return index;
         }
 
+
+        public static bool CheckIfPositionListHasThisNeuron(List<Position_SOM> columnsThatBurst, Neuron neuron)
+        {
+            var index = false;            
+
+            foreach (var x in columnsThatBurst)
+            {
+                if (x.X == neuron.NeuronID.X && x.Y == neuron.NeuronID.Y && x.Z == neuron.NeuronID.Z && x.W == neuron.NeuronID.W)
+                {
+                    index = true;
+                    break;
+                }                
+            }
+
+            return index;
+        }
+
+
         public static bool ListContains(List<Position_SOM> x, Position_SOM? y)
         {
             if (x == null || y == null)
@@ -88,7 +107,7 @@
         }
 
         public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron) =>
-            neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
+            neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);        
 
         public static bool CheckifNeuronListStringHAsNeuron(List<string> stringlist, Neuron neuron)
         {
@@ -100,6 +119,71 @@
                 }
             }
             return false;
+        }
+
+        public static bool DoListsHaveAnyOverlap(List<Neuron> list1, List<Neuron> list2)
+        {
+            foreach (var neuron in list1)
+            {
+                foreach (var item in list2)
+                {
+                    if(neuron.NeuronID.Equals(item.NeuronID))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns a new list that contains all the neurons in the second list that are not present in first list.
+        /// </summary>                
+        public static List<Neuron> GetNonOverlappingNeuronsFromSecondList(List<Neuron> predictedList, List<Neuron> firingList)
+        {
+            List<Neuron> toRet = new List<Neuron>();
+
+            foreach (var neuron in predictedList)
+            {
+                if(firingList.Contains(neuron) == false && neuron.nType == NeuronType.NORMAL)
+                {
+                    toRet.Add(neuron);
+                }
+            }
+
+            return toRet;
+        }
+
+
+        public static List<Neuron> PerformLeftOuterJoinBetweenTwoLists(List<Neuron> predictedList, List<Neuron> firingList)
+        {
+            List<Neuron> toRet = new List<Neuron>();
+
+            foreach (var neuron in predictedList)
+            {
+                if (firingList.Contains(neuron) == false && neuron.nType == NeuronType.NORMAL)
+                {
+                    toRet.Add(neuron);
+                }
+            }
+
+            return toRet;
+        }        
+
+        public static List<Position_SOM> GetNonOverlappingPositionsFromSecondList(List<Position_SOM> predictedList, List<Position_SOM> firingList)
+        {
+            List<Position_SOM> toRet = new List<Position_SOM>();
+
+            foreach (var neuron in predictedList)
+            {
+                if (firingList.Contains(neuron) == false && neuron.W == 'N')
+                {
+                    toRet.Add(neuron);
+                }
+            }
+
+            return toRet;
         }
     }
 }

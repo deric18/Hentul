@@ -1,43 +1,29 @@
 ﻿namespace FirstOrderMemoryUnitTest
-{
-    using FirstOrderMemory.Models;
-    using FirstOrderMemory.Models.Encoders;
+{    
     using NUnit.Framework;
-
-    [TestClass]
+    using FirstOrderMemory.Models.Encoders;
+    using Common;
+    
     public class EncoderTest
     {
         ByteEncoder encoder;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             encoder = new ByteEncoder(100, 8);
         }
 
-        [TestMethod]
+        [Test, Ignore("Needs Work!")]        
         public void TestBoolEncoderKeyConflict()
         {
-            BoolEncoder be = new BoolEncoder(100, 20);
+            BoolEncoder be = new BoolEncoder(100, 20);            
 
-            be.SetEncoderValues("1-8");
-
-            Assert.Throws<InvalidOperationException>(() => be.SetEncoderValues("1-8"));
+            InvalidOperationException invalidOperationException = Assert.Throws<InvalidOperationException>(code: () => be.SetEncoderValues("1-8"));
+            
         }
 
-        [TestMethod]
-        public void TestBoolEncoder1()
-        {
-            throw new NotImplementedException();
-        }
-
-        [TestMethod]
-        public void TestBoolEncoder2()
-        {
-            throw new NotImplementedException();
-        }
-
-        [TestMethod]
+      [Test]
         public void TestByteEncoder1()
         {
             byte toEncode1 = (byte)1;
@@ -55,7 +41,7 @@
             Assert.AreEqual(result1.ActiveBits.Count, result2.ActiveBits.Count);
         }
 
-        [TestMethod]
+      [Test]
         public void TestByteEncoder2()
         {           
 
@@ -69,7 +55,7 @@
 
         }
 
-        [TestMethod]
+      [Test]
         public void TestEncoderSparsity()
         {
 

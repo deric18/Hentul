@@ -1,4 +1,6 @@
-﻿namespace SecondOrderMemory.Models
+﻿using Common;
+
+namespace SecondOrderMemory.Models
 {
     public class Column
     {
@@ -7,23 +9,17 @@
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons) 
+        public Column(int x, int y, int numberOfNeurons, int BBMID) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position_SOM(x, y, i)));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BBMID));
             }            
             Init = 0;
         }
-
-
-
-        public void BurstFire()
-        {
-            Neurons.ForEach(x => x.Fire());
-        }
+        
 
         /// <summary>
         /// Fires the predicted neurons in the column , if there are no predicted neurons then it Bursts.
@@ -84,30 +80,13 @@
 
         internal bool PreCleanupCheck()
         {
-            return Neurons.Where(x => x.CurrentState == NeuronState.FIRING).Count() > 0;
-        }
-
-        internal void PostCycleCleanup()
-        {
-            var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
-
-            foreach (var neuron in firingNeurons)
+            if(Neurons.Any(x => x.CurrentState == NeuronState.FIRING))
             {
-                neuron.FlushVoltage();
+                int breakpoint = 1;
+                return true;
             }
 
-            foreach (var neuron in Neurons)
-            {
-                if (neuron.TAContributors.Count > 0)
-                {
-                    neuron.CleanUpContributersList();
-                }
-            }
-        }
-
-        internal void PruneCycleRefresh()
-        {
-            this.Neurons.ForEach(neuron => neuron.Prune());
-        }
+            return false;
+        }      
     }
 }

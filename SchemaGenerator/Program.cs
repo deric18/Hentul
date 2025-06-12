@@ -6,7 +6,7 @@ Console.WriteLine("Generting Schemas :");
 
 SchemaGenerator.SchemaGenerator sg = new SchemaGenerator.SchemaGenerator();
 
-//SOM : 1000 * 10 * 4
+//SOM : 200 * 10 * 5
 
 Console.WriteLine("Press any key to generate Dendritic Schema :");
 

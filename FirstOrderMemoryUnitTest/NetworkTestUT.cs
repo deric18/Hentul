@@ -1,48 +1,41 @@
 ﻿namespace FirstOrderMemoryUnitTest
 {
     using FirstOrderMemory.BehaviourManagers;
-    using FirstOrderMemory.Models;
-    using Common;
     using NUnit.Framework;
-
-    [TestClass]
+    using Common;
+    
     public class NetworkTestUT
     {
 
-        BlockBehaviourManager? bbManager;
+        BlockBehaviourManagerFOM? bbManager;
         const int X = 10;
         const int Y = 10;
-        int Z = 10;        
+        int Z = 4;        
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManager(X, Y, Z);
+            bbManager = new BlockBehaviourManagerFOM(X, Y, Z, LayerType.Layer_4);
 
-            bbManager.Init(0, 0, 1, 1, 1);            
+            bbManager.Init(1);            
         }
 
-        [TestMethod]
+        [Test, Ignore("Needs work!")]
         public void TestHowManyPatternsCanOneFOMBlockRemember()
         {
-            Assert.Fail();
+            throw new NotImplementedException();
         }
 
-        [TestMethod]
+        [Test, Ignore("Needs work!")]
         public void TestHowManyNeuronsCanWeDeleteBEforeNetworkForgets()
         {
-            Assert.Fail();
+            throw new NotImplementedException();
         }
 
-        [TestMethod]
+        [Test, Ignore("Needs work!")]
         public void TestHowMuchNoiseCanBeIntroduced()
         {
-            Assert.Fail();
-        }
-
-
-
-
-
+            throw new NotImplementedException();
+        } 
     }
 }

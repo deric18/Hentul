@@ -1,6 +1,6 @@
-﻿1. Schema Support for 10*4*10 cell tall FOM's and 1000*4*10 SOMs.
-2. CT for all the FOM array Usage in Hentul.UT
+﻿-Finish using the predicted Sensei from L3B to predict and classify the currentMatching Object in HC-EC
 
-
-Futre : 
-SOM Layer need to generate a movement action for the cursor to move across the screen to observe and classify the image.
+POOL & LABEL in L3A.
+- Pooling via Temporal input to L3A should be done via Temporal Location Signal , If the object is already recognised only then the temporal signal should be delivered
+-Even though Pooling layer construes to a stable pattern , the L3A layer still being a pooling layer doesnt not neccesarilly has a stable pattern , it has a composite pattern for every object
+and its entire function isto prevent bursting in incoming FOM Layers, it fires parts of its composite patterns based on current position on the object depolarising aspects of objects to the FOM's.

@@ -1,3 +1,3 @@
-global using Microsoft.VisualStudio.TestTools.UnitTesting;
+global using NUnit.Framework;
 using FirstOrderMemory.BehaviourManagers;
 using FirstOrderMemory.Models;

@@ -3,24 +3,23 @@
     using Common;
     using FirstOrderMemory.BehaviourManagers;
     using FirstOrderMemory.Models;
-
-    [TestClass]
+    using NUnit.Framework;
+    
     public class DetectorCircuitTest        
     {
-        BlockBehaviourManager bbManager;
+        BlockBehaviourManagerFOM bbManager;
         int NumColumns = 10;
         int Z = 10;
 
-        [TestInitialize]
         public void SetUp()
         {
-            bbManager = new BlockBehaviourManager(NumColumns, Z);
+            bbManager = new BlockBehaviourManagerFOM(NumColumns, Z);
 
-            bbManager.Init(0,1,0,1,11);
+            bbManager.Init(1);
 
         }
 
-        [TestMethod]
+      [Test]
         public void DetectorTestCT()
         {
             //Create a a specific pattern and check how long it takes for the network to detect it.
@@ -44,7 +43,7 @@
                     if((numCount / noiseSize) > 0 )             // Should avoid first iteration
                             if((numCount / cycleSize) >= learningCurveCount)        //ShouldCheckAfterLearningCurveCount 
                             {
-                                predictedSDR = bbManager.GetPredictedSDR();
+                                predictedSDR = bbManager.GetPredictedSDRForNextCycle();
                                 Assert.IsTrue(predictedSDR.IsUnionTo(sDR_SOMs[cycleSize - 1]));
                             }
 

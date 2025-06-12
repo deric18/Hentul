@@ -8,17 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Schemas\AxonalSchema-SOM.xml" />
-    <None Remove="Schemas\DendriticSchemaSOM.xml" />
+    <Folder Include="Schemas\" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schemas\AxonalSchema-SOM.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Schemas\DendriticSchemaSOM.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FirstOrderMemoryUnitTest\FirstOrderMemoryUnitTest.csproj" />
   </ItemGroup>
 
 </Project>

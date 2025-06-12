@@ -9,23 +9,24 @@ namespace FirstOrderMemory.Models
         public int Init { get; set; }
 
 
-        public Column(int x, int y, int numberOfNeurons, Position BlockId, Position UnitId, int BBMID) 
+        public Column(int x, int y, int numberOfNeurons, int BBMID) 
         {
             Neurons = new List<Neuron>(numberOfNeurons);
             ColumnID = new Position_SOM(x, y, numberOfNeurons);
             for (int i=0; i<numberOfNeurons; i++)
             {
-                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BlockId, UnitId, BBMID));
+                Neurons.Add(new Neuron(new Position_SOM(x, y, i), BBMID));
             }            
             Init = 0;
         }
 
-
-
-        public void BurstFire()
+        public Column(int x, int y, int numberOfNeurons, int BBMID, List<Neuron> Neurons)
         {
-            Neurons.ForEach(x => x.Fire());
+            this.Neurons = Neurons;
+            ColumnID = new Position_SOM(x, y, numberOfNeurons);  
+            Init = 0;
         }
+
 
         /// <summary>
         /// Fires the predicted neurons in the column , if there are no predicted neurons then it Bursts.
@@ -93,24 +94,6 @@ namespace FirstOrderMemory.Models
             }
 
             return false;
-        }
-
-        internal void PostCycleCleanup()
-        {
-            var firingNeurons = Neurons.Where( n => n.CurrentState == NeuronState.FIRING ).ToList();
-
-            foreach (var neuron in firingNeurons)
-            {
-                neuron.FlushVoltage();
-            }
-
-            foreach (var neuron in Neurons)
-            {
-                if (neuron.TAContributors.Count > 0)
-                {
-                    neuron.CleanUpContributersList();
-                }
-            }
         }        
     }
 }

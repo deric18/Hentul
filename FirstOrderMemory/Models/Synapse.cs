@@ -4,21 +4,26 @@ namespace FirstOrderMemory.Models
 {
     public class Synapse
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; private set; }        
+
         public string AxonalNeuronId { get; private set; }
+
         public string DendronalNeuronalId { get; private set; }
+
         public ulong lastFiredCycle {  get; private set; }
 
         public ulong lastPredictedCycle { get; private set; }
+
         public bool IsActive { get; private set; }
 
         public ConnectionType cType { get; private set; }
         
-        public UInt16 PredictiveHitCount { get; private set; }
+        public int PredictiveHitCount { get; private set; }
 
-        public UInt16 FiringHitCount { get; private set; }
+        public int FiringHitCount { get; private set; }
 
         private uint _strength {  get; set; } 
+
 
         public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong lastFiredCycle, uint strength, ConnectionType cType, bool isActive = false)
         {
@@ -32,7 +37,7 @@ namespace FirstOrderMemory.Models
             if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
             {
                 IsActive = true;
-                PredictiveHitCount = BlockBehaviourManager.DISTALNEUROPLASTICITY;
+                PredictiveHitCount = BlockBehaviourManagerFOM.DISTALNEUROPLASTICITY;
                 FiringHitCount = 0;
             }
             else
@@ -40,7 +45,7 @@ namespace FirstOrderMemory.Models
                 IsActive = isActive;
                 PredictiveHitCount = 1;
                 FiringHitCount = 0;
-            }
+            }            
         }
 
         public void Print()
@@ -54,9 +59,29 @@ namespace FirstOrderMemory.Models
             Console.WriteLine(" Firing Hit Count : " + FiringHitCount.ToString() + " \n " ); 
         }
 
+        public void SetDendronalID(string newdendronalID)
+        {
+            DendronalNeuronalId = newdendronalID;
+        }
+
+        public void SetAxonalID(string newAxonalID)
+        {
+            AxonalNeuronId = newAxonalID;
+        }
+
         public uint GetStrength()
         {            
             return _strength;
+        }
+
+        internal bool AnyStale(ulong currentCycle)
+        {
+            if (cType == ConnectionType.DISTALDENDRITICNEURON)
+            {
+                return IsActive == false;                
+            }
+
+            return false;
         }
 
         public void IncrementHitCount(ulong currentCycleNum)
@@ -68,7 +93,7 @@ namespace FirstOrderMemory.Models
                 breakpoint = true;
             }
 
-            if (PredictiveHitCount >= BlockBehaviourManager.DISTALNEUROPLASTICITY) 
+            if (PredictiveHitCount >= BlockBehaviourManagerFOM.DISTALNEUROPLASTICITY) 
             {
                 if(IsActive == false) 
                     IsActive = true;

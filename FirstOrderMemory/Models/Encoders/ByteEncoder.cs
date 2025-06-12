@@ -72,6 +72,7 @@
         public void Encode(byte b)
         {
             LastValue = b;
+
             ActiveBits.Clear();
 
             if (N != 100)
@@ -80,17 +81,20 @@
             }
 
             bool bit = false;
+
             //Sparse Encoding
+
             for (int index = 0; index < 8; index++)
             {
                 bit = (b & 1 << index) == 1 << index;
-
+            
                 if (bit)
                 {
                     SetValuesForBit(index);
-                }
-
+                }            
             }
+
+
             //DenseEncoding
         }
 

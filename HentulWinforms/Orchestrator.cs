@@ -8,7 +8,10 @@
     using FirstOrderMemory.Models.Encoders;
     using System.Runtime.InteropServices;
     using System;
-    using HentulWinforms.Hippocampal_Entorinal_complex;
+    using Hentul.Hippocampal_Entorinal_complex;
+    using System.Drawing.Imaging;
+    using Hentul;
+    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
 
     internal class Orchestrator
     {
@@ -42,7 +45,7 @@
 
         #region Used Variables
 
-        public int NumPixelsToProcessPerBlock { get; private set; }
+        public int Range { get; private set; }
 
         public int numPixelsProcessedPerBBM;
 
@@ -50,27 +53,21 @@
 
         private bool LogMode { get; set; }
 
-        Dictionary<string, BaseObject> Objects { get; set; }
-
         public bool IsMock { get; private set; }
 
         int NumColumns, Z;
-
-        public Dictionary<int, List<Position_SOM>> Buckets;
 
         public BlockBehaviourManager[] fomBBM { get; private set; }
 
         public BlockBehaviourManager somBBM_L3B { get; private set; }
 
-        public BlockBehaviourManager somBBM_L3A { get; private set; }
+        public BlockBehaviourManager somBBM_L3A { get; private set; }        
 
         public int[] MockBlockNumFires { get; private set; }
 
         private bool devbox = false;
 
-        public int BlockOffset;
-
-        public int UnitOffset;
+        public int BlockSize;
 
         public int ImageIndex { get; private set; }
 
@@ -80,11 +77,16 @@
 
         public List<string> ImageList { get; private set; }
 
-        public int blackPixelCount = 0;
-
         public Bitmap bmp;
 
-        public int range;
+        public string filename;
+
+        public NetworkMode NMode { get; set; }
+
+        List<Position_SOM> ONbits1;
+        List<Position_SOM> ONbits2;
+        List<Position_SOM> ONbits3;
+        List<Position_SOM> ONbits4;
 
         private readonly int FOMLENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMLENGTH"]);
         private readonly int FOMWIDTH = Convert.ToInt32(ConfigurationManager.AppSettings["FOMWIDTH"]);
@@ -97,41 +99,31 @@
         public Orchestrator(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
+            if (range != 10)
+            {
+                throw new InvalidOperationException("Invalid Operation !");
+            }
 
-            this.range = range;
-
-            NumPixelsToProcessPerBlock = range;
+            Range = range;  //10
 
             bmp = new Bitmap(range + range, range + range);
 
-            numPixelsProcessedPerBBM = 20;
+            numPixelsProcessedPerBBM = 4;
 
             LogMode = false;
 
-            double numerator = (2 * NumPixelsToProcessPerBlock) * (2 * NumPixelsToProcessPerBlock);
+            BlockSize = (2 * range) * (2 * range); //400
 
-            double denominator = numPixelsProcessedPerBBM;
+            NumBBMNeeded = (BlockSize / numPixelsProcessedPerBBM);   //100
 
-            double value = (numerator / denominator);
+            bool b = NumBBMNeeded % 1 != 0;
 
-            bool b = value % 1 != 0;
-
-            if (value % 1 != 0)
+            if (NumBBMNeeded != 100)
             {
-                throw new InvalidDataException("Number Of Pixels should always be a factor of BucketColLength : NumPixels : " + NumPixelsToProcessPerBlock.ToString());
+                throw new InvalidDataException("Number Of FOMM BBMs needed should always be 100, it throws off SOM Schema of 1250" + range.ToString());
             }
 
-            BlockOffset = range * 2;
-
-            UnitOffset = 10;
-
-            NumBBMNeeded = (int)value;
-
             fomBBM = new BlockBehaviourManager[NumBBMNeeded];
-
-            int x1 = 10 * NumBBMNeeded;
-
-            somBBM_L3B = new BlockBehaviourManager(x1, 10, 4);
 
             NumColumns = 10;
 
@@ -140,6 +132,8 @@
             Z = 4;
 
             CycleNum = 0;
+
+            NMode = NetworkMode.TRAINING;
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
@@ -151,17 +145,41 @@
             else
                 ImageIndex = 0;
 
-
             somBBM_L3A = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3A, BlockBehaviourManager.LogMode.BurstOnly);
 
-            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);
+            somBBM_L3B = new BlockBehaviourManager(1250, 10, 4, BlockBehaviourManager.LayerType.Layer_3B, BlockBehaviourManager.LogMode.BurstOnly);            
 
             MockBlockNumFires = new int[NumBBMNeeded];
 
+            ONbits1 = new List<Position_SOM>()
+            {
+                new Position_SOM(0,1),
+                new Position_SOM(2,2)
+            };
+
+            ONbits2 = new List<Position_SOM>()
+            {
+                new Position_SOM(6, 0),
+                new Position_SOM(8, 4)
+            };
+
+            ONbits3 = new List<Position_SOM>()
+            {
+                new Position_SOM(5,6),
+                new Position_SOM(8,9)
+            };
+
+            ONbits4 = new List<Position_SOM>()
+            {
+                new Position_SOM(7,1),
+                new Position_SOM(9,2)
+            };
+
             LoadFOMnSOM();
 
-        }
+            filename = "C:\\Users\\depint\\source\\repos\\Som Schema Docs\\sample.jpeg";
 
+        }
 
         public void LoadFOMnSOM()
         {
@@ -171,43 +189,278 @@
 
             for (int i = 0; i < NumBBMNeeded; i++)
             {
-                fomBBM[i].Init(0, 0, 1, 1, 10);
+                fomBBM[i].Init(i);
             }
 
 
             Console.WriteLine("Finished Init for this Instance \n");
-            Console.WriteLine("Range : " + NumPixelsToProcessPerBlock.ToString() + "\n");
-            Console.WriteLine("Total Number of Pixels :" + (NumPixelsToProcessPerBlock * NumPixelsToProcessPerBlock * 4).ToString() + "\n");
+            Console.WriteLine("Range : " + Range.ToString() + "\n");
+            Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeeded.ToString() + "\n");
 
 
             Console.WriteLine("Initing SOM Instance now ... \n");
 
-            somBBM_L3A.Init(0, 0, 0, 0, 1);
+            somBBM_L3A.Init(1);
 
-            somBBM_L3B.Init(0, 0, 0, 0, 1);
+            somBBM_L3B.Init(1);
 
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
 
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
-
         #endregion
 
-        public string StartCycle()
+
+        public void ProcesStep1()
         {
 
-            //Check how big the entire creen / image is and kee papring through all the objects.
+            SDR_SOM fomSdr = new SDR_SOM(10, 10, new List<Position_SOM>(), iType.SPATIAL);
+            SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
 
-            var str = DetectObject();
-            StoreObject();
+            #region STEP 1
+            // STEP 1 : Fire SDR's for L4 and L3A
 
-            return str;
+            // STEP 1A : Fire all FOM's first!
+
+            BlockBehaviourManager fom;
+
+            Mapper mapper = new Mapper(NumBBMNeeded, BlockSize);
+
+            mapper.ParseBitmap(bmp);
+
+            List<Position_SOM> somPosition = new List<Position_SOM>();
+
+            int blackCount = 0;
+
+            for (int i = 0; i < bmp.Width; i++)
+            {
+                for (int j = 0; j < bmp.Height; j++)
+                {
+                    if (mapper.flagCheckArr[i, j] == false)
+                    {
+                        blackCount++;
+                    }
+                }
+            }
+
+            foreach (var kvp in mapper.FOMBBMIDS)
+            {
+                switch (kvp.Key)
+                {
+                    case MAPPERCASE.ALL:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOTHREEE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREEFOUR:
+                        {
+
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONETHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOTHREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWOFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREEFOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.ONE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.TWO:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.THREE:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    case MAPPERCASE.FOUR:
+                        {
+                            foreach (var bbmID in kvp.Value)
+                            {
+                                fomBBM[bbmID].Fire(mapper.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, LayerType.Layer_4, bbmID));
+                            }
+                        }
+                        break;
+                    default:
+                        {
+                            throw new NotImplementedException();
+                        }
+                }
+            }
+
+            //STEP 1B : Fire all L3B SOM's
+
+            if (mapper.somPositions.Count != 0)
+                somBBM_L3B.Fire(new SDR_SOM(1250, 10, mapper.somPositions, iType.SPATIAL));
 
 
+            #endregion                       
 
         }
+
+        public void ProcessStep2()
+        {
+
+            #region STEP 2
+
+            // STEP 2 :
+            // Project  L3B -> HC if any for next motor output [ Locations of the firing neurons connected to HC should automatically get interpreted as location that needs to be looked at ]
+            //     if there are any recognitions done so far for a particular object in L3A, Display it too and inform HEC as well.
+            // If Prediction Mode
+            //  {
+            //     Collect Predictions from HCE for next motor output if Set the bool flag accordingly.            
+            //  }
+            // If Training Mode      
+            //  {
+            //      Push L4 -> L3A for spatial pooling.            
+            //  }
+            // Push SDRs from L4 -> L3A for better Spatial Pooling.            
+
+            var l3b = somBBM_L3B;
+
+
+            // Project  L3B -> HC for  populating object sensei into HCE            
+            if (NMode.Equals(NetworkMode.TRAINING))
+            {                
+                //Execute next location coordinate from Form and execute it.
+
+
+
+            }
+            else if (NMode.Equals(NetworkMode.PREDICTION))
+            {
+                
+                // If any output from HC execute the location output if NOT then take the standar default output.
+            }
+
+            #endregion
+
+        }
+
+
+        public string ProcessStep3()
+        {
+            #region STEP 3
+
+            string obj = string.Empty;
+
+            // STEP 3 :
+            // If object identified , return label and stop.
+            // Else 
+            // If there is any desired output from HEC , send back those cooridanates for next motor output. and Depolarize L3A only if there is already a decision made in HEC ?
+            
+
+            return obj;
+
+            
+            #endregion
+        }
+
+        #region BIG MAN WORK
+
+        //public string StartCycle()
+        //{
+
+        //    //Check how big the entire screen / image is and kee papring through all the objects.
+
+        //    var str = DetectObject();
+
+        //    StoreObject();
+
+        //    return str;
+
+
+
+        //}
 
         /// <summary>
         /// PROBLEMS:
@@ -215,20 +468,20 @@
         /// ALGORITHM:
         /// 
         /// </summary>
-        public string DetectObject()
-        {
-            var obj = string.Empty;
+        //public string DetectObject()
+        //{
+        //    var obj = string.Empty;
 
-            if (Objects == null || Objects.Count == 0)
-            {
-                obj = LearnFirstObject();
-                
-            }
+        //    if (Objects == null || Objects.Count == 0)
+        //    {
+        //        obj = LearnFirstObject();
 
-            //Traverse through Object Maps and what sensory inputs are telling you.
+        //    }
 
-            return obj;
-        }
+        //    //Traverse through Object Maps and what sensory inputs are telling you.
+
+        //    return obj;
+        //}
 
 
 
@@ -253,51 +506,157 @@
 
             bool stillRecognising = true;
 
-            while (stillRecognising)
-            {
-                // feed L4
-                SDR_SOM fomSdr;
-                for (int i = 0; i < fomBBM.Length; i++)
-                {
-                    fomSdr = GetFomSdrForIteration(i);
-                    fomBBM[i].Fire(fomSdr);
-                }
+            //while (stillRecognising)
+            //{
+            //    // feed L4
+            //    SDR_SOM fomSdr;
+            //    for (int i = 0; i < fomBBM.Length; i++)
+            //    {
+            //        fomSdr = GetFomSdrForIteration(i, mapper);
+            //        fomBBM[i].Fire(fomSdr);
+            //    }
 
-                //feed same pattern SOM BBM L3A
-                SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
-                somBBM_L3A.Fire(Sdr_Som3A);
+            //    //feed same pattern SOM BBM L3A
+            //    SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
+            //    somBBM_L3A.Fire(Sdr_Som3A);
 
-                // init L3B to Apple
-                SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
-                somBBM_L3B.Fire(Sdr_SomL3B);
+            //    // init L3B to Apple
+            //    SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
+            //    somBBM_L3B.Fire(Sdr_SomL3B);
 
-                // Push new object representation to 3A
-                // Push Wiring Burst Avoiding LTP to 4 from 3A.
-            }
+            //    // Push new object representation to 3A
+            //    // Push Wiring Burst Avoiding LTP to 4 from 3A.
+            //}
 
 
             return obj;
         }
 
-
-        private SDR_SOM GetFomSdrForIteration(int i)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
 
         private SDR_SOM GetSdrSomFromFOMs()
         {
             throw new NotImplementedException();
         }
 
+        public void MoveCursorToSpecificPosition(int x, int y)
+        {
+            POINT p;
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            p.X = x;
+            p.Y = y;
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+        }
+
+        public void MoveCursor(POINT p)
+        {
+            IntPtr desk = GetDesktopWindow();
+            IntPtr dc = GetWindowDC(desk);
+
+            ClientToScreen(dc, ref p);
+            SetCursorPos(p.X, p.Y);
+
+            ReleaseDC(desk, dc);
+        }
+
+        public POINT GetCurrentPointerPosition()
+        {
+            POINT point;
+
+            point = new POINT();
+            point.X = 0;
+            point.Y = 0;
+
+            if (GetCursorPos(out point))
+            {
+                //Console.Clear();
+                //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
+                return point;
+            }
+
+            return point;
+        }
+
+        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
+        {
+            SDR_SOM toRet;
+            int block_offset = 10;
+            List<Position_SOM> newPosList = new List<Position_SOM>();
+
+            foreach (var pos in fomSDR.ActiveBits)
+            {
+                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, pos.Y));
+            }
+
+            toRet = new SDR_SOM(1250, 10, newPosList, iType.SPATIAL);
+
+            return toRet;
+        }
+
+        public bool CheckifPixelisBlack(int x, int y)
+        {
+            if (x >= bmp.Width || y >= bmp.Height)
+                return false;
+
+            var color = bmp.GetPixel(x, y);
+
+            return (color.R < 200 && color.G < 200 && color.B < 200);
+        }
 
 
+        private void PrintMoreBlockVitals()
+        {
+            Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
+
+            int w = Console.Read();
+
+            if (w == 49)
+            {
+                ulong totalIncludedCycle = 0;
+
+                for (int i = 0; i < fomBBM.Count(); i++)
+                {
+                    if (fomBBM[i].BBMID != 0)
+                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
+
+                    totalIncludedCycle += fomBBM[i].CycleNum;
+
+                }
+
+                Console.WriteLine("Total Participated Cycles : " + totalIncludedCycle);
+                Console.WriteLine("Orchestrator CycleNum : " + CycleNum.ToString());
+
+                if (totalIncludedCycle != CycleNum)
+                {
+                    Console.WriteLine("ERROR : Incorrect Cycle Distribution amoung blocks");
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+        public void BackUp()
+        {
+            for (int i = 0; i < fomBBM.Length; i++)
+            {
+                fomBBM[i].BackUp(i.ToString());
+            }
+
+            somBBM_L3B.BackUp("SOM-1");
+        }
 
 
+        public void Restore()
+        {
 
+        }
 
-
-
+        #region Future Work
 
         private void MoveToNextObject()
         {
@@ -418,136 +777,174 @@
         }
 
 
-        public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
-        {
-            //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
-
-            Stopwatch stopWatch = new Stopwatch();
-
-            stopWatch.Start();
-
-            int TotalReps = 2;
-
-            int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
-            int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
-
-            int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
-
-            int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
-            int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
-
-            int num_unit_per_block_x = 5;
-            int num_unit_per_block_y = 5;
-
-            int num_pixels_per_Unit_x = 10;
-            int num_pixels_per_Unit_y = 10;
-
-            for (int reps = 0; reps < TotalReps; reps++)
-            {
-                for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
-                {
-                    for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-                    {
-                        int bbmId = 0;
-
-                        for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-                        {
-                            for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-                            {
-                                BoolEncoder boolEncoder = new BoolEncoder(100, 20);
-
-                                for (int j = 0; j < num_pixels_per_Unit_x; j++)
-                                {
-                                    for (int i = 0; i < num_pixels_per_Unit_y; i++)
-                                    {
-                                        int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-                                        int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-                                        //if the pixel is Black then tag the pixel location
-
-                                        if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-                                        {
-                                            int bp = 1;
-                                        }
-
-                                        if (CheckifPixelisBlack(pixel_x, pixel_y))
-                                        {
-
-                                            var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-                                            boolEncoder.SetEncoderValues(dataToEncode);
-
-                                        }
-                                    }
-
-                                    if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-                                    {
-                                        if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
-                                        {
-                                            fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
-                                        }
-
-                                        if (boolEncoder.HasValues())
-                                        {
-                                            CycleNum++;
-
-                                            var imageSDR = boolEncoder.Encode(iType.SPATIAL);
-
-                                            fomBBM[bbmId++].Fire(imageSDR);
-
-                                            SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-                                            if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-                                            {
-                                                fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-                                                somBBM_L3B.Fire(fomSDR);
-                                            }
-
-                                        }
-
-                                        boolEncoder.ClearEncoderValues();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        #region TRASH
 
 
-            PrintMoreBlockVitals();
+        //public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
+        //{
+        //    //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
 
-            BackUp();
+        //    Stopwatch stopWatch = new Stopwatch();
 
-            Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
+        //    stopWatch.Start();
 
-            Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
+        //    int TotalReps = 2;
 
-            Console.WriteLine("Done Processing Image");
+        //    int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
+        //    int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
 
-            Console.Read();
-        }
+        //    int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
+
+        //    int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
+        //    int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
+
+        //    int num_unit_per_block_x = 5;
+        //    int num_unit_per_block_y = 5;
+
+        //    int num_pixels_per_Unit_x = 10;
+        //    int num_pixels_per_Unit_y = 10;
+
+        //    for (int reps = 0; reps < TotalReps; reps++)
+        //    {
+        //        for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
+        //        {
+        //            for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
+        //            {
+        //                int bbmId = 0;
+
+        //                for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
+        //                {
+        //                    for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
+        //                    {
+        //                        BoolEncoder boolEncoder = new BoolEncoder(100, 20);
+
+        //                        for (int j = 0; j < num_pixels_per_Unit_x; j++)
+        //                        {
+        //                            for (int i = 0; i < num_pixels_per_Unit_y; i++)
+        //                            {
+        //                                int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
+        //                                int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
+
+        //                                //if the pixel is Black then tag the pixel location
+
+        //                                if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
+        //                                {
+        //                                    int bp = 1;
+        //                                }
+
+        //                                if (CheckifPixelisBlack(pixel_x, pixel_y))
+        //                                {
+
+        //                                    var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
+        //                                    boolEncoder.SetEncoderValues(dataToEncode);
+
+        //                                }
+        //                            }
+
+        //                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
+        //                            {
+        //                                if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
+        //                                {
+        //                                    fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
+        //                                }
+
+        //                                if (boolEncoder.HasValues())
+        //                                {
+        //                                    CycleNum++;
+
+        //                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
+
+        //                                    fomBBM[bbmId++].Fire(imageSDR);
+
+        //                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
+
+        //                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
+        //                                    {
+        //                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
+
+        //                                        somBBM_L3B.Fire(fomSDR);
+        //                                    }
+
+        //                                }
+
+        //                                boolEncoder.ClearEncoderValues();
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+
+
+        //    PrintMoreBlockVitals();
+
+        //    BackUp();
+
+        //    Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
+
+        //    Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
+
+        //    Console.WriteLine("Done Processing Image");
+
+        //    Console.Read();
+        //}
+
+        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
+        //{
+        //    if (numberOfPixels_Index % BlockOffset == 0)
+        //    {
+        //        return numberOfPixels_Index;
+        //    }
+
+        //    int nextMinNumberOfPixels = numberOfPixels_Index;
+
+        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
+
+        //    while (nextMinNumberOfPixels % 50 != 0)
+        //    {
+        //        nextMinNumberOfPixels--;
+
+        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
+        //        {
+        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
+        //        }
+
+        //    }
+
+        //    if (nextMinNumberOfPixels % 50 != 0)
+        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
+
+        //    return nextMinNumberOfPixels;
+        //}
 
         public void Grab()
         {
 
             Console.WriteLine("Grabbing cursor Position");
 
-            //Console.CursorVisible = false;
-
             POINT Point = this.GetCurrentPointerPosition();
-
-
-            //Console.CursorVisible = true;
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int x1 = Point.X - range < 0 ? 0 : Point.X - range;
-            int y1 = Point.Y - range < 0 ? 0 : Point.Y - range;
-            int x2 = Math.Abs(Point.X + range);
-            int y2 = Math.Abs(Point.Y + range);
+            int Range2 = Range + Range;
 
-            this.GetColorByRange(x1, y1, x2, y2);
+            int x1 = Point.X - Range < 0 ? 0 : Point.X - Range;
+            int y1 = Point.Y - Range < 0 ? 0 : Point.Y - Range;
+            int x2 = Math.Abs(Point.X + Range2);
+            int y2 = Math.Abs(Point.Y + Range);
+
+            //this.GetColorByRange(x1, y1, x2, y2);
+
+            Rectangle rect = new Rectangle(x1, y1, x2, y2);
+
+            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
+
+            Graphics g = Graphics.FromImage(bmp);
+
+            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
+
+            bmp.Save(filename, ImageFormat.Jpeg);
 
         }
 
@@ -560,9 +957,9 @@
             IntPtr dc = GetWindowDC(desk);
 
 
-            for (int i = x1, k = 0; i < x2 && k < range + range; i++, k++)
+            for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
             {
-                for (int j = y1, l = 0; j < y2 && l < range + range; j++, l++)
+                for (int j = y1, l = 0; j < y2 && l < Range + Range; j++, l++)
                 {
                     int a = (int)GetPixel(dc, i, j);
 
@@ -580,164 +977,17 @@
             ReleaseDC(desk, dc);
         }
 
+        #endregion
 
-        // Already grey scalled.
-        private static Color GetColorAt(int x, int y)
-        {
-            IntPtr desk = GetDesktopWindow();
-
-            IntPtr dc = GetWindowDC(desk);
-
-            int a = (int)GetPixel(dc, x, y);
-
-            ReleaseDC(desk, dc);
-
-            return System.Drawing.Color.FromArgb(255,
-                                                 (a >> 0) & 0xff,
-                                                 (a >> 8) & 0xff,
-                                                 (a >> 16) & 0xff);
-        }
-
-        public void MoveCursorToSpecificPosition(int x, int y)
-        {
-            POINT p;
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            p.X = x;
-            p.Y = y;
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
-        }
-
-        public void MoveCursor(POINT p)
-        {
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
-        }
-
-        public POINT GetCurrentPointerPosition()
-        {
-            POINT point;
-
-            point = new POINT();
-            point.X = 0;
-            point.Y = 0;
-
-            if (GetCursorPos(out point))
-            {
-                //Console.Clear();
-                //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
-                return point;
-            }
-
-            return point;
-        }
-
-        private SDR_SOM AddSOMOverheadtoFOMSDR(SDR_SOM fomSDR, int blockidX, int blockIdY)
-        {
-            SDR_SOM toRet;
-            int block_offset = 10;
-            List<Position_SOM> newPosList = new List<Position_SOM>();
-
-            foreach (var pos in fomSDR.ActiveBits)
-            {
-                newPosList.Add(new Position_SOM(blockidX * block_offset + pos.X, pos.Y));
-            }
-
-            toRet = new SDR_SOM(1250, 10, newPosList, iType.SPATIAL);
-
-            return toRet;
-        }
-
-        public bool CheckifPixelisBlack(int x, int y)
-        {
-            if (x >= bmp.Width || y >= bmp.Height)
-                return false;
-
-            var color = bmp.GetPixel(x, y);
-
-            return (color.R < 200 && color.G < 200 && color.B < 200);
-        }
-
-        public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        {
-            if (numberOfPixels_Index % BlockOffset == 0)
-            {
-                return numberOfPixels_Index;
-            }
-
-            int nextMinNumberOfPixels = numberOfPixels_Index;
-
-            int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
-
-            while (nextMinNumberOfPixels % 50 != 0)
-            {
-                nextMinNumberOfPixels--;
-
-                if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
-                {
-                    Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
-                }
-
-            }
-
-            if (nextMinNumberOfPixels % 50 != 0)
-                throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
-
-            return nextMinNumberOfPixels;
-        }
-
-        private void PrintMoreBlockVitals()
-        {
-            Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
-
-            int w = Console.Read();
-
-            if (w == 49)
-            {
-                ulong totalIncludedCycle = 0;
-
-                for (int i = 0; i < fomBBM.Count(); i++)
-                {
-                    if (fomBBM[i].BlockId != null)
-                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBM[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBM[i].CycleNum.ToString());
-
-                    totalIncludedCycle += fomBBM[i].CycleNum;
-
-                }
-
-                Console.WriteLine("Total Participated Cycles : " + totalIncludedCycle);
-                Console.WriteLine("Orchestrator CycleNum : " + CycleNum.ToString());
-
-                if (totalIncludedCycle != CycleNum)
-                {
-                    Console.WriteLine("ERROR : Incorrect Cycle Distribution amoung blocks");
-                    Thread.Sleep(5000);
-                }
-            }
-        }
-
-        public void BackUp()
-        {
-            for (int i = 0; i < fomBBM.Length; i++)
-            {
-                fomBBM[i].BackUp(i.ToString());
-            }
-
-            somBBM_L3B.BackUp("SOM-1");
-        }
+        #endregion
 
         #endregion
     }
+
+
+    #region Enums
+
+
 
     public enum VisionScope
     {
@@ -746,4 +996,6 @@
         NarrowScope,
         UNKNOWN
     }
+
+    #endregion
 }

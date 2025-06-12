@@ -7,28 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Schema Docs\1K Club\AxonalSchema-SOM.xml" />
+    <None Remove="Schema Docs\1K Club\DendriticSchemaSOM.xml" />
     <None Remove="Schema Docs\AxonalSchema-SOM.xml" />
-    <None Remove="Schema Docs\AxonalSchemaFOM.xml" />
-    <None Remove="Schema Docs\DendriticSchemaFOM.xml" />
-    <None Remove="Schema Docs\DendriticSchemaSOM.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schema Docs\AxonalSchema-SOM.xml">
+    <EmbeddedResource Include="Schema Docs\1K Club\AxonalSchema-SOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\AxonalSchemaFOM.xml">
+    <EmbeddedResource Include="Schema Docs\1K Club\DendriticSchemaSOM.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\DendriticSchemaFOM.xml">
+    <EmbeddedResource Include="Schema Docs\AxonalSchemaFOM-1.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Schema Docs\DendriticSchemaSOM.xml">
+    <EmbeddedResource Include="Schema Docs\DendriticSchemaFOM-1.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.9" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 

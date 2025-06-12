@@ -1,15 +1,9 @@
-﻿using FirstOrderMemory.BehaviourManagers;
-using Common;
-using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManager;
-
-namespace FirstOrderMemory.Models
+﻿namespace FirstOrderMemory.Models
 {
-
-    /// <summary>
-    /// Need to support 2 API's
-    /// 1.Fire()
-    /// 2.Wire()
-    /// </summary>
+    using Common;
+    using FirstOrderMemory.BehaviourManagers;    
+    using System.Text.Json.Serialization;
+   
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
         #region FLAGS
@@ -17,11 +11,14 @@ namespace FirstOrderMemory.Models
         public static readonly int TOTALNUMBEROFCORRECTPREDICTIONS = 0;
         public static readonly int TOTALNUMBEROFINCORRECTPREDICTIONS = 0;
         public static int TOTALNUMBEROFPARTICIPATEDCYCLES = 0;        
-        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 200;
+        public static readonly int COMMON_NEURONAL_FIRE_VOLTAGE = 150;
+		public static readonly int COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 300;
+        public static readonly int UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE = 600;
         public static readonly int TEMPORAL_NEURON_FIRE_VALUE = 40;
         public static readonly int APICAL_NEURONAL_FIRE_VALUE = 40;
+        public static readonly int MIN_DEPOLARIZE_FIRE_VALUE = 39;
         public static readonly int NMDA_NEURONAL_FIRE_VALUE = 100;
-        public static readonly int PROXIMAL_VOLTAGE_SPIKE_VALUE = 100;
+        public static readonly int PROXIMAL_VOLTAGE_SPIKE_VALUE = 60;
         public static readonly int PROXIMAL_AXON_TO_NEURON_FIRE_VALUE = 50;
         public static readonly int DISTAL_VOLTAGE_SPIKE_VALUE = 20;
         public static readonly uint AXONAL_CONNECTION = 1;
@@ -30,19 +27,18 @@ namespace FirstOrderMemory.Models
 
         #endregion
 
+
+        #region VARIABLES && CONSTRUCTORS
+
         private ulong redundantCounter = 0;
 
         public uint PruneCount { get; private set; }
 
-        public Position BlockID { get; private set; }
-
-        public Position UnitID { get; private set; }
-
-        public Position BBMId { get; private set; }
-
         public Position_SOM NeuronID { get; private set; }
 
         public NeuronType nType { get; private set; }
+
+        public ulong lastSpikeCycleNum { get; private set; }
 
         public Dictionary<string, char> TAContributors { get; private set; }
 
@@ -51,25 +47,23 @@ namespace FirstOrderMemory.Models
         /// </summary>
         public Dictionary<string, Synapse> AxonalList { get; private set; }
 
-
         /// <summary>
         /// Key is always Axonal Neuronal ID && Value is Synapse
         /// </summary>
-        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }                
+        public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }
 
         public List<Segment>? Segments { get; private set; } = null;
 
         public NeuronState CurrentState { get; private set; }
 
         public int flag { get; set; }
-        
-        public int Voltage { get; private set; }
 
-        public Neuron(Position_SOM neuronId, Position blockid, Position unitId, int BBMId, NeuronType nType = NeuronType.NORMAL)
+        public int Voltage { get; private set; }       
+
+
+        public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
-            NeuronID = neuronId;
-            BlockID = blockid;
-            UnitID = unitId;
+            NeuronID = neuronId;            
             BBMId = BBMId;
             this.nType = nType;
             TAContributors = new Dictionary<string, char>();            
@@ -79,16 +73,69 @@ namespace FirstOrderMemory.Models
             Voltage = 0;
             flag = 0;
             PruneCount = 0;
+            lastSpikeCycleNum = 0;
+        }
+
+        [JsonConstructor]
+        public Neuron(uint pruneCount , string NeuronId, string nType , Dictionary<string, Synapse> proximoDistalDendriticList, Dictionary<string, Synapse> axonalList, string currentState, int voltage, int flag, uint lastspikecyclenum)
+        {
+            this.NeuronID = Position_SOM.ConvertStringToPosition(NeuronId);
+            this.nType = nType.Equals(NeuronType.NORMAL.ToString()) ? NeuronType.NORMAL : nType.Equals(NeuronType.TEMPORAL.ToString()) ? NeuronType.TEMPORAL : nType.Equals(NeuronType.APICAL.ToString()) ? NeuronType.APICAL : throw new InvalidCastException("Could Not convert Neuron NType to proper Enum!");
+            TAContributors = new Dictionary<string, char>();
+            ProximoDistalDendriticList = proximoDistalDendriticList;
+            AxonalList = axonalList;
+            CurrentState = currentState.Equals(NeuronState.RESTING.ToString()) ? NeuronState.RESTING : (currentState.Equals(NeuronState.FIRING.ToString()) ? NeuronState.FIRING : currentState.Equals(NeuronState.SPIKING.ToString()) ? NeuronState.SPIKING : throw new InvalidCastException("Could Not convert Neuron State!"));
+            Voltage = voltage;
+            this.flag = flag;
+            PruneCount = pruneCount;
+            lastSpikeCycleNum = lastspikecyclenum;
         }
 
         public void IncrementPruneCount() => PruneCount++;
 
-        public void ChangeCurrentStateTo(NeuronState state)
+        #endregion
+
+
+        #region METHODSS
+
+        public void ProcessCurrentState(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string fileName = null)
         {
-            CurrentState = state;
+            if( Voltage == 0)
+            {
+                CurrentState = NeuronState.RESTING;
+            }
+            else if ( Voltage > 0 && Voltage < COMMON_NEURONAL_FIRE_VOLTAGE)
+            {
+                CurrentState = NeuronState.PREDICTED;
+            }
+            else if( Voltage >= COMMON_NEURONAL_FIRE_VOLTAGE && Voltage < COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
+            {
+                CurrentState = NeuronState.FIRING;
+            }
+            else if(Voltage >= COMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
+            {
+                if (logmode == LogMode.BurstOnly && fileName != null)
+                {
+                    WriteLogsToFile("Neuron " + NeuronID.ToString() + " entering Spiking Mode", fileName);
+                    if(Voltage >= UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
+                    {
+                        WriteLogsToFile("*******************Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************", fileName);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Neuron " + NeuronID.ToString() + " entering Spiking Mode", fileName);
+                }
+                CurrentState = NeuronState.SPIKING;
+                lastSpikeCycleNum = cycleNum;
+            }            
+            else
+            {
+                throw new InvalidOperationException("Should Never Happen!");
+            }
         }
 
-        public void Fire()
+        public void Fire(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string logFileName = "")
         {
             TOTALNUMBEROFPARTICIPATEDCYCLES++;
 
@@ -107,39 +154,66 @@ namespace FirstOrderMemory.Models
 
             Voltage += COMMON_NEURONAL_FIRE_VOLTAGE;
 
-            ChangeCurrentStateTo(NeuronState.FIRING);
+            ProcessCurrentState(cycleNum, logmode, logFileName);
         }
 
-        public void ProcessVoltage(int voltage, LogMode logmode = LogMode.BurstOnly)
+        public void ProcessVoltage(int voltage, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
         {
-            Voltage += voltage;
+            if(NeuronID.ToString().Equals("2-4-0-N"))
+            {
+                bool breakpoiunt = true;
+            }
 
-            CurrentState = NeuronState.PREDICTED;
+            Voltage += voltage;            
 
             if(voltage >= COMMON_NEURONAL_FIRE_VOLTAGE)
             {
                 if((logmode == LogMode.Info || logmode == LogMode.All))
-                    Console.WriteLine(" INFO :: Neurons.cs :::: Neuron " + NeuronID.ToString() + " is entering firing Mode");
-
-                CurrentState = NeuronState.FIRING;
+                    Console.WriteLine(" INFO :: Neurons.cs :::: Neuron " + NeuronID.ToString() + " is entering firing Mode");               
             }
+
+            ProcessCurrentState(cycleNum, logmode);
 
             // strengthen the contributed segment if the spike actually resulted in a Fire.
         }
 
-        public string GetMyTemporalPartner()
+        public string GetMyTemporalPartner1()
         {
             string pos = ProximoDistalDendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.AxonalNeuronId;
 
             if (!string.IsNullOrEmpty(pos))
             {
-                return pos;
+                return pos;                
             }
 
             throw new InvalidOperationException("GetMyTemproalPartner :: Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
-        }       
+        }
 
-        public string GetMyApicalPartner()
+        public Position_SOM GetMyTemporalPartner2()
+        {
+            string pos = ProximoDistalDendriticList.Values.FirstOrDefault(synapse => synapse.cType == ConnectionType.TEMPRORAL)?.AxonalNeuronId;
+
+            if (!string.IsNullOrEmpty(pos))
+            {                
+                return Position_SOM.ConvertStringToPosition(pos);
+            }
+
+            throw new InvalidOperationException("GetMyTemproalPartner :: Temporal Neuron Does Not Exist for this Neuron !!! Needs Investigation unless this is the temporal Neuron.");
+        }
+
+        public Position_SOM GetMyApicalPartner()
+        {
+            string pos = ProximoDistalDendriticList.Values?.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.AxonalNeuronId;
+
+            if (!string.IsNullOrEmpty(pos))
+            {
+                return Position_SOM.ConvertStringToPosition(pos);
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        public string GetMyApicalPartner1()
         {
             string pos = ProximoDistalDendriticList.Values?.FirstOrDefault(synapse => synapse.cType == ConnectionType.APICAL)?.AxonalNeuronId;
 
@@ -151,7 +225,7 @@ namespace FirstOrderMemory.Models
             throw new InvalidOperationException();
         }
         
-        public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
+        public bool InitProximalDendriticConnection(int i, int j, int k)
         {                        
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
             return AddNewProximalDendriticConnection(key);
@@ -163,12 +237,18 @@ namespace FirstOrderMemory.Models
             AddNewAxonalConnection(key);
         }
 
-        public void PostCycleCleanup() => FlushVoltage();        
-
         internal void CleanUpContributersList()
         {
             TAContributors.Clear();
         }
+
+        private void WriteLogsToFile(string logline, string logfilename)
+        {
+            File.AppendAllText(logfilename, logline + "\n");
+        }
+
+
+        #region Schema Based Connections
 
         private bool AddNewAxonalConnection(string key)
         {
@@ -201,8 +281,7 @@ namespace FirstOrderMemory.Models
                     return false;
                 }
                 else
-                {
-
+                {                    
                     AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, 0, AXONAL_CONNECTION, ConnectionType.AXONTONEURON, true));                    
 
                     return true;
@@ -250,14 +329,18 @@ namespace FirstOrderMemory.Models
             }            
         }
 
+        #endregion
+
+        #region Wiring
+
         //Gets Called for Dendritic End of the Neuron
-        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, BlockBehaviourManager.SchemaType schemaType, ConnectionType? cType = null)
+        public bool AddToDistalList(string axonalNeuronId, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType? cType = null, bool IsActive = false)
         {
 
-            if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
-            {
-                bool bp = true;
-            }
+            //if (axonalNeuronId == "5-1-7-N" && NeuronID.ToString() == "2-8-0-N")
+            //{
+            //    bool bp = true;
+            //}
 
             if (axonalNeuronId.Equals(NeuronID) && this.nType.Equals(nTypeSource))
             {
@@ -292,10 +375,10 @@ namespace FirstOrderMemory.Models
 
                         return true;
                     }
-                }
-                
+                }                
             }
                         
+            // Increment Hit Count!
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
             {
                 synapse.IncrementHitCount(CycleNum);
@@ -304,20 +387,26 @@ namespace FirstOrderMemory.Models
             }
             else
             {
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON));
-
-                //Console.WriteLine("AddToDistalList :: Adding new dendonal Connection to neuron : " + axonalNeuronId);
-
-                if( (ProximoDistalDendriticList.Count >= 400 && schemaType == BlockBehaviourManager.SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1400 && schemaType == BlockBehaviourManager.SchemaType.SOMSCHEMA))
+                if (nTypeSource.Equals(NeuronType.NORMAL) && (ProximoDistalDendriticList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA_VISION))
                 {
-                    Console.WriteLine(" WARNING :: Neuron : " + NeuronID.ToString() + " has reached more than 400 Distal Dendritic Connections " + BlockID);
+
+                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
+                    WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString(), filename);
+
                     Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
-                    Thread.Sleep(1000);
+                    WriteLogsToFile(" Total DistalDendritic Count : " + NeuronID.ToString(), filename);
+                    return false;
+                    //Thread.Sleep(1000);
                 }
+
+
+
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive));                
+                
                 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))
                 {
-                    BlockBehaviourManager.totalDendronalConnections++;                    
+                    BlockBehaviourManagerFOM.totalDendronalConnections++;                    
                 }
 
                 return true;
@@ -325,7 +414,7 @@ namespace FirstOrderMemory.Models
         }
 
         //Gets called for the axonal end of the neuron
-        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, BlockBehaviourManager.SchemaType schema)
+        public bool AddtoAxonalList(string key, NeuronType ntype, ulong CycleNum, ConnectionType connectionType, SchemaType schemaType, bool IsActive = false)
         {            
 
             if (key.Equals(NeuronID) && this.nType.Equals(ntype))
@@ -339,20 +428,30 @@ namespace FirstOrderMemory.Models
 
                 //synapse.IncrementHitCount();
 
-                Console.WriteLine(schema.ToString() + "INFO :: Axon already connected to Neuron");
+                Console.WriteLine(schemaType.ToString() + "INFO :: Axon already connected to Neuron");
 
                 return true;
             }
             else
             {
+                if ((AxonalList.Count >= 400 && schemaType == SchemaType.FOMSCHEMA) || (ProximoDistalDendriticList.Count >= 1000 && schemaType == SchemaType.SOMSCHEMA_VISION))
+                {
+                    Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString());
+                    Console.WriteLine("Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
+                    return false;
+                    //Thread.Sleep(1000);
+                }
 
-                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, false));                
+                AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive));                
 
                 return true;
             }
         }
 
-        internal bool RemoveAxonalConnection(Neuron dendronalNeuron)
+
+        #endregion
+
+        internal ConnectionRemovalReturnType RemoveAxonalConnection(Neuron dendronalNeuron)
         {
             if (AxonalList.TryGetValue(dendronalNeuron.NeuronID.ToString(), out var synapse))
             {                
@@ -360,18 +459,18 @@ namespace FirstOrderMemory.Models
                 if(synapse.cType.Equals(ConnectionType.AXONTONEURON))
                 {
                     Console.WriteLine(" WARNING :: RemoveAxonalConnection :: Cannot Remove Schema Based Axonal Connections");
-                    Thread.Sleep(5000);
-                    return false;
+                    //Thread.Sleep(5000);
+                    return ConnectionRemovalReturnType.SOFTFALSE;
                 }
 
                 Console.WriteLine("INFO :: Removing axonal connection to a neuron" + dendronalNeuron.NeuronID);
 
                 AxonalList.Remove(dendronalNeuron.NeuronID.ToString());
 
-                return true;
+                return ConnectionRemovalReturnType.TRUE;
             }
 
-            return false;
+            return ConnectionRemovalReturnType.HARDFALSE;
         }
 
         public int CompareTo(Neuron? other)
@@ -382,20 +481,55 @@ namespace FirstOrderMemory.Models
         public bool Equals(Neuron? other)
         {
             return this.Voltage == other?.Voltage;
-        }        
+        }                
 
-        internal void FlushVoltage()
+        internal void CheckSpikingFlush(ulong cycleNum)
+        {
+            if(CurrentState != NeuronState.SPIKING)
+            {
+                return;
+            }
+
+            if(cycleNum == 0 || lastSpikeCycleNum == 0 || lastSpikeCycleNum > cycleNum)
+            {
+                throw new InvalidOperationException("Last Spiking Value should never be zero");
+            }
+
+            if(cycleNum - lastSpikeCycleNum > 1)
+            {
+                FlushVoltage(cycleNum);
+            }
+        }
+
+        internal void FlushVoltage(ulong cycleNum)
         {
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
+            if (NeuronID.ToString().Equals("607-3-3-N")) 
+            {
+                bool breakpoiunt = true;
+            }
+
             Voltage = 0;
-            CurrentState = NeuronState.RESTING;
+            ProcessCurrentState(cycleNum);
         }
 
         internal bool DidItContribute(Neuron temporalContributor)
         {
             return TAContributors.TryGetValue(temporalContributor.NeuronID.ToString(), out char w);
         }
+
+        
+        internal List<Synapse> CheckForPrunableConnections(ulong currentCycle)
+        {
+            List<Synapse> staleConnections = ProximoDistalDendriticList.Values.Where(x => x.cType == ConnectionType.DISTALDENDRITICNEURON && x.IsActive == false).ToList();
+
+            return staleConnections;
+        }
     }
+
+
+        #endregion
+ }
 
     public enum ConnectionType
     {
@@ -413,4 +547,10 @@ namespace FirstOrderMemory.Models
         TEMPORAL,
         NORMAL
     }
-}
+
+    internal enum ConnectionRemovalReturnType
+    {
+        TRUE,
+        HARDFALSE,
+        SOFTFALSE
+    }

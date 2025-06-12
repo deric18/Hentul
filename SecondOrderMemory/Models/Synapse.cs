@@ -1,77 +1,116 @@
-﻿using SecondOrderMemory.BehaviourManagers;
-
-namespace SecondOrderMemory.Models
+﻿namespace SecondOrderMemory.Models
 {
     public class Synapse
     {
+
         public Guid Id { get; private set; }
+
+        public HashSet<string> SupportedLabels { get; private set; }                // Holdss only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
+
         public string AxonalNeuronId { get; private set; }
+
         public string DendronalNeuronalId { get; private set; }
-        public ulong lastFiredCycle {  get; private set; }
+
+        public ulong lastFiredCycle { get; private set; }
 
         public ulong lastPredictedCycle { get; private set; }
+
         public bool IsActive { get; private set; }
 
         public ConnectionType cType { get; private set; }
-        
-        public UInt16 PredictiveHitCount { get; private set; }
 
-        public UInt16 FiringHitCount { get; private set; }
+        public uint PredictiveHitCount { get; private set; }
 
-        private uint _strength {  get; set; } 
+        public uint FiringHitCount { get; private set; }
 
-        public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong lastFiredCycle, uint strength, ConnectionType cType, bool isActive = false)
+        private uint _strength { get; set; }
+
+        public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
             Id = Guid.NewGuid();
             AxonalNeuronId = axonalNeuronId;
             DendronalNeuronalId = dendriticNeuronId;
-            this.lastFiredCycle = lastFiredCycle;
-            this.lastPredictedCycle = lastFiredCycle;
+            this.lastFiredCycle = currentCycle;
+
+            this.lastPredictedCycle = currentCycle;
+
             this._strength = strength;
+
+            this.IsActive = isActive;
+
+            PredictiveHitCount = isActive ? BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY : 0;
+
+            FiringHitCount = 0;
+
             this.cType = cType;
-            if (cType.Equals(ConnectionType.APICAL) || cType.Equals(ConnectionType.TEMPRORAL))
+
+            if (objectLabel == null)    //Schema Based Connection
             {
-                IsActive = true;
-                PredictiveHitCount = SBBManager.DISTALNEUROPLASTICITY;
-                FiringHitCount = 0;
+                if (cType == ConnectionType.DISTALDENDRITICNEURON)
+                {
+                    throw new InvalidOperationException("Cannot create Distal Dendritic Connection as a Schema Based Connection! Need an Object Label to create a Distal Dendritic Connection!");
+                }
+
+                SupportedLabels = new HashSet<string>();
+
             }
-            else
+            else                        // Object Based Connection
             {
-                IsActive = isActive;
-                PredictiveHitCount = 1;
-                FiringHitCount = 0;
+                if (cType != ConnectionType.DISTALDENDRITICNEURON)
+                {
+                    throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
+                }
+
+                SupportedLabels = new HashSet<string>() { objectLabel };
             }
         }
 
-        public uint GetStrength()
-        {            
-            return _strength;
+        internal bool IsSynapseActive() => IsActive;
+
+        public bool IsMultiObjectSupported => SupportedLabels.Count > 1;
+
+        public void AddNewObjectLabel(string label) => SupportedLabels.Add(label);
+
+        public void Print()
+        {
+            Console.WriteLine(" Axonal Neuron ID : " + AxonalNeuronId);
+            Console.WriteLine(" Dendronal Neuron ID : " + DendronalNeuronalId);
+
+            foreach (var label in SupportedLabels)
+            {
+                Console.WriteLine("Label : " + label);
+                Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle);
+                Console.WriteLine(" Active : " + (IsActive ? "Yes" : "NO"));
+                Console.WriteLine(" Stringeth : " + _strength.ToString());
+                Console.WriteLine(" Connection Type : " + cType.ToString());
+                Console.WriteLine(" Firing Hit Count : " + FiringHitCount + " \n ");
+            }
         }
 
-        public void IncrementHitCount()
+        public uint GetStrength() => _strength;
+
+        public void IncrementHitCount(ulong currentCycleNum)
         {
 
-            if (DendronalNeuronalId.ToString().Equals("5-3-0-N") && AxonalNeuronId.ToString().Equals("0-2-0-N"))
+            if (DendronalNeuronalId.ToString().Equals("55-2-1-N"))
             {
                 bool breakpoint = false;
-                breakpoint = true;
             }
 
-            if (PredictiveHitCount >= SBBManager.DISTALNEUROPLASTICITY) 
+            if (PredictiveHitCount >= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY)
             {
-                if(IsActive == false) 
+                if (IsActive == false)
                     IsActive = true;
 
                 FiringHitCount++;
 
                 _strength++;
-                this.lastFiredCycle = SBBManager.CycleNum;
+
+                lastFiredCycle++;
             }
             else
             {
                 PredictiveHitCount++;
-
-                this.lastPredictedCycle = SBBManager.CycleNum;
             }
         }
     }

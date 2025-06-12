@@ -13,6 +13,7 @@ namespace FirstOrderMemory.Models.Encoders
         Dictionary<string, Position_SOM> Mappings;
         List<Position_SOM> _positions;
 
+        // Hard Coded for 20 bool pixel values
         public BoolEncoder(int n, int w) : base(n,w)
         {
             _positions = new List<Position_SOM>();

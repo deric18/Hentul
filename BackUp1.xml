@@ -1,7 +1,0 @@
-<Connections>
-  <DistalDendriticConnection>
-    <BlockID> MasterBlock </BlockID>
-    <SourceNeuronID> 0-0-0 </SourceNeuronID>
-    <TargetNeuronID> 0-0-0 </TargetNeuronID>
-  </DistalDendriticConnection>
-</Connections>

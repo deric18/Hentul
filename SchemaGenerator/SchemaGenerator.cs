@@ -5,8 +5,8 @@ namespace SchemaGenerator
     internal class SchemaGenerator
     {
         private const string filePath = "C:\\Users\\depint\\source\\repos\\Hentul\\SchemaGenerator\\Schemas\\";
-        private const string denrticicfileName = "DendriticSchemaFOM.xml";
-        private const string axonalfileName = "AxonalSchemaFOM.xml";
+        private const string denrticicfileName = "DendriticSchemaSOM.xml";
+        private const string axonalfileName = "AxonalSchemaSOM.xml";
 
         private bool debox = true;
 
@@ -18,7 +18,7 @@ namespace SchemaGenerator
 
         Random rand;
 
-        public SchemaGenerator(int x = 10, int y = 10, int z = 4, int numAxon = 2, int numDen = 4)
+        public SchemaGenerator(int x = 200, int y = 10, int z = 5, int numAxon = 2, int numDen = 4)
         {
             this.numX = x;
             this.numY = y;
@@ -46,31 +46,56 @@ namespace SchemaGenerator
 
                     for (int k = 0; k < numZ; k++)      //Proximal Connection Per Neuron Level
                     {
-                        var neuronNode = xmlDocument?.CreateElement("Neuron", string.Empty);
-                        
-                        int cache = int.MaxValue;
+                        var neuronNode = xmlDocument?.CreateElement("Neuron", string.Empty);                                                
 
                         neuronNode?.SetAttribute("X", i.ToString());
                         neuronNode?.SetAttribute("Y", j.ToString());
                         neuronNode?.SetAttribute("Z", k.ToString());
-                        
+
+                        int[] cacheX = new int[numberOfDendrities] , cacheY = new int[numberOfDendrities], cacheZ = new int[numberOfDendrities];
+
+                        for (int i1 = 0; i1 < numberOfDendrities; i1++)
+                        {
+                            cacheX[i1] = -1;
+                            cacheY[i1] = -1;
+                            cacheZ[i1] = -1;
+                        }
+
+                        int x, y, z;
 
                         for (int l = 0; l < numberOfDendrities; l++)   //Connections to other Neurons except Source Neuron
                         {
                             var childneuronNode = xmlDocument?.CreateElement("ProximalConnections", string.Empty);
+                            
+                            x = GetRandomNumberExcept(0, numX, i);                                                       
+                            y = GetRandomNumberExcept(0, numY, j);
+                            z = GetRandomNumberExcept(0, numZ, k);
 
-                            int x = GetRandomNumberExcept(0, numX, i);                                                       
-                            int y = GetRandomNumberExcept(0, numY, j);
-                            int z = GetRandomNumberExcept(0, numZ, k);
+                            while (CheckforRedudancy(cacheX, cacheY, cacheZ, x, y, z))              //Wrong
+                            {
+                                x = GetRandomNumberExcept(0, numX, i);
+                                y = GetRandomNumberExcept(0, numY, j);
+                                z = GetRandomNumberExcept(0, numZ, k);
+                                
+                            }
 
                             childneuronNode?.SetAttribute("X", x.ToString());
                             childneuronNode?.SetAttribute("Y", y.ToString());
                             childneuronNode?.SetAttribute("Z", z.ToString());
 
-                            neuronNode.AppendChild(childneuronNode);
+                            cacheX[l] = x;
+                            cacheY[l] = y;
+                            cacheZ[l] = z;  
 
-                            cache = l;
-                        }                                                
+                            neuronNode.AppendChild(childneuronNode);                            
+                        }
+                        
+                        for(int i1 = 0; i1 < numberOfDendrities; i1++ )
+                        {
+                            cacheX[i1] = -1;
+                            cacheY[i1] = -1;
+                            cacheZ[i1] = -1;
+                        }
 
                         sourceNeuronElement?.AppendChild(neuronNode);                        
                     }
@@ -82,10 +107,30 @@ namespace SchemaGenerator
 
             xmlDocument?.Save(filePath + denrticicfileName);        
 
+        }   
+
+        private bool CheckforRedudancy(int[] cacheX, int[] cacheY, int[] cacheZ, int x, int y, int z)
+        {
+            for (int i = 0; i < cacheX.Length; i++)
+            {
+                if (cacheX[i] == x)
+                {
+                    if (cacheY[i] == y)
+                    {
+                        if(cacheZ[i] == z)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public void GenerateAxonalSchema()
         {
+
             XmlDocument xmlDocument = new XmlDocument();
 
             xmlDocument.LoadXml("<AxonalSchema></AxonalSchema>");
