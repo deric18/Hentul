@@ -3,6 +3,7 @@
     using Hentul.Hippocampal_Entorinal_complex;
     using FirstOrderMemory.Models;
     using Common;
+    using Hentul.Encoders;
 
     public  class MapperTests
     {

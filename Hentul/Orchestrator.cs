@@ -8,6 +8,7 @@
     using System.Drawing;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
+    using Hentul.Encoders;
 
     public class Orchestrator
     {
@@ -35,7 +36,8 @@
         public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
         #endregion
 
-        #region CONSTRUCTOR 
+        #region CONSTRUCTOR
+
 
         #region Used Variables
 
@@ -231,7 +233,6 @@
         {
 
             Console.WriteLine("Starting Initialization  of FOM objects : \n");
-
 
             for (int i = 0; i < NumBBMNeededV; i++)
             {

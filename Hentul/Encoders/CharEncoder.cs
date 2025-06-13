@@ -1,4 +1,4 @@
-﻿namespace Hentul
+﻿namespace Hentul.Encoders
 {
     using Common;
     using Hentul.Hippocampal_Entorinal_complex;
@@ -13,13 +13,13 @@
     /// SOM -> 1 BBM of size 400 * 10 * 4
     /// </summary>
     public class CharEncoder
-    {         
+    {
 
         public int NumBBMPerChar { get; private set; }
 
-        private  Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>> Mappings { get; set; }
-        
-        public List<KeyValuePair<int, MAPPERCASE>> FOMBBMIDS { get; private set; }        
+        private Dictionary<int, List<KeyValuePair<int, MAPPERCASE>>> Mappings { get; set; }
+
+        public List<KeyValuePair<int, MAPPERCASE>> FOMBBMIDS { get; private set; }
 
         public List<Position_SOM> somPositions;
 
@@ -107,28 +107,28 @@
 
         public void Encode(char ch)
         {
-            if(Mappings.TryGetValue(ch - 64, out var listkvp))
+            if (Mappings.TryGetValue(ch - 64, out var listkvp))
             {
                 FOMBBMIDS = listkvp;
                 return;
             }
-            
+
             throw new InvalidOperationException("Invalid Character passed! Mappings does not exists for : " + ch);
         }
 
         public Sensation GetSenseiFromSDR_T(SDR_SOM sdr_SOM)
         {
             if (sdr_SOM.Length < 200)
-            {                
+            {
                 throw new InvalidDataException("SDR SOM is empty for Layer 3B or Invalid SDR Size!!!");
             }
-            
+
             if (sdr_SOM.ActiveBits.Count == 0)
             {
                 throw new InvalidOperationException(" sdr_SOM has not Active bits!");
             }
 
-            Sensation sensation = new();            
+            Sensation sensation = new();
 
             foreach (var pos in sdr_SOM.ActiveBits)
             {
@@ -341,8 +341,8 @@
         }
 
         public void Clean()
-        {            
-            somPositions.Clear();            
+        {
+            somPositions.Clear();
         }
     }
 }

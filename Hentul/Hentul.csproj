@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <Folder Include="BackUp\" />
+    <Folder Include="NewFolder\" />
   </ItemGroup>
 
 </Project>

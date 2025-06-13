@@ -1,7 +1,8 @@
-﻿namespace Hentul
+﻿namespace Hentul.Encoders
 {
     using Common;
     using FirstOrderMemory.Models;
+    using Hentul;
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Collections.Generic;
     using System.Drawing;
@@ -39,7 +40,7 @@
 
 
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
-        
+
 
         public List<Position_SOM> somPositions;
 
@@ -88,7 +89,7 @@
 
             somPositions = new List<Position_SOM>();
 
-            FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();            
+            FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
 
             Xoffset = -1;
             YOffset = -1;
@@ -422,7 +423,7 @@
         {
             if (somBits.Count == 0)
                 return null;
-            
+
             Dictionary<int, List<Position_SOM>> retDict = new Dictionary<int, List<Position_SOM>>();
 
             foreach (var pos in somBits)
@@ -442,10 +443,10 @@
                     newPos = new Position_SOM(pos.X, pos.Y, pos.Z);
                 else
                 {
-                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z); 
+                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z);
                 }
 
-                if(newPos.X >= 10)
+                if (newPos.X >= 10)
                 {
                     int breakpoint = 10;
                 }
@@ -455,7 +456,7 @@
                     posList.Add(newPos);
                 }
                 else
-                { 
+                {
                     retDict.Add(bbmID, new List<Position_SOM>() { newPos });
                 }
             }
@@ -505,7 +506,7 @@
 
                 if (check1 && check2 && check3 && check4)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
                 }
                 else if (check1 && check2 && check3 && check4 == false)
                 {
@@ -514,60 +515,60 @@
                         bool breakpoint = true;
                     }
 
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
                 }
                 else if (check1 && check2 && check4 && check3 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
                 }
                 else if (check1 && check3 && check4 && check2 == false)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
-                    
+
                 }
                 else if (check2 && check3 && check4 && check1 == false)                     //3's
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
                 }
                 else if (check1 && check2 && check3 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
                 }
                 else if (check1 && check3 && check2 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
                 }
                 else if (check4 && check3 && check2 == false && check1 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
                 }
                 else if (check4 && check1 && check2 == false && check3 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
                 }
                 else if (check4 && check2 && check3 == false && check1 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
                 }
                 else if (check2 && check3 && check4 == false && check1 == false)            //2's
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
                 }
                 else if (check1 && check2 == false && check3 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);
                 }
                 else if (check2 && check1 == false && check3 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);
                 }
                 else if (check3 && check1 == false && check2 == false && check4 == false)
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);
                 }
                 else if (check4 && check1 == false && check2 == false && check3 == false)    //1's
                 {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);                    
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);
                 }
                 else
                 {
@@ -600,14 +601,14 @@
         }
 
         private bool CheckIfColorIsWhite(Color color)
-            => (color.R > 240 && color.G > 240 && color.B > 240);
+            => color.R > 240 && color.G > 240 && color.B > 240;
 
         private bool CheckIfColorIsBlack(Color color)
-            => (color.R < 10 && color.G < 10 && color.B < 10);
+            => color.R < 10 && color.G < 10 && color.B < 10;
 
         public void Clean()
         {
-            FOMBBMIDS.Clear();            
+            FOMBBMIDS.Clear();
             somPositions.Clear();
             Xoffset = -1;
             YOffset = -1;
@@ -643,7 +644,7 @@
                 if (bbmID > 125 || bbmID < 0)
                 {
                     // BUG : need to figure out why SOM can have 1000 active bit
-                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");                    
+                    throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
                     //continue;
                 }
 
@@ -653,10 +654,10 @@
 
                 if (sensation_Location.sensLoc.TryGetValue(position?.ToString(), out KeyValuePair<int, List<Position2D>> kvp))
                 {
-                    kvp.Value.Add( new Position2D(pos.X, pos.Y));
+                    kvp.Value.Add(new Position2D(pos.X, pos.Y));
                 }
                 else
-                {                    
+                {
                     KeyValuePair<int, List<Position2D>> sensation = new KeyValuePair<int, List<Position2D>>(
                         bbmID,
                         new List<Position2D>() { new Position2D(pos.X, pos.Y) });
@@ -667,7 +668,7 @@
 
             return sensation_Location;
         }
-        
+
         public Position GetPositionForBBMID(int bbmID, Orchestrator.POINT point)
         {
             Position toReturn = null;

@@ -6,6 +6,7 @@
     using static Hentul.Orchestrator;
     using System.Drawing;
     using System.IO;
+    using Hentul.Encoders;
 
     public class OrchestratorTests
     {
@@ -38,38 +39,27 @@
                 "RECYCLEBIN",
                 "GITBASH",
                 "QBSSTUDIO",
-                "HENTUL",
-                ""
+                "HENTUL"                
             };
 
             int count = 0;
             int index = 0;
 
-            foreach (var word in wordsToTrain)
-            {
+           for(int i=0; i<wordsToTrain.Count; i++) 
+           {
                 orchestrator.ChangeNetworkModeToTraining();
-                int charcount = 0;
+                
+                string word = wordsToTrain[i];
 
                 foreach (var ch in word)
-                {
-                    charcount++;
-
-                    if (charcount == 5)
-                    {
-                        bool breakpoint = true;
-                    }
-
+                {                   
                     orchestrator.AddNewCharacterSensationToHC(ch);
-                }
+                }                
 
-                count++;
-
-                index = (count > wordsToTrain.Count - 1) ? wordsToTrain.Count - 1 : count;
-
-                orchestrator.DoneWithTraining(wordsToTrain[index]);
+                orchestrator.DoneWithTraining(word);
             }
 
-            Assert.AreEqual(orchestrator.HCAccessor.Objects.Count, 4);
+            Assert.AreEqual(orchestrator.HCAccessor.Objects.Count, 5);
         }
 
         [Test]
