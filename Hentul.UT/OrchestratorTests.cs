@@ -105,7 +105,7 @@
 
                 orchestrator.RecordPixels(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
-                orchestrator.FireAll_V(edgedbmp1);
+                orchestrator.ProcessVisual(edgedbmp1);
                 orchestrator.AddNewVisualSensationToHC();
 
             }
@@ -118,7 +118,7 @@
 
             orchestrator.RecordPixels();
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
-            orchestrator.FireAll_V(edgedbmp2);
+            orchestrator.ProcessVisual(edgedbmp2);
             var result = orchestrator.Verify_Predict_HC(true, 4);
 
             Assert.AreEqual(result.X, int.MaxValue);
@@ -268,7 +268,7 @@
 
             orchestrator.Restore();
 
-            foreach (var fom in orchestrator.fomBBMV)
+            foreach (var fom in orchestrator.VisionProcessor.fomBBMV)
             {
                 for (int i = 0; i < 100; i++)
                 {
@@ -288,7 +288,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3B_V.Columns[i, j] == null)
+                    if (orchestrator.VisionProcessor.somBBM_L3B_V.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -299,7 +299,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3A_V.Columns[i, j] == null)
+                    if (orchestrator.VisionProcessor.somBBM_L3A_V.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -741,13 +741,13 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.FireAll_V(bp1);
+            orchestrator.ProcessVisual(bp1);
             orchestrator.AddNewVisualSensationToHC();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-            orchestrator.FireAll_V(bp2);
+            orchestrator.ProcessVisual(bp2);
             orchestrator.AddNewVisualSensationToHC();
 
 
@@ -757,7 +757,7 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.FireAll_V(bp1);
+            orchestrator.ProcessVisual(bp1);
             var pos = orchestrator.Verify_Predict_HC(true);
 
             Assert.AreEqual(loc2X, pos.X);
