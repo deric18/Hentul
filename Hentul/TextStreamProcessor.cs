@@ -50,6 +50,8 @@
 
             this.logMode = logMode;
 
+            firingFOM_T = new();
+
             Init();
         }
 
@@ -59,6 +61,10 @@
             {
                 fomBBMT[i].Init(i);
             }
+
+            somBBM_L3A_T.Init(0);
+
+            somBBM_L3B_T.Init(0);
         }
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
