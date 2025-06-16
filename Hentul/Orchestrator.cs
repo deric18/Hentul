@@ -46,9 +46,7 @@
 
         public bool IsMock { get; private set; }
 
-        public HippocampalComplex HCAccessor { get; private set; }
-
-        public LocationEncoder locationEncoder { get; private set; }
+        public HippocampalComplex HCAccessor { get; private set; }        
 
         public int[] MockBlockNumFires { get; private set; }
 
@@ -74,9 +72,7 @@
 
         public NetworkMode NMode { get; set; }        
         
-        public VisionStreamProcessor VisionProcessor { get; set; }
-
-        public PixelEncoder pEncoder { get; private set; }            
+        public VisionStreamProcessor VisionProcessor { get; set; }            
 
         public TextStreamProcessor TextProcessor { get; private set; }
 
@@ -112,9 +108,7 @@
             else
                 ImageIndex = 0;
 
-            Init();
-
-            locationEncoder = new LocationEncoder(iType.TEMPORAL);
+            Init();            
 
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
 
@@ -218,7 +212,7 @@
             if (som_SDR != null)
             {
                 //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
 
                 if (HCAccessor.AddNewSensationLocationToObject(firingSensei) == false)
                 {
@@ -276,8 +270,8 @@
 
             if (som_SDR != null)
             {
-                var firingSensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
-                var predictedSensei = pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
+                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+                var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
 
                 List<string> predictedLabels = VisionProcessor.GetSupportedLabels();
 
@@ -325,12 +319,12 @@
 
             if (som_SDR != null)
             {
-                sensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+                sensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
             }
 
             if (predictedSDR != null)
             {
-                predictedSensei = pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
+                predictedSensei =  VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
             }
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
@@ -408,9 +402,9 @@
         private void ParseNFireBitmap(Bitmap greyScalebmp)
         {
 
-            pEncoder.ParseBitmap(greyScalebmp);
+            VisionProcessor.pEncoder.ParseBitmap(greyScalebmp);
 
-            foreach (var kvp in pEncoder.FOMBBMIDS)
+            foreach (var kvp in VisionProcessor.pEncoder.FOMBBMIDS)
             {
                 switch (kvp.Key)
                 {
@@ -418,7 +412,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
                             }
                         }
                         break;
@@ -426,7 +420,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
                             }
                         }
                         break;
@@ -435,7 +429,7 @@
 
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
                             }
                         }
                         break;
@@ -443,7 +437,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
                             }
                         }
                         break;
@@ -451,7 +445,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
                             }
                         }
                         break;
@@ -459,7 +453,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
                             }
                         }
                         break;
@@ -467,7 +461,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
                             }
                         }
                         break;
@@ -475,7 +469,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
                             }
                         }
                         break;
@@ -483,7 +477,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
                             }
                         }
                         break;
@@ -491,7 +485,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
                             }
                         }
                         break;
@@ -499,7 +493,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
                             }
                         }
                         break;
@@ -507,7 +501,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
                             }
                         }
                         break;
@@ -515,7 +509,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
                             }
                         }
                         break;
@@ -523,7 +517,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
                             }
                         }
                         break;
@@ -531,7 +525,7 @@
                         {
                             foreach (var bbmID in kvp.Value)
                             {
-                                pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
+                                VisionProcessor.pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
                             }
                         }
                         break;

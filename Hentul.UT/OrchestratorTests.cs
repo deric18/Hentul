@@ -59,7 +59,7 @@
                 orchestrator.DoneWithTraining(word);
             }
 
-            Assert.AreEqual(orchestrator.HCAccessor.Objects.Count, 5);
+            Assert.AreEqual(5, orchestrator.HCAccessor.Objects.Count);
         }
 
         [Test]
@@ -146,22 +146,22 @@
             bp.SetPixel(35, 9, Color.White);
 
 
-            orchestrator.pEncoder.ParseBitmap(bp);
+            orchestrator.VisionProcessor.pEncoder.ParseBitmap(bp);
 
             int breapoint = 1;
 
-            Assert.AreEqual(MAPPERCASE.ALL, orchestrator.pEncoder.FOMBBMIDS.Keys.ElementAt(0));
-            Assert.AreEqual(89, orchestrator.pEncoder.FOMBBMIDS.Values.ElementAt(0).ElementAt(0));
+            Assert.AreEqual(MAPPERCASE.ALL, orchestrator.VisionProcessor.pEncoder.FOMBBMIDS.Keys.ElementAt(0));
+            Assert.AreEqual(89, orchestrator.VisionProcessor.pEncoder.FOMBBMIDS.Values.ElementAt(0).ElementAt(0));
 
             int trues = 0;
             int falses = 0;
 
-            for (int i = 0; i < orchestrator.pEncoder.testBmpCoverage.GetUpperBound(0); i++)
+            for (int i = 0; i < orchestrator.VisionProcessor.pEncoder.testBmpCoverage.GetUpperBound(0); i++)
             {
-                for (int j = 0; j < orchestrator.pEncoder.testBmpCoverage.GetUpperBound(1); j++)
+                for (int j = 0; j < orchestrator.VisionProcessor.pEncoder.testBmpCoverage.GetUpperBound(1); j++)
                 {
                     //Assert.AreEqual(true, orchestrator.Mapper.flagCheckArr[i, j]);
-                    if (orchestrator.pEncoder.testBmpCoverage[i, j])
+                    if (orchestrator.VisionProcessor.pEncoder.testBmpCoverage[i, j])
                     {
                         trues++;
                     }
@@ -332,13 +332,13 @@
                 }
                 );
 
-            var sensloc = orchestrator.pEncoder.GetSenseiFromSDR_V(sdr, point);
+            var sensloc = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdr, point);
 
             Assert.AreEqual(1, sensloc.sensLoc.Count);
             Assert.AreEqual(4, sensloc.sensLoc.ElementAt(0).Value.Value.Count);
 
 
-            var sensloc1 = orchestrator.pEncoder.GetSenseiFromSDR_V(sdr1, point);
+            var sensloc1 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdr1, point);
 
             Assert.AreEqual(4, sensloc1.sensLoc.Count);
             Assert.AreEqual(1, sensloc1.sensLoc.ElementAt(0).Value.Value.Count);
@@ -369,7 +369,7 @@
             point.X = 1340;
             point.Y = 899;
 
-            var sensloc = orchestrator.pEncoder.GetSenseiFromSDR_V(sdr, point);
+            var sensloc = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdr, point);
 
 
             foreach (var kvp in sensloc.sensLoc)
@@ -437,7 +437,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, false, true);
 
@@ -489,7 +489,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -538,7 +538,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Assert.AreEqual(0, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -586,7 +586,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -634,7 +634,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10,  Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 
@@ -783,14 +783,14 @@
 
         private int GetXFromBBM_ID(int bbmId)
         {
-            orchestrator.pEncoder.Mappings.TryGetValue(bbmId, out var x);
+            orchestrator.VisionProcessor.pEncoder.Mappings.TryGetValue(bbmId, out var x);
 
             return x[0].X;
         }
 
         private int GetYFromBBM_ID(int bbmId)
         {
-            orchestrator.pEncoder.Mappings.TryGetValue(bbmId, out var x);
+            orchestrator.VisionProcessor.pEncoder.Mappings.TryGetValue(bbmId, out var x);
 
             return x[0].Y;
         }

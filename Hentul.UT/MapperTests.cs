@@ -15,7 +15,6 @@
         public void Setup()
         {
             orchestrator = Orchestrator.GetInstance(true, false, NetworkMode.PREDICTION);
-            mapper = orchestrator.pEncoder;
         }
 
 
