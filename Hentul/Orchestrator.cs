@@ -36,7 +36,6 @@
 
         #region CONSTRUCTOR
 
-
         #region Used Variables
 
         private static Orchestrator _orchestrator;
@@ -63,7 +62,7 @@
 
         public Bitmap bmp;
 
-        public static string filename;
+        public static string fileName;
 
         public string logfilename;
 
@@ -122,7 +121,7 @@
 
             //MockBlockNumFires = new int[NumBBMNeededV];                       
                         
-            filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
+            fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
             logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
 
@@ -189,7 +188,7 @@
             g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
 
             if (isMock == false)
-                bmp.Save(filename, ImageFormat.Jpeg);
+                bmp.Save(fileName, ImageFormat.Jpeg);
         }
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
@@ -206,7 +205,7 @@
                 throw new InvalidOperationException("INVALID State Management!");
             }
 
-            var som_SDR = VisionProcessor.GetVisualSensationForHC(CycleNum);
+            var som_SDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum);
 
             if (som_SDR != null)
             {
@@ -263,8 +262,8 @@
             }
 
             // If any output from HC execute the location output if NOT then take the standar default output.                
-            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
-            var predictedSDR = somBBM_L3B_V.GetPredictedSDRForNextCycle(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum);
+            var predictedSDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum + 1);
 
 
             if (som_SDR != null)
@@ -272,7 +271,7 @@
                 var firingSensei = pEncoder.GetSenseiFromSDR_V(som_SDR, point);
                 var predictedSensei = pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
 
-                List<string> predictedLabels = somBBM_L3B_V.GetSupportedLabels();
+                List<string> predictedLabels = VisionProcessor.GetSupportedLabels();
 
                 if (legacyPipeline)
                 {
@@ -304,8 +303,7 @@
             NMode = NetworkMode.PREDICTION;
             HCAccessor.DoneWithTraining();
             HCAccessor.SetNetworkModeToPrediction();
-            somBBM_L3B_V.ChangeNetworkModeToPrediction();
-            somBBM_L3A_V.ChangeNetworkModeToPrediction();
+            VisionProcessor.SetNetworkModeToPrediction();
         }
 
         //Gets the current SDR and next cycle predited SDR from classifier layer
@@ -314,8 +312,8 @@
 
             Sensation_Location sensei = null, predictedSensei = null;
 
-            var som_SDR = somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(CycleNum);
-            var predictedSDR = somBBM_L3B_V.GetPredictedSDRForNextCycle(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum);
+            var predictedSDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum + 1);
 
             if (som_SDR != null)
             {
@@ -348,7 +346,6 @@
 
                 Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
 
-
                 var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
 
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
@@ -365,8 +362,7 @@
 
                 ParseNFireBitmap(edgedbmp);
 
-                pEncoder.Clean();
-                firingFOM_V.Clear();
+                VisionProcessor.Clean();
 
                 uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
 
@@ -397,9 +393,7 @@
         #endregion
 
         #region Private Methods        
-
         
-
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
         /// </summary>     
@@ -553,7 +547,6 @@
             return toReturn;
         }
 
-
         private uint GetTotalBurstCountInFOMLayerInLastCycle(ulong cycleNum)
         {
             uint totalBurstCount = 0;
@@ -565,7 +558,6 @@
 
             return totalBurstCount;
         }
-
 
         public bool BiasFOM(SDR_SOM hcSignal)
         {
@@ -617,11 +609,7 @@
         #endregion
 
         #region Helper Methods
-
-
-
         
-
         public void RemoveDuplicateEntries(ref SDR_SOM sdr_SOM)
         {
             int i = 0, j = 0;

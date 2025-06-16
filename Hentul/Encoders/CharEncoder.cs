@@ -331,11 +331,13 @@
             List<Position_SOM> retList = new List<Position_SOM>();
             Position_SOM newPosition;
 
+
             foreach (var pos in oNbitsFOM)
             {
                 newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
                 retList.Add(newPosition);
             }
+
 
             return retList;
         }

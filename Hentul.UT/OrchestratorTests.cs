@@ -110,13 +110,13 @@
 
             }
 
-
             orchestrator.DoneWithTraining();
             orchestrator.ChangeNetworkModeToPrediction();
 
             Orchestrator.SetCursorPos(cursorPositions[0].X, cursorPositions[0].Y);
 
             orchestrator.RecordPixels();
+
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
             orchestrator.ProcessVisual(edgedbmp2);
             var result = orchestrator.Verify_Predict_HC(true, 4);
@@ -124,9 +124,7 @@
             Assert.AreEqual(result.X, int.MaxValue);
             Assert.AreEqual(result.Y, int.MaxValue);
 
-
             var arr = orchestrator.StartBurstAvoidanceWandering(5);
-
 
             int bp = 1;
             foreach (var i in arr)

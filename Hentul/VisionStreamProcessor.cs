@@ -144,10 +144,8 @@
             firingFOM_V.Clear();
         }
 
-        internal SDR_SOM GetVisualSensationForHC(ulong cyclenum)
-        {
-            return somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
-        }
+        internal SDR_SOM GetS3BLatestFiringCells(ulong cyclenum) =>        
+             somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);        
 
         private void WriteLogsToFile(string v)
         {
@@ -344,6 +342,7 @@
             somBBM_L3A_V.BackUp("SOML3A.json");
         }
 
+
         internal void PrintBlockVitalVision()
         {
             Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
@@ -357,7 +356,7 @@
                 for (int i = 0; i < fomBBMV.Count(); i++)
                 {
                     if (fomBBMV[i].BBMID != 0)
-                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBMV[i].PrintBlockDetailsSingleLine() + " | " + "Inclusded Cycle: " + fomBBMV[i].CycleNum.ToString());
+                        Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBMV[i].PrintBlockDetailsSingleLine() + " | " + "Included Cycle: " + fomBBMV[i].CycleNum.ToString());
 
                     totalIncludedCycle += fomBBMV[i].CycleNum;
 
@@ -374,10 +373,20 @@
             }
         }
 
+
         internal void SetNetworkModeToPrediction()
         {
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
             somBBM_L3A_V.ChangeNetworkModeToPrediction();
-        }        
+        }
+
+        internal List<string> GetSupportedLabels() => somBBM_L3B_V.GetSupportedLabels();
+
+
+        internal void Clean()
+        {
+            pEncoder.Clean();
+            firingFOM_V.Clear();
+        }
     }
 }
