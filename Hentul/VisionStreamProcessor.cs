@@ -76,6 +76,12 @@
                 throw new InvalidDataException("Number Of FOMM BBMs needed should always be 100, it throws off SOM Schema of 1250" + range.ToString());
             }
 
+            numPixelsProcessedPerBBM = 4;
+
+            NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
+
+            fomBBMV = new FBBM[NumBBMNeededV];
+
             if (shouldInit)
             {
 
@@ -88,14 +94,8 @@
 
                 somBBM_L3B_V = new SBBM(X, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
 
-            }
-
-            NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
-
-            numPixelsProcessedPerBBM = 4;
-
-            fomBBMV = new FBBM[NumBBMNeededV];
-
+            }                        
+            
             if(shouldInit) 
                 Init();
 

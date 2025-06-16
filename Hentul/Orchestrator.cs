@@ -105,7 +105,7 @@
 
             VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit);
 
-            TextProcessor = new TextStreamProcessor(logMode);
+            TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
             if (isMock)
                 ImageIndex = mockImageIndex;
@@ -378,7 +378,7 @@
                 {
                     Dictionary<int, List<Position_SOM>> dict = new Dictionary<int, List<Position_SOM>>();
 
-                    foreach (var fom in fomBBMV)
+                    foreach (var fom in VisionProcessor.fomBBMV)
                     {
                         Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
 
@@ -559,7 +559,7 @@
         {
             uint totalBurstCount = 0;
 
-            foreach (var fom in fomBBMV)
+            foreach (var fom in VisionProcessor.fomBBMV)
             {
                 totalBurstCount += fom.GetTotalBurstCountInLastCycle(cycleNum);
             }
@@ -604,7 +604,7 @@
                             bool bp = true;
                         }
 
-                        fomBBMV[kvp.Key].Fire(fomSDR, CycleNum);
+                        VisionProcessor.fomBBMV[kvp.Key].Fire(fomSDR, CycleNum);
 
                         flag = true;
                     }

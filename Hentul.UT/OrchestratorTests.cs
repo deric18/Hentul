@@ -686,7 +686,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 

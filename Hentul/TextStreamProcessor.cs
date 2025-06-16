@@ -27,11 +27,15 @@
         List<int> firingFOM_T;
 
 
-        public TextStreamProcessor(LogMode logMode)
+        public TextStreamProcessor(int numColumns, int z, LogMode logMode)
         {
             NumBBMNeededT = 2; //Number of BBMS needed for processing one character
 
             fomBBMT = new FBBM[NumBBMNeededT];
+
+            NumColumns = numColumns;
+
+            Z = z;
 
             for (int i = 0; i < NumBBMNeededT; i++)
             {
@@ -49,7 +53,6 @@
             Init();
         }
 
-
         private void Init()
         {
             for (int i = 0; i < NumBBMNeededT; i++)
@@ -57,7 +60,6 @@
                 fomBBMT[i].Init(i);
             }
         }
-
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void ProcessCharacter(char ch, ulong cycleNum)
