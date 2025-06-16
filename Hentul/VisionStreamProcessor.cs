@@ -34,18 +34,19 @@
 
         public ulong CycleNum;
 
+        public LogMode LogMode { get; private set; }
+
         public PixelEncoder pEncoder { get; private set; } 
 
         public Bitmap bmp { get; private set; }
 
 
-        public VisionStreamProcessor(int range, bool isMock, bool shouldInit)
+        public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
         {
+            this.X = x;
 
-            X = 1250;
-
-            NumColumns = 10;
-
+            this.NumColumns = numColumns;
+            
             IsMock = isMock;
 
             Z = 5;
@@ -97,6 +98,8 @@
 
             if(shouldInit) 
                 Init();
+
+            LogMode = logMode;
         }
 
         #endregion
@@ -145,7 +148,46 @@
         }
 
         internal SDR_SOM GetS3BLatestFiringCells(ulong cyclenum) =>        
-             somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);        
+             somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
+
+        private SDR_SOM GetSdrSomFromFOMsV()
+        {
+            if (firingFOM_V.Count == 0)
+            {
+                int exception = 1;
+            }
+
+            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
+            List<Position_SOM> posList = new List<Position_SOM>();
+
+            foreach (var fomID in firingFOM_V)
+            {
+                posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+            }
+
+
+            if (LogMode == Common.LogMode.BurstOnly)
+            {
+                int count = 0;
+
+                foreach (var fomID in firingFOM_V)
+                {
+                    count += fomBBMV[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
+                }
+
+                if (count == fomBBMV.Count() * Z)
+                {
+                    WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
+                }
+            }
+
+            if (posList == null || posList.Count == 0)
+            {
+                throw new NullReferenceException(" FOM BBM returned empty position list ");
+            }
+
+            return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
+        }
 
         private void WriteLogsToFile(string v)
         {

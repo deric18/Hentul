@@ -1,6 +1,5 @@
 ﻿namespace Hentul
-{
-    using System.Security.Cryptography;
+{    
     using Common;
     using Hentul.Encoders;
     using Hentul.Hippocampal_Entorinal_complex;
@@ -12,6 +11,8 @@
     {
 
         public FBBM[] fomBBMT { get; private set; }
+
+        public LogMode logMode { get; private set; }
 
         public SBBM somBBM_L3B_T { get; private set; }
 
@@ -26,7 +27,7 @@
         List<int> firingFOM_T;
 
 
-        public TextStreamProcessor()
+        public TextStreamProcessor(LogMode logMode)
         {
             NumBBMNeededT = 2; //Number of BBMS needed for processing one character
 
@@ -42,6 +43,8 @@
             somBBM_L3B_T = new SBBM(200, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
 
             cEncoder = new CharEncoder();
+
+            this.logMode = logMode;
 
             Init();
         }
@@ -78,7 +81,7 @@
                 somBBM_L3B_T.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), cycleNum);
 
                 // L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMsT();
+                SDR_SOM fom_SDR = GetSdrSomFromFOMsT(cycleNum);
 
                 if (fom_SDR.ActiveBits.Count == 0)
                     throw new InvalidOperationException("L4 returned empty SDR for L3A!");
@@ -97,8 +100,48 @@
 
         public SDR_SOM GetL3BSensation(ulong cycleNum)
         {
-            return somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(CycleNum);
+            return somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(cycleNum);
         }
+
+        private SDR_SOM GetSdrSomFromFOMsT(ulong CycleNum)
+        {
+            if (firingFOM_T.Count == 0)
+            {
+                int exception = 1;
+            }
+
+            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
+            List<Position_SOM> posList = new List<Position_SOM>();
+
+            foreach (var fomID in firingFOM_T)
+            {
+                posList.AddRange(CharEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+            }
+
+
+            if (logMode == Common.LogMode.BurstOnly)
+            {
+                int count = 0;
+
+                foreach (var fomID in firingFOM_T)
+                {
+                    count += fomBBMT[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
+                }
+
+                if (count == fomBBMT.Count() * Z)
+                {
+                    Orchestrator.WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
+                }
+            }
+
+            if (posList.Count != 0)
+            {
+                return new SDR_SOM(200, 10, posList, iType.SPATIAL);
+            }
+
+            throw new InvalidOperationException(" FOM BBM returned empty position list ");
+        }
+
 
         private void FireFOMsT(ulong CycleNum)
         {

@@ -82,10 +82,18 @@
 
         public ulong CycleNum { get; private set; }
 
+        private int NumColumns, X, Z;
+
         #endregion
 
         private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
+
+            X = 1250;
+
+            NumColumns = 10;
+
+            Z = 4;
 
             LogMode = false;
 
@@ -93,9 +101,11 @@
 
             NMode = nMode;
 
-            VisionProcessor = new VisionStreamProcessor(Range, isMock, ShouldInit);
+            logMode = Common.LogMode.BurstOnly;
 
-            TextProcessor = new TextStreamProcessor();
+            VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit);
+
+            TextProcessor = new TextStreamProcessor(logMode);
 
             if (isMock)
                 ImageIndex = mockImageIndex;
@@ -123,9 +133,7 @@
                         
             fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
-
-            logMode = Common.LogMode.BurstOnly;
+            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";            
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
@@ -914,7 +922,7 @@
 
         public static void WriteLogsToFile(string logMsg)
         {
-            File.WriteAllText(filename, logMsg);
+            File.WriteAllText(fileName, logMsg);
         }
 
         public void Restore()
