@@ -1,0 +1,81 @@
+{
+    {
+        "RegionName":  "V123",
+        "RegionType": "Visual",
+        {
+            "RegionName": "V1",
+            {
+                "Name": "Visual L4",
+                "Type": "FOM",
+                "SchemaType": "FOM"
+            },
+            {
+                "Name": "Visual L3B",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            },
+            {
+                "Name": "Visual L3A",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            }
+        },
+        {
+            "RegionName": "V2",
+            {
+                "Name": "Visual L4",
+                "Type": "FOM",
+                "SchemaType": "FOM"
+            },
+            {
+                "Name": "Visual L3B",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            },
+            {
+                "Name": "Visual L3A",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            }
+        },
+        {
+            "RegionName": "V3",
+            {
+                "Name": "Visual L4",
+                "Type": "FOM",
+                "SchemaType": "FOM"
+            },
+            {
+                "Name": "Visual L3B",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            },
+            {
+                "Name": "Visual L3A",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            }
+        }
+    },
+    {
+        "RegionType": "Audio",
+        "RegionName": "A1",
+        {
+            {
+                "Name": "Audio L4",
+                "Type": "FOM",
+                "SchemaType": "FOM"
+            },
+            {
+                "Name": "Audio L3B",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            },
+            {
+                "Name": "Audio L3A",
+                "Type": "SOM",
+                "SchemaType": "SOM"
+            }
+        }
+    }
+}

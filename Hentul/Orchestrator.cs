@@ -295,6 +295,7 @@
             return motorOutput;
         }
 
+
         public void DoneWithTraining(string label = "")
         {
             HCAccessor.DoneWithTraining(label);
@@ -329,6 +330,7 @@
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
         }
+
 
         public List<uint> StartBurstAvoidanceWandering(int totalWanders = 5)
         {

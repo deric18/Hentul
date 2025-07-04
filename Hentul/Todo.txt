@@ -1,6 +1,9 @@
-﻿-Finish using the predicted Sensei from L3B to predict and classify the currentMatching Object in HC-EC
-
-POOL & LABEL in L3A.
-- Pooling via Temporal input to L3A should be done via Temporal Location Signal , If the object is already recognised only then the temporal signal should be delivered
--Even though Pooling layer construes to a stable pattern , the L3A layer still being a pooling layer doesnt not neccesarilly has a stable pattern , it has a composite pattern for every object
-and its entire function isto prevent bursting in incoming FOM Layers, it fires parts of its composite patterns based on current position on the object depolarising aspects of objects to the FOM's.
+﻿-Image Segmentation [0]
+-Narrow vs Broad Vision[0]--> v1, v2, v3 
+-Multi Modal Regions[0] --> A1
+-Schema Based Region Init [0]
+-Temporal timestamp driven firings. [1]
+-Hierarchical Processing. [1]
+-Integration into  HC-EC complex. [1]
+-Motor Learning.[2]
+-Sensory - Motor Integration [2]

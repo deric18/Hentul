@@ -54,7 +54,7 @@
                 foreach (var ch in word)
                 {                   
                     orchestrator.AddNewCharacterSensationToHC(ch);
-                }                
+                }
 
                 orchestrator.DoneWithTraining(word);
             }
