@@ -19,7 +19,7 @@
                 "Type": "SOM",
                 "SchemaType": "SOM"
             }
-        },
+        }, //V1
         {
             "RegionName": "V2",
             {
@@ -37,7 +37,7 @@
                 "Type": "SOM",
                 "SchemaType": "SOM"
             }
-        },
+        }, //V2
         {
             "RegionName": "V3",
             {
@@ -55,7 +55,7 @@
                 "Type": "SOM",
                 "SchemaType": "SOM"
             }
-        }
+        }  //V3
     },
     {
         "RegionType": "Audio",
@@ -76,6 +76,6 @@
                 "Type": "SOM",
                 "SchemaType": "SOM"
             }
-        }
+        }  //A1
     }
 }

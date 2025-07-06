@@ -1,5 +1,4 @@
-﻿-Image Segmentation [0]
--Narrow vs Broad Vision[0]--> v1, v2, v3 
+﻿-Narrow vs Broad Vision[0]--> v1, v2, v3 
 -Multi Modal Regions[0] --> A1
 -Schema Based Region Init [0]
 -Temporal timestamp driven firings. [1]
