@@ -102,7 +102,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
                         instance.RecordPixels();
                         var bmp = instance.ConverToEdgedBitmap();
-                        instance.FireAll_V(bmp);
+                        instance.ProcessVisual(bmp);
 
                         var tuple = instance.GetSDRFromL3B();
 

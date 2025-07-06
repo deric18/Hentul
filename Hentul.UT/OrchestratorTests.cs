@@ -6,6 +6,7 @@
     using static Hentul.Orchestrator;
     using System.Drawing;
     using System.IO;
+    using Hentul.Encoders;
 
     public class OrchestratorTests
     {
@@ -38,38 +39,27 @@
                 "RECYCLEBIN",
                 "GITBASH",
                 "QBSSTUDIO",
-                "HENTUL",
-                ""
+                "HENTUL"                
             };
 
             int count = 0;
             int index = 0;
 
-            foreach (var word in wordsToTrain)
-            {
+           for(int i=0; i<wordsToTrain.Count; i++) 
+           {
                 orchestrator.ChangeNetworkModeToTraining();
-                int charcount = 0;
+                
+                string word = wordsToTrain[i];
 
                 foreach (var ch in word)
-                {
-                    charcount++;
-
-                    if (charcount == 5)
-                    {
-                        bool breakpoint = true;
-                    }
-
+                {                   
                     orchestrator.AddNewCharacterSensationToHC(ch);
                 }
 
-                count++;
-
-                index = (count > wordsToTrain.Count - 1) ? wordsToTrain.Count - 1 : count;
-
-                orchestrator.DoneWithTraining(wordsToTrain[index]);
+                orchestrator.DoneWithTraining(word);
             }
 
-            Assert.AreEqual(orchestrator.HCAccessor.Objects.Count, 4);
+            Assert.AreEqual(5, orchestrator.HCAccessor.Objects.Count);
         }
 
         [Test]
@@ -115,11 +105,10 @@
 
                 orchestrator.RecordPixels(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
-                orchestrator.FireAll_V(edgedbmp1);
+                orchestrator.ProcessVisual(edgedbmp1);
                 orchestrator.AddNewVisualSensationToHC();
 
             }
-
 
             orchestrator.DoneWithTraining();
             orchestrator.ChangeNetworkModeToPrediction();
@@ -127,16 +116,15 @@
             Orchestrator.SetCursorPos(cursorPositions[0].X, cursorPositions[0].Y);
 
             orchestrator.RecordPixels();
+
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
-            orchestrator.FireAll_V(edgedbmp2);
+            orchestrator.ProcessVisual(edgedbmp2);
             var result = orchestrator.Verify_Predict_HC(true, 4);
 
             Assert.AreEqual(result.X, int.MaxValue);
             Assert.AreEqual(result.Y, int.MaxValue);
 
-
             var arr = orchestrator.StartBurstAvoidanceWandering(5);
-
 
             int bp = 1;
             foreach (var i in arr)
@@ -158,22 +146,22 @@
             bp.SetPixel(35, 9, Color.White);
 
 
-            orchestrator.pEncoder.ParseBitmap(bp);
+            orchestrator.VisionProcessor.pEncoder.ParseBitmap(bp);
 
             int breapoint = 1;
 
-            Assert.AreEqual(MAPPERCASE.ALL, orchestrator.pEncoder.FOMBBMIDS.Keys.ElementAt(0));
-            Assert.AreEqual(89, orchestrator.pEncoder.FOMBBMIDS.Values.ElementAt(0).ElementAt(0));
+            Assert.AreEqual(MAPPERCASE.ALL, orchestrator.VisionProcessor.pEncoder.FOMBBMIDS.Keys.ElementAt(0));
+            Assert.AreEqual(89, orchestrator.VisionProcessor.pEncoder.FOMBBMIDS.Values.ElementAt(0).ElementAt(0));
 
             int trues = 0;
             int falses = 0;
 
-            for (int i = 0; i < orchestrator.pEncoder.testBmpCoverage.GetUpperBound(0); i++)
+            for (int i = 0; i < orchestrator.VisionProcessor.pEncoder.testBmpCoverage.GetUpperBound(0); i++)
             {
-                for (int j = 0; j < orchestrator.pEncoder.testBmpCoverage.GetUpperBound(1); j++)
+                for (int j = 0; j < orchestrator.VisionProcessor.pEncoder.testBmpCoverage.GetUpperBound(1); j++)
                 {
                     //Assert.AreEqual(true, orchestrator.Mapper.flagCheckArr[i, j]);
-                    if (orchestrator.pEncoder.testBmpCoverage[i, j])
+                    if (orchestrator.VisionProcessor.pEncoder.testBmpCoverage[i, j])
                     {
                         trues++;
                     }
@@ -278,7 +266,7 @@
 
             orchestrator.Restore();
 
-            foreach (var fom in orchestrator.fomBBMV)
+            foreach (var fom in orchestrator.VisionProcessor.fomBBMV)
             {
                 for (int i = 0; i < 100; i++)
                 {
@@ -298,7 +286,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3B_V.Columns[i, j] == null)
+                    if (orchestrator.VisionProcessor.somBBM_L3B_V.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -309,7 +297,7 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.somBBM_L3A_V.Columns[i, j] == null)
+                    if (orchestrator.VisionProcessor.somBBM_L3A_V.Columns[i, j] == null)
                     {
                         Assert.Fail();
                     }
@@ -344,13 +332,13 @@
                 }
                 );
 
-            var sensloc = orchestrator.pEncoder.GetSenseiFromSDR_V(sdr, point);
+            var sensloc = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdr, point);
 
             Assert.AreEqual(1, sensloc.sensLoc.Count);
             Assert.AreEqual(4, sensloc.sensLoc.ElementAt(0).Value.Value.Count);
 
 
-            var sensloc1 = orchestrator.pEncoder.GetSenseiFromSDR_V(sdr1, point);
+            var sensloc1 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdr1, point);
 
             Assert.AreEqual(4, sensloc1.sensLoc.Count);
             Assert.AreEqual(1, sensloc1.sensLoc.ElementAt(0).Value.Value.Count);
@@ -381,7 +369,7 @@
             point.X = 1340;
             point.Y = 899;
 
-            var sensloc = orchestrator.pEncoder.GetSenseiFromSDR_V(sdr, point);
+            var sensloc = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdr, point);
 
 
             foreach (var kvp in sensloc.sensLoc)
@@ -449,7 +437,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, false, true);
 
@@ -501,7 +489,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -550,7 +538,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Assert.AreEqual(0, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -598,7 +586,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Assert.AreEqual(100, Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, false).GetTotalMatchPercentage());
 
@@ -646,7 +634,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10,  Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 
@@ -698,7 +686,7 @@
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
-            Sensation_Location sensei2 = orchestrator.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
+            Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
             Match match = Sensation_Location.CompareSenseiPercentage(sensei1, sensei2, true, true);
 
@@ -751,13 +739,13 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.FireAll_V(bp1);
+            orchestrator.ProcessVisual(bp1);
             orchestrator.AddNewVisualSensationToHC();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-            orchestrator.FireAll_V(bp2);
+            orchestrator.ProcessVisual(bp2);
             orchestrator.AddNewVisualSensationToHC();
 
 
@@ -767,7 +755,7 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.FireAll_V(bp1);
+            orchestrator.ProcessVisual(bp1);
             var pos = orchestrator.Verify_Predict_HC(true);
 
             Assert.AreEqual(loc2X, pos.X);
@@ -795,14 +783,14 @@
 
         private int GetXFromBBM_ID(int bbmId)
         {
-            orchestrator.pEncoder.Mappings.TryGetValue(bbmId, out var x);
+            orchestrator.VisionProcessor.pEncoder.Mappings.TryGetValue(bbmId, out var x);
 
             return x[0].X;
         }
 
         private int GetYFromBBM_ID(int bbmId)
         {
-            orchestrator.pEncoder.Mappings.TryGetValue(bbmId, out var x);
+            orchestrator.VisionProcessor.pEncoder.Mappings.TryGetValue(bbmId, out var x);
 
             return x[0].Y;
         }
