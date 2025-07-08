@@ -14,6 +14,7 @@
 
         public int numPixelsProcessedPerBBM;
 
+
         public int NumBBMNeededV { get; private set; }
 
         public int BlockSize;
@@ -39,7 +40,6 @@
         public PixelEncoder pEncoder { get; private set; } 
 
         public Bitmap bmp { get; private set; }
-
 
         public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
         {
@@ -133,7 +133,7 @@
                 // L3B fire
                 somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), CycleNum);
 
-                //L3A fire
+                // L3A fire
                 SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
                 somBBM_L3A_V.Fire(fom_SDR, CycleNum);
             }
@@ -369,7 +369,7 @@
 
             somBBM_L3B_V = SBBM.Restore("SOML3B", LayerType.Layer_3B);
 
-            somBBM_L3A_V = SBBM.Restore("SOML3A", LayerType.Layer_3A);            
+            somBBM_L3A_V = SBBM.Restore("SOML3A", LayerType.Layer_3A);
         }
 
         internal void Backup()

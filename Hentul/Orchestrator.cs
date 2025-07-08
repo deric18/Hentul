@@ -72,7 +72,7 @@
 
         public NetworkMode NMode { get; set; }        
         
-        public VisionStreamProcessor VisionProcessor { get; set; }            
+        public VisionStreamProcessor VisionProcessor { get; set; }
 
         public TextStreamProcessor TextProcessor { get; private set; }
 
@@ -142,10 +142,6 @@
 
         private void Init()
         {
-
-
-
-
             Console.WriteLine("Finished Init for this Instance \n");
             Console.WriteLine("Range : " + Range.ToString() + "\n");            
 

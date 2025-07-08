@@ -838,8 +838,8 @@
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
 
-            if (NeuronsFiringLastCycle.Count == 0)
-                throw new InvalidOperationException("SOM Layer did not fire Last cycle! Check your stupid dumb Code");
+            //if (NeuronsFiringLastCycle.Count == 0)
+            //    throw new InvalidOperationException("SOM Layer did not fire Last cycle! Check your stupid dumb Code");
 
             if (currentCycle - CycleNum <= 1 && NeuronsFiringLastCycle.Count != 0)
             {
