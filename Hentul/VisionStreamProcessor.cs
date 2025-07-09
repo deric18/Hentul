@@ -4,6 +4,7 @@
     using Common;
     using Hentul.Encoders;
     using Hentul.Hippocampal_Entorinal_complex;
+    using OpenCvSharp;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
@@ -40,6 +41,9 @@
         public PixelEncoder pEncoder { get; private set; } 
 
         public Bitmap bmp { get; private set; }
+
+        public string logfilename { get; private set; }
+
 
         public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
         {
@@ -100,6 +104,8 @@
                 Init();
 
             LogMode = logMode;
+
+            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
         }
 
         #endregion
@@ -109,6 +115,11 @@
 
             Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeededV.ToString() + "\n");
+
+            for (int i = 0; i < NumBBMNeededV; i++)
+            {
+                fomBBMV[i].Init(i);
+            }
 
             somBBM_L3A_V.Init(1);
 
@@ -191,7 +202,7 @@
 
         private void WriteLogsToFile(string v)
         {
-            throw new NotImplementedException();
+            File.WriteAllText(logfilename, v);
         }
 
         private void FireFOMsV()
