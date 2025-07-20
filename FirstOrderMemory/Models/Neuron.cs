@@ -490,10 +490,10 @@
                 return;
             }
 
-            if(cycleNum == 0 || lastSpikeCycleNum == 0 || lastSpikeCycleNum > cycleNum)
-            {
-                throw new InvalidOperationException("Last Spiking Value should never be zero");
-            }
+            //if(cycleNum == 0 || lastSpikeCycleNum == 0 || lastSpikeCycleNum > cycleNum)
+            //{
+            //    throw new InvalidOperationException("Last Spiking Value should never be zero");
+            //}
 
             if(cycleNum - lastSpikeCycleNum > 1)
             {

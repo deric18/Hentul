@@ -142,18 +142,10 @@
 
         private void Init()
         {
-
-
-
-
             Console.WriteLine("Finished Init for this Instance \n");
             Console.WriteLine("Range : " + Range.ToString() + "\n");            
-
             Console.WriteLine("Initing SOM Instance now ... \n");
-            
-
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
-
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
@@ -196,18 +188,18 @@
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void ProcessVisual(Bitmap greyScalebmp)
         {
-            VisionProcessor.Process(greyScalebmp);            
+            VisionProcessor.Process(greyScalebmp);
         }
 
         //Stores the new object on to HC
-        public void AddNewVisualSensationToHC()
+        public void AddNewVisualSensationToHc()
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
             {
                 throw new InvalidOperationException("INVALID State Management!");
             }
 
-            var som_SDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
 
             if (som_SDR != null)
             {
@@ -224,7 +216,6 @@
                 throw new InvalidOperationException(" som_SDR should not be null!");
             }
         }
-
 
         //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
         public void AddNewCharacterSensationToHC(char ch)
@@ -263,9 +254,9 @@
                 throw new InvalidOperationException("Invalid State Managemnt!");
             }
 
-            // If any output from HC execute the location output if NOT then take the standar default output.                
-            var som_SDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum);
-            var predictedSDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum + 1);
+            // If any output from HC execute the location output if NOT then take the standard default output.                
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum + 1);
 
 
             if (som_SDR != null)
@@ -315,8 +306,8 @@
 
             Sensation_Location sensei = null, predictedSensei = null;
 
-            var som_SDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum);
-            var predictedSDR = VisionProcessor.GetS3BLatestFiringCells(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum + 1);
 
             if (som_SDR != null)
             {

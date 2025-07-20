@@ -114,7 +114,7 @@
                 throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
             }
 
-            matchingObjectList = ParseAllKnownObjectsForIncomingPattern(sensei, prediction);        // Traditional Pipeline.
+            matchingObjectList = Objects.Values.ToList(); //ParseAllKnownObjectsForIncomingPattern(sensei, prediction);        // Traditional Pipeline.
 
             if (matchingObjectList.Count > 0)
             {
@@ -124,11 +124,6 @@
 
                 foreach (var matchingObject in matchingObjectList)
                 {
-                    if (matchingObject.Label == "JackFruit")
-                    {
-                        bool breakpoint = true;
-                    }
-
                     if (matchingObject.Verify(null, isMock, iterationToConfirmation) == true)
                     {
                         currentmatchingObject = matchingObject;
@@ -382,14 +377,12 @@
 
         private List<RecognisedVisualEntity> ParseAllKnownObjectsForIncomingPattern(Sensation_Location sensei, Sensation_Location predictedSensei = null)
         {
-            List<RecognisedVisualEntity> potentialMatches = null;
-
             if (sensei.sensLoc.Count == 0)
             {
-                return potentialMatches;
+                return null;
             }
 
-            potentialMatches = new List<RecognisedVisualEntity>();
+            List<RecognisedVisualEntity>  potentialMatches = new List<RecognisedVisualEntity>();
             Tuple<int, int> tuple;
 
             foreach (var obj in Objects.Values)

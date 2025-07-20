@@ -106,7 +106,7 @@
                 orchestrator.RecordPixels(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
                 orchestrator.ProcessVisual(edgedbmp1);
-                orchestrator.AddNewVisualSensationToHC();
+                orchestrator.AddNewVisualSensationToHc();
 
             }
 
@@ -740,13 +740,13 @@
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
             orchestrator.ProcessVisual(bp1);
-            orchestrator.AddNewVisualSensationToHC();
+            orchestrator.AddNewVisualSensationToHc();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
             orchestrator.ProcessVisual(bp2);
-            orchestrator.AddNewVisualSensationToHC();
+            orchestrator.AddNewVisualSensationToHc();
 
 
             orchestrator.DoneWithTraining();

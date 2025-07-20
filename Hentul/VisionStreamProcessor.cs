@@ -157,7 +157,7 @@
             firingFOM_V.Clear();
         }
 
-        internal SDR_SOM GetS3BLatestFiringCells(ulong cyclenum) =>        
+        internal SDR_SOM GetSL3BLatestFiringCells(ulong cyclenum) =>        
              somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
 
         private SDR_SOM GetSdrSomFromFOMsV()
@@ -174,7 +174,6 @@
             {
                 posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
-
 
             if (LogMode == Common.LogMode.BurstOnly)
             {
