@@ -2,9 +2,7 @@
 {
     using System.Drawing;
     using Common;
-    using Hentul.Encoders;
-    using Hentul.Hippocampal_Entorinal_complex;
-    using OpenCvSharp;
+    using Encoders;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
