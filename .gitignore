@@ -11,7 +11,8 @@ SecondORderMemoryUnitTest/bin
 SecondORderMemoryUnitTest/obj
 Hentul/obj
 Hentul/bin
-
+Hentul.log
+Hentul/Images/.*
 #OS junk files
     [Tt]humbs.db
     *.DS_Store
