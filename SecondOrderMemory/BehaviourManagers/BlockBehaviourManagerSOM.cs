@@ -838,6 +838,7 @@
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
 
+            // Commenting the code below to support white images.
             //if (NeuronsFiringLastCycle.Count == 0)
             //    throw new InvalidOperationException("SOM Layer did not fire Last cycle! Check your stupid dumb Code");
 
@@ -1251,7 +1252,7 @@
                 WriteLogsToFile(schemToLoad.ToString() + PrintBlockDetailsSingleLine() + "WARNING :: PrepNetworkForNextCycle :: PerCycleFiringSparsity is exceeding 20 %");
             }
 
-            if (CurrentiType == iType.SPATIAL)
+            if (CurrentiType == iType.SPATIAL)      //Cache firing pattern
             {
                 NeuronsFiringLastCycle.Clear();
 

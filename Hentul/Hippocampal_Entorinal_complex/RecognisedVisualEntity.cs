@@ -76,7 +76,6 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 throw new InvalidOperationException("Orchestrator Instance cannot be null!");
             }
 
-
             if (frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
             {
                 throw new InvalidOperationException("RFrame cannot be Empty!");

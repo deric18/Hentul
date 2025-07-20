@@ -101,7 +101,7 @@ namespace HentulWinforms
 
                     orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
 
-                    orchestrator.AddNewVisualSensationToHC();    // Fire SOM per FOMS
+                    orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS
 
                     counter++;                      // Repeat!
 
