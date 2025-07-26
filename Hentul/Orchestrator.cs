@@ -554,6 +554,8 @@
             return totalBurstCount;
         }
 
+
+        // Call only after Post Classification : Decision has been made on the object and now we are actively what the object might look like at different locations.
         public bool BiasFOM(SDR_SOM hcSignal)
         {
             var spatialSignal = PixelEncoder.GetFOMEquivalentPositionsofSOM(hcSignal.ActiveBits);
@@ -580,7 +582,6 @@
                     {
                         fomSDR = new SDR_SOM(NumColumns, NumColumns, kvp.Value, iType.APICAL);
                     }
-
 
                     if (fomSDR != null && kvp.Key < 101)
                     {
