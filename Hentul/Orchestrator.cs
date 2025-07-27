@@ -264,7 +264,7 @@
                 var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
                 var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
 
-                List<string> predictedLabels = VisionProcessor.GetSupportedLabels();
+                List<string> predictedLabels = VisionProcessor.GetSupportedLabels(LearningUnitType.V1);
 
                 if (legacyPipeline)
                 {
