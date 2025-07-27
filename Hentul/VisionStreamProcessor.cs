@@ -1,4 +1,6 @@
-﻿namespace Hentul
+﻿using System.Runtime.InteropServices;
+
+namespace Hentul
 {
     using System.Drawing;
     using Common;
@@ -84,9 +86,9 @@
 
             if (shouldInit)
             {
-                v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename);
-                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename);
-                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename);
+                v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
+                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
+                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
             }
             
             Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
@@ -114,22 +116,35 @@
             v1.Process(pEncoder, CycleNum);
             v2.Process(pEncoder, CycleNum);
             v3.Process(pEncoder, CycleNum);
-            
 
 
-            pEncoder.Clean();
-            
-            
-            v1.Clear();
-            v2.Clear();
-            v3.Clear();
-            
+
+            Clean();
         }
 
-        internal SDR_SOM GetSL3BLatestFiringCells(ulong cyclenum) =>        
-             somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
+        internal SDR_SOM GetSL3BLatestFiringCells(LearningUnitType luType, ulong cyclenum) =>
+             GetLearningUnit(luType).somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
 
-        
+        internal FBBM[] GetFOMBBMVFromLearningUnit(LearningUnitType lType)
+        {
+            var lu = GetLearningUnit(lType);
+
+            return lu.fomBBMV;
+
+        }
+
+        internal LearningUnit GetLearningUnit(LearningUnitType lType)
+        {
+            if (v1.LType == lType)
+                return v1;
+            else if (v2.LType == lType)
+                return v2;
+            else if (v3.LType == lType)
+                return v3;
+
+            throw new InvalidOleVariantTypeException("No Matching input Learning Unit Type!");
+        }
+
         private void WriteLogsToFile(string v)
         {
             File.WriteAllText(logfilename, v);
@@ -153,7 +168,7 @@
         }
 
 
-        internal void PrintBlockVitalVision()
+        internal void PrintBlockVitalVision(LearningUnitType luType)
         {
             Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
 
@@ -163,7 +178,9 @@
             {
                 ulong totalIncludedCycle = 0;
 
-                for (int i = 0; i < fomBBMV.Count(); i++)
+                var fomBBMV = GetFOMBBMVFromLearningUnit(luType);
+
+                for (int i = 0; i < fomBBMV.Length; i++)
                 {
                     if (fomBBMV[i].BBMID != 0)
                         Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBMV[i].PrintBlockDetailsSingleLine() + " | " + "Included Cycle: " + fomBBMV[i].CycleNum.ToString());
@@ -186,17 +203,18 @@
 
         internal void SetNetworkModeToPrediction()
         {
-            somBBM_L3B_V.ChangeNetworkModeToPrediction();
-            somBBM_L3A_V.ChangeNetworkModeToPrediction();
+            v1.ChangeNetworkModeToPrediction();
         }
 
-        internal List<string> GetSupportedLabels() => somBBM_L3B_V.GetSupportedLabels();
+        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetSupportedLabels();
 
 
         internal void Clean()
         {
             pEncoder.Clean();
-            firingFOM_V.Clear();
+            v1.Clear();
+            v2.Clear();
+            v3.Clear();
         }
     }
 }

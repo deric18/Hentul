@@ -28,7 +28,9 @@
 
         private int Z { get; set; }
 
-        public LearningUnit(int numBBMNeededV, int numColumns, int z, int x, bool shouldInit, string logfileName, LogMode lMode = LogMode.BurstOnly)
+        public LearningUnitType LType { get; private set; }
+
+        public LearningUnit(int numBBMNeededV, int numColumns, int z, int x, bool shouldInit, string logfileName, LearningUnitType lType, LogMode lMode = LogMode.BurstOnly)
         {
             fomBBMV = new FBBM[numBBMNeededV];
             firingFOM_V = new List<int>();
@@ -50,6 +52,8 @@
             this.logfileName = logfileName;
 
             this.logMode = lMode;
+
+            this.LType = lType;
         }
 
         public void Init()
@@ -323,6 +327,11 @@
             somBBM_L3B_V.BackUp("SOML3B.json");
 
             somBBM_L3A_V.BackUp("SOML3A.json");
+        }
+
+        internal void ChangeNetworkModeToPrediction()
+        {
+            somBBM_L3A_V.ChangeNetworkModeToPrediction();
         }
     }
 }

@@ -199,7 +199,7 @@
                 throw new InvalidOperationException("INVALID State Management!");
             }
 
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
 
             if (som_SDR != null)
             {
@@ -255,8 +255,8 @@
             }
 
             // If any output from HC execute the location output if NOT then take the standard default output.                
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
 
 
             if (som_SDR != null)
@@ -297,7 +297,6 @@
             NMode = NetworkMode.PREDICTION;
             HCAccessor.DoneWithTraining();
             HCAccessor.SetNetworkModeToPrediction();
-            VisionProcessor.SetNetworkModeToPrediction();
         }
 
         //Gets the current SDR and next cycle predited SDR from classifier layer
@@ -306,8 +305,8 @@
 
             Sensation_Location sensei = null, predictedSensei = null;
 
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
 
             if (som_SDR != null)
             {
@@ -363,14 +362,14 @@
 
                 if (postBiasBurstCount > 0)
                 {
-                    Dictionary<int, List<Position_SOM>> dict = new Dictionary<int, List<Position_SOM>>();
+                    Dictionary<int, List<Position_SOM>> bbmToFiringPositions = new Dictionary<int, List<Position_SOM>>();
 
-                    foreach (var fom in VisionProcessor.fomBBMV)
+                    foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
                     {
                         Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
 
                         if (tuple != null)
-                            dict.Add(tuple.Item1, tuple.Item2);
+                            bbmToFiringPositions.Add(tuple.Item1, tuple.Item2);
                     }
 
                     breakpoint = 2;
@@ -546,7 +545,7 @@
         {
             uint totalBurstCount = 0;
 
-            foreach (var fom in VisionProcessor.fomBBMV)
+            foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
             {
                 totalBurstCount += fom.GetTotalBurstCountInLastCycle(cycleNum);
             }
@@ -592,7 +591,7 @@
                             bool bp = true;
                         }
 
-                        VisionProcessor.fomBBMV[kvp.Key].Fire(fomSDR, CycleNum);
+                        VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1)[kvp.Key].Fire(fomSDR, CycleNum);
 
                         flag = true;
                     }
@@ -896,7 +895,7 @@
 
         private void PrintMoreBlockVitals()
         {
-            VisionProcessor.PrintBlockVitalVision();
+            VisionProcessor.PrintBlockVitalVision(LearningUnitType.V1);
         }
 
         public void BackUp()
@@ -1201,6 +1200,13 @@
 
 
     #region Enums
+
+    public enum LearningUnitType
+    {
+        V1,
+        V2,
+        V3
+    }
 
     public enum VisionScope
     {
