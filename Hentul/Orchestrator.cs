@@ -295,6 +295,7 @@
         public void ChangeNetworkToPredictionMode()
         {
             NMode = NetworkMode.PREDICTION;
+            VisionProcessor.SetNetworkModeToPrediction();
             HCAccessor.DoneWithTraining();
             HCAccessor.SetNetworkModeToPrediction();
         }

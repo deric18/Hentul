@@ -332,6 +332,7 @@
         internal void ChangeNetworkModeToPrediction()
         {
             somBBM_L3A_V.ChangeNetworkModeToPrediction();
+            somBBM_L3B_V.ChangeNetworkModeToPrediction();
         }
     }
 }
