@@ -109,7 +109,7 @@ namespace Hentul
         #endregion
        
 
-        internal void Process(Bitmap greyScalebmp)
+        public void Process(Bitmap greyScalebmp)
         {
             pEncoder.ParseBitmap(greyScalebmp);
 
@@ -122,10 +122,10 @@ namespace Hentul
             Clean();
         }
 
-        internal SDR_SOM GetSL3BLatestFiringCells(LearningUnitType luType, ulong cyclenum) =>
+        public SDR_SOM GetSL3BLatestFiringCells(LearningUnitType luType, ulong cyclenum) =>
              GetLearningUnit(luType).somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
 
-        internal FBBM[] GetFOMBBMVFromLearningUnit(LearningUnitType lType)
+        public FBBM[] GetFOMBBMVFromLearningUnit(LearningUnitType lType)
         {
             var lu = GetLearningUnit(lType);
 
@@ -153,14 +153,14 @@ namespace Hentul
         
 
 
-        internal void Restore()
+        public void Restore()
         {
             v1.Restore();
             v2.Restore();
             v3.Restore();
         }
 
-        internal void Backup()
+        public void Backup()
         {
             v1.Backup();
             v2.Backup();
@@ -168,7 +168,7 @@ namespace Hentul
         }
 
 
-        internal void PrintBlockVitalVision(LearningUnitType luType)
+        public void PrintBlockVitalVision(LearningUnitType luType)
         {
             Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
 
