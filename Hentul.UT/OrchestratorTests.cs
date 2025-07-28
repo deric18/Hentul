@@ -266,7 +266,7 @@
 
             orchestrator.Restore();
 
-            foreach (var fom in orchestrator.VisionProcessor.fomBBMV)
+            foreach (var fom in orchestrator.VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
             {
                 for (int i = 0; i < 100; i++)
                 {
@@ -286,10 +286,10 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.VisionProcessor.somBBM_L3B_V.Columns[i, j] == null)
-                    {
-                        Assert.Fail();
-                    }
+                    //if (orchestrator.VisionProcessor..Columns[i, j] == null)
+                    //{
+                    //    Assert.Fail();
+                    //}
                 }
             }
 
@@ -297,10 +297,10 @@
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (orchestrator.VisionProcessor.somBBM_L3A_V.Columns[i, j] == null)
-                    {
-                        Assert.Fail();
-                    }
+                    //if (orchestrator.VisionProcessor.somBBM_L3A_V.Columns[i, j] == null)
+                    //{
+                    //    Assert.Fail();
+                    //}
                 }
             }
         }

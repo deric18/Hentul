@@ -72,7 +72,7 @@
 
         public NetworkMode NMode { get; set; }        
         
-        public VisionStreamProcessor VisionProcessor { get; set; }            
+        public VisionStreamProcessor VisionProcessor { get; set; }
 
         public TextStreamProcessor TextProcessor { get; private set; }
 
@@ -199,7 +199,7 @@
                 throw new InvalidOperationException("INVALID State Management!");
             }
 
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
 
             if (som_SDR != null)
             {
@@ -255,8 +255,8 @@
             }
 
             // If any output from HC execute the location output if NOT then take the standard default output.                
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
 
 
             if (som_SDR != null)
@@ -264,7 +264,7 @@
                 var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
                 var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
 
-                List<string> predictedLabels = VisionProcessor.GetSupportedLabels();
+                List<string> predictedLabels = VisionProcessor.GetSupportedLabels(LearningUnitType.V1);
 
                 if (legacyPipeline)
                 {
@@ -295,9 +295,9 @@
         public void ChangeNetworkToPredictionMode()
         {
             NMode = NetworkMode.PREDICTION;
+            VisionProcessor.SetNetworkModeToPrediction();
             HCAccessor.DoneWithTraining();
             HCAccessor.SetNetworkModeToPrediction();
-            VisionProcessor.SetNetworkModeToPrediction();
         }
 
         //Gets the current SDR and next cycle predited SDR from classifier layer
@@ -306,8 +306,8 @@
 
             Sensation_Location sensei = null, predictedSensei = null;
 
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(CycleNum + 1);
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
 
             if (som_SDR != null)
             {
@@ -363,14 +363,14 @@
 
                 if (postBiasBurstCount > 0)
                 {
-                    Dictionary<int, List<Position_SOM>> dict = new Dictionary<int, List<Position_SOM>>();
+                    Dictionary<int, List<Position_SOM>> bbmToFiringPositions = new Dictionary<int, List<Position_SOM>>();
 
-                    foreach (var fom in VisionProcessor.fomBBMV)
+                    foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
                     {
                         Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
 
                         if (tuple != null)
-                            dict.Add(tuple.Item1, tuple.Item2);
+                            bbmToFiringPositions.Add(tuple.Item1, tuple.Item2);
                     }
 
                     breakpoint = 2;
@@ -546,7 +546,7 @@
         {
             uint totalBurstCount = 0;
 
-            foreach (var fom in VisionProcessor.fomBBMV)
+            foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
             {
                 totalBurstCount += fom.GetTotalBurstCountInLastCycle(cycleNum);
             }
@@ -554,6 +554,8 @@
             return totalBurstCount;
         }
 
+
+        // Call only after Post Classification : Decision has been made on the object and now we are actively what the object might look like at different locations.
         public bool BiasFOM(SDR_SOM hcSignal)
         {
             var spatialSignal = PixelEncoder.GetFOMEquivalentPositionsofSOM(hcSignal.ActiveBits);
@@ -581,7 +583,6 @@
                         fomSDR = new SDR_SOM(NumColumns, NumColumns, kvp.Value, iType.APICAL);
                     }
 
-
                     if (fomSDR != null && kvp.Key < 101)
                     {
                         RemoveDuplicateEntries(ref fomSDR);
@@ -591,7 +592,7 @@
                             bool bp = true;
                         }
 
-                        VisionProcessor.fomBBMV[kvp.Key].Fire(fomSDR, CycleNum);
+                        VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1)[kvp.Key].Fire(fomSDR, CycleNum);
 
                         flag = true;
                     }
@@ -895,7 +896,7 @@
 
         private void PrintMoreBlockVitals()
         {
-            VisionProcessor.PrintBlockVitalVision();
+            VisionProcessor.PrintBlockVitalVision(LearningUnitType.V1);
         }
 
         public void BackUp()
@@ -1200,6 +1201,13 @@
 
 
     #region Enums
+
+    public enum LearningUnitType
+    {
+        V1,
+        V2,
+        V3
+    }
 
     public enum VisionScope
     {

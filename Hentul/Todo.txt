@@ -1,4 +1,27 @@
-﻿-Narrow vs Broad Vision[0]--> v1, v2, v3 
+﻿Small Direction
+- Refactor Code 
+- Introduce Learning LearningUnit
+- Refactor Vision Processor and Text Processor to use Learningunit for init , process , and depolarization
+- Update the record pixel logic to process pixels and store senseloc only when there is real data to store. [Put null check in senseloc]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Big Direction -------------------
+
+
+-Narrow vs Broad Vision[0]--> v1, v2, v3 
 -Multi Modal Regions[0] --> A1
 -Schema Based Region Init [0]
 -Temporal timestamp driven firings. [1]

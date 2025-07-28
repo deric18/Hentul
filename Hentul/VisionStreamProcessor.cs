@@ -1,4 +1,6 @@
-﻿namespace Hentul
+﻿using System.Runtime.InteropServices;
+
+namespace Hentul
 {
     using System.Drawing;
     using Common;
@@ -13,17 +15,16 @@
 
         public int numPixelsProcessedPerBBM;
 
+
         public int NumBBMNeededV { get; private set; }
 
         public int BlockSize;
 
-        public FBBM[] fomBBMV { get; private set; }
+        public LearningUnit v1 { get; private set; }
 
-        public List<int>  firingFOM_V {  get; private set; }
+        public LearningUnit v2 { get; private set; }
 
-        public SBBM somBBM_L3B_V { get; private set; }
-
-        public SBBM somBBM_L3A_V { get; private set; }
+        public LearningUnit v3 { get; private set; }
 
         public int Range { get; private set; }
 
@@ -40,6 +41,8 @@
         public Bitmap bmp { get; private set; }
 
         public string logfilename { get; private set; }
+        
+        public int numberOFLearningUnitsNeeded => 1; // This is a constant for now, can be changed later if needed.
 
 
         public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
@@ -47,7 +50,7 @@
             this.X = x;
 
             this.NumColumns = numColumns;
-            
+
             IsMock = isMock;
 
             Z = 5;
@@ -70,7 +73,7 @@
 
             bmp = new Bitmap(range + range, range + range);
 
-            firingFOM_V = new List<int>();
+            
 
             if (NumBBMNeededV != 100)
             {
@@ -81,24 +84,22 @@
 
             NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
 
-            fomBBMV = new FBBM[NumBBMNeededV];
+            if (shouldInit)
+            {
+                v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
+                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
+                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
+            }
+            
+            Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
+            Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeededV.ToString() + "\n");
 
             if (shouldInit)
             {
-
-                for (int i = 0; i < NumBBMNeededV; i++)
-                {
-                    fomBBMV[i] = new FBBM(NumColumns, NumColumns, Z, LayerType.Layer_4, Common.LogMode.None);
-                }
-
-                somBBM_L3A_V = new SBBM(X, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
-
-                somBBM_L3B_V = new SBBM(X, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
-
-            }                        
-            
-            if(shouldInit) 
-                Init();
+                v1.Init();
+                v2.Init();
+                v3.Init();
+            }
 
             LogMode = logMode;
 
@@ -106,94 +107,42 @@
         }
 
         #endregion
+       
 
-        private void Init()
-        {
-
-            Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
-            Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeededV.ToString() + "\n");
-
-            for (int i = 0; i < NumBBMNeededV; i++)
-            {
-                fomBBMV[i].Init(i);
-            }
-
-            somBBM_L3A_V.Init(1);
-
-            somBBM_L3B_V.Init(1);
-
-        }
-
-        internal void Process(Bitmap greyScalebmp)
+        public void Process(Bitmap greyScalebmp)
         {
             pEncoder.ParseBitmap(greyScalebmp);
 
-            FireFOMsV();
+            v1.Process(pEncoder, CycleNum);
+            v2.Process(pEncoder, CycleNum);
+            v3.Process(pEncoder, CycleNum);
 
-            if (pEncoder.somPositions.Count != 0)
-            {
-                if (pEncoder.somPositions.Count > 125)
-                {
-                    WriteLogsToFile("Layer 3B : SomPosition Write count " + pEncoder.somPositions.Count);
-                    bool breakpoint = true;
-                }
 
-                // L3B fire
-                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), CycleNum);
 
-                //L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
-                somBBM_L3A_V.Fire(fom_SDR, CycleNum);
-            }
-            else
-            {
-                somBBM_L3B_V.FireBlank(CycleNum);
-                somBBM_L3A_V.FireBlank(CycleNum);
-            }
-
-            pEncoder.Clean();
-            firingFOM_V.Clear();
+            Clean();
         }
 
-        internal SDR_SOM GetSL3BLatestFiringCells(ulong cyclenum) =>        
-             somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
+        public SDR_SOM GetSL3BLatestFiringCells(LearningUnitType luType, ulong cyclenum) =>
+             GetLearningUnit(luType).somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
 
-        private SDR_SOM GetSdrSomFromFOMsV()
+        public FBBM[] GetFOMBBMVFromLearningUnit(LearningUnitType lType)
         {
-            if (firingFOM_V.Count == 0)
-            {
-                int exception = 1;
-            }
+            var lu = GetLearningUnit(lType);
 
-            // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
-            List<Position_SOM> posList = new List<Position_SOM>();
+            return lu.fomBBMV;
 
-            foreach (var fomID in firingFOM_V)
-            {
-                posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
-            }
+        }
 
-            if (LogMode == Common.LogMode.BurstOnly)
-            {
-                int count = 0;
+        internal LearningUnit GetLearningUnit(LearningUnitType lType)
+        {
+            if (v1.LType == lType)
+                return v1;
+            else if (v2.LType == lType)
+                return v2;
+            else if (v3.LType == lType)
+                return v3;
 
-                foreach (var fomID in firingFOM_V)
-                {
-                    count += fomBBMV[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
-                }
-
-                if (count == fomBBMV.Count() * Z)
-                {
-                    WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
-                }
-            }
-
-            if (posList == null || posList.Count == 0)
-            {
-                throw new NullReferenceException(" FOM BBM returned empty position list ");
-            }
-
-            return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
+            throw new InvalidOleVariantTypeException("No Matching input Learning Unit Type!");
         }
 
         private void WriteLogsToFile(string v)
@@ -201,198 +150,25 @@
             File.WriteAllText(logfilename, v);
         }
 
-        private void FireFOMsV()
-        {
-            foreach (var kvp in pEncoder.FOMBBMIDS)
-            {
-                switch (kvp.Key)
-                {
-                    case MAPPERCASE.ALL:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ALL, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETWOTHREEE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOTHREEE, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWOTHREEFOUR:
-                        {
+        
 
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREEFOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETWOFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWOFOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETHREEFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREEFOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETWO:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETWO, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONETHREE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONETHREE, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONEFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONEFOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWOTHREE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOTHREE, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWOFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWOFOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.THREEFOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREEFOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.ONE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.ONE, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.TWO:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.TWO, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.THREE:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.THREE, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    case MAPPERCASE.FOUR:
-                        {
-                            foreach (var bbmID in kvp.Value)
-                            {
-                                var poses = pEncoder.GetSDR_SOMForMapperCase(MAPPERCASE.FOUR, bbmID);
-                                fomBBMV[bbmID].Fire(poses, CycleNum);
-                                firingFOM_V.Add(bbmID);
-                            }
-                        }
-                        break;
-                    default:
-                        {
-                            throw new NotImplementedException();
-                        }
-                }
-            }
+
+        public void Restore()
+        {
+            v1.Restore();
+            v2.Restore();
+            v3.Restore();
+        }
+
+        public void Backup()
+        {
+            v1.Backup();
+            v2.Backup();
+            v3.Backup();
         }
 
 
-        internal void Restore()
-        {
-            for (int i = 0; i < fomBBMV.Length; i++)
-            {
-                fomBBMV[i] = FBBM.Restore(i.ToString(), LayerType.Layer_4);
-            }
-
-            somBBM_L3B_V = SBBM.Restore("SOML3B", LayerType.Layer_3B);
-
-            somBBM_L3A_V = SBBM.Restore("SOML3A", LayerType.Layer_3A);            
-        }
-
-        internal void Backup()
-        {
-            for (int i = 0; i < fomBBMV.Length; i++)
-            {
-                fomBBMV[i].BackUp(i.ToString() + ".json");
-            }
-
-            somBBM_L3B_V.BackUp("SOML3B.json");
-
-            somBBM_L3A_V.BackUp("SOML3A.json");
-        }
-
-
-        internal void PrintBlockVitalVision()
+        public void PrintBlockVitalVision(LearningUnitType luType)
         {
             Console.WriteLine("Enter '1' to see a list of all the Block Usage List :");
 
@@ -402,7 +178,9 @@
             {
                 ulong totalIncludedCycle = 0;
 
-                for (int i = 0; i < fomBBMV.Count(); i++)
+                var fomBBMV = GetFOMBBMVFromLearningUnit(luType);
+
+                for (int i = 0; i < fomBBMV.Length; i++)
                 {
                     if (fomBBMV[i].BBMID != 0)
                         Console.WriteLine(i.ToString() + " :: Block ID : " + fomBBMV[i].PrintBlockDetailsSingleLine() + " | " + "Included Cycle: " + fomBBMV[i].CycleNum.ToString());
@@ -425,17 +203,18 @@
 
         internal void SetNetworkModeToPrediction()
         {
-            somBBM_L3B_V.ChangeNetworkModeToPrediction();
-            somBBM_L3A_V.ChangeNetworkModeToPrediction();
+            v1.ChangeNetworkModeToPrediction();
         }
 
-        internal List<string> GetSupportedLabels() => somBBM_L3B_V.GetSupportedLabels();
+        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetSupportedLabels();
 
 
         internal void Clean()
         {
             pEncoder.Clean();
-            firingFOM_V.Clear();
+            v1.Clear();
+            v2.Clear();
+            v3.Clear();
         }
     }
 }
