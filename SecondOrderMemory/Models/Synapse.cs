@@ -5,7 +5,8 @@
 
         public Guid Id { get; private set; }
 
-        public HashSet<string> SupportedLabels { get; private set; }                // Holdss only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
+        public HashSet<string> 
+            SupportedLabels { get; private set; }                // Holds only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
 
         public string AxonalNeuronId { get; private set; }
 

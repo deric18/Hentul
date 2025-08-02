@@ -1,10 +1,10 @@
 ﻿namespace SecondOrderMemory.Models
 {
-    using Common;
-    using System.Xml;
-    using System.Linq;
     using System;
     using System.ComponentModel;
+    using System.Linq;
+    using System.Xml;
+    using Common;
 
     public class BlockBehaviourManagerSOM
     {
@@ -99,7 +99,7 @@
         public List<Neuron> OverConnectedOffenderList { get; private set; }
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
 
-        private uint _firingBlacnkStreak;
+        private uint _firingBlankStreak;
 
         private bool IgnorePostCycleCleanUp;
 
@@ -232,7 +232,7 @@
 
             IgnorePostCycleCleanUp = false;
 
-            _firingBlacnkStreak = 0;
+            _firingBlankStreak = 0;
 
             this.includeBurstLearning145 = includeBurstLearning;
 
@@ -510,7 +510,7 @@
             if (!ValidateInput(incomingPattern, currentCycle))
                 return false;
 
-            _firingBlacnkStreak = 0;
+            _firingBlankStreak = 0;
 
             NumberOfColumnsThatFiredThisCycle = incomingPattern.ActiveBits.Count;
 
@@ -522,11 +522,6 @@
                         for (int i = 0; i < incomingPattern.ActiveBits.Count; i++)
                         {
                             var predictedNeuronPositions = Columns[incomingPattern.ActiveBits[i].X, incomingPattern.ActiveBits[i].Y].GetPredictedNeuronsFromColumn();
-
-                            if (incomingPattern.ActiveBits[i].X == 0 && incomingPattern.ActiveBits[i].Y == 4 && incomingPattern.ActiveBits.Count == 2 && predictedNeuronPositions.Count != 10)
-                            {
-                                int breakpoint = 0;
-                            }
 
                             if (predictedNeuronPositions?.Count == Columns[0, 0].Neurons.Count)
                             {
@@ -634,7 +629,6 @@
                     WriteLogsToFile("Thread Being Slept to 2000");
                     //Thread.Sleep(2000);
                 }
-
             }
 
             Fire();
@@ -833,7 +827,7 @@
         {
             List<Position_SOM> activeBits = new List<Position_SOM>();            
 
-            if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+            if (_firingBlankStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
                 throw new InvalidOperationException("Neurons Firing Last Cycle Should be empty after Blank Fires");
             }
@@ -938,9 +932,9 @@
             {
                 CycleNum = currentCycle;
 
-                _firingBlacnkStreak++;
+                _firingBlankStreak++;
 
-                if (_firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
+                if (_firingBlankStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
                 {
                     FlushAllNeuronsInList(NeuronsFiringLastCycle);
                     CompleteCleanUP();
@@ -1911,6 +1905,12 @@
 
         private bool ValidateInput(SDR_SOM incomingPattern, ulong currentCycle)
         {
+            if (SupportedLabels.Count == 0 && NetWorkMode == NetworkMode.PREDICTION)
+            {
+                throw new InvalidOperationException(
+                    " SOM Layer : " +  Layer.ToString() + "  : Have Not Learned enough to Classify Predictions!");
+            }
+
             if (incomingPattern.ActiveBits.Count == 0)
             {
                 Console.WriteLine("EXCEPTION :: Incoming Pattern cannot be empty");
@@ -2283,7 +2283,7 @@
         private void PreCyclePrep(ulong incomingCycle, iType itype)
         {
 
-            if (incomingCycle - CycleNum > 1 && _firingBlacnkStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP)
+            if (incomingCycle - CycleNum > 1 && _firingBlankStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP)
             {
                 foreach (var neuron in NeuronsFiringLastCycle)
                 {
