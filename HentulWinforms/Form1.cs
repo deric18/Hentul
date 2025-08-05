@@ -22,14 +22,18 @@ namespace HentulWinforms
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
         Orchestrator.POINT RightBottom = new Orchestrator.POINT();
 
-
-        string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
-        string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
-        string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+        string baseDir = AppContext.BaseDirectory;
+        string backupDirHC;
+        string backupDirFOM;
+        string backupDirSOM;
+        
 
         public Form1()
         {
             InitializeComponent();
+            backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\"));
+            backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
+            backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
             networkMode = NetworkMode.TRAINING;
             train_another_object.Visible = false;
         }
@@ -277,9 +281,9 @@ namespace HentulWinforms
         {
             CurrentImage.Image = orchestrator.bmp;
 
-            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
-
-            orchestrator.bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
+            
+            string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\savedImage.png"));
+            orchestrator.bmp.Save(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\savedImage.png")));
 
             //var edgeDetection = Cv2.im
 

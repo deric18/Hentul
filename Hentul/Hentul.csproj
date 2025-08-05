@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BackUp\" />
+    <Folder Include="BackUp\HC-EC\" />
+    <Folder Include="BackUp\FOM\" />
+    <Folder Include="BackUp\SOM\" />
     <Folder Include="Schema\" />
   </ItemGroup>
 

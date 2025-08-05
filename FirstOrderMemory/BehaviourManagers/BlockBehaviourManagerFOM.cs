@@ -10,7 +10,7 @@
     public class BlockBehaviourManagerFOM
     {
         #region VARIABLES        
-
+        string baseDir = AppContext.BaseDirectory;
         public ulong CycleNum { get; private set; }
 
         public int X { get; private set; }
@@ -2482,11 +2482,11 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchemaFOM.xml";
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\DendriticSchemaFOM.xml"));
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\1K Club\DendriticSchemaSOM.xml"));
             }
 
             if (File.Exists(dendriteDocumentPath) == false)
@@ -2648,11 +2648,11 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchemaFOM.xml";
+                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\AxonalSchemaFOM.xml"));
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
+                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\1K Club\AxonalSchema-SOM.xml"));
             }
 
             if (!File.Exists(axonalDocumentPath))

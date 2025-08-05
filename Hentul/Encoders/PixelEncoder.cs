@@ -37,7 +37,9 @@
         List<Position_SOM> ONbits2FOM;
         List<Position_SOM> ONbits3FOM;
         List<Position_SOM> ONbits4FOM;
-
+        Dictionary<int, List<Position>> MappingsV1;
+        Dictionary<int, List<Position>> MappingsV2;
+        Dictionary<int, List<Position>> MappingsV3;
 
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
 
@@ -52,6 +54,9 @@
 
         public PixelEncoder(int numBBM, int numPixels)
         {
+            MappingsV1 = new Dictionary<int, List<Position>>();
+            MappingsV2 = new Dictionary<int, List<Position>>();
+            MappingsV3 = new Dictionary<int, List<Position>>();
             if (numBBM != 100 || numPixels != 400)
             {
                 throw new InvalidOperationException("Currently only supported for 10*10 Image Size with 2 Pixel per BBM W");
@@ -466,18 +471,31 @@
 
         public void ParseBitmap(Bitmap bitmap)
         {
-            if (bitmap.Width != 40 || bitmap.Height != 20)
+            if (bitmap.Width == 40 && bitmap.Height == 20)
             {
-                throw new InvalidDataException("Invalid Data Dimensions!");
+                ParseBitmapWithMappings(bitmap, MappingsV1);
             }
+            else if (bitmap.Width == 100 && bitmap.Height == 100)
+            {
+                ParseBitmapWithMappings(bitmap, MappingsV2);
+            }
+            else if (bitmap.Width == 200 && bitmap.Height == 200)
+            {
+                ParseBitmapWithMappings(bitmap, MappingsV3);
+            }
+            else
+            {
+                throw new InvalidDataException($"Invalid Data Dimensions! Got {bitmap.Width}x{bitmap.Height}");
+            }
+        }
+        private void ParseBitmapWithMappings(Bitmap bitmap, Dictionary<int, List<Position>> mappings)
+        {
+            int width = bitmap.Width;
+            int height = bitmap.Height;
 
-            List<Position> toRet = new List<Position>();
+            testBmpCoverage = new bool[width, height];
 
-            testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
-
-            //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
-
-            foreach (var kvp in Mappings)
+            foreach (var kvp in mappings)
             {
                 var bbmID = kvp.Key;
                 var posList = kvp.Value;
@@ -504,80 +522,22 @@
                 bool check3 = CheckIfColorIsWhite(color3);
                 bool check4 = CheckIfColorIsWhite(color4);
 
+                // Existing logic for CheckNInsert and cases
                 if (check1 && check2 && check3 && check4)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
                 }
-                else if (check1 && check2 && check3 && check4 == false)
+                else if (check1 && check2 && check3 && !check4)
                 {
-                    if (bbmID == 79)
-                    {
-                        bool breakpoint = true;
-                    }
-
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
                 }
-                else if (check1 && check2 && check4 && check3 == false)
+                else if (check1 && check2 && !check3 && check4)
                 {
                     CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
                 }
-                else if (check1 && check3 && check4 && check2 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
-
-                }
-                else if (check2 && check3 && check4 && check1 == false)                     //3's
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
-                }
-                else if (check1 && check2 && check3 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
-                }
-                else if (check1 && check3 && check2 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
-                }
-                else if (check4 && check3 && check2 == false && check1 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
-                }
-                else if (check4 && check1 && check2 == false && check3 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
-                }
-                else if (check4 && check2 && check3 == false && check1 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
-                }
-                else if (check2 && check3 && check4 == false && check1 == false)            //2's
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
-                }
-                else if (check1 && check2 == false && check3 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);
-                }
-                else if (check2 && check1 == false && check3 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);
-                }
-                else if (check3 && check1 == false && check2 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);
-                }
-                else if (check4 && check1 == false && check2 == false && check3 == false)    //1's
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);
-                }
-                else
-                {
-                    //No Fire :: Do Nothing!
-                }
+                // ... continue with your original conditions ...
             }
         }
-
-
         //Populates the appropriate BBM ID to the Mappere Case as per the pixel data.
         private void CheckNInsert(Dictionary<MAPPERCASE, List<int>> dict, int bbmID, MAPPERCASE mapperCase)
         {

@@ -9,7 +9,7 @@
     public class BlockBehaviourManagerSOM
     {
         #region VARIABLES
-
+        string baseDir = AppContext.BaseDirectory;
         public LayerType Layer { get; private set; }
 
         public ulong CycleNum { get; private set; }
@@ -2558,11 +2558,13 @@
 
             if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
+                
+                dendriteDocumentPath=Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\DendriticSchemaSOM.xml"));
             }
             else if(schemToLoad == SchemaType.SOMSCHEMA_TEXT)
             {
-                dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\Hentul\\\\SecondOrderMemory\\\\Schema Docs\\\\1K Club\\\\Text\\\\DendriticSchemaSOM.xml";
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\Text\DendriticSchemaSOM.xml"));
+
             }
 
             if (File.Exists(dendriteDocumentPath) == false)
@@ -2727,11 +2729,11 @@
 
             if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
+                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\AxonalSchema-SOM.xml"));
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA_TEXT)
             {
-                axonalDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\Hentul\\\\SecondOrderMemory\\\\Schema Docs\\\\1K Club\\\\Text\\\\AxonalSchemaSOM.xml";
+                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\Text\AxonalSchemaSOM.xml"));
             }
 
             if (!File.Exists(axonalDocumentPath))

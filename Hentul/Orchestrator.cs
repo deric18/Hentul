@@ -10,6 +10,7 @@
 
     public class Orchestrator
     {
+        string baseDir = AppContext.BaseDirectory;
 
         public struct POINT
         {
@@ -124,10 +125,12 @@
             imageIndex = 1;
 
             //MockBlockNumFires = new int[NumBBMNeededV];                       
-                        
-            fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";            
+            //fileName = "C:\\darshaka\\Thabrew\\HentulGit\\Hentul\\Images\\savedImage.png";
+            fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\savedImage.jpg"));
+
+            //logfilename = "C:\\darshaka\\Thabrew\\HentulGit\\Hentul\\Logs\\Hentul-Orchestrator.log";
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
@@ -161,30 +164,71 @@
             Console.WriteLine("Grabbing cursor Position");
 
             point = this.GetCurrentPointerPosition();
-
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            int Range2 = Range + Range;
-
-            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
-            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
-            int x2 = Math.Abs(point.X + Range2);
-            int y2 = Math.Abs(point.Y + Range);
-
-            //this.GetColorByRange(x1, y1, x2, y2);
-
-            Rectangle rect = new Rectangle(x1, y1, x2, y2);
-
-            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
-
-            Graphics g = Graphics.FromImage(bmp);
-
-            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
-
-            if (isMock == false)
-                bmp.Save(fileName, ImageFormat.Jpeg);
+            System.Drawing.Point systemPoint = new System.Drawing.Point(point.X, point.Y);
+            // Create all 3 versions
+            RecordRegion(systemPoint, 10, "V1", isMock);
+            RecordRegion(systemPoint, 50, "V2", isMock); // 100x100
+            RecordRegion(systemPoint, 100, "V3", isMock); // 200x200
         }
+        
+        private void RecordRegion(Point cursor, int range, string label, bool isMock)
+        {
+            int size = range * 2;
+            int x1 = Math.Max(cursor.X - range, 0);
+            int y1 = Math.Max(cursor.Y - range, 0);
+            Rectangle rect = new Rectangle(x1, y1, size, size);
 
+            using (Bitmap fullBmp = new Bitmap(size, size, PixelFormat.Format32bppArgb))
+            using (Graphics g = Graphics.FromImage(fullBmp))
+            {
+                g.CopyFromScreen(x1, y1, 0, 0, fullBmp.Size, CopyPixelOperation.SourceCopy);
+
+                Bitmap processed;
+                if (label == "V1")
+                {
+                    // No downsampling
+                    processed = new Bitmap(40, 20);
+                    using (Graphics g2 = Graphics.FromImage(processed))
+                    {
+                        g2.DrawImage(fullBmp, 0, 0, 40, 20); // Or copy appropriate section
+                    }
+                }
+                else
+                {
+                    // Downsample to 40x20 (800 pixels)
+                    processed = new Bitmap(40, 20);
+                    for (int y = 0; y < 20; y++)
+                    {
+                        for (int x = 0; x < 40; x++)
+                        {
+                            int srcX = (int)((float)x / 40 * size);
+                            int srcY = (int)((float)y / 20 * size);
+                            Color pixel = fullBmp.GetPixel(srcX, srcY);
+                            processed.SetPixel(x, y, pixel);
+                        }
+                    }
+                }
+
+                if (label == "V2") bmp = processed;
+
+                if (!isMock)
+                {
+                   
+                    try
+                    {
+                        string outputPath = fileName.Replace(".jpg", $"_{label}.jpg");
+                        using (var bmp = new Bitmap(processed))
+                        {
+                            bmp.Save(outputPath, ImageFormat.Jpeg);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to save image: {ex.Message}");
+                    }
+                }
+            }
+        }
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void ProcessVisual(Bitmap greyScalebmp)
         {
