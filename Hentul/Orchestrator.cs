@@ -164,7 +164,7 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int Range2 = Range + Range;
+            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
 
             int x1 = point.X - Range < 0 ? 0 : point.X - Range;
             int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;

@@ -5,8 +5,7 @@
 
     /// <summary>
     /// Need to support 2 API's
-    /// 1.Fire()
-    /// 2.Wire()
+    /// "From where i have come , to where i am , to where i will be"
     /// </summary>
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
@@ -111,7 +110,7 @@
                     WriteLogsToFile("Neuron " + NeuronID.ToString() + " entering Spiking Mode", fileName);
                     if (Voltage >= UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
                     {
-                        WriteLogsToFile("*******************Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************", fileName);
+                        WriteLogsToFile("******************* Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************", fileName);
                     }
                 }
                 else
@@ -135,11 +134,9 @@
             {
                 Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
 
-#if !DEBUG
-
+                #if !DEBUG
                 Console.ReadKey();
-
-#endif
+                #endif
 
                 return;
             }

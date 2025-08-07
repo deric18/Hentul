@@ -5,8 +5,8 @@
 
         public Guid Id { get; private set; }
 
-        public HashSet<string> 
-            SupportedLabels { get; private set; }                // Holds only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
+        // Key - Predicted Neuronal ID , Value - Predicted Object Label
+        public List<Prediction> SupportedLabels { get; private set; }   // Holds only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
 
         public string AxonalNeuronId { get; private set; }
 
@@ -25,6 +25,48 @@
         public uint FiringHitCount { get; private set; }
 
         private uint _strength { get; set; }
+
+        public Synapse(string axonalNeuronId, string dendriticNeuronId, string nextNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
+        {
+            Id = Guid.NewGuid();
+            AxonalNeuronId = axonalNeuronId;
+            DendronalNeuronalId = dendriticNeuronId;
+            this.lastFiredCycle = currentCycle;
+
+            this.lastPredictedCycle = currentCycle;
+
+            this._strength = strength;
+
+            this.IsActive = isActive;
+
+            PredictiveHitCount = isActive ? BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY : 0;
+
+            FiringHitCount = 0;
+
+            this.cType = cType;
+
+            if (objectLabel == null)    //Schema Based Connection   Todo: You can use a counter here as a consistency checker.
+            {
+                if (cType == ConnectionType.DISTALDENDRITICNEURON)
+                {
+                    throw new InvalidOperationException("Cannot create Distal Dendritic Connection as a Schema Based Connection! Need an Object Label to create a Distal Dendritic Connection!");
+                }
+
+                SupportedLabels = new();
+
+            }
+            else                        // Object Based Connection cano only be for DistalDendriticNeuron type of connection.
+            {
+                if (cType != ConnectionType.DISTALDENDRITICNEURON)
+                {
+                    throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
+                }
+
+                SupportedLabels = new();
+                SupportedLabels.Add( new Prediction(nextNeuronId, objectLabel));
+                
+            }
+        }
 
         public Synapse(string axonalNeuronId, string dendriticNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
@@ -45,24 +87,24 @@
 
             this.cType = cType;
 
-            if (objectLabel == null)    //Schema Based Connection
+            if (objectLabel == null)    //Schema Based Connection   Todo: You can use a counter here as a consistency checker.
             {
                 if (cType == ConnectionType.DISTALDENDRITICNEURON)
                 {
                     throw new InvalidOperationException("Cannot create Distal Dendritic Connection as a Schema Based Connection! Need an Object Label to create a Distal Dendritic Connection!");
                 }
 
-                SupportedLabels = new HashSet<string>();
+                SupportedLabels = new();
 
             }
-            else                        // Object Based Connection
+            else                        // Object Based Connection cano only be for DistalDendriticNeuron type of connection.
             {
                 if (cType != ConnectionType.DISTALDENDRITICNEURON)
                 {
                     throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
                 }
 
-                SupportedLabels = new HashSet<string>() { objectLabel };
+                SupportedLabels = new();
             }
         }
 
@@ -92,12 +134,7 @@
 
         public void IncrementHitCount(ulong currentCycleNum)
         {
-
-            if (DendronalNeuronalId.ToString().Equals("55-2-1-N"))
-            {
-                bool breakpoint = false;
-            }
-
+            
             if (PredictiveHitCount >= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY)
             {
                 if (IsActive == false)

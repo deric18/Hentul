@@ -22,6 +22,8 @@
 
         public int BBMID { get; private set; }
 
+        public List<string> CurrentPredictions { get; private set; }
+
         public Dictionary<string, List<Neuron>> PredictedNeuronsfromLastCycle { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
@@ -163,6 +165,8 @@
             Y = y;
 
             this.Z = Z;
+
+            CurrentPredictions = new();
 
             PreviousiType = iType.NONE;
 
@@ -542,6 +546,7 @@
                                 TotalBurstFire++;
 
                                 NumberOfColumnsThatBurstLastCycle++;
+
                             }
                             else if (predictedNeuronPositions.Count == 1)
                             {
@@ -649,6 +654,7 @@
         private void Fire()
         {
 
+            // Populate NeuronsFiringThiscycle
             if (CurrentiType == iType.SPATIAL)
             {
                 foreach (var neuroString in PredictedNeuronsforThisCycle.Keys)
@@ -688,11 +694,13 @@
                 }
             }
 
+
+            // Iterate through NeuronsFiringTHisCycle and fire!
             foreach (var neuron in NeuronsFiringThisCycle)
             {
                 neuron.Fire(CycleNum, Mode, logfilename);
 
-                foreach (Synapse synapse in neuron.AxonalList.Values)
+                foreach (Synapse synapse in neuron.AxonalList.Values)       //it must have been done here for a reason.
                 {
                     ProcessSpikeFromNeuron(synapse);
                 }
