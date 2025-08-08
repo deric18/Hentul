@@ -24,6 +24,8 @@
 
         public List<string> CurrentPredictions { get; private set; }
 
+        private bool performHighOrderSequencing;
+
         public Dictionary<string, List<Neuron>> PredictedNeuronsfromLastCycle { get; private set; }
 
         public Dictionary<string, List<Neuron>> PredictedNeuronsForNextCycle { get; private set; }
@@ -167,6 +169,8 @@
             this.Z = Z;
 
             CurrentPredictions = new();
+
+            performHighOrderSequencing = true;
 
             PreviousiType = iType.NONE;
 
@@ -639,7 +643,16 @@
             Fire();
 
             if (NetWorkMode.Equals(NetworkMode.TRAINING) && CurrentiType == iType.SPATIAL)
+            {
                 Wire();
+
+                if(performHighOrderSequencing && CycleNum > 2)
+                {
+                    PerformHigherOrderSequencing();
+                }
+            }
+
+
 
             PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
 
@@ -649,6 +662,17 @@
             ValidateNetwork();
 
             return true;
+        }
+
+        private void PerformHigherOrderSequencing()
+        {
+            // For all the neurons that fired in the last cycle should add the neurons that are firing this cycle as there respected ObjectLAbel predictions.
+
+            //Q: What neurons should be used ? all or one ?
+
+            
+
+            throw new NotImplementedException();
         }
 
         private void Fire()
