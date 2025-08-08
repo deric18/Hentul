@@ -53,7 +53,6 @@
                 }
 
                 SupportedLabels = new();
-
             }
             else                        // Object Based Connection cano only be for DistalDendriticNeuron type of connection.
             {
@@ -63,8 +62,7 @@
                 }
 
                 SupportedLabels = new();
-                SupportedLabels.Add( new Prediction(nextNeuronId, objectLabel));
-                
+                SupportedLabels.Add( new Prediction(nextNeuronId, objectLabel));                
             }
         }
 

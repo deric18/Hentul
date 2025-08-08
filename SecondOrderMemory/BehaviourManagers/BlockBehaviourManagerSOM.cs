@@ -668,9 +668,22 @@
         {
             // For all the neurons that fired in the last cycle should add the neurons that are firing this cycle as there respected ObjectLAbel predictions.
 
-            //Q: What neurons should be used ? all or one ?
+            //Q: What neurons should be used ? -- all
 
-            
+            // Iterate through NeuronsFiringLastCycle and add the neurons that are firing this cycle as there predicted neurons for next cycle.
+            foreach (var prevneuron in NeuronsFiringLastCycle)
+            {
+                if (prevneuron.nType == NeuronType.NORMAL)
+                {
+                    foreach (var currNeuron in NeuronsFiringThisCycle)
+                    {                        
+                        
+
+                    }
+                }
+            }
+
+
 
             throw new NotImplementedException();
         }

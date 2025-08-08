@@ -8,18 +8,29 @@ namespace SecondOrderMemory.Models
 {
     public class Prediction
     {
-        public string NextNeuronId { get; set; }
+        public List<string> NextNeuronId { get; set; }
 
         public string ObjectLabel { get; set; }
 
 
         public uint HitCount { get; set; }
 
-        public Prediction(string nnId, string objectLabel)
+        public Prediction(string nextNeuronId, string objectLabel)
         {
-            NextNeuronId = nnId;
+            NextNeuronId = new();
+            NextNeuronId.Add(nextNeuronId);
             ObjectLabel = objectLabel;
             HitCount = 0;
+        }
+
+        public bool AddNewNextNeuronID(string nextNeuronId)
+        {
+            if (!NextNeuronId.Contains(nextNeuronId))
+            {
+                NextNeuronId.Add(nextNeuronId);
+                return true;
+            }
+            return false;
         }
     }
 }
