@@ -253,7 +253,7 @@
         public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
         {
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
-            return AddNewProximalDendriticConnection(key);
+            return AddNewProximalOrDendriticConnection(key);
         }
 
         public void InitAxonalConnectionForConnector(int i, int j, int k)
@@ -308,13 +308,9 @@
             }
         }
 
-        private bool AddNewProximalDendriticConnection(string key)
+        private bool AddNewProximalOrDendriticConnection(string key)
         {
-            if (key == "0-0-1")
-            {
-                int bp2 = 1;
-            }
-
+            
             if (key.Equals(NeuronID))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
@@ -322,7 +318,11 @@
 
             if (ProximoDistalDendriticList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
+                if (BlockBehaviourManagerSOM.Mode <= LogMode.Trace)
+                {
+                    Console.WriteLine("INFO :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : " + ++redundantCounter);
+                }
+                
                 return false;
             }
             else
@@ -337,6 +337,37 @@
         #endregion
 
         #region Wiring Connector Logic
+
+        internal bool PerformHigherSequencing(string objectLabel, List<string> nextNeuronIds)
+        {
+            if (objectLabel == null || nextNeuronIds == null || nextNeuronIds.Count == 0)
+            {
+                throw new InvalidOperationException(" Error: Neuron.cs : PErformHigherSequencing() : Input Prameters cannnot be Null!");
+            }
+
+            // Check if the associated object label under Prediction exist in any of the Synapse List if not add new
+            // if does then add this prediction to the AxonalList and increment the hitcount on the synapse for this particular objectLabel under synapse
+
+            foreach (var nextNeuronId in nextNeuronIds)
+            {
+                if (!string.IsNullOrEmpty(nextNeuronId) && !string.IsNullOrWhiteSpace(nextNeuronId))
+                {
+                    if (ProximoDistalDendriticList.TryGetValue(nextNeuronId, out var synapse))
+                    {
+                        if(!synapse.PopulatePrediction(objectLabel, nextNeuronIds))
+                        {
+                            throw new InvalidOperationException("Error : Neurons.cs : PerformHigherSequencing() : Could not add PRediction to the associated Object Label under the Synapse!");
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened! ");
+                    }
+                }
+            }
+
+            return true;
+        }
 
         //Gets Called for Dendritic End of the Neuron , Increments Hit Count if the connection already exists, Prediction adds new label if it does not exist
         public bool AddToDistalList(string axonalNeuronId, string objectLabel, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType cType, bool IsActive = false)
@@ -380,14 +411,19 @@
                 }
             }
 
+            //Only for Distal Connections.
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
             {
                 synapse1.IncrementHitCount(CycleNum);
 
-                if (!synapse1.CheckForSupportedLabel(objectLabel))
+                if (!synapse1.CheckForSupportedLabel(objectLabel))  //Higher Order Sequencing Logic!
                 {
                     if (!synapse1.AddNewObjectLabel(objectLabel))
                         throw new InvalidOperationException("A Predicted Dendritic Connection should always have a Prediction!");
+                }
+                else
+                {
+                    throw new InvalidOperationException("Every Normal Neuronal Distal Denritic Synapse should have an associated Label with it!");
                 }
 
                 return true;
@@ -400,7 +436,7 @@
                     WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count, filename);
                 }
 
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive, objectLabel));
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), objectLabel, CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive));
 
                 return true;
             }
@@ -440,7 +476,7 @@
                 }
                 else
                 {
-                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive, objectLabel));
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, objectLabel, CycleNum, AXONAL_CONNECTION, connectionType, IsActive));
                 }
 
                 return ConnectionRemovalReturnType.TRUE;
@@ -467,30 +503,7 @@
             }
 
             return ConnectionRemovalReturnType.HARDFALSE;
-        }
-
-        internal bool PerformHigherSequencing(Prediction prediction)
-        {
-            if (prediction == null || prediction.NextNeuronId == null || prediction.NextNeuronId.Count == 0)
-            {
-                return false;
-            }
-            foreach (var nextNeuronId in prediction.NextNeuronId)
-            {
-                if (!string.IsNullOrEmpty(nextNeuronId) && !string.IsNullOrWhiteSpace(nextNeuronId))
-                {
-                    if (ProximoDistalDendriticList.TryGetValue(nextNeuronId, out var synapse))
-                    {
-                        synapse.IncrementHitCount(0);
-                    }
-                    else
-                    {
-                        ProximoDistalDendriticList.Add(nextNeuronId, new Synapse(nextNeuronId, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, true));
-                    }
-                }
-            }
-            return true;
-        }
+        }        
 
         #endregion
 

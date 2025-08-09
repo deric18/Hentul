@@ -671,21 +671,19 @@
             //Q: What neurons should be used ? -- all
 
             // Iterate through NeuronsFiringLastCycle and add the neurons that are firing this cycle as there predicted neurons for next cycle.
+
+            if (NeuronsFiringThisCycle?.Count == 0)
+                throw new InvalidOperationException("Error : BlockBehaviourManagerSOm.cs : PerformHigherORderSequencing : NeuronsFiringThisCycle cannot be empty!");
+
+            var nextNeuronIds = NeuronsFiringThisCycle.Where(x => x.nType == NeuronType.NORMAL).Select(x => x.NeuronID.ToString()).ToList();
+
             foreach (var prevneuron in NeuronsFiringLastCycle)
             {
                 if (prevneuron.nType == NeuronType.NORMAL)
                 {
-                    foreach (var currNeuron in NeuronsFiringThisCycle)
-                    {                        
-                        
-
-                    }
+                    prevneuron.PerformHigherSequencing(CurrentObjectLabel, nextNeuronIds);
                 }
-            }
-
-
-
-            throw new NotImplementedException();
+            }            
         }
 
         private void Fire()
