@@ -683,7 +683,7 @@
                 {
                     prevneuron.PerformHigherSequencing(CurrentObjectLabel, nextNeuronIds);
                 }
-            }            
+            }
         }
 
         private void Fire()
