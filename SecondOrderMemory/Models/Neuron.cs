@@ -338,7 +338,7 @@
 
         #region Wiring Connector Logic
 
-        //Gets Called for Dendritic End of the Neuron
+        //Gets Called for Dendritic End of the Neuron , Increments Hit Count if the connection already exists, Prediction adds new label if it does not exist
         public bool AddToDistalList(string axonalNeuronId, string objectLabel, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType cType, bool IsActive = false)
         {
 
@@ -355,20 +355,14 @@
 
                     if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
                     {
-                        Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
-
-                        synapse.IncrementHitCount(CycleNum);
-
-                        if (synapse.SupportedLabels.Contains(objectLabel))
+                        if(BlockBehaviourManagerSOM.Mode == LogMode.All || BlockBehaviourManagerSOM.Mode == LogMode.Info)
                         {
-                            return true;
-                        }
-                        else
-                        {
-                            synapse.AddNewObjectLabel(objectLabel);
+                            Console.WriteLine("INFO :: SOM :: AddToDistalList : Connection Already Added Counter : " + ++redundantCounter);
+                        }                        
 
-                            return true;
-                        }
+                        synapse.IncrementHitCount(CycleNum);                        
+
+                        return true;
                     }
                     else
                     {
@@ -384,12 +378,17 @@
                         return true;
                     }
                 }
-
             }
 
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
             {
                 synapse1.IncrementHitCount(CycleNum);
+
+                if (!synapse1.CheckForSupportedLabel(objectLabel))
+                {
+                    if (!synapse1.AddNewObjectLabel(objectLabel))
+                        throw new InvalidOperationException("A Predicted Dendritic Connection should always have a Prediction!");
+                }
 
                 return true;
             }
@@ -397,16 +396,15 @@
             {
                 if (ProximoDistalDendriticList.Count >= 1000)
                 {
-
                     Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
                     WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count, filename);
-
                 }
 
                 ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive, objectLabel));
 
                 return true;
             }
+
         }
 
         //Gets called for the axonal end of the neuron
@@ -469,6 +467,29 @@
             }
 
             return ConnectionRemovalReturnType.HARDFALSE;
+        }
+
+        internal bool PerformHigherSequencing(Prediction prediction)
+        {
+            if (prediction == null || prediction.NextNeuronId == null || prediction.NextNeuronId.Count == 0)
+            {
+                return false;
+            }
+            foreach (var nextNeuronId in prediction.NextNeuronId)
+            {
+                if (!string.IsNullOrEmpty(nextNeuronId) && !string.IsNullOrWhiteSpace(nextNeuronId))
+                {
+                    if (ProximoDistalDendriticList.TryGetValue(nextNeuronId, out var synapse))
+                    {
+                        synapse.IncrementHitCount(0);
+                    }
+                    else
+                    {
+                        ProximoDistalDendriticList.Add(nextNeuronId, new Synapse(nextNeuronId, NeuronID.ToString(), 0, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, true));
+                    }
+                }
+            }
+            return true;
         }
 
         #endregion

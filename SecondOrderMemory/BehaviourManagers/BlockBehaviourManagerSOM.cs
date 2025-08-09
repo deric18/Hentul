@@ -94,7 +94,7 @@
 
         private SchemaType schemToLoad;
 
-        public LogMode Mode { get; private set; }
+        public static LogMode Mode { get; private set; }
 
         public ulong[] WireCasesTracker { get; private set; }
 
@@ -802,11 +802,11 @@
                 if (dendronalNeuron.ProximoDistalDendriticList.TryGetValue(axonalNeuron.NeuronID.ToString(), out var synapse1))
                     ProcessSpikeAsPer(synapse1, dendronalNeuron);
 
-                if (NetWorkMode.Equals(NetworkMode.PREDICTION))
-                {
-                    foreach (var label in synapse.SupportedLabels)
-                        SupportedLabels.Add(label);
-                }
+                //if (NetWorkMode.Equals(NetworkMode.PREDICTION)) Not needed since we are doing high order sequencing
+                //{
+                //    foreach (var label in synapse.SupportedLabels)
+                //        SupportedLabels.Add(label);
+                //}
             }
             else
             {

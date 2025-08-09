@@ -26,7 +26,7 @@
 
         private uint _strength { get; set; }
 
-        public Synapse(string axonalNeuronId, string dendriticNeuronId, string nextNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
+        public Synapse(string axonalNeuronId, string dendriticNeuronId, List<string> listNextNeuronId, ulong currentCycle, uint strength, ConnectionType cType, bool isActive = false, string objectLabel = null)
         {
             Id = Guid.NewGuid();
             AxonalNeuronId = axonalNeuronId;
@@ -62,7 +62,7 @@
                 }
 
                 SupportedLabels = new();
-                SupportedLabels.Add( new Prediction(nextNeuronId, objectLabel));                
+                SupportedLabels.Add(new Prediction(listNextNeuronId, objectLabel)); 
             }
         }
 
@@ -110,7 +110,42 @@
 
         public bool IsMultiObjectSupported => SupportedLabels.Count > 1;
 
-        public void AddNewObjectLabel(string label) => SupportedLabels.Add(label);
+        internal bool CheckForSupportedLabel(string objectLabel) =>                    
+            SupportedLabels.Any(prediction => prediction.ObjectLabel.ToLower() == objectLabel.ToLower());        
+
+        public bool AddNewObjectLabel(string label)
+        {
+            if (string.IsNullOrEmpty(label))
+                throw new InvalidOperationException("ERROR : Synapse() : Label cannot beempty");
+
+            if (!CheckForSupportedLabel(label))
+            {
+                SupportedLabels.Add(new Prediction(new List<string>(), label));
+                return true;
+            }
+
+            return false;
+        }
+
+        public void IncrementHitCount(ulong currentCycleNum)
+        {
+
+            if (PredictiveHitCount >= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY)
+            {
+                if (IsActive == false)
+                    IsActive = true;
+
+                FiringHitCount++;
+
+                _strength++;
+
+                lastFiredCycle++;
+            }
+            else
+            {
+                PredictiveHitCount++;
+            }
+        }
 
         public void Print()
         {
@@ -130,24 +165,22 @@
 
         public uint GetStrength() => _strength;
 
-        public void IncrementHitCount(ulong currentCycleNum)
+        public bool AddNewPrediction(List<string> nextNeuronList, string objectLabel)
         {
-            
-            if (PredictiveHitCount >= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY)
+            if (SupportedLabels.Count == 0)
             {
-                if (IsActive == false)
-                    IsActive = true;
-
-                FiringHitCount++;
-
-                _strength++;
-
-                lastFiredCycle++;
+                SupportedLabels.Add(new Prediction(nextNeuronList, objectLabel));
+                return true;
             }
-            else
+            foreach (var prediction in SupportedLabels)
             {
-                PredictiveHitCount++;
+                if (prediction.ObjectLabel == objectLabel)
+                {
+                    return prediction.AddNewNextNeuronID(nextNeuronList[0]);
+                }
             }
-        }
+            SupportedLabels.Add(new Prediction(nextNeuronList, objectLabel));
+            return true;
+        }                
     }
 }
