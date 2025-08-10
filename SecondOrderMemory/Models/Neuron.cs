@@ -563,6 +563,11 @@
             return staleConnections;
         }
 
+        internal List<string> GetCurrentPotentialMatches()
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion
 

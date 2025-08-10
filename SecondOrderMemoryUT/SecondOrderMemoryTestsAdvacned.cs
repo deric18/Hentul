@@ -27,6 +27,12 @@
         }
 
         [Test]
+        public void TestHigherSequenceMemory()
+        {
+            //Train the network on two object and switch to prediction mode and see if its classifies correctly on decider steps.
+        }
+
+        [Test]
         public void CheckAllNeuronsNonDistalConnectionsAreActive()
         {
             foreach (var column in bbManager.Columns)

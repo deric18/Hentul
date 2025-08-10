@@ -27,12 +27,34 @@ namespace SecondOrderMemory.Models
             HitCount = 0;
         }
         
-        internal void PopulatePrediction(string objectLabel, List<String> nextNeuronIdList)
+        internal bool PopulatePrediction(string objectLabel, List<String> nextNeuronIdList)
         {
-            if(objectLabel != ObjectLabel)
+            if(objectLabel != ObjectLabel || string.IsNullOrEmpty(objectLabel))
                 throw new InvalidOperationException("Prediction : PopulatePrediction : Object Labels Should Match!");
             
-            NextNeuronIdLists.Value.Add(nextNeuronIdList);            
+            if(nextNeuronIdList == null || nextNeuronIdList.Count == 0)
+                throw new ArgumentException("Prediction : PopulatePrediction : Next Neuron ID List cannot be null or empty!");
+
+            if (!Compare(nextNeuronIdList))
+            {
+                NextNeuronIdLists.Value.Add(nextNeuronIdList);
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool Compare(List<string> nextNeurons)
+        {
+            if (NextNeuronIdLists == null || NextNeuronIdLists.Value == null)
+                return false;
+
+            foreach (var neuronList in NextNeuronIdLists.Value)
+            {
+                if (neuronList.SequenceEqual(nextNeurons))
+                    return true;
+            }
+            return false;
         }
     }
 }

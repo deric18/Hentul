@@ -627,6 +627,7 @@
                         throw new InvalidOperationException("Invalid Input Pattern Type");
                     }
             }
+
             if (IsBurstOnly)
             {
                 if (BurstCache.Count == 0)
@@ -652,6 +653,8 @@
                 }
             }
 
+            if (NetWorkMode == NetworkMode.PREDICTION)
+                UpdateCurentPredictions();
 
 
             PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
@@ -662,6 +665,29 @@
             ValidateNetwork();
 
             return true;
+        }
+
+        private void UpdateCurentPredictions()
+        {
+            // After every Sptial Fire Collect all the intersection of all the supported labels from every single neuron that fired and remove the ones that are no longer supported.
+
+            List<string> cyclePredictions = new List<string>();
+
+            foreach (var neuron in NeuronsFiringThisCycle)
+            {
+                var neuronalPredictions = neuron.GetCurrentPotentialMatches();
+
+                if (neuronalPredictions != null && neuronalPredictions.Count() > 0)
+                {
+                    foreach (var prediction in neuronalPredictions)
+                    {
+                        if (!cyclePredictions.Contains(prediction))
+                        {
+                            cyclePredictions.Add(prediction);
+                        }
+                    }
+                }
+            }
         }
 
         private void PerformHigherOrderSequencing()
