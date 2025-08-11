@@ -563,7 +563,7 @@
             return staleConnections;
         }
 
-        internal List<string> GetCurrentPotentialMatches()
+        internal List<string> GetCurrentPotentialMatchesForCurrentCycle()
         {
             throw new NotImplementedException();
         }

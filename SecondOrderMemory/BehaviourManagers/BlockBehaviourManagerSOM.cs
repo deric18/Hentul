@@ -671,24 +671,49 @@
         {
             // After every Sptial Fire Collect all the intersection of all the supported labels from every single neuron that fired and remove the ones that are no longer supported.
 
-            List<string> cyclePredictions = new List<string>();
+            List<string> cyclePredictions = CurrentPredictions.ToList();
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                var neuronalPredictions = neuron.GetCurrentPotentialMatches();
+                var neuronalPredictions = neuron.GetCurrentPotentialMatchesForCurrentCycle();
 
                 if (neuronalPredictions != null && neuronalPredictions.Count() > 0)
                 {
-                    foreach (var prediction in neuronalPredictions)
+                    if (cyclePredictions.Count == 0)
                     {
-                        if (!cyclePredictions.Contains(prediction))
+                        cyclePredictions.AddRange(neuronalPredictions);
+                    }
+                    else
+                    {
+                        // Get an intersection of cyclePredictions and neuronalPredictions
+                        var intersect = cyclePredictions.Intersect(neuronalPredictions).ToList();
+
+                        if(intersect.Count == 0)
                         {
-                            cyclePredictions.Add(prediction);
+                            // Total Mistake now need to restart from scratch , will cross that bridge when we get there.
+                        }
+                        else
+                        {
+                            //increase probability of intersected predictions to 100% if its 1 but if more than keep 50-50
+
+                            if (intersect.Count == 1)
+                            {
+
+                            }
+                            else if (intersect.Count == 2)
+                            {
+
+                            }
+                            else if (intersect.Count == 3)
+                            {
+
+                            }
                         }
                     }
                 }
             }
         }
+
 
         private void PerformHigherOrderSequencing()
         {
