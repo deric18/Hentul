@@ -244,7 +244,7 @@
         }
 
 
-        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
+        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = false)
         {
             Position2D motorOutput = null;
             List<Position2D> positionToConfirm = new List<Position2D>();
@@ -270,15 +270,11 @@
                 {
                     motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
                 }
-                else
+                else    // brand New Pipeline : Classification done Primarily through V1.
                 {
-                    if (predictedSensei != null)
+                    if(VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
                     {
-                        var positionsToConfirm = HCAccessor.StoreObjectInGraph(firingSensei, predictedSensei, isMock);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Should Not Happen in PRediction Mode");
+                        VisionProcessor.v1.somBBM_L3B_V.GetSupportedLabels();
                     }
                 }
             }

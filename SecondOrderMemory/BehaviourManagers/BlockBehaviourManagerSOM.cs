@@ -698,6 +698,8 @@
 
                             if (intersect.Count == 1)
                             {
+                                NetWorkMode = NetworkMode.DONE;
+
 
                             }
                             else if (intersect.Count == 2)
