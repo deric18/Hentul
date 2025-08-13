@@ -157,7 +157,7 @@
         #region Public API
 
         /// Grabs Cursors Current Position and records pixels.        
-        public void RecordPixels(bool isMock = false)
+        public (Bitmap V1, Bitmap V2, Bitmap V3) RecordPixels(bool isMock = false)
         {
             CycleNum++;
 
@@ -166,24 +166,28 @@
             point = this.GetCurrentPointerPosition();
             System.Drawing.Point systemPoint = new System.Drawing.Point(point.X, point.Y);
             // Create all 3 versions
-            RecordRegion(systemPoint, 10, "V1", isMock);
-            RecordRegion(systemPoint, 50, "V2", isMock); // 100x100
-            RecordRegion(systemPoint, 100, "V3", isMock); // 200x200
+            Bitmap v1=RecordRegion(systemPoint, 10, "V1", isMock);
+            Bitmap v2=RecordRegion(systemPoint, 50, "V2", isMock); // 100x100
+            Bitmap v3=RecordRegion(systemPoint, 100, "V3", isMock); // 200x200
+
+            return (v1, v2, v3);
+
         }
-        
-        private void RecordRegion(Point cursor, int range, string label, bool isMock)
+
+        private Bitmap RecordRegion(Point cursor, int range, string label, bool isMock)
         {
             int size = range * 2;
             int x1 = Math.Max(cursor.X - range, 0);
             int y1 = Math.Max(cursor.Y - range, 0);
             Rectangle rect = new Rectangle(x1, y1, size, size);
 
+            Bitmap processed;
+
             using (Bitmap fullBmp = new Bitmap(size, size, PixelFormat.Format32bppArgb))
             using (Graphics g = Graphics.FromImage(fullBmp))
             {
                 g.CopyFromScreen(x1, y1, 0, 0, fullBmp.Size, CopyPixelOperation.SourceCopy);
 
-                Bitmap processed;
                 if (label == "V1")
                 {
                     // No downsampling
@@ -228,6 +232,7 @@
                     }
                 }
             }
+            return processed;
         }
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void ProcessVisual(Bitmap greyScalebmp)

@@ -37,103 +37,89 @@ namespace HentulWinforms
             networkMode = NetworkMode.TRAINING;
             train_another_object.Visible = false;
         }
-
-        private void StartButton_Click(object sender, EventArgs e)
+        private void UpdateCursorLabels(Orchestrator.POINT value)
         {
-
-            label_done.Text = "Procesing";
-
-            label_done.Refresh();
-
-            var value = LeftTop;
-
-            value.X = value.X + numPixels;
-            value.Y = value.Y + numPixels;
-
-            orchestrator.MoveCursor(value);
-
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
-
-            while (true)
+            labelX.Refresh();
+            labelY.Refresh();
+        }
+        private Orchestrator.POINT GetNextCursorPosition(Orchestrator.POINT current)
+        {
+            if (current.X <= RightTop.X - numPixels)
+                return MoveRight(current);
+            else if (current.Y <= RightBottom.Y - numPixels)
             {
+                var next = MoveDown(current);
+                return SetLeft(next);
+            }
+            return current;
+        }
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+            label_done.Text = "Processing";
+            label_done.Refresh();
+
+            var value = new Orchestrator.POINT
+            {
+                X = LeftTop.X + numPixels,
+                Y = LeftTop.Y + numPixels
+            };
+
+            orchestrator.MoveCursor(value);
+            UpdateCursorLabels(value);
+
+            bool finished = false;
+
+            while (!finished)
+            {
+                // Check if finished
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                 {
+                    finished = true;
                     label_done.Text = "Finished Processing Image";
+                    label_done.Refresh();
+                    train_another_object.Visible = true;
                     break;
                 }
-                else
+
+                // Move cursor
+                value = GetNextCursorPosition(value);
+
+                // Update UI
+                UpdateCursorLabels(value);
+                orchestrator.MoveCursor(value);
+
+                // Record pixels
+                var (v1, v2, v3) = orchestrator.RecordPixels();
+
+                // Update display images
+                CurrentImage.Image = v2; // Show medium version
+                CurrentImage.Refresh();
+
+                EdgedImage.Image = ConverToEdgedBitmap(v2);
+                EdgedImage.Refresh();
+
+                // Process visuals
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(v1));
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(v2));
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(v3));
+
+                if (networkMode == NetworkMode.TRAINING)
                 {
-                    if (value.X <= RightTop.X - numPixels)
-                        value = MoveRight(value);
-                    else
-                    {
-                        if (value.Y <= RightBottom.Y - numPixels)
-                        {
-                            value = MoveDown(value);
-                            value = SetLeft(value);
-                        }
-                        else
-                        {
-                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                            {
-                                label_done.Text = "Finished Processing Image";
-                                label_done.Refresh();
-                                train_another_object.Visible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (networkMode.Equals(NetworkMode.TRAINING))
-                {
-                    labelX.Text = value.X.ToString(); labelX.Refresh();
-                    labelY.Text = value.Y.ToString(); labelY.Refresh();
-
-                    orchestrator.MoveCursor(value);
-
-                    orchestrator.RecordPixels();        //Grab Image             
-
-                    CurrentImage.Image = orchestrator.bmp;
-
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
-
-                    orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS
-
-                    counter++;                      // Repeat!
-
+                    orchestrator.AddNewVisualSensationToHc();
+                    counter++;
                     CycleLabel.Text = counter.ToString();
-
                     CycleLabel.Refresh();
                 }
-                else if (networkMode.Equals(NetworkMode.PREDICTION))
+                else if (networkMode == NetworkMode.PREDICTION)
                 {
-                    orchestrator.RecordPixels();        //Grab Image
-
-                    CurrentImage.Image = orchestrator.bmp;
-
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
-
-                    var motorOutput = orchestrator.Verify_Predict_HC();    // Fire SOM per FOMS
+                    var motorOutput = orchestrator.Verify_Predict_HC();
 
                     if (motorOutput != null)
                     {
                         if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
                         {
-                            //Object Recognised!
                             var obj = orchestrator.GetPredictedObject();
                             ObjectLabel.Text = obj.Label;
                             ObjectLabel.Refresh();
@@ -150,50 +136,39 @@ namespace HentulWinforms
                             label_done.Refresh();
                             break;
                         }
-
-                        Orchestrator.POINT p = new Orchestrator.POINT();
-                        p.X = motorOutput.X; p.Y = motorOutput.Y;
+                        Orchestrator.POINT p = new Orchestrator.POINT
+                        {
+                            X = motorOutput.X,
+                            Y = motorOutput.Y
+                        };
+                        // Move cursor to predicted point
                         orchestrator.MoveCursor(p);
                     }
-                    else
-                    {
-                        //Just Move the cursor to the next default position
-                        orchestrator.MoveCursor(value);
-                        //label_done.Text = "Finished Processing Image";
-                        //break;
-                    }
-
                 }
             }
 
-            if (label_done.Text == "Finished Processing Image")
+            // Final processing after loop
+            if (networkMode == NetworkMode.TRAINING)
             {
-                if (networkMode == NetworkMode.TRAINING)
+                imageIndex++;
+                if (imageIndex == totalImagesToProcess)
                 {
-                    imageIndex++;
-
-                    if (imageIndex == totalImagesToProcess)
-                    {
-                        StartButton.Text = "Tet Classification Algo";
-                        StartButton.Refresh();
-                        orchestrator.ChangeNetworkToPredictionMode();
-                        networkMode = NetworkMode.PREDICTION;
-                        BackUp.Visible = true;
-                        orchestrator.MoveCursor(LeftTop);
-                    }
-                    else
-                    {
-                        orchestrator.DoneWithTraining();
-                        StartButton.Text = "Start Another Image";
-                        StartButton.Refresh();
-                    }
+                    StartButton.Text = "Test Classification Algo";
+                    StartButton.Refresh();
+                    orchestrator.ChangeNetworkToPredictionMode();
+                    networkMode = NetworkMode.PREDICTION;
+                    BackUp.Visible = true;
+                    orchestrator.MoveCursor(LeftTop);
                 }
-                else if (networkMode == NetworkMode.PREDICTION)
+                else
                 {
-                    bool failedToPredict = true;
+                    orchestrator.DoneWithTraining();
+                    StartButton.Text = "Start Another Image";
+                    StartButton.Refresh();
                 }
             }
         }
+
 
         private void wanderingButton_Click(object sender, EventArgs e)
         {
