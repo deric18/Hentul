@@ -7,6 +7,37 @@
     internal static class TestUtils
     {
 
+        public static List<SDR_SOM> GenerateThreeRandomSDRs(int x = 1000, int y = 10, int z = 4, int positionsPerSDR = 10, iType type = iType.SPATIAL)
+        {
+            var rand = new Random();
+            var allUsed = new HashSet<(int, int, int)>();
+            var sdrList = new List<SDR_SOM>();
+
+            for (int s = 0; s < 3; s++)
+            {
+                var positions = new List<Position_SOM>();
+
+                while (positions.Count < positionsPerSDR)
+                {
+                    int px = rand.Next(1, x + 1);
+                    int py = rand.Next(1, y + 1);
+                    int pz = rand.Next(1, z + 1);
+
+                    var tuple = (px, py, pz);
+
+                    // Ensure uniqueness across all SDRs
+                    if (allUsed.Add(tuple))
+                    {
+                        positions.Add(new Position_SOM(px, py, pz));
+                    }
+                }
+
+                sdrList.Add(new SDR_SOM(x, y, positions, type));
+            }
+
+            return sdrList;
+        }
+
         internal static SDR_SOM AddOffsetToSDR(SDR_SOM sdr, int offset)
         {
             List<Position_SOM> posList = new List<Position_SOM>();

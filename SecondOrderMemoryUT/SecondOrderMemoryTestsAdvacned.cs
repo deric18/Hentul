@@ -3,7 +3,7 @@
     using Common;
     using NUnit.Framework;
     using SecondOrderMemory.Models;
-    
+
     public class SecondOrderMemoryTestsAdvanced
     {
 
@@ -13,6 +13,8 @@
         int Z = 5;
         Random rand1;
         string testObjectLabel = "RandomObject 1";
+
+
 
         [SetUp]
         public void Setup()
@@ -26,10 +28,54 @@
             rand1 = new Random();
         }
 
+
         [Test]
-        public void TestHigherSequenceMemory()
+        public void TestPerformHigherOrderSequencing()
         {
-            //Train the network on two object and switch to prediction mode and see if its classifies correctly on decider steps.
+            // Arrange
+            var bbManager = new BlockBehaviourManagerSOM(10, 10, 4, LayerType.Layer_3B, LogMode.BurstOnly, "TestObject", true);
+            bbManager.Init(1);
+            bbManager.BeginTraining("TestObject");
+
+            // Create a sequence of patterns (A -> B -> C)
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs();
+            List<SDR_SOM> object2 = TestUtils.GenerateThreeRandomSDRs();
+            List<SDR_SOM> object3 = TestUtils.GenerateThreeRandomSDRs();
+
+            ulong cycle = 1;
+
+            bbManager.LearnNewObject(object1.ToString());
+
+            foreach( var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle++);
+            }
+
+            bbManager.LearnNewObject(object2.ToString());
+
+            foreach (var sdr in object2)
+            {
+                bbManager.Fire(sdr, cycle++);
+            }
+
+            bbManager.LearnNewObject(object3.ToString());
+
+            foreach (var sdr in object3)
+            {
+                bbManager.Fire(sdr, cycle++);
+            }
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle++);
+            }
+
+            var Labels = bbManager.GetSupportedLabels();
+
+
         }
 
         [Test]
@@ -51,9 +97,9 @@
                         }
                     }
 
-                    foreach(var connection in neuron.AxonalList)
+                    foreach (var connection in neuron.AxonalList)
                     {
-                        if(connection.Value.cType != ConnectionType.DISTALDENDRITICNEURON)
+                        if (connection.Value.cType != ConnectionType.DISTALDENDRITICNEURON)
                         {
                             Assert.IsTrue(connection.Value.IsActive);
                         }
@@ -234,7 +280,7 @@
                 if (repCount > wirecount)
                 {
 
-                    if(repCount == 32)
+                    if (repCount == 32)
                     {
                         int bp1 = 1;
                     }
@@ -242,8 +288,8 @@
                     predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter);
 
                     bool c = predictedSDR.IsUnionTo(patternC, true);
-                    
-                    if(c == false)
+
+                    if (c == false)
                     {
                         bool breakpoint = true;
 

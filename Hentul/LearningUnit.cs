@@ -334,5 +334,10 @@
             somBBM_L3A_V.ChangeNetworkModeToPrediction();
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
         }
+
+        internal void LearnNewObject(string objectName)
+        {
+            somBBM_L3B_V.LearnNewObject(objectName);
+        }
     }
 }

@@ -101,6 +101,7 @@
         string logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
 
         public List<Neuron> OverConnectedOffenderList { get; private set; }
+
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
 
         private uint _firingBlankStreak;
@@ -268,6 +269,7 @@
         {
             NetWorkMode = NetworkMode.PREDICTION;
             CurrentObjectLabel = null;
+            CurrentPredictions.Clear();
         }
 
         public void Init(int bbmID)
@@ -695,11 +697,16 @@
                         else
                         {
                             //increase probability of intersected predictions to 100% if its 1 but if more than keep 50-50
-
+                            if(intersect.Count == 0)
+                            {
+                                // Too little data. Move on with next Sequence.
+                            }
                             if (intersect.Count == 1)
                             {
-                                NetWorkMode = NetworkMode.DONE;
+                                //Prediction is good , NEed to Verify if early in cycle.
 
+                                NetWorkMode = NetworkMode.DONE;
+                                CurrentObjectLabel = intersect[0];
 
                             }
                             else if (intersect.Count == 2)
@@ -955,7 +962,7 @@
 
         public List<string> GetSupportedLabels()
         {
-            if (Layer.Equals(LayerType.Layer_3B) == false)
+            if (Layer.Equals(LayerType.Layer_3A) == false)
             {
                 throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
@@ -2902,6 +2909,11 @@
         {
             File.AppendAllText(logfilename, logline + "\n");
 
+        }
+
+        public void LearnNewObject(string objectName)
+        {
+            CurrentObjectLabel = objectName;
         }
 
         #endregion
