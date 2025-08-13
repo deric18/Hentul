@@ -33,14 +33,14 @@
         public void TestPerformHigherOrderSequencing()
         {
             // Arrange
-            var bbManager = new BlockBehaviourManagerSOM(10, 10, 4, LayerType.Layer_3B, LogMode.BurstOnly, "TestObject", true);
+            var bbManager = new BlockBehaviourManagerSOM(1250, 10, 5, LayerType.Layer_3B, LogMode.BurstOnly, "TestObject", true);
             bbManager.Init(1);
             bbManager.BeginTraining("TestObject");
 
             // Create a sequence of patterns (A -> B -> C)
-            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs();
-            List<SDR_SOM> object2 = TestUtils.GenerateThreeRandomSDRs();
-            List<SDR_SOM> object3 = TestUtils.GenerateThreeRandomSDRs();
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 4);
+            List<SDR_SOM> object2 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 4);
+            List<SDR_SOM> object3 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 4);
 
             ulong cycle = 1;
 
@@ -67,14 +67,16 @@
 
             bbManager.ChangeNetworkModeToPrediction();
 
+            cycle = 1;
 
             foreach (var sdr in object1)
             {
                 bbManager.Fire(sdr, cycle++);
             }
 
-            var Labels = bbManager.GetSupportedLabels();
+            var labels = bbManager.GetCurrentPredictions();
 
+            Assert.IsTrue(labels.Count > 0);
 
         }
 

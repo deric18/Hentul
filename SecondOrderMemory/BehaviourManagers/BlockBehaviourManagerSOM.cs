@@ -709,13 +709,9 @@
                                 CurrentObjectLabel = intersect[0];
 
                             }
-                            else if (intersect.Count == 2)
+                            else 
                             {
-
-                            }
-                            else if (intersect.Count == 3)
-                            {
-
+                                CurrentPredictions = intersect;
                             }
                         }
                     }
@@ -960,7 +956,7 @@
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
         }
 
-        public List<string> GetSupportedLabels()
+        public List<string> GetCurrentPredictions()
         {
             if (Layer.Equals(LayerType.Layer_3A) == false)
             {
@@ -972,7 +968,7 @@
                 throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
             }
 
-            return SupportedLabels.ToList();
+            return CurrentPredictions.ToList();
         }
 
         public List<Position_SOM> GetAllPredictedNeurons()

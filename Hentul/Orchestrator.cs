@@ -274,7 +274,7 @@
                 {
                     if(VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
                     {
-                        VisionProcessor.v1.somBBM_L3B_V.GetSupportedLabels();
+                        VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
                     }
                 }
             }

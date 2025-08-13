@@ -211,7 +211,7 @@ namespace Hentul
             v1.LearnNewObject(objectName);
         }
 
-        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetSupportedLabels();
+        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetCurrentPredictions();
 
 
         internal void Clean()
