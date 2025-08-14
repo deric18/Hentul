@@ -38,31 +38,41 @@
             bbManager.BeginTraining("TestObject");
 
             // Create a sequence of patterns (A -> B -> C)
-            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 4);
-            List<SDR_SOM> object2 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 4);
-            List<SDR_SOM> object3 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 4);
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
+            List<SDR_SOM> object2 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
+            List<SDR_SOM> object3 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
 
             ulong cycle = 1;
+            int repetitions = 3;
 
-            bbManager.LearnNewObject(object1.ToString());
+            bbManager.ChangeCurrentObjectLabel("Apple");
 
-            foreach( var sdr in object1)
+            for (int i = 0; i < repetitions; i++)
             {
-                bbManager.Fire(sdr, cycle++);
+                foreach (var sdr in object1)
+                {
+                    bbManager.Fire(sdr, cycle++);
+                }
             }
 
-            bbManager.LearnNewObject(object2.ToString());
+            bbManager.ChangeCurrentObjectLabel("Orange");
 
-            foreach (var sdr in object2)
+            for (int i = 0; i < repetitions; i++)
             {
-                bbManager.Fire(sdr, cycle++);
+                foreach (var sdr in object2)
+                {
+                    bbManager.Fire(sdr, cycle++);
+                }
             }
 
-            bbManager.LearnNewObject(object3.ToString());
+            bbManager.ChangeCurrentObjectLabel("Bananna");
 
-            foreach (var sdr in object3)
+            for (int i = 0; i < repetitions; i++)
             {
-                bbManager.Fire(sdr, cycle++);
+                foreach (var sdr in object3)
+                {
+                    bbManager.Fire(sdr, cycle++);
+                }
             }
 
             bbManager.ChangeNetworkModeToPrediction();

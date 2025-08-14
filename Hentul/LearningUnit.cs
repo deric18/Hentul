@@ -337,7 +337,7 @@
 
         internal void LearnNewObject(string objectName)
         {
-            somBBM_L3B_V.LearnNewObject(objectName);
+            somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);
         }
     }
 }

@@ -7,7 +7,7 @@
     internal static class TestUtils
     {
 
-        public static List<SDR_SOM> GenerateThreeRandomSDRs(int x = 1000, int y = 10, int z = 4, int positionsPerSDR = 10, iType type = iType.SPATIAL)
+        public static List<SDR_SOM> GenerateThreeRandomSDRs(int x = 1000, int y = 10, int positionsPerSDR = 10, iType type = iType.SPATIAL)
         {
             var rand = new Random();
             var allUsed = new HashSet<(int, int, int)>();
@@ -21,7 +21,7 @@
                 {
                     int px = rand.Next(1, x + 1);
                     int py = rand.Next(1, y + 1);
-                    int pz = rand.Next(1, z + 1);
+                    int pz = 0;
 
                     var tuple = (px, py, pz);
 

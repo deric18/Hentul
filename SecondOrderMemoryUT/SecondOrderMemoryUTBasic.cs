@@ -423,17 +423,30 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [Test, Ignore("Needs Work")]
-        public void TestWireCase3()
+        public void TestWireCase4()
         {
-            // Case 3 : None Bursted , Some fired which were predicted, Some Did Not Burst But Fired which were NOT predicted 
+            // Case 4 : All Bursted 
 
-            //Difficult to repro , will repro later. bigger fish to fry!
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 2);
 
-            Assert.Fail();
+            bbManager.ChangeCurrentObjectLabel("Apple");
+
+            ulong cycle = 1;
+
+            for(int i=0; i < 5; i++)
+            {
+                foreach(var sdr in object1)
+                {
+                    bbManager.Fire(sdr, cycle++);
+                }
+            }
+
+
+            // Ensure there is a inactive synapse between all the neurons in the first SDR to second SDR
         }
 
         [Test]
-        public void TestWireCase4()
+        public void TestWireCase3()
         {
             //Case 1: All Predicted Neurons Fired without anyone Bursting.
             //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!

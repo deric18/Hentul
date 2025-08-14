@@ -98,7 +98,7 @@
 
         public ulong[] WireCasesTracker { get; private set; }
 
-        string logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
+        public static string LogFileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
 
         public List<Neuron> OverConnectedOffenderList { get; private set; }
 
@@ -719,7 +719,6 @@
             }
         }
 
-
         private void PerformHigherOrderSequencing()
         {
             // For all the neurons that fired in the last cycle should add the neurons that are firing this cycle as there respected ObjectLAbel predictions.
@@ -741,6 +740,7 @@
                 }
             }
         }
+
 
         private void Fire()
         {
@@ -789,7 +789,7 @@
             // Iterate through NeuronsFiringTHisCycle and fire!
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                neuron.Fire(CycleNum, Mode, logfilename);
+                neuron.Fire(CycleNum, Mode, LogFileName);
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)       //it must have been done here for a reason.
                 {
@@ -887,7 +887,9 @@
                     case ConnectionType.NMDATONEURON:
                         targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, CycleNum, Mode);
                         break;
-
+                    case ConnectionType.PROXIMALDENDRITICNEURON:
+                        targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
+                        break;
                     default: throw new InvalidOperationException("Object Label Should never have this type Conneciton!");
                 }
             }
@@ -1216,7 +1218,7 @@
 
                     WireCasesTracker[3]++;
 
-                    if (Mode == LogMode.Trace)
+                    if (Mode >= LogMode.Trace)
                     {
                         Console.WriteLine("Wire Case 4 Picked Up!!");
                     }
@@ -1235,7 +1237,7 @@
 
                     WireCasesTracker[4]++;
 
-                    if (Mode == LogMode.Trace)
+                    if (Mode >= LogMode.Trace)
                     {
                         Console.WriteLine("Wire Case 5 Picked Up!!");
                     }
@@ -1749,7 +1751,7 @@
 
             if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.TRUE)
             {
-                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), CurrentObjectLabel, DendriticNeuron.nType, CycleNum, schemToLoad, logfilename, cType, IsActive);
+                bool IsDendronalConnectionSuccesful = DendriticNeuron.AddToDistalList(AxonalNeuron.NeuronID.ToString(), CurrentObjectLabel, DendriticNeuron.nType, CycleNum, schemToLoad, LogFileName, cType, IsActive);
 
                 if (cType.Equals(ConnectionType.DISTALDENDRITICNEURON))     //New Connection Added
                 {
@@ -2903,11 +2905,11 @@
 
         private void WriteLogsToFile(string logline)
         {
-            File.AppendAllText(logfilename, logline + "\n");
+            File.AppendAllText(LogFileName, logline + "\n");
 
         }
 
-        public void LearnNewObject(string objectName)
+        public void ChangeCurrentObjectLabel(string objectName)
         {
             CurrentObjectLabel = objectName;
         }

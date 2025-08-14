@@ -356,12 +356,16 @@
                     {
                         if(!synapse.PopulatePrediction(objectLabel, nextNeuronIds))
                         {
-                            throw new InvalidOperationException("Error : Neurons.cs : PerformHigherSequencing() : Could not add PRediction to the associated Object Label under the Synapse!");
+                            throw new InvalidOperationException("Error : Neurons.cs : PerformHigherSequencing() : Could not add Prediction to the associated Object Label under the Synapse!");
                         }
                     }
                     else
                     {
-                        throw new InvalidOperationException(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened! ");
+                        //throw new InvalidOperationException(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened! ");
+                        if(BlockBehaviourManagerSOM.Mode >= LogMode.BurstOnly)
+                        {
+                            WriteLogsToFile(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened!", BlockBehaviourManagerSOM.LogFileName);
+                        }
                     }
                 }
             }
