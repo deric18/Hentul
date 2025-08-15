@@ -55,10 +55,10 @@
                 if (cType != ConnectionType.DISTALDENDRITICNEURON)
                 {
                     throw new InvalidOperationException("Cannot create  a NON-Distal Dendritic Connection as a Distal connection!");
-                }
-
-                SupportedLabels = new();
+                }                
             }
+
+            SupportedLabels = new();
         }
 
         // Only for Schema Based Proximal Connections / Temporal / Apical

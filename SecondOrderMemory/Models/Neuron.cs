@@ -352,7 +352,7 @@
             {
                 if (!string.IsNullOrEmpty(nextNeuronId) && !string.IsNullOrWhiteSpace(nextNeuronId))
                 {
-                    if (ProximoDistalDendriticList.TryGetValue(nextNeuronId, out var synapse))
+                    if (AxonalList.TryGetValue(nextNeuronId, out var synapse))
                     {
                         if(!synapse.PopulatePrediction(objectLabel, nextNeuronIds))
                         {

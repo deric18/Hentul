@@ -422,29 +422,6 @@ namespace SecondOrderMemoryUnitTest
             Assert.IsTrue(prefireSynapseStrength1 < postFiringSynapeStrength1);
         }
 
-        [Test, Ignore("Needs Work")]
-        public void TestWireCase4()
-        {
-            // Case 4 : All Bursted 
-
-            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 2);
-
-            bbManager.ChangeCurrentObjectLabel("Apple");
-
-            ulong cycle = 1;
-
-            for(int i=0; i < 5; i++)
-            {
-                foreach(var sdr in object1)
-                {
-                    bbManager.Fire(sdr, cycle++);
-                }
-            }
-
-
-            // Ensure there is a inactive synapse between all the neurons in the first SDR to second SDR
-        }
-
         [Test]
         public void TestWireCase3()
         {
@@ -465,6 +442,51 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), bbManager.GetNeuronFromPosition(sdr2.ActiveBits[0])));
         }
+
+        [Test]
+        public void TestWireCase4()
+        {
+            // Case 4 : All Bursted 
+
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 2);
+
+            bbManager.ChangeCurrentObjectLabel("Apple");
+
+            ulong cycle = 1;
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle++);
+            }
+
+            // Ensure there is an inactive synapse between all the neurons in the first SDR to second SDR
+            var firstSDR = object1[0];
+            var secondSDR = object1[1];
+
+            foreach (var pos1 in firstSDR.ActiveBits)
+            {
+                var neuron1 = bbManager.Columns[pos1.X, pos1.Y].Neurons[pos1.Z];
+
+                foreach (var pos2 in secondSDR.ActiveBits)
+                {
+                    var neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
+
+                    // Check if neuron1 has a synapse to neuron2
+                    if (neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse synapse))
+                    {
+                        if (neuron2.ProximoDistalDendriticList.TryGetValue(neuron1.NeuronID.ToString(), out synapse))
+                        {
+                            Assert.IsFalse(synapse.IsActive, $"Synapse between {neuron1.NeuronID} and {neuron2.NeuronID} should be inactive.");
+                        }
+                    }
+                    else
+                    {
+                        // If no synapse exists, that's also considered inactive
+                        Assert.Fail($"No synapse exists between {neuron1.NeuronID} and {neuron2.NeuronID}");
+                    }
+                }
+            }
+        }        
 
 
         [Test, Ignore("Needs Work")]
