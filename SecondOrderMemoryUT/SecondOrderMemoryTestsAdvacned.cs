@@ -75,9 +75,7 @@
                 }
             }
 
-            bbManager.ChangeNetworkModeToPrediction();
-
-            cycle = 1;
+            bbManager.ChangeNetworkModeToPrediction();            
 
             foreach (var sdr in object1)
             {

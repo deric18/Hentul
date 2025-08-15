@@ -153,7 +153,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManagerSOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, string objectLabel = null, bool includeBurstLearning = false)
+        public BlockBehaviourManagerSOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, string objectLabel = null, bool includeBurstLearning = false)
         {
             this.NumberOfColumnsThatBurstLastCycle = 0;
 
@@ -2443,10 +2443,7 @@
 
             NumberOfColumnsThatFiredThisCycle = 0;
 
-            IsBurstOnly = false;
-
-            SupportedLabels.Clear();
-
+            IsBurstOnly = false;            
         }
 
         private void PrintBlockDetails()
@@ -2911,7 +2908,15 @@
 
         public void ChangeCurrentObjectLabel(string objectName)
         {
+            if(string.IsNullOrEmpty(objectName))
+            {
+                throw new InvalidOperationException("ERROR : ChangeCurrentObjectLabel() : Object Name cannot be empty");
+            }
+
             CurrentObjectLabel = objectName;
+
+            if(!SupportedLabels.Contains(objectName))
+                SupportedLabels.Add(objectName);
         }
 
         #endregion
