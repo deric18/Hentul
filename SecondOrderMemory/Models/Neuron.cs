@@ -570,6 +570,10 @@
         internal List<string> GetCurrentPotentialMatchesForCurrentCycle()
         {
             throw new NotImplementedException();
+
+            // return all the potential matches so far for the firing pattern
+
+            // for the current synapse in question , check who contribbuted to this neuron in the previous cycle and look up the synapse for that neuron and return the list of all the potential matches
         }
 
 
