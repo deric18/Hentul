@@ -58,6 +58,8 @@
         /// </summary>
         public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }
 
+        private List<Neuron> ContributingNeuronsLastCycle { get; set; }
+
         //public List<Segment>? Segments { get; private set; } = null;
 
         public NeuronState CurrentState { get; private set; }
@@ -74,6 +76,7 @@
             TAContributors = new Dictionary<string, char>();
             ProximoDistalDendriticList = new Dictionary<string, Synapse>();
             AxonalList = new Dictionary<string, Synapse>();
+            ContributingNeuronsLastCycle = new();
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
             flag = 0;
@@ -134,9 +137,9 @@
             {
                 Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
 
-                #if !DEBUG
+#if !DEBUG
                 Console.ReadKey();
-                #endif
+#endif
 
                 return;
             }
@@ -146,12 +149,37 @@
             ProcessCurrentState(cycleNum, logmode, logFileName);
         }
 
-        public void ProcessVoltage(int voltage, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
+        internal List<string> GetCurrentPotentialMatchesForCurrentCycle()
+        {
+            // For every neuron in ContributingNeuronList Strengthen those synpases and extract those labels into a list
+            List<string> potentialMatches = new List<string>();
+
+            foreach (var contributingNeuron in ContributingNeuronsLastCycle)
+            {
+                if (ProximoDistalDendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
+                {
+                    if (synapse.SupportedPredictions.Count > 0)
+                    {
+                        foreach (var prediction in synapse.SupportedPredictions)
+                        {
+                            potentialMatches.Add(prediction.ObjectLabel);
+                        }
+                    }
+                }
+            }
+
+            return potentialMatches;
+        }
+
+        public void ProcessVoltage(int voltage, Neuron contributingNeuron, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
         {
             if (NeuronID.ToString().Equals("1035-4-1-N"))
             {
                 bool breakpoiunt = true;
             }
+
+            if(contributingNeuron.nType == NeuronType.NORMAL)           // This is needed for HigherORderSequencing Logic : Completely Different Flow
+                ContributingNeuronsLastCycle.Add(contributingNeuron);
 
             Voltage += voltage;
 
@@ -310,7 +338,7 @@
 
         private bool AddNewProximalOrDendriticConnection(string key)
         {
-            
+
             if (key.Equals(NeuronID))
             {
                 throw new InvalidOperationException("Cannot connect neuron to itself");
@@ -322,7 +350,7 @@
                 {
                     Console.WriteLine("INFO :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : " + ++redundantCounter);
                 }
-                
+
                 return false;
             }
             else
@@ -354,7 +382,7 @@
                 {
                     if (AxonalList.TryGetValue(nextNeuronId, out var synapse))
                     {
-                        if(!synapse.PopulatePrediction(objectLabel, nextNeuronIds))
+                        if (!synapse.PopulatePrediction(objectLabel, nextNeuronIds))
                         {
                             throw new InvalidOperationException("Error : Neurons.cs : PerformHigherSequencing() : Could not add Prediction to the associated Object Label under the Synapse!");
                         }
@@ -362,7 +390,7 @@
                     else
                     {
                         //throw new InvalidOperationException(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened! ");
-                        if(BlockBehaviourManagerSOM.Mode >= LogMode.BurstOnly)
+                        if (BlockBehaviourManagerSOM.Mode >= LogMode.BurstOnly)
                         {
                             WriteLogsToFile(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened!", BlockBehaviourManagerSOM.LogFileName);
                         }
@@ -390,12 +418,12 @@
 
                     if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
                     {
-                        if(BlockBehaviourManagerSOM.Mode == LogMode.All || BlockBehaviourManagerSOM.Mode == LogMode.Info)
+                        if (BlockBehaviourManagerSOM.Mode == LogMode.All || BlockBehaviourManagerSOM.Mode == LogMode.Info)
                         {
                             Console.WriteLine("INFO :: SOM :: AddToDistalList : Connection Already Added Counter : " + ++redundantCounter);
-                        }                        
+                        }
 
-                        synapse.IncrementHitCount(CycleNum);                        
+                        synapse.IncrementHitCount(CycleNum, string.Empty);
 
                         return true;
                     }
@@ -418,7 +446,7 @@
             //Only for Distal Connections.
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
             {
-                synapse1.IncrementHitCount(CycleNum);
+                synapse1.IncrementHitCount(CycleNum, string.Empty);
 
                 if (!synapse1.CheckForSupportedLabel(objectLabel))  //Higher Order Sequencing Logic!
                 {
@@ -507,7 +535,7 @@
             }
 
             return ConnectionRemovalReturnType.HARDFALSE;
-        }        
+        }
 
         #endregion
 
@@ -553,6 +581,8 @@
 
             Voltage = 0;
             ProcessCurrentState(cycleNum);
+
+            ContributingNeuronsLastCycle.Clear();
         }
 
         internal bool DidItContribute(Neuron temporalContributor)
@@ -566,16 +596,6 @@
 
             return staleConnections;
         }
-
-        internal List<string> GetCurrentPotentialMatchesForCurrentCycle()
-        {
-            throw new NotImplementedException();
-
-            // return all the potential matches so far for the firing pattern
-
-            // for the current synapse in question , check who contribbuted to this neuron in the previous cycle and look up the synapse for that neuron and return the list of all the potential matches
-        }
-
 
         #endregion
 

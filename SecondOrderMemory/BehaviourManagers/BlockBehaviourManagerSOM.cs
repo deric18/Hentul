@@ -677,18 +677,18 @@
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                var neuronalPredictions = neuron.GetCurrentPotentialMatchesForCurrentCycle();
+                var currentPredictions = neuron.GetCurrentPotentialMatchesForCurrentCycle();
 
-                if (neuronalPredictions != null && neuronalPredictions.Count() > 0)
+                if (currentPredictions != null && currentPredictions.Count() > 0)
                 {
                     if (cyclePredictions.Count == 0)
                     {
-                        cyclePredictions.AddRange(neuronalPredictions);
+                        cyclePredictions.AddRange(currentPredictions);
                     }
                     else
                     {
                         // Get an intersection of cyclePredictions and neuronalPredictions
-                        var intersect = cyclePredictions.Intersect(neuronalPredictions).ToList();
+                        var intersect = cyclePredictions.Intersect(currentPredictions).ToList();
 
                         if(intersect.Count == 0)
                         {
@@ -816,11 +816,11 @@
                 if (!dendronalNeuron.TAContributors.TryGetValue(axonalNeuron.NeuronID.ToString(), out char w))
                 {
                     dendronalNeuron.TAContributors.Add(axonalNeuron.NeuronID.ToString(), 'T');
-                    dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
+                    dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, axonalNeuron, CycleNum, Mode);
                 }
                 else
                 {
-                    dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
+                    dendronalNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, axonalNeuron, CycleNum, Mode);
                 }
             }
             else if (synapse.cType == ConnectionType.APICAL)
@@ -828,11 +828,11 @@
                 if (!dendronalNeuron.TAContributors.TryGetValue(axonalNeuron.NeuronID.ToString(), out char w))
                 {
                     dendronalNeuron.TAContributors.Add(axonalNeuron.NeuronID.ToString(), 'A');
-                    dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                    dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, axonalNeuron, CycleNum, Mode);
                 }
                 else
                 {
-                    dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                    dendronalNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, axonalNeuron, CycleNum, Mode);
 
                     #region Removed Code [Potential Bug OR Feature
                     //if (cType.Equals(ConnectionType.TEMPRORAL))
@@ -846,7 +846,7 @@
             }
             else if (synapse.cType == ConnectionType.AXONTONEURON_SCHEMA)
             {
-                dendronalNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
+                dendronalNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, axonalNeuron, CycleNum, Mode);
             }
             else if (synapse.cType == ConnectionType.DISTALDENDRITICNEURON)
             {
@@ -876,19 +876,20 @@
 
         private void ProcessSpikeAsPer(Synapse synapse, Neuron targetNeuron)
         {
+            Neuron sourceNeuron = GetNeuronFromString(synapse.AxonalNeuronId);
 
             if (synapse.IsActive)       //Process Voltage only if the synapse is active.
             {
                 switch (synapse.cType)
                 {
                     case ConnectionType.DISTALDENDRITICNEURON:
-                        targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
+                        targetNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, sourceNeuron, CycleNum, Mode);
                         break;
                     case ConnectionType.NMDATONEURON:
-                        targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                        targetNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, sourceNeuron, CycleNum, Mode);
                         break;
                     case ConnectionType.PROXIMALDENDRITICNEURON:
-                        targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
+                        targetNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, sourceNeuron, CycleNum, Mode);
                         break;
                     default: throw new InvalidOperationException("Object Label Should never have this type Conneciton!");
                 }
@@ -2495,7 +2496,9 @@
 
                 //Console.WriteLine("SOM :: Pramoting Correctly Predicted Dendronal Connections");
 
-                synapse.IncrementHitCount(CycleNum);
+                string label = synapse.GetCorrectPredictedLabel(contributingNeuron, targetNeuron);
+
+                synapse.IncrementHitCount(CycleNum, label);
             }
         }
 

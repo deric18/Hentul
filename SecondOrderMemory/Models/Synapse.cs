@@ -6,7 +6,7 @@
         public Guid Id { get; private set; }
 
         // Key - Predicted Neuronal ID , Value - Predicted Object Label
-        public List<Prediction> SupportedLabels { get; private set; }   // Holds only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
+        public List<Prediction> SupportedPredictions { get; private set; }   // Holds only unique Object Label , Does not even hold Schema Bassed Connection or APical / Temporal connections.
 
         public string AxonalNeuronId { get; private set; }
 
@@ -58,7 +58,7 @@
                 }                
             }
 
-            SupportedLabels = new();
+            SupportedPredictions = new();
         }
 
         // Only for Schema Based Proximal Connections / Temporal / Apical
@@ -89,15 +89,28 @@
                 throw new InvalidOperationException("Cannot create Distal Dendritic Connection as a Schema Based Connection! Need an Object Label to create a Distal Dendritic Connection!");
             }
 
-            SupportedLabels = new();
+            SupportedPredictions = new();
+        }
+
+        public string GetCorrectPredictedLabel(Neuron sourceNeuron, Neuron sinkNeuron)
+        {
+            foreach (var prediction in SupportedPredictions)
+            {
+                if (prediction.CheckNGetMatchingLabel(sinkNeuron.NeuronID.ToString()) != null)
+                {
+                    return prediction.ObjectLabel;
+                }
+            }
+
+            return null;
         }
 
         internal bool IsSynapseActive() => IsActive;
 
-        public bool IsMultiObjectSupported => SupportedLabels.Count > 1;
+        public bool IsMultiObjectSupported => SupportedPredictions.Count > 1;
 
         internal bool CheckForSupportedLabel(string objectLabel) =>
-            SupportedLabels.Any(prediction => prediction.ObjectLabel.ToLower() == objectLabel.ToLower());
+            SupportedPredictions.Any(prediction => prediction.ObjectLabel.ToLower() == objectLabel.ToLower());
 
         public bool AddNewObjectLabel(string label)
         {
@@ -106,7 +119,7 @@
 
             if (!CheckForSupportedLabel(label))
             {
-                SupportedLabels.Add(new Prediction(label));
+                SupportedPredictions.Add(new Prediction(label));
                 return true;
             }
 
@@ -115,13 +128,13 @@
 
         internal bool PopulatePrediction(string objectLabel, List<string> nextNeuronIds)
         {
-            if (SupportedLabels.Count == 0)
+            if (SupportedPredictions.Count == 0)
             {
-                SupportedLabels.Add(new Prediction(objectLabel, nextNeuronIds));
+                SupportedPredictions.Add(new Prediction(objectLabel, nextNeuronIds));
                 return true;
             }
 
-            foreach (var label in SupportedLabels)
+            foreach (var label in SupportedPredictions)
             {
                 if (label.ObjectLabel.ToLower() == objectLabel.ToLower())
                 {
@@ -132,12 +145,12 @@
             }
 
             //Couldnt Find Matching Object Label ! Adding new Object Label
-            SupportedLabels.Add(new Prediction(objectLabel, nextNeuronIds));
+            SupportedPredictions.Add(new Prediction(objectLabel, nextNeuronIds));
 
             return true;
         }
 
-        public void IncrementHitCount(ulong currentCycleNum)
+        public void IncrementHitCount(ulong currentCycleNum, string objectLabel)
         {
 
             if (PredictiveHitCount >= BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY)
@@ -155,6 +168,20 @@
             {
                 PredictiveHitCount++;
             }
+
+            if (string.IsNullOrEmpty(objectLabel))
+            {
+                Prediction p = SupportedPredictions.Where (prediction => prediction.ObjectLabel == objectLabel).First();
+
+                if(p != null)
+                {
+                    p.HitCount++;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Synapse : IncrementHitCount : Could not find Prediction for the given Object Label!");
+                }
+            }
         }
 
         public void Print()
@@ -162,7 +189,7 @@
             Console.WriteLine(" Axonal Neuron ID : " + AxonalNeuronId);
             Console.WriteLine(" Dendronal Neuron ID : " + DendronalNeuronalId);
 
-            foreach (var label in SupportedLabels)
+            foreach (var label in SupportedPredictions)
             {
                 Console.WriteLine("Label : " + label);
                 Console.WriteLine(" Last Fired Cycle : " + lastFiredCycle);

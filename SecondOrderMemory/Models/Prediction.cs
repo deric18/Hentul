@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SecondOrderMemory.Models
+﻿namespace SecondOrderMemory.Models
 {
     public class Prediction
     {
@@ -26,8 +20,22 @@ namespace SecondOrderMemory.Models
             ObjectLabel = objectLabel;
             HitCount = 0;
         }
+
+        internal string CheckNGetMatchingLabel(string neuronId)
+        {
+            if (NextNeuronIdLists == null || NextNeuronIdLists.Value == null || NextNeuronIdLists.Value.Count == 0)
+                return null;
+            foreach (var neuronList in NextNeuronIdLists.Value)
+            {
+                if (neuronList.Contains(neuronId))
+                {                    
+                    return ObjectLabel;
+                }
+            }
+            return null;
+        }
         
-        internal bool PopulatePrediction(string objectLabel, List<String> nextNeuronIdList)
+        internal bool PopulatePrediction(string objectLabel, List<string> nextNeuronIdList)
         {
             if(objectLabel != ObjectLabel || string.IsNullOrEmpty(objectLabel))
                 throw new InvalidOperationException("Prediction : PopulatePrediction : Object Labels Should Match!");

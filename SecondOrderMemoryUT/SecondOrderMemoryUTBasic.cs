@@ -7,6 +7,7 @@ namespace SecondOrderMemoryUnitTest
     public class SeconfOrderMemoryUnitTest
     {
         BlockBehaviourManagerSOM? bbManager;
+        Neuron dummyContributingNeuron = new Neuron( new Position_SOM(0,0,0), 1);
         string testObjectLabel = "RandomObject 1";
         const int X = 1250;
         const int Y = 10;
@@ -69,7 +70,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(apicalSdr);
 
-            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7);
+            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7, dummyContributingNeuron);
 
             bbManager.Fire(spatialSdr, 1, false, true);
 
@@ -236,7 +237,7 @@ namespace SecondOrderMemoryUnitTest
 
             ulong counter = 1;
 
-            neuron1.ProcessVoltage(10, counter, LogMode.BurstOnly);
+            neuron1.ProcessVoltage(10, dummyContributingNeuron, counter, LogMode.BurstOnly);
 
             for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY + 1; i++)
             {
@@ -357,7 +358,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(axonalSdr, Counter++);
 
-            dendronalNeuron.ProcessVoltage(10);
+            dendronalNeuron.ProcessVoltage(10, dummyContributingNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -406,7 +407,7 @@ namespace SecondOrderMemoryUnitTest
             //Make the synapsse Active
             //RepeatCycle(axonalSdr, dendronalSdr, )
 
-            dendronalNeuron1.ProcessVoltage(10);
+            dendronalNeuron1.ProcessVoltage(10, dummyContributingNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -589,7 +590,7 @@ namespace SecondOrderMemoryUnitTest
 
                 bbManager.Fire(sdr1, counter++);
 
-                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30);
+                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30, dummyContributingNeuron);
 
                 bbManager.Fire(sdr2, counter++);
 
@@ -724,7 +725,7 @@ namespace SecondOrderMemoryUnitTest
                 currentStrength = postSynapse.GetStrength();
             }
 
-            overlapNeuron.ProcessVoltage(120);            
+            overlapNeuron.ProcessVoltage(120, dummyContributingNeuron);            
 
             Assert.IsTrue(currentStrength > previousStrength);
 
@@ -797,7 +798,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(apicalInputPattern, 1, true, true);
 
-            normalNeuron.ProcessVoltage(1);
+            normalNeuron.ProcessVoltage(1, dummyContributingNeuron);
 
             bbManager.Fire(spatialInputPattern, 1, true, true);
 
@@ -926,7 +927,7 @@ namespace SecondOrderMemoryUnitTest
 
             var extraNeuron = bbManager.Columns[2, 3].Neurons[2];
 
-            extraNeuron.ProcessVoltage(150, 0, LogMode.All);
+            extraNeuron.ProcessVoltage(150, dummyContributingNeuron, 0, LogMode.All);
 
             bbManager.Fire(spatialSdr);
 
@@ -1217,7 +1218,7 @@ namespace SecondOrderMemoryUnitTest
                 {
                     bbManager.Fire(axonalNeurondr, counter++);
 
-                    neuronToDeplarize.ProcessVoltage(10);
+                    neuronToDeplarize.ProcessVoltage(10, dummyContributingNeuron);
 
                     bbManager.Fire(dendronalNeuronSdr, counter++);
                 }

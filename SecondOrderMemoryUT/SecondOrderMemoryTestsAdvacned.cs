@@ -13,6 +13,7 @@
         int Z = 5;
         Random rand1;
         string testObjectLabel = "RandomObject 1";
+        Neuron dummyContributingNeuron = new Neuron(new Position_SOM(0, 0, 0), 1);
 
 
 
@@ -370,7 +371,7 @@
 
             foreach (var neuron in neigbhourNeurons)
             {
-                neuron.ProcessVoltage(50);
+                neuron.ProcessVoltage(50, dummyContributingNeuron);
             }
 
             int repCount = 3;
@@ -405,7 +406,7 @@
 
             foreach (var neuron in neigbhourNeurons)
             {
-                neuron.ProcessVoltage(50);
+                neuron.ProcessVoltage(50, dummyContributingNeuron);
             }
 
             bbManager.Fire(neighbhourSOM, counter++);
