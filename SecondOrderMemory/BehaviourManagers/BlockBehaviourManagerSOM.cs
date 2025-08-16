@@ -2922,6 +2922,8 @@
                 SupportedLabels.Add(objectName);
         }
 
+        public List<string> GetSupportedLabels() => SupportedLabels.ToList();
+
         #endregion
 
         #region ENUMS    

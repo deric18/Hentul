@@ -73,19 +73,23 @@
                 {
                     bbManager.Fire(sdr, cycle++);
                 }
+
             }
 
-            bbManager.ChangeNetworkModeToPrediction();            
+            bbManager.ChangeNetworkModeToPrediction();
 
             foreach (var sdr in object1)
             {
                 bbManager.Fire(sdr, cycle++);
             }
 
-            var labels = bbManager.GetCurrentPredictions();
+            var supportedLabelList = bbManager.GetSupportedLabels();
 
-            Assert.IsTrue(labels.Count > 0);
+            Assert.IsTrue(supportedLabelList.Count > 0);
 
+            var currentLabelList = bbManager.GetCurrentPredictions();
+
+            Assert.IsTrue(currentLabelList.Count > 0);
         }
 
         [Test]

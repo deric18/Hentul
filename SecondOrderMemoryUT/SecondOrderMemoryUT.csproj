@@ -7,7 +7,6 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <RunSettingsFilePath>C:\Users\depint\source\repos\Hentul\SecondOrderMemoryUT\bin\Debug\net8.0\fine-code-coverage\coverage-tool-output\SecondOrderMemoryUT-fcc-mscodecoverage-generated.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
