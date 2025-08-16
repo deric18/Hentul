@@ -139,8 +139,7 @@
                 if (label.ObjectLabel.ToLower() == objectLabel.ToLower())
                 {
                     //Found Matching Object Label!  Adding new batch of Prediction Set for the same Object Label!
-                    label.PopulatePrediction(label.ObjectLabel, nextNeuronIds);
-                    return true;
+                    return label.PopulatePrediction(label.ObjectLabel, nextNeuronIds);                    
                 }
             }
 
