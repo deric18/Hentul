@@ -20,7 +20,7 @@
         [SetUp]
         public void Setup()
         {
-            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3B, LogMode.BurstOnly, testObjectLabel, true);
+            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3A, LogMode.BurstOnly, testObjectLabel, true);
 
             bbManager.Init(1);
 
@@ -33,8 +33,7 @@
         [Test]
         public void TestPerformHigherOrderSequencing()
         {
-            // Arrange
-            var bbManager = new BlockBehaviourManagerSOM(1250, 10, 5, LayerType.Layer_3B, LogMode.BurstOnly, "TestObject", true);
+            // Arrange            
             bbManager.Init(1);
             bbManager.BeginTraining("TestObject");
 
