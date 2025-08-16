@@ -169,7 +169,7 @@
                 PredictiveHitCount++;
             }
 
-            if (string.IsNullOrEmpty(objectLabel))
+            if (!string.IsNullOrEmpty(objectLabel))
             {
                 Prediction p = SupportedPredictions.Where (prediction => prediction.ObjectLabel == objectLabel).First();
 
