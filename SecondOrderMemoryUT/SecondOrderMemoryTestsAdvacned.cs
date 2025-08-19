@@ -33,9 +33,17 @@
         }
 
         [Test]
-        [Description("Check if newly created synnapses are using the currentObjectLabel to init")]
+        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition of new predictions into the same Synapse")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing1()
+        {
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
+        }
+
+        [Test]
+        [Description("Check if newly created synnapses are using the currentObjectLabel to init")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing2()
         {
             // Chcek if the newly created synapses have labels fro mthe currentObjectLabel
 
@@ -81,15 +89,7 @@
                     }
                 }
             }            
-        }        
-
-        [Test]
-        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition of new predictions into the same Synapse")]
-        [TestCategory("Higher Order Sequencing")]
-        public void TestHigherOrderSequencing2()
-        {
-            // Chcek if the newly created synapses have labels from the currentObjectLabel
-        }
+        }                
 
         [Test]
         [Description("Check if 2 different objects with no overlapping sequences can create synapses and classify both object labels!")]
