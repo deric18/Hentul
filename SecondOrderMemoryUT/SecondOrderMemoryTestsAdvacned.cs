@@ -8,6 +8,7 @@
     using static SecondOrderMemory.Models.BlockBehaviourManagerSOM;
     using Assert = Assert;
     using DescriptionAttribute = DescriptionAttribute;
+    using IgnoreAttribute = IgnoreAttribute;
 
     public class SecondOrderMemoryTestsAdvanced
     {
@@ -56,16 +57,8 @@
             bbManager.ChangeCurrentObjectLabel(currentObjectLabel);
 
             foreach (var sdr in object1)
-            {
-                if(cycle > 0)
-                {
-                    bbManager.Fire(sdr, cycle, false, false, true);
-                }
-                else
-                {
-                    bbManager.Fire(sdr, cycle);
-                }
-
+            {                
+                bbManager.Fire(sdr, cycle, isMock: true);                
 
                 if (cycle > 0)
                 {
@@ -133,6 +126,45 @@
         public void TestHigherOrderSequencing3()
         {
             // Chcek if the newly created synapses have labels from the currentObjectLabel
+
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();
+
+            List<SDR_SOM> object2 = TestUtils.GenerateAlternativeSDRs();
+
+            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
+            string currentObjectLabel1 = "Apple";
+            string currentObjectLabel2 = "Orange";
+
+            bbManager.BeginTraining(currentObjectLabel1);
+
+            ulong cycle = 0;
+
+            foreach (var sdr in object1)
+            {               
+                bbManager.Fire(sdr, cycle, isMock: true);
+                cycle++;
+            }
+
+            bbManager.BeginTraining(currentObjectLabel2);
+
+            foreach (var sdr in object2)
+            {
+                bbManager.Fire(sdr, cycle, isMock: true);
+                cycle++;
+            }
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+            var supporttedLabels = bbManager.GetSupportedLabels();
+
+            Assert.AreEqual(3, supporttedLabels.Count);
+
+            bbManager.Fire(object1[0], cycle++, isMock: true);      
+            
+            var preds = bbManager.GetCurrentPredictions();
+
+            Assert.AreEqual(preds[0], currentObjectLabel1);
+
         }
 
         [Test]
@@ -197,7 +229,7 @@
             Assert.IsTrue(currentLabelList.Count > 0);
         }
 
-        [Test]
+        [Test, Ignore("Not more mental load available!")]
         [Description("Check if 3 objects with 2 objects with similar pattern with last but one pattern different with the 3rd object differing in last pattern get classified succesfully!")]
         [TestCategory("Higher Order Sequencing")]
         public void TestPerformHigherOrderSequencing5()

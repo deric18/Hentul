@@ -82,6 +82,49 @@
             return sdrList;
         }
 
+        internal static List<SDR_SOM> GenerateAlternativeSDRs()
+        {
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: alternative positions
+            var positions1 = new List<Position_SOM>
+            {
+                new Position_SOM(10, 1, 0),
+                new Position_SOM(150, 2, 1),
+                new Position_SOM(275, 3, 2),
+                new Position_SOM(425, 4, 3),
+                new Position_SOM(575, 5, 4)
+            };
+
+            // SDR 2: alternative positions
+            var positions2 = new List<Position_SOM>
+            {
+                new Position_SOM(625, 6, 0),
+                new Position_SOM(775, 7, 1),
+                new Position_SOM(925, 8, 2),
+                new Position_SOM(1075, 9, 3),
+                new Position_SOM(1150, 0, 4)
+            };
+
+            // SDR 3: alternative positions
+            var positions3 = new List<Position_SOM>
+            {
+                new Position_SOM(1230, 1, 0),
+                new Position_SOM(1240, 2, 1),
+                new Position_SOM(1245, 3, 2),
+                new Position_SOM(1248, 4, 3),
+                new Position_SOM(1249, 5, 4)
+            };
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions3, iType.SPATIAL));
+
+            return sdrList;
+        }
+
         public static Neuron GetNeuronFromString(string posString, BlockBehaviourManagerSOM bbManager)
         {
             var parts = posString.Split('-');

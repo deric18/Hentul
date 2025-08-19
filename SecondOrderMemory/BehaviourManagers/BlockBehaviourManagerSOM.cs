@@ -3,6 +3,7 @@
     using System;
     using System.ComponentModel;
     using System.Linq;
+    using System.Security.AccessControl;
     using System.Xml;
     using Common;
 
@@ -263,6 +264,8 @@
 
             NetWorkMode = NetworkMode.TRAINING;
             CurrentObjectLabel = Label;
+
+            AddNewLabelToSupportedLabels(Label);
         }
 
         public void ChangeNetworkModeToPrediction()
@@ -2928,8 +2931,20 @@
 
             CurrentObjectLabel = objectName;
 
-            if(!SupportedLabels.Contains(objectName))
-                SupportedLabels.Add(objectName);
+            //Add new Label to SupportedLabels 
+            AddNewLabelToSupportedLabels(objectName);
+
+        }
+
+        private bool AddNewLabelToSupportedLabels(string label)
+        {
+            if (!SupportedLabels.Contains(label))
+            {
+                SupportedLabels.Add(label);
+                return true;
+            }
+
+            return false;
         }
 
         public List<string> GetSupportedLabels() => SupportedLabels.ToList();
