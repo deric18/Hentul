@@ -382,7 +382,7 @@
                 {
                     if (AxonalList.TryGetValue(nextNeuronId, out var synapse))
                     {
-                        if (!synapse.PopulatePrediction(objectLabel, nextNeuronIds))
+                        if (synapse.PopulatePrediction(objectLabel, nextNeuronIds) == ConnectionAdditionReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Error : Neurons.cs : PerformHigherSequencing() : Could not add Prediction to the associated Object Label under the Synapse!");
                         }
@@ -623,6 +623,13 @@
     }
 
     public enum ConnectionRemovalReturnType
+    {
+        TRUE,
+        HARDFALSE,
+        SOFTFALSE
+    }
+
+    public enum ConnectionAdditionReturnType
     {
         TRUE,
         HARDFALSE,

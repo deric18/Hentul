@@ -126,12 +126,13 @@
             return false;
         }
 
-        internal bool PopulatePrediction(string objectLabel, List<string> nextNeuronIds)
-        {
+        internal ConnectionAdditionReturnType PopulatePrediction(string objectLabel, List<string> nextNeuronIds)
+        {            
+
             if (SupportedPredictions.Count == 0)
             {
                 SupportedPredictions.Add(new Prediction(objectLabel, nextNeuronIds));
-                return true;
+                return ConnectionAdditionReturnType.TRUE;
             }
 
             foreach (var label in SupportedPredictions)
@@ -146,7 +147,7 @@
             //Couldnt Find Matching Object Label ! Adding new Object Label
             SupportedPredictions.Add(new Prediction(objectLabel, nextNeuronIds));
 
-            return true;
+            return ConnectionAdditionReturnType.TRUE;
         }
 
         public void IncrementHitCount(ulong currentCycleNum, string objectLabel)

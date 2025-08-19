@@ -1,8 +1,11 @@
 ﻿namespace SecondOrderMemoryUnitTest
 {
     using Common;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NUnit.Framework;
     using SecondOrderMemory.Models;
+    using Assert = Assert;
+    using DescriptionAttribute = DescriptionAttribute;
 
     public class SecondOrderMemoryTestsAdvanced
     {
@@ -29,9 +32,84 @@
             rand1 = new Random();
         }
 
+        [Test]
+        [Description("Check if newly created synnapses are using the currentObjectLabel to init")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing1()
+        {
+            // Chcek if the newly created synapses have labels fro mthe currentObjectLabel
+
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
+
+            string currentObjectLabel = "Apple";
+
+            bbManager.BeginTraining(currentObjectLabel);
+
+            ulong cycle = 1;
+
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel);
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle++);
+
+                if(cycle > 1)
+                {
+                    var neuronsFiringThisCycle = bbManager.NeuronsFiringThisCycle;
+                    var neuronsFiringPreviousCycle = bbManager.NeuronsFiringLastCycle;
+
+                    foreach (var neuron in neuronsFiringPreviousCycle)
+                    {
+                        foreach (var connection in neuron.AxonalList)
+                        {
+                            if (connection.Value.cType == ConnectionType.DISTALDENDRITICNEURON)
+                            {
+                                Assert.IsTrue(connection.Value.SupportedPredictions[0].ObjectLabel == bbManager.CurrentObjectLabel);
+                            }
+                        }
+                        foreach (var dneuron in neuronsFiringPreviousCycle)
+                        {
+                            if(dneuron.ProximoDistalDendriticList.TryGetValue(neuron.NeuronID.ToString(), out var dconnection))
+                            {
+                                if (dconnection.cType == ConnectionType.DISTALDENDRITICNEURON)
+                                {
+                                    Assert.IsTrue(dconnection.SupportedPredictions[0].ObjectLabel == bbManager.CurrentObjectLabel);
+                                }
+                            }
+                        }
+                    }
+                }
+            }            
+        }
 
         [Test]
-        public void TestPerformHigherOrderSequencing()
+        [Description("Check if sequences of 5 unique object is succesfully getting stored")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing2()
+        {
+            // Chcek if the newly created synapses have labels fro mthe currentObjectLAbel
+        }
+
+        [Test]
+        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition new predictions into the same Synapse")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing3()
+        {
+            // Chcek if the newly created synapses have labels fro mthe currentObjectLAbel
+        }
+
+        [Test]
+        [Description("Check if 2 different objects can create synapses translate both object labels!")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing4()
+        {
+            // Chcek if the newly created synapses have labels fro mthe currentObjectLAbel
+        }
+
+        [Test]
+        [Description("Check if 3 different objects can be stored and classified accordingly as well!")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestPerformHigherOrderSequencing5()
         {
             // Arrange            
             bbManager.Init(1);
@@ -73,7 +151,6 @@
                 {
                     bbManager.Fire(sdr, cycle++);
                 }
-
             }
 
             bbManager.ChangeNetworkModeToPrediction();
@@ -91,6 +168,14 @@
 
             Assert.IsTrue(currentLabelList.Count > 0);
         }
+
+        [Test]
+        [Description("Check if 3 objects with 2 objects with similar pattern with last but one pattern different with the 3rd object differing in last pattern get classified succesfully!")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestPerformHigherOrderSequencing6()
+        {
+        }
+
 
         [Test]
         public void CheckAllNeuronsNonDistalConnectionsAreActive()

@@ -35,7 +35,7 @@
             return null;
         }
         
-        internal bool PopulatePrediction(string objectLabel, List<string> nextNeuronIdList)
+        internal ConnectionAdditionReturnType PopulatePrediction(string objectLabel, List<string> nextNeuronIdList)
         {
             if(objectLabel != ObjectLabel || string.IsNullOrEmpty(objectLabel))
                 throw new InvalidOperationException("Prediction : PopulatePrediction : Object Labels Should Match!");
@@ -46,10 +46,10 @@
             if (!Compare(nextNeuronIdList))
             {
                 NextNeuronIdLists.Value.Add(nextNeuronIdList);
-                return true;
+                return ConnectionAdditionReturnType.TRUE;
             }
 
-            return false;
+            return ConnectionAdditionReturnType.SOFTFALSE;
         }
 
         private bool Compare(List<string> nextNeurons)
