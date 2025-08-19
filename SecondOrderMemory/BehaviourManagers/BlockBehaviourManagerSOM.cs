@@ -509,7 +509,7 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
-        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false)
+        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool isMock = false)
         {
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
@@ -645,11 +645,11 @@
 
             Fire();
 
-            if (NetWorkMode.Equals(NetworkMode.TRAINING) && CurrentiType == iType.SPATIAL)
+            if (NetWorkMode == NetworkMode.TRAINING && CurrentiType == iType.SPATIAL)
             {
                 Wire();
 
-                if(performHighOrderSequencing && CycleNum > 2)
+                if(performHighOrderSequencing && ( CycleNum > 2 || isMock))
                 {
                     PerformHigherOrderSequencing();
                 }
@@ -1293,6 +1293,10 @@
                 }
                 else
                 {   // BUG: Few Bursted , Few Fired which were not predicted // Needs analysis on how something can fire without bursting which were not predicted.
+                    var currentlyFiring = NeuronsFiringThisCycle;
+                    var currentylPredicted = PredictedNeuronsforThisCycle;
+                    var ColumnsThatBurstCount = ColumnsThatBurst;
+
                     throw new NotImplementedException("This should never happen or the code has bugs! Get on it Biiiiiyaaattttcccchhhhhhhh!!!!! Need ENumification of Wire Cases!!!");
                 }
             }
@@ -1338,7 +1342,7 @@
 
         #region INIT METHOD
 
-        private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type)
+        private void PrepNetworkForNextCycle(bool ignorePostCycleCleanUp, iType type, List<SkipList> skips = null)
         {
             PerCycleFireSparsityPercentage = (NeuronsFiringThisCycle.Count * 100 / (X * Y * Z));
 
@@ -1419,6 +1423,8 @@
         //Selective Clean Up Logic , Should never perform Full Clean up.
         private void PostCycleCleanup(iType type)
         {
+
+
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
             if ((PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL)) && CurrentiType.Equals(iType.SPATIAL))
             {
@@ -1505,7 +1511,6 @@
 
             }
 
-
             //Case 2 : If a bursting signal came through , after wire , the Bursted neurons and all its connected cells should be cleaned up. Feature : How many Burst Cycle to wait before performing a full clean ? Answer : 1
             if (IsBurstOnly)
             {
@@ -1537,7 +1542,6 @@
 
                 BurstCache.Clear();
             }
-
 
             //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Kepingg them in the list will only complicate next cycle process , the other thing is if any neuron is spiking , it should not be cleaned up
             // since that will run the temporal dynamics of the system.
@@ -1594,7 +1598,7 @@
                     }
                 }
             }
-
+            
             NeuronsFiringThisCycle.Clear();
 
             ColumnsThatBurst.Clear();
@@ -1635,6 +1639,12 @@
 
         private void ConnectAllBurstingNeuronstoNeuronssFiringLastcycle()
         {
+            if(CycleNum > 0  && NeuronsFiringLastCycle.Count == 0)
+            {
+                WriteLogsToFile("NeuronsFiringLastCycle Should not be Zero , this will result in functional loss!");
+                throw new InvalidOperationException("NeuronsFiringLastCycle Should not be Zero , this will result in functional loss!");
+            }
+
             foreach (var position in ColumnsThatBurst)
             {
                 foreach (var dendriticNeuron in Columns[position.X, position.Y].Neurons)
@@ -1643,7 +1653,7 @@
                     {
                         if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
                         {
-                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
+                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) != ConnectionRemovalReturnType.TRUE)
                             {
                                 throw new InvalidOperationException("Unable to connect neurons!");
                             }
@@ -2935,6 +2945,11 @@
             POLOARIZED,
             FIRING,
             CLEANUP
+        }
+
+        public enum SkipList
+        {
+            NeuronsFiringThisCycle                       
         }
 
         #endregion

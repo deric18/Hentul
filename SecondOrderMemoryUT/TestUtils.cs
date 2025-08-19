@@ -38,6 +38,98 @@
             return sdrList;
         }
 
+        internal static List<SDR_SOM> GenerateSpepcificSDRs()
+        {            
+
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: positions
+            var positions1 = new List<Position_SOM>
+            {
+                new Position_SOM(0, 0, 0),
+                new Position_SOM(100, 1, 1),
+                new Position_SOM(200, 2, 2),
+                new Position_SOM(300, 3, 3),
+                new Position_SOM(400, 4, 4)
+            };
+
+                    // SDR 2: positions
+            var positions2 = new List<Position_SOM>
+            {
+                new Position_SOM(500, 5, 0),
+                new Position_SOM(600, 6, 1),
+                new Position_SOM(700, 7, 2),
+                new Position_SOM(800, 8, 3),
+                new Position_SOM(900, 9, 4)
+            };
+
+                    // SDR 3: positions
+            var positions3 = new List<Position_SOM>
+            {
+                new Position_SOM(1000, 0, 0),
+                new Position_SOM(1100, 1, 1),
+                new Position_SOM(1200, 2, 2),
+                new Position_SOM(1249, 3, 3),
+                new Position_SOM(0, 4, 4)
+            };
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions3, iType.SPATIAL));
+
+            return sdrList;
+        }
+
+        public static Neuron GetNeuronFromString(string posString, BlockBehaviourManagerSOM bbManager)
+        {
+            var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+            char nType = 'N';
+
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
+            
+
+            if (x > bbManager.X || y > bbManager.Y || z > bbManager.Z)
+            {
+                int breakpoint = 1;
+
+                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns  posString :  " + posString);
+            }
+
+            return GetNeuronFromPosition(nType, x, y, z, bbManager);
+        }
+
+        public static Neuron GetNeuronFromPosition(char w, int x, int y, int z, BlockBehaviourManagerSOM bbM)
+        {
+            Neuron toReturn = null;
+
+            if (w == 'N' || w == 'n')
+            {
+                toReturn = bbM.Columns[x, y].Neurons[z];
+            }
+            else if (w == 'T' || w == 't')
+            {
+                toReturn = bbM.TemporalLineArray[y, z];
+            }
+            else if (w == 'A' || w == 'a')
+            {
+                toReturn = bbM.ApicalLineArray[x, y];
+            }
+            else
+            {
+                throw new InvalidOperationException(" GetNeuronFromPosition :: Your Column structure is messed up!!!");
+            }
+
+            return toReturn;
+        }
+
         internal static SDR_SOM AddOffsetToSDR(SDR_SOM sdr, int offset)
         {
             List<Position_SOM> posList = new List<Position_SOM>();
