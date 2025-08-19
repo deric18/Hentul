@@ -151,27 +151,69 @@
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
+        public record RegionFrames(Bitmap Processed, Bitmap Raw, Rectangle Source, LearningUnitType Type);
 
         #endregion
 
         #region Public API
 
         /// Grabs Cursors Current Position and records pixels.        
-        public (Bitmap V1, Bitmap V2, Bitmap V3) RecordPixels(bool isMock = false)
+        public (RegionFrames V1, RegionFrames V2, RegionFrames V3) RecordPixels(bool isMock = false)
         {
             CycleNum++;
+            point = GetCurrentPointerPosition();
+            var p = new System.Drawing.Point(point.X, point.Y);
 
-            Console.WriteLine("Grabbing cursor Position");
-
-            point = this.GetCurrentPointerPosition();
-            System.Drawing.Point systemPoint = new System.Drawing.Point(point.X, point.Y);
-            // Create all 3 versions
-            Bitmap v1=RecordRegion(systemPoint, 10, "V1", isMock);
-            Bitmap v2=RecordRegion(systemPoint, 50, "V2", isMock); // 100x100
-            Bitmap v3=RecordRegion(systemPoint, 100, "V3", isMock); // 200x200
-
+            var v1 = RecordRegion(p, range: 10, label: "V1", LearningUnitType.V1, isMock);
+            var v2 = RecordRegion(p, range: 50, label: "V2", LearningUnitType.V2, isMock);
+            var v3 = RecordRegion(p, range: 100, label: "V3", LearningUnitType.V3, isMock);
             return (v1, v2, v3);
+        }
+        private RegionFrames RecordRegion(Point cursor, int range, string label, LearningUnitType type, bool isMock)
+        {
+            int size = range * 2;                      // capture size: 20, 100, 200
+            int x1 = Math.Max(cursor.X - range, 0);
+            int y1 = Math.Max(cursor.Y - range, 0);
+            var srcRect = new Rectangle(x1, y1, size, size);
 
+            using var raw = new Bitmap(size, size, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(raw))
+                g.CopyFromScreen(x1, y1, 0, 0, raw.Size, CopyPixelOperation.SourceCopy);
+
+            // processed is ALWAYS 40x20 for the encoder
+            var processed = new Bitmap(40, 20);
+            using (Graphics g2 = Graphics.FromImage(processed))
+                g2.DrawImage(raw, new Rectangle(0, 0, 40, 20));
+
+            if (!isMock)
+            {
+                // Build safe paths and ensure directory exists
+                string dir = Path.GetDirectoryName(fileName)!;
+                string baseName = Path.GetFileNameWithoutExtension(fileName);
+                Directory.CreateDirectory(dir);
+
+                string ts = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff"); // avoid lock/name collisions
+                string rawPngPath = Path.Combine(dir, $"{baseName}_{label}_raw_{ts}.png");
+                string jpgPath = Path.Combine(dir, $"{baseName}_{label}_{ts}.jpg");
+                string pngPath = Path.Combine(dir, $"{baseName}_{label}_{ts}.png");
+
+                // Save RAW as PNG (lossless, safest)
+                raw.Save(rawPngPath, ImageFormat.Png);
+
+                // Try JPEG first (if you need JPGs), then fall back to PNG
+                try
+                {
+                    processed.Save(jpgPath, ImageFormat.Jpeg);
+                }
+                catch (ExternalException)
+                {
+                    // Fallback to PNG if JPEG encoder/path has issues
+                    processed.Save(pngPath, ImageFormat.Png);
+                }
+            }
+
+            // Return frames (clone raw since it's disposed at end of using)
+            return new RegionFrames(processed, new Bitmap(raw), srcRect, type);
         }
 
         private Bitmap RecordRegion(Point cursor, int range, string label, bool isMock)
@@ -713,6 +755,37 @@
                     g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height),
                                 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
                 }
+            }
+
+            return newBitmap;
+        }
+        public Bitmap ConverToEdgedBitmapIdentify(Bitmap source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            var newBitmap = new Bitmap(source.Width, source.Height);
+
+            using (Graphics g = Graphics.FromImage(newBitmap))
+            {
+                var colorMatrix = new ColorMatrix(new float[][]
+                {
+            new float[] {.3f,  .3f,  .3f,  0, 0},
+            new float[] {.59f, .59f, .59f, 0, 0},
+            new float[] {.11f, .11f, .11f, 0, 0},
+            new float[] {0,    0,    0,    1, 0},
+            new float[] {0,    0,    0,    0, 1}
+                });
+
+                using var attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
+
+                g.DrawImage(
+                    source,
+                    new Rectangle(0, 0, source.Width, source.Height),
+                    0, 0, source.Width, source.Height,
+                    GraphicsUnit.Pixel,
+                    attributes
+                );
             }
 
             return newBitmap;

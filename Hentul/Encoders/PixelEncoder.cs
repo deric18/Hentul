@@ -471,7 +471,7 @@
 
         public void ParseBitmap(Bitmap bitmap)
         {
-            if (bitmap.Width == 40 && bitmap.Height == 20)
+            if ((bitmap.Width == 40|| bitmap.Width == 20) && bitmap.Height == 20)
             {
                 ParseBitmapWithMappings(bitmap, MappingsV1);
             }

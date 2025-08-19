@@ -94,17 +94,18 @@ namespace HentulWinforms
                 var (v1, v2, v3) = orchestrator.RecordPixels();
 
                 // Update display images
-                CurrentImage.Image = v2; // Show medium version
+                CurrentImage.Image = v1.Raw; // Show medium version
                 CurrentImage.Refresh();
 
-                EdgedImage.Image = ConverToEdgedBitmap(v2);
+                EdgedImage.Image = ConverToEdgedBitmap(v1.Raw);
                 EdgedImage.Refresh();
 
                 // Process visuals
-                
-                var v1Edge = ConverToEdgedBitmap(v1);
-                var v2Edge = ConverToEdgedBitmap(v2);
-                var v3Edge = ConverToEdgedBitmap(v3);
+
+                var v1Edge = ConverToEdgedBitmap(v1.Processed);
+                var v2Edge = ConverToEdgedBitmap(v2.Processed);
+                var v3Edge = ConverToEdgedBitmap(v3.Processed);
+
 
                 orchestrator.ProcessVisual(v1Edge, v2Edge, v3Edge);
 
@@ -227,14 +228,14 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            orchestrator.RecordPixels();
+            var (V1, V2, V3) = orchestrator.RecordPixels();
 
-            CurrentImage.Image = orchestrator.bmp;
-
+            // Show one of them (medium/Raw is usually good for display)
+            CurrentImage.Image = V1.Raw;
             CurrentImage.Refresh();
 
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
+            // Apply edge detection to the same image
+            EdgedImage.Image = ConverToEdgedBitmap(V1.Raw);
             EdgedImage.Refresh();
 
             label_done.Text = "Ready";
@@ -254,24 +255,22 @@ namespace HentulWinforms
                 Restore.Visible = true;
         }
 
-
         private Bitmap ConverToEdgedBitmap(Bitmap incoming)
         {
-            CurrentImage.Image = orchestrator.bmp;
+            if (incoming == null)
+                throw new ArgumentNullException(nameof(incoming), "ConverToEdgedBitmap: incoming bitmap was null.");
 
-            
-            string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\savedImage.png"));
-            orchestrator.bmp.Save(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\savedImage.png")));
+            // Convert Bitmap -> Mat (no disk I/O)
+            using var src = OpenCvSharp.Extensions.BitmapConverter.ToMat(incoming);
+            using var edges = new OpenCvSharp.Mat();
 
-            //var edgeDetection = Cv2.im
+            // Canny edge detection
+            OpenCvSharp.Cv2.Canny(src, edges, 50, 200);
 
-
-            var edgeImage = Cv2.ImRead(filename);
-            var imgdetect = new Mat();
-            Cv2.Canny(edgeImage, imgdetect, 50, 200);
-
-            return BitmapConverter.ToBitmap(imgdetect);
+            // Mat -> Bitmap
+            return OpenCvSharp.Extensions.BitmapConverter.ToBitmap(edges);
         }
+        
 
 
         private void label1_Click1(object sender, EventArgs e)
