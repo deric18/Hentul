@@ -59,16 +59,17 @@
                     var neuronsFiringPreviousCycle = bbManager.NeuronsFiringLastCycle;
 
                     foreach (var neuron in neuronsFiringPreviousCycle)
-                    {
-                        foreach (var connection in neuron.AxonalList)
-                        {
-                            if (connection.Value.cType == ConnectionType.DISTALDENDRITICNEURON)
-                            {
-                                Assert.IsTrue(connection.Value.SupportedPredictions[0].ObjectLabel == bbManager.CurrentObjectLabel);
-                            }
-                        }
+                    {                        
                         foreach (var dneuron in neuronsFiringPreviousCycle)
                         {
+                            if(neuron.AxonalList.TryGetValue(dneuron.NeuronID.ToString(), out var connection))
+                            {
+                                if (connection.cType == ConnectionType.DISTALDENDRITICNEURON)
+                                {
+                                    Assert.IsTrue(connection.SupportedPredictions[0].ObjectLabel == bbManager.CurrentObjectLabel);
+                                }
+                            }
+
                             if(dneuron.ProximoDistalDendriticList.TryGetValue(neuron.NeuronID.ToString(), out var dconnection))
                             {
                                 if (dconnection.cType == ConnectionType.DISTALDENDRITICNEURON)
@@ -80,39 +81,30 @@
                     }
                 }
             }            
-        }
+        }        
 
         [Test]
-        [Description("Check if sequences of 5 unique object is succesfully getting stored")]
+        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition of new predictions into the same Synapse")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing2()
         {
-            // Chcek if the newly created synapses have labels fro mthe currentObjectLAbel
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
         }
 
         [Test]
-        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition new predictions into the same Synapse")]
+        [Description("Check if 2 different objects with no overlapping sequences can create synapses and classify both object labels!")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing3()
         {
-            // Chcek if the newly created synapses have labels fro mthe currentObjectLAbel
-        }
-
-        [Test]
-        [Description("Check if 2 different objects can create synapses translate both object labels!")]
-        [TestCategory("Higher Order Sequencing")]
-        public void TestHigherOrderSequencing4()
-        {
-            // Chcek if the newly created synapses have labels fro mthe currentObjectLAbel
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
         }
 
         [Test]
         [Description("Check if 3 different objects can be stored and classified accordingly as well!")]
         [TestCategory("Higher Order Sequencing")]
-        public void TestPerformHigherOrderSequencing5()
+        public void TestPerformHigherOrderSequencing4()
         {
-            // Arrange            
-            bbManager.Init(1);
+
             bbManager.BeginTraining("TestObject");
 
             // Create a sequence of patterns (A -> B -> C)
@@ -172,7 +164,7 @@
         [Test]
         [Description("Check if 3 objects with 2 objects with similar pattern with last but one pattern different with the 3rd object differing in last pattern get classified succesfully!")]
         [TestCategory("Higher Order Sequencing")]
-        public void TestPerformHigherOrderSequencing6()
+        public void TestPerformHigherOrderSequencing5()
         {
         }
 
