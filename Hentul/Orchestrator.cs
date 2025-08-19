@@ -235,9 +235,15 @@
             return processed;
         }
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
-        public void ProcessVisual(Bitmap greyScalebmp)
+        public void ProcessVisual(Bitmap v1Grey, Bitmap v2Grey, Bitmap v3Grey)
         {
-            VisionProcessor.Process(greyScalebmp);
+            VisionProcessor.ProcessFor(LearningUnitType.V1, v1Grey);
+            VisionProcessor.ProcessFor(LearningUnitType.V2, v2Grey);
+            VisionProcessor.ProcessFor(LearningUnitType.V3, v3Grey);
+        }
+        public void ProcessVisual(Bitmap v1Grey)
+        {
+            VisionProcessor.ProcessFor(LearningUnitType.V1, v1Grey);
         }
 
         //Stores the new object on to HC

@@ -150,9 +150,15 @@ namespace Hentul
             File.WriteAllText(logfilename, v);
         }
 
-        
 
 
+        public void ProcessFor(LearningUnitType luType, Bitmap greyScaleBmp)
+        {
+            pEncoder.ParseBitmap(greyScaleBmp);
+            GetLearningUnit(luType).Process(pEncoder, CycleNum);
+            pEncoder.Clean();
+            GetLearningUnit(luType).Clear();
+        }
         public void Restore()
         {
             v1.Restore();

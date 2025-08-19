@@ -101,9 +101,12 @@ namespace HentulWinforms
                 EdgedImage.Refresh();
 
                 // Process visuals
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(v1));
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(v2));
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(v3));
+                
+                var v1Edge = ConverToEdgedBitmap(v1);
+                var v2Edge = ConverToEdgedBitmap(v2);
+                var v3Edge = ConverToEdgedBitmap(v3);
+
+                orchestrator.ProcessVisual(v1Edge, v2Edge, v3Edge);
 
                 if (networkMode == NetworkMode.TRAINING)
                 {
