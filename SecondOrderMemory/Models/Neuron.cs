@@ -137,9 +137,9 @@
             {
                 Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
 
-#if !DEBUG
+                #if !DEBUG
                 Console.ReadKey();
-#endif
+                #endif
 
                 return;
             }
@@ -156,7 +156,7 @@
 
             foreach (var contributingNeuron in ContributingNeuronsLastCycle)
             {
-                if (ProximoDistalDendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
+                if (AxonalList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
                 {
                     if (synapse.SupportedPredictions.Count > 0)
                     {
@@ -166,14 +166,14 @@
                         }
                     }
                 }
-            }
+            }            
 
             return potentialMatches;
         }
 
         public void ProcessVoltage(int voltage, Neuron contributingNeuron, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
         {
-            if (NeuronID.ToString().Equals("1035-4-1-N"))
+            if (NeuronID.ToString().Equals("500-5-0-N") && contributingNeuron.NeuronID.ToString().Equals("0-0-0-N"))
             {
                 bool breakpoiunt = true;
             }
@@ -576,14 +576,14 @@
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             if (NeuronID.ToString().Equals("607-3-3-N"))
             {
-                bool breakpoiunt = true;
+                bool breakpoint = true;
             }
 
             Voltage = 0;
-            ProcessCurrentState(cycleNum);
-
-            ContributingNeuronsLastCycle.Clear();
+            ProcessCurrentState(cycleNum);            
         }
+
+        internal void ClearContributingList() => ContributingNeuronsLastCycle.Clear();
 
         internal bool DidItContribute(Neuron temporalContributor)
         {

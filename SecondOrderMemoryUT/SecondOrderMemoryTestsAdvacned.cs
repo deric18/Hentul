@@ -141,7 +141,7 @@
 
             foreach (var sdr in object1)
             {               
-                bbManager.Fire(sdr, cycle, isMock: true);
+                bbManager.Fire(sdr, cycle, isMock: true, CreateActiveSynapses: true);
                 cycle++;
             }
 
@@ -159,12 +159,13 @@
 
             Assert.AreEqual(3, supporttedLabels.Count);
 
-            bbManager.Fire(object1[0], cycle++, isMock: true);      
-            
+            bbManager.Fire(object1[0], cycle++, isMock: true);
+            bbManager.Fire(object1[1], cycle++, isMock: true);
+            bbManager.Fire(object1[2], cycle++, isMock: true);
+
             var preds = bbManager.GetCurrentPredictions();
 
             Assert.AreEqual(preds[0], currentObjectLabel1);
-
         }
 
         [Test]

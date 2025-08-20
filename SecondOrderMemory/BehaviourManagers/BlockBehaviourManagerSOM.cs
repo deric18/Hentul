@@ -512,7 +512,7 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
-        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool isMock = false)
+        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool isMock = false, bool CreateActiveSynapses = false)
         {
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
             this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
@@ -650,9 +650,9 @@
 
             if (NetWorkMode == NetworkMode.TRAINING && CurrentiType == iType.SPATIAL)
             {
-                Wire();
+                Wire(CreateActiveSynapses);
 
-                if(performHighOrderSequencing && ( CycleNum > 2 || isMock))
+                if (performHighOrderSequencing && (CycleNum > 2 || isMock))
                 {
                     PerformHigherOrderSequencing();
                 }
@@ -676,48 +676,40 @@
         {
             // After every Sptial Fire Collect all the intersection of all the supported labels from every single neuron that fired and remove the ones that are no longer supported.
 
-            List<string> cyclePredictions = CurrentPredictions.ToList();
+            List<string> currentPredictions = new();
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                var currentPredictions = neuron.GetCurrentPotentialMatchesForCurrentCycle();
+                var cyclePredictions = neuron.GetCurrentPotentialMatchesForCurrentCycle();
 
-                if (currentPredictions != null && currentPredictions.Count() > 0)
+                if (cyclePredictions != null && cyclePredictions.Count() > 0)
                 {
-                    if (cyclePredictions.Count == 0)
-                    {
-                        cyclePredictions.AddRange(currentPredictions);
-                    }
-                    else
-                    {
-                        // Get an intersection of cyclePredictions and neuronalPredictions
-                        var intersect = cyclePredictions.Intersect(currentPredictions).ToList();
+                    currentPredictions.AddRange(cyclePredictions);
+                }
+            }
 
-                        if(intersect.Count == 0)
-                        {
-                            // Total Mistake now need to restart from scratch , will cross that bridge when we get there.
-                        }
-                        else
-                        {
-                            //increase probability of intersected predictions to 100% if its 1 but if more than keep 50-50
-                            if(intersect.Count == 0)
-                            {
-                                // Too little data. Move on with next Sequence.
-                            }
-                            if (intersect.Count == 1)
-                            {
-                                //Prediction is good , NEed to Verify if early in cycle.
+            // Get an intersection of cyclePredictions and neuronalPredictions
+            var intersect = CurrentPredictions.Intersect(currentPredictions).ToList();
 
-                                NetWorkMode = NetworkMode.DONE;
-                                CurrentObjectLabel = intersect[0];
+            if (intersect.Count == 0)
+            {
+                // Total Mistake now need to restart from scratch , will cross that bridge when we get there.
+                int breakpoint = 1;
+            }
+            else
+            {
+                //increase probability of intersected predictions to 100% if its 1 but if more than keep 50-50               
+                if (intersect.Count == 1)
+                {
+                    //Prediction is good , NEed to Verify if early in cycle.
 
-                            }
-                            else 
-                            {
-                                CurrentPredictions = intersect;
-                            }
-                        }
-                    }
+                    NetWorkMode = NetworkMode.DONE;
+                    CurrentObjectLabel = intersect[0];
+
+                }
+                else
+                {
+                    CurrentPredictions = intersect;
                 }
             }
         }
@@ -881,6 +873,11 @@
         {
             Neuron sourceNeuron = GetNeuronFromString(synapse.AxonalNeuronId);
 
+            if(sourceNeuron.NeuronID.ToString() == "0-0-0-N" && targetNeuron.NeuronID.ToString() == "500-5-0-N")
+            {
+                bool breakpoint = false; //Debugging breakpoint
+            }
+
             if (synapse.IsActive)       //Process Voltage only if the synapse is active.
             {
                 switch (synapse.cType)
@@ -930,7 +927,7 @@
 
         public SDR_SOM GetAllNeuronsFiringLatestCycle(ulong currentCycle, bool ignoreZ = true)
         {
-            List<Position_SOM> activeBits = new List<Position_SOM>();            
+            List<Position_SOM> activeBits = new List<Position_SOM>();
 
             if (_firingBlankStreak >= NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP && NeuronsFiringLastCycle.Count > 0)
             {
@@ -956,7 +953,7 @@
                 else
                 {
                     NeuronsFiringLastCycle.ForEach(n => { if (n.nType == NeuronType.NORMAL) activeBits.Add(n.NeuronID); });
-                }                
+                }
             }
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
@@ -1047,7 +1044,7 @@
             }
         }
 
-        private void Wire()
+        private void Wire(bool createActiveSynapses = false)
         {
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
@@ -1228,7 +1225,7 @@
                     }
 
                     if (includeBurstLearning145)
-                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle(createActiveSynapses);
                 }
                 else if (ColumnsThatBurst.Count < NumberOfColumnsThatFiredThisCycle && correctPredictionList.Count == 0)
                 {
@@ -1363,7 +1360,10 @@
                 {
                     //Prep for Next cycle Prediction
                     if (neuron.nType.Equals(NeuronType.NORMAL))
+                    {
                         NeuronsFiringLastCycle.Add(neuron);
+                        neuron.ClearContributingList();
+                    }
 
                 }
 
@@ -1601,7 +1601,7 @@
                     }
                 }
             }
-            
+
             NeuronsFiringThisCycle.Clear();
 
             ColumnsThatBurst.Clear();
@@ -1640,9 +1640,9 @@
             }
         }
 
-        private void ConnectAllBurstingNeuronstoNeuronssFiringLastcycle()
+        private void ConnectAllBurstingNeuronstoNeuronssFiringLastcycle(bool CreateActiveSynapses = false)
         {
-            if(CycleNum > 0  && NeuronsFiringLastCycle.Count == 0)
+            if (CycleNum > 0 && NeuronsFiringLastCycle.Count == 0)
             {
                 WriteLogsToFile("NeuronsFiringLastCycle Should not be Zero , this will result in functional loss!");
                 throw new InvalidOperationException("NeuronsFiringLastCycle Should not be Zero , this will result in functional loss!");
@@ -1656,7 +1656,7 @@
                     {
                         if (CheckifBothNeuronsAreSameOrintheSameColumn(dendriticNeuron, axonalNeuron) == false && BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendriticNeuron) == false)
                         {
-                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON) != ConnectionRemovalReturnType.TRUE)
+                            if (ConnectTwoNeurons(axonalNeuron, dendriticNeuron, ConnectionType.DISTALDENDRITICNEURON, CreateActiveSynapses) != ConnectionRemovalReturnType.TRUE)
                             {
                                 throw new InvalidOperationException("Unable to connect neurons!");
                             }
@@ -1751,7 +1751,7 @@
                     }
                 }
 
-                success = CheckNConnectTwoNeurons(AxonalNeuron, DendriticNeuron, cType, false);
+                success = CheckNConnectTwoNeurons(AxonalNeuron, DendriticNeuron, cType, IsActive);
             }
 
             return success;
@@ -1759,6 +1759,11 @@
 
         private ConnectionRemovalReturnType CheckNConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
         {
+            if (AxonalNeuron.NeuronID.ToString() == "0-0-0-N" && DendriticNeuron.NeuronID.ToString() == "500-5-0-N")
+            {
+                bool breakpoint = false; //Debugging breakpoint
+            }
+
             ConnectionRemovalReturnType IsAxonalConnectionSuccesful;
             //Add only Axonal Connection first to check if its not already added before adding dendronal Connection.           
             IsAxonalConnectionSuccesful = AxonalNeuron.AddtoAxonalList(DendriticNeuron.NeuronID.ToString(), CurrentObjectLabel, AxonalNeuron.nType, CycleNum, cType, schemToLoad, IsActive);
@@ -1876,7 +1881,7 @@
         private void CompleteCleanUP()
         {
             //DebugCheck();
-            if(Mode <= LogMode.BurstOnly) 
+            if (Mode <= LogMode.BurstOnly)
                 WriteLogsToFile(" TRACE :: CompleteCleanUp() :: Module was predicted but never Fired! May be Pooling Layers Need to update there pattern!  Performing Complete Clean Up!" + PrintBlockDetailsSingleLine());
 
             foreach (var col in Columns)
@@ -2023,7 +2028,7 @@
             if (SupportedLabels.Count == 0 && NetWorkMode == NetworkMode.PREDICTION)
             {
                 throw new InvalidOperationException(
-                    " SOM Layer : " +  Layer.ToString() + "  : Have Not Learned enough to Classify Predictions!");
+                    " SOM Layer : " + Layer.ToString() + "  : Have Not Learned enough to Classify Predictions!");
             }
 
             if (incomingPattern.ActiveBits.Count == 0)
@@ -2457,7 +2462,7 @@
 
             NumberOfColumnsThatFiredThisCycle = 0;
 
-            IsBurstOnly = false;            
+            IsBurstOnly = false;
         }
 
         private void PrintBlockDetails()
@@ -2656,7 +2661,7 @@
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
-            else if(X == 200 && Y == 10 && Z == 5)
+            else if (X == 200 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA_TEXT;
             }
@@ -2674,7 +2679,7 @@
             {
                 dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\SecondOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
             }
-            else if(schemToLoad == SchemaType.SOMSCHEMA_TEXT)
+            else if (schemToLoad == SchemaType.SOMSCHEMA_TEXT)
             {
                 dendriteDocumentPath = "C:\\\\Users\\\\depint\\\\source\\\\repos\\\\Hentul\\\\SecondOrderMemory\\\\Schema Docs\\\\1K Club\\\\Text\\\\DendriticSchemaSOM.xml";
             }
@@ -2824,7 +2829,7 @@
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
-            else if(X == 200 &&  Y == 10 && Z == 5)
+            else if (X == 200 && Y == 10 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA_TEXT;
             }
@@ -2924,7 +2929,7 @@
 
         public void ChangeCurrentObjectLabel(string objectName)
         {
-            if(string.IsNullOrEmpty(objectName))
+            if (string.IsNullOrEmpty(objectName))
             {
                 throw new InvalidOperationException("ERROR : ChangeCurrentObjectLabel() : Object Name cannot be empty");
             }
@@ -2964,7 +2969,7 @@
 
         public enum SkipList
         {
-            NeuronsFiringThisCycle                       
+            NeuronsFiringThisCycle
         }
 
         #endregion
