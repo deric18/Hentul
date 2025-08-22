@@ -41,6 +41,22 @@
 
             return index;
         }
+        public static List<string> GetUnionOfStringLists(List<string> list1, List<string> list2)
+        {
+            if (list1 == null && list2 == null)
+                return new List<string>();
+            if (list1 == null)
+                return new List<string>(list2);
+            if (list2 == null)
+                return new List<string>(list1);
+
+            // Use HashSet for uniqueness and performance
+            var unionSet = new HashSet<string>(list1);
+            foreach (var item in list2)
+                unionSet.Add(item);
+
+            return unionSet.ToList();
+        }
 
         public static bool CheckIfTwoNeuronsAreConnected(Neuron axonalNeuron, Neuron dendriticNeuron)
         {

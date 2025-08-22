@@ -57,7 +57,7 @@
             {
                 new Position_SOM(500, 5, 0),
                 new Position_SOM(510, 6, 1)                
-            };            
+            };
 
             sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
             sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));            

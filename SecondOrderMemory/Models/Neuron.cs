@@ -182,13 +182,8 @@
             {
                 foreach (var contributingNeuron in ContributingNeuronsLastCycle.Value)
                 {
-                    if (ProximoDistalDendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
-                    {
-                        if (NeuronID.ToString() == "500-5-0-N")
-                        {
-                            bool breakpoint = true;
-                        }
-
+                    if (contributingNeuron.AxonalList.TryGetValue(NeuronID.ToString(), out var synapse))
+                    {                        
                         if (synapse.SupportedPredictions.Count > 0)
                         {
                             foreach (var prediction in synapse.SupportedPredictions)
@@ -198,7 +193,7 @@
                         }
                     }
                 }
-            }
+            }            
 
             return potentialMatches;
         }

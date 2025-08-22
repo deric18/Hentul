@@ -154,9 +154,9 @@
 
             var preds = bbManager.GetCurrentPredictions();
 
-            Assert.AreEqual(preds[0], currentObjectLabel1);
+            Assert.That(1, Is.EqualTo(preds.Count));
 
-            bbManager.Fire(object1[2], cycle++);
+            Assert.That(currentObjectLabel1, Is.EqualTo(preds[0]));            
         }
 
         [Test]

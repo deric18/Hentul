@@ -1,8 +1,7 @@
 ﻿Small Direction
-- Refactor Code 
-- Introduce Learning LearningUnit
-- Refactor Vision Processor and Text Processor to use Learningunit for init , process , and depolarization
-- Update the record pixel logic to process pixels and store senseloc only when there is real data to store. [Put null check in senseloc]
+- Introduce Neuron
+- Introduce neuron level SupportedLabels for easier classification
+- Can static SOM BBM support multiple objects ? if not undo all the singleton logic.
 
 
 

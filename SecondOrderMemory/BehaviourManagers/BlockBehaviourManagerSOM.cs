@@ -312,6 +312,8 @@
             NetWorkMode = NetworkMode.PREDICTION;
             CurrentObjectLabel = null;
             CurrentPredictions.Clear();
+            NeuronsFiringLastCycle.Clear();
+            NeuronsFiringThisCycle.Clear();
         }
 
         public void Init(int bbmID)
@@ -700,7 +702,6 @@
             if (NetWorkMode == NetworkMode.PREDICTION)
                 UpdateCurentPredictions();
 
-
             PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
 
             if (ignorePostCycleCleanUp == false)
@@ -728,7 +729,7 @@
 
                 if (temp != null && temp.Count() > 0)
                 {
-                    cyclePredictions.AddRange(temp);        //success
+                    cyclePredictions = BBMUtils.GetUnionOfStringLists(cyclePredictions, temp);
                 }
             }
             
@@ -759,6 +760,7 @@
 
                     NetWorkMode = NetworkMode.DONE;
                     CurrentObjectLabel = intersect[0];
+                    CurrentPredictions = intersect;
 
                 }
                 else
@@ -1020,7 +1022,7 @@
                 throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
             }
 
-            if (NetWorkMode != NetworkMode.PREDICTION)
+            if (NetWorkMode == NetworkMode.TRAINING)
             {
                 throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
             }
