@@ -152,15 +152,15 @@
         internal List<string> GetCurrentPotentialMatchesForCurrentCycle(ulong currentCycle)
         {
             // For every neuron in ContributingNeuronList Strengthen those synpases and extract those labels into a list
-            List<string> potentialMatches = new List<string>();
+            List<string> potentialMatches = new List<string>();            
 
-            if(NeuronID.ToString() == "500-5-0-N")
+            bool check1 = (ContributingNeuronsLastCycle.Key != 0 && currentCycle - ContributingNeuronsLastCycle.Key < 1);      //Cant be Contributed and Fired in the same cycle!
+            bool check2 = currentCycle - ContributingNeuronsLastCycle.Key < 0;                                                  // Dont want negatie values , like WTF!
+
+            if (NeuronID.ToString() == "500-5-0-N")
             {
                 bool breakpoint = true;
             }
-
-            bool check1 = (ContributingNeuronsLastCycle.Key != 0 && currentCycle - ContributingNeuronsLastCycle.Key <= 1);      //Cant be Contributed and Fired in the same cycle!
-            bool check2 = currentCycle - ContributingNeuronsLastCycle.Key < 0;                                                  // Dont want negatie values , like WTF!
 
             if ( check1 || check2 )
             {
@@ -171,8 +171,7 @@
 
                     if (BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(contributingNeuron, Instance.NeuronsFiringThisCycle, Instance))
                     {
-                        WriteLogsToFile(BlockBehaviourManagerSOM.LogFileName, $"Error :: Neurons.cs :: GetCurrentPotentialMAtchesForCurrentCycle() : Contributing List is stale {currentCycle} - {ContributingNeuronsLastCycle.Key}");
-                        throw new InvalidOperationException("Non PSiking List are not allowed to persissts beyond once cycle , they should be cleaned up!");
+                        ClearContributingList();
                     }
                 }
                 
@@ -185,6 +184,11 @@
                 {
                     if (ProximoDistalDendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
                     {
+                        if (NeuronID.ToString() == "500-5-0-N")
+                        {
+                            bool breakpoint = true;
+                        }
+
                         if (synapse.SupportedPredictions.Count > 0)
                         {
                             foreach (var prediction in synapse.SupportedPredictions)
@@ -421,7 +425,6 @@
             }
 
             ContributingNeuronsLastCycle = new KeyValuePair<ulong, List<Neuron>>(0, null);
-
         }
 
         internal bool PerformHigherSequencing(string objectLabel, List<string> nextNeuronIds)
@@ -429,6 +432,11 @@
             if (objectLabel == null || nextNeuronIds == null || nextNeuronIds.Count == 0)
             {
                 throw new InvalidOperationException(" Error: Neuron.cs : PErformHigherSequencing() : Input Prameters cannnot be Null!");
+            }
+
+            if (NeuronID.ToString() == "500-5-0-N")
+            {
+                bool breakpoint = true;
             }
 
             // Check if the associated object label under Prediction exist in any of the Synapse List if not add new

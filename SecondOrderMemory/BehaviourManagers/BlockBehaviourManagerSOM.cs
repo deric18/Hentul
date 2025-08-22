@@ -728,10 +728,10 @@
 
                 if (temp != null && temp.Count() > 0)
                 {
-                    cyclePredictions.AddRange(temp);
+                    cyclePredictions.AddRange(temp);        //success
                 }
             }
-
+            
             List<string> intersect;
 
             if(CurrentPredictions == null || CurrentPredictions.Count == 0)
@@ -1599,13 +1599,11 @@
             //Case 3: If NeuronFiringThicCycle has any Temporal / Apical Firing Neurons they should be cleaned up [Thought : The neurons have already fired and Wired , Kepingg them in the list will only complicate next cycle process , the other thing is if any neuron is spiking , it should not be cleaned up
             // since that will run the temporal dynamics of the system.
             if (CurrentiType == iType.SPATIAL)
-            {
-                var spikingList = NeuronsFiringThisCycle.Where(n => n.CurrentState == NeuronState.SPIKING).ToList();
-
+            {                
                 foreach (var neuron in NeuronsFiringThisCycle)
                 {
                     //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
-                    if (neuron.CurrentState != NeuronState.SPIKING && BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuron, spikingList, this))
+                    if (neuron.CurrentState != NeuronState.SPIKING && BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuron, NeuronsFiringThisCycle, this))
                         neuron.FlushVoltage(CycleNum);
                 }
 

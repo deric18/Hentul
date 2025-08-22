@@ -123,30 +123,24 @@
         }
 
         [Test]
-        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition of new predictions into the same Synapse")]
+        [Description("Check PRedictions are getting added to the Sequentially firing neurons")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing2()
         {
             // Chcek if the newly created synapses have labels from the currentObjectLabel
 
-            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();            
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsforTestCase2();
 
             // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
-            string currentObjectLabel1 = "Apple";            
+            string currentObjectLabel1 = "Apple";
 
             bbManager.BeginTraining(currentObjectLabel1);
 
             ulong cycle = 0;
 
-            foreach (var sdr in object1)
-            {
-                bbManager.Fire(sdr, cycle, CreateActiveSynapses: true);
-                cycle++;
-            }
+            bbManager.Fire(object1[0], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(object1[1], cycle++, CreateActiveSynapses: true);
 
-            bbManager.Fire(object1[0], cycle++);
-
-            bbManager.Fire(object1[1], cycle++);
 
             bbManager.ChangeNetworkModeToPrediction();
 
@@ -166,9 +160,48 @@
         }
 
         [Test]
-        [Description("Check if 2 different objects with no overlapping sequences can create synapses and classify both object labels!")]
+        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition of new predictions into the same Synapse")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing3()
+        {
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
+
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();            
+
+            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
+            string currentObjectLabel1 = "Apple";            
+
+            bbManager.BeginTraining(currentObjectLabel1);
+
+            ulong cycle = 0;
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle, CreateActiveSynapses: true);
+                cycle++;
+            }            
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+            var supporttedLabels = bbManager.GetSupportedLabels();
+
+            Assert.AreEqual(2, supporttedLabels.Count);            
+
+            bbManager.Fire(object1[0], cycle++);            
+
+            bbManager.Fire(object1[1], cycle++);
+
+            var preds = bbManager.GetCurrentPredictions();
+
+            Assert.AreEqual(preds[0], currentObjectLabel1);
+
+            bbManager.Fire(object1[2], cycle++);
+        }
+
+        [Test]
+        [Description("Check if 2 different objects with no overlapping sequences can create synapses and classify both object labels!")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing4()
         {
             // Chcek if the newly created synapses have labels from the currentObjectLabel
 
@@ -222,7 +255,7 @@
         [Test]
         [Description("Check if 3 different objects can be stored and classified accordingly as well!")]
         [TestCategory("Higher Order Sequencing")]
-        public void TestPerformHigherOrderSequencing4()
+        public void TestPerformHigherOrderSequencing5()
         {
 
             bbManager.BeginTraining("TestObject");
@@ -279,13 +312,6 @@
             var currentLabelList = bbManager.GetCurrentPredictions();
 
             Assert.IsTrue(currentLabelList.Count > 0);
-        }
-
-        [Test, Ignore("Not more mental load available!")]
-        [Description("Check if 3 objects with 2 objects with similar pattern with last but one pattern different with the 3rd object differing in last pattern get classified succesfully!")]
-        [TestCategory("Higher Order Sequencing")]
-        public void TestPerformHigherOrderSequencing5()
-        {
         }
 
 

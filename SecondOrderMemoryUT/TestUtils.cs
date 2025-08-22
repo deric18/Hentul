@@ -38,6 +38,33 @@
             return sdrList;
         }
 
+        internal static List<SDR_SOM> GenerateSpepcificSDRsforTestCase2()
+        {
+
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: positions
+            var positions1 = new List<Position_SOM>
+            {
+                new Position_SOM(0, 0, 0),
+                new Position_SOM(10, 1, 1)                
+            };
+
+            // SDR 2: positions
+            var positions2 = new List<Position_SOM>
+            {
+                new Position_SOM(500, 5, 0),
+                new Position_SOM(510, 6, 1)                
+            };            
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));            
+
+            return sdrList;
+        }
+
         internal static List<SDR_SOM> GenerateSpepcificSDRs()
         {            
 
@@ -49,30 +76,24 @@
             var positions1 = new List<Position_SOM>
             {
                 new Position_SOM(0, 0, 0),
-                new Position_SOM(100, 1, 1),
-                new Position_SOM(200, 2, 2),
-                new Position_SOM(300, 3, 3),
-                new Position_SOM(400, 4, 4)
+                new Position_SOM(10, 1, 1),
+                new Position_SOM(20, 2, 2)                
             };
 
                     // SDR 2: positions
             var positions2 = new List<Position_SOM>
             {
                 new Position_SOM(500, 5, 0),
-                new Position_SOM(600, 6, 1),
-                new Position_SOM(700, 7, 2),
-                new Position_SOM(800, 8, 3),
-                new Position_SOM(900, 9, 4)
+                new Position_SOM(510, 6, 1),
+                new Position_SOM(520, 7, 2)                
             };
 
                     // SDR 3: positions
             var positions3 = new List<Position_SOM>
             {
                 new Position_SOM(1000, 0, 0),
-                new Position_SOM(1100, 1, 1),
-                new Position_SOM(1200, 2, 2),
-                new Position_SOM(1249, 3, 3),
-                new Position_SOM(0, 4, 4)
+                new Position_SOM(1010, 1, 1),
+                new Position_SOM(1020, 2, 2)                
             };
 
             sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
