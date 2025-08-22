@@ -58,7 +58,7 @@
         /// </summary>
         public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }
 
-        private List<Neuron> ContributingNeuronsLastCycle { get; set; }
+        private KeyValuePair<ulong, List<Neuron>> ContributingNeuronsLastCycle { get; set; }
 
         //public List<Segment>? Segments { get; private set; } = null;
 
@@ -113,7 +113,7 @@
                     WriteLogsToFile("Neuron " + NeuronID.ToString() + " entering Spiking Mode", fileName);
                     if (Voltage >= UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
                     {
-                        WriteLogsToFile("******************* Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************", fileName);
+                        WriteLogsToFile(fileName, "******************* Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************");
                     }
                 }
                 else
@@ -149,24 +149,52 @@
             ProcessCurrentState(cycleNum, logmode, logFileName);
         }
 
-        internal List<string> GetCurrentPotentialMatchesForCurrentCycle()
+        internal List<string> GetCurrentPotentialMatchesForCurrentCycle(ulong currentCycle)
         {
             // For every neuron in ContributingNeuronList Strengthen those synpases and extract those labels into a list
             List<string> potentialMatches = new List<string>();
 
-            foreach (var contributingNeuron in ContributingNeuronsLastCycle)
+            if(NeuronID.ToString() == "500-5-0-N")
             {
-                if (AxonalList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
+                bool breakpoint = true;
+            }
+
+            bool check1 = (ContributingNeuronsLastCycle.Key != 0 && currentCycle - ContributingNeuronsLastCycle.Key <= 1);      //Cant be Contributed and Fired in the same cycle!
+            bool check2 = currentCycle - ContributingNeuronsLastCycle.Key < 0;                                                  // Dont want negatie values , like WTF!
+
+            if ( check1 || check2 )
+            {
+                foreach (var contributingNeuron in ContributingNeuronsLastCycle.Value)
                 {
-                    if (synapse.SupportedPredictions.Count > 0)
+
+                    var Instance = BlockBehaviourManagerSOM.Instance;
+
+                    if (BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(contributingNeuron, Instance.NeuronsFiringThisCycle, Instance))
                     {
-                        foreach (var prediction in synapse.SupportedPredictions)
+                        WriteLogsToFile(BlockBehaviourManagerSOM.LogFileName, $"Error :: Neurons.cs :: GetCurrentPotentialMAtchesForCurrentCycle() : Contributing List is stale {currentCycle} - {ContributingNeuronsLastCycle.Key}");
+                        throw new InvalidOperationException("Non PSiking List are not allowed to persissts beyond once cycle , they should be cleaned up!");
+                    }
+                }
+                
+            }
+
+
+            if (ContributingNeuronsLastCycle.Value?.Count > 0)
+            {
+                foreach (var contributingNeuron in ContributingNeuronsLastCycle.Value)
+                {
+                    if (ProximoDistalDendriticList.TryGetValue(contributingNeuron.NeuronID.ToString(), out var synapse))
+                    {
+                        if (synapse.SupportedPredictions.Count > 0)
                         {
-                            potentialMatches.Add(prediction.ObjectLabel);
+                            foreach (var prediction in synapse.SupportedPredictions)
+                            {
+                                potentialMatches.Add(prediction.ObjectLabel);
+                            }
                         }
                     }
                 }
-            }            
+            }
 
             return potentialMatches;
         }
@@ -178,8 +206,27 @@
                 bool breakpoiunt = true;
             }
 
-            if(contributingNeuron.nType == NeuronType.NORMAL)           // This is needed for HigherORderSequencing Logic : Completely Different Flow
-                ContributingNeuronsLastCycle.Add(contributingNeuron);
+            if (contributingNeuron.nType == NeuronType.NORMAL)           // This is needed for HigherOrderSequencing Logic : Completely Different Flow
+            {
+                if(ContributingNeuronsLastCycle.Value == null)
+                    ContributingNeuronsLastCycle = new KeyValuePair<ulong, List<Neuron>>(cycleNum, new List<Neuron>() { contributingNeuron });
+                else
+                {
+                    if (ContributingNeuronsLastCycle.Key == cycleNum)
+                    {
+                        //Console.WriteLine("Contributing Neurons Last Cycle Key : " + ContributingNeuronsLastCycle.Key + " Cycle Num : " + cycleNum);
+                        if (!ContributingNeuronsLastCycle.Value.Contains(contributingNeuron))
+                        {
+                            ContributingNeuronsLastCycle.Value.Add(contributingNeuron);
+                        }
+                    }
+                    else
+                    {
+                        WriteLogsToFile(BlockBehaviourManagerSOM.LogFileName, $"Error :: Neurons.cs :: ProcessVoltage() : CACHE INVALIDATED : ContributingList  :: Trying to add new entry into cache thats old! {NeuronID.ToString()}");
+                        ContributingNeuronsLastCycle = new(0, null);
+                    }
+                }
+            }
 
             Voltage += voltage;
 
@@ -295,9 +342,9 @@
             TAContributors.Clear();
         }
 
-        private void WriteLogsToFile(string logline, string logfilename)
+        private void WriteLogsToFile(string logfilename, string logline)
         {
-            File.AppendAllText(logfilename, logline + "\n");
+            File.AppendAllText(logfilename, logline);
         }
 
         #endregion
@@ -366,6 +413,17 @@
 
         #region Wiring Connector Logic
 
+        internal void ClearContributingList()
+        {
+            if (NeuronID.ToString() == "500-5-0-N")
+            {
+                bool breakpoint = true;
+            }
+
+            ContributingNeuronsLastCycle = new KeyValuePair<ulong, List<Neuron>>(0, null);
+
+        }
+
         internal bool PerformHigherSequencing(string objectLabel, List<string> nextNeuronIds)
         {
             if (objectLabel == null || nextNeuronIds == null || nextNeuronIds.Count == 0)
@@ -392,7 +450,7 @@
                         //throw new InvalidOperationException(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened! ");
                         if (BlockBehaviourManagerSOM.Mode >= LogMode.BurstOnly)
                         {
-                            WriteLogsToFile(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened!", BlockBehaviourManagerSOM.LogFileName);
+                            WriteLogsToFile(BlockBehaviourManagerSOM.LogFileName, " Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened!");
                         }
                     }
                 }
@@ -581,9 +639,7 @@
 
             Voltage = 0;
             ProcessCurrentState(cycleNum);            
-        }
-
-        internal void ClearContributingList() => ContributingNeuronsLastCycle.Clear();
+        }        
 
         internal bool DidItContribute(Neuron temporalContributor)
         {

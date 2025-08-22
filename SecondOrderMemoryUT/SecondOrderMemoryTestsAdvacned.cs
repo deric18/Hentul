@@ -1,6 +1,7 @@
 ﻿namespace SecondOrderMemoryUnitTest
 {
     using System.ComponentModel;
+    using System.Reflection.Emit;
     using Common;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NUnit.Framework;
@@ -25,15 +26,24 @@
 
         [SetUp]
         public void Setup()
-        {
-            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3A, LogMode.BurstOnly, testObjectLabel, true);
+        {            
+            BlockBehaviourManagerSOM.Initialize(X, Y, Z, LayerType.Layer_3A, LogMode.BurstOnly, testObjectLabel, includeBurstLearning: true, isMock: true);
+
+            bbManager = BlockBehaviourManagerSOM.Instance;
 
             bbManager.Init(1);
 
             bbManager.BeginTraining(testObjectLabel);
 
             rand1 = new Random();
-        }       
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            BlockBehaviourManagerSOM.Reset();
+            bbManager = null;
+        }
 
         [Test]
         [Description("Check if newly created synnapses are using the currentObjectLabel to init")]
@@ -58,7 +68,7 @@
 
             foreach (var sdr in object1)
             {                
-                bbManager.Fire(sdr, cycle, isMock: true);                
+                bbManager.Fire(sdr, cycle);                
 
                 if (cycle > 0)
                 {
@@ -117,7 +127,42 @@
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing2()
         {
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
 
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();            
+
+            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
+            string currentObjectLabel1 = "Apple";            
+
+            bbManager.BeginTraining(currentObjectLabel1);
+
+            ulong cycle = 0;
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle, CreateActiveSynapses: true);
+                cycle++;
+            }
+
+            bbManager.Fire(object1[0], cycle++);
+
+            bbManager.Fire(object1[1], cycle++);
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+            var supporttedLabels = bbManager.GetSupportedLabels();
+
+            Assert.AreEqual(2, supporttedLabels.Count);
+
+            bbManager.Fire(object1[0], cycle++);
+
+            bbManager.Fire(object1[1], cycle++);
+
+            var preds = bbManager.GetCurrentPredictions();
+
+            Assert.AreEqual(preds[0], currentObjectLabel1);
+
+            bbManager.Fire(object1[2], cycle++);
         }
 
         [Test]
@@ -141,7 +186,7 @@
 
             foreach (var sdr in object1)
             {               
-                bbManager.Fire(sdr, cycle, isMock: true, CreateActiveSynapses: true);
+                bbManager.Fire(sdr, cycle, CreateActiveSynapses: true);
                 cycle++;
             }
 
@@ -149,7 +194,7 @@
 
             foreach (var sdr in object2)
             {
-                bbManager.Fire(sdr, cycle, isMock: true);
+                bbManager.Fire(sdr, cycle);
                 cycle++;
             }
 
@@ -159,13 +204,19 @@
 
             Assert.AreEqual(3, supporttedLabels.Count);
 
-            bbManager.Fire(object1[0], cycle++, isMock: true);
-            bbManager.Fire(object1[1], cycle++, isMock: true);
-            bbManager.Fire(object1[2], cycle++, isMock: true);
+            bbManager.Fire(object1[0], cycle++);
+
+            bbManager.Fire(object1[1], cycle++);
+
 
             var preds = bbManager.GetCurrentPredictions();
 
             Assert.AreEqual(preds[0], currentObjectLabel1);
+
+
+            bbManager.Fire(object1[2], cycle++);
+
+            
         }
 
         [Test]
@@ -435,7 +486,7 @@
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
                 }
 
-                bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A               
+                bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A
 
                 if (repCount > wirecount)
                 {

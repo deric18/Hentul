@@ -3,6 +3,7 @@
     using Common;
     using Hentul.Encoders;
     using Hentul.Hippocampal_Entorinal_complex;
+    using SecondOrderMemory.Models;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
@@ -42,9 +43,13 @@
                 fomBBMT[i] = new FBBM(NumColumns, NumColumns, Z, LayerType.Layer_4, Common.LogMode.None);
             }
 
-            somBBM_L3A_T = new SBBM(200, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
+            BlockBehaviourManagerSOM.Initialize(200, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
 
-            somBBM_L3B_T = new SBBM(200, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
+            somBBM_L3A_T = SBBM.Instance;
+
+            BlockBehaviourManagerSOM.Initialize(200, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
+
+            somBBM_L3B_T = SBBM.Instance;
 
             cEncoder = new CharEncoder();
 

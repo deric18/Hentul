@@ -1,12 +1,15 @@
 namespace SecondOrderMemoryUnitTest
 {    
-    using Common;    
+    using Common;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NUnit.Framework;
-    using SecondOrderMemory.Models;    
-    
+    using SecondOrderMemory.Models;
+    using Assert = Assert;
+    using IgnoreAttribute = IgnoreAttribute;
+
     public class SeconfOrderMemoryUnitTest
     {
-        BlockBehaviourManagerSOM? bbManager;
+        BlockBehaviourManagerSOM bbManager;
         Neuron dummyContributingNeuron = new Neuron( new Position_SOM(0,0,0), 1);
         string testObjectLabel = "RandomObject 1";
         const int X = 1250;
@@ -16,8 +19,10 @@ namespace SecondOrderMemoryUnitTest
 
         [SetUp]
         public void Setup()
-        {
-            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true);
+        {            
+            BlockBehaviourManagerSOM.Initialize(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true, isMock: true);
+            
+            bbManager = BlockBehaviourManagerSOM.Instance;
 
             bbManager.Init(1);
 
@@ -25,7 +30,13 @@ namespace SecondOrderMemoryUnitTest
 
             rand1 = new Random();
         }
-      
+
+        [TearDown]
+        public void TearDown()
+        {
+            BlockBehaviourManagerSOM.Reset();
+            bbManager = null;
+        }
 
         [Test]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
@@ -868,6 +879,48 @@ namespace SecondOrderMemoryUnitTest
             Assert.AreEqual(0, bbManager.GetNeuronFromPosition('n', 5, 1, 2).Voltage);
         }
 
+
+        [Test]
+        public void CheckNeuronIsNotInSpikeTrain_ReturnsFalse_IfNeuronIsInSpikeTrain()
+        {
+            // Arrange                        
+            ulong currCycle = 1;
+
+            // Create two neurons and connect one to the other via AxonalList
+            var neuronA = bbManager.Columns[0, 0].Neurons[0];
+            var neuronB = bbManager.Columns[1, 0].Neurons[0];
+            var dummyNeuron = bbManager.Columns[2, 3].Neurons[2];
+            // Add neuronB to neuronA's AxonalList
+            neuronA.AxonalList[neuronB.NeuronID.ToString()] = new Synapse(neuronA.NeuronID.ToString(), neuronB.NeuronID.ToString(), "Apple", currCycle, 10, ConnectionType.DISTALDENDRITICNEURON, true);
+
+            neuronA.ProcessVoltage(1000, dummyNeuron, currCycle, LogMode.BurstOnly);
+
+            var spikeList = new List<Neuron> { neuronA };
+
+            // Act
+            bool result = BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuronB, spikeList, bbManager);
+
+            // Assert
+            Assert.IsFalse(result, "Should return false if neuron is in the spike train via axonal connection.");
+        }
+
+        [Test]
+        public void CheckNeuronIsNotInSpikeTrain_ReturnsTrue_IfNeuronIsNotInSpikeTrain()
+        {
+            // Arrange            
+
+            var neuronA = bbManager.Columns[0, 0].Neurons[0];
+            var neuronB = bbManager.Columns[1, 0].Neurons[0];
+
+            // No connection between neuronA and neuronB
+            var spikeList = new List<Neuron> { neuronA };
+
+            // Act
+            bool result = BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuronB, spikeList, bbManager);
+
+            // Assert
+            Assert.IsTrue(result, "Should return true if neuron is not in the spike train.");
+        }
 
         [Test]
         public void TestWiringNegativeTest()

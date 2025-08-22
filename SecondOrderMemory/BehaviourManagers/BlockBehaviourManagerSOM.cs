@@ -2,8 +2,7 @@
 {
     using System;
     using System.ComponentModel;
-    using System.Linq;
-    using System.Security.AccessControl;
+    using System.Linq;    
     using System.Xml;
     using Common;
 
@@ -63,6 +62,8 @@
 
         public Neuron[,] ApicalLineArray { get; private set; }
 
+        public List<Neuron> SpkieTrain { get; private set; }
+
         public int axonCounter { get; private set; }
 
         public uint totalProximalConnections;
@@ -121,6 +122,8 @@
 
         private uint num_continuous_burst;
 
+        private bool IsMock;
+
         #endregion
 
         #region CONSTANTS
@@ -148,17 +151,49 @@
         private readonly int SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT;
         private readonly int SOMLTOTAL_NEURON_CONNECTIONLIMIT;
         private const int NUMBER_OF_ALLOWED_MAX_BLACNK_FIRES_BEFORE_CLEANUP = 1;
+        private const int SPIKE_HIERARCHY_LOOKUP = 2;
 
 
         #endregion
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManagerSOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, string objectLabel = null, bool includeBurstLearning = false)
-        {
-            this.NumberOfColumnsThatBurstLastCycle = 0;
+        // Singleton instance
+        private static BlockBehaviourManagerSOM? _instance = null;
+        private static readonly object _lock = new();
 
-            this.NumberOfColumnsThatFiredThisCycle = 0;
+        // Singleton accessor
+        public static BlockBehaviourManagerSOM Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    throw new InvalidOperationException("BlockBehaviourManagerSOM is not initialized. Call Initialize(...) first.");
+                return _instance;
+            }
+        }
+
+        public static void Initialize(int x, int y = 10, int z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, string objectLabel = null, bool includeBurstLearning = false, bool isMock = false)
+        {            
+            if (_instance == null)
+            {
+                _instance = new BlockBehaviourManagerSOM(x, y, z, layertype, mode, objectLabel, includeBurstLearning, isMock);
+            }
+        }
+
+        public static void Reset()
+        {
+            lock (_lock)
+            {
+                _instance = null;
+            }
+        }
+
+        private BlockBehaviourManagerSOM(int x, int y = 10, int z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, string objectLabel = null, bool includeBurstLearning = false, bool isMock = false)
+        {
+            NumberOfColumnsThatBurstLastCycle = 0;
+
+            NumberOfColumnsThatFiredThisCycle = 0;
 
             CycleNum = 0;
 
@@ -168,7 +203,7 @@
 
             Y = y;
 
-            this.Z = Z;
+            Z = z;
 
             CurrentPredictions = new();
 
@@ -204,6 +239,8 @@
 
             Columns = new Column[X, Y];
 
+            SpkieTrain = new();
+
             ColumnsThatBurst = new List<Position_SOM>();
 
             TemporalCycleCache = new Dictionary<ulong, List<Position_SOM>>();
@@ -231,7 +268,7 @@
                 throw new InvalidEnumArgumentException("Cannot accept argument Layer 4 for SOM Model");
             }
 
-            this.Layer = layertype;
+            Layer = layertype;
 
             FOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.1 * x * y * Z);
             SOM_SCHEMA_PER_CYCLE_NEW_SYNAPSE_LIMIT = (int)(0.05 * x * y * Z);
@@ -244,7 +281,7 @@
 
             _firingBlankStreak = 0;
 
-            this.includeBurstLearning145 = includeBurstLearning;
+            includeBurstLearning145 = includeBurstLearning;
 
             NetWorkMode = NetworkMode.TRAINING;
 
@@ -253,6 +290,8 @@
             SupportedLabels = new HashSet<string>();
 
             neruonMissedinNeuronsFiringThisCycleCount = 0;
+
+            IsMock = isMock;
         }
 
         public void BeginTraining(string Label)
@@ -285,7 +324,7 @@
                 {
                     try
                     {
-                        Columns[i, j] = new Column(i, j, Z, BBMID);
+                        _instance.Columns[i, j] = new Column(i, j, Z, BBMID);
                     }
                     catch (Exception ex)
                     {
@@ -311,7 +350,7 @@
             }
             try
             {
-                Column col = this.Columns[x, y];
+                Column col = _instance.Columns[x, y];
 
                 Neuron neuron = col.Neurons[z];
 
@@ -340,7 +379,7 @@
             }
             try
             {
-                Column col = this.Columns[x, y];
+                Column col = _instance.Columns[x, y];
 
                 Neuron neuron = col.Neurons[z];
 
@@ -512,10 +551,10 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
-        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool isMock = false, bool CreateActiveSynapses = false)
+        public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool CreateActiveSynapses = false)
         {
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
-            this.IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
+            IgnorePostCycleCleanUp = ignorePostCycleCleanUp;
 
             if (ignorePrecyclePrep == false)
                 PreCyclePrep(currentCycle, incomingPattern.InputPatternType);
@@ -612,7 +651,7 @@
 
                         foreach (var pos in incomingPattern.ActiveBits)
                         {
-                            apicalLineNeurons.Add(this.ApicalLineArray[pos.X, pos.Y]);
+                            apicalLineNeurons.Add(_instance.ApicalLineArray[pos.X, pos.Y]);
                         }
 
                         if (ApicalLineArray != null && apicalLineNeurons.Count != 0)
@@ -650,9 +689,9 @@
 
             if (NetWorkMode == NetworkMode.TRAINING && CurrentiType == iType.SPATIAL)
             {
-                Wire(CreateActiveSynapses);
+                Wire(IsMock, CreateActiveSynapses);
 
-                if (performHighOrderSequencing && (CycleNum > 2 || isMock))
+                if (performHighOrderSequencing && (CycleNum > 2 || IsMock))
                 {
                     PerformHigherOrderSequencing();
                 }
@@ -676,21 +715,36 @@
         {
             // After every Sptial Fire Collect all the intersection of all the supported labels from every single neuron that fired and remove the ones that are no longer supported.
 
-            List<string> currentPredictions = new();
+            List<string> cyclePredictions = new();
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                var cyclePredictions = neuron.GetCurrentPotentialMatchesForCurrentCycle();
-
-                if (cyclePredictions != null && cyclePredictions.Count() > 0)
+                if(neuron.NeuronID.ToString() == "500-5-0-N")
                 {
-                    currentPredictions.AddRange(cyclePredictions);
+                    bool breakpoint = true;
+                }
+
+                var temp = neuron.GetCurrentPotentialMatchesForCurrentCycle(CycleNum);
+
+                if (temp != null && temp.Count() > 0)
+                {
+                    cyclePredictions.AddRange(temp);
                 }
             }
 
-            // Get an intersection of cyclePredictions and neuronalPredictions
-            var intersect = CurrentPredictions.Intersect(currentPredictions).ToList();
+            List<string> intersect;
 
+            if(CurrentPredictions == null || CurrentPredictions.Count == 0)
+            {
+                // If Current Predictions is empty then just add the current predictions
+                intersect = cyclePredictions;
+            }
+            else
+            {
+                // If Current Predictions is not empty then get the intersection of both lists
+                intersect = CurrentPredictions.Intersect(cyclePredictions).ToList();
+            }
+            
             if (intersect.Count == 0)
             {
                 // Total Mistake now need to restart from scratch , will cross that bridge when we get there.
@@ -909,7 +963,7 @@
             {
                 List<Position_SOM> ActiveBits = new List<Position_SOM>();
 
-                //Using PredictedNeuronsforThisCycle as this PredictedNeuronsforNextCycle gets assigned to this.
+                //Using PredictedNeuronsforThisCycle as this PredictedNeuronsforNextCycle gets assigned to _instance.
                 foreach (var neuronstringID in PredictedNeuronsforThisCycle.Keys)
                 {
                     var pos = Position_SOM.ConvertStringToPosition(neuronstringID);
@@ -1044,7 +1098,7 @@
             }
         }
 
-        private void Wire(bool createActiveSynapses = false)
+        private void Wire(bool isMock = false, bool createActiveSynapses = false)
         {
             //Todo : Provide an enum for the wiring stratergy picked and simplify the below logic to a switch statement
 
@@ -1067,7 +1121,7 @@
                     }
                 };
 
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();                
 
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
                 {
@@ -1158,7 +1212,7 @@
 
                     //Boost the Bursting neurons
                     if (includeBurstLearning145 == true)
-                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle(createActiveSynapses);
 
                 }// ColumnsThatBurst.Count == 0 && correctPredictionList.Count = 5 &&  NumberOfColumnsThatFiredThisCycle = 8  cycleNum = 4 , repNum = 29
                 else if (ColumnsThatBurst.Count == 0 && NumberOfColumnsThatFiredThisCycle > correctPredictionList.Count)
@@ -1270,7 +1324,7 @@
 
                     //Boost All the Bursting Neurons
                     if (includeBurstLearning145 == true)
-                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle();
+                        ConnectAllBurstingNeuronstoNeuronssFiringLastcycle(createActiveSynapses);
 
                     //Boost the Non Bursting Neurons
 
@@ -1364,9 +1418,7 @@
                         NeuronsFiringLastCycle.Add(neuron);
                         neuron.ClearContributingList();
                     }
-
                 }
-
             }
 
             /*  Clean Up Policy : 
@@ -1426,8 +1478,6 @@
         //Selective Clean Up Logic , Should never perform Full Clean up.
         private void PostCycleCleanup(iType type)
         {
-
-
             //Case 1 : If temporal or Apical or both lines have deplolarized and spatial fired then clean up temporal or apical or both.
             if ((PreviousiType.Equals(iType.APICAL) || PreviousiType.Equals(iType.TEMPORAL)) && CurrentiType.Equals(iType.SPATIAL))
             {
@@ -1482,7 +1532,7 @@
                             WriteLogsToFile("ERROR :: PostCycleCleanUp :: Temporal Cached Pattern is older than Spatial Pattern! " + PrintBlockDetailsSingleLine());
                             throw new InvalidOperationException("Apical Cache is older than Spatial Pattern");
                         }
-
+                        
                         foreach (var pos in kvp.Value)
                         {
                             foreach (var synapse in ApicalLineArray[pos.X, pos.Y].AxonalList.Values)
@@ -1550,10 +1600,12 @@
             // since that will run the temporal dynamics of the system.
             if (CurrentiType == iType.SPATIAL)
             {
+                var spikingList = NeuronsFiringThisCycle.Where(n => n.CurrentState == NeuronState.SPIKING).ToList();
+
                 foreach (var neuron in NeuronsFiringThisCycle)
                 {
                     //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
-                    if (neuron.CurrentState != NeuronState.SPIKING)
+                    if (neuron.CurrentState != NeuronState.SPIKING && BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuron, spikingList, this))
                         neuron.FlushVoltage(CycleNum);
                 }
 
@@ -1623,6 +1675,54 @@
             PreviousiType = type;
         }
 
+        
+        
+        /// <summary>
+        /// Checks if Neurons is Present in Spike Train
+        /// </summary>        
+        /// <returns>fallse if neuron is present in spike train true otherwise</returns>
+        public static bool CheckNeuronIsNotInSpikeTrain(Neuron neuron, List<Neuron> spikeList, BlockBehaviourManagerSOM bbManager)
+        {
+            int level = SPIKE_HIERARCHY_LOOKUP;
+
+            var currSpikeList = spikeList.Where(x => x.CurrentState == NeuronState.SPIKING);
+
+            while (level > 0)
+            {
+                if (currSpikeList.Any(n => n.AxonalList.ContainsKey(neuron.NeuronID.ToString())))
+                {
+                    return false; // Neuron is in the SpikeTrain
+                }
+
+                List<Neuron> nextSpikeList = new List<Neuron>();
+
+                foreach (var spikeNeuron in currSpikeList)
+                {
+                    if (spikeNeuron.AxonalList.ContainsKey(neuron.NeuronID.ToString()))
+                    {
+                        return false; // Neuron is in the SpikeTrain
+                    }
+
+                    foreach (var key in spikeNeuron.AxonalList.Keys)
+                    {
+                        // Use the provided instance to call GetNeuronFromString
+                        var nextNeuron = bbManager.GetNeuronFromString(key);
+
+                        if (nextNeuron != null)
+                        {
+                            nextSpikeList.Add(nextNeuron);
+                        }
+                    }
+                }
+
+                currSpikeList = nextSpikeList.Distinct().ToList();
+
+                level--;
+            }
+
+            return true;
+        }
+
 
 
         #endregion
@@ -1642,7 +1742,7 @@
 
         private void ConnectAllBurstingNeuronstoNeuronssFiringLastcycle(bool CreateActiveSynapses = false)
         {
-            if (CycleNum > 0 && NeuronsFiringLastCycle.Count == 0)
+            if (CycleNum > 0 && NeuronsFiringLastCycle.Count == 0 && IsMock == false)
             {
                 WriteLogsToFile("NeuronsFiringLastCycle Should not be Zero , this will result in functional loss!");
                 throw new InvalidOperationException("NeuronsFiringLastCycle Should not be Zero , this will result in functional loss!");
@@ -1759,7 +1859,7 @@
 
         private ConnectionRemovalReturnType CheckNConnectTwoNeurons(Neuron AxonalNeuron, Neuron DendriticNeuron, ConnectionType cType, bool IsActive = false)
         {
-            if (AxonalNeuron.NeuronID.ToString() == "0-0-0-N" && DendriticNeuron.NeuronID.ToString() == "500-5-0-N")
+            if (AxonalNeuron.NeuronID.ToString() == "0-1-1-N" && DendriticNeuron.NeuronID.ToString() == "884-8-3-N")
             {
                 bool breakpoint = false; //Debugging breakpoint
             }
@@ -2557,14 +2657,14 @@
             {
                 for (int j = 0; j < Z; j++)
                 {
-                    if (this.TemporalLineArray[i, j] == null)
-                        this.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BBMID, NeuronType.TEMPORAL);
+                    if (_instance.TemporalLineArray[i, j] == null)
+                        _instance.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BBMID, NeuronType.TEMPORAL);
 
 
                     for (int k = 0; k < X; k++)
                     {
 
-                        if (ConnectTwoNeurons(this.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true) == ConnectionRemovalReturnType.HARDFALSE)
+                        if (ConnectTwoNeurons(_instance.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
@@ -2600,11 +2700,11 @@
             {
                 for (int j = 0; j < Y; j++)
                 {
-                    this.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BBMID, NeuronType.APICAL);
+                    _instance.ApicalLineArray[i, j] = new Neuron(new Position_SOM(i, j, 0, 'A'), BBMID, NeuronType.APICAL);
 
                     for (int k = 0; k < Z; k++)
                     {
-                        if (ConnectTwoNeurons(this.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == ConnectionRemovalReturnType.HARDFALSE)
+                        if (ConnectTwoNeurons(_instance.ApicalLineArray[i, j], Columns[i, j].Neurons[k], ConnectionType.APICAL, true) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
@@ -2622,7 +2722,7 @@
 
             foreach (var position in activeBits)
             {
-                temporalNeurons.Add(this.TemporalLineArray[position.X, position.Y]);
+                temporalNeurons.Add(_instance.TemporalLineArray[position.X, position.Y]);
             }
 
             return temporalNeurons;
@@ -2645,12 +2745,12 @@
 
         private void IncrementProximalConnectionCount()
         {
-            this.totalProximalConnections++;
+            _instance.totalProximalConnections++;
         }
 
         private void IncrementAxonalConnectionCount()
         {
-            this.totalAxonalConnections++;
+            _instance.totalAxonalConnections++;
         }
 
         private void ReadDendriticSchema()
