@@ -97,8 +97,13 @@ namespace HentulWinforms
                 CurrentImage.Image = v1.Raw; // Show medium version
                 CurrentImage.Refresh();
 
+                // >>> Only do edges + HTM on Nth frames
+                if (!orchestrator.ShouldProcessThisFrame)
+                    continue;
+
                 EdgedImage.Image = ConverToEdgedBitmap(v1.Raw);
                 EdgedImage.Refresh();
+
 
                 // Process visuals
 
@@ -107,19 +112,18 @@ namespace HentulWinforms
                 var v3Edge = ConverToEdgedBitmap(v3.Processed);
 
 
-                orchestrator.ProcessVisual(v1Edge, v2Edge, v3Edge);
+                var didProcess = orchestrator.ProcessVisual(v1Edge, v2Edge, v3Edge);
 
-                if (networkMode == NetworkMode.TRAINING)
+                if (didProcess && networkMode == NetworkMode.TRAINING)
                 {
                     orchestrator.AddNewVisualSensationToHc();
                     counter++;
                     CycleLabel.Text = counter.ToString();
                     CycleLabel.Refresh();
                 }
-                else if (networkMode == NetworkMode.PREDICTION)
+                else if (didProcess && networkMode == NetworkMode.PREDICTION)
                 {
                     var motorOutput = orchestrator.Verify_Predict_HC();
-
                     if (motorOutput != null)
                     {
                         if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
@@ -132,23 +136,21 @@ namespace HentulWinforms
                             label_done.Refresh();
                             train_another_object.Visible = true;
                             wanderingButton.Visible = true;
-                            break;
+                            finished = true; // optional: break out here too
                         }
                         else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
                         {
                             label_done.Text = "Object Could Not be Recognised!";
                             label_done.Refresh();
-                            break;
+                            finished = true;
                         }
-                        Orchestrator.POINT p = new Orchestrator.POINT
+                        else
                         {
-                            X = motorOutput.X,
-                            Y = motorOutput.Y
-                        };
-                        // Move cursor to predicted point
-                        orchestrator.MoveCursor(p);
+                            orchestrator.MoveCursor(new Orchestrator.POINT { X = motorOutput.X, Y = motorOutput.Y });
+                        }
                     }
                 }
+
             }
 
             // Final processing after loop

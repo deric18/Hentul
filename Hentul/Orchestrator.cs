@@ -40,6 +40,12 @@
         #region Used Variables
 
         private static Orchestrator _orchestrator;
+        public int ProcessEveryNthFrame { get; set; } = 3;// 1 = process every frame, 3 = every 3rd frame
+        public bool ShouldProcessThisFrame =>
+    ProcessEveryNthFrame <= 1 || (CycleNum % (ulong)ProcessEveryNthFrame) == 0;
+
+        public bool SaveDebugFrames { get; set; } = false;
+
 
         public int Range { get; private set; }
 
@@ -80,6 +86,8 @@
         public ulong CycleNum { get; private set; }
 
         private int NumColumns, X, Z;
+        private Bitmap _rawV1, _rawV2, _rawV3;          // 20x20, 100x100, 200x200
+        private Bitmap _procV1, _procV2, _procV3;       // all 40x20 (encoder input)
 
         #endregion
 
@@ -169,51 +177,63 @@
             var v3 = RecordRegion(p, range: 100, label: "V3", LearningUnitType.V3, isMock);
             return (v1, v2, v3);
         }
+        private void EnsureBuffers()
+        {
+            _rawV1 ??= new Bitmap(20, 20, PixelFormat.Format32bppArgb);
+            _rawV2 ??= new Bitmap(100, 100, PixelFormat.Format32bppArgb);
+            _rawV3 ??= new Bitmap(200, 200, PixelFormat.Format32bppArgb);
+
+            _procV1 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+            _procV2 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+            _procV3 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+        }
         private RegionFrames RecordRegion(Point cursor, int range, string label, LearningUnitType type, bool isMock)
         {
-            int size = range * 2;                      // capture size: 20, 100, 200
+            EnsureBuffers();
+
+            // pick buffers by type
+            Bitmap rawBuf, procBuf;
+            switch (type)
+            {
+                case LearningUnitType.V1: rawBuf = _rawV1; procBuf = _procV1; break; // 20x20 → 40x20
+                case LearningUnitType.V2: rawBuf = _rawV2; procBuf = _procV2; break; // 100x100 → 40x20
+                case LearningUnitType.V3: rawBuf = _rawV3; procBuf = _procV3; break; // 200x200 → 40x20
+                default: throw new ArgumentOutOfRangeException(nameof(type));
+            }
+
+            int size = range * 2;
             int x1 = Math.Max(cursor.X - range, 0);
             int y1 = Math.Max(cursor.Y - range, 0);
             var srcRect = new Rectangle(x1, y1, size, size);
 
-            using var raw = new Bitmap(size, size, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(raw))
-                g.CopyFromScreen(x1, y1, 0, 0, raw.Size, CopyPixelOperation.SourceCopy);
+            // 1) Copy screen → rawBuf
+            using (var g = Graphics.FromImage(rawBuf))
+                g.CopyFromScreen(x1, y1, 0, 0, new Size(size, size), CopyPixelOperation.SourceCopy);
 
-            // processed is ALWAYS 40x20 for the encoder
-            var processed = new Bitmap(40, 20);
-            using (Graphics g2 = Graphics.FromImage(processed))
-                g2.DrawImage(raw, new Rectangle(0, 0, 40, 20));
-
-            if (!isMock)
+            // 2) Resize rawBuf → procBuf (40x20)
+            using (var g2 = Graphics.FromImage(procBuf))
             {
-                // Build safe paths and ensure directory exists
+                g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                g2.DrawImage(rawBuf, new Rectangle(0, 0, 40, 20));
+            }
+
+            // (optional) Save fixed files, not every time
+            if (SaveDebugFrames)
+            {
                 string dir = Path.GetDirectoryName(fileName)!;
                 string baseName = Path.GetFileNameWithoutExtension(fileName);
                 Directory.CreateDirectory(dir);
 
-                string ts = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff"); // avoid lock/name collisions
-                string rawPngPath = Path.Combine(dir, $"{baseName}_{label}_raw_{ts}.png");
-                string jpgPath = Path.Combine(dir, $"{baseName}_{label}_{ts}.jpg");
-                string pngPath = Path.Combine(dir, $"{baseName}_{label}_{ts}.png");
-
-                // Save RAW as PNG (lossless, safest)
-                raw.Save(rawPngPath, ImageFormat.Png);
-
-                // Try JPEG first (if you need JPGs), then fall back to PNG
-                try
-                {
-                    processed.Save(jpgPath, ImageFormat.Jpeg);
-                }
-                catch (ExternalException)
-                {
-                    // Fallback to PNG if JPEG encoder/path has issues
-                    processed.Save(pngPath, ImageFormat.Png);
-                }
+                string rawPath = Path.Combine(dir, $"{baseName}_{label}_raw.png");
+                string procPath = Path.Combine(dir, $"{baseName}_{label}.png");
+                if (File.Exists(rawPath)) File.Delete(rawPath);
+                if (File.Exists(procPath)) File.Delete(procPath);
+                rawBuf.Save(rawPath, ImageFormat.Png);
+                procBuf.Save(procPath, ImageFormat.Png);
             }
 
-            // Return frames (clone raw since it's disposed at end of using)
-            return new RegionFrames(processed, new Bitmap(raw), srcRect, type);
+            // Return references (do NOT dispose these shared buffers)
+            return new RegionFrames(procBuf, rawBuf, srcRect, type);
         }
 
         private Bitmap RecordRegion(Point cursor, int range, string label, bool isMock)
@@ -277,11 +297,16 @@
             return processed;
         }
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
-        public void ProcessVisual(Bitmap v1Grey, Bitmap v2Grey, Bitmap v3Grey)
+        public bool ProcessVisual(Bitmap v1Grey, Bitmap v2Grey, Bitmap v3Grey)
         {
+            // Skip work unless this is the Nth frame
+            if (ProcessEveryNthFrame > 1 && (CycleNum % (ulong)ProcessEveryNthFrame) != 0)
+                return false;
+
             VisionProcessor.ProcessFor(LearningUnitType.V1, v1Grey);
             VisionProcessor.ProcessFor(LearningUnitType.V2, v2Grey);
             VisionProcessor.ProcessFor(LearningUnitType.V3, v3Grey);
+            return true;
         }
         public void ProcessVisual(Bitmap v1Grey)
         {
