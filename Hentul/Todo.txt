@@ -1,5 +1,5 @@
 ﻿Small Direction
-- Introduce Neuron
+- Better Burst Connection Wiring Logic.
 - Introduce neuron level SupportedLabels for easier classification
 - Can static SOM BBM support multiple objects ? if not undo all the singleton logic.
 

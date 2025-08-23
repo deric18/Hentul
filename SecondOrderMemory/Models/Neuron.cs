@@ -68,6 +68,8 @@
 
         public int Voltage { get; private set; }
 
+        public List<string> SupportedLabels { get; private set; } 
+
         public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
             NeuronID = neuronId;
@@ -82,6 +84,7 @@
             flag = 0;
             PruneCount = 0;
             lastSpikeCycleNum = 0;
+            SupportedLabels = new List<string>();
         }
 
         public void IncrementPruneCount() => PruneCount++;
@@ -129,22 +132,23 @@
             }
         }
 
-        public void Fire(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string logFileName = "")
+        public void Fire(ulong cycleNum, string currentObjectLabel, LogMode logmode = LogMode.BurstOnly, string logFileName = "")
         {
             TOTALNUMBEROFPARTICIPATEDCYCLES++;
 
             if (AxonalList == null || AxonalList?.Count == 0)
             {
                 Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
-
-                #if !DEBUG
-                Console.ReadKey();
-                #endif
-
+                WriteLogsToFile(logFileName, "TRACE :: Neurons.cs :: Fire() :: EMpty Fire.");
                 return;
             }
 
-            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE;
+            if (BlockBehaviourManagerSOM.Instance.NetWorkMode == NetworkMode.TRAINING && !SupportedLabels.Contains(currentObjectLabel))
+            {                
+                SupportedLabels.Add(currentObjectLabel);
+            }
+
+            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE + 1;
 
             ProcessCurrentState(cycleNum, logmode, logFileName);
         }
@@ -173,10 +177,8 @@
                     {
                         ClearContributingList();
                     }
-                }
-                
+                }                
             }
-
 
             if (ContributingNeuronsLastCycle.Value?.Count > 0)
             {
@@ -193,7 +195,12 @@
                         }
                     }
                 }
-            }            
+            }
+
+            if(potentialMatches.Count == 0)
+            {
+                potentialMatches = SupportedLabels;
+            }
 
             return potentialMatches;
         }

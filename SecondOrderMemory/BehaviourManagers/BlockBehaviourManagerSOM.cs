@@ -310,10 +310,8 @@
         public void ChangeNetworkModeToPrediction()
         {
             NetWorkMode = NetworkMode.PREDICTION;
-            CurrentObjectLabel = null;
-            CurrentPredictions.Clear();
-            NeuronsFiringLastCycle.Clear();
-            NeuronsFiringThisCycle.Clear();
+            CurrentObjectLabel = null;            
+            CompleteCleanUP();
         }
 
         public void Init(int bbmID)
@@ -720,7 +718,7 @@
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                if(neuron.NeuronID.ToString() == "500-5-0-N")
+                if(neuron.NeuronID.ToString() == "0-0-0-N")
                 {
                     bool breakpoint = true;
                 }
@@ -840,7 +838,7 @@
             // Iterate through NeuronsFiringTHisCycle and fire!
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                neuron.Fire(CycleNum, Mode, LogFileName);
+                neuron.Fire(CycleNum, CurrentObjectLabel, Mode, LogFileName);
 
                 foreach (Synapse synapse in neuron.AxonalList.Values)       //it must have been done here for a reason.
                 {
@@ -2125,6 +2123,11 @@
 
         private bool ValidateInput(SDR_SOM incomingPattern, ulong currentCycle)
         {
+            if(NetWorkMode == NetworkMode.DONE)
+            {
+                throw new InvalidOperationException(" SOM Layer : " + Layer.ToString() + "  : Network is in DONE Mode, Cannot Process any more Inputs!");
+            }
+
             if (SupportedLabels.Count == 0 && NetWorkMode == NetworkMode.PREDICTION)
             {
                 throw new InvalidOperationException(
@@ -3038,7 +3041,7 @@
 
             //Add new Label to SupportedLabels 
             AddNewLabelToSupportedLabels(objectName);
-
+            CompleteCleanUP();
         }
 
         private bool AddNewLabelToSupportedLabels(string label)

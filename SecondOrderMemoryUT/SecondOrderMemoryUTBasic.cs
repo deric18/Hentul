@@ -111,6 +111,28 @@ namespace SecondOrderMemoryUnitTest
         }
 
         [Test]
+        public void TestWeDontAddLabelsToNeuronsOnlyInTrainingMode()
+        {
+            SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+
+            bbManager.BeginTraining("Apple");
+
+            bbManager.Fire(sdr1, 1);
+
+            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels.Count);
+
+            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels[0]);
+
+            bbManager.ChangeCurrentObjectLabel("Banana");
+
+            bbManager.ChangeNetworkModeToPrediction();            
+
+            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels.Count);
+
+            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels[0]);
+        }
+
+        [Test]
         public void TestStaleApicalVoltageGetsCleanedUp()
         {
             //After Temporal && Apical , Make sure Spatial Fire cleans up all the temporal and Apical Deploarizations that did not contribute to the fire.

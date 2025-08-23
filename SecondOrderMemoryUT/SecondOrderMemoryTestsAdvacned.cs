@@ -53,7 +53,7 @@
         {
             // Chcek if the newly created synapses have labels fro mthe currentObjectLabel
 
-            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsForTestCase2();
 
             // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
 
@@ -123,7 +123,7 @@
         }
 
         [Test]
-        [Description("Check PRedictions are getting added to the Sequentially firing neurons")]
+        [Description("Train one Object , Predict One Object")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing2()
         {
@@ -140,7 +140,6 @@
 
             bbManager.Fire(object1[0], cycle++, CreateActiveSynapses: true);
             bbManager.Fire(object1[1], cycle++, CreateActiveSynapses: true);
-
 
             bbManager.ChangeNetworkModeToPrediction();
 
@@ -160,42 +159,54 @@
         }
 
         [Test]
-        [Description("Check if sequences of 5 similar sequences for the same synapse results in addition of new predictions into the same Synapse")]
+        [Description("Train 2 objects with similar patterns and predict accordingly")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing3()
         {
             // Chcek if the newly created synapses have labels from the currentObjectLabel
 
-            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();            
+            List<SDR_SOM> objects = TestUtils.GenerateSpepcificSDRsforTestCase3();
 
             // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
-            string currentObjectLabel1 = "Apple";            
+            string currentObjectLabel1 = "Apple";
+            string currentObjectLabel2 = "Orange";
 
             bbManager.BeginTraining(currentObjectLabel1);
 
             ulong cycle = 0;
 
-            foreach (var sdr in object1)
-            {
-                bbManager.Fire(sdr, cycle, CreateActiveSynapses: true);
-                cycle++;
-            }            
+            bbManager.Fire(objects[0], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[1], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[2], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[3], cycle++, CreateActiveSynapses: true);            
+
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel2);  
+
+            bbManager.Fire(objects[4], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[5], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[6], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[7], cycle++, CreateActiveSynapses: true);
 
             bbManager.ChangeNetworkModeToPrediction();
 
             var supporttedLabels = bbManager.GetSupportedLabels();
 
-            Assert.AreEqual(2, supporttedLabels.Count);            
+            Assert.AreEqual(supporttedLabels.Count, 3);
 
-            bbManager.Fire(object1[0], cycle++);            
-
-            bbManager.Fire(object1[1], cycle++);
+            bbManager.Fire(objects[0], cycle++);
+            bbManager.Fire(objects[1], cycle++);
 
             var preds = bbManager.GetCurrentPredictions();
 
-            Assert.AreEqual(preds[0], currentObjectLabel1);
+            Assert.AreEqual(2, preds.Count);
 
-            bbManager.Fire(object1[2], cycle++);
+            bbManager.Fire(objects[6], cycle++);
+
+            preds = bbManager.GetCurrentPredictions();
+
+            Assert.AreEqual(1, preds.Count);    //Succesfully Classified object 2
+
+            Assert.AreEqual(preds[0], currentObjectLabel2);
         }
 
         [Test]
@@ -205,7 +216,7 @@
         {
             // Chcek if the newly created synapses have labels from the currentObjectLabel
 
-            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRs();
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsForTestCase2();
 
             List<SDR_SOM> object2 = TestUtils.GenerateAlternativeSDRs();
 
