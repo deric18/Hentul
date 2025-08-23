@@ -68,7 +68,7 @@
 
         public int Voltage { get; private set; }
 
-        public List<string> SupportedLabels { get; private set; } 
+        public List<string> AllTimeSupportedLabels { get; private set; } 
 
         public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
@@ -84,7 +84,7 @@
             flag = 0;
             PruneCount = 0;
             lastSpikeCycleNum = 0;
-            SupportedLabels = new List<string>();
+            AllTimeSupportedLabels = new List<string>();
         }
 
         public void IncrementPruneCount() => PruneCount++;
@@ -143,9 +143,9 @@
                 return;
             }
 
-            if (BlockBehaviourManagerSOM.Instance.NetWorkMode == NetworkMode.TRAINING && !SupportedLabels.Contains(currentObjectLabel))
+            if (BlockBehaviourManagerSOM.Instance.NetWorkMode == NetworkMode.TRAINING && !AllTimeSupportedLabels.Contains(currentObjectLabel))
             {                
-                SupportedLabels.Add(currentObjectLabel);
+                AllTimeSupportedLabels.Add(currentObjectLabel);
             }
 
             Voltage += COMMON_NEURONAL_FIRE_VOLTAGE + 1;
@@ -156,12 +156,12 @@
         internal List<string> GetCurrentPotentialMatchesForCurrentCycle(ulong currentCycle)
         {
             // For every neuron in ContributingNeuronList Strengthen those synpases and extract those labels into a list
-            List<string> potentialMatches = new List<string>();            
+            List<string> potentialMatchesFromPreviousCycleFiringNeurons = new List<string>();            
 
             bool check1 = (ContributingNeuronsLastCycle.Key != 0 && currentCycle - ContributingNeuronsLastCycle.Key < 1);      //Cant be Contributed and Fired in the same cycle!
             bool check2 = currentCycle - ContributingNeuronsLastCycle.Key < 0;                                                  // Dont want negatie values , like WTF!
 
-            if (NeuronID.ToString() == "500-5-0-N")
+            if (NeuronID.ToString() == "777-3-0-N")
             {
                 bool breakpoint = true;
             }
@@ -190,19 +190,23 @@
                         {
                             foreach (var prediction in synapse.SupportedPredictions)
                             {
-                                potentialMatches.Add(prediction.ObjectLabel);
+                                potentialMatchesFromPreviousCycleFiringNeurons.Add(prediction.ObjectLabel);
                             }
                         }
                     }
                 }
             }
 
-            if(potentialMatches.Count == 0)
+            if(potentialMatchesFromPreviousCycleFiringNeurons.Count == 0)
             {
-                potentialMatches = SupportedLabels;
+                potentialMatchesFromPreviousCycleFiringNeurons = AllTimeSupportedLabels;
+            }
+            else if(potentialMatchesFromPreviousCycleFiringNeurons.Count > 1)
+            {
+                potentialMatchesFromPreviousCycleFiringNeurons = potentialMatchesFromPreviousCycleFiringNeurons.Intersect(AllTimeSupportedLabels).ToList();                
             }
 
-            return potentialMatches;
+            return potentialMatchesFromPreviousCycleFiringNeurons;
         }
 
         public void ProcessVoltage(int voltage, Neuron contributingNeuron, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)

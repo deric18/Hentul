@@ -193,14 +193,17 @@
 
             Assert.AreEqual(supporttedLabels.Count, 3);
 
-            bbManager.Fire(objects[0], cycle++);
-            bbManager.Fire(objects[1], cycle++);
+            bbManager.Fire(objects[0], cycle++);        // Fire 1
 
             var preds = bbManager.GetCurrentPredictions();
-
             Assert.AreEqual(2, preds.Count);
 
-            bbManager.Fire(objects[6], cycle++);
+            bbManager.Fire(objects[1], cycle++);        // Fire 2
+
+            preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(2, preds.Count);
+
+            bbManager.Fire(objects[6], cycle++);        //Fire 3
 
             preds = bbManager.GetCurrentPredictions();
 

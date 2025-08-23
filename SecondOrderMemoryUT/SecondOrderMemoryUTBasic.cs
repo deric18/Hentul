@@ -119,17 +119,17 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(sdr1, 1);
 
-            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels.Count);
+            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels.Count);
 
-            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels[0]);
+            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels[0]);
 
             bbManager.ChangeCurrentObjectLabel("Banana");
 
             bbManager.ChangeNetworkModeToPrediction();            
 
-            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels.Count);
+            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels.Count);
 
-            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).SupportedLabels[0]);
+            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels[0]);
         }
 
         [Test]
@@ -437,21 +437,21 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(axonalSdr, Counter++);
 
-            //Make the synapsse Active
-            //RepeatCycle(axonalSdr, dendronalSdr, )
-
             dendronalNeuron1.ProcessVoltage(10, dummyContributingNeuron);
 
-            bbManager.Fire(dendronalSdr, Counter++);
+            // Use PickWinnerNeuron to get the actual winner after bursting
+            var winnerNeuron = bbManager.Columns[dendronalPos2.X, dendronalPos2.Y].PickWinnerNeuron();
 
+            bbManager.Fire(dendronalSdr, Counter++);
+            
             var postFiringSynapeStrength1 = bbManager.GetNeuronFromPosition(dendronalPos1).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
-            var postFiringSynapeStrength2 = bbManager.GetNeuronFromPosition(dendronalPos2).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
+            var postFiringSynapeStrength2 = winnerNeuron.ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
 
             Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(axonalNeuron, dendronalNeuron1));
 
-            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendronalNeuron2));
+            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, winnerNeuron));
 
-            Assert.AreEqual(prefireSynapseStrength2, postFiringSynapeStrength2);
+            Assert.AreEqual(Neuron.INITIAL_SYNAPTIC_CONNECTION_STRENGTH, postFiringSynapeStrength2);
 
             Assert.IsTrue(prefireSynapseStrength1 < postFiringSynapeStrength1);
         }
@@ -470,11 +470,13 @@ namespace SecondOrderMemoryUnitTest
 
             SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3, 3) }, iType.SPATIAL);
 
+            var winnerNeuron = bbManager.Columns[sdr2.ActiveBits[0].X, sdr2.ActiveBits[0].Y].PickWinnerNeuron();
+
             bbManager.Fire(sdr2, counter++);
 
             //Verify both the both the columns have atleast 1 of each other columns axons and dendrites.
 
-            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), bbManager.GetNeuronFromPosition(sdr2.ActiveBits[0])));
+            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), winnerNeuron));
         }
 
         [Test]

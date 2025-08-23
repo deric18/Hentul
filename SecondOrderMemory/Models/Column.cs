@@ -20,6 +20,19 @@ namespace SecondOrderMemory.Models
             Init = 0;
         }
         
+        public Neuron PickWinnerNeuron()
+        {
+            if (Neurons == null || Neurons.Count == 0)
+                throw new InvalidOperationException("No neurons in this column.");
+
+            // Find the neuron with the minimum number of ProximoDistalDendritic connections
+
+            //POTENTIAL MINOR BUG : By orderig all the neurrons , if all the neurons have 0 oe equal number of connections only one neuron might get picked every time.
+
+            return Neurons
+                .OrderBy(n => n.ProximoDistalDendriticList?.Count ?? 0)
+                .First();
+        }
 
         /// <summary>
         /// Fires the predicted neurons in the column , if there are no predicted neurons then it Bursts.
