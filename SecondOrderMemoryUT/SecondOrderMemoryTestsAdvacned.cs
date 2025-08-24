@@ -50,39 +50,31 @@
         [TestCategory("Higher Order Sequencing")]
 
         public void TestHigherOrderSequencing1()
-        {
-            // Chcek if the newly created synapses have labels fro mthe currentObjectLabel
-
-            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsForTestCase2();
-
-            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
-
-
+        {            
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsForTestCase2();            
             string currentObjectLabel = "Apple";
-
-            bbManager.BeginTraining(currentObjectLabel);
-
             ulong cycle = 0;
 
+            bbManager.BeginTraining(currentObjectLabel);            
             bbManager.ChangeCurrentObjectLabel(currentObjectLabel);
 
             foreach (var sdr in object1)
             {                
-                bbManager.Fire(sdr, cycle);                
+                bbManager.Fire(sdr, cycle);
 
                 if (cycle > 0)
-                {
-                    var neuronsFiringThisCycle = bbManager.NeuronsFiringLastCycle;
+                {   
+                    // Done this as Post Cycle NeuronsFiringThicCylce gets cleaned up!
 
+                    var neuronsFiringThisCycleBurstedColumns = GetColumnsFromNeurons(bbManager.NeuronsFiringLastCycle);
                     var neuronsFiringPreviousCycle = object1[(int)cycle-1].ActiveBits.Select(x => bbManager.GetNeuronFromPosition(x)).ToList();
 
-                    Assert.IsTrue(neuronsFiringThisCycle.Count > 0);
-
+                    Assert.IsTrue(neuronsFiringThisCycleBurstedColumns.Count > 0);
                     Assert.IsTrue(neuronsFiringPreviousCycle.Count > 0);
 
                     foreach (var sneuron in neuronsFiringPreviousCycle)
                     {
-                        foreach (var dneuron in neuronsFiringThisCycle)
+                        foreach (var dneuron in neuronsFiringThisCycleBurstedColumns)
                         {
                             if (sneuron.AxonalList.TryGetValue(dneuron.NeuronID.ToString(), out var connection))
                             {
@@ -120,6 +112,25 @@
 
                 cycle++;
             }            
+        }
+
+        private List<Neuron> GetColumnsFromNeurons(List<Neuron> neuronList)
+        {
+            List<Neuron> ColmnsThatBurst = new();
+
+            foreach(var neuron in neuronList)
+            {
+                var pos = Position_SOM.ConvertStringToPosition(neuron.NeuronID.ToString());
+
+                var winnerNeuron = bbManager.Columns[pos.X, pos.Y].PickWinnerNeuron();
+
+                if(!ColmnsThatBurst.Any(neuron => neuron.NeuronID.ToString() == winnerNeuron.NeuronID.ToString()))
+                {
+                    ColmnsThatBurst.Add(winnerNeuron);
+                }
+            }
+
+            return ColmnsThatBurst;
         }
 
         [Test]
