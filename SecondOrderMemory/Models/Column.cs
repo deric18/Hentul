@@ -29,9 +29,11 @@ namespace SecondOrderMemory.Models
 
             //POTENTIAL MINOR BUG : By orderig all the neurrons , if all the neurons have 0 oe equal number of connections only one neuron might get picked every time.
 
-            return Neurons
+            var lickyWinner = Neurons
                 .OrderBy(n => n.ProximoDistalDendriticList?.Count ?? 0)
                 .First();
+
+            return lickyWinner;
         }
 
         /// <summary>

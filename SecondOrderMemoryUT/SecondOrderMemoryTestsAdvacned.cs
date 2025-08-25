@@ -59,7 +59,7 @@
             bbManager.ChangeCurrentObjectLabel(currentObjectLabel);
 
             foreach (var sdr in object1)
-            {                
+            {
                 bbManager.Fire(sdr, cycle);
 
                 if (cycle > 0)
@@ -109,7 +109,6 @@
                         }
                     }
                 }
-
                 cycle++;
             }            
         }
@@ -122,7 +121,7 @@
             {
                 var pos = Position_SOM.ConvertStringToPosition(neuron.NeuronID.ToString());
 
-                var winnerNeuron = bbManager.Columns[pos.X, pos.Y].PickWinnerNeuron();
+                var winnerNeuron = bbManager.Columns[pos.X, pos.Y].Neurons[0];
 
                 if(!ColmnsThatBurst.Any(neuron => neuron.NeuronID.ToString() == winnerNeuron.NeuronID.ToString()))
                 {
@@ -158,9 +157,7 @@
 
             Assert.AreEqual(2, supporttedLabels.Count);
 
-            bbManager.Fire(object1[0], cycle++);
-
-            bbManager.Fire(object1[1], cycle++);
+            bbManager.Fire(object1[0], cycle++);            
 
             var preds = bbManager.GetCurrentPredictions();
 
@@ -170,7 +167,7 @@
         }
 
         [Test]
-        [Description("Train 2 objects with similar patterns and predict accordingly")]
+        [Description("Train 2 objects with similar first half patterns and predict accordingly")]
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing3()
         {
@@ -272,15 +269,13 @@
             Assert.AreEqual(preds[0], currentObjectLabel1);
 
 
-            bbManager.Fire(object1[2], cycle++);
-
-            
+            bbManager.Fire(object1[2], cycle++);            
         }
 
         [Test]
         [Description("Check if 3 different objects can be stored and classified accordingly as well!")]
         [TestCategory("Higher Order Sequencing")]
-        public void TestPerformHigherOrderSequencing5()
+        public void TestHigherOrderSequencing5()
         {
 
             bbManager.BeginTraining("TestObject");
@@ -293,7 +288,7 @@
             ulong cycle = 1;
             int repetitions = 3;
 
-            bbManager.BeginTraining("TestObject");
+            bbManager.BeginTraining("Apple");
 
             for (int i = 0; i < repetitions; i++)
             {
@@ -325,14 +320,14 @@
 
             bbManager.ChangeNetworkModeToPrediction();
 
+            var supportedLabelList = bbManager.GetSupportedLabels();
+
+            Assert.AreEqual(supportedLabelList.Count, 3);
+
             foreach (var sdr in object1)
             {
                 bbManager.Fire(sdr, cycle++);
             }
-
-            var supportedLabelList = bbManager.GetSupportedLabels();
-
-            Assert.IsTrue(supportedLabelList.Count > 0);
 
             var currentLabelList = bbManager.GetCurrentPredictions();
 

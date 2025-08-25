@@ -470,7 +470,7 @@ namespace SecondOrderMemoryUnitTest
 
             SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3, 3) }, iType.SPATIAL);
 
-            var winnerNeuron = bbManager.Columns[sdr2.ActiveBits[0].X, sdr2.ActiveBits[0].Y].PickWinnerNeuron();
+            var winnerNeuron = bbManager.Columns[sdr2.ActiveBits[0].X, sdr2.ActiveBits[0].Y].Neurons[0];
 
             bbManager.Fire(sdr2, counter++);
 
