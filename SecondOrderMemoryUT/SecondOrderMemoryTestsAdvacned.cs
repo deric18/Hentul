@@ -225,115 +225,67 @@
         [TestCategory("Higher Order Sequencing")]
         public void TestHigherOrderSequencing4()
         {
-            // Chcek if the newly created synapses have labels from the currentObjectLabel
+            // Chcek if the newly created synapses have labels from the currentObjectLabel            
 
-            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsForTestCase2();
-
-            List<SDR_SOM> object2 = TestUtils.GenerateAlternativeSDRs();
+            List<SDR_SOM> objects = TestUtils.GetSDRsForTestCase4();
 
             // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
             string currentObjectLabel1 = "Apple";
             string currentObjectLabel2 = "Orange";
+            string currentObjectLabel3 = "Annanas";
 
             bbManager.BeginTraining(currentObjectLabel1);
 
             ulong cycle = 0;
 
-            foreach (var sdr in object1)
-            {               
-                bbManager.Fire(sdr, cycle, CreateActiveSynapses: true);
-                cycle++;
-            }
+            bbManager.Fire(objects[0], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[1], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[2], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[3], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[4], cycle++, CreateActiveSynapses: true);
 
-            bbManager.BeginTraining(currentObjectLabel2);
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel2);
 
-            foreach (var sdr in object2)
-            {
-                bbManager.Fire(sdr, cycle);
-                cycle++;
-            }
+            bbManager.Fire(objects[5], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[6], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[7], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[8], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[9], cycle++, CreateActiveSynapses: true);
+
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel3);
+
+            bbManager.Fire(objects[10], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[11], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[12], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[13], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[14], cycle++, CreateActiveSynapses: true);
 
             bbManager.ChangeNetworkModeToPrediction();
 
             var supporttedLabels = bbManager.GetSupportedLabels();
+            Assert.AreEqual(4, supporttedLabels.Count);
 
+            bbManager.Fire(objects[0], cycle++);
+            bbManager.Fire(objects[1], cycle++);
+
+            supporttedLabels = bbManager.GetCurrentPredictions();
             Assert.AreEqual(3, supporttedLabels.Count);
 
-            bbManager.Fire(object1[0], cycle++);
-
-            bbManager.Fire(object1[1], cycle++);
-
+            bbManager.Fire(objects[7], cycle++);
+            bbManager.Fire(objects[8], cycle++);
 
             var preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(preds.Count, 2);
+            Assert.AreEqual(preds[0], currentObjectLabel2);
+            Assert.AreEqual(preds[1], currentObjectLabel3);
 
-            Assert.AreEqual(preds[0], currentObjectLabel1);
+            bbManager.Fire(objects[14], cycle++);
 
-
-            bbManager.Fire(object1[2], cycle++);            
-        }
-
-        [Test]
-        [Description("Check if 3 different objects can be stored and classified accordingly as well!")]
-        [TestCategory("Higher Order Sequencing")]
-        public void TestHigherOrderSequencing5()
-        {
-
-            bbManager.BeginTraining("TestObject");
-
-            // Create a sequence of patterns (A -> B -> C)
-            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
-            List<SDR_SOM> object2 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
-            List<SDR_SOM> object3 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 5);
-
-            ulong cycle = 1;
-            int repetitions = 3;
-
-            bbManager.BeginTraining("Apple");
-
-            for (int i = 0; i < repetitions; i++)
-            {
-                foreach (var sdr in object1)
-                {
-                    bbManager.Fire(sdr, cycle++);
-                }
-            }
-
-            bbManager.ChangeCurrentObjectLabel("Orange");
-
-            for (int i = 0; i < repetitions; i++)
-            {
-                foreach (var sdr in object2)
-                {
-                    bbManager.Fire(sdr, cycle++);
-                }
-            }
-
-            bbManager.ChangeCurrentObjectLabel("Bananna");
-
-            for (int i = 0; i < repetitions; i++)
-            {
-                foreach (var sdr in object3)
-                {
-                    bbManager.Fire(sdr, cycle++);
-                }
-            }
-
-            bbManager.ChangeNetworkModeToPrediction();
-
-            var supportedLabelList = bbManager.GetSupportedLabels();
-
-            Assert.AreEqual(supportedLabelList.Count, 3);
-
-            foreach (var sdr in object1)
-            {
-                bbManager.Fire(sdr, cycle++);
-            }
-
-            var currentLabelList = bbManager.GetCurrentPredictions();
-
-            Assert.IsTrue(currentLabelList.Count > 0);
-        }
-
+            preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(preds.Count, 1);
+            Assert.AreEqual(preds[0], currentObjectLabel3);
+            
+        }        
 
         [Test]
         public void CheckAllNeuronsNonDistalConnectionsAreActive()
