@@ -338,28 +338,28 @@
         //Stores the new object on to HC
         public void AddNewVisualSensationToHc()
         {
-            if (!NMode.Equals(NetworkMode.TRAINING))
-            {
+            if (NMode != NetworkMode.TRAINING)
                 throw new InvalidOperationException("INVALID State Management!");
-            }
 
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            // Get SDRs for all three scales at this CycleNum
+            var sdrV1 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var sdrV2 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V2, CycleNum);
+            var sdrV3 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V3, CycleNum);
 
-            if (som_SDR != null)
-            {
-                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+            if (sdrV1 == null) // keep V1 mandatory to preserve current semantics
+                throw new InvalidOperationException("V1 SDR should not be null!");
 
-                if (HCAccessor.AddNewSensationLocationToObject(firingSensei) == false)
-                {
-                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(" som_SDR should not be null!");
-            }
+            // Convert to Sensation_Location(s) with the current cursor point
+            var v1 = VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV1, point);
+            var v2 = (sdrV2 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV2, point) : null;
+            var v3 = (sdrV3 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV3, point) : null;
+
+            var bundle = new VisualSensationBundle(v1, v2, v3, point);
+
+            if (!HCAccessor.AddNewSensationLocationToObject(bundle))
+                throw new InvalidOperationException("Could not add object to HC (duplicate or wrong mode).");
         }
+
 
         //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
         public void AddNewCharacterSensationToHC(char ch)
@@ -390,45 +390,32 @@
 
         public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
         {
-            Position2D motorOutput = null;
-            List<Position2D> positionToConfirm = new List<Position2D>();
-
-            if (!NMode.Equals(NetworkMode.PREDICTION))
-            {
+            if (NMode != NetworkMode.PREDICTION)
                 throw new InvalidOperationException("Invalid State Managemnt!");
-            }
 
-            // If any output from HC execute the location output if NOT then take the standard default output.                
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
+            var sdrV1 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            if (sdrV1 == null) return null;
 
+            var v1 = VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV1, point);
 
-            if (som_SDR != null)
-            {
-                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
-                var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
+            // Auxiliary evidence (not sent to HC)
+            var sdrV2 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V2, CycleNum);
+            var sdrV3 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V3, CycleNum);
 
-                List<string> predictedLabels = VisionProcessor.GetSupportedLabels(LearningUnitType.V1);
+            var v2 = sdrV2 != null ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV2, point) : null;
+            var v3 = sdrV3 != null ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV3, point) : null;
 
-                if (legacyPipeline)
-                {
-                    motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
-                }
-                else
-                {
-                    if (predictedSensei != null)
-                    {
-                        var positionsToConfirm = HCAccessor.StoreObjectInGraph(firingSensei, predictedSensei, isMock);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Should Not Happen in PRediction Mode");
-                    }
-                }
-            }
+            // Call existing HC (V1 only)
+            var move = HCAccessor.VerifyObject(v1, null, isMock, iterationsToConfirmation);
 
-            return motorOutput;
-        }
+            // Optional: veto or dampen strange moves unless V2/V3 roughly agree with the label/region.
+            // Example placeholder (depends on your Sensation/label APIs):
+            /*
+            var ok = MultiScaleAgrees(v1, v2, v3);
+            if (!ok) return null; // or return a smaller step / keep scanning
+            */
+            return move;
+       }
 
 
         public void DoneWithTraining(string label = "")
