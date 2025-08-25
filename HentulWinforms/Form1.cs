@@ -95,15 +95,33 @@ namespace HentulWinforms
                 var (v1, v2, v3) = orchestrator.RecordPixels();
 
                 // Update display images
-                CurrentImage.Image = v1.Raw; // Show medium version
-                CurrentImage.Refresh();
+                //V1Gray.Image = v1.Raw; // Show medium version
+                //V1Gray.Refresh();
 
                 // >>> Only do edges + HTM on Nth frames
                 if (!orchestrator.ShouldProcessThisFrame)
                     continue;
 
-                EdgedImage.Image = ConverToEdgedBitmap(v1.Raw);
-                EdgedImage.Refresh();
+                V1Gray.Image = ToGray(v1.Processed);
+                V1White.Image = ToWhiteScale(v1.Processed);
+                V1Gray.Refresh();
+
+                V2Gray.Image = ToGray(v2.Processed);
+                V2White.Image = ToWhiteScale(v2.Processed);
+                V2Gray.Refresh();
+
+                V3Gray.Image = ToGray(v3.Processed);
+                V3White.Image = ToWhiteScale(v3.Processed);
+                V3Gray.Refresh();
+
+                V1White.Image = ConverToEdgedBitmap(v1.Raw);
+                V1White.Refresh();
+
+                V2White.Image = ConverToEdgedBitmap(v1.Raw);
+                V2White.Refresh();
+
+                V3White.Image = ConverToEdgedBitmap(v1.Raw);
+                V3White.Refresh();
 
 
                 // Process visuals
@@ -234,12 +252,12 @@ namespace HentulWinforms
             var (V1, V2, V3) = orchestrator.RecordPixels();
 
             // Show one of them (medium/Raw is usually good for display)
-            CurrentImage.Image = V1.Raw;
-            CurrentImage.Refresh();
+            V1Gray.Image = V1.Raw;
+            V1Gray.Refresh();
 
             // Apply edge detection to the same image
-            EdgedImage.Image = ConverToEdgedBitmap(V1.Raw);
-            EdgedImage.Refresh();
+            V1White.Image = ConverToEdgedBitmap(V1.Raw);
+            V1White.Refresh();
 
             label_done.Text = "Ready";
         }
@@ -335,8 +353,25 @@ namespace HentulWinforms
         { }
 
         private void label2_Click(object sender, EventArgs e)
-        { }        
+        { }
+        private Bitmap ToGray(Bitmap src)
+        {
+            using var m = BitmapConverter.ToMat(src);
+            using var gray = new OpenCvSharp.Mat();
+            Cv2.CvtColor(m, gray, ColorConversionCodes.BGR2GRAY);
+            return BitmapConverter.ToBitmap(gray);
+        }
 
+        private Bitmap ToWhiteScale(Bitmap src) // “whitescale” = binary (black/white)
+        {
+            using var m = BitmapConverter.ToMat(src);
+            using var gray = new OpenCvSharp.Mat();
+            using var bin = new OpenCvSharp.Mat();
+            Cv2.CvtColor(m, gray, ColorConversionCodes.BGR2GRAY);
+            // Otsu picks threshold automatically; BinaryInv if you prefer white foreground
+            Cv2.Threshold(gray, bin, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+            return BitmapConverter.ToBitmap(bin);
+        }
         private void button1_Click_3(object sender, EventArgs e)
         {
             List<string> wordsToTrain = new List<string>()
