@@ -7,6 +7,7 @@
     using System.Drawing.Imaging;
     using System.Drawing;
     using Hentul.Encoders;
+    using System.Windows.Forms;
 
     public class Orchestrator
     {
@@ -187,6 +188,7 @@
             _procV2 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
             _procV3 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
         }
+
         private RegionFrames RecordRegion(Point cursor, int range, string label, LearningUnitType type, bool isMock)
         {
             EnsureBuffers();
@@ -202,22 +204,42 @@
             }
 
             int size = range * 2;
-            int x1 = Math.Max(cursor.X - range, 0);
-            int y1 = Math.Max(cursor.Y - range, 0);
-            var srcRect = new Rectangle(x1, y1, size, size);
 
-            // 1) Copy screen → rawBuf
+            // Desired source rectangle (centered at cursor)
+            var desired = new Rectangle(cursor.X - range, cursor.Y - range, size, size);
+
+            // Clip to virtual desktop
+            Rectangle desktop = DesktopBounds.VirtualScreen();
+            Rectangle inter = Rectangle.Intersect(desired, desktop);
+
+            // Prepare destination: clear to black (so out-of-screen areas become black)
             using (var g = Graphics.FromImage(rawBuf))
-                g.CopyFromScreen(x1, y1, 0, 0, new Size(size, size), CopyPixelOperation.SourceCopy);
+            {
+                g.Clear(Color.Black);
+            }
 
-            // 2) Resize rawBuf → procBuf (40x20)
+            // Only copy if we have a non-empty intersection
+            if (!inter.IsEmpty)
+            {
+                // Compute where in the raw buffer the intersection should land
+                // (offset from desired's top-left)
+                int destX = inter.Left - desired.Left;
+                int destY = inter.Top - desired.Top;
+
+                using (var g = Graphics.FromImage(rawBuf))
+                {
+                    // CopyFromScreen needs a size; use only the intersection size
+                    g.CopyFromScreen(inter.Left, inter.Top, destX, destY, inter.Size, CopyPixelOperation.SourceCopy);
+                }
+            }
+
+            // Resize rawBuf ⇒ 40×20 for the encoder
             using (var g2 = Graphics.FromImage(procBuf))
             {
                 g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
                 g2.DrawImage(rawBuf, new Rectangle(0, 0, 40, 20));
             }
 
-            // (optional) Save fixed files, not every time
             if (SaveDebugFrames)
             {
                 string dir = Path.GetDirectoryName(fileName)!;
@@ -232,9 +254,9 @@
                 procBuf.Save(procPath, ImageFormat.Png);
             }
 
-            // Return references (do NOT dispose these shared buffers)
-            return new RegionFrames(procBuf, rawBuf, srcRect, type);
+            return new RegionFrames(procBuf, rawBuf, desired, type);
         }
+
 
         private Bitmap RecordRegion(Point cursor, int range, string label, bool isMock)
         {

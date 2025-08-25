@@ -6,6 +6,7 @@ namespace HentulWinforms
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+    using System.Windows.Forms;
 
     public partial class Form1 : Form
     {
