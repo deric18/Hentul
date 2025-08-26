@@ -7,6 +7,385 @@
     internal static class TestUtils
     {
 
+        public static List<SDR_SOM> GenerateThreeRandomSDRs(int x = 1000, int y = 10, int positionsPerSDR = 10, iType type = iType.SPATIAL)
+        {
+            var rand = new Random();
+            var allUsed = new HashSet<(int, int, int)>();
+            var sdrList = new List<SDR_SOM>();
+
+            for (int s = 0; s < 3; s++)
+            {
+                var positions = new List<Position_SOM>();
+
+                while (positions.Count < positionsPerSDR)
+                {
+                    int px = rand.Next(1, x + 1);
+                    int py = rand.Next(1, y + 1);
+                    int pz = 0;
+
+                    var tuple = (px, py, pz);
+
+                    // Ensure uniqueness across all SDRs
+                    if (allUsed.Add(tuple))
+                    {
+                        positions.Add(new Position_SOM(px, py, pz));
+                    }
+                }
+
+                sdrList.Add(new SDR_SOM(x, y, positions, type));
+            }
+
+            return sdrList;
+        }
+
+        internal static List<SDR_SOM> GenerateSpepcificSDRsforTestCase2()
+        {
+
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: positions
+            var positions1 = new List<Position_SOM>
+            {
+                new Position_SOM(0, 0, 0),
+                new Position_SOM(10, 1, 1)                
+            };
+
+            // SDR 2: positions
+            var positions2 = new List<Position_SOM>
+            {
+                new Position_SOM(500, 5, 0),
+                new Position_SOM(510, 6, 1)                
+            };
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));            
+
+            return sdrList;
+        }
+
+        internal static List<SDR_SOM> GenerateSpepcificSDRsForTestCase2()
+        {
+
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: positions
+            var positions1 = new List<Position_SOM>
+            {
+                new Position_SOM(0, 0, 0),
+                new Position_SOM(10, 1, 1),
+                new Position_SOM(20, 2, 2)
+            };
+
+            // SDR 2: positions
+            var positions2 = new List<Position_SOM>
+            {
+                new Position_SOM(500, 5, 0),
+                new Position_SOM(510, 6, 1),
+                new Position_SOM(520, 7, 2)
+            };
+
+            // SDR 3: positions
+            var positions3 = new List<Position_SOM>
+            {
+                new Position_SOM(1000, 0, 0),
+                new Position_SOM(1010, 1, 1),
+                new Position_SOM(1020, 2, 2)
+            };
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions3, iType.SPATIAL));
+
+            return sdrList;
+        }
+
+        internal static List<SDR_SOM> GenerateSpepcificSDRsforTestCase3()
+        {            
+
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: positions
+            var positions11 = new List<Position_SOM>
+            {
+                new Position_SOM(0, 0, 0),
+                new Position_SOM(10, 1, 1),
+                new Position_SOM(20, 2, 2)                
+            };
+
+                    
+            var positions12 = new List<Position_SOM>
+            {
+                new Position_SOM(530, 3, 0),
+                new Position_SOM(560, 4, 1),
+                new Position_SOM(570, 9, 4)
+            };
+
+            var positions13 = new List<Position_SOM>
+            {                
+                new Position_SOM(630, 3, 0),
+                new Position_SOM(660, 4, 1),
+                new Position_SOM(670, 9, 4)
+            };
+
+            var positions14 = new List<Position_SOM>
+            {
+                new Position_SOM(880, 0, 0),
+                new Position_SOM(840, 1, 1),
+                new Position_SOM(888, 2, 2)                
+            };
+
+
+            // SDR 2: positions
+            var positions21 = new List<Position_SOM>
+            {
+                new Position_SOM(0, 0, 0),
+                new Position_SOM(10, 1, 1),
+                new Position_SOM(20, 2, 2)
+            };
+
+            var positions22 = new List<Position_SOM>
+            {
+                new Position_SOM(530, 3, 0),
+                new Position_SOM(560, 4, 1),
+                new Position_SOM(570, 9, 4)
+            };
+
+            var positions23 = new List<Position_SOM>
+            {
+                new Position_SOM(777, 3, 0),
+                new Position_SOM(720, 4, 1),
+                new Position_SOM(740, 9, 4)
+            };
+
+            var positions24 = new List<Position_SOM>
+            {
+                new Position_SOM(995, 0, 0),
+                new Position_SOM(999, 1, 1),
+                new Position_SOM(930, 2, 2)
+            };
+
+
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions11, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions12 , iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions13, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions14, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions21, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions22, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions23, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions24, iType.SPATIAL));
+
+            return sdrList;
+        }
+
+        internal static List<SDR_SOM> GenerateAlternativeSDRs()
+        {
+            var sdrList = new List<SDR_SOM>();
+            int length = 1250;
+            int breadth = 10;
+
+            // SDR 1: alternative positions
+            var positions1 = new List<Position_SOM>
+            {
+                new Position_SOM(10, 1, 0),
+                new Position_SOM(150, 2, 1),
+                new Position_SOM(275, 3, 2),
+                new Position_SOM(425, 4, 3),
+                new Position_SOM(575, 5, 4)
+            };
+
+            // SDR 2: alternative positions
+            var positions2 = new List<Position_SOM>
+            {
+                new Position_SOM(625, 6, 0),
+                new Position_SOM(775, 7, 1),
+                new Position_SOM(925, 8, 2),
+                new Position_SOM(1075, 9, 3),
+                new Position_SOM(1150, 0, 4)
+            };
+
+            // SDR 3: alternative positions
+            var positions3 = new List<Position_SOM>
+            {
+                new Position_SOM(1230, 1, 0),
+                new Position_SOM(1240, 2, 1),
+                new Position_SOM(1245, 3, 2),
+                new Position_SOM(1248, 4, 3),
+                new Position_SOM(1249, 5, 4)
+            };
+
+            sdrList.Add(new SDR_SOM(length, breadth, positions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, positions3, iType.SPATIAL));
+
+            return sdrList;
+        }
+
+        internal static List<SDR_SOM> GetSDRsForTestCase4()
+        {
+            int length = 1250;
+            int breadth = 10;
+
+            // Shared SDRs for all objects (first two SDRs)
+            var sharedPositions1 = new List<Position_SOM>
+            {
+                new Position_SOM(10, 1, 0),
+                new Position_SOM(20, 2, 1),
+                new Position_SOM(30, 3, 2),
+                new Position_SOM(40, 4, 3),
+                new Position_SOM(50, 5, 4)
+            };
+            var sharedPositions2 = new List<Position_SOM>
+            {
+                new Position_SOM(60, 6, 0),
+                new Position_SOM(70, 7, 1),
+                new Position_SOM(80, 8, 2),
+                new Position_SOM(90, 9, 3),
+                new Position_SOM(100, 0, 4)
+            };
+
+            // Object 1 unique SDRs for positions 3, 4, 5
+            var obj1Positions3 = new List<Position_SOM>
+            {
+                new Position_SOM(101, 1, 0),
+                new Position_SOM(102, 2, 1),
+                new Position_SOM(103, 3, 2),
+                new Position_SOM(104, 4, 3),
+                new Position_SOM(105, 5, 4)
+            };
+            var obj1Positions4 = new List<Position_SOM>
+            {
+                new Position_SOM(111, 1, 0),
+                new Position_SOM(112, 2, 1),
+                new Position_SOM(113, 3, 2),
+                new Position_SOM(114, 4, 3),
+                new Position_SOM(115, 5, 4)
+            };
+            var obj1Positions5 = new List<Position_SOM>
+            {
+                new Position_SOM(121, 1, 0),
+                new Position_SOM(122, 2, 1),
+                new Position_SOM(123, 3, 2),
+                new Position_SOM(124, 4, 3),
+                new Position_SOM(125, 5, 4)
+            };
+
+            // Objects 2 and 3 share SDRs for positions 3 and 4
+            var sharedObj2Obj3Positions3 = new List<Position_SOM>
+            {
+                new Position_SOM(210, 6, 0),
+                new Position_SOM(220, 7, 1),
+                new Position_SOM(230, 8, 2),
+                new Position_SOM(240, 9, 3),
+                new Position_SOM(250, 0, 4)
+            };
+            var sharedObj2Obj3Positions4 = new List<Position_SOM>
+            {
+                new Position_SOM(260, 6, 0),
+                new Position_SOM(270, 7, 1),
+                new Position_SOM(280, 8, 2),
+                new Position_SOM(290, 9, 3),
+                new Position_SOM(300, 0, 4)
+            };
+
+            // Unique SDRs for position 5 for objects 2 and 3
+            var obj2Positions5 = new List<Position_SOM>
+            {
+                new Position_SOM(311, 6, 0),
+                new Position_SOM(312, 7, 1),
+                new Position_SOM(313, 8, 2),
+                new Position_SOM(314, 9, 3),
+                new Position_SOM(315, 0, 4)
+            };
+            var obj3Positions5 = new List<Position_SOM>
+            {
+                new Position_SOM(321, 6, 0),
+                new Position_SOM(322, 7, 1),
+                new Position_SOM(323, 8, 2),
+                new Position_SOM(324, 9, 3),
+                new Position_SOM(325, 0, 4)
+            };
+
+            var sdrList = new List<SDR_SOM>();
+
+            // Object 1
+            sdrList.Add(new SDR_SOM(length, breadth, sharedPositions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedPositions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, obj1Positions3, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, obj1Positions4, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, obj1Positions5, iType.SPATIAL));
+
+            // Object 2
+            sdrList.Add(new SDR_SOM(length, breadth, sharedPositions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedPositions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedObj2Obj3Positions3, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedObj2Obj3Positions4, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, obj2Positions5, iType.SPATIAL));
+
+            // Object 3
+            sdrList.Add(new SDR_SOM(length, breadth, sharedPositions1, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedPositions2, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedObj2Obj3Positions3, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, sharedObj2Obj3Positions4, iType.SPATIAL));
+            sdrList.Add(new SDR_SOM(length, breadth, obj3Positions5, iType.SPATIAL));
+
+            return sdrList;
+        }
+
+        public static Neuron GetNeuronFromString(string posString, BlockBehaviourManagerSOM bbManager)
+        {
+            var parts = posString.Split('-');
+            int x = Convert.ToInt32(parts[0]);
+            int y = Convert.ToInt32(parts[1]);
+            int z = Convert.ToInt32(parts[2]);
+            char nType = 'N';
+
+            if (parts.Length == 4)
+            {
+                nType = Convert.ToChar(parts[3]);
+            }
+            
+
+            if (x > bbManager.X || y > bbManager.Y || z > bbManager.Z)
+            {
+                int breakpoint = 1;
+
+                throw new NullReferenceException("ConvertStringPosToNeuron : Couldnt Find the neuron in the columns  posString :  " + posString);
+            }
+
+            return GetNeuronFromPosition(nType, x, y, z, bbManager);
+        }
+
+        public static Neuron GetNeuronFromPosition(char w, int x, int y, int z, BlockBehaviourManagerSOM bbM)
+        {
+            Neuron toReturn = null;
+
+            if (w == 'N' || w == 'n')
+            {
+                toReturn = bbM.Columns[x, y].Neurons[z];
+            }
+            else if (w == 'T' || w == 't')
+            {
+                toReturn = bbM.TemporalLineArray[y, z];
+            }
+            else if (w == 'A' || w == 'a')
+            {
+                toReturn = bbM.ApicalLineArray[x, y];
+            }
+            else
+            {
+                throw new InvalidOperationException(" GetNeuronFromPosition :: Your Column structure is messed up!!!");
+            }
+
+            return toReturn;
+        }
+
         internal static SDR_SOM AddOffsetToSDR(SDR_SOM sdr, int offset)
         {
             List<Position_SOM> posList = new List<Position_SOM>();

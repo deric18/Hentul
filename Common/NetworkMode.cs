@@ -3,6 +3,7 @@
     public enum NetworkMode
     {
         TRAINING,
-        PREDICTION
+        PREDICTION,
+        DONE
     }
 }

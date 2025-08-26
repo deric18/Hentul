@@ -1,12 +1,16 @@
 namespace SecondOrderMemoryUnitTest
 {    
-    using Common;    
+    using Common;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NUnit.Framework;
-    using SecondOrderMemory.Models;    
-    
+    using SecondOrderMemory.Models;
+    using Assert = Assert;
+    using IgnoreAttribute = IgnoreAttribute;
+
     public class SeconfOrderMemoryUnitTest
     {
-        BlockBehaviourManagerSOM? bbManager;
+        BlockBehaviourManagerSOM bbManager;
+        Neuron dummyContributingNeuron = new Neuron( new Position_SOM(0,0,0), 1);
         string testObjectLabel = "RandomObject 1";
         const int X = 1250;
         const int Y = 10;
@@ -15,8 +19,10 @@ namespace SecondOrderMemoryUnitTest
 
         [SetUp]
         public void Setup()
-        {
-            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true);
+        {            
+            BlockBehaviourManagerSOM.Initialize(X, Y, Z, LayerType.Layer_3B, LogMode.None, null, true, isMock: true);
+            
+            bbManager = BlockBehaviourManagerSOM.Instance;
 
             bbManager.Init(1);
 
@@ -24,7 +30,13 @@ namespace SecondOrderMemoryUnitTest
 
             rand1 = new Random();
         }
-      
+
+        [TearDown]
+        public void TearDown()
+        {
+            BlockBehaviourManagerSOM.Reset();
+            bbManager = null;
+        }
 
         [Test]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
@@ -69,7 +81,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(apicalSdr);
 
-            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7);
+            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7, dummyContributingNeuron);
 
             bbManager.Fire(spatialSdr, 1, false, true);
 
@@ -96,6 +108,28 @@ namespace SecondOrderMemoryUnitTest
 
             Assert.AreEqual(invalidOperationException.Message, "ConnectTwoNeuronsOrIncrementStrength :: Temporal Neurons cannot connect to Normal Neurons Post Init!");
 
+        }
+
+        [Test]
+        public void TestWeDontAddLabelsToNeuronsOnlyInTrainingMode()
+        {
+            SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
+
+            bbManager.BeginTraining("Apple");
+
+            bbManager.Fire(sdr1, 1);
+
+            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels.Count);
+
+            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels[0]);
+
+            bbManager.ChangeCurrentObjectLabel("Banana");
+
+            bbManager.ChangeNetworkModeToPrediction();            
+
+            Assert.AreEqual(1, bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels.Count);
+
+            Assert.AreEqual("Apple", bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]).AllTimeSupportedLabels[0]);
         }
 
         [Test]
@@ -236,7 +270,7 @@ namespace SecondOrderMemoryUnitTest
 
             ulong counter = 1;
 
-            neuron1.ProcessVoltage(10, counter, LogMode.BurstOnly);
+            neuron1.ProcessVoltage(10, dummyContributingNeuron, counter, LogMode.BurstOnly);
 
             for (int i = 0; i < BlockBehaviourManagerSOM.DISTALNEUROPLASTICITY + 1; i++)
             {
@@ -357,7 +391,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(axonalSdr, Counter++);
 
-            dendronalNeuron.ProcessVoltage(10);
+            dendronalNeuron.ProcessVoltage(10, dummyContributingNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -403,37 +437,27 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(axonalSdr, Counter++);
 
-            //Make the synapsse Active
-            //RepeatCycle(axonalSdr, dendronalSdr, )
+            dendronalNeuron1.ProcessVoltage(10, dummyContributingNeuron);
 
-            dendronalNeuron1.ProcessVoltage(10);
+            // Use PickWinnerNeuron to get the actual winner after bursting
+            var winnerNeuron = bbManager.Columns[dendronalPos2.X, dendronalPos2.Y].PickWinnerNeuron();
 
             bbManager.Fire(dendronalSdr, Counter++);
-
+            
             var postFiringSynapeStrength1 = bbManager.GetNeuronFromPosition(dendronalPos1).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
-            var postFiringSynapeStrength2 = bbManager.GetNeuronFromPosition(dendronalPos2).ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
+            var postFiringSynapeStrength2 = winnerNeuron.ProximoDistalDendriticList[axonalPos.ToString()].GetStrength();
 
             Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsHaveAnActiveSynapse(axonalNeuron, dendronalNeuron1));
 
-            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, dendronalNeuron2));
+            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(axonalNeuron, winnerNeuron));
 
-            Assert.AreEqual(prefireSynapseStrength2, postFiringSynapeStrength2);
+            Assert.AreEqual(Neuron.INITIAL_SYNAPTIC_CONNECTION_STRENGTH, postFiringSynapeStrength2);
 
             Assert.IsTrue(prefireSynapseStrength1 < postFiringSynapeStrength1);
         }
 
-        [Test, Ignore("Needs Work")]
-        public void TestWireCase3()
-        {
-            // Case 3 : None Bursted , Some fired which were predicted, Some Did Not Burst But Fired which were NOT predicted 
-
-            //Difficult to repro , will repro later. bigger fish to fry!
-
-            Assert.Fail();
-        }
-
         [Test]
-        public void TestWireCase4()
+        public void TestWireCase3()
         {
             //Case 1: All Predicted Neurons Fired without anyone Bursting.
             //When there is prediction from neuron1 and at the same time there is a prediction from neuron2 as well and then neuron 3 fires , both connections from neuron 1 and neuron 2 should be stregthened!
@@ -446,12 +470,59 @@ namespace SecondOrderMemoryUnitTest
 
             SDR_SOM sdr2 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(5, 3, 3) }, iType.SPATIAL);
 
+            var winnerNeuron = bbManager.Columns[sdr2.ActiveBits[0].X, sdr2.ActiveBits[0].Y].Neurons[0];
+
             bbManager.Fire(sdr2, counter++);
 
             //Verify both the both the columns have atleast 1 of each other columns axons and dendrites.
 
-            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), bbManager.GetNeuronFromPosition(sdr2.ActiveBits[0])));
+            Assert.IsTrue(BBMUtils.CheckIfTwoNeuronsAreConnected(bbManager.GetNeuronFromPosition(sdr1.ActiveBits[0]), winnerNeuron));
         }
+
+        [Test]
+        public void TestWireCase4()
+        {
+            // Case 4 : All Bursted 
+
+            List<SDR_SOM> object1 = TestUtils.GenerateThreeRandomSDRs(1249, 9, 2);
+
+            bbManager.ChangeCurrentObjectLabel("Apple");
+
+            ulong cycle = 1;
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle++);
+            }
+
+            // Ensure there is an inactive synapse between all the neurons in the first SDR to second SDR
+            var firstSDR = object1[0];
+            var secondSDR = object1[1];
+
+            foreach (var pos1 in firstSDR.ActiveBits)
+            {
+                var neuron1 = bbManager.Columns[pos1.X, pos1.Y].Neurons[pos1.Z];
+
+                foreach (var pos2 in secondSDR.ActiveBits)
+                {
+                    var neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
+
+                    // Check if neuron1 has a synapse to neuron2
+                    if (neuron1.AxonalList.TryGetValue(neuron2.NeuronID.ToString(), out Synapse synapse))
+                    {
+                        if (neuron2.ProximoDistalDendriticList.TryGetValue(neuron1.NeuronID.ToString(), out synapse))
+                        {
+                            Assert.IsFalse(synapse.IsActive, $"Synapse between {neuron1.NeuronID} and {neuron2.NeuronID} should be inactive.");
+                        }
+                    }
+                    else
+                    {
+                        // If no synapse exists, that's also considered inactive
+                        Assert.Fail($"No synapse exists between {neuron1.NeuronID} and {neuron2.NeuronID}");
+                    }
+                }
+            }
+        }        
 
 
         [Test, Ignore("Needs Work")]
@@ -554,7 +625,7 @@ namespace SecondOrderMemoryUnitTest
 
                 bbManager.Fire(sdr1, counter++);
 
-                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30);
+                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30, dummyContributingNeuron);
 
                 bbManager.Fire(sdr2, counter++);
 
@@ -689,7 +760,7 @@ namespace SecondOrderMemoryUnitTest
                 currentStrength = postSynapse.GetStrength();
             }
 
-            overlapNeuron.ProcessVoltage(120);            
+            overlapNeuron.ProcessVoltage(120, dummyContributingNeuron);            
 
             Assert.IsTrue(currentStrength > previousStrength);
 
@@ -762,7 +833,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Fire(apicalInputPattern, 1, true, true);
 
-            normalNeuron.ProcessVoltage(1);
+            normalNeuron.ProcessVoltage(1, dummyContributingNeuron);
 
             bbManager.Fire(spatialInputPattern, 1, true, true);
 
@@ -834,6 +905,48 @@ namespace SecondOrderMemoryUnitTest
 
 
         [Test]
+        public void CheckNeuronIsNotInSpikeTrain_ReturnsFalse_IfNeuronIsInSpikeTrain()
+        {
+            // Arrange                        
+            ulong currCycle = 1;
+
+            // Create two neurons and connect one to the other via AxonalList
+            var neuronA = bbManager.Columns[0, 0].Neurons[0];
+            var neuronB = bbManager.Columns[1, 0].Neurons[0];
+            var dummyNeuron = bbManager.Columns[2, 3].Neurons[2];
+            // Add neuronB to neuronA's AxonalList
+            neuronA.AxonalList[neuronB.NeuronID.ToString()] = new Synapse(neuronA.NeuronID.ToString(), neuronB.NeuronID.ToString(), "Apple", currCycle, 10, ConnectionType.DISTALDENDRITICNEURON, true);
+
+            neuronA.ProcessVoltage(1000, dummyNeuron, currCycle, LogMode.BurstOnly);
+
+            var spikeList = new List<Neuron> { neuronA };
+
+            // Act
+            bool result = BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuronB, spikeList, bbManager);
+
+            // Assert
+            Assert.IsFalse(result, "Should return false if neuron is in the spike train via axonal connection.");
+        }
+
+        [Test]
+        public void CheckNeuronIsNotInSpikeTrain_ReturnsTrue_IfNeuronIsNotInSpikeTrain()
+        {
+            // Arrange            
+
+            var neuronA = bbManager.Columns[0, 0].Neurons[0];
+            var neuronB = bbManager.Columns[1, 0].Neurons[0];
+
+            // No connection between neuronA and neuronB
+            var spikeList = new List<Neuron> { neuronA };
+
+            // Act
+            bool result = BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuronB, spikeList, bbManager);
+
+            // Assert
+            Assert.IsTrue(result, "Should return true if neuron is not in the spike train.");
+        }
+
+        [Test]
         public void TestWiringNegativeTest()
         {
             //After spatial Fire and then an apical fire , Wire() method should not be called as there is nothing to wire. Spatial should have been cleanedup
@@ -891,7 +1004,7 @@ namespace SecondOrderMemoryUnitTest
 
             var extraNeuron = bbManager.Columns[2, 3].Neurons[2];
 
-            extraNeuron.ProcessVoltage(150, 0, LogMode.All);
+            extraNeuron.ProcessVoltage(150, dummyContributingNeuron, 0, LogMode.All);
 
             bbManager.Fire(spatialSdr);
 
@@ -1182,7 +1295,7 @@ namespace SecondOrderMemoryUnitTest
                 {
                     bbManager.Fire(axonalNeurondr, counter++);
 
-                    neuronToDeplarize.ProcessVoltage(10);
+                    neuronToDeplarize.ProcessVoltage(10, dummyContributingNeuron);
 
                     bbManager.Fire(dendronalNeuronSdr, counter++);
                 }

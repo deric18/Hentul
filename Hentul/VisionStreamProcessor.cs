@@ -21,11 +21,11 @@ namespace Hentul
 
         public int BlockSize;
 
-        public LearningUnit v1 { get; private set; }
+        public LearningUnit v1 { get; private set; }    //10 * 10
 
-        public LearningUnit v2 { get; private set; }
+        public LearningUnit v2 { get; private set; }    // 50 * 50
 
-        public LearningUnit v3 { get; private set; }
+        public LearningUnit v3 { get; private set; }    // 100 X 100
 
         public int Range { get; private set; }
 
@@ -125,6 +125,7 @@ namespace Hentul
         public SDR_SOM GetSL3BLatestFiringCells(LearningUnitType luType, ulong cyclenum) =>
              GetLearningUnit(luType).somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
 
+
         public FBBM[] GetFOMBBMVFromLearningUnit(LearningUnitType lType)
         {
             var lu = GetLearningUnit(lType);
@@ -214,7 +215,12 @@ namespace Hentul
             v3.ChangeNetworkModeToPrediction();
         }
 
-        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetSupportedLabels();
+        public void LearnNewObject(string objectName)
+        {
+            v1.LearnNewObject(objectName);
+        }
+
+        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetCurrentPredictions();
 
 
         internal void Clean()

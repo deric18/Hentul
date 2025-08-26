@@ -180,6 +180,7 @@
         }
         private void EnsureBuffers()
         {
+            // Allocate reusable buffers only
             _rawV1 ??= new Bitmap(20, 20, PixelFormat.Format32bppArgb);
             _rawV2 ??= new Bitmap(100, 100, PixelFormat.Format32bppArgb);
             _rawV3 ??= new Bitmap(200, 200, PixelFormat.Format32bppArgb);
@@ -193,53 +194,53 @@
         {
             EnsureBuffers();
 
-            // pick buffers by type
+            // Choose the correct raw/processed buffers based on learning unit
             Bitmap rawBuf, procBuf;
             switch (type)
             {
-                case LearningUnitType.V1: rawBuf = _rawV1; procBuf = _procV1; break; // 20x20 → 40x20
-                case LearningUnitType.V2: rawBuf = _rawV2; procBuf = _procV2; break; // 100x100 → 40x20
-                case LearningUnitType.V3: rawBuf = _rawV3; procBuf = _procV3; break; // 200x200 → 40x20
+                case LearningUnitType.V1: rawBuf = _rawV1; procBuf = _procV1; break; // 20×20 → 40×20
+                case LearningUnitType.V2: rawBuf = _rawV2; procBuf = _procV2; break; // 100×100 → 40×20
+                case LearningUnitType.V3: rawBuf = _rawV3; procBuf = _procV3; break; // 200×200 → 40×20
                 default: throw new ArgumentOutOfRangeException(nameof(type));
             }
 
             int size = range * 2;
 
-            // Desired source rectangle (centered at cursor)
+            // Desired square centered on cursor
             var desired = new Rectangle(cursor.X - range, cursor.Y - range, size, size);
 
-            // Clip to virtual desktop
+            // Clip to the virtual desktop (supports multi-monitor; no WinForms dependency)
             Rectangle desktop = DesktopBounds.VirtualScreen();
             Rectangle inter = Rectangle.Intersect(desired, desktop);
 
-            // Prepare destination: clear to black (so out-of-screen areas become black)
+            // Pre-clear the raw buffer to black so any off-screen area shows as black
             using (var g = Graphics.FromImage(rawBuf))
-            {
                 g.Clear(Color.Black);
-            }
 
-            // Only copy if we have a non-empty intersection
+            // Copy only the visible intersection into the correct offset inside our raw buffer
             if (!inter.IsEmpty)
             {
-                // Compute where in the raw buffer the intersection should land
-                // (offset from desired's top-left)
-                int destX = inter.Left - desired.Left;
+                int destX = inter.Left - desired.Left; // where to place the top-left in rawBuf
                 int destY = inter.Top - desired.Top;
 
                 using (var g = Graphics.FromImage(rawBuf))
                 {
-                    // CopyFromScreen needs a size; use only the intersection size
-                    g.CopyFromScreen(inter.Left, inter.Top, destX, destY, inter.Size, CopyPixelOperation.SourceCopy);
+                    g.CopyFromScreen(
+                        inter.Left, inter.Top,          // source screen origin
+                        destX, destY,                   // destination origin in rawBuf
+                        inter.Size,                     // copy size (intersection only)
+                        CopyPixelOperation.SourceCopy);
                 }
             }
 
-            // Resize rawBuf ⇒ 40×20 for the encoder
+            // Downscale raw → 40×20 for the encoder (keeps your HTM interface unchanged)
             using (var g2 = Graphics.FromImage(procBuf))
             {
                 g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
                 g2.DrawImage(rawBuf, new Rectangle(0, 0, 40, 20));
             }
 
+            // Optional debugging
             if (SaveDebugFrames)
             {
                 string dir = Path.GetDirectoryName(fileName)!;
@@ -254,6 +255,8 @@
                 procBuf.Save(procPath, ImageFormat.Png);
             }
 
+            // Return both the processed (40×20) and the raw (native scale) images,
+            // plus the intended source rect (before clipping) and the LU type
             return new RegionFrames(procBuf, rawBuf, desired, type);
         }
 
@@ -388,34 +391,47 @@
         }
 
 
-        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
+        public Position2D Verify_Predict_HC(
+    bool isMock = false,
+    uint iterationsToConfirmation = 10,
+    bool legacyPipeline = true)
         {
             if (NMode != NetworkMode.PREDICTION)
-                throw new InvalidOperationException("Invalid State Managemnt!");
+                throw new InvalidOperationException("Invalid State Management!");
 
+            // --- Pull latest SDRs for this cycle from all three visual scales ---
             var sdrV1 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
-            if (sdrV1 == null) return null;
+            if (sdrV1 == null)
+                return null; // no firing => nothing to verify this cycle
 
+            // Primary (V1) sensation used by HC
             var v1 = VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV1, point);
 
-            // Auxiliary evidence (not sent to HC)
+            // Optional, auxiliary evidence (not required for HC call)
             var sdrV2 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V2, CycleNum);
             var sdrV3 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V3, CycleNum);
 
-            var v2 = sdrV2 != null ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV2, point) : null;
-            var v3 = sdrV3 != null ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV3, point) : null;
+            var v2 = (sdrV2 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV2, point) : null;
+            var v3 = (sdrV3 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV3, point) : null;
 
-            // Call existing HC (V1 only)
-            var move = HCAccessor.VerifyObject(v1, null, isMock, iterationsToConfirmation);
+            // --- Legacy pipeline (current behavior): V1-only verification in HC ---
+            if (legacyPipeline)
+            {
+                return HCAccessor.VerifyObject(v1, null, isMock, iterationsToConfirmation);
+            }
 
-            // Optional: veto or dampen strange moves unless V2/V3 roughly agree with the label/region.
-            // Example placeholder (depends on your Sensation/label APIs):
-            /*
-            var ok = MultiScaleAgrees(v1, v2, v3);
-            if (!ok) return null; // or return a smaller step / keep scanning
-            */
-            return move;
-       }
+            // --- Future/new pipeline hook ---
+            // If you later add a multi-scale HC API, you can use (v1,v2,v3) together.
+            // For now, keep behavior identical to legacy to avoid breaking predictions.
+            // Example placeholder:
+            // if (VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
+            // {
+            //     var preds = VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
+            //     // incorporate 'preds' with v2/v3 signals if desired
+            // }
+
+            return HCAccessor.VerifyObject(v1, null, isMock, iterationsToConfirmation);
+        }
 
 
         public void DoneWithTraining(string label = "")
