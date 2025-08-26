@@ -207,7 +207,12 @@ namespace Hentul
             v1.ChangeNetworkModeToPrediction();
         }
 
-        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetSupportedLabels();
+        public void LearnNewObject(string objectName)
+        {
+            v1.LearnNewObject(objectName);
+        }
+
+        internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetCurrentPredictions();
 
 
         internal void Clean()

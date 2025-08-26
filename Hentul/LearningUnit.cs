@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using Common;
     using Encoders;
+    using SecondOrderMemory.Models;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
@@ -43,10 +44,15 @@
                 for (int i = 0; i < numBBMNeededV; i++)
                 {
                     fomBBMV[i] = new FBBM(numColumns, numColumns, z, LayerType.Layer_4, Common.LogMode.None);
-                }
+                }                                
 
-                somBBM_L3A_V = new SBBM(x, numColumns, z, LayerType.Layer_3A, Common.LogMode.None);
-                somBBM_L3B_V = new SBBM(x, numColumns, z, LayerType.Layer_3B, Common.LogMode.None);
+                BlockBehaviourManagerSOM.Initialize(x, numColumns, z, LayerType.Layer_3A, LogMode.None);
+
+                somBBM_L3A_V = SBBM.Instance;
+                
+                BlockBehaviourManagerSOM.Initialize(x, numColumns, z, LayerType.Layer_3B, LogMode.None);
+
+                somBBM_L3B_V = SBBM.Instance;
             }
 
             this.logfileName = logfileName;
@@ -333,6 +339,11 @@
         {
             somBBM_L3A_V.ChangeNetworkModeToPrediction();
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
+        }
+
+        internal void LearnNewObject(string objectName)
+        {
+            somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);
         }
     }
 }

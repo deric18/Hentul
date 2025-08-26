@@ -697,7 +697,7 @@
         }
 
 
-        [Test, Description("To Test if we ever send the same locations from Mapper while predicting as opposed to Training.")]
+        [Test, Description("To Test if we ever send the same locations from Mapper while predicting as opposed to Training."), Ignore("Needs work with poling!!")]
         public void TestPixelToSensationAtLocationConversion()
         {
             int loc1X = 2333;

@@ -1,0 +1,3 @@
+
+- Higher Order Sequence Memory is only implemented for Axonal Neuron end in the Axonal List , the Dendronal Counter parts are not included for the addition 
+of PRedictions.

@@ -5,8 +5,7 @@
 
     /// <summary>
     /// Need to support 2 API's
-    /// 1.Fire()
-    /// 2.Wire()
+    /// "From where i have come , to where i am , to where i will be"
     /// </summary>
     public class Neuron : IEquatable<Neuron>, IComparable<Neuron>
     {
@@ -59,6 +58,8 @@
         /// </summary>
         public Dictionary<string, Synapse> ProximoDistalDendriticList { get; private set; }
 
+        private KeyValuePair<ulong, List<Neuron>> ContributingNeuronsLastCycle { get; set; }
+
         //public List<Segment>? Segments { get; private set; } = null;
 
         public NeuronState CurrentState { get; private set; }
@@ -66,6 +67,8 @@
         public int flag { get; set; }
 
         public int Voltage { get; private set; }
+
+        public List<string> AllTimeSupportedLabels { get; private set; } 
 
         public Neuron(Position_SOM neuronId, int BBMId, NeuronType nType = NeuronType.NORMAL)
         {
@@ -75,11 +78,13 @@
             TAContributors = new Dictionary<string, char>();
             ProximoDistalDendriticList = new Dictionary<string, Synapse>();
             AxonalList = new Dictionary<string, Synapse>();
+            ContributingNeuronsLastCycle = new();
             CurrentState = NeuronState.RESTING;
             Voltage = 0;
             flag = 0;
             PruneCount = 0;
             lastSpikeCycleNum = 0;
+            AllTimeSupportedLabels = new List<string>();
         }
 
         public void IncrementPruneCount() => PruneCount++;
@@ -111,7 +116,7 @@
                     WriteLogsToFile("Neuron " + NeuronID.ToString() + " entering Spiking Mode", fileName);
                     if (Voltage >= UNCOMMMON_NEURONAL_SPIKE_TRAIN_VOLTAGE)
                     {
-                        WriteLogsToFile("*******************Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************", fileName);
+                        WriteLogsToFile(fileName, "******************* Neuron : " + NeuronID.ToString() + " ENTERING ULTRA SPIKING MODE****************");
                     }
                 }
                 else
@@ -127,33 +132,110 @@
             }
         }
 
-        public void Fire(ulong cycleNum, LogMode logmode = LogMode.BurstOnly, string logFileName = "")
+        public void Fire(ulong cycleNum, string currentObjectLabel, LogMode logmode = LogMode.BurstOnly, string logFileName = "")
         {
             TOTALNUMBEROFPARTICIPATEDCYCLES++;
 
             if (AxonalList == null || AxonalList?.Count == 0)
             {
                 Console.WriteLine(" ERROR :: Neuron.Fire() :: No Neurons are Connected to this Neuron : " + NeuronID.ToString());
-
-#if !DEBUG
-
-                Console.ReadKey();
-
-#endif
-
+                WriteLogsToFile(logFileName, "TRACE :: Neurons.cs :: Fire() :: EMpty Fire.");
                 return;
             }
 
-            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE;
+            if (BlockBehaviourManagerSOM.Instance.NetWorkMode == NetworkMode.TRAINING && !AllTimeSupportedLabels.Contains(currentObjectLabel))
+            {                
+                AllTimeSupportedLabels.Add(currentObjectLabel);
+            }
+
+            Voltage += COMMON_NEURONAL_FIRE_VOLTAGE + 1;
 
             ProcessCurrentState(cycleNum, logmode, logFileName);
         }
 
-        public void ProcessVoltage(int voltage, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
+        internal List<string> GetCurrentPotentialMatchesForCurrentCycle(ulong currentCycle)
         {
-            if (NeuronID.ToString().Equals("1035-4-1-N"))
+            // For every neuron in ContributingNeuronList Strengthen those synpases and extract those labels into a list
+            List<string> potentialMatchesFromPreviousCycleFiringNeurons = new List<string>();            
+
+            bool check1 = (ContributingNeuronsLastCycle.Key != 0 && currentCycle - ContributingNeuronsLastCycle.Key < 1);      //Cant be Contributed and Fired in the same cycle!
+            bool check2 = currentCycle - ContributingNeuronsLastCycle.Key < 0;                                                  // Dont want negatie values , like WTF!
+
+            if (NeuronID.ToString() == "210-6-0-N")
+            {
+                bool breakpoint = true;
+            }
+
+            if ( check1 || check2 )
+            {
+                foreach (var contributingNeuron in ContributingNeuronsLastCycle.Value)
+                {
+
+                    var Instance = BlockBehaviourManagerSOM.Instance;
+
+                    if (BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(contributingNeuron, Instance.NeuronsFiringThisCycle, Instance))
+                    {
+                        ClearContributingList();
+                    }
+                }                
+            }
+
+            if (ContributingNeuronsLastCycle.Value?.Count > 0)
+            {
+                foreach (var contributingNeuron in ContributingNeuronsLastCycle.Value)
+                {
+                    if (contributingNeuron.AxonalList.TryGetValue(NeuronID.ToString(), out var synapse))
+                    {                        
+                        if (synapse.SupportedPredictions.Count > 0)
+                        {
+                            foreach (var prediction in synapse.SupportedPredictions)
+                            {
+                                potentialMatchesFromPreviousCycleFiringNeurons.Add(prediction.ObjectLabel);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(potentialMatchesFromPreviousCycleFiringNeurons.Count == 0)
+            {
+                potentialMatchesFromPreviousCycleFiringNeurons = AllTimeSupportedLabels;
+            }
+            else if(potentialMatchesFromPreviousCycleFiringNeurons.Count > 1)
+            {
+                potentialMatchesFromPreviousCycleFiringNeurons = potentialMatchesFromPreviousCycleFiringNeurons.Intersect(AllTimeSupportedLabels).ToList();                
+            }
+
+            return potentialMatchesFromPreviousCycleFiringNeurons;
+        }
+
+        public void ProcessVoltage(int voltage, Neuron contributingNeuron, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
+        {
+            if (NeuronID.ToString().Equals("500-5-0-N") && contributingNeuron.NeuronID.ToString().Equals("0-0-0-N"))
             {
                 bool breakpoiunt = true;
+            }
+
+            if (contributingNeuron.nType == NeuronType.NORMAL)           // This is needed for HigherOrderSequencing Logic : Completely Different Flow
+            {
+                if(ContributingNeuronsLastCycle.Value == null)
+                    ContributingNeuronsLastCycle = new KeyValuePair<ulong, List<Neuron>>(cycleNum, new List<Neuron>() { contributingNeuron });
+                else
+                {
+                    if (ContributingNeuronsLastCycle.Key == cycleNum)
+                    {
+                        //Console.WriteLine("Contributing Neurons Last Cycle Key : " + ContributingNeuronsLastCycle.Key + " Cycle Num : " + cycleNum);
+                        if (!ContributingNeuronsLastCycle.Value.Contains(contributingNeuron))
+                        {
+                            ContributingNeuronsLastCycle.Value.Add(contributingNeuron);
+                        }
+                    }
+                    else
+                    {
+                        WriteLogsToFile(BlockBehaviourManagerSOM.LogFileName, $"Error :: Neurons.cs :: ProcessVoltage() : CACHE INVALIDATED : ContributingList  :: Trying to add new entry into cache thats old! {NeuronID.ToString()}");
+                        ContributingNeuronsLastCycle = new(0, null);
+                    }
+                }
             }
 
             Voltage += voltage;
@@ -256,7 +338,7 @@
         public bool InitProximalConnectionForDendriticConnection(int i, int j, int k)
         {
             string key = Position_SOM.ConvertIKJtoString(i, j, k);
-            return AddNewProximalDendriticConnection(key);
+            return AddNewProximalOrDendriticConnection(key);
         }
 
         public void InitAxonalConnectionForConnector(int i, int j, int k)
@@ -270,9 +352,9 @@
             TAContributors.Clear();
         }
 
-        private void WriteLogsToFile(string logline, string logfilename)
+        private void WriteLogsToFile(string logfilename, string logline)
         {
-            File.AppendAllText(logfilename, logline + "\n");
+            File.AppendAllText(logfilename, logline);
         }
 
         #endregion
@@ -311,12 +393,8 @@
             }
         }
 
-        private bool AddNewProximalDendriticConnection(string key)
+        private bool AddNewProximalOrDendriticConnection(string key)
         {
-            if (key == "0-0-1")
-            {
-                int bp2 = 1;
-            }
 
             if (key.Equals(NeuronID))
             {
@@ -325,7 +403,11 @@
 
             if (ProximoDistalDendriticList.TryGetValue(key, out var synapse))
             {
-                Console.WriteLine("ERROR :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : ", ++redundantCounter);
+                if (BlockBehaviourManagerSOM.Mode <= LogMode.Trace)
+                {
+                    Console.WriteLine("INFO :: SOM :: AddNewProximalDendriticConnection : Connection Already Added Counter : " + ++redundantCounter);
+                }
+
                 return false;
             }
             else
@@ -341,7 +423,57 @@
 
         #region Wiring Connector Logic
 
-        //Gets Called for Dendritic End of the Neuron
+        internal void ClearContributingList()
+        {
+            if (NeuronID.ToString() == "500-5-0-N")
+            {
+                bool breakpoint = true;
+            }
+
+            ContributingNeuronsLastCycle = new KeyValuePair<ulong, List<Neuron>>(0, null);
+        }
+
+        internal bool PerformHigherSequencing(string objectLabel, List<string> nextNeuronIds)
+        {
+            if (objectLabel == null || nextNeuronIds == null || nextNeuronIds.Count == 0)
+            {
+                throw new InvalidOperationException(" Error: Neuron.cs : PErformHigherSequencing() : Input Prameters cannnot be Null!");
+            }
+
+            if (NeuronID.ToString() == "500-5-0-N")
+            {
+                bool breakpoint = true;
+            }
+
+            // Check if the associated object label under Prediction exist in any of the Synapse List if not add new
+            // if does then add this prediction to the AxonalList and increment the hitcount on the synapse for this particular objectLabel under synapse
+
+            foreach (var nextNeuronId in nextNeuronIds)
+            {
+                if (!string.IsNullOrEmpty(nextNeuronId) && !string.IsNullOrWhiteSpace(nextNeuronId))
+                {
+                    if (AxonalList.TryGetValue(nextNeuronId, out var synapse))
+                    {
+                        if (synapse.PopulatePrediction(objectLabel, nextNeuronIds) == ConnectionAdditionReturnType.HARDFALSE)
+                        {
+                            throw new InvalidOperationException("Error : Neurons.cs : PerformHigherSequencing() : Could not add Prediction to the associated Object Label under the Synapse!");
+                        }
+                    }
+                    else
+                    {
+                        //throw new InvalidOperationException(" Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened! ");
+                        if (BlockBehaviourManagerSOM.Mode >= LogMode.BurstOnly)
+                        {
+                            WriteLogsToFile(BlockBehaviourManagerSOM.LogFileName, " Error : Neurons.cs : PerformHigherSequencing() : Post Wire , Every neuron in this firing cycle should have added atleast one connection to Neurons Firing Last cycle! that has not happened!");
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        //Gets Called for Dendritic End of the Neuron , Increments Hit Count if the connection already exists, Prediction adds new label if it does not exist
         public bool AddToDistalList(string axonalNeuronId, string objectLabel, NeuronType nTypeSource, ulong CycleNum, SchemaType schemaType, string filename, ConnectionType cType, bool IsActive = false)
         {
 
@@ -358,20 +490,14 @@
 
                     if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse))
                     {
-                        Console.WriteLine("ERROR :: SOM :: AddToDistalList : Connection Already Added Counter : ", ++redundantCounter);
-
-                        synapse.IncrementHitCount(CycleNum);
-
-                        if (synapse.SupportedLabels.Contains(objectLabel))
+                        if (BlockBehaviourManagerSOM.Mode == LogMode.All || BlockBehaviourManagerSOM.Mode == LogMode.Info)
                         {
-                            return true;
+                            Console.WriteLine("INFO :: SOM :: AddToDistalList : Connection Already Added Counter : " + ++redundantCounter);
                         }
-                        else
-                        {
-                            synapse.AddNewObjectLabel(objectLabel);
 
-                            return true;
-                        }
+                        synapse.IncrementHitCount(CycleNum, string.Empty);
+
+                        return true;
                     }
                     else
                     {
@@ -387,12 +513,22 @@
                         return true;
                     }
                 }
-
             }
 
+            //Only for Distal Connections.
             if (ProximoDistalDendriticList.TryGetValue(axonalNeuronId, out var synapse1))
             {
-                synapse1.IncrementHitCount(CycleNum);
+                synapse1.IncrementHitCount(CycleNum, string.Empty);
+
+                if (!synapse1.CheckForSupportedLabel(objectLabel))  //Higher Order Sequencing Logic!
+                {
+                    if (!synapse1.AddNewObjectLabel(objectLabel))
+                        throw new InvalidOperationException("A Predicted Dendritic Connection should always have a Prediction!");
+                }
+                else
+                {
+                    throw new InvalidOperationException("Every Normal Neuronal Distal Denritic Synapse should have an associated Label with it!");
+                }
 
                 return true;
             }
@@ -400,16 +536,15 @@
             {
                 if (ProximoDistalDendriticList.Count >= 1000)
                 {
-
                     Console.WriteLine(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count);
                     WriteLogsToFile(" WARNING :: Overconnecting Neuron NeuronID : " + NeuronID.ToString() + "Total DistalDendritic Count :" + ProximoDistalDendriticList.Count, filename);
-
                 }
 
-                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive, objectLabel));
+                ProximoDistalDendriticList.Add(axonalNeuronId, new Synapse(axonalNeuronId, NeuronID.ToString(), objectLabel, CycleNum, INITIAL_SYNAPTIC_CONNECTION_STRENGTH, ConnectionType.DISTALDENDRITICNEURON, IsActive));
 
                 return true;
             }
+
         }
 
         //Gets called for the axonal end of the neuron
@@ -445,7 +580,7 @@
                 }
                 else
                 {
-                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, CycleNum, AXONAL_CONNECTION, connectionType, IsActive, objectLabel));
+                    AxonalList.Add(key, new Synapse(NeuronID.ToString(), key, objectLabel, CycleNum, AXONAL_CONNECTION, connectionType, IsActive));
                 }
 
                 return ConnectionRemovalReturnType.TRUE;
@@ -513,12 +648,12 @@
             //Console.WriteLine("Flushing Voltage on Neuron !!! " + NeuronID.ToString);
             if (NeuronID.ToString().Equals("607-3-3-N"))
             {
-                bool breakpoiunt = true;
+                bool breakpoint = true;
             }
 
             Voltage = 0;
-            ProcessCurrentState(cycleNum);
-        }
+            ProcessCurrentState(cycleNum);            
+        }        
 
         internal bool DidItContribute(Neuron temporalContributor)
         {
@@ -531,7 +666,6 @@
 
             return staleConnections;
         }
-
 
         #endregion
 
@@ -559,6 +693,13 @@
     }
 
     public enum ConnectionRemovalReturnType
+    {
+        TRUE,
+        HARDFALSE,
+        SOFTFALSE
+    }
+
+    public enum ConnectionAdditionReturnType
     {
         TRUE,
         HARDFALSE,

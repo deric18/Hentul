@@ -1,9 +1,16 @@
 ﻿namespace SecondOrderMemoryUnitTest
 {
+    using System.ComponentModel;
+    using System.Reflection.Emit;
     using Common;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using NUnit.Framework;
     using SecondOrderMemory.Models;
-    
+    using static SecondOrderMemory.Models.BlockBehaviourManagerSOM;
+    using Assert = Assert;
+    using DescriptionAttribute = DescriptionAttribute;
+    using IgnoreAttribute = IgnoreAttribute;
+
     public class SecondOrderMemoryTestsAdvanced
     {
 
@@ -13,11 +20,16 @@
         int Z = 5;
         Random rand1;
         string testObjectLabel = "RandomObject 1";
+        Neuron dummyContributingNeuron = new Neuron(new Position_SOM(0, 0, 0), 1);
+
+
 
         [SetUp]
         public void Setup()
-        {
-            bbManager = new BlockBehaviourManagerSOM(X, Y, Z, LayerType.Layer_3B, LogMode.BurstOnly, testObjectLabel, true);
+        {            
+            BlockBehaviourManagerSOM.Initialize(X, Y, Z, LayerType.Layer_3A, LogMode.BurstOnly, testObjectLabel, includeBurstLearning: true, isMock: true);
+
+            bbManager = BlockBehaviourManagerSOM.Instance;
 
             bbManager.Init(1);
 
@@ -25,6 +37,259 @@
 
             rand1 = new Random();
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            BlockBehaviourManagerSOM.Reset();
+            bbManager = null;
+        }
+
+        [Test]
+        [Description("Check if newly created synnapses are using the currentObjectLabel to init")]
+        [TestCategory("Higher Order Sequencing")]
+
+        public void TestHigherOrderSequencing1()
+        {            
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsForTestCase2();            
+            string currentObjectLabel = "Apple";
+            ulong cycle = 0;
+
+            bbManager.BeginTraining(currentObjectLabel);            
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel);
+
+            foreach (var sdr in object1)
+            {
+                bbManager.Fire(sdr, cycle);
+
+                if (cycle > 0)
+                {   
+                    // Done this as Post Cycle NeuronsFiringThicCylce gets cleaned up!
+
+                    var neuronsFiringThisCycleBurstedColumns = GetColumnsFromNeurons(bbManager.NeuronsFiringLastCycle);
+                    var neuronsFiringPreviousCycle = object1[(int)cycle-1].ActiveBits.Select(x => bbManager.GetNeuronFromPosition(x)).ToList();
+
+                    Assert.IsTrue(neuronsFiringThisCycleBurstedColumns.Count > 0);
+                    Assert.IsTrue(neuronsFiringPreviousCycle.Count > 0);
+
+                    foreach (var sneuron in neuronsFiringPreviousCycle)
+                    {
+                        foreach (var dneuron in neuronsFiringThisCycleBurstedColumns)
+                        {
+                            if (sneuron.AxonalList.TryGetValue(dneuron.NeuronID.ToString(), out var connection))
+                            {
+                                if (connection.cType == ConnectionType.DISTALDENDRITICNEURON)
+                                {
+                                    Assert.IsTrue(connection.SupportedPredictions[0].ObjectLabel == bbManager.CurrentObjectLabel);
+                                }
+                                else
+                                {
+                                    Assert.Fail();
+                                }
+                            }
+                            else
+                            {
+                                Assert.Fail($" {sneuron.NeuronID.ToString()} does not have a connection for { dneuron.NeuronID.ToString()} " );
+                            }
+
+                            if (dneuron.ProximoDistalDendriticList.TryGetValue(sneuron.NeuronID.ToString(), out var dconnection))
+                            {
+                                if (dconnection.cType == ConnectionType.DISTALDENDRITICNEURON)
+                                {                                    
+                                }
+                                else
+                                {
+                                    Assert.Fail();
+                                }
+                            }
+                            else
+                            {
+                                Assert.Fail($" {dneuron.NeuronID.ToString()} does not have a connection for {sneuron.NeuronID.ToString()} ");
+                            }
+                        }
+                    }
+                }
+                cycle++;
+            }            
+        }
+
+        private List<Neuron> GetColumnsFromNeurons(List<Neuron> neuronList)
+        {
+            List<Neuron> ColmnsThatBurst = new();
+
+            foreach(var neuron in neuronList)
+            {
+                var pos = Position_SOM.ConvertStringToPosition(neuron.NeuronID.ToString());
+
+                var winnerNeuron = bbManager.Columns[pos.X, pos.Y].Neurons[0];
+
+                if(!ColmnsThatBurst.Any(neuron => neuron.NeuronID.ToString() == winnerNeuron.NeuronID.ToString()))
+                {
+                    ColmnsThatBurst.Add(winnerNeuron);
+                }
+            }
+
+            return ColmnsThatBurst;
+        }
+
+        [Test]
+        [Description("Train one Object , Predict One Object")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing2()
+        {
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
+
+            List<SDR_SOM> object1 = TestUtils.GenerateSpepcificSDRsforTestCase2();
+
+            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
+            string currentObjectLabel1 = "Apple";
+
+            bbManager.BeginTraining(currentObjectLabel1);
+
+            ulong cycle = 0;
+
+            bbManager.Fire(object1[0], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(object1[1], cycle++, CreateActiveSynapses: true);
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+            var supporttedLabels = bbManager.GetSupportedLabels();
+
+            Assert.AreEqual(2, supporttedLabels.Count);
+
+            bbManager.Fire(object1[0], cycle++);            
+
+            var preds = bbManager.GetCurrentPredictions();
+
+            Assert.That(1, Is.EqualTo(preds.Count));
+
+            Assert.That(currentObjectLabel1, Is.EqualTo(preds[0]));            
+        }
+
+        [Test]
+        [Description("Train 2 objects with similar first half patterns and predict accordingly")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing3()
+        {
+            // Chcek if the newly created synapses have labels from the currentObjectLabel
+
+            List<SDR_SOM> objects = TestUtils.GenerateSpepcificSDRsforTestCase3();
+
+            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
+            string currentObjectLabel1 = "Apple";
+            string currentObjectLabel2 = "Orange";
+
+            bbManager.BeginTraining(currentObjectLabel1);
+
+            ulong cycle = 0;
+
+            bbManager.Fire(objects[0], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[1], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[2], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[3], cycle++, CreateActiveSynapses: true);            
+
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel2);  
+
+            bbManager.Fire(objects[4], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[5], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[6], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[7], cycle++, CreateActiveSynapses: true);
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+            var supporttedLabels = bbManager.GetSupportedLabels();
+
+            Assert.AreEqual(supporttedLabels.Count, 3);
+
+            bbManager.Fire(objects[0], cycle++);        // Fire 1
+
+            var preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(2, preds.Count);
+
+            bbManager.Fire(objects[1], cycle++);        // Fire 2
+
+            preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(2, preds.Count);
+
+            bbManager.Fire(objects[6], cycle++);        //Fire 3
+
+            preds = bbManager.GetCurrentPredictions();
+
+            Assert.AreEqual(1, preds.Count);    //Succesfully Classified object 2
+
+            Assert.AreEqual(preds[0], currentObjectLabel2);
+        }
+
+        [Test]
+        [Description("Check if 2 different objects with no overlapping sequences can create synapses and classify both object labels!")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestHigherOrderSequencing4()
+        {
+            // Chcek if the newly created synapses have labels from the currentObjectLabel            
+
+            List<SDR_SOM> objects = TestUtils.GetSDRsForTestCase4();
+
+            // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
+            string currentObjectLabel1 = "Apple";
+            string currentObjectLabel2 = "Orange";
+            string currentObjectLabel3 = "Annanas";
+
+            bbManager.BeginTraining(currentObjectLabel1);
+
+            ulong cycle = 0;
+
+            bbManager.Fire(objects[0], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[1], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[2], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[3], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[4], cycle++, CreateActiveSynapses: false);
+
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel2);
+
+            bbManager.Fire(objects[5], cycle++);
+            bbManager.Fire(objects[6], cycle++);
+            bbManager.Fire(objects[7], cycle++);
+            bbManager.Fire(objects[8], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[9], cycle++, CreateActiveSynapses: false);
+
+            bbManager.ChangeCurrentObjectLabel(currentObjectLabel3);
+
+            bbManager.Fire(objects[10], cycle++);
+            bbManager.Fire(objects[11], cycle++);
+            bbManager.Fire(objects[12], cycle++);
+            bbManager.Fire(objects[13], cycle++);
+            bbManager.Fire(objects[14], cycle++, CreateActiveSynapses: false);
+
+            bbManager.ChangeNetworkModeToPrediction();
+
+            var supporttedLabels = bbManager.GetSupportedLabels();
+            Assert.AreEqual(4, supporttedLabels.Count);
+
+            bbManager.Fire(objects[0], cycle++);
+            bbManager.Fire(objects[1], cycle++);
+
+            supporttedLabels = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(3, supporttedLabels.Count);
+
+            bbManager.Fire(objects[7], cycle++);
+
+            var preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(preds.Count, 2);
+
+            bbManager.Fire(objects[8], cycle++);
+
+            preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(preds.Count, 2);
+            Assert.AreEqual(preds[0], currentObjectLabel2);
+            Assert.AreEqual(preds[1], currentObjectLabel3);
+
+            bbManager.Fire(objects[14], cycle++);
+
+            preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(preds.Count, 1);
+            Assert.AreEqual(preds[0], currentObjectLabel3);
+            
+        }        
 
         [Test]
         public void CheckAllNeuronsNonDistalConnectionsAreActive()
@@ -45,9 +310,9 @@
                         }
                     }
 
-                    foreach(var connection in neuron.AxonalList)
+                    foreach (var connection in neuron.AxonalList)
                     {
-                        if(connection.Value.cType != ConnectionType.DISTALDENDRITICNEURON)
+                        if (connection.Value.cType != ConnectionType.DISTALDENDRITICNEURON)
                         {
                             Assert.IsTrue(connection.Value.IsActive);
                         }
@@ -223,12 +488,12 @@
                     Assert.IsFalse(predictedSDR.IsUnionTo(patternC, true, false));
                 }
 
-                bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A               
+                bbManager.Fire(patternB, counter++);       //Fire B , Predict C NOT A
 
                 if (repCount > wirecount)
                 {
 
-                    if(repCount == 32)
+                    if (repCount == 32)
                     {
                         int bp1 = 1;
                     }
@@ -236,8 +501,8 @@
                     predictedSDR = bbManager.GetPredictedSDRForNextCycle(counter);
 
                     bool c = predictedSDR.IsUnionTo(patternC, true);
-                    
-                    if(c == false)
+
+                    if (c == false)
                     {
                         bool breakpoint = true;
 
@@ -308,7 +573,7 @@
 
             foreach (var neuron in neigbhourNeurons)
             {
-                neuron.ProcessVoltage(50);
+                neuron.ProcessVoltage(50, dummyContributingNeuron);
             }
 
             int repCount = 3;
@@ -343,7 +608,7 @@
 
             foreach (var neuron in neigbhourNeurons)
             {
-                neuron.ProcessVoltage(50);
+                neuron.ProcessVoltage(50, dummyContributingNeuron);
             }
 
             bbManager.Fire(neighbhourSOM, counter++);

@@ -164,7 +164,7 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
-            int Range2 = Range + Range;
+            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
 
             int x1 = point.X - Range < 0 ? 0 : point.X - Range;
             int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
@@ -244,7 +244,7 @@
         }
 
 
-        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = true)
+        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = false)
         {
             Position2D motorOutput = null;
             List<Position2D> positionToConfirm = new List<Position2D>();
@@ -270,15 +270,11 @@
                 {
                     motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
                 }
-                else
+                else    // brand New Pipeline : Classification done Primarily through V1.
                 {
-                    if (predictedSensei != null)
+                    if(VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
                     {
-                        var positionsToConfirm = HCAccessor.StoreObjectInGraph(firingSensei, predictedSensei, isMock);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Should Not Happen in PRediction Mode");
+                        VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
                     }
                 }
             }
