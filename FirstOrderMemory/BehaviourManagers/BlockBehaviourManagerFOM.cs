@@ -10,7 +10,7 @@
     public class BlockBehaviourManagerFOM
     {
         #region VARIABLES        
-        string baseDir = AppContext.BaseDirectory;
+        public string baseDir = AppContext.BaseDirectory;
         public ulong CycleNum { get; private set; }
 
         public int X { get; private set; }
@@ -81,7 +81,7 @@
         private bool includeBurstLearning2;
         private bool includeBurstLearning4;
 
-        private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
+        private string backupDirectory;
 
         public iType PreviousiType { get; private set; }
 
@@ -97,7 +97,7 @@
 
         public ulong[] WireCasesTracker { get; private set; }
 
-        string logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
+        string logfilename;
 
         public List<Neuron> OverConnectedOffenderList { get; private set; }
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
@@ -144,6 +144,8 @@
 
         public BlockBehaviourManagerFOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearningWireCase2 = false, bool includeBurstLearningWireCase4 = true, bool includeSequenceLearning = true)
         {
+            backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\"));
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul.log"));
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
 

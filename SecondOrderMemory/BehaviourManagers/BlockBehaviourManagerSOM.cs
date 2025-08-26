@@ -84,7 +84,7 @@
 
         private bool includeBurstLearning145;
 
-        private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
+        private string backupDirectory;
 
         public iType PreviousiType { get; private set; }
 
@@ -100,7 +100,7 @@
 
         public ulong[] WireCasesTracker { get; private set; }
 
-        public static string LogFileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
+        public static string LogFileName;
 
         public List<Neuron> OverConnectedOffenderList { get; private set; }
 
@@ -191,6 +191,8 @@
 
         private BlockBehaviourManagerSOM(int x, int y = 10, int z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.BurstOnly, string objectLabel = null, bool includeBurstLearning = false, bool isMock = false)
         {
+            backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\"));
+            LogFileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul.log"));
             NumberOfColumnsThatBurstLastCycle = 0;
 
             NumberOfColumnsThatFiredThisCycle = 0;
