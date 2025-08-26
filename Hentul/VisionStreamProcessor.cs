@@ -5,6 +5,7 @@ namespace Hentul
     using System.Drawing;
     using Common;
     using Encoders;
+    using OpenCvSharp;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
@@ -43,7 +44,7 @@ namespace Hentul
         public string logfilename { get; private set; }
         
         public int numberOFLearningUnitsNeeded => 1; // This is a constant for now, can be changed later if needed.
-
+        string baseDir = AppContext.BaseDirectory;
 
         public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
         {
@@ -102,8 +103,7 @@ namespace Hentul
             }
 
             LogMode = logMode;
-
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
         }
 
         #endregion
@@ -151,9 +151,15 @@ namespace Hentul
             File.WriteAllText(logfilename, v);
         }
 
-        
 
 
+        public void ProcessFor(LearningUnitType luType, Bitmap greyScaleBmp)
+        {
+            pEncoder.ParseBitmap(greyScaleBmp);
+            GetLearningUnit(luType).Process(pEncoder, CycleNum);
+            pEncoder.Clean();
+            GetLearningUnit(luType).Clear();
+        }
         public void Restore()
         {
             v1.Restore();
@@ -205,6 +211,8 @@ namespace Hentul
         internal void SetNetworkModeToPrediction()
         {
             v1.ChangeNetworkModeToPrediction();
+            v2.ChangeNetworkModeToPrediction();
+            v3.ChangeNetworkModeToPrediction();
         }
 
         public void LearnNewObject(string objectName)

@@ -6,6 +6,7 @@ namespace HentulWinforms
     using OpenCvSharp;
     using OpenCvSharp.Extensions;
     using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+    using System.Windows.Forms;
 
     public partial class Form1 : Form
     {
@@ -22,114 +23,130 @@ namespace HentulWinforms
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
         Orchestrator.POINT RightBottom = new Orchestrator.POINT();
 
-
-        string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
-        string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
-        string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+        string baseDir = AppContext.BaseDirectory;
+        string backupDirHC;
+        string backupDirFOM;
+        string backupDirSOM;
+        
 
         public Form1()
         {
             InitializeComponent();
+            backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\"));
+            backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
+            backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
             networkMode = NetworkMode.TRAINING;
             train_another_object.Visible = false;
         }
-
-        private void StartButton_Click(object sender, EventArgs e)
+        private void UpdateCursorLabels(Orchestrator.POINT value)
         {
-
-            label_done.Text = "Procesing";
-
-            label_done.Refresh();
-
-            var value = LeftTop;
-
-            value.X = value.X + numPixels;
-            value.Y = value.Y + numPixels;
-
-            orchestrator.MoveCursor(value);
-
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
-
-            while (true)
+            labelX.Refresh();
+            labelY.Refresh();
+        }
+        private Orchestrator.POINT GetNextCursorPosition(Orchestrator.POINT current)
+        {
+            if (current.X <= RightTop.X - numPixels)
+                return MoveRight(current);
+            else if (current.Y <= RightBottom.Y - numPixels)
             {
+                var next = MoveDown(current);
+                return SetLeft(next);
+            }
+            return current;
+        }
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+            label_done.Text = "Processing";
+            label_done.Refresh();
+
+            var value = new Orchestrator.POINT
+            {
+                X = LeftTop.X + numPixels,
+                Y = LeftTop.Y + numPixels
+            };
+
+            orchestrator.MoveCursor(value);
+            UpdateCursorLabels(value);
+
+            bool finished = false;
+
+            while (!finished)
+            {
+                // Check if finished
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                 {
+                    finished = true;
                     label_done.Text = "Finished Processing Image";
+                    label_done.Refresh();
+                    train_another_object.Visible = true;
                     break;
                 }
-                else
+
+                // Move cursor
+                value = GetNextCursorPosition(value);
+
+                // Update UI
+                UpdateCursorLabels(value);
+                orchestrator.MoveCursor(value);
+
+                // Record pixels
+                var (v1, v2, v3) = orchestrator.RecordPixels();
+
+                // Update display images
+                //V1Gray.Image = v1.Raw; // Show medium version
+                //V1Gray.Refresh();
+
+                // >>> Only do edges + HTM on Nth frames
+                if (!orchestrator.ShouldProcessThisFrame)
+                    continue;
+
+                V1Gray.Image = ToGray(v1.Processed);
+                V1White.Image = ToWhiteScale(v1.Processed);
+                V1Gray.Refresh();
+
+                V2Gray.Image = ToGray(v2.Processed);
+                V2White.Image = ToWhiteScale(v2.Processed);
+                V2Gray.Refresh();
+
+                V3Gray.Image = ToGray(v3.Processed);
+                V3White.Image = ToWhiteScale(v3.Processed);
+                V3Gray.Refresh();
+
+                V1White.Image = ConverToEdgedBitmap(v1.Raw);
+                V1White.Refresh();
+
+                V2White.Image = ConverToEdgedBitmap(v1.Raw);
+                V2White.Refresh();
+
+                V3White.Image = ConverToEdgedBitmap(v1.Raw);
+                V3White.Refresh();
+
+
+                // Process visuals
+
+                var v1Edge = ConverToEdgedBitmap(v1.Processed);
+                var v2Edge = ConverToEdgedBitmap(v2.Processed);
+                var v3Edge = ConverToEdgedBitmap(v3.Processed);
+
+
+                var didProcess = orchestrator.ProcessVisual(v1Edge, v2Edge, v3Edge);
+
+                if (didProcess && networkMode == NetworkMode.TRAINING)
                 {
-                    if (value.X <= RightTop.X - numPixels)
-                        value = MoveRight(value);
-                    else
-                    {
-                        if (value.Y <= RightBottom.Y - numPixels)
-                        {
-                            value = MoveDown(value);
-                            value = SetLeft(value);
-                        }
-                        else
-                        {
-                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                            {
-                                label_done.Text = "Finished Processing Image";
-                                label_done.Refresh();
-                                train_another_object.Visible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (networkMode.Equals(NetworkMode.TRAINING))
-                {
-                    labelX.Text = value.X.ToString(); labelX.Refresh();
-                    labelY.Text = value.Y.ToString(); labelY.Refresh();
-
-                    orchestrator.MoveCursor(value);
-
-                    orchestrator.RecordPixels();        //Grab Image             
-
-                    CurrentImage.Image = orchestrator.bmp;
-
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
-
-                    orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS
-
-                    counter++;                      // Repeat!
-
+                    orchestrator.AddNewVisualSensationToHc();
+                    counter++;
                     CycleLabel.Text = counter.ToString();
-
                     CycleLabel.Refresh();
                 }
-                else if (networkMode.Equals(NetworkMode.PREDICTION))
+                else if (didProcess && networkMode == NetworkMode.PREDICTION)
                 {
-                    orchestrator.RecordPixels();        //Grab Image
-
-                    CurrentImage.Image = orchestrator.bmp;
-
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
-
-                    var motorOutput = orchestrator.Verify_Predict_HC();    // Fire SOM per FOMS
-
+                    var motorOutput = orchestrator.Verify_Predict_HC();
                     if (motorOutput != null)
                     {
                         if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
                         {
-                            //Object Recognised!
                             var obj = orchestrator.GetPredictedObject();
                             ObjectLabel.Text = obj.Label;
                             ObjectLabel.Refresh();
@@ -138,58 +155,45 @@ namespace HentulWinforms
                             label_done.Refresh();
                             train_another_object.Visible = true;
                             wanderingButton.Visible = true;
-                            break;
+                            finished = true; // optional: break out here too
                         }
                         else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
                         {
                             label_done.Text = "Object Could Not be Recognised!";
                             label_done.Refresh();
-                            break;
+                            finished = true;
                         }
-
-                        Orchestrator.POINT p = new Orchestrator.POINT();
-                        p.X = motorOutput.X; p.Y = motorOutput.Y;
-                        orchestrator.MoveCursor(p);
+                        else
+                        {
+                            orchestrator.MoveCursor(new Orchestrator.POINT { X = motorOutput.X, Y = motorOutput.Y });
+                        }
                     }
-                    else
-                    {
-                        //Just Move the cursor to the next default position
-                        orchestrator.MoveCursor(value);
-                        //label_done.Text = "Finished Processing Image";
-                        //break;
-                    }
-
                 }
+
             }
 
-            if (label_done.Text == "Finished Processing Image")
+            // Final processing after loop
+            if (networkMode == NetworkMode.TRAINING)
             {
-                if (networkMode == NetworkMode.TRAINING)
+                imageIndex++;
+                if (imageIndex == totalImagesToProcess)
                 {
-                    imageIndex++;
-
-                    if (imageIndex == totalImagesToProcess)
-                    {
-                        StartButton.Text = "Tet Classification Algo";
-                        StartButton.Refresh();
-                        orchestrator.ChangeNetworkToPredictionMode();
-                        networkMode = NetworkMode.PREDICTION;
-                        BackUp.Visible = true;
-                        orchestrator.MoveCursor(LeftTop);
-                    }
-                    else
-                    {
-                        orchestrator.DoneWithTraining();
-                        StartButton.Text = "Start Another Image";
-                        StartButton.Refresh();
-                    }
+                    StartButton.Text = "Test Classification Algo";
+                    StartButton.Refresh();
+                    orchestrator.ChangeNetworkToPredictionMode();
+                    networkMode = NetworkMode.PREDICTION;
+                    BackUp.Visible = true;
+                    orchestrator.MoveCursor(LeftTop);
                 }
-                else if (networkMode == NetworkMode.PREDICTION)
+                else
                 {
-                    bool failedToPredict = true;
+                    orchestrator.DoneWithTraining();
+                    StartButton.Text = "Start Another Image";
+                    StartButton.Refresh();
                 }
             }
         }
+
 
         private void wanderingButton_Click(object sender, EventArgs e)
         {
@@ -245,15 +249,15 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            orchestrator.RecordPixels();
+            var (V1, V2, V3) = orchestrator.RecordPixels();
 
-            CurrentImage.Image = orchestrator.bmp;
+            // Show one of them (medium/Raw is usually good for display)
+            V1Gray.Image = V1.Raw;
+            V1Gray.Refresh();
 
-            CurrentImage.Refresh();
-
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-            EdgedImage.Refresh();
+            // Apply edge detection to the same image
+            V1White.Image = ConverToEdgedBitmap(V1.Raw);
+            V1White.Refresh();
 
             label_done.Text = "Ready";
         }
@@ -272,24 +276,22 @@ namespace HentulWinforms
                 Restore.Visible = true;
         }
 
-
         private Bitmap ConverToEdgedBitmap(Bitmap incoming)
         {
-            CurrentImage.Image = orchestrator.bmp;
+            if (incoming == null)
+                throw new ArgumentNullException(nameof(incoming), "ConverToEdgedBitmap: incoming bitmap was null.");
 
-            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
+            // Convert Bitmap -> Mat (no disk I/O)
+            using var src = OpenCvSharp.Extensions.BitmapConverter.ToMat(incoming);
+            using var edges = new OpenCvSharp.Mat();
 
-            orchestrator.bmp.Save("C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png");
+            // Canny edge detection
+            OpenCvSharp.Cv2.Canny(src, edges, 50, 200);
 
-            //var edgeDetection = Cv2.im
-
-
-            var edgeImage = Cv2.ImRead(filename);
-            var imgdetect = new Mat();
-            Cv2.Canny(edgeImage, imgdetect, 50, 200);
-
-            return BitmapConverter.ToBitmap(imgdetect);
+            // Mat -> Bitmap
+            return OpenCvSharp.Extensions.BitmapConverter.ToBitmap(edges);
         }
+        
 
 
         private void label1_Click1(object sender, EventArgs e)
@@ -351,8 +353,25 @@ namespace HentulWinforms
         { }
 
         private void label2_Click(object sender, EventArgs e)
-        { }        
+        { }
+        private Bitmap ToGray(Bitmap src)
+        {
+            using var m = BitmapConverter.ToMat(src);
+            using var gray = new OpenCvSharp.Mat();
+            Cv2.CvtColor(m, gray, ColorConversionCodes.BGR2GRAY);
+            return BitmapConverter.ToBitmap(gray);
+        }
 
+        private Bitmap ToWhiteScale(Bitmap src) // “whitescale” = binary (black/white)
+        {
+            using var m = BitmapConverter.ToMat(src);
+            using var gray = new OpenCvSharp.Mat();
+            using var bin = new OpenCvSharp.Mat();
+            Cv2.CvtColor(m, gray, ColorConversionCodes.BGR2GRAY);
+            // Otsu picks threshold automatically; BinaryInv if you prefer white foreground
+            Cv2.Threshold(gray, bin, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+            return BitmapConverter.ToBitmap(bin);
+        }
         private void button1_Click_3(object sender, EventArgs e)
         {
             List<string> wordsToTrain = new List<string>()

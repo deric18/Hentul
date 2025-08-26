@@ -87,7 +87,24 @@
             // Need to include logic for what object is currently being sensed and
             return CurrentObject.AddNewSenei(sensei);            
         }
+        public bool AddNewSensationLocationToObject(VisualSensationBundle bundle)
+        {
+            if (bundle is null) throw new ArgumentNullException(nameof(bundle));
 
+            // Reuse existing behavior: store V1 as your primary “key”
+            var ok = AddNewSensationLocationToObject(bundle.V1);
+            if (!ok) return false;
+
+            // OPTIONAL: if you want to persist multi-scale:
+            // Attach V2/V3 to the same location as auxiliary features.
+            // Pseudocode (depends on your internal HC object model):
+            /*
+            if (bundle.V2 != null) this.AttachAuxiliaryVisual(bundle.Cursor, "V2", bundle.V2);
+            if (bundle.V3 != null) this.AttachAuxiliaryVisual(bundle.Cursor, "V3", bundle.V3);
+            */
+
+            return true;
+        }
         public bool AddNewSensationToObject(Sensation sensation)
         {
             if(ValidateTInput(sensation))
