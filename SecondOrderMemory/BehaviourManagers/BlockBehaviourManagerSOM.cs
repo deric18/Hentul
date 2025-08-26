@@ -718,7 +718,7 @@
 
             foreach (var neuron in NeuronsFiringThisCycle)
             {
-                if (neuron.NeuronID.ToString() == "0-0-0-N")
+                if (neuron.NeuronID.ToString() == "210-6-0-N")
                 {
                     bool breakpoint = true;
                 }

@@ -238,27 +238,27 @@
 
             ulong cycle = 0;
 
-            bbManager.Fire(objects[0], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[1], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[2], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[3], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[4], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[0], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[1], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[2], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[3], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[4], cycle++, CreateActiveSynapses: false);
 
             bbManager.ChangeCurrentObjectLabel(currentObjectLabel2);
 
-            bbManager.Fire(objects[5], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[6], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[7], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[8], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[9], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[5], cycle++);
+            bbManager.Fire(objects[6], cycle++);
+            bbManager.Fire(objects[7], cycle++);
+            bbManager.Fire(objects[8], cycle++, CreateActiveSynapses: false);
+            bbManager.Fire(objects[9], cycle++, CreateActiveSynapses: false);
 
             bbManager.ChangeCurrentObjectLabel(currentObjectLabel3);
 
-            bbManager.Fire(objects[10], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[11], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[12], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[13], cycle++, CreateActiveSynapses: true);
-            bbManager.Fire(objects[14], cycle++, CreateActiveSynapses: true);
+            bbManager.Fire(objects[10], cycle++);
+            bbManager.Fire(objects[11], cycle++);
+            bbManager.Fire(objects[12], cycle++);
+            bbManager.Fire(objects[13], cycle++);
+            bbManager.Fire(objects[14], cycle++, CreateActiveSynapses: false);
 
             bbManager.ChangeNetworkModeToPrediction();
 
@@ -272,9 +272,13 @@
             Assert.AreEqual(3, supporttedLabels.Count);
 
             bbManager.Fire(objects[7], cycle++);
-            bbManager.Fire(objects[8], cycle++);
 
             var preds = bbManager.GetCurrentPredictions();
+            Assert.AreEqual(preds.Count, 2);
+
+            bbManager.Fire(objects[8], cycle++);
+
+            preds = bbManager.GetCurrentPredictions();
             Assert.AreEqual(preds.Count, 2);
             Assert.AreEqual(preds[0], currentObjectLabel2);
             Assert.AreEqual(preds[1], currentObjectLabel3);

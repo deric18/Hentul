@@ -161,7 +161,7 @@
             bool check1 = (ContributingNeuronsLastCycle.Key != 0 && currentCycle - ContributingNeuronsLastCycle.Key < 1);      //Cant be Contributed and Fired in the same cycle!
             bool check2 = currentCycle - ContributingNeuronsLastCycle.Key < 0;                                                  // Dont want negatie values , like WTF!
 
-            if (NeuronID.ToString() == "777-3-0-N")
+            if (NeuronID.ToString() == "210-6-0-N")
             {
                 bool breakpoint = true;
             }
