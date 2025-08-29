@@ -87,8 +87,8 @@ namespace Hentul
             if (shouldInit)
             {
                 v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
-                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
-                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
+                //v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
+                //v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
             }
             
             Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
@@ -97,8 +97,8 @@ namespace Hentul
             if (shouldInit)
             {
                 v1.Init();
-                v2.Init();
-                v3.Init();
+                //v2.Init();
+                //v3.Init();
             }
 
             LogMode = logMode;
@@ -109,13 +109,15 @@ namespace Hentul
         #endregion
        
 
-        public void Process(Bitmap greyScalebmp)
+        public void Process(Bitmap greyScalebmp, ulong cycle)
         {
+            CycleNum = cycle;
+
             pEncoder.ParseBitmap(greyScalebmp);
 
-            v1.Process(pEncoder, CycleNum);
-            v2.Process(pEncoder, CycleNum);
-            v3.Process(pEncoder, CycleNum);
+            v1.Process(pEncoder, cycle);
+            //v2.Process(pEncoder, CycleNum);
+            //v3.Process(pEncoder, CycleNum);
 
 
 
@@ -214,13 +216,14 @@ namespace Hentul
 
         internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetCurrentPredictions();
 
-
         internal void Clean()
         {
             pEncoder.Clean();
             v1.Clear();
-            v2.Clear();
-            v3.Clear();
+            //v2.Clear();
+            //v3.Clear();
         }
+
+        internal List<string> GetCurrentPredictions() => v1.somBBM_L3B_V.GetCurrentPredictions();
     }
 }

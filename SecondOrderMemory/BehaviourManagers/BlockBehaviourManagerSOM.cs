@@ -312,6 +312,8 @@
             NetWorkMode = NetworkMode.PREDICTION;
             CurrentObjectLabel = null;
             CompleteCleanUP();
+
+            WriteLogsToFile($"SOM Layer {Layer.ToString()} switched to Prediction Mode! ");
         }
 
         public void Init(int bbmID)
@@ -543,6 +545,21 @@
 
         #region PUBLIC API
 
+        public List<string> GetCurrentPredictions()
+        {
+            if (Layer.Equals(LayerType.Layer_3A) == false)
+            {
+                throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
+            }
+
+            if (NetWorkMode == NetworkMode.TRAINING)
+            {
+                throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
+            }
+
+            return CurrentPredictions.ToList();
+        }
+
         /// <summary>
         /// Processes the Incoming Input Pattern
         /// </summary>
@@ -551,6 +568,7 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
+        /// 
         public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool CreateActiveSynapses = false)
         {
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
@@ -755,11 +773,10 @@
                 if (intersect.Count == 1)
                 {
                     //Prediction is good , NEed to Verify if early in cycle.
-
+                    WriteLogsToFile($" Object Classified :: {Layer.ToString()} has switched to DONE State!");
                     NetWorkMode = NetworkMode.DONE;
                     CurrentObjectLabel = intersect[0];
                     CurrentPredictions = intersect;
-
                 }
                 else
                 {
@@ -789,7 +806,6 @@
                 }
             }
         }
-
 
         private void Fire()
         {
@@ -1014,22 +1030,7 @@
             }
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
-        }
-
-        public List<string> GetCurrentPredictions()
-        {
-            if (Layer.Equals(LayerType.Layer_3A) == false)
-            {
-                throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
-            }
-
-            if (NetWorkMode == NetworkMode.TRAINING)
-            {
-                throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
-            }
-
-            return CurrentPredictions.ToList();
-        }
+        }        
 
         public List<Position_SOM> GetAllPredictedNeurons()
         {

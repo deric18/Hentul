@@ -12,7 +12,7 @@ namespace HentulWinforms
         Orchestrator orchestrator;
         NetworkMode networkMode;
         readonly int numPixels = 10;
-        int counter = 0;
+        ulong counter = 0;
         int imageIndex = 0;
         int totalImagesToProcess = 1;
 
@@ -99,9 +99,9 @@ namespace HentulWinforms
 
                     EdgedImage.Refresh();
 
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
+                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter);     // Fire FOMS per image
 
-                    orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS
+                    // orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS
 
                     counter++;                      // Repeat!
 
@@ -109,68 +109,19 @@ namespace HentulWinforms
 
                     CycleLabel.Refresh();
                 }
-                else if (networkMode.Equals(NetworkMode.PREDICTION))
-                {
-                    orchestrator.RecordPixels();        //Grab Image
-
-                    CurrentImage.Image = orchestrator.bmp;
-
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp));     // Fire FOMS per image
-
-                    var motorOutput = orchestrator.Verify_Predict_HC();    // Fire SOM per FOMS
-
-                    if (motorOutput != null)
-                    {
-                        if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
-                        {
-                            //Object Recognised!
-                            var obj = orchestrator.GetPredictedObject();
-                            ObjectLabel.Text = obj.Label;
-                            ObjectLabel.Refresh();
-
-                            label_done.Text = "Object Recognised!";
-                            label_done.Refresh();
-                            train_another_object.Visible = true;
-                            wanderingButton.Visible = true;
-                            break;
-                        }
-                        else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
-                        {
-                            label_done.Text = "Object Could Not be Recognised!";
-                            label_done.Refresh();
-                            break;
-                        }
-
-                        Orchestrator.POINT p = new Orchestrator.POINT();
-                        p.X = motorOutput.X; p.Y = motorOutput.Y;
-                        orchestrator.MoveCursor(p);
-                    }
-                    else
-                    {
-                        //Just Move the cursor to the next default position
-                        orchestrator.MoveCursor(value);
-                        //label_done.Text = "Finished Processing Image";
-                        //break;
-                    }
-
-                }
             }
 
             if (label_done.Text == "Finished Processing Image")
             {
+                startClassificationButton.Visible = true;
+
                 if (networkMode == NetworkMode.TRAINING)
                 {
                     imageIndex++;
 
                     if (imageIndex == totalImagesToProcess)
                     {
-                        StartButton.Text = "Tet Classification Algo";
+                        StartButton.Text = "Test Classification Algo";
                         StartButton.Refresh();
                         orchestrator.ChangeNetworkToPredictionMode();
                         networkMode = NetworkMode.PREDICTION;
@@ -184,14 +135,136 @@ namespace HentulWinforms
                         StartButton.Refresh();
                     }
                 }
-                else if (networkMode == NetworkMode.PREDICTION)
-                {
-                    bool failedToPredict = true;
-                }
             }
         }
 
-        private void wanderingButton_Click(object sender, EventArgs e)
+        private void startClassificationButton_Click(object sender, EventArgs e)
+        {
+            label_done.Text = "Procesing";
+
+            label_done.Refresh();
+
+            var value = LeftTop;
+
+            value.X = value.X + numPixels;
+            value.Y = value.Y + numPixels;
+
+            orchestrator.MoveCursor(value);
+
+            labelX.Text = value.X.ToString();
+            labelY.Text = value.Y.ToString();
+
+            networkMode = NetworkMode.PREDICTION;
+            orchestrator.ChangeNetworkModeToPrediction();
+            ObjectLabel.Visible = true;
+
+            while (true)
+            {
+                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
+                {
+                    label_done.Text = "Reached End Of Image";
+                    break;
+                }
+                else
+                {
+                    if (value.X <= RightTop.X - numPixels)
+                        value = MoveRight(value);
+                    else
+                    {
+                        if (value.Y <= RightBottom.Y - numPixels)
+                        {
+                            value = MoveDown(value);
+                            value = SetLeft(value);
+                        }
+                        else
+                        {
+                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
+                            {
+                                label_done.Text = "Reached End Of Image";
+                                label_done.Refresh();
+                                train_another_object.Visible = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
+
+                if (networkMode != NetworkMode.PREDICTION)
+                {
+                    throw new InvalidOperationException("Mode should be in Prediction!");
+                }
+                else if (networkMode == NetworkMode.DONE)
+                {
+                    label_done.Text = "Classification Done!";
+                    break;
+                }
+
+                orchestrator.RecordPixels();        //Grab Image
+
+                CurrentImage.Image = orchestrator.bmp;
+
+                CurrentImage.Refresh();
+
+                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
+
+                EdgedImage.Refresh();
+
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter);     // Fire FOMS per image
+
+                var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
+
+                string val = string.Empty;
+
+                foreach (var pred in predictions)
+                {
+                    val = pred.ToString();
+                }
+                
+                ObjectLabel.Text = val;
+                counter++;                
+                #region LEGACY CODE
+
+                //if (motorOutput != null)
+                //{
+                //    if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
+                //    {
+                //        //Object Recognised!
+                //        var obj = orchestrator.GetPredictedObject();
+                //        ObjectLabel.Text = obj.Label;
+                //        ObjectLabel.Refresh();
+
+                //        label_done.Text = "Object Recognised!";
+                //        label_done.Refresh();
+                //        train_another_object.Visible = true;
+                //        wanderingButton.Visible = true;
+                //        break;
+                //    }
+                //    else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
+                //    {
+                //        label_done.Text = "Object Could Not be Recognised!";
+                //        label_done.Refresh();
+                //        break;
+                //    }
+
+                //    Orchestrator.POINT p = new Orchestrator.POINT();
+                //    p.X = motorOutput.X; p.Y = motorOutput.Y;
+                //    orchestrator.MoveCursor(p);
+                //}
+                //else
+                {
+                    //Just Move the cursor to the next default position
+                    orchestrator.MoveCursor(value);
+                    //label_done.Text = "Finished Processing Image";
+                    //break;
+                }
+                #endregion
+
+            }
+        }
+
+        private void WanderingButton_Click(object sender, EventArgs e)
         {
             StartBurstAvoidance();
         }
@@ -265,6 +338,7 @@ namespace HentulWinforms
             label_done.Text = "Ready";
             wanderingButton.Visible = false;
             BackUp.Visible = false;
+            startClassificationButton.Visible = false;
 
             if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
                 Restore.Visible = false;
@@ -351,7 +425,7 @@ namespace HentulWinforms
         { }
 
         private void label2_Click(object sender, EventArgs e)
-        { }        
+        { }
 
         private void button1_Click_3(object sender, EventArgs e)
         {
@@ -370,7 +444,7 @@ namespace HentulWinforms
                 orchestrator.ChangeNetworkModeToTraining();
 
                 foreach (var ch in word)
-                {                    
+                {
                     orchestrator.AddNewCharacterSensationToHC(ch);
                 }
 

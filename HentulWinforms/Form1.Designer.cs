@@ -49,6 +49,7 @@ namespace HentulWinforms
             textBox1 = new TextBox();
             label2 = new Label();
             button1 = new Button();
+            startClassificationButton = new Button();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             SuspendLayout();
@@ -158,13 +159,13 @@ namespace HentulWinforms
             // 
             // wanderingButton
             // 
-            wanderingButton.Location = new Point(380, 339);
+            wanderingButton.Location = new Point(380, 364);
             wanderingButton.Name = "wanderingButton";
             wanderingButton.Size = new Size(136, 23);
             wanderingButton.TabIndex = 12;
             wanderingButton.Text = "Test Burst Prevention Algo";
             wanderingButton.UseVisualStyleBackColor = true;
-            wanderingButton.Click += wanderingButton_Click;
+            wanderingButton.Click += WanderingButton_Click;
             // 
             // BackUp
             // 
@@ -224,12 +225,23 @@ namespace HentulWinforms
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click_3;
             // 
+            // startClassificationButton
+            // 
+            startClassificationButton.Location = new Point(380, 326);
+            startClassificationButton.Name = "startClassificationButton";
+            startClassificationButton.Size = new Size(136, 23);
+            startClassificationButton.TabIndex = 19;
+            startClassificationButton.Text = "Start Classification";
+            startClassificationButton.UseVisualStyleBackColor = true;
+            startClassificationButton.Click += startClassificationButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(startClassificationButton);
             Controls.Add(button1);
             Controls.Add(label2);
             Controls.Add(textBox1);
@@ -282,5 +294,6 @@ namespace HentulWinforms
         private TextBox textBox1;
         private Label label2;
         private Button button1;
+        private Button startClassificationButton;
     }
 }

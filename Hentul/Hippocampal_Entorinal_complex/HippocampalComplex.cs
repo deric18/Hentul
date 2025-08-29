@@ -432,7 +432,7 @@
             var instance = Orchestrator.GetInstance();
             instance.RecordPixels();
             var bmp = instance.ConverToEdgedBitmap();
-            instance.ProcessVisual(bmp);
+            instance.ProcessVisual(bmp, 0);
             return instance.GetSDRFromL3B();
         }
 

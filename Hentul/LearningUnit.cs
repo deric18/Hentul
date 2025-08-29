@@ -75,6 +75,13 @@
             CycleNum = 0;
         }
 
+        internal void LearnNewObject(string objectName)
+        {
+            somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);
+        }
+
+
+        // Supports both Training and Prediction Mode
         public void Process(PixelEncoder pEncoder, ulong cycleNum)
         {
             CycleNum = cycleNum;
@@ -339,11 +346,6 @@
         {
             somBBM_L3A_V.ChangeNetworkModeToPrediction();
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
-        }
-
-        internal void LearnNewObject(string objectName)
-        {
-            somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);
-        }
+        }        
     }
 }
