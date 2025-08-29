@@ -46,7 +46,7 @@ namespace HentulWinforms
             BackUp = new Button();
             Restore = new Button();
             train_another_object = new Button();
-            textBox1 = new TextBox();
+            objectBox = new TextBox();
             label2 = new Label();
             button1 = new Button();
             startClassificationButton = new Button();
@@ -197,13 +197,13 @@ namespace HentulWinforms
             train_another_object.UseVisualStyleBackColor = true;
             train_another_object.Click += train_another_object_Click;
             // 
-            // textBox1
+            // objectBox
             // 
-            textBox1.Location = new Point(1475, 112);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(100, 23);
-            textBox1.TabIndex = 16;
-            textBox1.TextChanged += textBox1_TextChanged;
+            objectBox.Location = new Point(1475, 112);
+            objectBox.Name = "objectBox";
+            objectBox.Size = new Size(100, 23);
+            objectBox.TabIndex = 16;
+            objectBox.TextChanged += textBox1_TextChanged;
             // 
             // label2
             // 
@@ -244,7 +244,7 @@ namespace HentulWinforms
             Controls.Add(startClassificationButton);
             Controls.Add(button1);
             Controls.Add(label2);
-            Controls.Add(textBox1);
+            Controls.Add(objectBox);
             Controls.Add(train_another_object);
             Controls.Add(Restore);
             Controls.Add(BackUp);
@@ -291,7 +291,7 @@ namespace HentulWinforms
         private Button BackUp;
         private Button Restore;
         private Button train_another_object;
-        private TextBox textBox1;
+        private TextBox objectBox;
         private Label label2;
         private Button button1;
         private Button startClassificationButton;

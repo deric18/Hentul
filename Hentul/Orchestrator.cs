@@ -1207,6 +1207,11 @@
             return burstCache;
         }
 
+        public void LearnNewObject(string v)
+        {
+            VisionProcessor.LearnNewObject(v);
+        }
+
         #endregion
     }
 

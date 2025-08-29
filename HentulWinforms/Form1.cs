@@ -115,23 +115,9 @@ namespace HentulWinforms
 
                 if (networkMode == NetworkMode.TRAINING)
                 {
-                    imageIndex++;
-
-                    if (imageIndex == totalImagesToProcess)
-                    {
-                        StartButton.Text = "Test Classification Algo";
-                        StartButton.Refresh();
-                        orchestrator.ChangeNetworkToPredictionMode();
-                        networkMode = NetworkMode.PREDICTION;
-                        BackUp.Visible = true;
-                        orchestrator.MoveCursor(LeftTop);
-                    }
-                    else
-                    {
-                        orchestrator.DoneWithTraining();
-                        StartButton.Text = "Start Another Image";
-                        StartButton.Refresh();
-                    }
+                    orchestrator.LearnNewObject(objectBox.Text);
+                    StartButton.Text = "Start Another Image";
+                    StartButton.Refresh();
                 }
             }
         }
@@ -223,7 +209,7 @@ namespace HentulWinforms
                 EdgedImage.Refresh();
 
                 orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image                                
-                
+
                 #region LEGACY CODE
 
                 //if (motorOutput != null)
