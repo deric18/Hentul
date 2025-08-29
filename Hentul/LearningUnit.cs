@@ -86,6 +86,8 @@
         {
             CycleNum = cycleNum;
 
+            FireFOMsV(pEncoder, cycleNum);
+
             if (pEncoder.somPositions.Count != 0)
             {
                 if (pEncoder.somPositions.Count > 125)
@@ -98,8 +100,8 @@
                 somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), cycleNum);
 
                 // L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
-                somBBM_L3A_V.Fire(fom_SDR, cycleNum);
+                //SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
+                //somBBM_L3A_V.Fire(fom_SDR, cycleNum);
             }
             else
             {
@@ -143,6 +145,8 @@
             return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
         }
 
+
+        // Should be called after pixelEncoder has processed the bitmap, parses all the FOMBBMIDS and fires FOMS and tracks all the firing FOMs into firingFOM
         private void FireFOMsV(PixelEncoder pEncoder, ulong CycleNum)
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
@@ -208,8 +212,8 @@
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_V.Add(bbmID);
                         }
-                    }
-                        break;
+                            break;
+                    }                        
                     case MAPPERCASE.ONETHREE:
                     {
                         foreach (var bbmID in kvp.Value)
@@ -346,6 +350,11 @@
         {
             somBBM_L3A_V.ChangeNetworkModeToPrediction();
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
-        }        
+        }
+
+        internal void BeginTraining(string objectLabel)
+        {
+            somBBM_L3B_V.BeginTraining(objectLabel);
+        }
     }
 }

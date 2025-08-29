@@ -149,6 +149,11 @@
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
+        public void BeginTraining(string objectLabel)
+        {
+            VisionProcessor.BeginTraining(objectLabel);
+        }
+
         #endregion
 
         #region Public API
@@ -188,7 +193,7 @@
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
         {
-            ParseNFireBitmap(greyScalebmp);
+            //ParseNFireBitmap(greyScalebmp);
             VisionProcessor.Process(greyScalebmp, cycle);
         }
 

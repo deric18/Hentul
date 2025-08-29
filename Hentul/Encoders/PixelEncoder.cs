@@ -215,180 +215,95 @@
         {
             var positionstoAdd = new List<Position_SOM>();
 
+            // Helper to process each ONbitsXFOM list
+            void ProcessFOM(List<Position_SOM> fomList)
+            {
+                positionstoAdd.AddRange(fomList);
+                var items = GetSOMEquivalentPositionsofFOM(fomList, bbmID);
+                CheckForDuplicates(items);
+                somPositions.AddRange(items);
+            }
+
             switch (mappercase)
             {
                 case MAPPERCASE.ALL:
-                    {
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits2FOM);
-                        positionstoAdd.AddRange(ONbits3FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits2FOM);
+                    ProcessFOM(ONbits3FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.ONETWOTHREEE:
-                    {
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits2FOM);
-                        positionstoAdd.AddRange(ONbits3FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits2FOM);
+                    ProcessFOM(ONbits3FOM);
                     break;
                 case MAPPERCASE.TWOTHREEFOUR:
-                    {
-
-                        positionstoAdd.AddRange(ONbits2FOM);
-                        positionstoAdd.AddRange(ONbits3FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits2FOM);
+                    ProcessFOM(ONbits3FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.ONETWOFOUR:
-                    {
-
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits2FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits2FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.ONETHREEFOUR:
-                    {
-
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits3FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits3FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.ONETWO:
-                    {
-
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits2FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits2FOM);
                     break;
                 case MAPPERCASE.ONETHREE:
-                    {
-
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits3FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits3FOM);
                     break;
                 case MAPPERCASE.ONEFOUR:
-                    {
-
-                        positionstoAdd.AddRange(ONbits1FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits1FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.TWOTHREE:
-                    {
-
-                        positionstoAdd.AddRange(ONbits2FOM);
-                        positionstoAdd.AddRange(ONbits3FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits2FOM);
+                    ProcessFOM(ONbits3FOM);
                     break;
                 case MAPPERCASE.TWOFOUR:
-                    {
-
-                        positionstoAdd.AddRange(ONbits2FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits2FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.THREEFOUR:
-                    {
-
-                        positionstoAdd.AddRange(ONbits3FOM);
-                        positionstoAdd.AddRange(ONbits4FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits3FOM);
+                    ProcessFOM(ONbits4FOM);
                     break;
                 case MAPPERCASE.ONE:
-                    {
-
-                        positionstoAdd.AddRange(ONbits1FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits1FOM, bbmID));
-
-
-                    }
+                    ProcessFOM(ONbits1FOM);
                     break;
                 case MAPPERCASE.TWO:
-                    {
-
-                        positionstoAdd.AddRange(ONbits2FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits2FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits2FOM);
                     break;
                 case MAPPERCASE.THREE:
-                    {
-
-                        positionstoAdd.AddRange(ONbits3FOM);
-
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits3FOM, bbmID));
-
-                    }
+                    ProcessFOM(ONbits3FOM);
                     break;
                 case MAPPERCASE.FOUR:
-                    {
-                        positionstoAdd.AddRange(ONbits4FOM);
-                        somPositions.AddRange(GetSOMEquivalentPositionsofFOM(ONbits4FOM, bbmID));
-                    }
+                    ProcessFOM(ONbits4FOM);
                     break;
                 default:
-                    {
-                        throw new NotImplementedException("No Valid Mapper Case Found for Layer Type");
-                    }
+                    throw new NotImplementedException("No Valid Mapper Case Found for Layer Type");
             }
 
             return new SDR_SOM(10, 10, positionstoAdd, iType.SPATIAL);
+        }
+
+        private void CheckForDuplicates(List<Position_SOM> poses)
+        {
+            foreach (var pos in poses)
+            {
+                if(pos.ToString() == "790-1-0-N")
+                {
+                    bool breakPoint = true;
+                }
+            }
         }
 
         internal static List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbitsFOM, int bbmID)

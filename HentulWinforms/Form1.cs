@@ -99,11 +99,9 @@ namespace HentulWinforms
 
                     EdgedImage.Refresh();
 
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter);     // Fire FOMS per image
+                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
 
-                    // orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS
-
-                    counter++;                      // Repeat!
+                    // orchestrator.AddNewVisualSensationToHc();    // Fire SOM per FOMS                    
 
                     CycleLabel.Text = counter.ToString();
 
@@ -191,13 +189,26 @@ namespace HentulWinforms
 
                 networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
 
-                if (networkMode != NetworkMode.PREDICTION)
+                if (networkMode == NetworkMode.TRAINING)
                 {
-                    throw new InvalidOperationException("Mode should be in Prediction!");
+                    throw new InvalidOperationException("Mode should be in Prediction or Done!");
                 }
                 else if (networkMode == NetworkMode.DONE)
                 {
                     label_done.Text = "Classification Done!";
+
+                    var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
+
+                    string val = string.Empty;
+
+                    foreach (var pred in predictions)
+                    {
+                        val = pred.ToString();
+                    }
+
+                    ObjectLabel.Text = val;
+
+
                     break;
                 }
 
@@ -211,19 +222,8 @@ namespace HentulWinforms
 
                 EdgedImage.Refresh();
 
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter);     // Fire FOMS per image
-
-                var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
-
-                string val = string.Empty;
-
-                foreach (var pred in predictions)
-                {
-                    val = pred.ToString();
-                }
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image                                
                 
-                ObjectLabel.Text = val;
-                counter++;                
                 #region LEGACY CODE
 
                 //if (motorOutput != null)
@@ -327,6 +327,8 @@ namespace HentulWinforms
             EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
 
             EdgedImage.Refresh();
+
+            orchestrator.BeginTraining("Apple");
 
             label_done.Text = "Ready";
         }

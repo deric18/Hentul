@@ -84,6 +84,8 @@ namespace Hentul
 
             NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
 
+            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+
             if (shouldInit)
             {
                 v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
@@ -101,9 +103,7 @@ namespace Hentul
                 //v3.Init();
             }
 
-            LogMode = logMode;
-
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+            LogMode = logMode;            
         }
 
         #endregion
@@ -147,15 +147,7 @@ namespace Hentul
 
             throw new InvalidOleVariantTypeException("No Matching input Learning Unit Type!");
         }
-
-        private void WriteLogsToFile(string v)
-        {
-            File.WriteAllText(logfilename, v);
-        }
-
-        
-
-
+                
         public void Restore()
         {
             v1.Restore();
@@ -225,5 +217,10 @@ namespace Hentul
         }
 
         internal List<string> GetCurrentPredictions() => v1.somBBM_L3B_V.GetCurrentPredictions();
+
+        internal void BeginTraining(string objectLabel)
+        {
+            v1.BeginTraining(objectLabel);
+        }
     }
 }
