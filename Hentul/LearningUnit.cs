@@ -88,16 +88,16 @@
 
             FireFOMsV(pEncoder, cycleNum);
 
-            if (pEncoder.somPositions.Count != 0)
+            if (pEncoder.SomPositions.Count != 0)
             {
-                if (pEncoder.somPositions.Count > 125)
+                if (pEncoder.SomPositions.Count > 125)
                 {
-                    WriteLogsToFile("Layer 3B : SomPosition Write count " + pEncoder.somPositions.Count);
+                    WriteLogsToFile("Layer 3B : SomPosition Write count " + pEncoder.SomPositions.Count);
                     bool breakpoint = true;
                 }
 
                 // L3B fire
-                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), cycleNum);
+                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.SomPositions, iType.SPATIAL), cycleNum);
 
                 // L3A fire
                 //SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
