@@ -42,7 +42,7 @@
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
 
 
-        public List<Position_SOM> somPositions;
+        public List<Position_SOM> SomPositions { get; private set; }
 
         public bool[,] testBmpCoverage { get; private set; }
 
@@ -87,7 +87,7 @@
                 new Position_SOM(9, 2)
             };
 
-            somPositions = new List<Position_SOM>();
+            SomPositions = new List<Position_SOM>();
 
             FOMBBMIDS = new Dictionary<MAPPERCASE, List<int>>();
 
@@ -215,13 +215,18 @@
         {
             var positionstoAdd = new List<Position_SOM>();
 
+            bool ignorecheckforDuplicates = false;
+
             // Helper to process each ONbitsXFOM list
             void ProcessFOM(List<Position_SOM> fomList)
             {
                 positionstoAdd.AddRange(fomList);
                 var items = GetSOMEquivalentPositionsofFOM(fomList, bbmID);
-                CheckForDuplicates(items);
-                somPositions.AddRange(items);
+
+                if(ignorecheckforDuplicates)
+                    CheckForDuplicates(items);
+
+                SomPositions.AddRange(items);
             }
 
             switch (mappercase)
@@ -299,9 +304,15 @@
         {
             foreach (var pos in poses)
             {
-                if(pos.ToString() == "790-1-0-N")
+                foreach (var existing in SomPositions)
                 {
-                    bool breakPoint = true;
+                    // Use Position_SOM.Equals for comparison
+                    if (pos.Equals(existing))
+                    {
+                        // Duplicate found; handle as needed
+                        int breakpoint = 1;
+                        // Optionally, you could log, throw, or return here
+                    }
                 }
             }
         }
@@ -524,7 +535,7 @@
         public void Clean()
         {
             FOMBBMIDS.Clear();
-            somPositions.Clear();
+            SomPositions.Clear();
             Xoffset = -1;
             YOffset = -1;
         }

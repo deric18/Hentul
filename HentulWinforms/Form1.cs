@@ -15,6 +15,7 @@ namespace HentulWinforms
         ulong counter = 0;
         int imageIndex = 0;
         int totalImagesToProcess = 1;
+        List<string> objectList = new();
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -40,6 +41,26 @@ namespace HentulWinforms
             label_done.Text = "Procesing";
 
             label_done.Refresh();
+
+            if(string.IsNullOrEmpty(objectBox.Text))
+            {
+                label_done.Text = "You need to input a object label before you can train!!";
+                return;
+            }
+
+            if (objectList.Contains(objectBox.Text))
+            {
+                label_done.Text = "Object Already Trained!!";
+                return;
+            }
+            if (counter > 0)
+            {
+                orchestrator.LearnNewObject(objectBox.Text);
+            }
+            else
+            {
+                orchestrator.BeginTraining(objectBox.Text); 
+            }
 
             var value = LeftTop;
 
@@ -114,8 +135,7 @@ namespace HentulWinforms
                 startClassificationButton.Visible = true;
 
                 if (networkMode == NetworkMode.TRAINING)
-                {
-                    orchestrator.LearnNewObject(objectBox.Text);
+                {                    
                     StartButton.Text = "Start Another Image";
                     StartButton.Refresh();
                 }
@@ -312,9 +332,7 @@ namespace HentulWinforms
 
             EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
 
-            EdgedImage.Refresh();
-
-            orchestrator.BeginTraining("Apple");
+            EdgedImage.Refresh();            
 
             label_done.Text = "Ready";
         }
@@ -322,7 +340,7 @@ namespace HentulWinforms
 
         private void Form1_Load(object sender, EventArgs e)
         {   //RT : 1575, LB : 1032
-            LeftTop.X = 954; LeftTop.Y = 416; RightTop.X = 1596; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y;
+            LeftTop.X = 954; LeftTop.Y = 416; RightTop.X = 1596; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y - 500;
             label_done.Text = "Ready";
             wanderingButton.Visible = false;
             BackUp.Visible = false;

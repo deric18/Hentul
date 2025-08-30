@@ -270,7 +270,7 @@
 
         #endregion
 
-        #region Private Methods        
+        #region Private Methods
 
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.

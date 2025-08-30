@@ -307,6 +307,20 @@
             AddNewLabelToSupportedLabels(Label);
         }
 
+        public void ChangeCurrentObjectLabel(string objectName)
+        {
+            if (string.IsNullOrEmpty(objectName))
+            {
+                throw new InvalidOperationException("ERROR : ChangeCurrentObjectLabel() : Object Name cannot be empty");
+            }
+
+            CurrentObjectLabel = objectName;
+
+            //Add new Label to SupportedLabels 
+            AddNewLabelToSupportedLabels(objectName);
+            CompleteCleanUP();
+        }
+
         public void ChangeNetworkModeToPrediction()
         {
             NetWorkMode = NetworkMode.PREDICTION;
@@ -3032,21 +3046,7 @@
         {
             File.AppendAllText(LogFileName, logline + "\n");
 
-        }
-
-        public void ChangeCurrentObjectLabel(string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-            {
-                throw new InvalidOperationException("ERROR : ChangeCurrentObjectLabel() : Object Name cannot be empty");
-            }
-
-            CurrentObjectLabel = objectName;
-
-            //Add new Label to SupportedLabels 
-            AddNewLabelToSupportedLabels(objectName);
-            CompleteCleanUP();
-        }
+        }        
 
         private bool AddNewLabelToSupportedLabels(string label)
         {
