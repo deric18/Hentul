@@ -53,6 +53,9 @@ namespace HentulWinforms
                 label_done.Text = "Object Already Trained!!";
                 return;
             }
+
+            objectList.Add(objectBox.Text);
+
             if (counter > 0)
             {
                 orchestrator.LearnNewObject(objectBox.Text);
@@ -184,14 +187,28 @@ namespace HentulWinforms
                         {
                             if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                             {
-                                label_done.Text = "Reached End Of Image";
-                                label_done.Refresh();
+                                label_done.Text = "Reached End Of Image";label_done.Refresh();
+
                                 train_another_object.Visible = true;
+
+                                var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
+                                string val = string.Empty;
+                                predictions.ForEach( x => val += x.ToString() + " | " );
+
+                                ObjectLabel.Text = val;ObjectLabel.Refresh();
                                 break;
                             }
                         }
                     }
                 }
+
+                orchestrator.RecordPixels();        //Grab Image
+
+                CurrentImage.Image = orchestrator.bmp; CurrentImage.Refresh();
+
+                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp); EdgedImage.Refresh();
+
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
 
                 networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
 
@@ -201,72 +218,19 @@ namespace HentulWinforms
                 }
                 else if (networkMode == NetworkMode.DONE)
                 {
-                    label_done.Text = "Classification Done!";
+                    label_done.Text = "Classification Done!";label_done.Refresh ();
 
                     var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
-
                     string val = string.Empty;
-
                     foreach (var pred in predictions)
                     {
                         val = pred.ToString();
                     }
-
                     ObjectLabel.Text = val;
-
+                    ObjectLabel.Refresh();
 
                     break;
-                }
-
-                orchestrator.RecordPixels();        //Grab Image
-
-                CurrentImage.Image = orchestrator.bmp;
-
-                CurrentImage.Refresh();
-
-                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-                EdgedImage.Refresh();
-
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image                                
-
-                #region LEGACY CODE
-
-                //if (motorOutput != null)
-                //{
-                //    if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
-                //    {
-                //        //Object Recognised!
-                //        var obj = orchestrator.GetPredictedObject();
-                //        ObjectLabel.Text = obj.Label;
-                //        ObjectLabel.Refresh();
-
-                //        label_done.Text = "Object Recognised!";
-                //        label_done.Refresh();
-                //        train_another_object.Visible = true;
-                //        wanderingButton.Visible = true;
-                //        break;
-                //    }
-                //    else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
-                //    {
-                //        label_done.Text = "Object Could Not be Recognised!";
-                //        label_done.Refresh();
-                //        break;
-                //    }
-
-                //    Orchestrator.POINT p = new Orchestrator.POINT();
-                //    p.X = motorOutput.X; p.Y = motorOutput.Y;
-                //    orchestrator.MoveCursor(p);
-                //}
-                //else
-                {
-                    //Just Move the cursor to the next default position
-                    orchestrator.MoveCursor(value);
-                    //label_done.Text = "Finished Processing Image";
-                    //break;
-                }
-                #endregion
-
+                }                                             
             }
         }
 
