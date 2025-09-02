@@ -142,7 +142,7 @@
 
         #region CONSTRUCTORS & INITIALIZATIONS 
 
-        public BlockBehaviourManagerFOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.None, bool includeBurstLearningWireCase2 = false, bool includeBurstLearningWireCase4 = true, bool includeSequenceLearning = true)
+        public BlockBehaviourManagerFOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.Trace, bool includeBurstLearningWireCase2 = false, bool includeBurstLearningWireCase4 = true, bool includeSequenceLearning = true)
         {
 
             this.NumberOfColumnsThatFiredThisCycle = 0;
@@ -693,8 +693,8 @@
                         {
                             if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                             {
-                                if (Mode < LogMode.BurstOnly)                                
-                                    WriteLogsToFile("INFO  :: Neuron in the Predicted List was in firing state. Adding it back now! Missed Count : " + PrintBlockDetailsSingleLine());
+                                if (Mode <= LogMode.Trace)                                
+                                    WriteLogsToFile("WARN  :: Neuron in the Predicted List was in firing state but was not in the Firing List. Adding it back now! Missed Count : " + PrintBlockDetailsSingleLine());
                                 NeuronsFiringThisCycle.Add(neuron);
                             }
                         }

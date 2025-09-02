@@ -1931,7 +1931,7 @@
                 WriteLogsToFile(" ERROR :: ConnectTwoNeurons :::: Could not ADD new Dendronal Connection to the Neuron and return a HArd False! Dendronal Neuron ID : " + DendriticNeuron.NeuronID + " Layer Type :" + Layer.ToString());
                 throw new InvalidOperationException("HARD FALSE eStablishing new Axonal Connection!");
             }
-            else if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.SOFTFALSE)
+            else if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.SOFTFALSE && Mode > LogMode.Trace)
             {
                 //Need investigation as why the same connection is tried twice : No need to investigate
                 WriteLogsToFile(" ERROR :: ConnectTwoNeurons ::::Another Failed Attempt at adding a redundant Connection Dendronal Neuron ID :  " + DendriticNeuron.NeuronID + " Axonal Neuron ID : " + AxonalNeuron.NeuronID + " Layer Type :" + Layer.ToString());
