@@ -20,11 +20,11 @@ namespace Hentul
 
         public int BlockSize;
 
-        public LearningUnit v1 { get; private set; }    //10 * 10
+        public LearningUnit v1 { get; private set; }    //20 * 20
 
-        public LearningUnit v2 { get; private set; }    // 50 * 50
+        public LearningUnit v2 { get; private set; }    // 100 * 100
 
-        public LearningUnit v3 { get; private set; }    // 100 X 100
+        public LearningUnit v3 { get; private set; }    // 200 X 200
 
         public int Range { get; private set; }
 
@@ -84,11 +84,13 @@ namespace Hentul
 
             NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
 
+            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+
             if (shouldInit)
             {
                 v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
-                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
-                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
+                //v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
+                //v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
             }
             
             Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
@@ -97,27 +99,25 @@ namespace Hentul
             if (shouldInit)
             {
                 v1.Init();
-                v2.Init();
-                v3.Init();
+                //v2.Init();
+                //v3.Init();
             }
 
             LogMode = logMode;
-
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
         }
 
         #endregion
        
 
-        public void Process(Bitmap greyScalebmp)
+        public void Process(Bitmap greyScalebmp, ulong cycle)
         {
+            CycleNum = cycle;
+
             pEncoder.ParseBitmap(greyScalebmp);
 
-            v1.Process(pEncoder, CycleNum);
-            v2.Process(pEncoder, CycleNum);
-            v3.Process(pEncoder, CycleNum);
-
-
+            v1.Process(pEncoder, cycle);
+            //v2.Process(pEncoder, CycleNum);
+            //v3.Process(pEncoder, CycleNum);
 
             Clean();
         }
@@ -145,15 +145,7 @@ namespace Hentul
 
             throw new InvalidOleVariantTypeException("No Matching input Learning Unit Type!");
         }
-
-        private void WriteLogsToFile(string v)
-        {
-            File.WriteAllText(logfilename, v);
-        }
-
-        
-
-
+                
         public void Restore()
         {
             v1.Restore();
@@ -214,13 +206,19 @@ namespace Hentul
 
         internal List<string> GetSupportedLabels(LearningUnitType luType) => GetLearningUnit(luType).somBBM_L3B_V.GetCurrentPredictions();
 
-
         internal void Clean()
         {
             pEncoder.Clean();
             v1.Clear();
-            v2.Clear();
-            v3.Clear();
+            //v2.Clear();
+            //v3.Clear();
+        }
+
+        internal List<string> GetCurrentPredictions() => v1.somBBM_L3B_V.GetCurrentPredictions();
+
+        internal void BeginTraining(string objectLabel)
+        {
+            v1.BeginTraining(objectLabel);
         }
     }
 }

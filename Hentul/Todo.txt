@@ -1,6 +1,17 @@
-﻿Small Direction
-- Better Burst Connection Wiring Logic.
-- Introduce neuron level SupportedLabels for easier classification
+﻿Cuurent Feature :  Support of Hippocampus for Classification.
+
+Major Sub Features:
+1. Provide support for Spatial Map of the environment around the agent with Boundary cells, Grid cell like Graph Cells storing locations of objects.
+2. Support and classify Favourite spots for every object for easier classification and differentiation.
+3. Provide Support for Path Integration for the agent So it can move from position to position with Burst Avoidance along the path for self assertion of the computed path.
+
+
+Implementation:
+1. SPATIAL MAP:
+-
+
+
+
 - Can static SOM BBM support multiple objects ? if not undo all the singleton logic.
 
 

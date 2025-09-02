@@ -75,24 +75,34 @@
             CycleNum = 0;
         }
 
+
+        internal void LearnNewObject(string objectName)
+        {
+            somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);            
+        }
+
+
+        // Supports both Training and Prediction Mode
         public void Process(PixelEncoder pEncoder, ulong cycleNum)
         {
             CycleNum = cycleNum;
 
-            if (pEncoder.somPositions.Count != 0)
+            FireFOMsV(pEncoder, cycleNum);
+
+            if (pEncoder.SomPositions.Count != 0)
             {
-                if (pEncoder.somPositions.Count > 125)
+                if (pEncoder.SomPositions.Count > 125)
                 {
-                    WriteLogsToFile("Layer 3B : SomPosition Write count " + pEncoder.somPositions.Count);
+                    WriteLogsToFile("Layer 3B : SomPosition Write count " + pEncoder.SomPositions.Count);
                     bool breakpoint = true;
                 }
 
                 // L3B fire
-                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.somPositions, iType.SPATIAL), cycleNum);
+                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.SomPositions, iType.SPATIAL), cycleNum);
 
                 // L3A fire
-                SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
-                somBBM_L3A_V.Fire(fom_SDR, cycleNum);
+                //SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
+                //somBBM_L3A_V.Fire(fom_SDR, cycleNum);
             }
             else
             {
@@ -136,6 +146,8 @@
             return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
         }
 
+
+        // Should be called after pixelEncoder has processed the bitmap, parses all the FOMBBMIDS and fires FOMS and tracks all the firing FOMs into firingFOM
         private void FireFOMsV(PixelEncoder pEncoder, ulong CycleNum)
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
@@ -201,8 +213,8 @@
                             fomBBMV[bbmID].Fire(poses, CycleNum);
                             firingFOM_V.Add(bbmID);
                         }
-                    }
-                        break;
+                            break;
+                    }                        
                     case MAPPERCASE.ONETHREE:
                     {
                         foreach (var bbmID in kvp.Value)
@@ -341,9 +353,9 @@
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
         }
 
-        internal void LearnNewObject(string objectName)
+        internal void BeginTraining(string objectLabel)
         {
-            somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);
+            somBBM_L3B_V.BeginTraining(objectLabel);
         }
     }
 }

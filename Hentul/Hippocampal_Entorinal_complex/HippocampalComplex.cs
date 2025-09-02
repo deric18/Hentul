@@ -182,9 +182,7 @@
             }
 
             return matchedEntity;
-        }
-
-        #endregion
+        }        
 
         public void DoneWithTraining(string label = "")
         {
@@ -206,6 +204,8 @@
                 imageIndex++;
             }
         }
+
+        #endregion
 
 
         #region UTILITY & MOCK 
@@ -432,7 +432,7 @@
             var instance = Orchestrator.GetInstance();
             instance.RecordPixels();
             var bmp = instance.ConverToEdgedBitmap();
-            instance.ProcessVisual(bmp);
+            instance.ProcessVisual(bmp, 0);
             return instance.GetSDRFromL3B();
         }
 

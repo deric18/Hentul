@@ -46,7 +46,7 @@
 
         public bool IsMock { get; private set; }
 
-        public HippocampalComplex HCAccessor { get; private set; }        
+        public HippocampalComplex HCAccessor { get; private set; }
 
         public int[] MockBlockNumFires { get; private set; }
 
@@ -70,8 +70,8 @@
 
         private int imageIndex { get; set; }
 
-        public NetworkMode NMode { get; set; }        
-        
+        public NetworkMode NMode { get; set; }
+
         public VisionStreamProcessor VisionProcessor { get; set; }
 
         public TextStreamProcessor TextProcessor { get; private set; }
@@ -108,7 +108,7 @@
             else
                 ImageIndex = 0;
 
-            Init();            
+            Init();
 
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
 
@@ -124,10 +124,10 @@
             imageIndex = 1;
 
             //MockBlockNumFires = new int[NumBBMNeededV];                       
-                        
+
             fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
 
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";            
+            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
@@ -143,10 +143,15 @@
         private void Init()
         {
             Console.WriteLine("Finished Init for this Instance \n");
-            Console.WriteLine("Range : " + Range.ToString() + "\n");            
+            Console.WriteLine("Range : " + Range.ToString() + "\n");
             Console.WriteLine("Initing SOM Instance now ... \n");
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
+        }
+
+        public void BeginTraining(string objectLabel)
+        {
+            VisionProcessor.BeginTraining(objectLabel);
         }
 
         #endregion
@@ -186,35 +191,10 @@
         }
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
-        public void ProcessVisual(Bitmap greyScalebmp)
+        public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
         {
-            VisionProcessor.Process(greyScalebmp);
-        }
-
-        //Stores the new object on to HC
-        public void AddNewVisualSensationToHc()
-        {
-            if (!NMode.Equals(NetworkMode.TRAINING))
-            {
-                throw new InvalidOperationException("INVALID State Management!");
-            }
-
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
-
-            if (som_SDR != null)
-            {
-                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
-
-                if (HCAccessor.AddNewSensationLocationToObject(firingSensei) == false)
-                {
-                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(" som_SDR should not be null!");
-            }
+            //ParseNFireBitmap(greyScalebmp);
+            VisionProcessor.Process(greyScalebmp, cycle);
         }
 
         //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
@@ -243,45 +223,15 @@
             }
         }
 
-
-        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = false)
+        public List<string> GetPredictionsVisual()
         {
-            Position2D motorOutput = null;
-            List<Position2D> positionToConfirm = new List<Position2D>();
+            if (NMode != NetworkMode.PREDICTION)
+                throw new InvalidOperationException("Network Must be in PRediction Mode!");
 
-            if (!NMode.Equals(NetworkMode.PREDICTION))
-            {
-                throw new InvalidOperationException("Invalid State Managemnt!");
-            }
+            var predictions = VisionProcessor.GetCurrentPredictions();
 
-            // If any output from HC execute the location output if NOT then take the standard default output.                
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
-
-
-            if (som_SDR != null)
-            {
-                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
-                var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
-
-                List<string> predictedLabels = VisionProcessor.GetSupportedLabels(LearningUnitType.V1);
-
-                if (legacyPipeline)
-                {
-                    motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
-                }
-                else    // brand New Pipeline : Classification done Primarily through V1.
-                {
-                    if(VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
-                    {
-                        VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
-                    }
-                }
-            }
-
-            return motorOutput;
+            return predictions;
         }
-
 
         public void DoneWithTraining(string label = "")
         {
@@ -292,8 +242,8 @@
         {
             NMode = NetworkMode.PREDICTION;
             VisionProcessor.SetNetworkModeToPrediction();
-            HCAccessor.DoneWithTraining();
-            HCAccessor.SetNetworkModeToPrediction();
+            //HCAccessor.DoneWithTraining();
+            //HCAccessor.SetNetworkModeToPrediction();
         }
 
         //Gets the current SDR and next cycle predited SDR from classifier layer
@@ -312,79 +262,16 @@
 
             if (predictedSDR != null)
             {
-                predictedSensei =  VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
+                predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
             }
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
-        }
-
-
-        public List<uint> StartBurstAvoidanceWandering(int totalWanders = 5)
-        {
-            //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
-            //somBBM_L3A.Fire(temporalSignalForPosition);  
-
-            // Object recognised! 
-            int counter = totalWanders > 0 ? HCAccessor.GetObjectTotalSensationCount() : totalWanders;
-            int breakpoint = 1;
-
-            List<uint> burstCache = new List<uint>();
-
-            while (counter != 0)
-            {
-                if (counter == 2)
-                    breakpoint = 3;
-
-                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
-
-                var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
-
-                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
-
-                RecordPixels();
-
-                var edgedbmp = ConverToEdgedBitmap();
-
-                var apicalSignal = apicalSignalSOM.ActiveBits;
-
-                var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
-
-                BiasFOM(apicalSignalFOM);
-
-                ParseNFireBitmap(edgedbmp);
-
-                VisionProcessor.Clean();
-
-                uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
-
-                if (postBiasBurstCount > 0)
-                {
-                    Dictionary<int, List<Position_SOM>> bbmToFiringPositions = new Dictionary<int, List<Position_SOM>>();
-
-                    foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
-                    {
-                        Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
-
-                        if (tuple != null)
-                            bbmToFiringPositions.Add(tuple.Item1, tuple.Item2);
-                    }
-
-                    breakpoint = 2;
-                }
-
-                burstCache.Add(postBiasBurstCount);
-
-                CycleNum++;
-                counter--;
-            }
-
-            return burstCache;
-        }
+        }        
 
         #endregion
 
-        #region Private Methods        
-        
+        #region Private Methods
+
         /// <summary>
         /// Takens in a bmp and preps and fires all FOM & SOM's.
         /// </summary>     
@@ -601,7 +488,7 @@
         #endregion
 
         #region Helper Methods
-        
+
         public void RemoveDuplicateEntries(ref SDR_SOM sdr_SOM)
         {
             int i = 0, j = 0;
@@ -662,7 +549,7 @@
         public RecognisedVisualEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
 
         public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
-        
+
 
         private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)
         {
@@ -877,11 +764,9 @@
 
         public void ChangeNetworkModeToPrediction()
         {
-            NMode = NetworkMode.PREDICTION;
-            HCAccessor.SetNetworkModeToPrediction();
-
+            NMode = NetworkMode.PREDICTION;            
             VisionProcessor.SetNetworkModeToPrediction();
-            
+            //HCAccessor.SetNetworkModeToPrediction();
         }
 
         public void ChangeNetworkModeToTraining()
@@ -1191,6 +1076,141 @@
         #endregion
 
         #endregion
+
+        #endregion
+
+        #region LEGACY CODE
+
+        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = false)
+        {
+            Position2D motorOutput = null;
+            List<Position2D> positionToConfirm = new List<Position2D>();
+
+            if (!NMode.Equals(NetworkMode.PREDICTION))
+            {
+                throw new InvalidOperationException("Invalid State Managemnt!");
+            }
+
+            // If any output from HC execute the location output if NOT then take the standard default output.                
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
+
+
+            if (som_SDR != null)
+            {
+                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+                var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
+
+                List<string> predictedLabels = VisionProcessor.GetSupportedLabels(LearningUnitType.V1);
+
+                if (legacyPipeline)
+                {
+                    motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
+                }
+                else    // brand New Pipeline : Classification done Primarily through V1.
+                {
+                    if (VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
+                    {
+                        VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
+                    }
+                }
+            }
+
+            return motorOutput;
+        }
+
+        //Stores the new object on to HC
+        public void AddNewVisualSensationToHc()
+        {
+            if (!NMode.Equals(NetworkMode.TRAINING))
+            {
+                throw new InvalidOperationException("INVALID State Management!");
+            }
+
+            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+
+            if (som_SDR != null)
+            {
+                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
+
+                if (HCAccessor.AddNewSensationLocationToObject(firingSensei) == false)
+                {
+                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(" som_SDR should not be null!");
+            }
+        }
+
+        public List<uint> StartBurstAvoidanceWandering(int totalWanders = 5)
+        {
+            //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
+            //somBBM_L3A.Fire(temporalSignalForPosition);  
+
+            // Object recognised! 
+            int counter = totalWanders > 0 ? HCAccessor.GetObjectTotalSensationCount() : totalWanders;
+            int breakpoint = 1;
+
+            List<uint> burstCache = new List<uint>();
+
+            while (counter != 0)
+            {
+                if (counter == 2)
+                    breakpoint = 3;
+
+                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
+
+                var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
+
+                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
+
+                RecordPixels();
+
+                var edgedbmp = ConverToEdgedBitmap();
+
+                var apicalSignal = apicalSignalSOM.ActiveBits;
+
+                var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
+
+                BiasFOM(apicalSignalFOM);
+
+                ParseNFireBitmap(edgedbmp);
+
+                VisionProcessor.Clean();
+
+                uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
+
+                if (postBiasBurstCount > 0)
+                {
+                    Dictionary<int, List<Position_SOM>> bbmToFiringPositions = new Dictionary<int, List<Position_SOM>>();
+
+                    foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
+                    {
+                        Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
+
+                        if (tuple != null)
+                            bbmToFiringPositions.Add(tuple.Item1, tuple.Item2);
+                    }
+
+                    breakpoint = 2;
+                }
+
+                burstCache.Add(postBiasBurstCount);
+
+                CycleNum++;
+                counter--;
+            }
+
+            return burstCache;
+        }
+
+        public void LearnNewObject(string v)
+        {
+            VisionProcessor.LearnNewObject(v);
+        }
 
         #endregion
     }

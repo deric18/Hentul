@@ -85,6 +85,8 @@
         [Test, Ignore("Need access to cursor and custom Apple Image to be hosted!")]
         public void TestWanderingCursor()
         {
+            ulong counter = 0;
+
             List<Position2D> cursorPositions = new List<Position2D>()
             {
                 new Position2D( 1346, 456),
@@ -105,7 +107,7 @@
 
                 orchestrator.RecordPixels(true);
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
-                orchestrator.ProcessVisual(edgedbmp1);
+                orchestrator.ProcessVisual(edgedbmp1, counter++);
                 orchestrator.AddNewVisualSensationToHc();
 
             }
@@ -118,7 +120,7 @@
             orchestrator.RecordPixels();
 
             var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
-            orchestrator.ProcessVisual(edgedbmp2);
+            orchestrator.ProcessVisual(edgedbmp2, counter++);
             var result = orchestrator.Verify_Predict_HC(true, 4);
 
             Assert.AreEqual(result.X, int.MaxValue);
@@ -706,6 +708,8 @@
             int loc2X = 1250;
             int loc2Y = 957;
 
+            ulong counter = 0;
+
             Bitmap bp1 = new Bitmap(40, 20);
 
             for (int i = 0; i < 40; i++)
@@ -739,13 +743,13 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.ProcessVisual(bp1);
+            orchestrator.ProcessVisual(bp1, counter++);
             orchestrator.AddNewVisualSensationToHc();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-            orchestrator.ProcessVisual(bp2);
+            orchestrator.ProcessVisual(bp2, counter++);
             orchestrator.AddNewVisualSensationToHc();
 
 
@@ -755,7 +759,7 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.ProcessVisual(bp1);
+            orchestrator.ProcessVisual(bp1, counter++);
             var pos = orchestrator.Verify_Predict_HC(true);
 
             Assert.AreEqual(loc2X, pos.X);
