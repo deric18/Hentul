@@ -41,7 +41,6 @@ namespace HentulWinforms
             label_done = new Label();
             label1 = new Label();
             CycleLabel = new Label();
-            labelBox = new TextBox();
             wanderingButton = new Button();
             BackUp = new Button();
             Restore = new Button();
@@ -50,8 +49,30 @@ namespace HentulWinforms
             label2 = new Label();
             button1 = new Button();
             startClassificationButton = new Button();
+            pictureBox1 = new PictureBox();
+            pictureBox2 = new PictureBox();
+            pictureBox3 = new PictureBox();
+            pictureBox4 = new PictureBox();
+            pictureBox5 = new PictureBox();
+            pictureBox6 = new PictureBox();
+            pictureBox7 = new PictureBox();
+            pictureBox8 = new PictureBox();
+            pictureBox9 = new PictureBox();
+            pictureBox10 = new PictureBox();
+            pictureBox11 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox5).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox6).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox7).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox8).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox9).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox10).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox11).BeginInit();
             SuspendLayout();
             // 
             // StartButton
@@ -71,12 +92,11 @@ namespace HentulWinforms
             CurrentImage.Size = new Size(250, 168);
             CurrentImage.TabIndex = 1;
             CurrentImage.TabStop = false;
-            CurrentImage.Click += CurrentImage_Click;
             // 
             // labelX
             // 
             labelX.AutoSize = true;
-            labelX.Location = new Point(723, 521);
+            labelX.Location = new Point(43, 272);
             labelX.Name = "labelX";
             labelX.Size = new Size(39, 15);
             labelX.TabIndex = 2;
@@ -85,7 +105,7 @@ namespace HentulWinforms
             // labelY
             // 
             labelY.AutoSize = true;
-            labelY.Location = new Point(853, 521);
+            labelY.Location = new Point(111, 272);
             labelY.Name = "labelY";
             labelY.Size = new Size(39, 15);
             labelY.TabIndex = 3;
@@ -113,7 +133,7 @@ namespace HentulWinforms
             // ObjectLabel
             // 
             ObjectLabel.AutoSize = true;
-            ObjectLabel.Location = new Point(209, 26);
+            ObjectLabel.Location = new Point(755, 26);
             ObjectLabel.Name = "ObjectLabel";
             ObjectLabel.Size = new Size(70, 15);
             ObjectLabel.TabIndex = 7;
@@ -137,7 +157,6 @@ namespace HentulWinforms
             label1.Size = new Size(52, 15);
             label1.TabIndex = 9;
             label1.Text = "CYCLE #";
-            label1.Click += label1_Click_1;
             // 
             // CycleLabel
             // 
@@ -148,14 +167,6 @@ namespace HentulWinforms
             CycleLabel.Size = new Size(13, 15);
             CycleLabel.TabIndex = 10;
             CycleLabel.Text = "0";
-            CycleLabel.Click += CycleLabel_Click;
-            // 
-            // labelBox
-            // 
-            labelBox.Location = new Point(1216, 674);
-            labelBox.Name = "labelBox";
-            labelBox.Size = new Size(100, 23);
-            labelBox.TabIndex = 11;
             // 
             // wanderingButton
             // 
@@ -169,7 +180,7 @@ namespace HentulWinforms
             // 
             // BackUp
             // 
-            BackUp.Location = new Point(380, 654);
+            BackUp.Location = new Point(43, 402);
             BackUp.Name = "BackUp";
             BackUp.Size = new Size(136, 23);
             BackUp.TabIndex = 13;
@@ -179,7 +190,7 @@ namespace HentulWinforms
             // 
             // Restore
             // 
-            Restore.Location = new Point(380, 704);
+            Restore.Location = new Point(43, 473);
             Restore.Name = "Restore";
             Restore.Size = new Size(136, 23);
             Restore.TabIndex = 14;
@@ -203,7 +214,6 @@ namespace HentulWinforms
             objectBox.Name = "objectBox";
             objectBox.Size = new Size(100, 23);
             objectBox.TabIndex = 16;
-            objectBox.TextChanged += textBox1_TextChanged;
             // 
             // label2
             // 
@@ -217,7 +227,7 @@ namespace HentulWinforms
             // 
             // button1
             // 
-            button1.Location = new Point(1475, 177);
+            button1.Location = new Point(1467, 170);
             button1.Name = "button1";
             button1.Size = new Size(108, 23);
             button1.TabIndex = 18;
@@ -235,12 +245,111 @@ namespace HentulWinforms
             startClassificationButton.UseVisualStyleBackColor = true;
             startClassificationButton.Click += startClassificationButton_Click;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Location = new Point(43, 589);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(1540, 100);
+            pictureBox1.TabIndex = 20;
+            pictureBox1.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            pictureBox2.Location = new Point(437, 723);
+            pictureBox2.Name = "pictureBox2";
+            pictureBox2.Size = new Size(94, 100);
+            pictureBox2.TabIndex = 21;
+            pictureBox2.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            pictureBox3.Location = new Point(537, 723);
+            pictureBox3.Name = "pictureBox3";
+            pictureBox3.Size = new Size(100, 100);
+            pictureBox3.TabIndex = 22;
+            pictureBox3.TabStop = false;
+            // 
+            // pictureBox4
+            // 
+            pictureBox4.Location = new Point(643, 723);
+            pictureBox4.Name = "pictureBox4";
+            pictureBox4.Size = new Size(106, 100);
+            pictureBox4.TabIndex = 23;
+            pictureBox4.TabStop = false;
+            // 
+            // pictureBox5
+            // 
+            pictureBox5.Location = new Point(755, 723);
+            pictureBox5.Name = "pictureBox5";
+            pictureBox5.Size = new Size(109, 100);
+            pictureBox5.TabIndex = 24;
+            pictureBox5.TabStop = false;
+            // 
+            // pictureBox6
+            // 
+            pictureBox6.Location = new Point(870, 723);
+            pictureBox6.Name = "pictureBox6";
+            pictureBox6.Size = new Size(99, 100);
+            pictureBox6.TabIndex = 25;
+            pictureBox6.TabStop = false;
+            // 
+            // pictureBox7
+            // 
+            pictureBox7.Location = new Point(975, 723);
+            pictureBox7.Name = "pictureBox7";
+            pictureBox7.Size = new Size(95, 100);
+            pictureBox7.TabIndex = 26;
+            pictureBox7.TabStop = false;
+            // 
+            // pictureBox8
+            // 
+            pictureBox8.Location = new Point(1076, 723);
+            pictureBox8.Name = "pictureBox8";
+            pictureBox8.Size = new Size(108, 100);
+            pictureBox8.TabIndex = 27;
+            pictureBox8.TabStop = false;
+            // 
+            // pictureBox9
+            // 
+            pictureBox9.Location = new Point(1190, 723);
+            pictureBox9.Name = "pictureBox9";
+            pictureBox9.Size = new Size(102, 100);
+            pictureBox9.TabIndex = 28;
+            pictureBox9.TabStop = false;
+            // 
+            // pictureBox10
+            // 
+            pictureBox10.Location = new Point(1298, 723);
+            pictureBox10.Name = "pictureBox10";
+            pictureBox10.Size = new Size(110, 100);
+            pictureBox10.TabIndex = 29;
+            pictureBox10.TabStop = false;
+            // 
+            // pictureBox11
+            // 
+            pictureBox11.Location = new Point(1414, 723);
+            pictureBox11.Name = "pictureBox11";
+            pictureBox11.Size = new Size(110, 100);
+            pictureBox11.TabIndex = 30;
+            pictureBox11.TabStop = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(pictureBox11);
+            Controls.Add(pictureBox10);
+            Controls.Add(pictureBox9);
+            Controls.Add(pictureBox8);
+            Controls.Add(pictureBox7);
+            Controls.Add(pictureBox6);
+            Controls.Add(pictureBox5);
+            Controls.Add(pictureBox4);
+            Controls.Add(pictureBox3);
+            Controls.Add(pictureBox2);
+            Controls.Add(pictureBox1);
             Controls.Add(startClassificationButton);
             Controls.Add(button1);
             Controls.Add(label2);
@@ -249,7 +358,6 @@ namespace HentulWinforms
             Controls.Add(Restore);
             Controls.Add(BackUp);
             Controls.Add(wanderingButton);
-            Controls.Add(labelBox);
             Controls.Add(CycleLabel);
             Controls.Add(label1);
             Controls.Add(label_done);
@@ -265,8 +373,34 @@ namespace HentulWinforms
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)CurrentImage).EndInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox4).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox5).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox6).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox7).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox8).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox9).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox10).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox11).EndInit();
             ResumeLayout(false);
             PerformLayout();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void labelY_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void Init()
@@ -286,7 +420,6 @@ namespace HentulWinforms
         private Label label_done;
         private Label label1;
         private Label CycleLabel;
-        private TextBox labelBox;
         private Button wanderingButton;
         private Button BackUp;
         private Button Restore;
@@ -295,5 +428,16 @@ namespace HentulWinforms
         private Label label2;
         private Button button1;
         private Button startClassificationButton;
+        private PictureBox pictureBox1;
+        private PictureBox pictureBox2;
+        private PictureBox pictureBox3;
+        private PictureBox pictureBox4;
+        private PictureBox pictureBox5;
+        private PictureBox pictureBox6;
+        private PictureBox pictureBox7;
+        private PictureBox pictureBox8;
+        private PictureBox pictureBox9;
+        private PictureBox pictureBox10;
+        private PictureBox pictureBox11;
     }
 }

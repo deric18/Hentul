@@ -182,9 +182,7 @@
             }
 
             return matchedEntity;
-        }
-
-        #endregion
+        }        
 
         public void DoneWithTraining(string label = "")
         {
@@ -206,6 +204,8 @@
                 imageIndex++;
             }
         }
+
+        #endregion
 
 
         #region UTILITY & MOCK 
