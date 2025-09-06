@@ -931,6 +931,7 @@
                             {
                                 int breakpoint = 0;
                             }
+
                             foreach (var synapse in TemporalLineArray[pos.X, pos.Y].AxonalList.Values)
                             {
                                 if (synapse.DendronalNeuronalId != null)
@@ -2197,6 +2198,7 @@
 
             AddPredictedNeuronForNextCycle(predictedNeuron, contrinutingNeuron);
 
+
             //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.                        
 
             if (cType.Equals(ConnectionType.TEMPRORAL) || cType.Equals(ConnectionType.APICAL))
@@ -2206,20 +2208,20 @@
                     if (cType.Equals(ConnectionType.TEMPRORAL))
                     {
                         predictedNeuron.TAContributors.Add(contrinutingNeuron.NeuronID.ToString(), 'T');
-                        predictedNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
+                        predictedNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, contrinutingNeuron, CycleNum, Mode);
                     }
                     else if (cType.Equals(ConnectionType.APICAL))
                     {
                         predictedNeuron.TAContributors.Add(contrinutingNeuron.NeuronID.ToString(), 'A');
-                        predictedNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                        predictedNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, contrinutingNeuron, CycleNum, Mode);
                     }
                 }
                 else
                 {
                     if (cType.Equals(ConnectionType.TEMPRORAL))
-                        predictedNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, CycleNum, Mode);
+                        predictedNeuron.ProcessVoltage(TEMPORAL_NEURON_FIRE_VALUE, contrinutingNeuron, CycleNum, Mode);
                     else if (cType.Equals(ConnectionType.APICAL))
-                        predictedNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                        predictedNeuron.ProcessVoltage(APICAL_NEURONAL_FIRE_VALUE, contrinutingNeuron, CycleNum, Mode);
 
                     #region Removed Code [Potential Bug OR Feature
                     //if (cType.Equals(ConnectionType.TEMPRORAL))
@@ -2238,13 +2240,13 @@
                     switch (synapse.cType)
                     {
                         case ConnectionType.DISTALDENDRITICNEURON:
-                            predictedNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
+                            predictedNeuron.ProcessVoltage(DISTAL_VOLTAGE_SPIKE_VALUE, contrinutingNeuron, CycleNum, Mode);
                             break;
                         case ConnectionType.PROXIMALDENDRITICNEURON:
-                            predictedNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE, CycleNum, Mode);
+                            predictedNeuron.ProcessVoltage(PROXIMAL_VOLTAGE_SPIKE_VALUE, contrinutingNeuron, CycleNum, Mode);
                             break;
                         case ConnectionType.NMDATONEURON:
-                            predictedNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, CycleNum, Mode);
+                            predictedNeuron.ProcessVoltage(NMDA_NEURONAL_FIRE_VALUE, contrinutingNeuron, CycleNum, Mode);
                             break;
                     }
                 }
@@ -2255,7 +2257,7 @@
             }
             else if (cType.Equals(ConnectionType.AXONTONEURON))
             {
-                predictedNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, CycleNum, Mode);
+                predictedNeuron.ProcessVoltage(PROXIMAL_AXON_TO_NEURON_FIRE_VALUE, contrinutingNeuron, CycleNum, Mode);
             }
             else
             {

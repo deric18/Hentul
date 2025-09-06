@@ -68,9 +68,11 @@
 
             var spatialSdr = new SDR_SOM(10, 10, new List<Position_SOM> { pos }, iType.SPATIAL);
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             bbManager.Fire(apicalSdr);
 
-            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7);
+            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7, dummyNeuron);
 
             bbManager.Fire(spatialSdr, 1, false, true);
 
@@ -279,6 +281,8 @@
 
             ulong Counter = 1;
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
             {
                 throw new Exception("Could Not connect two neurons!");
@@ -288,7 +292,7 @@
 
             bbManager.Fire(axonalSdr, Counter++);
 
-            dendronalNeuron.ProcessVoltage(10);
+            dendronalNeuron.ProcessVoltage(10, dummyNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -338,7 +342,9 @@
             //Make the synapsse Active                       
             //RepeatCycle(axonalSdr, dendronalSdr, )
 
-            dendronalNeuron1.ProcessVoltage(10);
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
+            dendronalNeuron1.ProcessVoltage(10, dummyNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -471,13 +477,15 @@
                 Assert.AreNotEqual(NeuronState.PREDICTED, neuron2.CurrentState);
             }
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             for (int i = 0; i <= BlockBehaviourManagerFOM.DISTALNEUROPLASTICITY; i++)
             {
                 Console.WriteLine("repcount : " + i.ToString());
 
                 bbManager.Fire(sdr1, counter++);
 
-                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30);
+                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30, dummyNeuron);
 
                 bbManager.Fire(sdr2, counter++);
 
@@ -612,7 +620,9 @@
                 currentStrength = postSynapse.GetStrength();
             }
 
-            overlapNeuron.ProcessVoltage(120);
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
+            overlapNeuron.ProcessVoltage(120, dummyNeuron);
 
             Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuron.NeuronID.ToString());
 
@@ -678,7 +688,9 @@
 
             bbManager.Fire(apicalInputPattern, 1, true, true);
 
-            normalNeuron.ProcessVoltage(1);
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
+            normalNeuron.ProcessVoltage(1, dummyNeuron);
 
             bbManager.Fire(spatialInputPattern, 1, true, true);
 
@@ -1049,6 +1061,7 @@
 
         public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount, ulong counter = 1, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
         {
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
 
             if (ShouldDepolarize == false)
             {
@@ -1066,7 +1079,7 @@
                 {
                     bbManager.Fire(axonalNeurondr, counter++);
 
-                    neuronToDeplarize.ProcessVoltage(10);
+                    neuronToDeplarize.ProcessVoltage(10, dummyNeuron);
 
                     bbManager.Fire(dendronalNeuronSdr, counter++);
                 }

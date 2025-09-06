@@ -58,9 +58,11 @@ namespace FirstOrderMemoryUnitTest
 
             var spatialSdr = TestUtils.GenerateApicalOrSpatialSDRForDepolarization(iType.SPATIAL);
 
-            var extraNeuron = bbManager.Columns[2, 3].Neurons[2];            
+            var extraNeuron = bbManager.Columns[2, 3].Neurons[2];
 
-            extraNeuron.ProcessVoltage(150, 0, LogMode.All);
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
+            extraNeuron.ProcessVoltage(150, dummyNeuron, 0, LogMode.All);
 
             bbManager.Fire(spatialSdr);
 
@@ -76,11 +78,13 @@ namespace FirstOrderMemoryUnitTest
 
             var pos = apicalSdr.ActiveBits[0];
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             var spatialSdr = new SDR_SOM(10, 10, new List<Position_SOM> { pos }, iType.SPATIAL);
 
             bbManager.Fire(apicalSdr);
 
-            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7);
+            bbManager.Columns[pos.X, pos.Y].Neurons[Z - 1].ProcessVoltage(7, dummyNeuron);
 
             bbManager.Fire(spatialSdr, 1, false, true);
 
@@ -303,6 +307,8 @@ namespace FirstOrderMemoryUnitTest
             Position_SOM dendronalPos1 = new Position_SOM(5, 3, 3, 'N');
             Position_SOM dendronalPos2 = new Position_SOM(2, 3, 3, 'N');
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             SDR_SOM axonalSdr = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { axonalPos }, iType.SPATIAL);
             SDR_SOM dendronalSdr = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { dendronalPos1, dendronalPos2 }, iType.SPATIAL);
 
@@ -328,7 +334,7 @@ namespace FirstOrderMemoryUnitTest
             //Make the synapsse Active                       
             //RepeatCycle(axonalSdr, dendronalSdr, )
 
-            dendronalNeuron1.ProcessVoltage(10);
+            dendronalNeuron1.ProcessVoltage(10, dummyNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -370,6 +376,8 @@ namespace FirstOrderMemoryUnitTest
             Neuron axonalNeuron = bbManager.Columns[axonalPos.X, axonalPos.Y].Neurons[axonalPos.Z];
             Neuron dendronalNeuron = bbManager.Columns[dendronalPos.X, dendronalPos.Y].Neurons[dendronalPos.Z];
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             ulong Counter = 1;
 
             if (!bbManager.ConnectTwoNeurons(axonalNeuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON))
@@ -381,7 +389,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(axonalSdr, Counter++);
 
-            dendronalNeuron.ProcessVoltage(10);
+            dendronalNeuron.ProcessVoltage(10, dummyNeuron);
 
             bbManager.Fire(dendronalSdr, Counter++);
 
@@ -465,6 +473,8 @@ namespace FirstOrderMemoryUnitTest
             Neuron neuron1 = bbManager.Columns[pos1.X, pos1.Y].Neurons[pos1.Z];
             Neuron neuron2 = bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z];
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             ulong counter = 1;
 
             if (!bbManager.ConnectTwoNeurons(neuron1, neuron2, ConnectionType.DISTALDENDRITICNEURON))
@@ -487,7 +497,7 @@ namespace FirstOrderMemoryUnitTest
 
                 bbManager.Fire(sdr1, counter++);
 
-                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30);
+                bbManager.Columns[pos2.X, pos2.Y].Neurons[pos2.Z].ProcessVoltage(30, dummyNeuron);
 
                 bbManager.Fire(sdr2, counter++);
 
@@ -604,6 +614,8 @@ namespace FirstOrderMemoryUnitTest
 
             var overlapNeuron = bbManager.GetNeuronFromPosition('N', overlapPos.X, overlapPos.Y, overlapPos.Z);
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             var temporalNeuron = bbManager.GetNeuronFromString(overlapNeuron.GetMyTemporalPartner1());
 
             if (overlapNeuron.ProximoDistalDendriticList.TryGetValue(temporalNeuron.NeuronID.ToString(), out Synapse preSynapse))
@@ -622,7 +634,7 @@ namespace FirstOrderMemoryUnitTest
                 currentStrength = postSynapse.GetStrength();
             }
 
-            overlapNeuron.ProcessVoltage(120);
+            overlapNeuron.ProcessVoltage(120, dummyNeuron);
 
             Assert.AreEqual(temporalNeuron.NeuronID.ToString(), temporalNeuron.NeuronID.ToString());
 
@@ -675,6 +687,8 @@ namespace FirstOrderMemoryUnitTest
             SDR_SOM apicalInputPattern = new SDR_SOM(10, 10, apicalPosList, iType.APICAL);
             SDR_SOM spatialInputPattern = new SDR_SOM(10, 10, apicalPosList, iType.SPATIAL);
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             uint previousStrength = 0, currentStrength = 0;
 
             Neuron normalNeuron = bbManager.GetNeuronFromString(apicalPosList[0].ToString());
@@ -688,7 +702,7 @@ namespace FirstOrderMemoryUnitTest
 
             bbManager.Fire(apicalInputPattern, 1, true, true);
 
-            normalNeuron.ProcessVoltage(1);
+            normalNeuron.ProcessVoltage(1, dummyNeuron);
 
             bbManager.Fire(spatialInputPattern, 1, true, true);
 
@@ -1130,6 +1144,8 @@ namespace FirstOrderMemoryUnitTest
         public void RepeatCycle(SDR_SOM axonalNeurondr, SDR_SOM dendronalNeuronSdr, int repCount, ulong counter = 1, bool ShouldDepolarize = false, Neuron neuronToDeplarize = null)
         {
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             if (ShouldDepolarize == false)
             {
                 for (int i = 0; i < repCount; i++)
@@ -1146,7 +1162,7 @@ namespace FirstOrderMemoryUnitTest
                 {
                     bbManager.Fire(axonalNeurondr, counter++);
 
-                    neuronToDeplarize.ProcessVoltage(10);
+                    neuronToDeplarize.ProcessVoltage(10, dummyNeuron);
 
                     bbManager.Fire(dendronalNeuronSdr, counter++);
                 }
