@@ -324,7 +324,11 @@
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public bool ProcessVisual(Bitmap v1Grey, Bitmap v2Grey, Bitmap v3Grey)
         {
-            // Skip work unless this is the Nth frame
+            // Normalize all inputs to 40×20 for the encoder
+            v1Grey = Ensure40x20(v1Grey);
+            v2Grey = Ensure40x20(v2Grey);
+            v3Grey = Ensure40x20(v3Grey);
+
             if (ProcessEveryNthFrame > 1 && (CycleNum % (ulong)ProcessEveryNthFrame) != 0)
                 return false;
 
@@ -332,6 +336,21 @@
             VisionProcessor.ProcessFor(LearningUnitType.V2, v2Grey);
             VisionProcessor.ProcessFor(LearningUnitType.V3, v3Grey);
             return true;
+        }
+        private static Bitmap Ensure40x20(Bitmap src)
+        {
+            if (src == null) throw new ArgumentNullException(nameof(src));
+            if (src.Width == 40 && src.Height == 20) return src;
+
+            var dst = new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(dst))
+            {
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.DrawImage(src, new Rectangle(0, 0, 40, 20));
+            }
+            return dst;
         }
         public void ProcessVisual(Bitmap v1Grey)
         {

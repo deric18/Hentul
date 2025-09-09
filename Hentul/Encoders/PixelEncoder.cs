@@ -471,22 +471,14 @@
 
         public void ParseBitmap(Bitmap bitmap)
         {
-            if ((bitmap.Width == 40|| bitmap.Width == 20) && bitmap.Height == 20)
-            {
+            if (bitmap.Width == 40 && bitmap.Height == 20)
                 ParseBitmapWithMappings(bitmap, MappingsV1);
-            }
             else if (bitmap.Width == 100 && bitmap.Height == 100)
-            {
                 ParseBitmapWithMappings(bitmap, MappingsV2);
-            }
             else if (bitmap.Width == 200 && bitmap.Height == 200)
-            {
                 ParseBitmapWithMappings(bitmap, MappingsV3);
-            }
             else
-            {
                 throw new InvalidDataException($"Invalid Data Dimensions! Got {bitmap.Width}x{bitmap.Height}");
-            }
         }
         private void ParseBitmapWithMappings(Bitmap bitmap, Dictionary<int, List<Position>> mappings)
         {

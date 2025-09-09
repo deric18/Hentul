@@ -117,10 +117,10 @@ namespace HentulWinforms
                 V1White.Image = ConverToEdgedBitmap(v1.Raw);
                 V1White.Refresh();
 
-                V2White.Image = ConverToEdgedBitmap(v1.Raw);
+                V2White.Image = ConverToEdgedBitmap(v2.Raw);
                 V2White.Refresh();
 
-                V3White.Image = ConverToEdgedBitmap(v1.Raw);
+                V3White.Image = ConverToEdgedBitmap(v3.Raw);
                 V3White.Refresh();
 
 
