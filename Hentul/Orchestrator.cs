@@ -300,7 +300,7 @@
                     }
                 }
 
-                if (label == "V2") bmp = processed;
+              
 
                 if (!isMock)
                 {
@@ -511,16 +511,9 @@
 
                 MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
 
-                RecordPixels();
-
-                var edgedbmp = ConverToEdgedBitmap();
-
-                var apicalSignal = apicalSignalSOM.ActiveBits;
-
-                var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
-
-                BiasFOM(apicalSignalFOM);
-
+                var frames = RecordPixels();
+                // Use V2 at normalized scale for edge map (keeps previous intent)
+                var edgedbmp = ConverToEdgedBitmapIdentify(frames.V2.Processed);
                 ParseNFireBitmap(edgedbmp);
 
                 VisionProcessor.Clean();
