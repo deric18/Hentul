@@ -23,8 +23,7 @@
 
         public int YOffset { get; private set; }
 
-        public Dictionary<int, Position[]> Mappings { get; private set; }
-
+       
         /// <summary>
         /// Per BBM of size 10 * 10 , the BBM gets split into 4 parts for 4 pixels , one part for each pixel 
         /// pixel 1 : X : 0 - 5 , Y : 0 - 5
@@ -37,9 +36,9 @@
         List<Position_SOM> ONbits2FOM;
         List<Position_SOM> ONbits3FOM;
         List<Position_SOM> ONbits4FOM;
-        Dictionary<int, List<Position>> MappingsV1;
-        Dictionary<int, List<Position>> MappingsV2;
-        Dictionary<int, List<Position>> MappingsV3;
+        public Dictionary<int, Position[]> Mappings { get; private set; }
+
+
 
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
 
@@ -54,9 +53,7 @@
 
         public PixelEncoder(int numBBM, int numPixels)
         {
-            MappingsV1 = new Dictionary<int, List<Position>>();
-            MappingsV2 = new Dictionary<int, List<Position>>();
-            MappingsV3 = new Dictionary<int, List<Position>>();
+            Mappings = new Dictionary<int, Position[]>();
             if (numBBM != 100 || numPixels != 400)
             {
                 throw new InvalidOperationException("Currently only supported for 10*10 Image Size with 2 Pixel per BBM W");
@@ -469,67 +466,57 @@
             return retDict;
         }
 
-        public void ParseBitmap(Bitmap bitmap)
+        
+        public void ParseBitmap(Bitmap bitmap, bool[,] validMask = null)
         {
-            if (bitmap.Width == 40 && bitmap.Height == 20)
-                ParseBitmapWithMappings(bitmap, MappingsV1);
-            else if (bitmap.Width == 100 && bitmap.Height == 100)
-                ParseBitmapWithMappings(bitmap, MappingsV2);
-            else if (bitmap.Width == 200 && bitmap.Height == 200)
-                ParseBitmapWithMappings(bitmap, MappingsV3);
-            else
-                throw new InvalidDataException($"Invalid Data Dimensions! Got {bitmap.Width}x{bitmap.Height}");
-        }
-        private void ParseBitmapWithMappings(Bitmap bitmap, Dictionary<int, List<Position>> mappings)
-        {
-            int width = bitmap.Width;
-            int height = bitmap.Height;
+            if (bitmap == null) throw new ArgumentNullException(nameof(bitmap));
+            if (bitmap.Width != 40 || bitmap.Height != 20)
+                throw new InvalidDataException($"Encoder expects 40x20; got {bitmap.Width}x{bitmap.Height}");
 
+            int width = bitmap.Width;   // 40
+            int height = bitmap.Height; // 20
             testBmpCoverage = new bool[width, height];
 
-            foreach (var kvp in mappings)
+            foreach (var kvp in Mappings)
             {
-                var bbmID = kvp.Key;
-                var posList = kvp.Value;
+                int bbmID = kvp.Key;
+                var posArr = kvp.Value;             // Position[4]
 
-                var pixel1 = posList[0];
-                var pixel2 = posList[1];
-                var pixel3 = posList[2];
-                var pixel4 = posList[3];
+                var p1 = posArr[0];
+                var p2 = posArr[1];
+                var p3 = posArr[2];
+                var p4 = posArr[3];
 
-                Color color1 = bitmap.GetPixel(pixel1.X, pixel1.Y);
-                testBmpCoverage[pixel1.X, pixel1.Y] = true;
+                // Gate on mask if provided (prevents padding/whitespace from activating)
+                bool ok1 = validMask == null || validMask[p1.X, p1.Y];
+                bool ok2 = validMask == null || validMask[p2.X, p2.Y];
+                bool ok3 = validMask == null || validMask[p3.X, p3.Y];
+                bool ok4 = validMask == null || validMask[p4.X, p4.Y];
 
-                Color color2 = bitmap.GetPixel(pixel2.X, pixel2.Y);
-                testBmpCoverage[pixel2.X, pixel2.Y] = true;
+                // Mark coverage (for debugging)
+                if (ok1) testBmpCoverage[p1.X, p1.Y] = true;
+                if (ok2) testBmpCoverage[p2.X, p2.Y] = true;
+                if (ok3) testBmpCoverage[p3.X, p3.Y] = true;
+                if (ok4) testBmpCoverage[p4.X, p4.Y] = true;
 
-                Color color3 = bitmap.GetPixel(pixel3.X, pixel3.Y);
-                testBmpCoverage[pixel3.X, pixel3.Y] = true;
+                // Read pixels only if valid by mask
+                var c1 = ok1 ? bitmap.GetPixel(p1.X, p1.Y) : Color.Black;
+                var c2 = ok2 ? bitmap.GetPixel(p2.X, p2.Y) : Color.Black;
+                var c3 = ok3 ? bitmap.GetPixel(p3.X, p3.Y) : Color.Black;
+                var c4 = ok4 ? bitmap.GetPixel(p4.X, p4.Y) : Color.Black;
 
-                Color color4 = bitmap.GetPixel(pixel4.X, pixel4.Y);
-                testBmpCoverage[pixel4.X, pixel4.Y] = true;
+                bool w1 = ok1 && CheckIfColorIsWhite(c1);
+                bool w2 = ok2 && CheckIfColorIsWhite(c2);
+                bool w3 = ok3 && CheckIfColorIsWhite(c3);
+                bool w4 = ok4 && CheckIfColorIsWhite(c4);
 
-                bool check1 = CheckIfColorIsWhite(color1);
-                bool check2 = CheckIfColorIsWhite(color2);
-                bool check3 = CheckIfColorIsWhite(color3);
-                bool check4 = CheckIfColorIsWhite(color4);
-
-                // Existing logic for CheckNInsert and cases
-                if (check1 && check2 && check3 && check4)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
-                }
-                else if (check1 && check2 && check3 && !check4)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
-                }
-                else if (check1 && check2 && !check3 && check4)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
-                }
-                // ... continue with your original conditions ...
+                if (w1 && w2 && w3 && w4) CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
+                else if (w1 && w2 && w3 && !w4) CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
+                else if (w1 && w2 && !w3 && w4) CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
+                // ... keep the rest of your cases as before ...
             }
         }
+
         //Populates the appropriate BBM ID to the Mappere Case as per the pixel data.
         private void CheckNInsert(Dictionary<MAPPERCASE, List<int>> dict, int bbmID, MAPPERCASE mapperCase)
         {
