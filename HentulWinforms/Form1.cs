@@ -49,7 +49,7 @@ namespace HentulWinforms
 
             if (string.IsNullOrEmpty(objectBox.Text))
             {
-                label_done.Text = "You need to input a object label before you can train!!";
+                label_done.Text = "Enter object label before you train!!";
                 return;
             }
 

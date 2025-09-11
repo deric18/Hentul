@@ -60,6 +60,7 @@ namespace HentulWinforms
             pictureBox9 = new PictureBox();
             pictureBox10 = new PictureBox();
             pictureBox11 = new PictureBox();
+            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -77,7 +78,7 @@ namespace HentulWinforms
             // 
             // StartButton
             // 
-            StartButton.Location = new Point(291, 159);
+            StartButton.Location = new Point(291, 82);
             StartButton.Name = "StartButton";
             StartButton.Size = new Size(136, 23);
             StartButton.TabIndex = 0;
@@ -87,7 +88,7 @@ namespace HentulWinforms
             // 
             // CurrentImage
             // 
-            CurrentImage.Location = new Point(723, 210);
+            CurrentImage.Location = new Point(513, 90);
             CurrentImage.Name = "CurrentImage";
             CurrentImage.Size = new Size(250, 168);
             CurrentImage.TabIndex = 1;
@@ -96,7 +97,7 @@ namespace HentulWinforms
             // labelX
             // 
             labelX.AutoSize = true;
-            labelX.Location = new Point(43, 272);
+            labelX.Location = new Point(40, 759);
             labelX.Name = "labelX";
             labelX.Size = new Size(39, 15);
             labelX.TabIndex = 2;
@@ -105,7 +106,7 @@ namespace HentulWinforms
             // labelY
             // 
             labelY.AutoSize = true;
-            labelY.Location = new Point(111, 272);
+            labelY.Location = new Point(108, 759);
             labelY.Name = "labelY";
             labelY.Size = new Size(39, 15);
             labelY.TabIndex = 3;
@@ -114,7 +115,7 @@ namespace HentulWinforms
             // 
             // Start
             // 
-            Start.Location = new Point(291, 112);
+            Start.Location = new Point(291, 26);
             Start.Name = "Start";
             Start.Size = new Size(136, 23);
             Start.TabIndex = 4;
@@ -124,7 +125,7 @@ namespace HentulWinforms
             // 
             // EdgedImage
             // 
-            EdgedImage.Location = new Point(1059, 210);
+            EdgedImage.Location = new Point(915, 90);
             EdgedImage.Name = "EdgedImage";
             EdgedImage.Size = new Size(250, 168);
             EdgedImage.TabIndex = 5;
@@ -133,7 +134,7 @@ namespace HentulWinforms
             // ObjectLabel
             // 
             ObjectLabel.AutoSize = true;
-            ObjectLabel.Location = new Point(31, 112);
+            ObjectLabel.Location = new Point(31, 90);
             ObjectLabel.Name = "ObjectLabel";
             ObjectLabel.Size = new Size(70, 15);
             ObjectLabel.TabIndex = 7;
@@ -142,7 +143,7 @@ namespace HentulWinforms
             // label_done
             // 
             label_done.AutoSize = true;
-            label_done.Location = new Point(31, 26);
+            label_done.Location = new Point(931, 30);
             label_done.Name = "label_done";
             label_done.Size = new Size(64, 15);
             label_done.TabIndex = 8;
@@ -170,7 +171,7 @@ namespace HentulWinforms
             // 
             // wanderingButton
             // 
-            wanderingButton.Location = new Point(1448, 224);
+            wanderingButton.Location = new Point(1448, 86);
             wanderingButton.Name = "wanderingButton";
             wanderingButton.Size = new Size(136, 23);
             wanderingButton.TabIndex = 12;
@@ -200,7 +201,7 @@ namespace HentulWinforms
             // 
             // train_another_object
             // 
-            train_another_object.Location = new Point(291, 247);
+            train_another_object.Location = new Point(291, 180);
             train_another_object.Name = "train_another_object";
             train_another_object.Size = new Size(136, 23);
             train_another_object.TabIndex = 15;
@@ -210,7 +211,7 @@ namespace HentulWinforms
             // 
             // objectBox
             // 
-            objectBox.Location = new Point(649, 104);
+            objectBox.Location = new Point(662, 27);
             objectBox.Name = "objectBox";
             objectBox.Size = new Size(100, 23);
             objectBox.TabIndex = 16;
@@ -218,16 +219,16 @@ namespace HentulWinforms
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(506, 112);
+            label2.Location = new Point(513, 35);
             label2.Name = "label2";
-            label2.Size = new Size(95, 15);
+            label2.Size = new Size(99, 15);
             label2.TabIndex = 17;
-            label2.Text = "Enter Icon Name";
+            label2.Text = "Enter Fruit  Name";
             label2.Click += label2_Click;
             // 
             // button1
             // 
-            button1.Location = new Point(1467, 170);
+            button1.Location = new Point(1448, 35);
             button1.Name = "button1";
             button1.Size = new Size(108, 23);
             button1.TabIndex = 18;
@@ -237,7 +238,7 @@ namespace HentulWinforms
             // 
             // startClassificationButton
             // 
-            startClassificationButton.Location = new Point(291, 200);
+            startClassificationButton.Location = new Point(291, 129);
             startClassificationButton.Name = "startClassificationButton";
             startClassificationButton.Size = new Size(136, 23);
             startClassificationButton.TabIndex = 19;
@@ -247,7 +248,7 @@ namespace HentulWinforms
             // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(69, 445);
+            pictureBox1.Location = new Point(108, 281);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(1540, 100);
             pictureBox1.TabIndex = 20;
@@ -333,12 +334,22 @@ namespace HentulWinforms
             pictureBox11.TabIndex = 30;
             pictureBox11.TabStop = false;
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(-1, 314);
+            label3.Name = "label3";
+            label3.Size = new Size(80, 15);
+            label3.TabIndex = 31;
+            label3.Text = "V1 SOM Layer";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(label3);
             Controls.Add(pictureBox11);
             Controls.Add(pictureBox10);
             Controls.Add(pictureBox9);
@@ -439,5 +450,6 @@ namespace HentulWinforms
         private PictureBox pictureBox9;
         private PictureBox pictureBox10;
         private PictureBox pictureBox11;
+        private Label label3;
     }
 }
