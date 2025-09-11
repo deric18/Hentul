@@ -77,7 +77,7 @@ namespace HentulWinforms
             // 
             // StartButton
             // 
-            StartButton.Location = new Point(380, 290);
+            StartButton.Location = new Point(291, 159);
             StartButton.Name = "StartButton";
             StartButton.Size = new Size(136, 23);
             StartButton.TabIndex = 0;
@@ -114,7 +114,7 @@ namespace HentulWinforms
             // 
             // Start
             // 
-            Start.Location = new Point(380, 247);
+            Start.Location = new Point(291, 112);
             Start.Name = "Start";
             Start.Size = new Size(136, 23);
             Start.TabIndex = 4;
@@ -133,7 +133,7 @@ namespace HentulWinforms
             // ObjectLabel
             // 
             ObjectLabel.AutoSize = true;
-            ObjectLabel.Location = new Point(755, 26);
+            ObjectLabel.Location = new Point(31, 112);
             ObjectLabel.Name = "ObjectLabel";
             ObjectLabel.Size = new Size(70, 15);
             ObjectLabel.TabIndex = 7;
@@ -170,7 +170,7 @@ namespace HentulWinforms
             // 
             // wanderingButton
             // 
-            wanderingButton.Location = new Point(380, 364);
+            wanderingButton.Location = new Point(1448, 224);
             wanderingButton.Name = "wanderingButton";
             wanderingButton.Size = new Size(136, 23);
             wanderingButton.TabIndex = 12;
@@ -180,7 +180,7 @@ namespace HentulWinforms
             // 
             // BackUp
             // 
-            BackUp.Location = new Point(43, 402);
+            BackUp.Location = new Point(31, 814);
             BackUp.Name = "BackUp";
             BackUp.Size = new Size(136, 23);
             BackUp.TabIndex = 13;
@@ -190,7 +190,7 @@ namespace HentulWinforms
             // 
             // Restore
             // 
-            Restore.Location = new Point(43, 473);
+            Restore.Location = new Point(204, 814);
             Restore.Name = "Restore";
             Restore.Size = new Size(136, 23);
             Restore.TabIndex = 14;
@@ -200,7 +200,7 @@ namespace HentulWinforms
             // 
             // train_another_object
             // 
-            train_another_object.Location = new Point(380, 402);
+            train_another_object.Location = new Point(291, 247);
             train_another_object.Name = "train_another_object";
             train_another_object.Size = new Size(136, 23);
             train_another_object.TabIndex = 15;
@@ -210,7 +210,7 @@ namespace HentulWinforms
             // 
             // objectBox
             // 
-            objectBox.Location = new Point(1475, 112);
+            objectBox.Location = new Point(649, 104);
             objectBox.Name = "objectBox";
             objectBox.Size = new Size(100, 23);
             objectBox.TabIndex = 16;
@@ -218,7 +218,7 @@ namespace HentulWinforms
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(1320, 116);
+            label2.Location = new Point(506, 112);
             label2.Name = "label2";
             label2.Size = new Size(95, 15);
             label2.TabIndex = 17;
@@ -237,7 +237,7 @@ namespace HentulWinforms
             // 
             // startClassificationButton
             // 
-            startClassificationButton.Location = new Point(380, 326);
+            startClassificationButton.Location = new Point(291, 200);
             startClassificationButton.Name = "startClassificationButton";
             startClassificationButton.Size = new Size(136, 23);
             startClassificationButton.TabIndex = 19;
@@ -247,7 +247,7 @@ namespace HentulWinforms
             // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(43, 589);
+            pictureBox1.Location = new Point(69, 445);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(1540, 100);
             pictureBox1.TabIndex = 20;
