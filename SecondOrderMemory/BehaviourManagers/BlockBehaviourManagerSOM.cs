@@ -309,11 +309,27 @@
             AddNewLabelToSupportedLabels(Label);
         }
 
+        public void ChangeCurrentObjectLabel(string objectName)
+        {
+            if (string.IsNullOrEmpty(objectName))
+            {
+                throw new InvalidOperationException("ERROR : ChangeCurrentObjectLabel() : Object Name cannot be empty");
+            }
+
+            CurrentObjectLabel = objectName;
+
+            //Add new Label to SupportedLabels 
+            AddNewLabelToSupportedLabels(objectName);
+            CompleteCleanUP();
+        }
+
         public void ChangeNetworkModeToPrediction()
         {
             NetWorkMode = NetworkMode.PREDICTION;
             CurrentObjectLabel = null;
             CompleteCleanUP();
+
+            WriteLogsToFile($"SOM Layer {Layer.ToString()} switched to Prediction Mode! ");
         }
 
         public void Init(int bbmID)
@@ -545,6 +561,21 @@
 
         #region PUBLIC API
 
+        public List<string> GetCurrentPredictions()
+        {
+            if (Layer.Equals(LayerType.Layer_3A) == false)
+            {
+                throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
+            }
+
+            if (NetWorkMode == NetworkMode.TRAINING)
+            {
+                throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
+            }
+
+            return CurrentPredictions.ToList();
+        }
+
         /// <summary>
         /// Processes the Incoming Input Pattern
         /// </summary>
@@ -553,6 +584,7 @@
         /// <param name="ignorePrecyclePrep"> Will not Perfrom CleanUp if False and vice versa</param>
         /// <param name="ignorePostCycleCleanUp">Will not Perfrom CleanUp if False and vice versa</param>
         /// <exception cref="InvalidOperationException"></exception>
+        /// 
         public bool Fire(SDR_SOM incomingPattern, ulong currentCycle = 0, bool ignorePrecyclePrep = false, bool ignorePostCycleCleanUp = false, bool CreateActiveSynapses = false)
         {
             // BUG : Potential Bug:  if after one complete cycle of firing ( T -> A -> Spatial) performing a cleanup might remove reset probabilities for the next fire cycle
@@ -757,11 +789,10 @@
                 if (intersect.Count == 1)
                 {
                     //Prediction is good , NEed to Verify if early in cycle.
-
+                    WriteLogsToFile($" Object Classified :: {Layer.ToString()} has switched to DONE State!");
                     NetWorkMode = NetworkMode.DONE;
                     CurrentObjectLabel = intersect[0];
                     CurrentPredictions = intersect;
-
                 }
                 else
                 {
@@ -791,7 +822,6 @@
                 }
             }
         }
-
 
         private void Fire()
         {
@@ -1016,22 +1046,7 @@
             }
 
             return new SDR_SOM(X, Y, activeBits, iType.SPATIAL);
-        }
-
-        public List<string> GetCurrentPredictions()
-        {
-            if (Layer.Equals(LayerType.Layer_3A) == false)
-            {
-                throw new InvalidOperationException("Only Layer 3A is a Pooling Layer");
-            }
-
-            if (NetWorkMode == NetworkMode.TRAINING)
-            {
-                throw new InvalidOperationException("Should Only be Called during Prediction Mode!");
-            }
-
-            return CurrentPredictions.ToList();
-        }
+        }        
 
         public List<Position_SOM> GetAllPredictedNeurons()
         {
@@ -1918,7 +1933,7 @@
                 WriteLogsToFile(" ERROR :: ConnectTwoNeurons :::: Could not ADD new Dendronal Connection to the Neuron and return a HArd False! Dendronal Neuron ID : " + DendriticNeuron.NeuronID + " Layer Type :" + Layer.ToString());
                 throw new InvalidOperationException("HARD FALSE eStablishing new Axonal Connection!");
             }
-            else if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.SOFTFALSE)
+            else if (IsAxonalConnectionSuccesful == ConnectionRemovalReturnType.SOFTFALSE && Mode > LogMode.Trace)
             {
                 //Need investigation as why the same connection is tried twice : No need to investigate
                 WriteLogsToFile(" ERROR :: ConnectTwoNeurons ::::Another Failed Attempt at adding a redundant Connection Dendronal Neuron ID :  " + DendriticNeuron.NeuronID + " Axonal Neuron ID : " + AxonalNeuron.NeuronID + " Layer Type :" + Layer.ToString());
@@ -3035,21 +3050,7 @@
         {
             File.AppendAllText(LogFileName, logline + "\n");
 
-        }
-
-        public void ChangeCurrentObjectLabel(string objectName)
-        {
-            if (string.IsNullOrEmpty(objectName))
-            {
-                throw new InvalidOperationException("ERROR : ChangeCurrentObjectLabel() : Object Name cannot be empty");
-            }
-
-            CurrentObjectLabel = objectName;
-
-            //Add new Label to SupportedLabels 
-            AddNewLabelToSupportedLabels(objectName);
-            CompleteCleanUP();
-        }
+        }        
 
         private bool AddNewLabelToSupportedLabels(string label)
         {

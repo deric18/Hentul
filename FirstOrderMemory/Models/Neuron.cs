@@ -42,6 +42,8 @@
 
         public Dictionary<string, char> TAContributors { get; private set; }
 
+        public List<Neuron> PreviousCycleContributer { get; private set; }
+
         /// <summary>
         /// Key is always Dendronal Neurons ID && Value is Synapse
         /// </summary>
@@ -74,6 +76,7 @@
             flag = 0;
             PruneCount = 0;
             lastSpikeCycleNum = 0;
+            PreviousCycleContributer = new();
         }
 
         [JsonConstructor]
@@ -157,7 +160,7 @@
             ProcessCurrentState(cycleNum, logmode, logFileName);
         }
 
-        public void ProcessVoltage(int voltage, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
+        public void ProcessVoltage(int voltage, Neuron contributingNeuron, ulong cycleNum = 0, LogMode logmode = LogMode.BurstOnly)
         {
             if(NeuronID.ToString().Equals("2-4-0-N"))
             {
@@ -171,6 +174,8 @@
                 if((logmode == LogMode.Info || logmode == LogMode.All))
                     Console.WriteLine(" INFO :: Neurons.cs :::: Neuron " + NeuronID.ToString() + " is entering firing Mode");               
             }
+
+            PreviousCycleContributer.Add(contributingNeuron);
 
             ProcessCurrentState(cycleNum, logmode);
 
@@ -511,6 +516,7 @@
 
             Voltage = 0;
             ProcessCurrentState(cycleNum);
+            PreviousCycleContributer.Clear();
         }
 
         internal bool DidItContribute(Neuron temporalContributor)

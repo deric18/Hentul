@@ -1,5 +1,4 @@
-﻿
-using System.Configuration;
+﻿using System.Configuration;
 
 namespace HentulWinforms
 {
@@ -41,24 +40,25 @@ namespace HentulWinforms
             label_done = new Label();
             label1 = new Label();
             CycleLabel = new Label();
-            labelBox = new TextBox();
             wanderingButton = new Button();
             BackUp = new Button();
             Restore = new Button();
             train_another_object = new Button();
-            textBox1 = new TextBox();
+            objectBox = new TextBox();
             label2 = new Label();
             button1 = new Button();
             V2White = new PictureBox();
             V2Gray = new PictureBox();
             V3White = new PictureBox();
             V3Gray = new PictureBox();
+            pictureBox1 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)V1Gray).BeginInit();
             ((System.ComponentModel.ISupportInitialize)V1White).BeginInit();
             ((System.ComponentModel.ISupportInitialize)V2White).BeginInit();
             ((System.ComponentModel.ISupportInitialize)V2Gray).BeginInit();
             ((System.ComponentModel.ISupportInitialize)V3White).BeginInit();
             ((System.ComponentModel.ISupportInitialize)V3Gray).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // StartButton
@@ -80,7 +80,6 @@ namespace HentulWinforms
             V1Gray.Size = new Size(130, 43);
             V1Gray.TabIndex = 1;
             V1Gray.TabStop = false;
-            V1Gray.Click += CurrentImage_Click;
             // 
             // labelX
             // 
@@ -108,7 +107,7 @@ namespace HentulWinforms
             Start.Name = "Start";
             Start.Size = new Size(155, 31);
             Start.TabIndex = 4;
-            Start.Text = "Init ";
+            Start.Text = "Init";
             Start.UseVisualStyleBackColor = true;
             Start.Click += button1_Click;
             // 
@@ -148,7 +147,6 @@ namespace HentulWinforms
             label1.Size = new Size(62, 20);
             label1.TabIndex = 9;
             label1.Text = "CYCLE #";
-            label1.Click += label1_Click_1;
             // 
             // CycleLabel
             // 
@@ -160,14 +158,6 @@ namespace HentulWinforms
             CycleLabel.TabIndex = 10;
             CycleLabel.Text = "0";
             CycleLabel.Click += CycleLabel_Click;
-            // 
-            // labelBox
-            // 
-            labelBox.Location = new Point(1390, 899);
-            labelBox.Margin = new Padding(3, 4, 3, 4);
-            labelBox.Name = "labelBox";
-            labelBox.Size = new Size(114, 27);
-            labelBox.TabIndex = 11;
             // 
             // wanderingButton
             // 
@@ -213,23 +203,23 @@ namespace HentulWinforms
             train_another_object.UseVisualStyleBackColor = true;
             train_another_object.Click += train_another_object_Click;
             // 
-            // textBox1
+            // objectBox
             // 
-            textBox1.Location = new Point(1686, 149);
-            textBox1.Margin = new Padding(3, 4, 3, 4);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(114, 27);
-            textBox1.TabIndex = 16;
-            textBox1.TextChanged += textBox1_TextChanged;
+            objectBox.Location = new Point(1509, 179);
+            objectBox.Margin = new Padding(3, 4, 3, 4);
+            objectBox.Name = "objectBox";
+            objectBox.Size = new Size(114, 27);
+            objectBox.TabIndex = 16;
+            objectBox.TextChanged += textBox1_TextChanged;
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Location = new Point(1509, 155);
             label2.Name = "label2";
-            label2.Size = new Size(119, 20);
+            label2.Size = new Size(133, 20);
             label2.TabIndex = 17;
-            label2.Text = "Enter Icon Name";
+            label2.Text = "Enter Object Name";
             label2.Click += label2_Click;
             // 
             // button1
@@ -279,24 +269,32 @@ namespace HentulWinforms
             V3Gray.TabIndex = 21;
             V3Gray.TabStop = false;
             // 
+            // pictureBox1 (SOM layer)
+            // 
+            pictureBox1.Location = new Point(35, 610);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(1380, 60);
+            pictureBox1.TabIndex = 23;
+            pictureBox1.TabStop = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1924, 1055);
+            Controls.Add(pictureBox1);
             Controls.Add(V3White);
             Controls.Add(V3Gray);
             Controls.Add(V2White);
             Controls.Add(V2Gray);
             Controls.Add(button1);
             Controls.Add(label2);
-            Controls.Add(textBox1);
+            Controls.Add(objectBox);
             Controls.Add(train_another_object);
             Controls.Add(Restore);
             Controls.Add(BackUp);
             Controls.Add(wanderingButton);
-            Controls.Add(labelBox);
             Controls.Add(CycleLabel);
             Controls.Add(label1);
             Controls.Add(label_done);
@@ -317,8 +315,24 @@ namespace HentulWinforms
             ((System.ComponentModel.ISupportInitialize)V2Gray).EndInit();
             ((System.ComponentModel.ISupportInitialize)V3White).EndInit();
             ((System.ComponentModel.ISupportInitialize)V3Gray).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void labelY_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void Init()
@@ -338,17 +352,17 @@ namespace HentulWinforms
         private Label label_done;
         private Label label1;
         private Label CycleLabel;
-        private TextBox labelBox;
         private Button wanderingButton;
         private Button BackUp;
         private Button Restore;
         private Button train_another_object;
-        private TextBox textBox1;
+        private TextBox objectBox;
         private Label label2;
         private Button button1;
         private PictureBox V2White;
         private PictureBox V2Gray;
         private PictureBox V3White;
         private PictureBox V3Gray;
+        private PictureBox pictureBox1;
     }
 }

@@ -139,9 +139,11 @@
 
             ulong counter = 1;
 
+            var dummyNeuron = bbManager.Columns[8, 4].Neurons[3];
+
             bbManager.Fire(apicalSdr);
 
-            neuron3.ProcessVoltage(10);
+            neuron3.ProcessVoltage(10, dummyNeuron);
 
             Assert.AreEqual(neuron3.Voltage, 50);
 
