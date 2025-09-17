@@ -59,21 +59,7 @@ namespace HentulWinforms
         {
             // LOCAL training guardrails + begin/learn flow
             label_done.Text = "Procesing";
-            label_done.Refresh();
-
-            if (string.IsNullOrEmpty(objectBox.Text))
-            {
-                label_done.Text = "Enter object label before you train!!";
-                return;
-            }
-
-            if (objectList.Contains(objectBox.Text))
-            {
-                label_done.Text = "Object Already Trained!!";
-                return;
-            }
-
-            objectList.Add(objectBox.Text);
+            label_done.Refresh();            
 
             if (counter > 0)
             {
@@ -110,6 +96,20 @@ namespace HentulWinforms
 
         private void StartButton_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(objectBox.Text))
+            {
+                label_done.Text = "Enter object label before you train!!"; label_done.Refresh();
+                return;
+            }
+
+            if (objectList.Contains(objectBox.Text))
+            {
+                label_done.Text = "Object Already Trained!!"; label_done.Refresh();
+                return;
+            }
+
+            objectList.Add(objectBox.Text);
+
             label_done.Text = "Processing";
             label_done.Refresh();
 
