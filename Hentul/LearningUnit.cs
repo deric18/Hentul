@@ -4,6 +4,7 @@
     using Common;
     using Encoders;
     using SecondOrderMemory.Models;
+    using static Hentul.Orchestrator;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 

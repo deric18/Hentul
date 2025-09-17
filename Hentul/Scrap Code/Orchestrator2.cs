@@ -11,6 +11,7 @@ namespace Hentul
     using Image = SixLabors.ImageSharp.Image;
     using FirstOrderMemory.Models.Encoders;
     using Hentul.Hippocampal_Entorinal_complex;
+    using static Hentul.Orchestrator;
 
     internal class Orchestrator2
     {

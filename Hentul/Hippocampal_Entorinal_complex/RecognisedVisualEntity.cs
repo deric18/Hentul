@@ -1,15 +1,16 @@
 ﻿/// Author : Deric Pinto
 namespace Hentul.Hippocampal_Entorinal_complex
 {
+
     using Common;
 
     public class RecognisedVisualEntity : Entity
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
-
+        string baseDir = AppContext.BaseDirectory;
         public List<Position2D> FavouritePositions { get; set; }
 
-        // Holds the indexes of all the objects in ObjectSnapshot which are needed for classification of the object.
+        //Holds the indexes of all the objects in objectsnapshot which are needed for classfication of the object.
         public RFrame frame { get; private set; }
 
         public Position2D CenterPosition { get; private set; }
@@ -39,7 +40,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
             ObjectSnapshot = unrec.ObjectSnapshot;
             _visitedIndexes = new List<int>();
             frame = null;
-            failureReportfileName = "C:\\Users\\depint\\source\\repos\\Hentul\\failureReport.txt";
+            failureReportfileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\failureReport.txt"));
+
         }
 
         public void Clean()
@@ -60,7 +62,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             frame = new RFrame(ObjectSnapshot);
         }
 
-        // For legacy Verification Purpose (updated to V1+V2+V3 pipeline)
+        // For legacy Verification Purpose
         public bool Verify(Sensation_Location sensei = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
             if (ObjectSnapshot?.Count == 0)
@@ -81,43 +83,48 @@ namespace Hentul.Hippocampal_Entorinal_complex
             {
                 for (int j = 0; j < frame?.DisplacementTable?.GetLength(1); j++)
                 {
-                    if (i == j) continue;
-
-                    var newSensei = ObjectSnapshot[j];
-                    var newPos = newSensei.CenterPosition;
-
-                    // Move cursor to new location
-                    Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
-
-                    // --- YOUR MODIFICATIONS: capture/edge/ process for V1, V2, V3 ---
-                    // Capture V1, V2, V3 regions together (isMock allows test mode)
-                    var (v1, v2, v3) = instance.RecordPixels(isMock);
-
-                    // Apply edge detection per region
-                    using var v1Edge = instance.ConverToEdgedBitmapIdentify(v1.Raw);
-                    using var v2Edge = instance.ConverToEdgedBitmapIdentify(v2.Raw);
-                    using var v3Edge = instance.ConverToEdgedBitmapIdentify(v3.Raw);
-
-                    // Process all three scales
-                    instance.ProcessVisual(v1Edge, v2Edge, v3Edge);
-                    // ---------------------------------------------------------------
-
-                    var tuple = instance.GetSDRFromL3B();
-
-                    if (tuple.Item1 == null)
-                        return false;
-
-                    // Verify intersection policies
-                    if (!(HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false ||
-                          HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
+                    if (i != j)
                     {
-                        return false;
+                        var newSensei = ObjectSnapshot[j];
+                        var newPos = newSensei.CenterPosition;
+
+                        // Move cursor to new location
+                        Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
+
+
+                        // ✅ Capture V1, V2, V3 regions together
+                        var (v1, v2, v3) = instance.RecordPixels(isMock);
+
+                        // ✅ Apply edge detection for each region separately
+                        using var v1Edge = instance.ConverToEdgedBitmapIdentify(v1.Raw);
+                        using var v2Edge = instance.ConverToEdgedBitmapIdentify(v2.Raw);
+                        using var v3Edge = instance.ConverToEdgedBitmapIdentify(v3.Raw);
+
+                        // Process all three
+                        instance.ProcessVisual(v1Edge, v2Edge, v3Edge);
+
+                        instance.RecordPixels();
+                        var bmp = instance.ConverToEdgedBitmap();
+                        instance.ProcessVisual(bmp, 0);
+
+
+                        var tuple = instance.GetSDRFromL3B();
+
+                        if (tuple.Item1 == null)
+                            return false;
+
+                        // Verify intersection policies
+                        if (!(HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false ||
+                              HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
+                        {
+                            return false;
+                        }
+
+                        confirmations++;
+
+                        if (confirmations == iterationToConfirmation)
+                            return true;
                     }
-
-                    confirmations++;
-
-                    if (confirmations == iterationToConfirmation)
-                        return true;
                 }
             }
 
@@ -182,13 +189,16 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             if (posToVerify != null && source != null)
             {
-                // Extract this sensei from object snapshot for comparison exactly at this location.
+                //Extract this sensei from object snapshot for comparision exactly at this location.
+
                 int index = 0;
 
                 foreach (var sensei in ObjectSnapshot)
                 {
                     if (source.CenterPosition == posToVerify)
                     {
+                        //Pos found copy sensei to currentComparision
+
                         CurrentComparision = sensei;
                         CurrentComparisionKeyIndex = index;
                         _visitedIndexes.Add(index);
@@ -216,6 +226,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
                     {
                         if (sensei.Id == source.Id)
                         {
+                            //Pos found copy sensei to currentComparision
+
                             CurrentComparision = sensei;
                             CurrentComparisionKeyIndex = index;
                             _visitedIndexes.Add(index);
@@ -305,7 +317,29 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 tuple = Sensation_Location.CompareObjectSenseiAgainstListPercentage(sensei, ObjectSnapshot, predictedSensei, true, true);
             }
 
+            //if(tuple.Item1 > 0 && tuple.Item2 > 0)
+            //{
+            //    //PRedicted Sensei matche as well
+            //}
+            //else if(tuple.Item1 == 0 && tuple.Item2 == 0)
+            //{
+
+            //}
+            //else if (tuple.Item1 == 0 && tuple.Item2 > 0)
+            //{
+
+            //}
+            //else if( tuple.Item1 > 0 && tuple.Item2 == 0)
+            //{
+
+            //}
+            //else if(tuple.Item1 == 100 && tuple.Item2 == 100)
+            //{
+
+            //}
+
             return tuple;
         }
     }
+
 }
