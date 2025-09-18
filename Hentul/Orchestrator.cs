@@ -103,11 +103,7 @@
 
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
-            if (isMock)
-                ImageIndex = mockImageIndex;
-            else
-                ImageIndex = 0;
-
+            if(ShouldInit) 
             Init();
 
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);

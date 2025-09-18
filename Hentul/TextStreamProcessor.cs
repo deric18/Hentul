@@ -128,7 +128,8 @@
 
             foreach (var fomID in firingFOM_T)
             {
-                posList.AddRange(CharEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+                posList.AddRange(
+                    CharEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
 
 

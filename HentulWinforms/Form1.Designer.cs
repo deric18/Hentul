@@ -61,6 +61,7 @@ namespace HentulWinforms
             pictureBox10 = new PictureBox();
             pictureBox11 = new PictureBox();
             label3 = new Label();
+            wordBox = new TextBox();
             ((System.ComponentModel.ISupportInitialize)CurrentImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)EdgedImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -171,7 +172,7 @@ namespace HentulWinforms
             // 
             // wanderingButton
             // 
-            wanderingButton.Location = new Point(1448, 86);
+            wanderingButton.Location = new Point(291, 225);
             wanderingButton.Name = "wanderingButton";
             wanderingButton.Size = new Size(136, 23);
             wanderingButton.TabIndex = 12;
@@ -228,11 +229,11 @@ namespace HentulWinforms
             // 
             // button1
             // 
-            button1.Location = new Point(1448, 35);
+            button1.Location = new Point(1327, 82);
             button1.Name = "button1";
             button1.Size = new Size(108, 23);
             button1.TabIndex = 18;
-            button1.Text = "Train Words";
+            button1.Text = "Train Word";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click_3;
             // 
@@ -343,12 +344,20 @@ namespace HentulWinforms
             label3.TabIndex = 31;
             label3.Text = "V1 SOM Layer";
             // 
+            // wordBox
+            // 
+            wordBox.Location = new Point(1514, 82);
+            wordBox.Name = "wordBox";
+            wordBox.Size = new Size(100, 23);
+            wordBox.TabIndex = 32;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1705, 903);
+            Controls.Add(wordBox);
             Controls.Add(label3);
             Controls.Add(pictureBox11);
             Controls.Add(pictureBox10);
@@ -451,5 +460,6 @@ namespace HentulWinforms
         private PictureBox pictureBox10;
         private PictureBox pictureBox11;
         private Label label3;
+        private TextBox wordBox;
     }
 }

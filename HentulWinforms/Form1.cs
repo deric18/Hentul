@@ -52,7 +52,7 @@ namespace HentulWinforms
                 label_done.Text = "Enter object label before you train!!";
                 return;
             }
-             
+
             if (objectList.Contains(objectBox.Text))
             {
                 label_done.Text = "Object Already Trained!!";
@@ -280,7 +280,8 @@ namespace HentulWinforms
             label_done.Text = "Innitting...";
             label_done.Refresh();
             networkMode = NetworkMode.TRAINING;
-            orchestrator = Orchestrator.GetInstance();
+
+            orchestrator = Orchestrator.GetInstance(isMock: false, shouldInit: true);
 
             var value = orchestrator.GetCurrentPointerPosition();
 
@@ -353,25 +354,26 @@ namespace HentulWinforms
         }
 
         private void button1_Click_3(object sender, EventArgs e)
-        {
-            List<string> wordsToTrain = new List<string>()
-            {
-                "MyComputer",
-                "RecycleBin",
-                "GitBash",
-                "QBSStudio",
-                "Hentul"
-            };
+        {            
 
-            foreach (var word in wordsToTrain)
+            orchestrator.ChangeNetworkModeToTraining();
+
+            var text = wordBox.Text;
+
+            var carrs = text.ToCharArray();
+
+            foreach (var ch in carrs)
             {
-                orchestrator.ChangeNetworkModeToTraining();
-                foreach (var ch in word)
+                if (!Char.IsLetter(ch))
                 {
-                    orchestrator.AddNewCharacterSensationToHC(ch);
-                }
-                orchestrator.DoneWithTraining();
+                    label_done.Text = "Words should only be letters"; label_done.Refresh();
+                    return;
+                }       
+
+                orchestrator.AddNewCharacterSensationToHC(ch);
             }
+
+            orchestrator.DoneWithTraining();
         }
 
         // -------------------- SOM Visualization Logic --------------------        
