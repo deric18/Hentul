@@ -3,13 +3,15 @@
     using Common;
     using System.Runtime.InteropServices;
     using System;
-    using Hentul.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
     using System.Drawing;
     using Hentul.Encoders;
+    using System.Windows.Forms;
+    using Hentul.Hippocampal_Entorinal_complex;
 
     public class Orchestrator
     {
+        string baseDir = AppContext.BaseDirectory;
 
         public struct POINT
         {
@@ -39,6 +41,12 @@
         #region Used Variables
 
         private static Orchestrator _orchestrator;
+        public int ProcessEveryNthFrame { get; set; } = 3;// 1 = process every frame, 3 = every 3rd frame
+        public bool ShouldProcessThisFrame =>
+    ProcessEveryNthFrame <= 1 || (CycleNum % (ulong)ProcessEveryNthFrame) == 0;
+
+        public bool SaveDebugFrames { get; set; } = false;
+
 
         public int Range { get; private set; }
 
@@ -79,6 +87,8 @@
         public ulong CycleNum { get; private set; }
 
         private int NumColumns, X, Z;
+        private Bitmap _rawV1, _rawV2, _rawV3;          // 20x20, 100x100, 200x200
+        private Bitmap _procV1, _procV2, _procV3;       // all 40x20 (encoder input)
 
         #endregion
 
@@ -123,14 +133,16 @@
 
             imageIndex = 1;
 
-            //MockBlockNumFires = new int[NumBBMNeededV];                       
+        //MockBlockNumFires = new int[NumBBMNeededV];                       
 
-            fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
+        //fileName = "C:\\darshaka\\Thabrew\\HentulGit\\Hentul\\Images\\savedImage.png";
+        fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\savedImage.jpg"));
 
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+            //logfilename = "C:\\darshaka\\Thabrew\\HentulGit\\Hentul\\Logs\\Hentul-Orchestrator.log";
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
         }
 
-        public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
+    public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
         {
             if (_orchestrator == null)
             {
@@ -148,6 +160,7 @@
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
+        public record RegionFrames(Bitmap Processed, Bitmap Raw, Rectangle Source, LearningUnitType Type);
 
         public void BeginTraining(string objectLabel)
         {
@@ -159,46 +172,171 @@
         #region Public API
 
         /// Grabs Cursors Current Position and records pixels.        
-        public void RecordPixels(bool isMock = false)
+        public (RegionFrames V1, RegionFrames V2, RegionFrames V3) RecordPixels(bool isMock = false)
         {
             CycleNum++;
+            point = GetCurrentPointerPosition();
+            var p = new System.Drawing.Point(point.X, point.Y);
 
-            Console.WriteLine("Grabbing cursor Position");
+            var v1 = RecordRegion(p, range: 10, label: "V1", LearningUnitType.V1, isMock);
+            var v2 = RecordRegion(p, range: 50, label: "V2", LearningUnitType.V2, isMock);
+            var v3 = RecordRegion(p, range: 100, label: "V3", LearningUnitType.V3, isMock);
+            return (v1, v2, v3);
+        }
+        private void EnsureBuffers()
+        {
+            // Allocate reusable buffers only
+            _rawV1 ??= new Bitmap(20, 20, PixelFormat.Format32bppArgb);
+            _rawV2 ??= new Bitmap(100, 100, PixelFormat.Format32bppArgb);
+            _rawV3 ??= new Bitmap(200, 200, PixelFormat.Format32bppArgb);
 
-            point = this.GetCurrentPointerPosition();
-
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
-
-            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
-            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
-            int x2 = Math.Abs(point.X + Range2);
-            int y2 = Math.Abs(point.Y + Range);
-
-            //this.GetColorByRange(x1, y1, x2, y2);
-
-            Rectangle rect = new Rectangle(x1, y1, x2, y2);
-
-            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
-
-            Graphics g = Graphics.FromImage(bmp);
-
-            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
-
-            if (isMock == false)
-                bmp.Save(fileName, ImageFormat.Jpeg);
+            _procV1 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+            _procV2 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+            _procV3 ??= new Bitmap(40, 20, PixelFormat.Format32bppArgb);
         }
 
+        private RegionFrames RecordRegion(Point cursor, int range, string label, LearningUnitType type, bool isMock)
+        {
+            EnsureBuffers();
+
+        // Choose the correct raw/processed buffers based on learning unit
+        Bitmap rawBuf, procBuf;
+            switch (type)
+            {
+                case LearningUnitType.V1: rawBuf = _rawV1; procBuf = _procV1; break; // 20×20 → 40×20
+                case LearningUnitType.V2: rawBuf = _rawV2; procBuf = _procV2; break; // 100×100 → 40×20
+                case LearningUnitType.V3: rawBuf = _rawV3; procBuf = _procV3; break; // 200×200 → 40×20
+                default: throw new ArgumentOutOfRangeException(nameof(type));
+            }
+
+            int size = range * 2;
+
+            // Desired square centered on cursor
+            var desired = new Rectangle(cursor.X - range, cursor.Y - range, size, size);
+
+            // Clip to the virtual desktop (supports multi-monitor; no WinForms dependency)
+            Rectangle desktop = DesktopBounds.VirtualScreen();
+            Rectangle inter = Rectangle.Intersect(desired, desktop);
+
+            // Pre-clear the raw buffer to black so any off-screen area shows as black
+            using (var g = Graphics.FromImage(rawBuf))
+                g.Clear(Color.Black);
+
+            // Copy only the visible intersection into the correct offset inside our raw buffer
+            if (!inter.IsEmpty)
+            {
+                int destX = inter.Left - desired.Left; // where to place the top-left in rawBuf
+                int destY = inter.Top - desired.Top;
+
+                using (var g = Graphics.FromImage(rawBuf))
+                {
+                    g.CopyFromScreen(
+                        inter.Left, inter.Top,          // source screen origin
+                        destX, destY,                   // destination origin in rawBuf
+                        inter.Size,                     // copy size (intersection only)
+                        CopyPixelOperation.SourceCopy);
+                }
+            }
+
+            // Downscale raw → 40×20 for the encoder (keeps your HTM interface unchanged)
+            using (var g2 = Graphics.FromImage(procBuf))
+            {
+                g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                g2.DrawImage(rawBuf, new Rectangle(0, 0, 40, 20));
+            }
+
+            // Optional debugging
+            if (SaveDebugFrames)
+            {
+                string dir = Path.GetDirectoryName(fileName)!;
+                string baseName = Path.GetFileNameWithoutExtension(fileName);
+                Directory.CreateDirectory(dir);
+
+                string rawPath = Path.Combine(dir, $"{baseName}_{label}_raw.png");
+                string procPath = Path.Combine(dir, $"{baseName}_{label}.png");
+                if (File.Exists(rawPath)) File.Delete(rawPath);
+                if (File.Exists(procPath)) File.Delete(procPath);
+                rawBuf.Save(rawPath, ImageFormat.Png);
+                procBuf.Save(procPath, ImageFormat.Png);
+            }
+
+            // Return both the processed (40×20) and the raw (native scale) images,
+            // plus the intended source rect (before clipping) and the LU type
+            return new RegionFrames(procBuf, rawBuf, desired, type);
+        }
+
+
+        
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
-        public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
+        public bool ProcessVisual(Bitmap v1Grey, Bitmap v2Grey, Bitmap v3Grey)
+        {
+            // Normalize all inputs to 40×20 for the encoder
+            v1Grey = Ensure40x20(v1Grey);
+            v2Grey = Ensure40x20(v2Grey);
+            v3Grey = Ensure40x20(v3Grey);
+
+            if (ProcessEveryNthFrame > 1 && (CycleNum % (ulong)ProcessEveryNthFrame) != 0)
+                return false;
+
+            VisionProcessor.ProcessFor(LearningUnitType.V1, v1Grey);
+            VisionProcessor.ProcessFor(LearningUnitType.V2, v2Grey);
+            VisionProcessor.ProcessFor(LearningUnitType.V3, v3Grey);
+            return true;
+        }
+        private static Bitmap Ensure40x20(Bitmap src)
+        {
+            if (src == null) throw new ArgumentNullException(nameof(src));
+            if (src.Width == 40 && src.Height == 20) return src;
+
+            var dst = new Bitmap(40, 20, PixelFormat.Format32bppArgb);
+            using (var g = Graphics.FromImage(dst))
+            {
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.DrawImage(src, new Rectangle(0, 0, 40, 20));
+            }
+            return dst;
+        }
+        public void ProcessVisual(Bitmap v1Grey)
+        {
+            VisionProcessor.ProcessFor(LearningUnitType.V1, v1Grey);
+        }
+
+        //Stores the new object on to HC
+        public void AddNewVisualSensationToHc()
+        {
+            if (NMode != NetworkMode.TRAINING)
+                throw new InvalidOperationException("INVALID State Management!");
+
+            // Get SDRs for all three scales at this CycleNum
+            var sdrV1 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            var sdrV2 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V2, CycleNum);
+            var sdrV3 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V3, CycleNum);
+
+            if (sdrV1 == null) // keep V1 mandatory to preserve current semantics
+                throw new InvalidOperationException("V1 SDR should not be null!");
+
+            // Convert to Sensation_Location(s) with the current cursor point
+            var v1 = VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV1, point);
+            var v2 = (sdrV2 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV2, point) : null;
+            var v3 = (sdrV3 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV3, point) : null;
+
+            var bundle = new VisualSensationBundle(v1, v2, v3, point);
+
+            if (!HCAccessor.AddNewSensationLocationToObject(bundle))
+                throw new InvalidOperationException("Could not add object to HC (duplicate or wrong mode).");
+        }
+/// Fires L4 and L3B with the same input and output of L4 -> L3A
+public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
         {
             //ParseNFireBitmap(greyScalebmp);
             VisionProcessor.Process(greyScalebmp, cycle);
-        }
+         }
 
-        //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
-        public void AddNewCharacterSensationToHC(char ch)
+
+    //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
+    public void AddNewCharacterSensationToHC(char ch)
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
             {
@@ -223,17 +361,59 @@
             }
         }
 
-        public List<string> GetPredictionsVisual()
+        public Position2D Verify_Predict_HC(
+    bool isMock = false,
+    uint iterationsToConfirmation = 10,
+    bool legacyPipeline = true)
+        {
+            if (NMode != NetworkMode.PREDICTION)
+                throw new InvalidOperationException("Invalid State Management!");
+
+            // --- Pull latest SDRs for this cycle from all three visual scales ---
+            var sdrV1 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
+            if (sdrV1 == null)
+                return null; // no firing => nothing to verify this cycle
+
+            // Primary (V1) sensation used by HC
+            var v1 = VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV1, point);
+
+            // Optional, auxiliary evidence (not required for HC call)
+            var sdrV2 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V2, CycleNum);
+            var sdrV3 = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V3, CycleNum);
+
+            var v2 = (sdrV2 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV2, point) : null;
+            var v3 = (sdrV3 != null) ? VisionProcessor.pEncoder.GetSenseiFromSDR_V(sdrV3, point) : null;
+
+            // --- Legacy pipeline (current behavior): V1-only verification in HC ---
+            if (legacyPipeline)
+            {
+                return HCAccessor.VerifyObject(v1, null, isMock, iterationsToConfirmation);
+            }
+
+            // --- Future/new pipeline hook ---
+            // If you later add a multi-scale HC API, you can use (v1,v2,v3) together.
+            // For now, keep behavior identical to legacy to avoid breaking predictions.
+            // Example placeholder:
+            // if (VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
+            // {
+            //     var preds = VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
+            //     // incorporate 'preds' with v2/v3 signals if desired
+            // }
+
+            return HCAccessor.VerifyObject(v1, null, isMock, iterationsToConfirmation);
+        }
+public List<string> GetPredictionsVisual()
         {
             if (NMode != NetworkMode.PREDICTION)
                 throw new InvalidOperationException("Network Must be in PRediction Mode!");
 
-            var predictions = VisionProcessor.GetCurrentPredictions();
+
+        var predictions = VisionProcessor.GetCurrentPredictions();
 
             return predictions;
-        }
+         }
 
-        public void DoneWithTraining(string label = "")
+    public void DoneWithTraining(string label = "")
         {
             HCAccessor.DoneWithTraining(label);
         }
@@ -266,7 +446,7 @@
             }
 
             return new Tuple<Sensation_Location, Sensation_Location>(sensei, predictedSensei);
-        }        
+        }
 
         #endregion
 
@@ -522,11 +702,11 @@
                 ColorMatrix colorMatrix = new ColorMatrix(
                    new float[][]
                    {
-                     new float[] {.3f, .3f, .3f, 0, 0},
-                     new float[] {.59f, .59f, .59f, 0, 0},
-                     new float[] {.11f, .11f, .11f, 0, 0},
-                     new float[] {0, 0, 0, 1, 0},
-                     new float[] {0, 0, 0, 0, 1}
+                 new float[] {.3f, .3f, .3f, 0, 0},
+                 new float[] {.59f, .59f, .59f, 0, 0},
+                 new float[] {.11f, .11f, .11f, 0, 0},
+                 new float[] {0, 0, 0, 1, 0},
+                 new float[] {0, 0, 0, 0, 1}
                    });
 
                 //create some image attributes
@@ -541,6 +721,37 @@
                     g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height),
                                 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
                 }
+            }
+
+            return newBitmap;
+        }
+        public Bitmap ConverToEdgedBitmapIdentify(Bitmap source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            var newBitmap = new Bitmap(source.Width, source.Height);
+
+            using (Graphics g = Graphics.FromImage(newBitmap))
+            {
+                var colorMatrix = new ColorMatrix(new float[][]
+                {
+        new float[] {.3f,  .3f,  .3f,  0, 0},
+        new float[] {.59f, .59f, .59f, 0, 0},
+        new float[] {.11f, .11f, .11f, 0, 0},
+        new float[] {0,    0,    0,    1, 0},
+        new float[] {0,    0,    0,    0, 1}
+                });
+
+                using var attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
+
+                g.DrawImage(
+                    source,
+                    new Rectangle(0, 0, source.Width, source.Height),
+                    0, 0, source.Width, source.Height,
+                    GraphicsUnit.Pixel,
+                    attributes
+                );
             }
 
             return newBitmap;
@@ -764,7 +975,7 @@
 
         public void ChangeNetworkModeToPrediction()
         {
-            NMode = NetworkMode.PREDICTION;            
+            NMode = NetworkMode.PREDICTION;
             VisionProcessor.SetNetworkModeToPrediction();
             //HCAccessor.SetNetworkModeToPrediction();
         }
@@ -1081,69 +1292,9 @@
 
         #region LEGACY CODE
 
-        public Position2D Verify_Predict_HC(bool isMock = false, uint iterationsToConfirmation = 10, bool legacyPipeline = false)
-        {
-            Position2D motorOutput = null;
-            List<Position2D> positionToConfirm = new List<Position2D>();
-
-            if (!NMode.Equals(NetworkMode.PREDICTION))
-            {
-                throw new InvalidOperationException("Invalid State Managemnt!");
-            }
-
-            // If any output from HC execute the location output if NOT then take the standard default output.                
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
-            var predictedSDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum + 1);
-
-
-            if (som_SDR != null)
-            {
-                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
-                var predictedSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(predictedSDR, point);
-
-                List<string> predictedLabels = VisionProcessor.GetSupportedLabels(LearningUnitType.V1);
-
-                if (legacyPipeline)
-                {
-                    motorOutput = HCAccessor.VerifyObject(firingSensei, null, isMock, iterationsToConfirmation);
-                }
-                else    // brand New Pipeline : Classification done Primarily through V1.
-                {
-                    if (VisionProcessor.v1.somBBM_L3B_V.NetWorkMode == NetworkMode.DONE)
-                    {
-                        VisionProcessor.v1.somBBM_L3B_V.GetCurrentPredictions();
-                    }
-                }
-            }
-
-            return motorOutput;
-        }
-
+        
         //Stores the new object on to HC
-        public void AddNewVisualSensationToHc()
-        {
-            if (!NMode.Equals(NetworkMode.TRAINING))
-            {
-                throw new InvalidOperationException("INVALID State Management!");
-            }
-
-            var som_SDR = VisionProcessor.GetSL3BLatestFiringCells(LearningUnitType.V1, CycleNum);
-
-            if (som_SDR != null)
-            {
-                //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
-                var firingSensei = VisionProcessor.pEncoder.GetSenseiFromSDR_V(som_SDR, point);
-
-                if (HCAccessor.AddNewSensationLocationToObject(firingSensei) == false)
-                {
-                    throw new InvalidOperationException("Could Not Add Object to HC ! Either it was NOT in TRAINING MODE or sensation already exist in the current Object");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(" som_SDR should not be null!");
-            }
-        }
+        
 
         public List<uint> StartBurstAvoidanceWandering(int totalWanders = 5)
         {
@@ -1233,5 +1384,7 @@
         UNKNOWN
     }
 
-    #endregion
+#endregion
+
+
 }

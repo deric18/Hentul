@@ -5,6 +5,7 @@ namespace Hentul
     using System.Drawing;
     using Common;
     using Encoders;
+    using OpenCvSharp;
     using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
@@ -36,14 +37,14 @@ namespace Hentul
 
         public LogMode LogMode { get; private set; }
 
-        public PixelEncoder pEncoder { get; private set; } 
+        public PixelEncoder pEncoder { get; private set; }
 
         public Bitmap bmp { get; private set; }
 
         public string logfilename { get; private set; }
-        
-        public int numberOFLearningUnitsNeeded => 1; // This is a constant for now, can be changed later if needed.
 
+        public int numberOFLearningUnitsNeeded => 1; // This is a constant for now, can be changed later if needed.
+        string baseDir = AppContext.BaseDirectory;
 
         public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
         {
@@ -73,7 +74,7 @@ namespace Hentul
 
             bmp = new Bitmap(range + range, range + range);
 
-            
+
 
             if (NumBBMNeededV != 100)
             {
@@ -89,25 +90,27 @@ namespace Hentul
             if (shouldInit)
             {
                 v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
-                //v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
-                //v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
+                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
+                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
             }
-            
+
             Console.WriteLine("Total Number of Pixels :" + (Range * Range * 4).ToString() + "\n");
             Console.WriteLine("Total First Order BBMs Created : " + NumBBMNeededV.ToString() + "\n");
 
             if (shouldInit)
             {
                 v1.Init();
-                //v2.Init();
-                //v3.Init();
+                v2.Init();
+                v3.Init();
             }
 
             LogMode = logMode;
+
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..........\Hentul\Logs\Hentul-Orchestrator.log"));
         }
 
-        #endregion
-       
+
+
 
         public void Process(Bitmap greyScalebmp, ulong cycle)
         {
@@ -136,22 +139,35 @@ namespace Hentul
 
         internal LearningUnit GetLearningUnit(LearningUnitType lType)
         {
-            if (v1.LType == lType)
-                return v1;
-            else if (v2.LType == lType)
-                return v2;
-            else if (v3.LType == lType)
-                return v3;
+            if (v1 != null && v1.LType == lType) return v1;
+            if (v2 != null && v2.LType == lType) return v2;
+            if (v3 != null && v3.LType == lType) return v3;
 
-            throw new InvalidOleVariantTypeException("No Matching input Learning Unit Type!");
+            throw new InvalidOperationException($"LearningUnit '{lType}' is not initialized.");
         }
-                
+
+        private void WriteLogsToFile(string v)
+        {
+            File.WriteAllText(logfilename, v);
+        }
+
+
+
+        public void ProcessFor(LearningUnitType luType, Bitmap greyScaleBmp)
+        {
+            pEncoder.ParseBitmap(greyScaleBmp);
+            GetLearningUnit(luType).Process(pEncoder, CycleNum);
+            pEncoder.Clean();
+            GetLearningUnit(luType).Clear();
+        }
+
         public void Restore()
         {
             v1.Restore();
             v2.Restore();
             v3.Restore();
         }
+
 
         public void Backup()
         {
@@ -197,6 +213,8 @@ namespace Hentul
         internal void SetNetworkModeToPrediction()
         {
             v1.ChangeNetworkModeToPrediction();
+            v2.ChangeNetworkModeToPrediction();
+            v3.ChangeNetworkModeToPrediction();
         }
 
         public void LearnNewObject(string objectName)
@@ -221,4 +239,5 @@ namespace Hentul
             v1.BeginTraining(objectLabel);
         }
     }
+    #endregion 
 }

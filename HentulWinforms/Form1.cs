@@ -1,12 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
+using Common;
+using Hentul;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
+
 namespace HentulWinforms
 {
-    using Common;
-    using Hentul;
-    using OpenCvSharp;
-    using OpenCvSharp.Extensions;
-    using System.Drawing.Drawing2D;
-    using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
-
     public partial class Form1 : Form
     {
         Orchestrator orchestrator;
@@ -23,9 +28,11 @@ namespace HentulWinforms
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
         Orchestrator.POINT RightBottom = new Orchestrator.POINT();
 
-        string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
-        string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
-        string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+        // --- backup dirs: keep LOCAL dynamic paths; drop master’s hard-coded absolute paths
+        string baseDir = AppContext.BaseDirectory;
+        string backupDirHC;
+        string backupDirFOM;
+        string backupDirSOM;
 
         // --- SOM Visualization Fields ---        
         private const int SOM_X = 1250;   // Matches LearningUnit X
@@ -38,28 +45,21 @@ namespace HentulWinforms
         public Form1()
         {
             InitializeComponent();
+
+            // build portable backup paths relative to the app base dir
+            backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\")); // repo root
+            backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
+            backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
+
             networkMode = NetworkMode.TRAINING;
             train_another_object.Visible = false;
         }
 
-        private void StartButton_Click(object sender, EventArgs e)
+        private void UpdateCursorLabels(Orchestrator.POINT value)
         {
+            // LOCAL training guardrails + begin/learn flow
             label_done.Text = "Procesing";
-            label_done.Refresh();
-
-            if (string.IsNullOrEmpty(objectBox.Text))
-            {
-                label_done.Text = "Enter object label before you train!!";
-                return;
-            }
-
-            if (objectList.Contains(objectBox.Text))
-            {
-                label_done.Text = "Object Already Trained!!";
-                return;
-            }
-
-            objectList.Add(objectBox.Text);
+            label_done.Refresh();            
 
             if (counter > 0)
             {
@@ -70,83 +70,185 @@ namespace HentulWinforms
                 orchestrator.BeginTraining(objectBox.Text);
             }
 
-            var value = LeftTop;
-            value.X = value.X + numPixels;
-            value.Y = value.Y + numPixels;
+            var next = LeftTop;
+            next.X = next.X + numPixels;
+            next.Y = next.Y + numPixels;
+            orchestrator.MoveCursor(next);
 
-            orchestrator.MoveCursor(value);
-
+            // include master’s useful UI label updates
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
+            labelX.Refresh();
+            labelY.Refresh();
+        }
 
-            while (true)
+        private Orchestrator.POINT GetNextCursorPosition(Orchestrator.POINT current)
+        {
+            if (current.X <= RightTop.X - numPixels)
+                return MoveRight(current);
+            else if (current.Y <= RightBottom.Y - numPixels)
             {
+                var next = MoveDown(current);
+                return SetLeft(next);
+            }
+            return current;
+        }
+
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(objectBox.Text))
+            {
+                label_done.Text = "Enter object label before you train!!"; label_done.Refresh();
+                return;
+            }
+
+            if (objectList.Contains(objectBox.Text))
+            {
+                label_done.Text = "Object Already Trained!!"; label_done.Refresh();
+                return;
+            }
+
+            objectList.Add(objectBox.Text);
+
+            label_done.Text = "Processing";
+            label_done.Refresh();
+
+            var value = new Orchestrator.POINT
+            {
+                X = LeftTop.X + numPixels,
+                Y = LeftTop.Y + numPixels
+            };
+
+            orchestrator.MoveCursor(value);
+            UpdateCursorLabels(value);
+
+            bool finished = false;
+
+            while (!finished)
+            {
+                // Stop when we reach end of scan region
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                 {
+                    finished = true;
                     label_done.Text = "Finished Processing Image";
+                    label_done.Refresh();
+                    train_another_object.Visible = true;
                     break;
                 }
-                else
+
+                // Move cursor across the grid
+                value = GetNextCursorPosition(value);
+
+                // Update UI labels and move pointer
+                UpdateCursorLabels(value);
+                orchestrator.MoveCursor(value);
+
+                // Record multi-scale pixels (V1/V2/V3)
+                var (v1, v2, v3) = orchestrator.RecordPixels();
+
+                // Only process every Nth frame (perf)
+                if (!orchestrator.ShouldProcessThisFrame)
+                    continue;
+
+                // Display processed frames (grayscale & whitescale)
+                V1Gray.Image = ToGray(v1.Processed);
+                V1White.Image = ToWhiteScale(v1.Processed);
+                V1Gray.Refresh();
+
+                V2Gray.Image = ToGray(v2.Processed);
+                V2White.Image = ToWhiteScale(v2.Processed);
+                V2Gray.Refresh();
+
+                V3Gray.Image = ToGray(v3.Processed);
+                V3White.Image = ToWhiteScale(v3.Processed);
+                V3Gray.Refresh();
+
+                // Display raw-edge previews (for quick inspection)
+                V1White.Image = ConverToEdgedBitmap(v1.Raw);
+                V1White.Refresh();
+
+                V2White.Image = ConverToEdgedBitmap(v2.Raw);
+                V2White.Refresh();
+
+                V3White.Image = ConverToEdgedBitmap(v3.Raw);
+                V3White.Refresh();
+
+                // Edge inputs fed to HTM pipeline (normalized 40x20 already done by Orchestrator)
+                var v1Edge = ConverToEdgedBitmap(v1.Processed);
+                var v2Edge = ConverToEdgedBitmap(v2.Processed);
+                var v3Edge = ConverToEdgedBitmap(v3.Processed);
+
+                var didProcess = orchestrator.ProcessVisual(v1Edge, v2Edge, v3Edge);
+
+                if (didProcess && networkMode == NetworkMode.TRAINING)
                 {
-                    if (value.X <= RightTop.X - numPixels)
-                        value = MoveRight(value);
-                    else
+                    orchestrator.AddNewVisualSensationToHc();
+                    counter++;
+                    CycleLabel.Text = counter.ToString();
+                    CycleLabel.Refresh();
+                }
+                else if (didProcess && networkMode == NetworkMode.PREDICTION)
+                {
+                    var motorOutput = orchestrator.Verify_Predict_HC();
+                    if (motorOutput != null)
                     {
-                        if (value.Y <= RightBottom.Y - numPixels)
+                        if (motorOutput.X == int.MaxValue && motorOutput.Y == int.MaxValue)
                         {
-                            value = MoveDown(value);
-                            value = SetLeft(value);
+                            var obj = orchestrator.GetPredictedObject();
+                            ObjectLabel.Text = obj.Label;
+                            ObjectLabel.Refresh();
+
+                            label_done.Text = "Object Recognised!";
+                            label_done.Refresh();
+                            train_another_object.Visible = true;
+                            wanderingButton.Visible = true;
+                            finished = true; // stop scanning
+                        }
+                        else if (motorOutput.X == int.MinValue && motorOutput.Y == int.MinValue)
+                        {
+                            label_done.Text = "Object Could Not be Recognised!";
+                            label_done.Refresh();
+                            finished = true;
                         }
                         else
                         {
-                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                            {
-                                label_done.Text = "Finished Processing Image";
-                                label_done.Refresh();
-                                train_another_object.Visible = true;
-                                break;
-                            }
+                            orchestrator.MoveCursor(new Orchestrator.POINT { X = motorOutput.X, Y = motorOutput.Y });
                         }
                     }
                 }
 
-                if (networkMode.Equals(NetworkMode.TRAINING))
-                {
-                    labelX.Text = value.X.ToString(); labelX.Refresh();
-                    labelY.Text = value.Y.ToString(); labelY.Refresh();
-
-                    orchestrator.MoveCursor(value);
-
-                    orchestrator.RecordPixels();        //Grab Image             
-
-                    CurrentImage.Image = orchestrator.bmp;
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-                    EdgedImage.Refresh();
-
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
-
-                    CycleLabel.Text = counter.ToString();
-                    CycleLabel.Refresh();
-                }
-
+                // Optional visualizations
                 DrawSomLayer();
-                //DrawFomLayers();      Dont want to print 100 FOM pictureBoxes.
+                // DrawFomLayers(); // uncomment if you want to draw many FOM PBs
             }
 
-            if (label_done.Text == "Finished Processing Image")
+            // After loop completes
+            if (networkMode == NetworkMode.TRAINING)
             {
-                startClassificationButton.Visible = true;
-
-                if (networkMode == NetworkMode.TRAINING)
+                imageIndex++;
+                if (imageIndex == totalImagesToProcess)
                 {
-                    StartButton.Text = "Start Another Image";
+                    StartButton.Text = "Test Classification Algo";
                     StartButton.Refresh();
+                    orchestrator.ChangeNetworkToPredictionMode();
+                    networkMode = NetworkMode.PREDICTION;
+                    BackUp.Visible = true;
+                    orchestrator.MoveCursor(LeftTop);
+                }
+                else
+                {
+                    orchestrator.DoneWithTraining();
+                    startClassificationButton.Visible = true;
                 }
             }
         }
 
+        private void WanderingButton_Click(object sender, EventArgs e)
+        {
+            StartBurstAvoidance();
+        }
+
+        // (from master) keep this as a separate handler as well
         private void startClassificationButton_Click(object sender, EventArgs e)
         {
             label_done.Text = "Procesing";
@@ -174,7 +276,6 @@ namespace HentulWinforms
                 {
                     label_done.Text = "Reached End Of Image";
                     UpdatePredictions();
-
                     break;
                 }
                 else
@@ -194,7 +295,6 @@ namespace HentulWinforms
                             {
                                 label_done.Text = "Reached End Of Image"; label_done.Refresh();
                                 UpdatePredictions();
-
                                 break;
                             }
                         }
@@ -203,36 +303,21 @@ namespace HentulWinforms
 
                 orchestrator.MoveCursor(value);
 
-                orchestrator.RecordPixels();        //Grab Image
+                var (V1, V2, V3) = orchestrator.RecordPixels();
 
-                CurrentImage.Image = orchestrator.bmp; CurrentImage.Refresh();
+                // show current image and its edges (use any of the three; here V1 raw)
+                CurrentImage.Image = V1.Raw; CurrentImage.Refresh();
+                EdgedImage.Image = ConverToEdgedBitmap(V1.Raw); EdgedImage.Refresh();
 
-                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp); EdgedImage.Refresh();
+                // feed edged processed frames
+                var didProcess = orchestrator.ProcessVisual(
+                    ConverToEdgedBitmap(V1.Processed),
+                    ConverToEdgedBitmap(V2.Processed),
+                    ConverToEdgedBitmap(V3.Processed)
+                );
 
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
-
-                networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
-
-                if (networkMode == NetworkMode.TRAINING)
-                {
-                    throw new InvalidOperationException("Mode should be in Prediction or Done!");
-                }
-                else if (networkMode == NetworkMode.DONE)
-                {
-                    label_done.Text = "Classification Done!"; label_done.Refresh();
-
-                    var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
-                    string val = string.Empty;
-                    foreach (var pred in predictions)
-                    {
-                        val = pred.ToString();
-                    }
-                    ObjectLabel.Text = val;
-                    ObjectLabel.Refresh();
-
-                    break;
-                }
-
+                // Note: this branch was originally wired to somBBM_L3B_V.NetWorkMode in master
+                // Keep prediction loop simple here; SOM visual draw below:
                 DrawSomLayer();
             }
         }
@@ -245,11 +330,6 @@ namespace HentulWinforms
             predictions.ForEach(x => val += x.ToString() + " | ");
 
             ObjectLabel.Text = val; ObjectLabel.Refresh();
-        }
-
-        private void WanderingButton_Click(object sender, EventArgs e)
-        {
-            StartBurstAvoidance();
         }
 
         private void StartBurstAvoidance()
@@ -274,7 +354,7 @@ namespace HentulWinforms
             value.X = value.X - Math.Abs(LeftTop.X - RightTop.X) + numPixels;
             return value;
         }
-
+        
         private void button1_Click(object sender, EventArgs e)
         {
             label_done.Text = "Innitting...";
@@ -298,20 +378,26 @@ namespace HentulWinforms
             labelX.Text = value.X.ToString();
             labelY.Text = value.Y.ToString();
 
-            orchestrator.RecordPixels();
+            var (V1, V2, V3) = orchestrator.RecordPixels();
 
-            CurrentImage.Image = orchestrator.bmp;
-            CurrentImage.Refresh();
+            // Show one of them (medium/Raw is usually good for display)
+            V1Gray.Image = V1.Raw;
+            V1Gray.Refresh();
 
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-            EdgedImage.Refresh();
+            // Apply edge detection to the same image
+            V1White.Image = ConverToEdgedBitmap(V1.Raw);
+            V1White.Refresh();
 
             label_done.Text = "Ready";
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            LeftTop.X = 954; LeftTop.Y = 416; RightTop.X = 1596; RightTop.Y = LeftTop.Y; LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116; RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y - 500;
+            LeftTop.X = 954; LeftTop.Y = 416;
+            RightTop.X = 1596; RightTop.Y = LeftTop.Y;
+            LeftBottom.X = LeftTop.X; LeftBottom.Y = 1116;
+            RightBottom.X = RightTop.X; RightBottom.Y = LeftBottom.Y - 500;
+
             label_done.Text = "Ready";
             wanderingButton.Visible = false;
             BackUp.Visible = false;
@@ -322,15 +408,14 @@ namespace HentulWinforms
 
         private Bitmap ConverToEdgedBitmap(Bitmap incoming)
         {
-            CurrentImage.Image = orchestrator.bmp;
-            string filename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
-            orchestrator.bmp.Save(filename);
+            if (incoming == null)
+                throw new ArgumentNullException(nameof(incoming), "ConverToEdgedBitmap: incoming bitmap was null.");
 
-            var edgeImage = Cv2.ImRead(filename);
-            var imgdetect = new Mat();
-            Cv2.Canny(edgeImage, imgdetect, 50, 200);
-
-            return BitmapConverter.ToBitmap(imgdetect);
+            // In-memory OpenCV Canny (no disk I/O)
+            using var src = BitmapConverter.ToMat(incoming);
+            using var edges = new Mat();
+            Cv2.Canny(src, edges, 50, 200);
+            return BitmapConverter.ToBitmap(edges);
         }
 
         private void BackUp_Click(object sender, EventArgs e)
@@ -351,7 +436,6 @@ namespace HentulWinforms
             orchestrator.ChangeNetworkModeToPrediction();
             StartButton_Click(sender, e);
         }
-
         private void button1_Click_3(object sender, EventArgs e)
         {
             List<string> wordsToTrain = new List<string>()
@@ -374,8 +458,31 @@ namespace HentulWinforms
             }
         }
 
-        // -------------------- SOM Visualization Logic --------------------        
+        private void textBox1_TextChanged(object sender, EventArgs e) { }
 
+        private void label2_Click(object sender, EventArgs e) { }
+
+        private Bitmap ToGray(Bitmap src)
+        {
+            using var m = BitmapConverter.ToMat(src);
+            using var gray = new Mat();
+            Cv2.CvtColor(m, gray, ColorConversionCodes.BGR2GRAY);
+            return BitmapConverter.ToBitmap(gray);
+        }
+
+        // “whitescale” = binary (black/white)
+        private Bitmap ToWhiteScale(Bitmap src)
+        {
+            using var m = BitmapConverter.ToMat(src);
+            using var gray = new Mat();
+            using var bin = new Mat();
+            Cv2.CvtColor(m, gray, ColorConversionCodes.BGR2GRAY);
+            // Otsu picks threshold automatically; BinaryInv if you prefer white foreground
+            Cv2.Threshold(gray, bin, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+            return BitmapConverter.ToBitmap(bin);
+        }
+
+        // -------------------- SOM Visualization Logic --------------------        
         private void DrawSomLayer()
         {
             if (orchestrator == null ||
@@ -437,8 +544,7 @@ namespace HentulWinforms
                             (float)Math.Ceiling(cellW),
                             (float)Math.Ceiling(cellH));
 
-                        // Color scheme:
-                        // Lime = normal firing                        
+                        // Lime = normal firing
                         g.FillRectangle(Brushes.Lime, rect);
                     }
                 }
@@ -452,7 +558,6 @@ namespace HentulWinforms
         }
 
         // -------------------- FOM (Layer 4) Visualization Logic --------------------
-
         private void DrawFomLayers()
         {
             if (orchestrator?.VisionProcessor?.v1 == null || fomPictureBoxes == null)

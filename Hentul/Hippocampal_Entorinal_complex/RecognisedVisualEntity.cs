@@ -7,7 +7,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
     public class RecognisedVisualEntity : Entity
     {
         public List<Sensation_Location> ObjectSnapshot { get; set; }
-
+        string baseDir = AppContext.BaseDirectory;
         public List<Position2D> FavouritePositions { get; set; }
 
         //Holds the indexes of all the objects in objectsnapshot which are needed for classfication of the object.
@@ -40,7 +40,8 @@ namespace Hentul.Hippocampal_Entorinal_complex
             ObjectSnapshot = unrec.ObjectSnapshot;
             _visitedIndexes = new List<int>();
             frame = null;
-            failureReportfileName = "C:\\Users\\depint\\source\\repos\\Hentul\\failureReport.txt";
+            failureReportfileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\failureReport.txt"));
+
         }
 
         public void Clean()
@@ -65,21 +66,16 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public bool Verify(Sensation_Location sensei = null, bool isMock = false, uint iterationToConfirmation = 10)
         {
             if (ObjectSnapshot?.Count == 0)
-            {
                 throw new InvalidOperationException("Snapshot cannot be empty");
-            }
 
             Orchestrator instance = Orchestrator.GetInstance();
 
             if (instance == null)
-            {
                 throw new InvalidOperationException("Orchestrator Instance cannot be null!");
-            }
 
-            if (frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
-            {
+            if (frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count ||
+                frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
                 throw new InvalidOperationException("RFrame cannot be Empty!");
-            }
 
             int confirmations = 0;
 
@@ -92,24 +88,34 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         var newSensei = ObjectSnapshot[j];
                         var newPos = newSensei.CenterPosition;
 
-                        if (newPos.X == 1364 && newPos.Y == 426)
-                        {
-                            bool breakpoint = true;
-                        }                      
-
-
+                        // Move cursor to new location
                         Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
+
+
+                        // ✅ Capture V1, V2, V3 regions together
+                        var (v1, v2, v3) = instance.RecordPixels(isMock);
+
+                        // ✅ Apply edge detection for each region separately
+                        using var v1Edge = instance.ConverToEdgedBitmapIdentify(v1.Raw);
+                        using var v2Edge = instance.ConverToEdgedBitmapIdentify(v2.Raw);
+                        using var v3Edge = instance.ConverToEdgedBitmapIdentify(v3.Raw);
+
+                        // Process all three
+                        instance.ProcessVisual(v1Edge, v2Edge, v3Edge);
+
                         instance.RecordPixels();
                         var bmp = instance.ConverToEdgedBitmap();
                         instance.ProcessVisual(bmp, 0);
+
 
                         var tuple = instance.GetSDRFromL3B();
 
                         if (tuple.Item1 == null)
                             return false;
 
-
-                        if (!(HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false || HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
+                        // Verify intersection policies
+                        if (!(HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false ||
+                              HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
                         {
                             return false;
                         }
@@ -117,13 +123,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
                         confirmations++;
 
                         if (confirmations == iterationToConfirmation)
-                        {
                             return true;
-                        }
                     }
                 }
-
-                return true;
             }
 
             return true;
@@ -143,7 +145,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         }
 
         public int GetRandomSenseIndexFromRecognisedEntity()
-        {            
+        {
             bool flag = true;
 
             if (_visitedIndexes.Contains(CurrentComparisionKeyIndex))
