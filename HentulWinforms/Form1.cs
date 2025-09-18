@@ -52,7 +52,7 @@ namespace HentulWinforms
                 label_done.Text = "Enter object label before you train!!";
                 return;
             }
-
+             
             if (objectList.Contains(objectBox.Text))
             {
                 label_done.Text = "Object Already Trained!!";
