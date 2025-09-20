@@ -2,6 +2,7 @@
 {
 
     using Common;
+    using OpenCvSharp.Text;
     using System.Xml;
 
     public class HippocampalComplex
@@ -26,7 +27,7 @@
         private Position _cachedPosition;
 
         private RecognisedVisualEntity currentmatchingObject;
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
         public RecognitionState ObjectState { get; private set; }
 
         public int currentIterationToConfirmation;
@@ -54,7 +55,7 @@
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
             currentIterationToConfirmation = 0;
-            backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
+            backupDir = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\")); 
             objectlabellist = new List<string>
             {
                 "Apple",
@@ -329,8 +330,8 @@
             string filename = "HC-EC.xml";
 
             HippocampalComplex hcComplex = new HippocampalComplex("Apple");
-
-            string backupDir = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
+           
+            string backupDir = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\")); 
 
             var xmlDocument = new XmlDocument();
 

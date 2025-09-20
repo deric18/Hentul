@@ -7,6 +7,7 @@
     using System.Drawing.Imaging;
     using System.Drawing;
     using Hentul.Encoders;
+    using OpenCvSharp.Text;
 
     public class Orchestrator
     {
@@ -81,7 +82,7 @@
         private int NumColumns, X, Z;
 
         #endregion
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
         private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
 
@@ -125,9 +126,8 @@
 
             //MockBlockNumFires = new int[NumBBMNeededV];                       
 
-            fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
-
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+            fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png")); 
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)

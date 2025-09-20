@@ -4,7 +4,8 @@ namespace SchemaGenerator
 {
     internal class SchemaGenerator
     {
-        private const string filePath = "C:\\Users\\depint\\source\\repos\\Hentul\\SchemaGenerator\\Schemas\\";
+        private static readonly string baseDir = AppContext.BaseDirectory;
+        private static readonly string filePath =Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SchemaGenerator\Schemas\"));
         private const string denrticicfileName = "DendriticSchemaSOM.xml";
         private const string axonalfileName = "AxonalSchemaSOM.xml";
 

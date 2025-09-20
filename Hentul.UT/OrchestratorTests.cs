@@ -7,6 +7,7 @@
     using System.Drawing;
     using System.IO;
     using Hentul.Encoders;
+    using OpenCvSharp.Text;
 
     public class OrchestratorTests
     {
@@ -21,7 +22,7 @@
         string bPos2 = "13-33-2-N";
         string bPos3 = "14-43-2-N";
         string bPos4 = "15-77-2-N";
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
         [SetUp]
         public void Setup()
         {
@@ -225,9 +226,9 @@
         [Test, Ignore("Takes too long")]
         public void TestBackUp()
         {
-            string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
-            string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
-            string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+            string backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));
+            string backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\")); 
+            string backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\")); 
             string obj = "Apple";
 
             KeyValuePair<int, List<Position2D>> kvp = new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>()
@@ -257,9 +258,9 @@
         [Test, Ignore("Takes too long")]
         public void TestRestore()
         {
-            string backupDirHC = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\HC-EC\\";
-            string backupDirFOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
-            string backupDirSOM = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+            string backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));
+            string backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\")); 
+            string backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\")); 
 
             if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
             {

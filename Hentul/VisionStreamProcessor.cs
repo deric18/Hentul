@@ -15,7 +15,7 @@ namespace Hentul
 
         public int numPixelsProcessedPerBBM;
 
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
         public int NumBBMNeededV { get; private set; }
 
         public int BlockSize;
@@ -83,8 +83,8 @@ namespace Hentul
             numPixelsProcessedPerBBM = 4;
 
             NumBBMNeededV = (BlockSize / numPixelsProcessedPerBBM);   //100
-
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+            
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
 
             if (shouldInit)
             {
