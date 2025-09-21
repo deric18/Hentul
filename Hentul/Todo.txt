@@ -1,4 +1,7 @@
-﻿Cuurent Feature :  Support of Hippocampus for Classification.
+﻿Cuurent Feature : 
+1.	Support of Hippocampus for Classification.
+2.	Automate Text Learning and Prediction for all the words in the dictionary.
+3.  Need to spin up new encoder & Decoder for Motor Cortex.
 
 Major Sub Features:
 1. Provide support for Spatial Map of the environment around the agent with Boundary cells, Grid cell like Graph Cells storing locations of objects.

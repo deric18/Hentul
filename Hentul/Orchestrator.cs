@@ -87,6 +87,7 @@
         #endregion
 
         private static readonly string baseDir = AppContext.BaseDirectory;
+
         private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
 
