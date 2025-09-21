@@ -41,11 +41,13 @@ namespace Hentul
         public Bitmap bmp { get; private set; }
 
         public string logfilename { get; private set; }
+
+        public Logger logger { get; private set; }
         
         public int numberOFLearningUnitsNeeded => 1; // This is a constant for now, can be changed later if needed.
 
 
-        public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
+        public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit, Logger logger)
         {
             this.X = x;
 
@@ -104,6 +106,8 @@ namespace Hentul
             }
 
             LogMode = logMode;
+
+            this.logger = logger;
         }
 
         #endregion
@@ -133,7 +137,6 @@ namespace Hentul
             return lu.fomBBMV;
 
         }
-
         internal LearningUnit GetLearningUnit(LearningUnitType lType)
         {
             if (v1.LType == lType)
@@ -159,7 +162,6 @@ namespace Hentul
             v2.Backup();
             v3.Backup();
         }
-
 
         public void PrintBlockVitalVision(LearningUnitType luType)
         {
@@ -192,7 +194,6 @@ namespace Hentul
                 }
             }
         }
-
 
         internal void SetNetworkModeToPrediction()
         {
