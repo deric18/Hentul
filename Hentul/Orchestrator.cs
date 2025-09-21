@@ -85,6 +85,7 @@
         public Logger logger;
 
         #endregion
+
         private static readonly string baseDir = AppContext.BaseDirectory;
         private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
@@ -224,11 +225,12 @@
 
         public string GetPredictionTextual()
         {
-            string res = string.Empty;
+            if (NMode != NetworkMode.PREDICTION)
+                throw new InvalidOperationException("Network Must be in PRediction Mode!");
 
-            string rpediction = TextProcessor.GetPrediction();
+            string prediction = TextProcessor.GetPrediction();
 
-            return res;
+            return prediction;
         }
 
         public List<string> GetPredictionsVisual()

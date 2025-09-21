@@ -290,7 +290,8 @@
         internal Sensation ConvertSDR_To_Sensation(SDR_SOM som_SDR) => cEncoder.GetSenseiFromSDR_T(som_SDR);
 
         internal string GetPrediction()
-        {
+        {            
+
             var res = somBBM_L3B.GetCurrentPredictions();
             
             if(res.Count > 1)
