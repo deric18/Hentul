@@ -194,16 +194,16 @@
         }
 
         //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
-        public void AddNewCharacterSensationToHC(char ch)
+        public void AddNewCharacterSensationToHC(char ch, ulong cycleNum)
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
             {
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
 
-            TextProcessor.ProcessCharacter(ch, CycleNum);
+            TextProcessor.ProcessCharacter(ch, cycleNum);
 
-            var som_SDR = TextProcessor.GetL3BSensation(CycleNum);
+            var som_SDR = TextProcessor.GetL3BSensation(cycleNum);
 
             if (som_SDR == null || som_SDR.ActiveBits.Count == 0)
             {

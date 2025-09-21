@@ -358,7 +358,7 @@ namespace HentulWinforms
 
             orchestrator.ChangeNetworkModeToTraining();
 
-            var text = wordBox.Text;
+            var text = wordBox.Text.ToUpper();
 
             var carrs = text.ToCharArray();
 
@@ -368,9 +368,9 @@ namespace HentulWinforms
                 {
                     label_done.Text = "Words should only be letters"; label_done.Refresh();
                     return;
-                }       
+                }                       
 
-                orchestrator.AddNewCharacterSensationToHC(ch);
+                orchestrator.AddNewCharacterSensationToHC(ch, counter++);
             }
 
             orchestrator.DoneWithTraining();
