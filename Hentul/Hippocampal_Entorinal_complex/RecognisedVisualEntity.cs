@@ -20,7 +20,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
         public Sensation_Location CurrentComparision;
 
         public int CurrentComparisionKeyIndex { get; private set; }
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
         public string Label { get; private set; }
 
         private string failureReportfileName;
@@ -40,7 +40,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             ObjectSnapshot = unrec.ObjectSnapshot;
             _visitedIndexes = new List<int>();
             frame = null;
-            failureReportfileName = "C:\\Users\\depint\\source\\repos\\Hentul\\failureReport.txt";
+            failureReportfileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\failureReport.txt")); 
         }
 
         public void Clean()

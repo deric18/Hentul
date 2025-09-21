@@ -54,7 +54,7 @@
 
 
         #endregion
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
         public Orchestrator3(int range, bool isMock = false, bool ShouldInit = true, int mockImageIndex = 7)
         {
             //Todo : Project shape data of the input image to one region and project colour data of the image to another region.                        
@@ -151,14 +151,14 @@
         {
             var dict = new List<string>();
 
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Apple.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\Ananas.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\orange.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\bannana.jpg");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\grapes.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\jackfruit.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\watermelon.png");
-            dict.Add(@"C:\Users\depint\source\repos\Hentul\Images\white.png");
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\Apple.png")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\Ananas.png")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\orange.png")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\bannana.jpg")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\grapes.png")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\jackfruit.png")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\watermelon.png")));
+            dict.Add(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Images\white.png")));
 
             return dict;
         }

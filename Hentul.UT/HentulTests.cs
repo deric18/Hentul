@@ -2,12 +2,14 @@ namespace Hentul.UT
 {    
     using Hentul;
     using Hentul.Hippocampal_Entorinal_complex;
+    using OpenCvSharp.Text;
     using System.Text;
 
     public class HentulTests
     {
         ScreenGrabber sg;
         Random rand;
+        private static readonly string baseDir = AppContext.BaseDirectory;
         int count = 25;
         bool[,] booleans;
 
@@ -337,7 +339,7 @@ namespace Hentul.UT
         [Test, Ignore("No longer Needed!")]
         public void TestImagePixelCoverageWithDebug()
         {
-            string filepath = @"C:\Users\depint\source\repos\Hentul\Hentul.UT\TestDocs\errorsIndexes.txt";
+            string filepath = Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul.UT\TestDocs\errorsIndexes.txt");
 
             int doubleRange = 2 * count;
 
