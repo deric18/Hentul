@@ -80,9 +80,8 @@
         private bool includeSequenceLearning;
         private bool includeBurstLearning2;
         private bool includeBurstLearning4;
-
-        private string backupDirectory = "C:\\Users\\depint\\Desktop\\Hentul\\Hentul\\BackUp\\";
-
+        private static readonly string baseDir = AppContext.BaseDirectory;
+        private string backupDirectory =Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\"));
         public iType PreviousiType { get; private set; }
 
         public iType CurrentiType { get; private set; }
@@ -96,8 +95,9 @@
         public LogMode Mode { get; private set; }
 
         public ulong[] WireCasesTracker { get; private set; }
-
-        string logfilename = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul.log";
+        string logfilename =Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul.log"));
+        
+            
 
         public List<Neuron> OverConnectedOffenderList { get; private set; }
         public List<Neuron> OverConnectedInShortInterval { get; private set; }
@@ -144,7 +144,6 @@
 
         public BlockBehaviourManagerFOM(int x, int y = 10, int Z = 4, LayerType layertype = LayerType.UNKNOWN, LogMode mode = LogMode.Trace, bool includeBurstLearningWireCase2 = false, bool includeBurstLearningWireCase4 = true, bool includeSequenceLearning = true)
         {
-
             this.NumberOfColumnsThatFiredThisCycle = 0;
 
             this.NumberOfColumnsThatBurstLastCycle = 0;
@@ -230,6 +229,8 @@
 
         public void Init(int bbmID)
         {
+            backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\"));
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul.log"));
             BBMID = bbmID;
 
             for (int i = 0; i < X; i++)
@@ -349,8 +350,7 @@
 
             xmlDocument.LoadXml("<Connections></Connections>");
 
-            backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\";
-
+            backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\"));
             filename = filename + "-DendriticSchema.xml";
 
 
@@ -393,11 +393,11 @@
         {
             if (Layer.Equals(LayerType.Layer_4))
             {
-                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+                backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
             }
             else
             {
-                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+                backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
             }
 
             backupDirectory += filename;
@@ -443,12 +443,12 @@
 
             if (layer.Equals(LayerType.Layer_4))
             {
-                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\FOM\\";
+                backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
                 X = 10; Y = 10; Z = 4;
             }
             else if (layer.Equals(LayerType.Layer_3A) || layer.Equals(LayerType.Layer_3B))
             {
-                backupDirectory = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\BackUp\\SOM\\";
+                backupDirectory = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
                 X = 1250; Y = 10; Z = 4;
             }
             else
@@ -2484,11 +2484,11 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\DendriticSchemaFOM.xml";
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\DendriticSchemaFOM.xml"));
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
-                dendriteDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\DendriticSchemaSOM.xml";
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\1K Club\DendriticSchemaSOM.xml")); 
             }
 
             if (File.Exists(dendriteDocumentPath) == false)
@@ -2650,11 +2650,11 @@
 
             if (schemToLoad == SchemaType.FOMSCHEMA)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\AxonalSchemaFOM.xml";
+                axonalDocumentPath =Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\AxonalSchemaFOM.xml"));
             }
             else if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
             {
-                axonalDocumentPath = "C:\\Users\\depint\\source\\repos\\Hentul\\FirstOrderMemory\\Schema Docs\\1K Club\\AxonalSchema-SOM.xml";
+                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\FirstOrderMemory\Schema Docs\1K Club\AxonalSchema-SOM.xml"));
             }
 
             if (!File.Exists(axonalDocumentPath))

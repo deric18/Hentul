@@ -15,9 +15,9 @@
 
         public LogMode logMode { get; private set; }
 
-        public SBBM somBBM_L3B_T { get; private set; }
+        public SBBM somBBM_L3B { get; private set; }
 
-        public SBBM somBBM_L3A_T { get; private set; }
+        public SBBM somBBM_L3A { get; private set; }
 
         public int NumBBMNeededT { get; private set; }
 
@@ -27,8 +27,9 @@
 
         List<int> firingFOM_T;
 
+        Logger logger;
 
-        public TextStreamProcessor(int numColumns, int z, LogMode logMode)
+        public TextStreamProcessor(int numColumns, int z, LogMode logMode, Logger logger)
         {
             NumBBMNeededT = 2; //Number of BBMS needed for processing one character
 
@@ -45,17 +46,19 @@
 
             BlockBehaviourManagerSOM.Initialize(200, NumColumns, Z, LayerType.Layer_3A, Common.LogMode.None);
 
-            somBBM_L3A_T = SBBM.Instance;
+            somBBM_L3A = SBBM.Instance;
 
             BlockBehaviourManagerSOM.Initialize(200, NumColumns, Z, LayerType.Layer_3B, Common.LogMode.None);
 
-            somBBM_L3B_T = SBBM.Instance;
+            somBBM_L3B = SBBM.Instance;
 
             cEncoder = new CharEncoder();
 
             this.logMode = logMode;
 
             firingFOM_T = new();
+
+            this.logger = logger;
 
             Init();
         }
@@ -67,9 +70,9 @@
                 fomBBMT[i].Init(i);
             }
 
-            somBBM_L3A_T.Init(0);
+            somBBM_L3A.Init(0);
 
-            somBBM_L3B_T.Init(0);
+            somBBM_L3B.Init(0);
         }
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
@@ -88,10 +91,10 @@
             if (cEncoder.somPositions.Count != 0)
             {
                 if (cEncoder.somPositions.Count > 2)
-                    Orchestrator.WriteLogsToFile("Layer 3B : SomPosition Write count " + cEncoder.somPositions.Count);
+                    logger.WriteLogsToFile("Layer 3B : SomPosition Write count " + cEncoder.somPositions.Count);
 
                 // L3B fire
-                somBBM_L3B_T.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), cycleNum);
+                somBBM_L3B.Fire(new SDR_SOM(200, 10, cEncoder.somPositions, iType.SPATIAL), cycleNum);
 
                 // L3A fire
                 SDR_SOM fom_SDR = GetSdrSomFromFOMsT(cycleNum);
@@ -99,12 +102,12 @@
                 if (fom_SDR.ActiveBits.Count == 0)
                     throw new InvalidOperationException("L4 returned empty SDR for L3A!");
 
-                somBBM_L3A_T.Fire(fom_SDR, cycleNum);
+                somBBM_L3A.Fire(fom_SDR, cycleNum);
             }
             else
             {
-                somBBM_L3B_T.FireBlank(cycleNum);
-                somBBM_L3A_T.FireBlank(cycleNum);
+                somBBM_L3B.FireBlank(cycleNum);
+                somBBM_L3A.FireBlank(cycleNum);
             }
 
             cEncoder.Clean();
@@ -113,7 +116,7 @@
 
         public SDR_SOM GetL3BSensation(ulong cycleNum)
         {
-            return somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(cycleNum);
+            return somBBM_L3B.GetAllNeuronsFiringLatestCycle(cycleNum);
         }
 
         private SDR_SOM GetSdrSomFromFOMsT(ulong CycleNum)
@@ -132,7 +135,6 @@
                     CharEncoder.GetSOMEquivalentPositionsofFOM(fomBBMT[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
 
-
             if (logMode == Common.LogMode.BurstOnly)
             {
                 int count = 0;
@@ -144,7 +146,7 @@
 
                 if (count == fomBBMT.Count() * Z)
                 {
-                    Orchestrator.WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
+                    logger.WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
                 }
             }
 
@@ -286,6 +288,19 @@
             }
         }
 
-        internal Sensation ConvertSDR_To_Sensation(SDR_SOM som_SDR) => cEncoder.GetSenseiFromSDR_T(som_SDR);        
+        internal Sensation ConvertSDR_To_Sensation(SDR_SOM som_SDR) => cEncoder.GetSenseiFromSDR_T(som_SDR);
+
+        internal string GetPrediction()
+        {            
+
+            var res = somBBM_L3B.GetCurrentPredictions();
+            
+            if(res.Count > 1)
+            {
+                logger.WriteLogsToFile("TextStreamProcessor should not return more than one string!");
+            }
+
+            return res[0];
+        }
     }
 }

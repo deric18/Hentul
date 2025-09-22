@@ -1,12 +1,14 @@
 ﻿namespace Hentul
 {
-    using Common;
-    using System.Runtime.InteropServices;
     using System;
-    using Hentul.Hippocampal_Entorinal_complex;
-    using System.Drawing.Imaging;
     using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.Runtime.InteropServices;
+    using Common;
     using Hentul.Encoders;
+    using Hentul.Hippocampal_Entorinal_complex;
+    using Hentul.Interfaces;
+    using OpenCvSharp.Text;
 
     public class Orchestrator
     {
@@ -80,7 +82,11 @@
 
         private int NumColumns, X, Z;
 
+        public Logger logger;
+
         #endregion
+
+        private static readonly string baseDir = AppContext.BaseDirectory;
 
         private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
@@ -99,31 +105,26 @@
 
             logMode = Common.LogMode.BurstOnly;
 
-            VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit);
+            fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
+            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
 
-            TextProcessor = new TextStreamProcessor(10, 5, logMode);
+            SetUpLogger(fileName);
+
+            VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit, logger);
+
+            logger = new Logger(fileName);
+
+            TextProcessor = new TextStreamProcessor(10, 5, logMode, logger);
 
             if(ShouldInit) 
             Init();
 
-            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
+            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);                        
+        }
 
-            objectlabellist = new List<string>
-            {
-                "Apple",
-                "Ananas",
-                "Watermelon",
-                "JackFruit",
-                "Grapes"
-            };
-
-            imageIndex = 1;
-
-            //MockBlockNumFires = new int[NumBBMNeededV];                       
-
-            fileName = "C:\\Users\\depint\\source\\repos\\Hentul\\Hentul\\Images\\savedImage.png";
-
-            logfilename = "C:\\Users\\depint\\source\\Logs\\Hentul-Orchestrator.log";
+        private void SetUpLogger(string path)
+        {            
+            logger = new Logger(path);
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
@@ -219,6 +220,16 @@
             }
         }
 
+        public string GetPredictionTextual()
+        {
+            if (NMode != NetworkMode.PREDICTION)
+                throw new InvalidOperationException("Network Must be in PRediction Mode!");
+
+            string prediction = TextProcessor.GetPrediction();
+
+            return prediction;
+        }
+
         public List<string> GetPredictionsVisual()
         {
             if (NMode != NetworkMode.PREDICTION)
@@ -238,6 +249,7 @@
         {
             NMode = NetworkMode.PREDICTION;
             VisionProcessor.SetNetworkModeToPrediction();
+
             //HCAccessor.DoneWithTraining();
             //HCAccessor.SetNetworkModeToPrediction();
         }
@@ -441,7 +453,7 @@
 
             if (spatialSignal == null)
             {
-                WriteLogsToFile("Empty Polarizing Signal for FOM During Waaandering!!!");
+                logger.WriteLogsToFile("Empty Polarizing Signal for FOM During Waaandering!!!");
                 return false;
             }
 
@@ -782,13 +794,7 @@
             VisionProcessor.Backup();
             HCAccessor.Backup();
 
-        }
-
-
-        public static void WriteLogsToFile(string logMsg)
-        {
-            File.WriteAllText(fileName, logMsg);
-        }
+        }        
 
         public void Restore()
         {
