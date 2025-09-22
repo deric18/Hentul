@@ -50,9 +50,7 @@
 
         public HippocampalComplex HCAccessor { get; private set; }
 
-        public int[] MockBlockNumFires { get; private set; }
-
-        private bool devbox = false;
+        public int[] MockBlockNumFires { get; private set; }        
 
         public int ImageIndex { get; private set; }
 
@@ -62,7 +60,7 @@
 
         public Bitmap bmp;
 
-        public static string fileName;
+        public static string ImagefileName;
 
         public string logfilename;
 
@@ -105,14 +103,13 @@
 
             logMode = Common.LogMode.BurstOnly;
 
-            fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
-            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
+            ImagefileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));            
 
-            SetUpLogger(fileName);
+            SetUpLogger();
 
             VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit, logger);
 
-            logger = new Logger(fileName);
+            logger = new Logger(ImagefileName);
 
             TextProcessor = new TextStreamProcessor(10, 5, logMode, logger);
 
@@ -122,9 +119,9 @@
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);                        
         }
 
-        private void SetUpLogger(string path)
+        private void SetUpLogger()
         {            
-            logger = new Logger(path);
+            logger = new Logger(Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log")));
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
@@ -184,7 +181,7 @@
             g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
 
             if (isMock == false)
-                bmp.Save(fileName, ImageFormat.Jpeg);
+                bmp.Save(ImagefileName, ImageFormat.Jpeg);
         }
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
@@ -554,130 +551,9 @@
             return newBitmap;
         }
 
-        public RecognisedVisualEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();
+        public RecognisedVisualEntity GetPredictedObject() => HCAccessor.GetCurrentPredictedObject();        
 
-        public RecognitionState CheckIfObjectIsRecognised() => HCAccessor.ObjectState;
-
-
-        private bool CompareTwoPositionLists(List<Position_SOM> pattern1, List<Position_SOM> pattern2)
-        {
-            int breakpint = 1;
-
-            pattern1.Sort();
-
-            pattern2.Sort();
-
-            List<int> unmatchedIndex = new List<int>();
-            int bp2 = 1;
-
-            int matchCount = 0;
-            int index = 0;
-
-            foreach (var item in pattern2)
-            {
-                if (pattern1.Where(x => x.X == item.X && x.Y == item.Y && x.Z == item.Z).Count() != 0)
-                    matchCount++;
-                else
-                {
-                    unmatchedIndex.Add(index);
-                }
-
-                index++;
-            }
-
-            return matchCount == pattern2.Count;
-        }
-
-        #endregion
-
-        #region BIG MAN WORK
-
-        //public string StartCycle()
-        //{
-
-        //    //Check how big the entire screen / image is and kee papring through all the objects.
-
-        //    var str = DetectObject();
-
-        //    StoreObject();
-
-        //    return str;
-
-
-
-        //}
-
-        /// <summary>
-        /// PROBLEMS:
-        /// 
-        /// ALGORITHM:
-        /// 
-        /// </summary>
-        //public string DetectObject()
-        //{
-        //    var obj = string.Empty;
-
-        //    if (Objects == null || Objects.Count == 0)
-        //    {
-        //        obj = LearnFirstObject();
-
-        //    }
-
-        //    //Traverse through Object Maps and what sensory inputs are telling you.
-
-        //    return obj;
-        //}
-
-
-
-        /// <summary>
-        /// 
-        /// PROBLEMS:
-        /// 1. How to figure out on the current mouse position whether if its on an object and how to traverse through the object of the object itself is bigger than the current visual radius.
-        /// 2. How to handle 2 different types of feed processing ? Narrow vs Broad fields of vision.
-        /// 
-        /// ALGORITHM : 
-        /// 1. Get Current Position of the Mouse Pointer and get current Screen Measurements.
-        /// 2. Run around the object trying to figure out the object, go to as many unexplored locations on the object as possible.
-        /// 3. After you feel you have explored all the points on the object , concurrently keep storing all the locations onto the new unrecognised Object.                
-        /// </summary>
-        private string LearnFirstObject()
-        {
-            //No Object Frame , Have to create a sense @ Location object map from scratch for this particular object.            
-
-            // -> L4, -> L3b, L3b -> HP -> output , DoesItMatch Expectation ? y ? Get 5 more confirmations and store model : work on the second prediction if there is 
-
-            string obj = string.Empty;
-
-            bool stillRecognising = true;
-
-            //while (stillRecognising)
-            //{
-            //    // feed L4
-            //    SDR_SOM fomSdr;
-            //    for (int i = 0; i < fomBBM.Length; i++)
-            //    {
-            //        fomSdr = GetFomSdrForIteration(i, mapper);
-            //        fomBBM[i].Fire(fomSdr);
-            //    }
-
-            //    //feed same pattern SOM BBM L3A
-            //    SDR_SOM Sdr_Som3A = new SDR_SOM(10, 10, new List<Position_SOM>() { }, iType.SPATIAL);
-            //    somBBM_L3Af.Fire(Sdr_Som3A);
-
-            //    // init L3B to Apple
-            //    SDR_SOM Sdr_SomL3B = GetSdrSomFromFOMs();
-            //    somBBM_L3BV.Fire(Sdr_SomL3B);
-
-            //    // Push new object representation to 3A
-            //    // Push Wiring Burst Avoiding LTP to 4 from 3A.
-            //}
-
-
-            return obj;
-        }
-
-        #endregion
+        #endregion        
 
         #region Public Helper Methods
 
@@ -802,284 +678,7 @@
             _orchestrator.HCAccessor = HippocampalComplex.Restore();
         }
 
-        #endregion
-
-        #region Future Work
-
-        private void MoveToNextObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void StoreObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        #region PRIVATE HELPER METHODS
-
-        private void GetPixelsAsPerScope()
-        {
-
-            POINT currentMousePosition = GetCurrentPointerPosition();
-
-
-            switch (GetScope())
-            {
-                case VisionScope.NarrowScope:       // High Detail In-Object Scope
-                    {
-                        break;
-                    }
-                case VisionScope.ObjectScope:       // Fully View of Object
-                    {
-                        break;
-                    }
-                case VisionScope.BroadScope:        // complete visual view at capacity.
-                    {
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-        }
-
-        private VisionScope GetScope()
-        {
-            VisionScope scopeToReturn = VisionScope.NarrowScope;
-
-            bool makesSense = false;
-
-            while (makesSense != false)
-            {
-
-                // Get Screen Pixel Values 
-
-                // Analyse
-
-                // Increase or decrease Scope && try again
-
-                makesSense = DoesItMakeSense();
-            }
-
-            return scopeToReturn;
-        }
-
-
-
-        private bool DoesItMakeSense()
-        {
-            // Check if cursor is currently on top of an object or just screen saver ?
-            //If object , check what is the size of the object and return the dimension needed to cover the whole object.
-            AdjustScopetoNearestObject();
-
-
-            //if Scope is not on Object then return broad scope to grab the whole screen view with lower pixel rate.
-            GrabWholeScreen();
-
-            return true;
-
-        }
-
-        private Bitmap GrabWholeScreen()
-        {
-
-            // Bitmap bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-            throw new NotImplementedException();
-
-
-
-        }
-
-
-
-        private void AdjustScopetoNearestObject()
-        {
-            POINT p = GetCurrentPointerPosition();
-
-
-
-
-
-        }
-
-
-        #region TRASH
-
-
-        //public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
-        //{
-        //    //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
-
-        //    Stopwatch stopWatch = new Stopwatch();
-
-        //    stopWatch.Start();
-
-        //    int TotalReps = 2;
-
-        //    int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
-        //    int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
-
-        //    int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
-
-        //    int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
-        //    int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
-
-        //    int num_unit_per_block_x = 5;
-        //    int num_unit_per_block_y = 5;
-
-        //    int num_pixels_per_Unit_x = 10;
-        //    int num_pixels_per_Unit_y = 10;
-
-        //    for (int reps = 0; reps < TotalReps; reps++)
-        //    {
-        //        for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
-        //        {
-        //            for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-        //            {
-        //                int bbmId = 0;
-
-        //                for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-        //                {
-        //                    for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-        //                    {
-        //                        BoolEncoder boolEncoder = new BoolEncoder(100, 20);
-
-        //                        for (int j = 0; j < num_pixels_per_Unit_x; j++)
-        //                        {
-        //                            for (int i = 0; i < num_pixels_per_Unit_y; i++)
-        //                            {
-        //                                int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-        //                                int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-        //                                //if the pixel is Black then tag the pixel location
-
-        //                                if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-        //                                {
-        //                                    int bp = 1;
-        //                                }
-
-        //                                if (CheckifPixelisBlack(pixel_x, pixel_y))
-        //                                {
-
-        //                                    var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-        //                                    boolEncoder.SetEncoderValues(dataToEncode);
-
-        //                                }
-        //                            }
-
-        //                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-        //                            {
-        //                                if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
-        //                                {
-        //                                    fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
-        //                                }
-
-        //                                if (boolEncoder.HasValues())
-        //                                {
-        //                                    CycleNum++;
-
-        //                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
-
-        //                                    fomBBM[bbmId++].Fire(imageSDR);
-
-        //                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-        //                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-        //                                    {
-        //                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-        //                                        somBBM_L3BV.Fire(fomSDR);
-        //                                    }
-
-        //                                }
-
-        //                                boolEncoder.ClearEncoderValues();
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-
-        //    PrintMoreBlockVitals();
-
-        //    BackUp();
-
-        //    Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
-
-        //    Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
-
-        //    Console.WriteLine("Done Processing Image");
-
-        //    Console.Read();
-        //}
-
-        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        //{
-        //    if (numberOfPixels_Index % BlockOffset == 0)
-        //    {
-        //        return numberOfPixels_Index;
-        //    }
-
-        //    int nextMinNumberOfPixels = numberOfPixels_Index;
-
-        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
-
-        //    while (nextMinNumberOfPixels % 50 != 0)
-        //    {
-        //        nextMinNumberOfPixels--;
-
-        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
-        //        {
-        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
-        //        }
-
-        //    }
-
-        //    if (nextMinNumberOfPixels % 50 != 0)
-        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
-
-        //    return nextMinNumberOfPixels;
-        //}
-
-
-        // Already grey scalled.
-        private void GetColorByRange(int x1, int y1, int x2, int y2)
-        {
-            IntPtr desk = GetDesktopWindow();
-
-            IntPtr dc = GetWindowDC(desk);
-
-
-            for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
-            {
-                for (int j = y1, l = 0; j < y2 && l < Range + Range; j++, l++)
-                {
-                    int a = (int)GetPixel(dc, i, j);
-
-                    Color color = System.Drawing.Color.FromArgb(255,
-                                                 (a >> 0) & 0xff,
-                                                 (a >> 8) & 0xff,
-                                                 (a >> 16) & 0xff);
-
-                    bmp.SetPixel(k, l, color);
-
-                }
-
-            }
-
-            ReleaseDC(desk, dc);
-        }
-
-        #endregion
-
-        #endregion
-
-        #endregion
+        #endregion                
 
         #region LEGACY CODE
 

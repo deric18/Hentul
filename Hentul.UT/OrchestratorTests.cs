@@ -43,7 +43,7 @@
                 "HENTUL"                
             };
 
-            int count = 0;
+            ulong count = 0;
             int index = 0;
 
            for(int i=0; i<wordsToTrain.Count; i++) 
@@ -54,7 +54,7 @@
 
                 foreach (var ch in word)
                 {                   
-                    orchestrator.AddNewCharacterSensationToHC(ch);
+                    orchestrator.AddNewCharacterSensationToHC(ch, count++);
                 }
 
                 orchestrator.DoneWithTraining(word);

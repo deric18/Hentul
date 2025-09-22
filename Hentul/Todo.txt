@@ -13,22 +13,7 @@ Implementation:
 1. SPATIAL MAP:
 -
 
-
-
 - Can static SOM BBM support multiple objects ? if not undo all the singleton logic.
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 Big Direction -------------------
