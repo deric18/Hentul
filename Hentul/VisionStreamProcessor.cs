@@ -74,9 +74,7 @@ namespace Hentul
             pEncoder = new PixelEncoder(NumBBMNeededV, BlockSize);
 
             bmp = new Bitmap(range + range, range + range);
-
             
-
             if (NumBBMNeededV != 100)
             {
                 throw new InvalidDataException("Number Of FOMM BBMs needed should always be 100, it throws off SOM Schema of 1250" + range.ToString());
