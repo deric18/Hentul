@@ -36,7 +36,24 @@
             fomBBMV = new FBBM[numBBMNeededV];
             firingFOM_V = new List<int>();
             NumColumns = numColumns;
-            X = x;
+
+            // Scale X parameter based on learning unit type for different SOM sizes
+            switch (lType)
+            {
+                case LearningUnitType.V1:
+                    X = x;          // 1250 (original)
+                    break;
+                case LearningUnitType.V2:
+                    X = x * 5;      // 6250 (5x wider for 100x100 region)
+                    break;
+                case LearningUnitType.V3:
+                    X = x * 10;     // 12500 (10x wider for 200x200 region)
+                    break;
+                default:
+                    X = x;
+                    break;
+            }
+
             Z = z;
 
             if (shouldInit)
@@ -44,21 +61,18 @@
                 for (int i = 0; i < numBBMNeededV; i++)
                 {
                     fomBBMV[i] = new FBBM(numColumns, numColumns, z, LayerType.Layer_4, Common.LogMode.None);
-                }                                
+                }
 
-                BlockBehaviourManagerSOM.Initialize(x, numColumns, z, LayerType.Layer_3A, LogMode.None);
-
+                // Initialize SOM layers with scaled X parameter for different region sizes
+                BlockBehaviourManagerSOM.Initialize(X, numColumns, z, LayerType.Layer_3A, LogMode.None);
                 somBBM_L3A_V = SBBM.Instance;
-                
-                BlockBehaviourManagerSOM.Initialize(x, numColumns, z, LayerType.Layer_3B, LogMode.None);
 
+                BlockBehaviourManagerSOM.Initialize(X, numColumns, z, LayerType.Layer_3B, LogMode.None);
                 somBBM_L3B_V = SBBM.Instance;
             }
 
             this.logfileName = logfileName;
-
             this.logMode = lMode;
-
             this.LType = lType;
         }
 
@@ -91,16 +105,33 @@
 
             if (pEncoder.SomPositions.Count != 0)
             {
-                if (pEncoder.SomPositions.Count > 125)
+                // Dynamic threshold based on learning unit type
+                int expectedMaxPositions = LType switch
                 {
-                    WriteLogsToFile("Layer 3B : SomPosition Write count " + pEncoder.SomPositions.Count);
+                    LearningUnitType.V1 => 125,    // Original threshold for 20x20
+                    LearningUnitType.V2 => 625,    // 5x more for 100x100 (125 * 5)
+                    LearningUnitType.V3 => 1250,   // 10x more for 200x200 (125 * 10)
+                    _ => 125
+                };
+
+                if (pEncoder.SomPositions.Count > expectedMaxPositions)
+                {
+                    WriteLogsToFile($"Layer 3B {LType}: SomPosition Write count " + pEncoder.SomPositions.Count);
                     bool breakpoint = true;
                 }
 
-                // L3B fire
-                somBBM_L3B_V.Fire(new SDR_SOM(1250, 10, pEncoder.SomPositions, iType.SPATIAL), cycleNum);
+                // L3B fire with dynamic SOM dimensions based on learning unit type
+                int somWidth = LType switch
+                {
+                    LearningUnitType.V1 => 1250,   // Original width for V1
+                    LearningUnitType.V2 => 6250,   // 5x wider for V2 
+                    LearningUnitType.V3 => 12500,  // 10x wider for V3
+                    _ => 1250
+                };
 
-                // L3A fire
+                somBBM_L3B_V.Fire(new SDR_SOM(somWidth, 10, pEncoder.SomPositions, iType.SPATIAL), cycleNum);
+
+                // L3A fire (commented out in original, but would need same scaling)
                 //SDR_SOM fom_SDR = GetSdrSomFromFOMsV();
                 //somBBM_L3A_V.Fire(fom_SDR, cycleNum);
             }
@@ -110,8 +141,6 @@
                 somBBM_L3A_V.FireBlank(cycleNum);
             }
         }
-
-
         // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
         private SDR_SOM GetSdrSomFromFOMsV()
         {
