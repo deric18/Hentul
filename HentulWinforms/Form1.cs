@@ -15,7 +15,9 @@ namespace HentulWinforms
         ulong counter = 0;
         int imageIndex = 0;
         int totalImagesToProcess = 1;
-        List<string> objectList = new();
+        List<string> objectList = new(); 
+        private PictureBox V2GrayscaleImage, V2WhitescaleImage;
+        private PictureBox V3GrayscaleImage, V3WhitescaleImage;
 
         // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
@@ -26,6 +28,9 @@ namespace HentulWinforms
         string backupDirHC;
         string backupDirFOM;
         string backupDirSOM;
+        private const int SOM_X_V1 = 1250; // matches LearningUnit V1 X
+        private const int SOM_X_V2 = 5000; // V2: 100x100 -> X * 4 in LearningUnit
+        private const int SOM_X_V3 = 20000; // V3: 200x200 -> X * 16 in LearningUnit
 
         // --- SOM Visualization Fields ---        
         private const int SOM_X = 1250;   // Matches LearningUnit X
@@ -47,7 +52,7 @@ namespace HentulWinforms
 
         private void StartButton_Click(object sender, EventArgs e)
         {
-            label_done.Text = "Procesing";
+            label_done.Text = "Processing";
             label_done.Refresh();
 
             if (string.IsNullOrEmpty(objectBox.Text))
@@ -115,27 +120,61 @@ namespace HentulWinforms
 
                 if (networkMode.Equals(NetworkMode.TRAINING))
                 {
-                    labelX.Text = value.X.ToString(); labelX.Refresh();
-                    labelY.Text = value.Y.ToString(); labelY.Refresh();
+                    labelX.Text = value.X.ToString();
+                    labelX.Refresh();
+                    labelY.Text = value.Y.ToString();
+                    labelY.Refresh();
 
                     orchestrator.MoveCursor(value);
 
-                    orchestrator.RecordPixels();        //Grab Image             
+                    // Record pixels for all regions (V1, V2, V3)
+                    orchestrator.RecordPixels(); // This now captures all three scales internally
 
+                    // Update V1 displays (existing)
                     CurrentImage.Image = orchestrator.bmp;
                     CurrentImage.Refresh();
 
                     EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
                     EdgedImage.Refresh();
 
-                    orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
+                    // Update V2 displays (add these PictureBoxes to designer)
+                    if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV2 != null)
+                    {
+                        pictureBoxV2Grayscale.Image = ConvertToGrayscale(orchestrator.VisionProcessor.bmpV2);
+                        pictureBoxV2Grayscale.Refresh();
+                    }
+
+                    if (pictureBoxV2Whitescale != null && orchestrator.VisionProcessor.bmpV2 != null)
+                    {
+                        pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.VisionProcessor.bmpV2);
+                        pictureBoxV2Whitescale.Refresh();
+                    }
+
+                    // Update V3 displays (add these PictureBoxes to designer)
+                    if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV3 != null)
+                    {
+                        pictureBoxV2Grayscale.Image = ConvertToGrayscale(orchestrator.VisionProcessor.bmpV3);
+                        pictureBoxV2Grayscale.Refresh();
+                    }
+
+                    if (pictureBoxV3Whitescale != null && orchestrator.VisionProcessor.bmpV3 != null)
+                    {
+                        pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.VisionProcessor.bmpV3);
+                        pictureBoxV3Whitescale.Refresh();
+                    }
+
+                    // Process visual data for all regions simultaneously
+                    var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
+                    orchestrator.ProcessVisual(edgedBitmap, counter++); // This now processes V1, V2, V3
 
                     CycleLabel.Text = counter.ToString();
                     CycleLabel.Refresh();
                 }
 
-                DrawSomLayer();
-                //DrawFomLayers();      Dont want to print 100 FOM pictureBoxes.
+                // Draw SOM layers for all regions
+                DrawAllSomLayers();
+
+                //DrawFomLayers(); // Dont want to print 100 FOM pictureBoxes.
             }
 
             if (label_done.Text == "Finished Processing Image")
@@ -149,7 +188,64 @@ namespace HentulWinforms
                 }
             }
         }
+        
+        private void UpdateImageDisplays()
+        {
+            // Update V1 displays (existing)
+            CurrentImage.Image = orchestrator.bmp;
+            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
 
+            // Update V2 displays (new)
+            V2GrayscaleImage.Image = ConvertToGrayscale(orchestrator.bmpV2);
+            V2WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV2);
+
+            // Update V3 displays (new)  
+            V3GrayscaleImage.Image = ConvertToGrayscale(orchestrator.bmpV3);
+            V3WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV3);
+        }
+        // Add these helper methods for image conversion
+        private Bitmap ConvertToGrayscale(Bitmap source)
+        {
+            if (source == null) return null;
+
+            var result = new Bitmap(source.Width, source.Height);
+
+            for (int y = 0; y < source.Height; y++)
+            {
+                for (int x = 0; x < source.Width; x++)
+                {
+                    var color = source.GetPixel(x, y);
+                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
+                    var grayColor = Color.FromArgb(gray, gray, gray);
+                    result.SetPixel(x, y, grayColor);
+                }
+            }
+
+            return result;
+        }
+
+        private Bitmap ConvertToWhitescale(Bitmap source)
+        {
+            if (source == null) return null;
+
+            var result = new Bitmap(source.Width, source.Height);
+            byte threshold = 200; // Whitescale threshold
+
+            for (int y = 0; y < source.Height; y++)
+            {
+                for (int x = 0; x < source.Width; x++)
+                {
+                    var color = source.GetPixel(x, y);
+                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
+
+                    bool isWhite = gray >= threshold;
+                    var whiteColor = isWhite ? Color.White : Color.Black;
+                    result.SetPixel(x, y, whiteColor);
+                }
+            }
+
+            return result;
+        }
         private void startClassificationButton_Click(object sender, EventArgs e)
         {
             label_done.Text = "Procesing";
@@ -278,38 +374,59 @@ namespace HentulWinforms
             return value;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            label_done.Text = "Innitting...";
+            label_done.Text = "Initializing...";
             label_done.Refresh();
             networkMode = NetworkMode.TRAINING;
-            orchestrator = Orchestrator.GetInstance();
 
-            var value = orchestrator.GetCurrentPointerPosition();
+            try
+            {
+                // Use existing GetInstance method (no parameter changes needed)
+                await Task.Run(() =>
+                {
+                    orchestrator = Orchestrator.GetInstance();
+                });
 
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
+                // Rest of your existing code unchanged
+                var value = orchestrator.GetCurrentPointerPosition();
+                labelX.Text = value.X.ToString();
+                labelY.Text = value.Y.ToString();
 
-            var standard = LeftTop;
-            standard.X = standard.X + numPixels;
-            standard.Y = standard.Y + numPixels;
+                var standard = LeftTop;
+                standard.X = standard.X + numPixels;
+                standard.Y = standard.Y + numPixels;
 
-            orchestrator.MoveCursor(standard);
+                orchestrator.MoveCursor(standard);
 
-            value = orchestrator.GetCurrentPointerPosition();
+                value = orchestrator.GetCurrentPointerPosition();
+                labelX.Text = value.X.ToString();
+                labelY.Text = value.Y.ToString();
 
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
+                orchestrator.RecordPixels();
 
-            orchestrator.RecordPixels();
+                CurrentImage.Image = orchestrator.bmp;
+                CurrentImage.Refresh();
 
-            CurrentImage.Image = orchestrator.bmp;
-            CurrentImage.Refresh();
+                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
+                EdgedImage.Refresh();
 
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-            EdgedImage.Refresh();
+                label_done.Text = "Ready";
 
-            label_done.Text = "Ready";
+                // Optional: Initialize V2/V3 in background for later use
+                // Uncomment these lines if you want V2/V3 available:
+                /*
+                _ = Task.Run(() =>
+                {
+                    orchestrator.InitializeV2V3IfNeeded();
+                    this.Invoke(() => label_done.Text = "All regions ready");
+                });
+                */
+            }
+            catch (Exception ex)
+            {
+                label_done.Text = $"Error: {ex.Message}";
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -378,23 +495,55 @@ namespace HentulWinforms
         }
 
         // -------------------- SOM Visualization Logic --------------------        
-
-        private void DrawSomLayer()
+        private void DrawAllSomLayers()
         {
+            DrawSomLayer(LearningUnitType.V1);
+            DrawSomLayer(LearningUnitType.V2);
+            DrawSomLayer(LearningUnitType.V3);
+        }
+        private void DrawSomLayer(LearningUnitType regionType = LearningUnitType.V1)
+        {
+            // Get the appropriate learning unit and picture box
+            LearningUnit learningUnit;
+            PictureBox targetPictureBox;
+            int somWidth;
+
+            switch (regionType)
+            {
+                case LearningUnitType.V1:
+                    learningUnit = orchestrator?.VisionProcessor?.v1;
+                    targetPictureBox = pictureBox1;
+                    somWidth = SOM_X_V1;
+                    break;
+                case LearningUnitType.V2:
+                    learningUnit = orchestrator?.VisionProcessor?.v2;
+                    targetPictureBox = pictureBoxV2Som; // Add this to designer
+                    somWidth = SOM_X_V2;
+                    break;
+                case LearningUnitType.V3:
+                    learningUnit = orchestrator?.VisionProcessor?.v3;
+                    targetPictureBox = pictureBoxV3Som; // Add this to designer
+                    somWidth = SOM_X_V3;
+                    break;
+                default:
+                    return;
+            }
+
+            // Null checks
             if (orchestrator == null ||
                 orchestrator.VisionProcessor == null ||
-                orchestrator.VisionProcessor.v1 == null ||
-                orchestrator.VisionProcessor.v1.somBBM_L3B_V == null ||
-                pictureBox1.IsDisposed)
+                learningUnit == null ||
+                learningUnit.somBBM_L3B_V == null ||
+                targetPictureBox == null ||
+                targetPictureBox.IsDisposed)
             {
                 return;
             }
 
-            var somMgr = orchestrator.VisionProcessor.v1.somBBM_L3B_V;
+            var somMgr = learningUnit.somBBM_L3B_V;
 
-            // Attempt to get latest firing neurons (CycleNum + 1 pattern consistent with tests)
+            // Attempt to get latest firing neurons
             SDR_SOM firing = null;
-
             try
             {
                 var cycle = somMgr.CycleNum;
@@ -418,13 +567,14 @@ namespace HentulWinforms
             lock (somDrawLock)
             {
                 // Prepare bitmap
-                var bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+                var bmp = new Bitmap(targetPictureBox.Width, targetPictureBox.Height);
                 using (var g = Graphics.FromImage(bmp))
                 {
                     g.SmoothingMode = SmoothingMode.HighSpeed;
                     g.Clear(Color.Black);
 
-                    double cellW = (double)bmp.Width / SOM_X;
+                    // Use dynamic width based on region type
+                    double cellW = (double)bmp.Width / somWidth;
                     double cellH = (double)bmp.Height / SOM_Y;
 
                     // Draw firing neurons
@@ -432,7 +582,10 @@ namespace HentulWinforms
                     {
                         int x = pos.X;
                         int y = pos.Y;
-                        if (x < 0 || x >= SOM_X || y < 0 || y >= SOM_Y) continue;
+
+                        // Bounds check with dynamic width
+                        if (x < 0 || x >= somWidth || y < 0 || y >= SOM_Y)
+                            continue;
 
                         var rect = new RectangleF(
                             (float)(x * cellW),
@@ -440,16 +593,23 @@ namespace HentulWinforms
                             (float)Math.Ceiling(cellW),
                             (float)Math.Ceiling(cellH));
 
-                        // Color scheme:
-                        // Lime = normal firing                        
-                        g.FillRectangle(Brushes.Lime, rect);
+                        // Color scheme based on region type for visual distinction:
+                        Brush brush = regionType switch
+                        {
+                            LearningUnitType.V1 => Brushes.Lime,      // Green for V1
+                            LearningUnitType.V2 => Brushes.Cyan,      // Cyan for V2  
+                            LearningUnitType.V3 => Brushes.Yellow,    // Yellow for V3
+                            _ => Brushes.Lime
+                        };
+
+                        g.FillRectangle(brush, rect);
                     }
                 }
 
                 // Swap image
-                var old = pictureBox1.Image;
-                pictureBox1.Image = bmp;
-                pictureBox1.Refresh();
+                var old = targetPictureBox.Image;
+                targetPictureBox.Image = bmp;
+                targetPictureBox.Refresh();
                 old?.Dispose();
             }
         }
