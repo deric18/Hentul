@@ -73,7 +73,7 @@
         }
 
         /// Fires L4 and L3B with the same input and output of L4 -> L3A
-        public void ProcessCharacter(char ch, ulong cycleNum)
+        public void ProcessInput(char ch, ulong cycleNum)
         {
 
             if (ch < 65 || ch > 90)
@@ -114,6 +114,14 @@
         public SDR_SOM GetL3BSensation(ulong cycleNum)
         {
             return somBBM_L3B_T.GetAllNeuronsFiringLatestCycle(cycleNum);
+        }
+
+        internal void Clean()
+        {
+            cEncoder.Clean();
+            //fomBBMT.For.Clear();
+            //v2.Clear();
+            //v3.Clear();
         }
 
         private SDR_SOM GetSdrSomFromFOMsT(ulong CycleNum)
