@@ -194,7 +194,7 @@
         public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
         {
             //ParseNFireBitmap(greyScalebmp);
-            VisionProcessor.Process(greyScalebmp, cycle);
+            VisionProcessor.ProcessInput(greyScalebmp, cycle);
         }
 
         //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
@@ -205,7 +205,7 @@
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
 
-            TextProcessor.ProcessCharacter(ch, CycleNum);
+            TextProcessor.ProcessInput(ch, CycleNum);
 
             var som_SDR = TextProcessor.GetL3BSensation(CycleNum);
 

@@ -109,7 +109,7 @@ namespace Hentul
         #endregion
        
 
-        public void Process(Bitmap greyScalebmp, ulong cycle)
+        public void ProcessInput(Bitmap greyScalebmp, ulong cycle)
         {
             CycleNum = cycle;
 
