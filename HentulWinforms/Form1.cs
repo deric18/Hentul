@@ -140,7 +140,7 @@ namespace HentulWinforms
                     // Update V2 displays (add these PictureBoxes to designer)
                     if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV2 != null)
                     {
-                        pictureBoxV2Grayscale.Image = ConvertToGrayscale(orchestrator.VisionProcessor.bmpV2);
+                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.VisionProcessor.bmpV2);
                         pictureBoxV2Grayscale.Refresh();
                     }
 
@@ -153,7 +153,7 @@ namespace HentulWinforms
                     // Update V3 displays (add these PictureBoxes to designer)
                     if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV3 != null)
                     {
-                        pictureBoxV2Grayscale.Image = ConvertToGrayscale(orchestrator.VisionProcessor.bmpV3);
+                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.VisionProcessor.bmpV3);
                         pictureBoxV2Grayscale.Refresh();
                     }
 
@@ -196,11 +196,11 @@ namespace HentulWinforms
             EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
 
             // Update V2 displays (new)
-            V2GrayscaleImage.Image = ConvertToGrayscale(orchestrator.bmpV2);
+            V2GrayscaleImage.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
             V2WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV2);
 
             // Update V3 displays (new)  
-            V3GrayscaleImage.Image = ConvertToGrayscale(orchestrator.bmpV3);
+            V3GrayscaleImage.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
             V3WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV3);
         }
         // Add these helper methods for image conversion
