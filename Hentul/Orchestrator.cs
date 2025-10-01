@@ -80,28 +80,23 @@
         public ulong CycleNum { get; private set; }
 
         private int NumColumns, X, Z;
+        public Bitmap bmpV2, bmpV3;
 
         #endregion
         private static readonly string baseDir = AppContext.BaseDirectory;
-        private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
+        
+        private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true,
+                    NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {
-
             X = 1250;
-
             NumColumns = 10;
-
             Z = 4;
-
             LogMode = false;
-
             Range = visionrange;
-
             NMode = nMode;
-
             logMode = Common.LogMode.BurstOnly;
 
             VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit);
-
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
             if (isMock)
@@ -115,19 +110,17 @@
 
             objectlabellist = new List<string>
             {
-                "Apple",
-                "Ananas",
-                "Watermelon",
-                "JackFruit",
-                "Grapes"
+                "Apple", "Ananas", "Watermelon", "JackFruit", "Grapes"
             };
 
             imageIndex = 1;
-
-            //MockBlockNumFires = new int[NumBBMNeededV];                       
-
-            fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png")); 
+            fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
             logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
+        }
+
+        public void InitializeV2V3IfNeeded()
+        {
+            VisionProcessor.InitializeV2V3IfNeeded();
         }
 
         public static Orchestrator GetInstance(bool isMock = false, bool shouldInit = true, NetworkMode nMode = NetworkMode.TRAINING)
@@ -136,7 +129,6 @@
             {
                 _orchestrator = new Orchestrator(10, isMock, shouldInit, nMode);
             }
-
             return _orchestrator;
         }
 
@@ -157,47 +149,46 @@
         #endregion
 
         #region Public API
-
-        /// Grabs Cursors Current Position and records pixels.        
-        public void RecordPixels(bool isMock = false)
+  
+        public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
         {
-            CycleNum++;
+            int currentRange = regionType switch
+            {
+                LearningUnitType.V1 => Range,      // 10  -> 20x20
+                LearningUnitType.V2 => Range * 5,  // 50  -> 100x100
+                LearningUnitType.V3 => Range * 10, // 100 -> 200x200
+                _ => Range
+            };
 
-            Console.WriteLine("Grabbing cursor Position");
+            var cur = GetCurrentPointerPosition();       
+            int w = currentRange * 2;
+            int h = currentRange * 2;
 
-            point = this.GetCurrentPointerPosition();
+            int x = Math.Max(0, cur.X - currentRange);
+            int y = Math.Max(0, cur.Y - currentRange);
+            var rect = new Rectangle(x, y, w, h);
 
-            Console.WriteLine("Grabbing Screen Pixels...");
-
-            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
-
-            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
-            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
-            int x2 = Math.Abs(point.X + Range2);
-            int y2 = Math.Abs(point.Y + Range);
-
-            //this.GetColorByRange(x1, y1, x2, y2);
-
-            Rectangle rect = new Rectangle(x1, y1, x2, y2);
-
-            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
-
-            Graphics g = Graphics.FromImage(bmp);
-
-            g.CopyFromScreen(x1, y1, 0, 0, bmp.Size, CopyPixelOperation.SourceCopy);
-
-            if (isMock == false)
-                bmp.Save(fileName, ImageFormat.Jpeg);
+            switch (regionType)
+            {
+                case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
+                case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
+                case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
+            }
+        }
+        private Bitmap CaptureScreenRegion(Rectangle rect)
+        {
+            var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            using var g = Graphics.FromImage(bmp);
+            g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
+            return bmp;
         }
 
-        /// Fires L4 and L3B with the same input and output of L4 -> L3A
         public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
         {
             //ParseNFireBitmap(greyScalebmp);
             VisionProcessor.ProcessInput(greyScalebmp, cycle);
         }
 
-        //Fire L4 & L3B for given character , Fires L3A from L4 input, Stores L3A -> HC.
         public void AddNewCharacterSensationToHC(char ch)
         {
             if (!NMode.Equals(NetworkMode.TRAINING))
@@ -214,7 +205,7 @@
                 throw new InvalidOperationException("som_SDR should not be Empty!");
             }
 
-            //Wrong : location should be the location of the mouse pointer relative to the image and not just BBMID.
+            
             Sensation firingSensei = TextProcessor.ConvertSDR_To_Sensation(som_SDR);
 
             if (HCAccessor.AddNewSensationToObject(firingSensei) == false)
