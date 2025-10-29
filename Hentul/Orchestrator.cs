@@ -147,9 +147,14 @@
         }
 
         #endregion
-
+        public void RecordAllRegions()
+        {
+            RecordPixels(LearningUnitType.V1);
+            RecordPixels(LearningUnitType.V2);
+            RecordPixels(LearningUnitType.V3);
+        }
         #region Public API
-  
+
         public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
         {
             int currentRange = regionType switch
@@ -160,7 +165,7 @@
                 _ => Range
             };
 
-            var cur = GetCurrentPointerPosition();       
+            var cur = GetCurrentPointerPosition();
             int w = currentRange * 2;
             int h = currentRange * 2;
 
@@ -170,9 +175,15 @@
 
             switch (regionType)
             {
-                case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
-                case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
-                case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
+                case LearningUnitType.V1:
+                    bmp = CaptureScreenRegion(rect);
+                    break;
+                case LearningUnitType.V2:
+                    bmpV2 = CaptureScreenRegion(rect);
+                    break;
+                case LearningUnitType.V3:
+                    bmpV3 = CaptureScreenRegion(rect);
+                    break;
             }
         }
         private Bitmap CaptureScreenRegion(Rectangle rect)
@@ -185,7 +196,9 @@
 
         public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
         {
-            //ParseNFireBitmap(greyScalebmp);
+            CycleNum = cycle;
+
+            // Process all three regions
             VisionProcessor.Process(greyScalebmp, cycle);
         }
 

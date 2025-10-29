@@ -104,17 +104,17 @@ namespace Hentul
 
             Range = range;
 
-           
             BlockSize = (2 * range) * (2 * range);
             NumBBMNeededV = 100;
+
+            // Initialize ALL encoders upfront
             pEncoderV1 = new PixelEncoder(100, 400);
             bmpV1 = new Bitmap(range + range, range + range);
 
-            
-            pEncoderV2 = new PixelEncoder(100, 400);
+            pEncoderV2 = new PixelEncoder(100, 10000); // 100x100 = 10,000 pixels
             bmpV2 = new Bitmap(100, 100);
 
-            pEncoderV3 = new PixelEncoder(100, 400);
+            pEncoderV3 = new PixelEncoder(100, 40000); // 200x200 = 40,000 pixels
             bmpV3 = new Bitmap(200, 200);
 
             numPixelsProcessedPerBBM = 4;
@@ -122,12 +122,24 @@ namespace Hentul
 
             if (shouldInit)
             {
+                // Initialize V1
                 v1 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V1);
                 v1.Init();
 
+                // Initialize V2 and V3 immediately (not lazy)
+                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V2);
+                v2.Init();
+
+                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, shouldInit, logfilename, LearningUnitType.V3);
+                v3.Init();
+
+                _v2v3Initialized = true;
+
                 Console.WriteLine("V1 - Total Number of Pixels: " + (Range * Range * 4).ToString());
+                Console.WriteLine("V2 - Total Number of Pixels: " + (100 * 100).ToString());
+                Console.WriteLine("V3 - Total Number of Pixels: " + (200 * 200).ToString());
                 Console.WriteLine("V1 - Total First Order BBMs Created: " + NumBBMNeededV.ToString());
-                Console.WriteLine("V2/V3 - Available on demand (not yet initialized)");
+                Console.WriteLine("All regions (V1, V2, V3) initialized successfully");
             }
 
             LogMode = logMode;
@@ -176,22 +188,16 @@ namespace Hentul
                 _frameSkipCounter = 0;
             }
 
-            // Always process V1
-            ProcessV1(greyScalebmp, cycle);
-
-            
-            if (_v2v3Initialized && v2 != null && v3 != null)
-            {
-                ProcessV2(greyScalebmp, cycle);
-                ProcessV3(greyScalebmp, cycle);
-            }
+            // Always process ALL THREE regions (not conditional)
+            ProcessV1(greyScalebmp, MapCycle(cycle, LearningUnitType.V1));
+            ProcessV2(greyScalebmp, MapCycle(cycle, LearningUnitType.V2));
+            ProcessV3(greyScalebmp, MapCycle(cycle, LearningUnitType.V3));
 
             Clean();
         }
 
         private void ProcessV1(Bitmap greyScalebmp, ulong cycle)
         {
-            // Apply subsampling if needed
             var processedBmp = ApplySubsampling(greyScalebmp, 20, 20);
             var grayscaleBmp = ConvertToGrayscale(processedBmp);
             var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
@@ -199,10 +205,14 @@ namespace Hentul
             pEncoderV1.ParseBitmap(whitescaleBmp);
             v1.Process(pEncoderV1, cycle);
         }
-       
+        private static ulong MapCycle(ulong baseCycle, LearningUnitType t)
+        {
+            // room to expand later; ensures strictly increasing sequence within a “frame”
+            return baseCycle * 10UL + (t == LearningUnitType.V1 ? 1UL : t == LearningUnitType.V2 ? 2UL : 3UL);
+        }
         private void ProcessV2(Bitmap greyScalebmp, ulong cycle)
         {
-            // Scale to 100x100 with subsampling
+            if (v2 == null) return;
             var processedBmp = ApplySubsampling(greyScalebmp, 100, 100);
             var grayscaleBmp = ConvertToGrayscale(processedBmp);
             var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
@@ -211,9 +221,10 @@ namespace Hentul
             v2.Process(pEncoderV2, cycle);
         }
 
+
         private void ProcessV3(Bitmap greyScalebmp, ulong cycle)
         {
-            // Scale to 200x200 with subsampling
+            if (v3 == null) return;
             var processedBmp = ApplySubsampling(greyScalebmp, 200, 200);
             var grayscaleBmp = ConvertToGrayscale(processedBmp);
             var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
@@ -222,7 +233,6 @@ namespace Hentul
             v3.Process(pEncoderV3, cycle);
         }
 
-      
         private Bitmap ApplySubsampling(Bitmap source, int targetWidth, int targetHeight)
         {
             var result = new Bitmap(targetWidth, targetHeight);
@@ -414,16 +424,47 @@ namespace Hentul
         // Combined predictions from all regions
         internal List<string> GetCurrentPredictions()
         {
-            var predictions = new List<string>();
+            var v1Preds = v1?.somBBM_L3B_V?.GetCurrentPredictions() ?? new List<string>();
+            var v2Preds = v2?.somBBM_L3B_V?.GetCurrentPredictions() ?? new List<string>();
+            var v3Preds = v3?.somBBM_L3B_V?.GetCurrentPredictions() ?? new List<string>();
 
-            if (v1?.somBBM_L3B_V != null)
-                predictions.AddRange(v1.somBBM_L3B_V.GetCurrentPredictions());
-            if (v2?.somBBM_L3B_V != null)
-                predictions.AddRange(v2.somBBM_L3B_V.GetCurrentPredictions());
-            if (v3?.somBBM_L3B_V != null)
-                predictions.AddRange(v3.somBBM_L3B_V.GetCurrentPredictions());
+            // Collect all predictions with vote counts
+            var voteCounts = new Dictionary<string, int>();
 
-            return predictions.Distinct().ToList();
+            foreach (var pred in v1Preds)
+            {
+                voteCounts[pred] = voteCounts.GetValueOrDefault(pred, 0) + 1;
+            }
+
+            foreach (var pred in v2Preds)
+            {
+                voteCounts[pred] = voteCounts.GetValueOrDefault(pred, 0) + 1;
+            }
+
+            foreach (var pred in v3Preds)
+            {
+                voteCounts[pred] = voteCounts.GetValueOrDefault(pred, 0) + 1;
+            }
+
+            // If no predictions at all, return empty
+            if (voteCounts.Count == 0)
+                return new List<string>();
+
+            // Return predictions that appear in 2 or more regions (majority vote)
+            var majorityPreds = voteCounts.Where(kvp => kvp.Value >= 2)
+                                           .OrderByDescending(kvp => kvp.Value)
+                                           .Select(kvp => kvp.Key)
+                                           .ToList();
+
+            // If no majority, return all predictions sorted by vote count
+            if (!majorityPreds.Any())
+            {
+                return voteCounts.OrderByDescending(kvp => kvp.Value)
+                                .Select(kvp => kvp.Key)
+                                .ToList();
+            }
+
+            return majorityPreds;
         }
 
         internal void BeginTraining(string objectLabel)

@@ -127,45 +127,42 @@ namespace HentulWinforms
 
                     orchestrator.MoveCursor(value);
 
-                    // Record pixels for all regions (V1, V2, V3)
-                    orchestrator.RecordPixels(); // This now captures all three scales internally
+                    // Capture ALL THREE regions
+                    orchestrator.RecordAllRegions();
 
-                    // Update V1 displays (existing)
+                    // Update V1 displays
                     CurrentImage.Image = orchestrator.bmp;
                     CurrentImage.Refresh();
-
                     EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
                     EdgedImage.Refresh();
 
-                    // Update V2 displays (add these PictureBoxes to designer)
-                    if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV2 != null)
+                    // Update V2 displays
+                    if (pictureBoxV2Grayscale != null && orchestrator.bmpV2 != null)
                     {
-                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.VisionProcessor.bmpV2);
+                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
                         pictureBoxV2Grayscale.Refresh();
                     }
-
-                    if (pictureBoxV2Whitescale != null && orchestrator.VisionProcessor.bmpV2 != null)
+                    if (pictureBoxV2Whitescale != null && orchestrator.bmpV2 != null)
                     {
-                        pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.VisionProcessor.bmpV2);
+                        pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV2);
                         pictureBoxV2Whitescale.Refresh();
                     }
 
-                    // Update V3 displays (add these PictureBoxes to designer)
-                    if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV3 != null)
+                    // Update V3 displays
+                    if (pictureBoxV3Grayscale != null && orchestrator.bmpV3 != null)
                     {
-                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.VisionProcessor.bmpV3);
-                        pictureBoxV2Grayscale.Refresh();
+                        pictureBoxV3Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
+                        pictureBoxV3Grayscale.Refresh();
                     }
-
-                    if (pictureBoxV3Whitescale != null && orchestrator.VisionProcessor.bmpV3 != null)
+                    if (pictureBoxV3Whitescale != null && orchestrator.bmpV3 != null)
                     {
-                        pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.VisionProcessor.bmpV3);
+                        pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV3);
                         pictureBoxV3Whitescale.Refresh();
                     }
 
-                    // Process visual data for all regions simultaneously
+                    // Process ALL THREE regions (this now internally handles V1, V2, V3)
                     var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
-                    orchestrator.ProcessVisual(edgedBitmap, counter++); // This now processes V1, V2, V3
+                    orchestrator.ProcessVisual(edgedBitmap, counter++);
 
                     CycleLabel.Text = counter.ToString();
                     CycleLabel.Refresh();
@@ -173,8 +170,6 @@ namespace HentulWinforms
 
                 // Draw SOM layers for all regions
                 DrawAllSomLayers();
-
-                //DrawFomLayers(); // Dont want to print 100 FOM pictureBoxes.
             }
 
             if (label_done.Text == "Finished Processing Image")
@@ -248,7 +243,7 @@ namespace HentulWinforms
         }
         private void startClassificationButton_Click(object sender, EventArgs e)
         {
-            label_done.Text = "Procesing";
+            label_done.Text = "Processing";
             label_done.Refresh();
 
             var value = LeftTop;
@@ -264,16 +259,12 @@ namespace HentulWinforms
             orchestrator.ChangeNetworkModeToPrediction();
             ObjectLabel.Visible = true;
 
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
-
             while (true)
             {
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                 {
                     label_done.Text = "Reached End Of Image";
                     UpdatePredictions();
-
                     break;
                 }
                 else
@@ -291,9 +282,9 @@ namespace HentulWinforms
                         {
                             if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                             {
-                                label_done.Text = "Reached End Of Image"; label_done.Refresh();
+                                label_done.Text = "Reached End Of Image";
+                                label_done.Refresh();
                                 UpdatePredictions();
-
                                 break;
                             }
                         }
@@ -302,13 +293,38 @@ namespace HentulWinforms
 
                 orchestrator.MoveCursor(value);
 
-                orchestrator.RecordPixels();        //Grab Image
+                // Capture ALL THREE regions
+                orchestrator.RecordAllRegions();
 
-                CurrentImage.Image = orchestrator.bmp; CurrentImage.Refresh();
+                // Update displays for all regions
+                CurrentImage.Image = orchestrator.bmp;
+                CurrentImage.Refresh();
+                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
+                EdgedImage.Refresh();
 
-                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp); EdgedImage.Refresh();
+                if (pictureBoxV2Grayscale != null && orchestrator.bmpV2 != null)
+                {
+                    pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
+                    pictureBoxV2Grayscale.Refresh();
+                }
+                if (pictureBoxV2Whitescale != null && orchestrator.bmpV2 != null)
+                {
+                    pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV2);
+                    pictureBoxV2Whitescale.Refresh();
+                }
+                if (pictureBoxV3Grayscale != null && orchestrator.bmpV3 != null)
+                {
+                    pictureBoxV3Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
+                    pictureBoxV3Grayscale.Refresh();
+                }
+                if (pictureBoxV3Whitescale != null && orchestrator.bmpV3 != null)
+                {
+                    pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV3);
+                    pictureBoxV3Whitescale.Refresh();
+                }
 
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
+                // Process ALL THREE regions for classification
+                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);
 
                 networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
 
@@ -318,13 +334,15 @@ namespace HentulWinforms
                 }
                 else if (networkMode == NetworkMode.DONE)
                 {
-                    label_done.Text = "Classification Done!"; label_done.Refresh();
+                    label_done.Text = "Classification Done!";
+                    label_done.Refresh();
 
-                    var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
+                    // Get predictions from ALL regions (with voting logic)
+                    var predictions = orchestrator.GetPredictionsVisual();
                     string val = string.Empty;
                     foreach (var pred in predictions)
                     {
-                        val = pred.ToString();
+                        val += pred.ToString() + " ";
                     }
                     ObjectLabel.Text = val;
                     ObjectLabel.Refresh();
@@ -332,7 +350,7 @@ namespace HentulWinforms
                     break;
                 }
 
-                DrawSomLayer();
+                DrawAllSomLayers();
             }
         }
 

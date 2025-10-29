@@ -79,11 +79,15 @@
         }
         public PixelEncoder(int numBBM, int numPixels)
         {
-            if (numBBM != 100 || numPixels != 400)
+            if (numBBM <= 0 || numPixels <= 0)
             {
-                throw new InvalidOperationException("Currently only supported for 10*10 Image Size with 2 Pixel per BBM W");
+                throw new InvalidOperationException("numBBM and numPixels must be positive values");
             }
 
+            if (numPixels < numBBM)
+            {
+                throw new InvalidOperationException("numPixels must be >= numBBM");
+            }
             NumBBM = numBBM;
             NumPixels = numPixels;
             NumPixelsPerBBM = numPixels / numBBM;
@@ -335,17 +339,57 @@
 
             return retDict;
         }
+        private void RebuildMappings(int blocksPerSide)
+        {
+            Mappings.Clear();
 
+            int maxBBMs = Math.Min(NumBBM, blocksPerSide * blocksPerSide);
+            int bbmID = 0;
+
+            for (int br = 0; br < blocksPerSide && bbmID < NumBBM; br++)
+            {
+                for (int bc = 0; bc < blocksPerSide && bbmID < NumBBM; bc++)
+                {
+                    int x0 = br * 2;
+                    int y0 = bc * 2;
+
+                    Mappings[bbmID] = new[]
+                    {
+                new Position(x0,     y0    ),
+                new Position(x0,     y0 + 1),
+                new Position(x0 + 1, y0    ),
+                new Position(x0 + 1, y0 + 1),
+            };
+
+                    bbmID++;
+                }
+            }
+        }
         public void ParseBitmap(Bitmap bitmap)
         {
-            if (bitmap.Width != 20 || bitmap.Height != 20)
+            // Support multiple sizes: 20x20 (V1), 100x100 (V2), 200x200 (V3)
+            if (bitmap.Width != 20 && bitmap.Width != 100 && bitmap.Width != 200)
             {
-                throw new InvalidDataException("Invalid Data Dimensions!");
+                throw new InvalidDataException($"Invalid Data Dimensions! Expected 20x20, 100x100, or 200x200, got {bitmap.Width}x{bitmap.Height}");
+            }
+
+            if (bitmap.Width != bitmap.Height)
+            {
+                throw new InvalidDataException("Bitmap must be square!");
             }
 
             List<Position> toRet = new List<Position>();
-
             testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
+
+            // Calculate blocks per side based on image size
+            int blocksPerSide = bitmap.Width / 2;  // 10 for 20x20, 50 for 100x100, 100 for 200x200
+            int pixelsPerBlock = 2; // Each block covers 2x2 pixels
+
+            // Rebuild mappings for this bitmap size if needed
+            if (Mappings.Count != blocksPerSide * blocksPerSide)
+            {
+                RebuildMappings(blocksPerSide);
+            }
 
             //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
 
@@ -382,12 +426,7 @@
                 }
                 else if (check1 && check2 && check3 && check4 == false)
                 {
-                    if (bbmID == 79)
-                    {
-                        bool breakpoint = true;
-                    }
-
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
                 }
                 else if (check1 && check2 && check4 && check3 == false)
                 {
