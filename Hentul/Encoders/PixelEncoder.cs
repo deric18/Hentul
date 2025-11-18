@@ -49,34 +49,7 @@
         public int LENGTH { get; private set; }
 
         public int WIDTH { get; private set; }
-        public class PixelEncoderV2 : PixelEncoder
-        {
-            public PixelEncoderV2(int numBBM, int numPixels) : base(numBBM, numPixels)
-            {
-                // V2 specific mappings for 100x100 processing
-                PerformV2Mappings();
-            }
-
-            private void PerformV2Mappings()
-            {
-                // Create mappings for 50x50 BBM grid covering 100x100 image
-                // Each BBM covers 2x2 pixel area
-            }
-        }
-        public class PixelEncoderV3 : PixelEncoder
-        {
-            public PixelEncoderV3(int numBBM, int numPixels) : base(numBBM, numPixels)
-            {
-                // V3 specific mappings for 200x200 processing
-                PerformV3Mappings();
-            }
-
-            private void PerformV3Mappings()
-            {
-                // Create mappings for 100x100 BBM grid covering 200x200 image  
-                // Each BBM covers 2x2 pixel area
-            }
-        }
+        
         public PixelEncoder(int numBBM, int numPixels)
         {
             if (numBBM != 100 || numPixels != 400)

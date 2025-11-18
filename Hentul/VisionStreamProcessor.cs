@@ -76,8 +76,8 @@ namespace Hentul
         public PixelEncoder pEncoderV2 { get; private set; }
         public PixelEncoder pEncoderV3 { get; private set; }
         public PixelEncoder pEncoder => pEncoderV1;
-        private bool _v2v3Initialized = false;
 
+        private bool _v2v3Initialized = false;
 
         public Bitmap bmpV1 { get; private set; }
         public Bitmap bmpV2 { get; private set; }

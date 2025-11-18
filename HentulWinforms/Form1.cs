@@ -71,7 +71,7 @@ namespace HentulWinforms
 
             if (counter > 0)
             {
-                orchestrator.LearnNewObject(objectBox.Text);
+                //orchestrator.LearnNewObject(objectBox.Text);
             }
             else
             {
@@ -353,7 +353,7 @@ namespace HentulWinforms
 
         private void StartBurstAvoidance()
         {
-            orchestrator.StartBurstAvoidanceWandering(100);
+            //orchestrator.StartBurstAvoidanceWandering(100);
         }
 
         public Orchestrator.POINT MoveRight(Orchestrator.POINT value)

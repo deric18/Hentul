@@ -142,41 +142,43 @@
             }
         }
         // Go through all the FOM BBM and get there currently firing Active Positions and prep them for L3A.
-        private SDR_SOM GetSdrSomFromFOMsV()
-        {
+        //private SDR_SOM GetSdrSomFromFOMsV()
+        //{
 
-            List<Position_SOM> posList = new List<Position_SOM>();
+        //    List<Position_SOM> posList = new List<Position_SOM>();
 
-            foreach (var fomID in firingFOM_V)
-            {
-                posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
-            }
+        //    foreach (var fomID in firingFOM_V)
+        //    {
+        //        posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+        //    }
 
-            if (logMode == Common.LogMode.BurstOnly)
-            {
-                int count = 0;
+        //    if (logMode == Common.LogMode.BurstOnly)
+        //    {
+        //        int count = 0;
 
-                foreach (var fomID in firingFOM_V)
-                {
-                    count += fomBBMV[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
-                }
+        //        foreach (var fomID in firingFOM_V)
+        //        {
+        //            count += fomBBMV[fomID].GetAllNeuronsFiringLatestCycle(CycleNum, false).ActiveBits.Count;
+        //        }
 
-                if (count == fomBBMV.Count() * Z)
-                {
-                    WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
-                }
-            }
+        //        if (count == fomBBMV.Count() * Z)
+        //        {
+        //            WriteLogsToFile(" ALL Columns fired for cycle Num :" + CycleNum.ToString());
+        //        }
+        //    }
 
-            if (posList == null || posList.Count == 0)
-            {
-                throw new NullReferenceException(" FOM BBM returned empty position list ");
-            }
+        //    if (posList == null || posList.Count == 0)
+        //    {
+        //        throw new NullReferenceException(" FOM BBM returned empty position list ");
+        //    }
 
-            return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
-        }
+        //    return new SDR_SOM(1250, 10, posList, iType.SPATIAL);
+        //}
 
 
         // Should be called after pixelEncoder has processed the bitmap, parses all the FOMBBMIDS and fires FOMS and tracks all the firing FOMs into firingFOM
+
+
         private void FireFOMsV(PixelEncoder pEncoder, ulong CycleNum)
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
