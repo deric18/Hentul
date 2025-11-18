@@ -15,7 +15,7 @@ namespace HentulWinforms
         ulong counter = 0;
         int imageIndex = 0;
         int totalImagesToProcess = 1;
-        List<string> objectList = new(); 
+        List<string> objectList = new();
         private PictureBox V2GrayscaleImage, V2WhitescaleImage;
         private PictureBox V3GrayscaleImage, V3WhitescaleImage;
 
@@ -183,7 +183,7 @@ namespace HentulWinforms
                 }
             }
         }
-        
+
         private void UpdateImageDisplays()
         {
             // Update V1 displays (existing)
@@ -747,6 +747,11 @@ namespace HentulWinforms
                 pb.Refresh();
                 old?.Dispose();
             }
+        }
+
+        private void pictureBoxV2Som_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
