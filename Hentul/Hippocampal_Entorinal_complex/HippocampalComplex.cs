@@ -125,7 +125,7 @@
 
                 foreach (var matchingObject in matchingObjectList)
                 {
-                    if (matchingObject.Verify(null, isMock, iterationToConfirmation) == true)
+                    if (true) //matchingObject.Verify(null, isMock, iterationToConfirmation) == true)
                     {
                         currentmatchingObject = matchingObject;
                         ObjectState = RecognitionState.Recognised;
@@ -426,16 +426,7 @@
         }
 
 
-        #region Unused 
-
-        private Tuple<Sensation_Location, Sensation_Location> ProcessStep1N2FromOrchestrator()
-        {
-            var instance = Orchestrator.GetInstance();
-            instance.RecordPixels();
-            var bmp = instance.ConverToEdgedBitmap();
-            instance.ProcessVisual(bmp, 0);
-            return instance.GetSDRFromL3B();
-        }
+        #region Unused        
 
         internal static bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei, string label = null, string filename = null)
         {

@@ -53,6 +53,7 @@ namespace HentulWinforms
         private void StartButton_Click(object sender, EventArgs e)
         {
             label_done.Text = "Processing";
+
             label_done.Refresh();
 
             if (string.IsNullOrEmpty(objectBox.Text))
@@ -130,39 +131,31 @@ namespace HentulWinforms
                     // Capture ALL THREE regions
                     orchestrator.RecordAllRegions();
 
-                    // Update V1 displays
+                    // Update displays for all regions
                     CurrentImage.Image = orchestrator.bmp;
                     CurrentImage.Refresh();
                     EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
                     EdgedImage.Refresh();
 
-                    // Update V2 displays
-                    if (pictureBoxV2Grayscale != null && orchestrator.bmpV2 != null)
+                    if (orchestrator.bmpV2 != null)
                     {
-                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
+                        pictureBoxV2Whitescale.Image = orchestrator.bmpV2;
+                        pictureBoxV2Whitescale.Refresh();
+                        pictureBoxV2Grayscale.Image = orchestrator.bmpV2_g;
                         pictureBoxV2Grayscale.Refresh();
                     }
-                    if (pictureBoxV2Whitescale != null && orchestrator.bmpV2 != null)
-                    {
-                        pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV2);
-                        pictureBoxV2Whitescale.Refresh();
-                    }
 
-                    // Update V3 displays
-                    if (pictureBoxV3Grayscale != null && orchestrator.bmpV3 != null)
+                    if (orchestrator.bmpV3 != null)
                     {
-                        pictureBoxV3Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
-                        pictureBoxV3Grayscale.Refresh();
-                    }
-                    if (pictureBoxV3Whitescale != null && orchestrator.bmpV3 != null)
-                    {
-                        pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV3);
+                        pictureBoxV3Whitescale.Image = orchestrator.bmpV3;
                         pictureBoxV3Whitescale.Refresh();
+                        pictureBoxV3Grayscale.Image = orchestrator.bmpV3_g;
+                        pictureBoxV3Grayscale.Refresh();
                     }
 
                     // Process ALL THREE regions (this now internally handles V1, V2, V3)
-                    var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
-                    orchestrator.ProcessVisual(edgedBitmap, counter++);
+                    var edgedBitmap = orchestrator.bmp_g;
+                    orchestrator.ProcessVisual(counter++);
 
                     CycleLabel.Text = counter.ToString();
                     CycleLabel.Refresh();
@@ -302,29 +295,24 @@ namespace HentulWinforms
                 EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
                 EdgedImage.Refresh();
 
-                if (pictureBoxV2Grayscale != null && orchestrator.bmpV2 != null)
+                if (orchestrator.bmpV2 != null)
                 {
-                    pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
+                    pictureBoxV2Whitescale.Image = orchestrator.bmpV2;
+                    pictureBoxV2Whitescale.Refresh();
+                    pictureBoxV2Grayscale.Image = orchestrator.bmpV2_g;
                     pictureBoxV2Grayscale.Refresh();
                 }
-                if (pictureBoxV2Whitescale != null && orchestrator.bmpV2 != null)
-                {
-                    pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV2);
-                    pictureBoxV2Whitescale.Refresh();
-                }
-                if (pictureBoxV3Grayscale != null && orchestrator.bmpV3 != null)
-                {
-                    pictureBoxV3Grayscale.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
-                    pictureBoxV3Grayscale.Refresh();
-                }
-                if (pictureBoxV3Whitescale != null && orchestrator.bmpV3 != null)
-                {
-                    pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.bmpV3);
-                    pictureBoxV3Whitescale.Refresh();
-                }
 
+                if (orchestrator.bmpV3 != null)
+                {
+                    pictureBoxV3Whitescale.Image = orchestrator.bmpV3;
+                    pictureBoxV3Whitescale.Refresh();
+                    pictureBoxV3Grayscale.Image = orchestrator.bmpV3_g;
+                    pictureBoxV3Grayscale.Refresh();
+                }                
+                
                 // Process ALL THREE regions for classification
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);
+                orchestrator.ProcessVisual(counter++);
 
                 networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
 
@@ -362,17 +350,7 @@ namespace HentulWinforms
             predictions.ForEach(x => val += x.ToString() + " | ");
 
             ObjectLabel.Text = val; ObjectLabel.Refresh();
-        }
-
-        private void WanderingButton_Click(object sender, EventArgs e)
-        {
-            StartBurstAvoidance();
-        }
-
-        private void StartBurstAvoidance()
-        {
-            orchestrator.StartBurstAvoidanceWandering(100);
-        }
+        }            
 
         public Orchestrator.POINT MoveRight(Orchestrator.POINT value)
         {
@@ -750,6 +728,11 @@ namespace HentulWinforms
         }
 
         private void pictureBoxV2Som_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
         {
 
         }

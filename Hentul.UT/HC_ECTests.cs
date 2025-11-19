@@ -134,20 +134,6 @@
         }
 
 
-
-        [Test, Ignore("Needs Work!!!")]
-        public void TestVerify()
-        {
-            List<RecognisedVisualEntity> entities = TestUtils.GenerateRandomEntities(4);
-
-            hc.LoadMockObject(entities, true);
-
-            RecognisedVisualEntity entity = entities[0];            
-
-            entity.Verify(null, true, 6);            
-        }
-
-
         [Test, Ignore("Needs a lot more Work")]
         public void TestPreditObject2PositiveTest()
         {
