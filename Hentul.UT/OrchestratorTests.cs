@@ -82,6 +82,36 @@
 
             Assert.AreEqual(3, sdr.ActiveBits.Count);
         }
+
+        [Test, Ignore("Need access to cursor and custom Apple Image to be hosted!")]
+        public void TestWanderingCursor()
+        {
+            ulong counter = 0;
+
+            List<Position2D> cursorPositions = new List<Position2D>()
+            {
+                new Position2D( 1346, 456),
+                new Position2D( 1043, 629),
+                new Position2D( 1279, 620),
+                new Position2D( 1498, 612),
+                new Position2D( 1346, 656)
+            };
+
+            foreach (var position in cursorPositions)
+            {
+                if (position.X == 1498)
+                {
+                    bool bp1 = true;
+                }
+
+                Orchestrator.SetCursorPos(position.X, position.Y);                
+
+                orchestrator.RecordPixels();
+                var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
+                orchestrator.ProcessVisual(edgedbmp1, counter++);
+                orchestrator.AddNewVisualSensationToHc();
+
+            }
        
 
         [Test]

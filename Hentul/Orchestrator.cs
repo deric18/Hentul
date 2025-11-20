@@ -284,7 +284,7 @@
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
 
-            TextProcessor.ProcessCharacter(ch, CycleNum);
+            TextProcessor.ProcessInput(ch, CycleNum);
 
             var som_SDR = TextProcessor.GetL3BSensation(CycleNum);
 
