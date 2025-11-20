@@ -182,8 +182,10 @@ namespace Hentul
 
             // Always process ALL THREE regions (not conditional)
             ProcessV1(bmpv1, cycle);
-            ProcessV2(bmpv2, cycle);
-            ProcessV3(bmpv3, cycle);            
+
+
+            //ProcessV2(bmpv2, cycle);
+            //ProcessV3(bmpv3, cycle);            
 
             Clean();
         }

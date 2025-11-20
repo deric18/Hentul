@@ -168,6 +168,15 @@
 
             Console.WriteLine("Grabbing Screen Pixels...");
 
+            int currentRange = regionType switch
+            {
+                LearningUnitType.V1 => Range,      // 10  -> 20x20
+                LearningUnitType.V2 => Range * 5,  // 50  -> 100x100
+                LearningUnitType.V3 => Range * 10, // 100 -> 200x200
+                _ => Range
+            };
+
+
             int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
 
             int x1 = point.X - Range < 0 ? 0 : point.X - Range;
@@ -179,19 +188,7 @@
 
             Rectangle rect = new Rectangle(x1, y1, x2, y2);
 
-            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
-
-            int currentRange = regionType switch
-            {
-                LearningUnitType.V1 => Range,      // 10  -> 20x20
-                LearningUnitType.V2 => Range * 5,  // 50  -> 100x100
-                LearningUnitType.V3 => Range * 10, // 100 -> 200x200
-                _ => Range
-            };
-
-            var cur = GetCurrentPointerPosition();
-            int w = currentRange * 2;
-            int h = currentRange * 2;                       
+            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);                          
 
             switch (regionType)
             {
