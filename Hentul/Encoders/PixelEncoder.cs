@@ -423,9 +423,8 @@
         }
 
         public void ParseBitmap(Bitmap bitmap)
-        {
-            // Support multiple sizes: 20x20 (V1), 100x100 (V2), 200x200 (V3)
-            if (bitmap.Width != 20 || bitmap.Height != 20)
+        {            
+            if (bitmap.Width != 40 || bitmap.Height != 20)
             {
                 throw new InvalidDataException("Invalid Data Dimensions!");
             }
