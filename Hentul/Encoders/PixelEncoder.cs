@@ -365,12 +365,13 @@
                 }
             }
         }
+
         public void ParseBitmap(Bitmap bitmap)
         {
             // Support multiple sizes: 20x20 (V1), 100x100 (V2), 200x200 (V3)
-            if (bitmap.Width != 20 && bitmap.Width != 100 && bitmap.Width != 200)
+            if (bitmap.Width != 20 || bitmap.Height != 20)
             {
-                throw new InvalidDataException($"Invalid Data Dimensions! Expected 20x20, 100x100, or 200x200, got {bitmap.Width}x{bitmap.Height}");
+                throw new InvalidDataException("Invalid Data Dimensions!");
             }
 
             if (bitmap.Width != bitmap.Height)
@@ -381,15 +382,7 @@
             List<Position> toRet = new List<Position>();
             testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
 
-            // Calculate blocks per side based on image size
-            int blocksPerSide = bitmap.Width / 2;  // 10 for 20x20, 50 for 100x100, 100 for 200x200
-            int pixelsPerBlock = 2; // Each block covers 2x2 pixels
-
-            // Rebuild mappings for this bitmap size if needed
-            if (Mappings.Count != blocksPerSide * blocksPerSide)
-            {
-                RebuildMappings(blocksPerSide);
-            }
+            
 
             //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
 

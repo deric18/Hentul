@@ -36,7 +36,7 @@
             fomBBMV = new FBBM[numBBMNeededV];
             firingFOM_V = new List<int>();
             NumColumns = numColumns;
-           
+            X = x;
             Z = z;
 
             if (shouldInit)
