@@ -94,7 +94,7 @@
             NumColumns = 10;
             Z = 4;
             LogMode = false;
-            Range = visionrange;
+            Range = 10;
             NMode = nMode;
             logMode = Common.LogMode.BurstOnly;
 
@@ -161,6 +161,26 @@
 
         public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
         {
+
+            Console.WriteLine("Grabbing cursor Position");
+
+            point = this.GetCurrentPointerPosition();
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
+
+            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
+            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
+            int x2 = Math.Abs(point.X + Range2);
+            int y2 = Math.Abs(point.Y + Range);
+
+            //this.GetColorByRange(x1, y1, x2, y2);
+
+            Rectangle rect = new Rectangle(x1, y1, x2, y2);
+
+            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
+
             int currentRange = regionType switch
             {
                 LearningUnitType.V1 => Range,      // 10  -> 20x20
@@ -171,11 +191,7 @@
 
             var cur = GetCurrentPointerPosition();
             int w = currentRange * 2;
-            int h = currentRange * 2;
-
-            int x = Math.Max(0, cur.X - currentRange);
-            int y = Math.Max(0, cur.Y - currentRange);
-            var rect = new Rectangle(x, y, w, h);
+            int h = currentRange * 2;                       
 
             switch (regionType)
             {
@@ -194,6 +210,17 @@
                     bmpV3_g = ConverToEdgedBitmap(bmpV3);
                     break;
             }
+        }
+
+        private Bitmap CaptureScreenRegion(Rectangle rect)
+        {
+            var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            using var g = Graphics.FromImage(bmp);
+
+            g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
+
+            return bmp;
         }
 
         private Bitmap ApplySubsampling(Bitmap source, int targetWidth, int targetHeight, int step)
@@ -252,17 +279,7 @@
             }
 
             return result;
-        }
-
-        private Bitmap CaptureScreenRegion(Rectangle rect)
-        {
-            var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-            using var g = Graphics.FromImage(bmp);
-            g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
-
-            return bmp;
-        }
+        }        
 
         public void ProcessVisual(ulong cycle)
         {
