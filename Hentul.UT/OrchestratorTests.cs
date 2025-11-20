@@ -106,7 +106,7 @@
 
                 Orchestrator.SetCursorPos(position.X, position.Y);                
 
-                orchestrator.RecordPixels(true);
+                orchestrator.RecordPixels();
                 var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
                 orchestrator.ProcessVisual(edgedbmp1, counter++);
                 orchestrator.AddNewVisualSensationToHc();
