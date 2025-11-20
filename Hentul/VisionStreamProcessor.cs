@@ -72,10 +72,8 @@ namespace Hentul
         public LogMode LogMode { get; private set; }
 
         // Multiple encoders for different scales
-        public PixelEncoder pEncoderV1 { get; private set; }
-        public PixelEncoder pEncoderV2 { get; private set; }
-        public PixelEncoder pEncoderV3 { get; private set; }
-        public PixelEncoder pEncoder => pEncoderV1;
+        public PixelEncoder pEncoder { get; private set; }
+                
         private bool _v2v3Initialized = false;
 
 
@@ -108,15 +106,9 @@ namespace Hentul
             NumBBMNeededV = 100;
 
             // Initialize ALL encoders upfront
-            pEncoderV1 = new PixelEncoder(100, 400);
+            pEncoder = new PixelEncoder(100, 400);
             bmpV1 = new Bitmap(range + range, range + range);
-
-            pEncoderV2 = new PixelEncoder(100, 10000); // 100x100 = 10,000 pixels
-            bmpV2 = new Bitmap(100, 100);
-
-            pEncoderV3 = new PixelEncoder(100, 40000); // 200x200 = 40,000 pixels
-            bmpV3 = new Bitmap(200, 200);
-
+            
             numPixelsProcessedPerBBM = 4;
             logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
 
@@ -144,21 +136,19 @@ namespace Hentul
 
             LogMode = logMode;
         }
+
         public void InitializeV2V3IfNeeded()
         {
             if (_v2v3Initialized) return;
 
             try
             {
-                Console.WriteLine("Initializing V2/V3 regions...");
+                Console.WriteLine("Initializing V2/V3 regions...");                
 
-                int numBBMV2 = 100;   
-                int numBBMV3 = 100;    
-
-                v2 = new LearningUnit(numBBMV2, NumColumns, Z, X * 2, true, logfilename, LearningUnitType.V2);
+                v2 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, true, logfilename, LearningUnitType.V2);
                 v2.Init();
 
-                v3 = new LearningUnit(numBBMV3, NumColumns, Z, X * 3, true, logfilename, LearningUnitType.V3);
+                v3 = new LearningUnit(NumBBMNeededV, NumColumns, Z, X, true, logfilename, LearningUnitType.V3);
                 v3.Init();
 
                 _v2v3Initialized = true;
@@ -169,13 +159,15 @@ namespace Hentul
                 Console.WriteLine($"V2/V3 initialization failed: {ex.Message}");
             }
         }
+
         public async Task InitializeV2V3Async()
         {
             await Task.Run(() => InitializeV2V3IfNeeded());
         }
+
         #endregion
 
-        public void Process(Bitmap greyScalebmp, ulong cycle)
+        public void Process(Bitmap bmpv1, Bitmap bmpv2, Bitmap bmpv3, ulong cycle)
         {
             CycleNum = cycle;
 
@@ -189,96 +181,35 @@ namespace Hentul
             }
 
             // Always process ALL THREE regions (not conditional)
-            ProcessV1(greyScalebmp, MapCycle(cycle, LearningUnitType.V1));
-            ProcessV2(greyScalebmp, MapCycle(cycle, LearningUnitType.V2));
-            ProcessV3(greyScalebmp, MapCycle(cycle, LearningUnitType.V3));
+            ProcessV1(bmpv1, cycle);
+            ProcessV2(bmpv2, cycle);
+            ProcessV3(bmpv3, cycle);            
 
             Clean();
         }
 
         private void ProcessV1(Bitmap greyScalebmp, ulong cycle)
-        {
-            var processedBmp = ApplySubsampling(greyScalebmp, 20, 20);
-            var grayscaleBmp = ConvertToGrayscale(processedBmp);
-            var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
+        {                
+            pEncoder.ParseBitmap(greyScalebmp);
+            v1.Process(pEncoder, cycle);
+        }        
 
-            pEncoderV1.ParseBitmap(whitescaleBmp);
-            v1.Process(pEncoderV1, cycle);
-        }
-        private static ulong MapCycle(ulong baseCycle, LearningUnitType t)
-        {
-            // room to expand later; ensures strictly increasing sequence within a “frame”
-            return baseCycle * 10UL + (t == LearningUnitType.V1 ? 1UL : t == LearningUnitType.V2 ? 2UL : 3UL);
-        }
         private void ProcessV2(Bitmap greyScalebmp, ulong cycle)
-        {
-            if (v2 == null) return;
-            var processedBmp = ApplySubsampling(greyScalebmp, 100, 100);
-            var grayscaleBmp = ConvertToGrayscale(processedBmp);
-            var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
-
-            pEncoderV2.ParseBitmap(whitescaleBmp);
-            v2.Process(pEncoderV2, cycle);
+        {                
+            pEncoder.ParseBitmap(greyScalebmp);
+            v2.Process(pEncoder, cycle);
         }
 
 
         private void ProcessV3(Bitmap greyScalebmp, ulong cycle)
-        {
-            if (v3 == null) return;
-            var processedBmp = ApplySubsampling(greyScalebmp, 200, 200);
-            var grayscaleBmp = ConvertToGrayscale(processedBmp);
-            var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
-
-            pEncoderV3.ParseBitmap(whitescaleBmp);
-            v3.Process(pEncoderV3, cycle);
+        {               
+            pEncoder.ParseBitmap(greyScalebmp);
+            v3.Process(pEncoder, cycle);
         }
 
-        private Bitmap ApplySubsampling(Bitmap source, int targetWidth, int targetHeight)
-        {
-            var result = new Bitmap(targetWidth, targetHeight);
-            var stepX = (double)source.Width / targetWidth;
-            var stepY = (double)source.Height / targetHeight;
 
-            using (var g = Graphics.FromImage(result))
-            {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                g.DrawImage(source, 0, 0, targetWidth, targetHeight);
-            }
-
-            // Apply "every 3rd pixel" sampling if configured
-            if (_settings.SubsampleStep > 1)
-            {
-                return ApplyPixelSubsampling(result, _settings.SubsampleStep);
-            }
-
-            return result;
-        }
-
-        private Bitmap ApplyPixelSubsampling(Bitmap source, int step)
-        {
-            var result = new Bitmap(source.Width, source.Height);
-
-            for (int y = 0; y < source.Height; y += step)
-            {
-                for (int x = 0; x < source.Width; x += step)
-                {
-                    if (x < source.Width && y < source.Height)
-                    {
-                        var color = source.GetPixel(x, y);
-                        // Fill the step area with the same color
-                        for (int dy = 0; dy < step && y + dy < source.Height; dy++)
-                        {
-                            for (int dx = 0; dx < step && x + dx < source.Width; dx++)
-                            {
-                                result.SetPixel(x + dx, y + dy, color);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
+        //this is too slow , cannot use this.
+        
 
         private Bitmap ConvertToGrayscale(Bitmap source)
         {
@@ -296,29 +227,7 @@ namespace Hentul
             }
 
             return result;
-        }
-
-        private Bitmap ConvertToWhitescale(Bitmap source)
-        {
-            var result = new Bitmap(source.Width, source.Height);
-
-            for (int y = 0; y < source.Height; y++)
-            {
-                for (int x = 0; x < source.Width; x++)
-                {
-                    var color = source.GetPixel(x, y);
-                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
-
-                    bool isWhite = gray >= _settings.WhiteThreshold;
-                    if (_settings.InvertWhite) isWhite = !isWhite;
-
-                    var whiteColor = isWhite ? Color.White : Color.Black;
-                    result.SetPixel(x, y, whiteColor);
-                }
-            }
-
-            return result;
-        }
+        }      
 
         public SDR_SOM GetSL3BLatestFiringCells(LearningUnitType luType, ulong cyclenum) =>
              GetLearningUnit(luType).somBBM_L3B_V.GetAllNeuronsFiringLatestCycle(cyclenum);
@@ -413,9 +322,7 @@ namespace Hentul
 
         internal void Clean()
         {
-            pEncoderV1?.Clean();
-            pEncoderV2?.Clean();
-            pEncoderV3?.Clean();
+            pEncoder.Clean();
             v1?.Clear();
             v2?.Clear();
             v3?.Clear();

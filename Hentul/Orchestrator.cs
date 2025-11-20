@@ -59,7 +59,9 @@
 
         public List<string> ImageList { get; private set; }
 
-        public Bitmap bmp;
+        public Bitmap bmp, bmpV2, bmpV3;
+
+        public Bitmap bmp_g, bmpV2_g, bmpV3_g;
 
         public static string fileName;
 
@@ -79,10 +81,10 @@
 
         public ulong CycleNum { get; private set; }
 
-        private int NumColumns, X, Z;
-        public Bitmap bmpV2, bmpV3;
+        private int NumColumns, X, Z;        
 
         #endregion
+
         private static readonly string baseDir = AppContext.BaseDirectory;
         
         private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true,
@@ -92,7 +94,7 @@
             NumColumns = 10;
             Z = 4;
             LogMode = false;
-            Range = visionrange;
+            Range = 10;
             NMode = nMode;
             logMode = Common.LogMode.BurstOnly;
 
@@ -147,16 +149,38 @@
         }
 
         #endregion
+
         public void RecordAllRegions()
         {
             RecordPixels(LearningUnitType.V1);
             RecordPixels(LearningUnitType.V2);
             RecordPixels(LearningUnitType.V3);
         }
+
         #region Public API
 
         public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
         {
+
+            Console.WriteLine("Grabbing cursor Position");
+
+            point = this.GetCurrentPointerPosition();
+
+            Console.WriteLine("Grabbing Screen Pixels...");
+
+            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
+
+            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
+            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
+            int x2 = Math.Abs(point.X + Range2);
+            int y2 = Math.Abs(point.Y + Range);
+
+            //this.GetColorByRange(x1, y1, x2, y2);
+
+            Rectangle rect = new Rectangle(x1, y1, x2, y2);
+
+            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);
+
             int currentRange = regionType switch
             {
                 LearningUnitType.V1 => Range,      // 10  -> 20x20
@@ -167,39 +191,107 @@
 
             var cur = GetCurrentPointerPosition();
             int w = currentRange * 2;
-            int h = currentRange * 2;
-
-            int x = Math.Max(0, cur.X - currentRange);
-            int y = Math.Max(0, cur.Y - currentRange);
-            var rect = new Rectangle(x, y, w, h);
+            int h = currentRange * 2;                       
 
             switch (regionType)
             {
                 case LearningUnitType.V1:
                     bmp = CaptureScreenRegion(rect);
+                    bmp_g = ConverToEdgedBitmap(bmp);
                     break;
                 case LearningUnitType.V2:
                     bmpV2 = CaptureScreenRegion(rect);
+                    bmpV2 = ApplySubsampling(bmpV2, 20, 20, 3);
+                    bmpV2_g = ConverToEdgedBitmap(bmpV2);
                     break;
                 case LearningUnitType.V3:
                     bmpV3 = CaptureScreenRegion(rect);
+                    bmpV3 = ApplySubsampling(bmpV3, 20, 20, 6);
+                    bmpV3_g = ConverToEdgedBitmap(bmpV3);
                     break;
             }
         }
+
         private Bitmap CaptureScreenRegion(Rectangle rect)
         {
             var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
             using var g = Graphics.FromImage(bmp);
+
             g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
+
             return bmp;
         }
 
-        public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
+        private Bitmap ApplySubsampling(Bitmap source, int targetWidth, int targetHeight, int step)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (step <= 0) throw new ArgumentOutOfRangeException(nameof(step), "step must be >= 1");
+
+            int width = source.Width;
+            int height = source.Height;
+
+            // If step == 1 treat as a full copy or optional resize to target dims.
+            if (step == 1)
+            {
+                if (targetWidth > 0 && targetHeight > 0 && (targetWidth != width || targetHeight != height))
+                {
+                    var scaled = new Bitmap(targetWidth, targetHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    using var g = Graphics.FromImage(scaled);
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(source, 0, 0, targetWidth, targetHeight);
+                    return scaled;
+                }
+
+                return new Bitmap(source);
+            }
+
+            // Create a result the same size as source and clear to a background color (black).
+            var result = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            using (var g = Graphics.FromImage(result))
+            {
+                g.Clear(Color.Black);
+            }
+
+            // Copy only every 'step' pixel in both X and Y (keeps sampled pixels at original coordinates).
+            // Note: uses GetPixel/SetPixel for simplicity. For large images or tight loops consider LockBits for performance.
+            for (int y = 0; y < height; y += step)
+            {
+                for (int x = 0; x < width; x += step)
+                {
+                    // bounds guaranteed by loops
+                    var color = source.GetPixel(x, y);
+                    result.SetPixel(x, y, color);
+                }
+            }
+
+            // If caller requested a downsampled target size, scale the sparse-sampled result to the target.
+            if (targetWidth > 0 && targetHeight > 0 && (targetWidth != width || targetHeight != height))
+            {
+                var scaled = new Bitmap(targetWidth, targetHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                using (var g2 = Graphics.FromImage(scaled))
+                {
+                    g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                    g2.DrawImage(result, 0, 0, targetWidth, targetHeight);
+                }
+                result.Dispose();
+                return scaled;
+            }
+
+            return result;
+        }        
+
+        public void ProcessVisual(ulong cycle)
+        {
+            if(cycle != 0 && cycle <= CycleNum)
+            {
+                throw new InvalidOperationException("Orchestrator :: incoming Cycle number should always be greater than internal cycle number!");
+            }
+
             CycleNum = cycle;
 
             // Process all three regions
-            VisionProcessor.Process(greyScalebmp, cycle);
+            VisionProcessor.Process(bmp, bmpV2, bmpV3, cycle);
         }
 
         public void AddNewCharacterSensationToHC(char ch)
@@ -209,7 +301,7 @@
                 throw new InvalidOperationException("AddNewCharacterSensationToHC_T :: Network Should be in Training Mode before Predicting!");
             }
 
-            TextProcessor.ProcessCharacter(ch, CycleNum);
+            TextProcessor.ProcessInput(ch, CycleNum);
 
             var som_SDR = TextProcessor.GetL3BSensation(CycleNum);
 
@@ -514,9 +606,9 @@
             sdr_SOM.ActiveBits = newActiveBitsList;
         }
 
-        public Bitmap ConverToEdgedBitmap()
+        public Bitmap ConverToEdgedBitmap(Bitmap bitmap)
         {
-            Bitmap newBitmap = new Bitmap(bmp.Width, bmp.Height);
+            Bitmap newBitmap = new Bitmap(bitmap.Width, bitmap.Height);
 
             //get a graphics object from the new image
             using (Graphics g = Graphics.FromImage(newBitmap))
@@ -542,7 +634,7 @@
 
                     //draw the original image on the new image
                     //using the grayscale color matrix
-                    g.DrawImage(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height),
+                    g.DrawImage(bitmap, new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                                 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, attributes);
                 }
             }
@@ -860,29 +952,12 @@
 
                 // Analyse
 
-                // Increase or decrease Scope && try again
-
-                makesSense = DoesItMakeSense();
+                // Increase or decrease Scope && try again                
             }
 
             return scopeToReturn;
         }
-
-
-
-        private bool DoesItMakeSense()
-        {
-            // Check if cursor is currently on top of an object or just screen saver ?
-            //If object , check what is the size of the object and return the dimension needed to cover the whole object.
-            AdjustScopetoNearestObject();
-
-
-            //if Scope is not on Object then return broad scope to grab the whole screen view with lower pixel rate.
-            GrabWholeScreen();
-
-            return true;
-
-        }
+        
 
         private Bitmap GrabWholeScreen()
         {
@@ -894,162 +969,7 @@
 
         }
 
-
-
-        private void AdjustScopetoNearestObject()
-        {
-            POINT p = GetCurrentPointerPosition();
-
-
-
-
-
-        }
-
-
-        #region TRASH
-
-
-        //public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
-        //{
-        //    //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
-
-        //    Stopwatch stopWatch = new Stopwatch();
-
-        //    stopWatch.Start();
-
-        //    int TotalReps = 2;
-
-        //    int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
-        //    int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
-
-        //    int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
-
-        //    int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
-        //    int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
-
-        //    int num_unit_per_block_x = 5;
-        //    int num_unit_per_block_y = 5;
-
-        //    int num_pixels_per_Unit_x = 10;
-        //    int num_pixels_per_Unit_y = 10;
-
-        //    for (int reps = 0; reps < TotalReps; reps++)
-        //    {
-        //        for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
-        //        {
-        //            for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-        //            {
-        //                int bbmId = 0;
-
-        //                for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-        //                {
-        //                    for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-        //                    {
-        //                        BoolEncoder boolEncoder = new BoolEncoder(100, 20);
-
-        //                        for (int j = 0; j < num_pixels_per_Unit_x; j++)
-        //                        {
-        //                            for (int i = 0; i < num_pixels_per_Unit_y; i++)
-        //                            {
-        //                                int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-        //                                int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-        //                                //if the pixel is Black then tag the pixel location
-
-        //                                if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-        //                                {
-        //                                    int bp = 1;
-        //                                }
-
-        //                                if (CheckifPixelisBlack(pixel_x, pixel_y))
-        //                                {
-
-        //                                    var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-        //                                    boolEncoder.SetEncoderValues(dataToEncode);
-
-        //                                }
-        //                            }
-
-        //                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-        //                            {
-        //                                if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
-        //                                {
-        //                                    fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
-        //                                }
-
-        //                                if (boolEncoder.HasValues())
-        //                                {
-        //                                    CycleNum++;
-
-        //                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
-
-        //                                    fomBBM[bbmId++].Fire(imageSDR);
-
-        //                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-        //                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-        //                                    {
-        //                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-        //                                        somBBM_L3BV.Fire(fomSDR);
-        //                                    }
-
-        //                                }
-
-        //                                boolEncoder.ClearEncoderValues();
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-
-        //    PrintMoreBlockVitals();
-
-        //    BackUp();
-
-        //    Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
-
-        //    Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
-
-        //    Console.WriteLine("Done Processing Image");
-
-        //    Console.Read();
-        //}
-
-        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        //{
-        //    if (numberOfPixels_Index % BlockOffset == 0)
-        //    {
-        //        return numberOfPixels_Index;
-        //    }
-
-        //    int nextMinNumberOfPixels = numberOfPixels_Index;
-
-        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
-
-        //    while (nextMinNumberOfPixels % 50 != 0)
-        //    {
-        //        nextMinNumberOfPixels--;
-
-        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
-        //        {
-        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
-        //        }
-
-        //    }
-
-        //    if (nextMinNumberOfPixels % 50 != 0)
-        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
-
-        //    return nextMinNumberOfPixels;
-        //}
-
-
-        // Already grey scalled.
+                
         private void GetColorByRange(int x1, int y1, int x2, int y2)
         {
             IntPtr desk = GetDesktopWindow();
@@ -1080,8 +1000,7 @@
         #endregion
 
         #endregion
-
-        #endregion
+        
 
         #region LEGACY CODE
 
@@ -1147,69 +1066,7 @@
             {
                 throw new InvalidOperationException(" som_SDR should not be null!");
             }
-        }
-
-        public List<uint> StartBurstAvoidanceWandering(int totalWanders = 5)
-        {
-            //var temporalSignalForPosition = new SDR_SOM(NumColumns, Z, GetLocationSDR(nextDesiredPosition), iType.TEMPORAL);
-            //somBBM_L3A.Fire(temporalSignalForPosition);  
-
-            // Object recognised! 
-            int counter = totalWanders > 0 ? HCAccessor.GetObjectTotalSensationCount() : totalWanders;
-            int breakpoint = 1;
-
-            List<uint> burstCache = new List<uint>();
-
-            while (counter != 0)
-            {
-                if (counter == 2)
-                    breakpoint = 3;
-
-                Position2D nextDesiredPosition = HCAccessor.GetNextLocationForWandering();
-
-                var apicalSignalSOM = new SDR_SOM(X, NumColumns, Conver2DtoSOMList(HCAccessor.GetNextSensationForWanderingPosition()), iType.APICAL);
-
-                MoveCursorToSpecificPosition(nextDesiredPosition.X, nextDesiredPosition.Y);
-
-                RecordPixels();
-
-                var edgedbmp = ConverToEdgedBitmap();
-
-                var apicalSignal = apicalSignalSOM.ActiveBits;
-
-                var apicalSignalFOM = new SDR_SOM(X, NumColumns, apicalSignal, iType.APICAL);               //Fire FOMS with APICAL input
-
-                BiasFOM(apicalSignalFOM);
-
-                ParseNFireBitmap(edgedbmp);
-
-                VisionProcessor.Clean();
-
-                uint postBiasBurstCount = GetTotalBurstCountInFOMLayerInLastCycle(CycleNum);
-
-                if (postBiasBurstCount > 0)
-                {
-                    Dictionary<int, List<Position_SOM>> bbmToFiringPositions = new Dictionary<int, List<Position_SOM>>();
-
-                    foreach (var fom in VisionProcessor.GetFOMBBMVFromLearningUnit(LearningUnitType.V1))
-                    {
-                        Tuple<int, List<Position_SOM>> tuple = fom.GetBurstingColumnsInLastCycle(CycleNum);
-
-                        if (tuple != null)
-                            bbmToFiringPositions.Add(tuple.Item1, tuple.Item2);
-                    }
-
-                    breakpoint = 2;
-                }
-
-                burstCache.Add(postBiasBurstCount);
-
-                CycleNum++;
-                counter--;
-            }
-
-            return burstCache;
-        }
+        }        
 
         public void LearnNewObject(string v)
         {
