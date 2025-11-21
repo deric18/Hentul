@@ -15,7 +15,7 @@ namespace HentulWinforms
         ulong counter = 0;
         int imageIndex = 0;
         int totalImagesToProcess = 1;
-        List<string> objectList = new(); 
+        List<string> objectList = new();
         private PictureBox V2GrayscaleImage, V2WhitescaleImage;
         private PictureBox V3GrayscaleImage, V3WhitescaleImage;
 
@@ -68,81 +68,22 @@ namespace HentulWinforms
             }
 
             objectList.Add(objectBox.Text);
-            
-            orchestrator.BeginTraining(objectBox.Text);            
 
-            var value = LeftTop;
-            value.X = value.X + numPixels;
-            value.Y = value.Y + numPixels;
-
-            orchestrator.MoveCursor(value);
-
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
-
-            while (true)
+            if (networkMode.Equals(NetworkMode.TRAINING))
             {
-                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                {
-                    label_done.Text = "Finished Processing Image";
-                    break;
-                }
-                else
-                {
-                    if (value.X <= RightTop.X - numPixels)
-                        value = MoveRight(value);
-                    else
-                    {
-                        if (value.Y <= RightBottom.Y - numPixels)
-                        {
-                            value = MoveDown(value);
-                            value = SetLeft(value);
-                        }
-                        else
-                        {
-                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                            {
-                                label_done.Text = "Finished Processing Image";
-                                label_done.Refresh();
-                                train_another_object.Visible = true;
-                                break;
-                            }
-                        }
-                    }
-                }
 
-                if (networkMode.Equals(NetworkMode.TRAINING))
-                {
-                    labelX.Text = value.X.ToString();
-                    labelX.Refresh();
-                    labelY.Text = value.Y.ToString();
-                    labelY.Refresh();
+                orchestrator.BeginTraining(objectBox.Text);
 
-                    orchestrator.MoveCursor(value);
+                // Process visual data for all regions simultaneously
+                var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
+                orchestrator.ProcessVisual(edgedBitmap, counter++); // This now processes V1, V2, V3
 
-                    // Record pixels for all regions (V1, V2, V3)
-                    orchestrator.RecordPixels(); // This now captures all three scales internally
-
-                    // Update V1 displays (existing)
-                    CurrentImage.Image = orchestrator.bmp;
-                    CurrentImage.Refresh();
-
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-                    EdgedImage.Refresh();
-                   
-                    // Process visual data for all regions simultaneously
-                    var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
-                    orchestrator.ProcessVisual(edgedBitmap, counter++); // This now processes V1, V2, V3
-
-                    CycleLabel.Text = counter.ToString();
-                    CycleLabel.Refresh();
-                }
-
-                // Draw SOM layers for all regions
-                DrawAllSomLayers();
-
-                //DrawFomLayers(); // Dont want to print 100 FOM pictureBoxes.
+                CycleLabel.Text = counter.ToString();
+                CycleLabel.Refresh();
             }
+
+            // Draw SOM layers for all regions
+            DrawAllSomLayers();
 
             if (label_done.Text == "Finished Processing Image")
             {
@@ -155,159 +96,25 @@ namespace HentulWinforms
                 }
             }
         }
-        
-        private void UpdateImageDisplays()
-        {
-            // Update V1 displays (existing)
-            CurrentImage.Image = orchestrator.bmp;
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
 
-            // Update V2 displays (new)
-            V2GrayscaleImage.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
-            V2WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV2);
-
-            // Update V3 displays (new)  
-            V3GrayscaleImage.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
-            V3WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV3);
-        }
-        // Add these helper methods for image conversion
-        private Bitmap ConvertToGrayscale(Bitmap source)
-        {
-            if (source == null) return null;
-
-            var result = new Bitmap(source.Width, source.Height);
-
-            for (int y = 0; y < source.Height; y++)
-            {
-                for (int x = 0; x < source.Width; x++)
-                {
-                    var color = source.GetPixel(x, y);
-                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
-                    var grayColor = Color.FromArgb(gray, gray, gray);
-                    result.SetPixel(x, y, grayColor);
-                }
-            }
-
-            return result;
-        }
-
-        private Bitmap ConvertToWhitescale(Bitmap source)
-        {
-            if (source == null) return null;
-
-            var result = new Bitmap(source.Width, source.Height);
-            byte threshold = 200; // Whitescale threshold
-
-            for (int y = 0; y < source.Height; y++)
-            {
-                for (int x = 0; x < source.Width; x++)
-                {
-                    var color = source.GetPixel(x, y);
-                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
-
-                    bool isWhite = gray >= threshold;
-                    var whiteColor = isWhite ? Color.White : Color.Black;
-                    result.SetPixel(x, y, whiteColor);
-                }
-            }
-
-            return result;
-        }
         private void startClassificationButton_Click(object sender, EventArgs e)
         {
             label_done.Text = "Procesing";
             label_done.Refresh();
 
-            var value = LeftTop;
-            value.X = value.X + numPixels;
-            value.Y = value.Y + numPixels;
-
-            orchestrator.MoveCursor(value);
-
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
-
-            networkMode = NetworkMode.PREDICTION;
-            orchestrator.ChangeNetworkModeToPrediction();
-            ObjectLabel.Visible = true;
-
-            labelX.Text = value.X.ToString();
-            labelY.Text = value.Y.ToString();
-
-            while (true)
+            if (networkMode == NetworkMode.TRAINING)
             {
-                if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                {
-                    label_done.Text = "Reached End Of Image";                    
-
-                    break;
-                }
-                else
-                {
-                    if (value.X <= RightTop.X - numPixels)
-                        value = MoveRight(value);
-                    else
-                    {
-                        if (value.Y <= RightBottom.Y - numPixels)
-                        {
-                            value = MoveDown(value);
-                            value = SetLeft(value);
-                        }
-                        else
-                        {
-                            if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
-                            {
-                                label_done.Text = "Reached End Of Image"; label_done.Refresh();                                
-
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                orchestrator.MoveCursor(value);
-
-                orchestrator.RecordPixels();        //Grab Image
-
-                CurrentImage.Image = orchestrator.bmp; CurrentImage.Refresh();
-
-                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp); EdgedImage.Refresh();
-
-                orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
-                
-
-                if (networkMode == NetworkMode.TRAINING)
-                {
-                    throw new InvalidOperationException("Mode should be in Prediction or Done!");
-                }
-                else if (networkMode == NetworkMode.DONE)
-                {
-                    label_done.Text = "Classification Done!"; label_done.Refresh();
-                                        
-                }
-
-                DrawSomLayer();
+                throw new InvalidOperationException("Mode should be in Prediction or Done!");
             }
-        }               
-     
+            else if (networkMode == NetworkMode.DONE)
+            {
+                label_done.Text = "Classification Done!"; label_done.Refresh();
 
-        public Orchestrator.POINT MoveRight(Orchestrator.POINT value)
-        {
-            value.X = value.X + numPixels * 2;
-            return value;
-        }
+            }
 
-        public Orchestrator.POINT MoveDown(Orchestrator.POINT value)
-        {
-            value.Y = value.Y + numPixels * 2;
-            return value;
+            DrawSomLayer();
         }
-
-        public Orchestrator.POINT SetLeft(Orchestrator.POINT value)
-        {
-            value.X = value.X - Math.Abs(LeftTop.X - RightTop.X) + numPixels;
-            return value;
-        }
+       
 
         private async void button1_Click(object sender, EventArgs e)
         {
@@ -338,25 +145,11 @@ namespace HentulWinforms
                 labelX.Text = value.X.ToString();
                 labelY.Text = value.Y.ToString();
 
-                orchestrator.RecordPixels();
-
-                CurrentImage.Image = orchestrator.bmp;
-                CurrentImage.Refresh();
-
-                EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-                EdgedImage.Refresh();
+                orchestrator.RecordPixels();         
 
                 label_done.Text = "Ready";
 
-                // Optional: Initialize V2/V3 in background for later use
-                // Uncomment these lines if you want V2/V3 available:
-                /*
-                _ = Task.Run(() =>
-                {
-                    orchestrator.InitializeV2V3IfNeeded();
-                    this.Invoke(() => label_done.Text = "All regions ready");
-                });
-                */
+                openFileDialog1.ShowDialog();
             }
             catch (Exception ex)
             {
@@ -376,8 +169,7 @@ namespace HentulWinforms
         }
 
         private Bitmap ConverToEdgedBitmap(Bitmap incoming)
-        {
-            CurrentImage.Image = orchestrator.bmp;
+        {            
             string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
             orchestrator.bmp.Save(filename);
 
@@ -442,7 +234,7 @@ namespace HentulWinforms
             //LearningUnit learningUnit;
             //PictureBox targetPictureBox;
             //int somWidth;
-           
+
 
             //// Null checks           
             //var somMgr = learningUnit.somBBM_L3B_V;
@@ -519,7 +311,30 @@ namespace HentulWinforms
             //}
         }
 
-        // -------------------- FOM (Layer 4) Visualization Logic --------------------
-        
+        private void CurrentImage_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+        private void openFileDialog1_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var dlg = sender as OpenFileDialog ?? openFileDialog1;
+            var file = dlg?.FileName;
+            if (string.IsNullOrEmpty(file) || !System.IO.File.Exists(file))
+                return;
+
+            // Load via stream and clone to avoid locking the source file
+            using var fs = new System.IO.FileStream(file, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            using var img = Image.FromStream(fs);
+            var bmp = new Bitmap(img);
+
+            // Dispose previous image to avoid leaks
+            var old = pictureBox2.Image;
+            pictureBox2.Image = bmp;
+            old?.Dispose();
+
+            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+        }
     }
 }
