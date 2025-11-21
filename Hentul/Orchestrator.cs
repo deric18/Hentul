@@ -187,7 +187,7 @@
 
             switch (regionType)
             {
-                case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
+                case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); bmp_g = ConverToEdgedBitmap(bmp); break;
                 case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
                 case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
             }
@@ -202,64 +202,6 @@
             g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
 
             return bmp;
-        }
-
-        private Bitmap ApplySubsampling(Bitmap source, int targetWidth, int targetHeight, int step)
-        {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            if (step <= 0) throw new ArgumentOutOfRangeException(nameof(step), "step must be >= 1");
-
-            int width = source.Width;
-            int height = source.Height;
-
-            // If step == 1 treat as a full copy or optional resize to target dims.
-            if (step == 1)
-            {
-                if (targetWidth > 0 && targetHeight > 0 && (targetWidth != width || targetHeight != height))
-                {
-                    var scaled = new Bitmap(targetWidth, targetHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    using var g = Graphics.FromImage(scaled);
-                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                    g.DrawImage(source, 0, 0, targetWidth, targetHeight);
-                    return scaled;
-                }
-
-                return new Bitmap(source);
-            }
-
-            // Create a result the same size as source and clear to a background color (black).
-            var result = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            using (var g = Graphics.FromImage(result))
-            {
-                g.Clear(Color.Black);
-            }
-
-            // Copy only every 'step' pixel in both X and Y (keeps sampled pixels at original coordinates).
-            // Note: uses GetPixel/SetPixel for simplicity. For large images or tight loops consider LockBits for performance.
-            for (int y = 0; y < height; y += step)
-            {
-                for (int x = 0; x < width; x += step)
-                {
-                    // bounds guaranteed by loops
-                    var color = source.GetPixel(x, y);
-                    result.SetPixel(x, y, color);
-                }
-            }
-
-            // If caller requested a downsampled target size, scale the sparse-sampled result to the target.
-            if (targetWidth > 0 && targetHeight > 0 && (targetWidth != width || targetHeight != height))
-            {
-                var scaled = new Bitmap(targetWidth, targetHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                using (var g2 = Graphics.FromImage(scaled))
-                {
-                    g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                    g2.DrawImage(result, 0, 0, targetWidth, targetHeight);
-                }
-                result.Dispose();
-                return scaled;
-            }
-
-            return result;
         }        
 
         public void ProcessVisual(ulong cycle)
@@ -269,7 +211,7 @@
                 throw new InvalidOperationException("Orchestrator :: incoming Cycle number should always be greater than internal cycle number!");
             }
 
-            CycleNum = cycle;
+            CycleNum = cycle;            
 
             // Process all three regions
             VisionProcessor.Process(bmp, bmpV2, bmpV3, cycle);

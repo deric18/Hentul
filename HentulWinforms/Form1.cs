@@ -134,35 +134,33 @@ namespace HentulWinforms
                     // Update displays for all regions
                     CurrentImage.Image = orchestrator.bmp;
                     CurrentImage.Refresh();
-                    EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
+                    EdgedImage.Image = orchestrator.bmp_g;
                     EdgedImage.Refresh();
 
-                    if (orchestrator.bmpV2 != null)
-                    {
-                        pictureBoxV2Whitescale.Image = orchestrator.bmpV2;
-                        pictureBoxV2Whitescale.Refresh();
-                        pictureBoxV2Grayscale.Image = orchestrator.bmpV2_g;
-                        pictureBoxV2Grayscale.Refresh();
-                    }
+                    //if (orchestrator.bmpV2 != null)
+                    //{
+                    //    pictureBoxV2Whitescale.Image = orchestrator.bmpV2;
+                    //    pictureBoxV2Whitescale.Refresh();
+                    //    pictureBoxV2Grayscale.Image = orchestrator.bmpV2_g;
+                    //    pictureBoxV2Grayscale.Refresh();
+                    //}
 
-                    if (orchestrator.bmpV3 != null)
-                    {
-                        pictureBoxV3Whitescale.Image = orchestrator.bmpV3;
-                        pictureBoxV3Whitescale.Refresh();
-                        pictureBoxV3Grayscale.Image = orchestrator.bmpV3_g;
-                        pictureBoxV3Grayscale.Refresh();
-                    }
+                    //if (orchestrator.bmpV3 != null)
+                    //{
+                    //    pictureBoxV3Whitescale.Image = orchestrator.bmpV3;
+                    //    pictureBoxV3Whitescale.Refresh();
+                    //    pictureBoxV3Grayscale.Image = orchestrator.bmpV3_g;
+                    //    pictureBoxV3Grayscale.Refresh();
+                    //}
 
-                    // Process ALL THREE regions (this now internally handles V1, V2, V3)
-                    var edgedBitmap = orchestrator.bmp_g;
+                    // Process ALL THREE regions (this now internally handles V1, V2, V3)                   
                     orchestrator.ProcessVisual(counter++);
 
                     CycleLabel.Text = counter.ToString();
                     CycleLabel.Refresh();
                 }
 
-                // Draw SOM layers for all regions
-                UpdateImageDisplays();
+                // Draw SOM layers for all regions                
                 DrawAllSomLayers();
             }
 
@@ -177,64 +175,8 @@ namespace HentulWinforms
                 }
             }
         }
-
-        private void UpdateImageDisplays()
-        {
-            // Update V1 displays (existing)
-            CurrentImage.Image = orchestrator.bmp;
-            EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
-
-            // Update V2 displays (new)
-            //V2GrayscaleImage.Image = ConverToEdgedBitmap(orchestrator.bmpV2);
-            //V2WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV2);
-
-            // Update V3 displays (new)  
-            //V3GrayscaleImage.Image = ConverToEdgedBitmap(orchestrator.bmpV3);
-            //V3WhitescaleImage.Image = ConvertToWhitescale(orchestrator.bmpV3);
-        }
-        // Add these helper methods for image conversion
-        private Bitmap ConvertToGrayscale(Bitmap source)
-        {
-            if (source == null) return null;
-
-            var result = new Bitmap(source.Width, source.Height);
-
-            for (int y = 0; y < source.Height; y++)
-            {
-                for (int x = 0; x < source.Width; x++)
-                {
-                    var color = source.GetPixel(x, y);
-                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
-                    var grayColor = Color.FromArgb(gray, gray, gray);
-                    result.SetPixel(x, y, grayColor);
-                }
-            }
-
-            return result;
-        }
-
-        private Bitmap ConvertToWhitescale(Bitmap source)
-        {
-            if (source == null) return null;
-
-            var result = new Bitmap(source.Width, source.Height);
-            byte threshold = 200; // Whitescale threshold
-
-            for (int y = 0; y < source.Height; y++)
-            {
-                for (int x = 0; x < source.Width; x++)
-                {
-                    var color = source.GetPixel(x, y);
-                    var gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
-
-                    bool isWhite = gray >= threshold;
-                    var whiteColor = isWhite ? Color.White : Color.Black;
-                    result.SetPixel(x, y, whiteColor);
-                }
-            }
-
-            return result;
-        }
+       
+        // Add these helper methods for image conversion      
         private void startClassificationButton_Click(object sender, EventArgs e)
         {
             label_done.Text = "Processing";
@@ -507,7 +449,7 @@ namespace HentulWinforms
                 orchestrator.VisionProcessor.v1.somBBM_L3B_V == null ||
                 pictureBox1.IsDisposed)
             {
-                return;
+                throw new InvalidOperationException("Everything is nukk dummy!!1");
             }
 
             var somMgr = orchestrator.VisionProcessor.v1.somBBM_L3B_V;
@@ -539,6 +481,7 @@ namespace HentulWinforms
             {
                 // Prepare bitmap
                 var bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+
                 using (var g = Graphics.FromImage(bmp))
                 {
                     g.SmoothingMode = SmoothingMode.HighSpeed;
