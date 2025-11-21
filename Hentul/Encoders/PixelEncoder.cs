@@ -212,7 +212,7 @@
 
         public void ParseBitmap(Bitmap bitmap)
         {
-            if ((bitmap.Width != 40 || bitmap.Height != 20) && (bitmap.Width != 200 || bitmap.Height != 100) && (bitmap.Width != 400 || bitmap.Height != 200))
+            if (bitmap.Width != 40 && bitmap.Height != 20)
             {
                 throw new InvalidDataException("Invalid Data Dimensions!");
             }

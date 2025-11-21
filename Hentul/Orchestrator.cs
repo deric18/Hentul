@@ -170,42 +170,26 @@
 
             int currentRange = regionType switch
             {
-                LearningUnitType.V1 => Range,      // 10  -> 20x20
-                LearningUnitType.V2 => Range * 5,  // 50  -> 100x100
-                LearningUnitType.V3 => Range * 10, // 100 -> 200x200
+                LearningUnitType.V1 => Range,      // 10  -> 40x20
+                LearningUnitType.V2 => Range * 5,  // 50  -> 200x100
+                LearningUnitType.V3 => Range * 10, // 100 -> 400x200
                 _ => Range
             };
 
+            var cur = GetCurrentPointerPosition();       
+            int w = currentRange * 4;
+            int h = currentRange * 2;
 
-            int Range2 = Range + Range;     // We take in 20 rows and 40 columns , Mapper has similar mappings as well.
+            int x = Math.Max(0, cur.X - currentRange);
+            int y = Math.Max(0, cur.Y - currentRange);
 
-            int x1 = point.X - Range < 0 ? 0 : point.X - Range;
-            int y1 = point.Y - Range < 0 ? 0 : point.Y - Range;
-            int x2 = Math.Abs(point.X + Range2);
-            int y2 = Math.Abs(point.Y + Range);
-
-            //this.GetColorByRange(x1, y1, x2, y2);
-
-            Rectangle rect = new Rectangle(x1, y1, x2, y2);
-
-            bmp = new Bitmap(Range2 + Range2, Range2, PixelFormat.Format32bppArgb);                          
+            var rect = new Rectangle(x, y, w, h);
 
             switch (regionType)
             {
-                case LearningUnitType.V1:
-                    bmp = CaptureScreenRegion(rect);
-                    bmp_g = ConverToEdgedBitmap(bmp);
-                    break;
-                case LearningUnitType.V2:
-                    bmpV2 = CaptureScreenRegion(rect);
-                    bmpV2 = ApplySubsampling(bmpV2, 20, 20, 3);
-                    bmpV2_g = ConverToEdgedBitmap(bmpV2);
-                    break;
-                case LearningUnitType.V3:
-                    bmpV3 = CaptureScreenRegion(rect);
-                    bmpV3 = ApplySubsampling(bmpV3, 20, 20, 6);
-                    bmpV3_g = ConverToEdgedBitmap(bmpV3);
-                    break;
+                case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
+                case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
+                case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
             }
         }
 
