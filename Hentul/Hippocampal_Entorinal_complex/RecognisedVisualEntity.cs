@@ -59,75 +59,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
                 sensei.RefreshID();
             }
             frame = new RFrame(ObjectSnapshot);
-        }
-
-        // For legacy Verification Purpose
-        public bool Verify(Sensation_Location sensei = null, bool isMock = false, uint iterationToConfirmation = 10)
-        {
-            if (ObjectSnapshot?.Count == 0)
-            {
-                throw new InvalidOperationException("Snapshot cannot be empty");
-            }
-
-            Orchestrator instance = Orchestrator.GetInstance();
-
-            if (instance == null)
-            {
-                throw new InvalidOperationException("Orchestrator Instance cannot be null!");
-            }
-
-            if (frame?.DisplacementTable?.GetLength(0) != ObjectSnapshot.Count || frame?.DisplacementTable?.GetLength(1) != ObjectSnapshot.Count)
-            {
-                throw new InvalidOperationException("RFrame cannot be Empty!");
-            }
-
-            int confirmations = 0;
-
-            for (int i = 0; i < frame?.DisplacementTable?.GetLength(0); i++)
-            {
-                for (int j = 0; j < frame?.DisplacementTable?.GetLength(1); j++)
-                {
-                    if (i != j)
-                    {
-                        var newSensei = ObjectSnapshot[j];
-                        var newPos = newSensei.CenterPosition;
-
-                        if (newPos.X == 1364 && newPos.Y == 426)
-                        {
-                            bool breakpoint = true;
-                        }                      
-
-
-                        Orchestrator.MoveCursorToSpecificPosition(newPos.X, newPos.Y);
-                        instance.RecordPixels();
-                        var bmp = instance.ConverToEdgedBitmap();
-                        instance.ProcessVisual(bmp, 0);
-
-                        var tuple = instance.GetSDRFromL3B();
-
-                        if (tuple.Item1 == null)
-                            return false;
-
-
-                        if (!(HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(tuple.Item1, newSensei) == false || HippocampalComplex.VerifyObjectSensationAtLocationssInterSectionPolicy(newSensei, tuple.Item1) == false))
-                        {
-                            return false;
-                        }
-
-                        confirmations++;
-
-                        if (confirmations == iterationToConfirmation)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return true;
-            }
-
-            return true;
-        }
+        }        
 
         public bool IncrementCurrentComparisionKeyIndex()
         {

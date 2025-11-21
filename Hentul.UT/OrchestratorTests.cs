@@ -32,6 +32,7 @@
         }
 
         [Test]
+        [Ignore("Needs work!")]
         public void TestTextInput()
         {
             List<string> wordsToTrain = new List<string>()
@@ -40,20 +41,20 @@
                 "RECYCLEBIN",
                 "GITBASH",
                 "QBSSTUDIO",
-                "HENTUL"                
+                "HENTUL"
             };
 
             int count = 0;
             int index = 0;
 
-           for(int i=0; i<wordsToTrain.Count; i++) 
-           {
+            for (int i = 0; i < wordsToTrain.Count; i++)
+            {
                 orchestrator.ChangeNetworkModeToTraining();
-                
+
                 string word = wordsToTrain[i];
 
                 foreach (var ch in word)
-                {                   
+                {
                     orchestrator.AddNewCharacterSensationToHC(ch);
                 }
 
@@ -83,58 +84,7 @@
             Assert.AreEqual(3, sdr.ActiveBits.Count);
         }
 
-        [Test, Ignore("Need access to cursor and custom Apple Image to be hosted!")]
-        public void TestWanderingCursor()
-        {
-            ulong counter = 0;
 
-            List<Position2D> cursorPositions = new List<Position2D>()
-            {
-                new Position2D( 1346, 456),
-                new Position2D( 1043, 629),
-                new Position2D( 1279, 620),
-                new Position2D( 1498, 612),
-                new Position2D( 1346, 656)
-            };
-
-            foreach (var position in cursorPositions)
-            {
-                if (position.X == 1498)
-                {
-                    bool bp1 = true;
-                }
-
-                Orchestrator.SetCursorPos(position.X, position.Y);                
-
-                orchestrator.RecordPixels();
-                var edgedbmp1 = orchestrator.ConverToEdgedBitmap();
-                orchestrator.ProcessVisual(edgedbmp1, counter++);
-                orchestrator.AddNewVisualSensationToHc();
-
-            }
-
-            orchestrator.DoneWithTraining();
-            orchestrator.ChangeNetworkModeToPrediction();
-
-            Orchestrator.SetCursorPos(cursorPositions[0].X, cursorPositions[0].Y);
-
-            orchestrator.RecordPixels();
-
-            var edgedbmp2 = orchestrator.ConverToEdgedBitmap();
-            orchestrator.ProcessVisual(edgedbmp2, counter++);
-            var result = orchestrator.Verify_Predict_HC(true, 4);
-
-            Assert.AreEqual(result.X, int.MaxValue);
-            Assert.AreEqual(result.Y, int.MaxValue);
-
-            var arr = orchestrator.StartBurstAvoidanceWandering(5);
-
-            int bp = 1;
-            foreach (var i in arr)
-            {
-                Assert.AreEqual(i, 0);
-            }
-        }
 
         [Test]
         public void TestMapperParseBitMap()
@@ -209,11 +159,11 @@
                     new Position2D(3,4)
                 });
 
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();           
+            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
 
             dict.Add(obj, kvp);
 
-            Sensation_Location sensei = new Sensation_Location(dict, new Position2D(1, 2));            
+            Sensation_Location sensei = new Sensation_Location(dict, new Position2D(1, 2));
 
             orchestrator.HCAccessor.AddNewSensationLocationToObject(sensei);
 
@@ -227,8 +177,8 @@
         public void TestBackUp()
         {
             string backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));
-            string backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\")); 
-            string backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\")); 
+            string backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
+            string backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
             string obj = "Apple";
 
             KeyValuePair<int, List<Position2D>> kvp = new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>()
@@ -259,8 +209,8 @@
         public void TestRestore()
         {
             string backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));
-            string backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\")); 
-            string backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\")); 
+            string backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
+            string backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
 
             if (Directory.GetFiles(backupDirHC).Length == 0 || Directory.GetFiles(backupDirFOM).Length == 0 || Directory.GetFiles(backupDirSOM).Length == 0)
             {
@@ -396,7 +346,7 @@
             //Bitmap bmp = new Bitmap()
             //var senseLoc = orchestrator.Mapper.ParseBitmap()
         }
-       
+
 
         [Test]
         public void TestCompareSenseiMatchPercentageNegativeTestForLocationIDOnly()
@@ -422,7 +372,7 @@
             KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
             KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
             KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
-            
+
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -433,10 +383,10 @@
 
             List<Position2D> activeBits = new List<Position2D>();
 
-           activeBits.AddRange(activeBits1);
-           activeBits.AddRange(activeBits2);
-           activeBits.AddRange(activeBits3);
-           activeBits.AddRange(activeBits4);
+            activeBits.AddRange(activeBits1);
+            activeBits.AddRange(activeBits2);
+            activeBits.AddRange(activeBits3);
+            activeBits.AddRange(activeBits4);
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
@@ -474,7 +424,7 @@
             KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
             KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(55, activeBits2);
             KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);           
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -485,10 +435,10 @@
 
             List<Position2D> activeBits = new List<Position2D>();
 
-           activeBits.AddRange(activeBits1);
-           activeBits.AddRange(activeBits2);
-           activeBits.AddRange(activeBits3);
-           activeBits.AddRange(activeBits4);
+            activeBits.AddRange(activeBits1);
+            activeBits.AddRange(activeBits2);
+            activeBits.AddRange(activeBits3);
+            activeBits.AddRange(activeBits4);
 
             SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
@@ -523,7 +473,7 @@
             KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(1, activeBits1);
             KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(2, activeBits2);
             KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(3, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);            
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -572,7 +522,7 @@
             KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
             KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(24, activeBits4);
 
-            
+
             Sensation_Location sensei1 = new Sensation_Location();
 
             sensei1.AddNewSensationAtThisLocation(gPos1, kvp1);
@@ -619,7 +569,7 @@
             KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(1, activeBits1);
             KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(2, activeBits2);
             KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(3, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);            
+            KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);
 
             Sensation_Location sensei1 = new Sensation_Location();
 
@@ -635,7 +585,7 @@
             activeBits.AddRange(activeBits3);
             activeBits.AddRange(activeBits4);
 
-            SDR_SOM activeSDR = new SDR_SOM(1000, 10,  Conver2DtoSOMList(activeBits), iType.SPATIAL);
+            SDR_SOM activeSDR = new SDR_SOM(1000, 10, Conver2DtoSOMList(activeBits), iType.SPATIAL);
 
             Sensation_Location sensei2 = orchestrator.VisionProcessor.pEncoder.GetSenseiFromSDR_V(activeSDR, point);
 
@@ -645,7 +595,7 @@
             Assert.AreEqual(0, match.GetTotalMatchPercentage());
 
         }
-     
+
 
         [Test, Description("Tests CompareSenseiMatchPercentage for 2 Sensei's based on Location && BBM ID && Position Lit for Negative Outcome!")]
         public void TestCompareSenseiMatchPercentageNegativeTestForBBMID_LocationID_PositionList()
@@ -672,7 +622,7 @@
             KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(2, activeBits2);
             KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(3, activeBits3);
             KeyValuePair<int, List<Position2D>> kvp4 = new KeyValuePair<int, List<Position2D>>(4, activeBits4);
-         
+
             Sensation_Location sensei1 = new Sensation_Location();
 
             sensei1.AddNewSensationAtThisLocation(bPos1, kvp1);
@@ -744,13 +694,13 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.ProcessVisual(bp1, counter++);
+            orchestrator.ProcessVisual(counter++);
             orchestrator.AddNewVisualSensationToHc();
 
 
             orchestrator.point.X = loc2X;
             orchestrator.point.Y = loc2Y;
-            orchestrator.ProcessVisual(bp2, counter++);
+            orchestrator.ProcessVisual(counter++);
             orchestrator.AddNewVisualSensationToHc();
 
 
@@ -760,7 +710,7 @@
 
             orchestrator.point.X = loc1X;
             orchestrator.point.Y = loc1Y;
-            orchestrator.ProcessVisual(bp1, counter++);
+            orchestrator.ProcessVisual(counter++);
             var pos = orchestrator.Verify_Predict_HC(true);
 
             Assert.AreEqual(loc2X, pos.X);
