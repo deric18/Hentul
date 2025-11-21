@@ -190,13 +190,8 @@ namespace Hentul
         }
 
         private void ProcessV1(Bitmap greyScalebmp, ulong cycle)
-        {
-            // Apply subsampling if needed
-            var processedBmp = ApplySubsampling(greyScalebmp, 20, 20);
-            var grayscaleBmp = ConvertToGrayscale(processedBmp);
-            var whitescaleBmp = ConvertToWhitescale(grayscaleBmp);
-
-            pEncoderV1.ParseBitmap(whitescaleBmp);
+        {            
+            pEncoderV1.ParseBitmap(greyScalebmp);
             v1.Process(pEncoderV1, cycle);
         }
        

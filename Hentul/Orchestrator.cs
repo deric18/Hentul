@@ -154,18 +154,19 @@
         {
             int currentRange = regionType switch
             {
-                LearningUnitType.V1 => Range,      // 10  -> 20x20
-                LearningUnitType.V2 => Range * 5,  // 50  -> 100x100
-                LearningUnitType.V3 => Range * 10, // 100 -> 200x200
+                LearningUnitType.V1 => Range,      // 10  -> 40x20
+                LearningUnitType.V2 => Range * 5,  // 50  -> 200x100
+                LearningUnitType.V3 => Range * 10, // 100 -> 400x200
                 _ => Range
             };
 
             var cur = GetCurrentPointerPosition();       
-            int w = currentRange * 2;
+            int w = currentRange * 4;
             int h = currentRange * 2;
 
             int x = Math.Max(0, cur.X - currentRange);
             int y = Math.Max(0, cur.Y - currentRange);
+
             var rect = new Rectangle(x, y, w, h);
 
             switch (regionType)
@@ -175,6 +176,7 @@
                 case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
             }
         }
+
         private Bitmap CaptureScreenRegion(Rectangle rect)
         {
             var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);

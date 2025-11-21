@@ -1,12 +1,10 @@
 ﻿namespace Hentul.Encoders
 {
-    using Common;
-    using FirstOrderMemory.Models;
+    using Common;    
     using Hentul;
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Collections.Generic;
-    using System.Drawing;
-    using static FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
+    using System.Drawing;    
 
     /// <summary>
     /// Maps all the Bits to there respective BBMIDs.
@@ -41,49 +39,21 @@
 
         public Dictionary<MAPPERCASE, List<int>> FOMBBMIDS { get; private set; }
 
-
         public List<Position_SOM> SomPositions { get; private set; }
 
         public bool[,] testBmpCoverage { get; private set; }
-
-        public int LENGTH { get; private set; }
-
-        public int WIDTH { get; private set; }
-        public class PixelEncoderV2 : PixelEncoder
-        {
-            public PixelEncoderV2(int numBBM, int numPixels) : base(numBBM, numPixels)
-            {
-                // V2 specific mappings for 100x100 processing
-                PerformV2Mappings();
-            }
-
-            private void PerformV2Mappings()
-            {
-                // Create mappings for 50x50 BBM grid covering 100x100 image
-                // Each BBM covers 2x2 pixel area
-            }
-        }
-        public class PixelEncoderV3 : PixelEncoder
-        {
-            public PixelEncoderV3(int numBBM, int numPixels) : base(numBBM, numPixels)
-            {
-                // V3 specific mappings for 200x200 processing
-                PerformV3Mappings();
-            }
-
-            private void PerformV3Mappings()
-            {
-                // Create mappings for 100x100 BBM grid covering 200x200 image  
-                // Each BBM covers 2x2 pixel area
-            }
-        }
+       
         public PixelEncoder(int numBBM, int numPixels)
         {
-            if (numBBM != 100 || numPixels != 400)
+            if (numBBM <= 0 || numPixels <= 0)
             {
-                throw new InvalidOperationException("Currently only supported for 10*10 Image Size with 2 Pixel per BBM W");
+                throw new InvalidOperationException("numBBM and numPixels must be positive values");
             }
 
+            if (numPixels < numBBM)
+            {
+                throw new InvalidOperationException("numPixels must be >= numBBM");
+            }
             NumBBM = numBBM;
             NumPixels = numPixels;
             NumPixelsPerBBM = numPixels / numBBM;
@@ -129,11 +99,11 @@
         /// Number Of Pixels : 400 pixels 
         /// BBM : 100
         /// NumPixelPerBBM : 4
+        /// A BBM of 10 * 10 rows and columns will get divided into 4 regions , 1 per pixel i.e 
         /// Row ID could be more than 20 but the total number of rows processed will be 20 , this is a misnomer that confused me a while back.
         /// </summary>
         private void PerformMappings()
         {
-
             Mappings = new Dictionary<int, Position[]> {
                 {   0   , new Position[4] { new Position (  0   ,   0   ), new Position( 0   ,   1   ), new Position(    1   ,   0   ), new Position(    1   ,   1   ) } },
                 {   1   , new Position[4] { new Position (  0   ,   2   ), new Position( 0   ,   3   ), new Position(    1   ,   2   ), new Position(    1   ,   3   ) } },
@@ -236,8 +206,139 @@
                 {   98  , new Position[4] { new Position (  38  ,   16  ), new Position( 38  ,   17  ), new Position(    39  ,   16  ), new Position(    39  ,   7   ) } },
                 {   99  , new Position[4] { new Position (  38  ,   18  ), new Position( 38  ,   19  ), new Position(    39  ,   18  ), new Position(    39  ,   9   ) } }
                 };
+
         }
 
+
+        public void ParseBitmap(Bitmap bitmap)
+        {
+            if (bitmap.Width != 40 && bitmap.Height != 20)
+            {
+                throw new InvalidDataException("Invalid Data Dimensions!");
+            }
+
+            List<Position> toRet = new List<Position>();
+
+            testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
+
+            //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
+
+            foreach (var kvp in Mappings)
+            {
+                var bbmID = kvp.Key;
+                var posList = kvp.Value;
+
+                var pixel1 = posList[0];
+                var pixel2 = posList[1];
+                var pixel3 = posList[2];
+                var pixel4 = posList[3];
+
+                Color color1 = bitmap.GetPixel(pixel1.X, pixel1.Y);
+                testBmpCoverage[pixel1.X, pixel1.Y] = true;
+
+                Color color2 = bitmap.GetPixel(pixel2.X, pixel2.Y);
+                testBmpCoverage[pixel2.X, pixel2.Y] = true;
+
+                Color color3 = bitmap.GetPixel(pixel3.X, pixel3.Y);
+                testBmpCoverage[pixel3.X, pixel3.Y] = true;
+
+                Color color4 = bitmap.GetPixel(pixel4.X, pixel4.Y);
+                testBmpCoverage[pixel4.X, pixel4.Y] = true;
+
+                bool check1 = CheckIfColorIsWhite(color1);
+                bool check2 = CheckIfColorIsWhite(color2);
+                bool check3 = CheckIfColorIsWhite(color3);
+                bool check4 = CheckIfColorIsWhite(color4);
+
+                if (check1 && check2 && check3 && check4)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
+                }
+                else if (check1 && check2 && check3 && check4 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
+                }
+                else if (check1 && check2 && check4 && check3 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
+                }
+                else if (check1 && check3 && check4 && check2 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
+                }
+                else if (check2 && check3 && check4 && check1 == false)                     //3's
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
+                }
+                else if (check1 && check2 && check3 == false && check4 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
+                }
+                else if (check1 && check3 && check2 == false && check4 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
+                }
+                else if (check4 && check3 && check2 == false && check1 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
+                }
+                else if (check4 && check1 && check2 == false && check3 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
+                }
+                else if (check4 && check2 && check3 == false && check1 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
+                }
+                else if (check2 && check3 && check4 == false && check1 == false)            //2's
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
+                }
+                else if (check1 && check2 == false && check3 == false && check4 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);
+                }
+                else if (check2 && check1 == false && check3 == false && check4 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);
+                }
+                else if (check3 && check1 == false && check2 == false && check4 == false)
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);
+                }
+                else if (check4 && check1 == false && check2 == false && check3 == false)    //1's
+                {
+                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);
+                }
+                else
+                {
+                    //No Fire :: Do Nothing!
+                }
+            }
+        }
+
+
+        //Populates the appropriate BBM ID to the Mappere Case as per the pixel data.
+        private void CheckNInsert(Dictionary<MAPPERCASE, List<int>> dict, int bbmID, MAPPERCASE mapperCase)
+        {
+            if (dict == null)
+                return;
+
+            List<int> intlist;
+
+            if (dict.TryGetValue(mapperCase, out intlist))
+            {
+                if (!intlist.Contains(bbmID))
+                {
+                    intlist.Add(bbmID);
+                }
+            }
+            else
+            {
+                intlist = new List<int>() { bbmID };
+                dict.Add(mapperCase, intlist);
+            }
+        }
 
         public SDR_SOM GetSDR_SOMForMapperCase(MAPPERCASE mappercase, int bbmID)
         {
@@ -326,239 +427,7 @@
             }
 
             return new SDR_SOM(10, 10, positionstoAdd, iType.SPATIAL);
-        }
-
-        private void CheckForDuplicates(List<Position_SOM> poses)
-        {
-            foreach (var pos in poses)
-            {
-                foreach (var existing in SomPositions)
-                {
-                    // Use Position_SOM.Equals for comparison
-                    if (pos.Equals(existing))
-                    {
-                        // Duplicate found; handle as needed
-                        int breakpoint = 1;
-                        // Optionally, you could log, throw, or return here
-                    }
-                }
-            }
-        }
-
-        internal static List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbitsFOM, int bbmID)
-        {
-            List<Position_SOM> retList = new List<Position_SOM>();
-            Position_SOM newPosition;
-
-            foreach (var pos in oNbitsFOM)
-            {
-                newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
-                retList.Add(newPosition);
-            }
-
-            return retList;
-        }
-
-        internal static List<Position_SOM> GetFOMEquivalentPositionsofSOM(List<Position_SOM> oNbitsFOM, int bbmID)
-        {
-            List<Position_SOM> retList = new List<Position_SOM>();
-            Position_SOM newPosition;
-
-            foreach (var pos in oNbitsFOM)
-            {
-                newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
-                retList.Add(newPosition);
-            }
-
-            return retList;
-        }
-
-        internal static Dictionary<int, List<Position_SOM>> GetFOMEquivalentPositionsofSOM(List<Position_SOM> somBits)
-        {
-            if (somBits.Count == 0)
-                return null;
-
-            Dictionary<int, List<Position_SOM>> retDict = new Dictionary<int, List<Position_SOM>>();
-
-            foreach (var pos in somBits)
-            {
-                int bbmID = pos.X / 10;
-
-                if (bbmID > 120 || bbmID < 0)
-                {
-                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
-
-                    continue;
-                }
-
-                Position_SOM newPos = null;
-
-                if (pos.X < 10)
-                    newPos = new Position_SOM(pos.X, pos.Y, pos.Z);
-                else
-                {
-                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z);
-                }
-
-                if (newPos.X >= 10)
-                {
-                    int breakpoint = 10;
-                }
-
-                if (retDict.TryGetValue(bbmID, out var posList))
-                {
-                    posList.Add(newPos);
-                }
-                else
-                {
-                    retDict.Add(bbmID, new List<Position_SOM>() { newPos });
-                }
-            }
-
-            return retDict;
-        }
-
-        public void ParseBitmap(Bitmap bitmap)
-        {
-            if (bitmap.Width != 40 || bitmap.Height != 20)
-            {
-                throw new InvalidDataException("Invalid Data Dimensions!");
-            }
-
-            List<Position> toRet = new List<Position>();
-
-            testBmpCoverage = new bool[bitmap.Width, bitmap.Height];
-
-            //Iterating over these mappings will cover the incoming bmp of dimensions 20 * 20 [400 pixels in total].
-
-            foreach (var kvp in Mappings)
-            {
-                var bbmID = kvp.Key;
-                var posList = kvp.Value;
-
-                var pixel1 = posList[0];
-                var pixel2 = posList[1];
-                var pixel3 = posList[2];
-                var pixel4 = posList[3];
-
-                Color color1 = bitmap.GetPixel(pixel1.X, pixel1.Y);
-                testBmpCoverage[pixel1.X, pixel1.Y] = true;
-
-                Color color2 = bitmap.GetPixel(pixel2.X, pixel2.Y);
-                testBmpCoverage[pixel2.X, pixel2.Y] = true;
-
-                Color color3 = bitmap.GetPixel(pixel3.X, pixel3.Y);
-                testBmpCoverage[pixel3.X, pixel3.Y] = true;
-
-                Color color4 = bitmap.GetPixel(pixel4.X, pixel4.Y);
-                testBmpCoverage[pixel4.X, pixel4.Y] = true;
-
-                bool check1 = CheckIfColorIsWhite(color1);
-                bool check2 = CheckIfColorIsWhite(color2);
-                bool check3 = CheckIfColorIsWhite(color3);
-                bool check4 = CheckIfColorIsWhite(color4);
-
-                if (check1 && check2 && check3 && check4)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ALL);
-                }
-                else if (check1 && check2 && check3 && check4 == false)
-                {
-                    if (bbmID == 79)
-                    {
-                        bool breakpoint = true;
-                    }
-
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOTHREEE);
-                }
-                else if (check1 && check2 && check4 && check3 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWOFOUR);
-                }
-                else if (check1 && check3 && check4 && check2 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREEFOUR);
-
-                }
-                else if (check2 && check3 && check4 && check1 == false)                     //3's
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREEFOUR);
-                }
-                else if (check1 && check2 && check3 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETWO);
-                }
-                else if (check1 && check3 && check2 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONETHREE);
-                }
-                else if (check4 && check3 && check2 == false && check1 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREEFOUR);
-                }
-                else if (check4 && check1 && check2 == false && check3 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONEFOUR);
-                }
-                else if (check4 && check2 && check3 == false && check1 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOFOUR);
-                }
-                else if (check2 && check3 && check4 == false && check1 == false)            //2's
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWOTHREE);
-                }
-                else if (check1 && check2 == false && check3 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.ONE);
-                }
-                else if (check2 && check1 == false && check3 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.TWO);
-                }
-                else if (check3 && check1 == false && check2 == false && check4 == false)
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.THREE);
-                }
-                else if (check4 && check1 == false && check2 == false && check3 == false)    //1's
-                {
-                    CheckNInsert(FOMBBMIDS, bbmID, MAPPERCASE.FOUR);
-                }
-                else
-                {
-                    //No Fire :: Do Nothing!
-                }
-            }
-        }
-
-
-        //Populates the appropriate BBM ID to the Mappere Case as per the pixel data.
-        private void CheckNInsert(Dictionary<MAPPERCASE, List<int>> dict, int bbmID, MAPPERCASE mapperCase)
-        {
-            if (dict == null)
-                return;
-
-            List<int> intlist;
-
-            if (dict.TryGetValue(mapperCase, out intlist))
-            {
-                if (!intlist.Contains(bbmID))
-                {
-                    intlist.Add(bbmID);
-                }
-            }
-            else
-            {
-                intlist = new List<int>() { bbmID };
-                dict.Add(mapperCase, intlist);
-            }
-        }
-
-        private bool CheckIfColorIsWhite(Color color)
-            => color.R > 240 && color.G > 240 && color.B > 240;
-
-        private bool CheckIfColorIsBlack(Color color)
-            => color.R < 10 && color.G < 10 && color.B < 10;
+        }        
 
         public void Clean()
         {
@@ -654,6 +523,102 @@
 
             return toReturn;
         }
+
+        private void CheckForDuplicates(List<Position_SOM> poses)
+        {
+            foreach (var pos in poses)
+            {
+                foreach (var existing in SomPositions)
+                {
+                    // Use Position_SOM.Equals for comparison
+                    if (pos.Equals(existing))
+                    {
+                        // Duplicate found; handle as needed
+                        int breakpoint = 1;
+                        // Optionally, you could log, throw, or return here
+                    }
+                }
+            }
+        }
+
+        internal static List<Position_SOM> GetSOMEquivalentPositionsofFOM(List<Position_SOM> oNbitsFOM, int bbmID)
+        {
+            List<Position_SOM> retList = new List<Position_SOM>();
+            Position_SOM newPosition;
+
+            foreach (var pos in oNbitsFOM)
+            {
+                newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
+                retList.Add(newPosition);
+            }
+
+            return retList;
+        }
+
+        internal static List<Position_SOM> GetFOMEquivalentPositionsofSOM(List<Position_SOM> oNbitsFOM, int bbmID)
+        {
+            List<Position_SOM> retList = new List<Position_SOM>();
+            Position_SOM newPosition;
+
+            foreach (var pos in oNbitsFOM)
+            {
+                newPosition = new Position_SOM(pos.X + 10 * bbmID, pos.Y);
+                retList.Add(newPosition);
+            }
+
+            return retList;
+        }
+
+        internal static Dictionary<int, List<Position_SOM>> GetFOMEquivalentPositionsofSOM(List<Position_SOM> somBits)
+        {
+            if (somBits.Count == 0)
+                return null;
+
+            Dictionary<int, List<Position_SOM>> retDict = new Dictionary<int, List<Position_SOM>>();
+
+            foreach (var pos in somBits)
+            {
+                int bbmID = pos.X / 10;
+
+                if (bbmID > 120 || bbmID < 0)
+                {
+                    //throw new InvalidOperationException("BBM ID cannot exceed more than 99 for this system!");
+
+                    continue;
+                }
+
+                Position_SOM newPos = null;
+
+                if (pos.X < 10)
+                    newPos = new Position_SOM(pos.X, pos.Y, pos.Z);
+                else
+                {
+                    newPos = new Position_SOM(pos.X % 10, pos.Y, pos.Z);
+                }
+
+                if (newPos.X >= 10)
+                {
+                    int breakpoint = 10;
+                }
+
+                if (retDict.TryGetValue(bbmID, out var posList))
+                {
+                    posList.Add(newPos);
+                }
+                else
+                {
+                    retDict.Add(bbmID, new List<Position_SOM>() { newPos });
+                }
+            }
+
+            return retDict;
+        }
+
+        private bool CheckIfColorIsWhite(Color color)
+            => color.R > 240 && color.G > 240 && color.B > 240;
+
+        private bool CheckIfColorIsBlack(Color color)
+            => color.R < 10 && color.G < 10 && color.B < 10;
     }
 
     public enum MAPPERCASE
