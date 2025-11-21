@@ -68,15 +68,8 @@ namespace HentulWinforms
             }
 
             objectList.Add(objectBox.Text);
-
-            if (counter > 0)
-            {
-                orchestrator.LearnNewObject(objectBox.Text);
-            }
-            else
-            {
-                orchestrator.BeginTraining(objectBox.Text);
-            }
+            
+            orchestrator.BeginTraining(objectBox.Text);            
 
             var value = LeftTop;
             value.X = value.X + numPixels;
@@ -136,33 +129,7 @@ namespace HentulWinforms
 
                     EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp);
                     EdgedImage.Refresh();
-
-                    // Update V2 displays (add these PictureBoxes to designer)
-                    if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV2 != null)
-                    {
-                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.VisionProcessor.bmpV2);
-                        pictureBoxV2Grayscale.Refresh();
-                    }
-
-                    if (pictureBoxV2Whitescale != null && orchestrator.VisionProcessor.bmpV2 != null)
-                    {
-                        pictureBoxV2Whitescale.Image = ConvertToWhitescale(orchestrator.VisionProcessor.bmpV2);
-                        pictureBoxV2Whitescale.Refresh();
-                    }
-
-                    // Update V3 displays (add these PictureBoxes to designer)
-                    if (pictureBoxV2Grayscale != null && orchestrator.VisionProcessor.bmpV3 != null)
-                    {
-                        pictureBoxV2Grayscale.Image = ConverToEdgedBitmap(orchestrator.VisionProcessor.bmpV3);
-                        pictureBoxV2Grayscale.Refresh();
-                    }
-
-                    if (pictureBoxV3Whitescale != null && orchestrator.VisionProcessor.bmpV3 != null)
-                    {
-                        pictureBoxV3Whitescale.Image = ConvertToWhitescale(orchestrator.VisionProcessor.bmpV3);
-                        pictureBoxV3Whitescale.Refresh();
-                    }
-
+                   
                     // Process visual data for all regions simultaneously
                     var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
                     orchestrator.ProcessVisual(edgedBitmap, counter++); // This now processes V1, V2, V3
@@ -271,8 +238,7 @@ namespace HentulWinforms
             {
                 if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                 {
-                    label_done.Text = "Reached End Of Image";
-                    UpdatePredictions();
+                    label_done.Text = "Reached End Of Image";                    
 
                     break;
                 }
@@ -291,8 +257,7 @@ namespace HentulWinforms
                         {
                             if (value.X >= RightTop.X - numPixels && value.Y >= RightBottom.Y - numPixels)
                             {
-                                label_done.Text = "Reached End Of Image"; label_done.Refresh();
-                                UpdatePredictions();
+                                label_done.Text = "Reached End Of Image"; label_done.Refresh();                                
 
                                 break;
                             }
@@ -309,8 +274,7 @@ namespace HentulWinforms
                 EdgedImage.Image = ConverToEdgedBitmap(orchestrator.bmp); EdgedImage.Refresh();
 
                 orchestrator.ProcessVisual(ConverToEdgedBitmap(orchestrator.bmp), counter++);     // Fire FOMS per image
-
-                networkMode = orchestrator.VisionProcessor.v1.somBBM_L3B_V.NetWorkMode;
+                
 
                 if (networkMode == NetworkMode.TRAINING)
                 {
@@ -319,42 +283,13 @@ namespace HentulWinforms
                 else if (networkMode == NetworkMode.DONE)
                 {
                     label_done.Text = "Classification Done!"; label_done.Refresh();
-
-                    var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
-                    string val = string.Empty;
-                    foreach (var pred in predictions)
-                    {
-                        val = pred.ToString();
-                    }
-                    ObjectLabel.Text = val;
-                    ObjectLabel.Refresh();
-
-                    break;
+                                        
                 }
 
                 DrawSomLayer();
             }
-        }
-
-        private void UpdatePredictions()
-        {
-            train_another_object.Visible = true;
-            var predictions = orchestrator.GetPredictionsVisual();    // Fire SOM per FOMS
-            string val = string.Empty;
-            predictions.ForEach(x => val += x.ToString() + " | ");
-
-            ObjectLabel.Text = val; ObjectLabel.Refresh();
-        }
-
-        private void WanderingButton_Click(object sender, EventArgs e)
-        {
-            StartBurstAvoidance();
-        }
-
-        private void StartBurstAvoidance()
-        {
-            orchestrator.StartBurstAvoidanceWandering(100);
-        }
+        }               
+     
 
         public Orchestrator.POINT MoveRight(Orchestrator.POINT value)
         {
@@ -504,231 +439,87 @@ namespace HentulWinforms
         private void DrawSomLayer(LearningUnitType regionType = LearningUnitType.V1)
         {
             // Get the appropriate learning unit and picture box
-            LearningUnit learningUnit;
-            PictureBox targetPictureBox;
-            int somWidth;
+            //LearningUnit learningUnit;
+            //PictureBox targetPictureBox;
+            //int somWidth;
+           
 
-            switch (regionType)
-            {
-                case LearningUnitType.V1:
-                    learningUnit = orchestrator?.VisionProcessor?.v1;
-                    targetPictureBox = pictureBox1;
-                    somWidth = SOM_X_V1;
-                    break;
-                case LearningUnitType.V2:
-                    learningUnit = orchestrator?.VisionProcessor?.v2;
-                    targetPictureBox = pictureBoxV2Som; // Add this to designer
-                    somWidth = SOM_X_V2;
-                    break;
-                case LearningUnitType.V3:
-                    learningUnit = orchestrator?.VisionProcessor?.v3;
-                    targetPictureBox = pictureBoxV3Som; // Add this to designer
-                    somWidth = SOM_X_V3;
-                    break;
-                default:
-                    return;
-            }
+            //// Null checks           
+            //var somMgr = learningUnit.somBBM_L3B_V;
 
-            // Null checks
-            if (orchestrator == null ||
-                orchestrator.VisionProcessor == null ||
-                learningUnit == null ||
-                learningUnit.somBBM_L3B_V == null ||
-                targetPictureBox == null ||
-                targetPictureBox.IsDisposed)
-            {
-                return;
-            }
+            //// Attempt to get latest firing neurons
+            //SDR_SOM firing = null;
+            //try
+            //{
+            //    var cycle = somMgr.CycleNum;
+            //    firing = somMgr.GetAllNeuronsFiringLatestCycle(cycle);
 
-            var somMgr = learningUnit.somBBM_L3B_V;
+            //    if (firing.ActiveBits.Count != 0)
+            //    {
+            //        bool breakpoint = true;
+            //    }
+            //}
+            //catch
+            //{
+            //    return;
+            //}
 
-            // Attempt to get latest firing neurons
-            SDR_SOM firing = null;
-            try
-            {
-                var cycle = somMgr.CycleNum;
-                firing = somMgr.GetAllNeuronsFiringLatestCycle(cycle);
+            //if (firing == null)
+            //{
+            //    return;
+            //}
 
-                if (firing.ActiveBits.Count != 0)
-                {
-                    bool breakpoint = true;
-                }
-            }
-            catch
-            {
-                return;
-            }
+            //lock (somDrawLock)
+            //{
+            //    // Prepare bitmap
+            //    var bmp = new Bitmap(targetPictureBox.Width, targetPictureBox.Height);
+            //    using (var g = Graphics.FromImage(bmp))
+            //    {
+            //        g.SmoothingMode = SmoothingMode.HighSpeed;
+            //        g.Clear(Color.Black);
 
-            if (firing == null)
-            {
-                return;
-            }
+            //        // Use dynamic width based on region type
+            //        double cellW = (double)bmp.Width / somWidth;
+            //        double cellH = (double)bmp.Height / SOM_Y;
 
-            lock (somDrawLock)
-            {
-                // Prepare bitmap
-                var bmp = new Bitmap(targetPictureBox.Width, targetPictureBox.Height);
-                using (var g = Graphics.FromImage(bmp))
-                {
-                    g.SmoothingMode = SmoothingMode.HighSpeed;
-                    g.Clear(Color.Black);
+            //        // Draw firing neurons
+            //        foreach (var pos in firing.ActiveBits)
+            //        {
+            //            int x = pos.X;
+            //            int y = pos.Y;
 
-                    // Use dynamic width based on region type
-                    double cellW = (double)bmp.Width / somWidth;
-                    double cellH = (double)bmp.Height / SOM_Y;
+            //            // Bounds check with dynamic width
+            //            if (x < 0 || x >= somWidth || y < 0 || y >= SOM_Y)
+            //                continue;
 
-                    // Draw firing neurons
-                    foreach (var pos in firing.ActiveBits)
-                    {
-                        int x = pos.X;
-                        int y = pos.Y;
+            //            var rect = new RectangleF(
+            //                (float)(x * cellW),
+            //                (float)(y * cellH),
+            //                (float)Math.Ceiling(cellW),
+            //                (float)Math.Ceiling(cellH));
 
-                        // Bounds check with dynamic width
-                        if (x < 0 || x >= somWidth || y < 0 || y >= SOM_Y)
-                            continue;
+            //            // Color scheme based on region type for visual distinction:
+            //            Brush brush = regionType switch
+            //            {
+            //                LearningUnitType.V1 => Brushes.Lime,      // Green for V1
+            //                LearningUnitType.V2 => Brushes.Cyan,      // Cyan for V2  
+            //                LearningUnitType.V3 => Brushes.Yellow,    // Yellow for V3
+            //                _ => Brushes.Lime
+            //            };
 
-                        var rect = new RectangleF(
-                            (float)(x * cellW),
-                            (float)(y * cellH),
-                            (float)Math.Ceiling(cellW),
-                            (float)Math.Ceiling(cellH));
+            //            g.FillRectangle(brush, rect);
+            //        }
+            //    }
 
-                        // Color scheme based on region type for visual distinction:
-                        Brush brush = regionType switch
-                        {
-                            LearningUnitType.V1 => Brushes.Lime,      // Green for V1
-                            LearningUnitType.V2 => Brushes.Cyan,      // Cyan for V2  
-                            LearningUnitType.V3 => Brushes.Yellow,    // Yellow for V3
-                            _ => Brushes.Lime
-                        };
-
-                        g.FillRectangle(brush, rect);
-                    }
-                }
-
-                // Swap image
-                var old = targetPictureBox.Image;
-                targetPictureBox.Image = bmp;
-                targetPictureBox.Refresh();
-                old?.Dispose();
-            }
+            //    // Swap image
+            //    var old = targetPictureBox.Image;
+            //    targetPictureBox.Image = bmp;
+            //    targetPictureBox.Refresh();
+            //    old?.Dispose();
+            //}
         }
 
         // -------------------- FOM (Layer 4) Visualization Logic --------------------
-
-        private void DrawFomLayers()
-        {
-            if (orchestrator?.VisionProcessor?.v1 == null || fomPictureBoxes == null)
-                return;
-
-            // Ensure designer created these controls: pictureBox2 .. pictureBox11
-            try
-            {
-                fomPictureBoxes = new[]
-                {
-                    pictureBox2, pictureBox3, pictureBox4, pictureBox5, pictureBox6,
-                    pictureBox7, pictureBox8, pictureBox9, pictureBox10, pictureBox11
-                };
-            }
-            catch
-            {
-                // Ignore if not all present yet
-            }
-
-            var lu = orchestrator.VisionProcessor.v1;
-            var cycle = lu.CycleNum;
-
-            // Loop through first N FOM BBMs mapped to picture boxes
-            int count = Math.Min(lu.fomBBMV.Length, fomPictureBoxes.Length);
-
-            for (int i = 0; i < count; i++)
-            {
-                var pb = fomPictureBoxes[i];
-                if (pb == null || pb.IsDisposed) continue;
-
-                var fom = lu.fomBBMV[i];
-                SDR_SOM firing = null;
-                SDR_SOM bursting = null;
-
-                try
-                {
-                    firing = fom.GetAllNeuronsFiringLatestCycle(cycle, true);
-                    bursting = fom.GetAllColumnsBurstingLatestCycle(cycle);
-                }
-                catch
-                {
-                    continue;
-                }
-
-                var bmp = new Bitmap(pb.Width, pb.Height);
-                using (var g = Graphics.FromImage(bmp))
-                {
-                    g.SmoothingMode = SmoothingMode.HighSpeed;
-                    g.Clear(Color.Black);
-
-                    // FOM columns are 10 x 10
-                    const int GRID_X = 10;
-                    const int GRID_Y = 10;
-
-                    double cellW = (double)bmp.Width / GRID_X;
-                    double cellH = (double)bmp.Height / GRID_Y;
-
-                    // Cache burst positions
-                    HashSet<(int X, int Y)> burstSet = new();
-                    if (bursting != null)
-                    {
-                        foreach (var b in bursting.ActiveBits)
-                        {
-                            burstSet.Add((b.X, b.Y));
-                        }
-                    }
-
-                    // Draw firing neurons
-                    if (firing != null)
-                    {
-                        foreach (var pos in firing.ActiveBits)
-                        {
-                            if (pos.X < 0 || pos.X >= GRID_X || pos.Y < 0 || pos.Y >= GRID_Y) continue;
-
-                            var rect = new RectangleF(
-                                (float)(pos.X * cellW),
-                                (float)(pos.Y * cellH),
-                                (float)Math.Ceiling(cellW),
-                                (float)Math.Ceiling(cellH));
-
-                            // Fill firing
-                            g.FillRectangle(Brushes.Lime, rect);
-
-                            // Highlight burst
-                            if (burstSet.Contains((pos.X, pos.Y)))
-                            {
-                                using var pen = new Pen(Color.OrangeRed, Math.Max(1f, (float)(cellW * 0.15)));
-                                g.DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
-                            }
-                        }
-                    }
-
-                    // Optional: draw grid (light)
-                    using (var gridPen = new Pen(Color.FromArgb(30, 255, 255, 255), 1f))
-                    {
-                        for (int gx = 0; gx <= GRID_X; gx++)
-                        {
-                            float x = (float)(gx * cellW);
-                            g.DrawLine(gridPen, x, 0, x, bmp.Height);
-                        }
-                        for (int gy = 0; gy <= GRID_Y; gy++)
-                        {
-                            float y = (float)(gy * cellH);
-                            g.DrawLine(gridPen, 0, y, bmp.Width, y);
-                        }
-                    }
-                }
-
-                var old = pb.Image;
-                pb.Image = bmp;
-                pb.Refresh();
-                old?.Dispose();
-            }
-        }
+        
     }
 }

@@ -184,17 +184,7 @@ namespace HentulWinforms
             CycleLabel.Size = new Size(17, 20);
             CycleLabel.TabIndex = 10;
             CycleLabel.Text = "0";
-            // 
-            // wanderingButton
-            // 
-            wanderingButton.Location = new Point(1655, 115);
-            wanderingButton.Margin = new Padding(3, 4, 3, 4);
-            wanderingButton.Name = "wanderingButton";
-            wanderingButton.Size = new Size(155, 31);
-            wanderingButton.TabIndex = 12;
-            wanderingButton.Text = "Test Burst Prevention Algo";
-            wanderingButton.UseVisualStyleBackColor = true;
-            wanderingButton.Click += WanderingButton_Click;
+            
             // 
             // BackUp
             // 
