@@ -76,7 +76,7 @@
         internal void LearnNewObject(string objectName)
         {
             somBBM_L3B_V.ChangeCurrentObjectLabel(objectName);            
-        }
+        } 
 
 
         // Supports both Training and Prediction Mode
