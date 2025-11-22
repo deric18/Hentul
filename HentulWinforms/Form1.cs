@@ -131,21 +131,7 @@ namespace HentulWinforms
                     orchestrator = Orchestrator.GetInstance();
                 });
 
-                // Rest of your existing code unchanged
-                var value = orchestrator.GetCurrentPointerPosition();
-                labelX.Text = value.X.ToString();
-                labelY.Text = value.Y.ToString();
-
-                var standard = LeftTop;
-                standard.X = standard.X + numPixels;
-                standard.Y = standard.Y + numPixels;
-
-                orchestrator.MoveCursor(standard);
-
-                value = orchestrator.GetCurrentPointerPosition();
-                labelX.Text = value.X.ToString();
-                labelY.Text = value.Y.ToString();                
-
+                // Rest of your existing code unchanged         
                 label_done.Text = "Ready";
 
                 openFileDialog1.ShowDialog();
