@@ -77,9 +77,10 @@ namespace HentulWinforms
 
                 pictureBox3.Image = orchestrator.bmp_g;
 
-                orchestrator.ProcessVisual(counter++); 
+                orchestrator.BeginTraining(objectBox.Text);
 
                 CycleLabel.Text = counter.ToString();
+
                 CycleLabel.Refresh();
             }
             
@@ -143,9 +144,7 @@ namespace HentulWinforms
 
                 value = orchestrator.GetCurrentPointerPosition();
                 labelX.Text = value.X.ToString();
-                labelY.Text = value.Y.ToString();
-
-                orchestrator.RecordPixels();         
+                labelY.Text = value.Y.ToString();                
 
                 label_done.Text = "Ready";
 

@@ -36,33 +36,21 @@
 
         #region CONSTRUCTOR
 
-        #region Used Variables
-
-        private static Orchestrator _orchestrator;
-
-        public int Range { get; private set; }
+        #region Used Variables                
 
         private bool LogMode { get; set; }
 
         public bool IsMock { get; private set; }
 
-        public HippocampalComplex HCAccessor { get; private set; }
-
-        public int[] MockBlockNumFires { get; private set; }
-
-        private bool devbox = false;
+        public HippocampalComplex HCAccessor { get; private set; }                
 
         public int ImageIndex { get; private set; }
 
-        public POINT point;
+        public POINT point;        
 
-        public List<string> ImageList { get; private set; }
+        public Bitmap bmp, bmp_g;        
 
-        public Bitmap bmp;
-
-        public static string fileName;
-
-        public string logfilename;
+        public string logFileName;
 
         public LogMode logMode;
 
@@ -70,30 +58,25 @@
 
         private int imageIndex { get; set; }
 
+        private string fileName;
+
+        private static Orchestrator _orchestrator;
+
         public NetworkMode NMode { get; set; }
 
         public VisionStreamProcessor VisionProcessor { get; set; }
 
         public TextStreamProcessor TextProcessor { get; private set; }
 
-        public ulong CycleNum { get; private set; }
-
-        private int NumColumns, X, Z;
-
-        public Bitmap bmpV2, bmpV3;
-        public Bitmap bmp_g;
+        public ulong CycleNum { get; private set; }                        
 
         #endregion
         private static readonly string baseDir = AppContext.BaseDirectory;
         
-        private Orchestrator(int visionrange, bool isMock = false, bool ShouldInit = true,
+        private Orchestrator(bool isMock = false, bool ShouldInit = true,
                     NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
-        {
-            X = 1250;
-            NumColumns = 10;
-            Z = 4;
-            LogMode = false;
-            Range = visionrange;
+        {            
+            LogMode = false;            
             NMode = nMode;
             logMode = Common.LogMode.BurstOnly;
 
@@ -116,7 +99,7 @@
 
             imageIndex = 1;
             fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
-            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
+            logFileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
         }
 
 
@@ -124,19 +107,22 @@
         {
             if (_orchestrator == null)
             {
-                _orchestrator = new Orchestrator(10, isMock, shouldInit, nMode);
+                _orchestrator = new Orchestrator(isMock, shouldInit, nMode);
             }
             return _orchestrator;
         }
 
         private void Init()
         {
-            Console.WriteLine("Finished Init for this Instance \n");
-            Console.WriteLine("Range : " + Range.ToString() + "\n");
+            Console.WriteLine("Finished Init for this Instance \n");            
             Console.WriteLine("Initing SOM Instance now ... \n");
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
+
+        #endregion
+
+        #region Public API         
 
 
         public void BeginTraining(string objectLabel)
@@ -148,49 +134,7 @@
             VisionProcessor.Train(bmp_g, CycleNum, objectLabel);
         }
 
-        #endregion
 
-        #region Public API
-  
-        public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
-        {
-            int currentRange = regionType switch
-            {
-                LearningUnitType.V1 => Range,      // 10  -> 40x20
-                LearningUnitType.V2 => Range * 5,  // 50  -> 200x100
-                LearningUnitType.V3 => Range * 10, // 100 -> 400x200
-                _ => Range
-            };
-
-            var cur = GetCurrentPointerPosition();
-            int w = currentRange * 4;
-            int h = currentRange * 2;
-
-            int x = Math.Max(0, cur.X - currentRange);
-            int y = Math.Max(0, cur.Y - currentRange);
-
-            var rect = new Rectangle(x, y, w, h);
-
-            switch (regionType)
-            {
-                case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
-                case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
-                case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
-            }
-        }
-
-        private Bitmap CaptureScreenRegion(Rectangle rect)
-        {
-            var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            using var g = Graphics.FromImage(bmp);
-            g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
-            return bmp;
-        }
-
-        public void ProcessVisual(ulong cycle)
-        {
-           
-        }
 
         public void AddNewCharacterSensationToHC(char ch)
         {
@@ -226,7 +170,7 @@
             NMode = NetworkMode.PREDICTION;
             VisionProcessor.SetNetworkModeToPrediction();
             //HCAccessor.DoneWithTraining();
-            //HCAccessor.SetNetworkModeToPrediction();
+            //HCAccessor.SetNetworkModeToPrediction()
         }        
 
         #endregion
@@ -555,7 +499,7 @@
 
         public static void WriteLogsToFile(string logMsg)
         {
-            File.WriteAllText(fileName, logMsg);
+            File.WriteAllText(_orchestrator.logFileName, logMsg);
         }
 
         public void Restore()
@@ -809,32 +753,32 @@
 
 
         // Already grey scalled.
-        private void GetColorByRange(int x1, int y1, int x2, int y2)
-        {
-            IntPtr desk = GetDesktopWindow();
+        //private void GetColorByRange(int x1, int y1, int x2, int y2)
+        //{
+        //    IntPtr desk = GetDesktopWindow();
 
-            IntPtr dc = GetWindowDC(desk);
+        //    IntPtr dc = GetWindowDC(desk);
 
 
-            for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
-            {
-                for (int j = y1, l = 0; j < y2 && l < Range + Range; j++, l++)
-                {
-                    int a = (int)GetPixel(dc, i, j);
+        //    for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
+        //    {
+        //        for (int j = y1, l = 0; j < y2 && l < Range + Range; j++, l++)
+        //        {
+        //            int a = (int)GetPixel(dc, i, j);
 
-                    Color color = System.Drawing.Color.FromArgb(255,
-                                                 (a >> 0) & 0xff,
-                                                 (a >> 8) & 0xff,
-                                                 (a >> 16) & 0xff);
+        //            Color color = System.Drawing.Color.FromArgb(255,
+        //                                         (a >> 0) & 0xff,
+        //                                         (a >> 8) & 0xff,
+        //                                         (a >> 16) & 0xff);
 
-                    bmp.SetPixel(k, l, color);
+        //            bmp.SetPixel(k, l, color);
 
-                }
+        //        }
 
-            }
+        //    }
 
-            ReleaseDC(desk, dc);
-        }
+        //    ReleaseDC(desk, dc);
+        //}
 
         #endregion
 
@@ -973,6 +917,41 @@
         //public void LearnNewObject(string v)
         //{
         //    VisionProcessor.LearnNewObject(v);
+        //}
+
+        //public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
+        //{
+        //    int currentRange = regionType switch
+        //    {
+        //        LearningUnitType.V1 => Range,      // 10  -> 40x20
+        //        LearningUnitType.V2 => Range * 5,  // 50  -> 200x100
+        //        LearningUnitType.V3 => Range * 10, // 100 -> 400x200
+        //        _ => Range
+        //    };
+
+        //    var cur = GetCurrentPointerPosition();
+        //    int w = currentRange * 4;
+        //    int h = currentRange * 2;
+
+        //    int x = Math.Max(0, cur.X - currentRange);
+        //    int y = Math.Max(0, cur.Y - currentRange);
+
+        //    var rect = new Rectangle(x, y, w, h);
+
+        //    switch (regionType)
+        //    {
+        //        case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
+        //        case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
+        //        case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
+        //    }
+        //}
+
+        //private Bitmap CaptureScreenRegion(Rectangle rect)
+        //{
+        //    var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+        //    using var g = Graphics.FromImage(bmp);
+        //    g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
+        //    return bmp;
         //}
 
         #endregion

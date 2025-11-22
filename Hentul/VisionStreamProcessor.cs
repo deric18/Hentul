@@ -60,7 +60,10 @@
                 Console.WriteLine("V2/V3 - Available on demand (not yet initialized)");
 
                 SBBM.Initialize(X, NumColumns, Z, LayerType.Layer_3B, logMode);
+
                 SomBBM = SBBM.Instance;
+
+                SomBBM.Init(1);
             }
 
             LogMode = logMode;
@@ -76,24 +79,15 @@
 
             var sdr = pEncoder.EncodeBitmap(greyScalebmp);
 
-            SomBBM.Fire(sdr,cycle);
-                       
-
-            Clean();
+            SomBBM.Fire(sdr,cycle);                                   
         }
                                                               
 
         internal void SetNetworkModeToPrediction()
         {
-            
+            SomBBM.ChangeNetworkModeToPrediction();
         }
-
           
-
-        internal void Clean()
-        {
-           
-        }
 
         internal void SetUpObjectLabelOnce(string objectLabel)
         {
