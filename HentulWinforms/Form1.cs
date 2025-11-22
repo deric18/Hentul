@@ -16,10 +16,8 @@ namespace HentulWinforms
         int imageIndex = 0;
         int totalImagesToProcess = 1;
         List<string> objectList = new();
-        private PictureBox V2GrayscaleImage, V2WhitescaleImage;
-        private PictureBox V3GrayscaleImage, V3WhitescaleImage;
-
-        // LT : 784,367   RT: 1414,367  LB : 784, 1034   RB: 1414, 1034
+        
+        
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
         Orchestrator.POINT RightTop = new Orchestrator.POINT();
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
@@ -72,17 +70,19 @@ namespace HentulWinforms
             if (networkMode.Equals(NetworkMode.TRAINING))
             {
 
-                orchestrator.BeginTraining(objectBox.Text);
+                orchestrator.bmp = (Bitmap)pictureBox2.Image;
 
                 // Process visual data for all regions simultaneously
-                var edgedBitmap = ConverToEdgedBitmap(orchestrator.bmp);
-                orchestrator.ProcessVisual(edgedBitmap, counter++); // This now processes V1, V2, V3
+                orchestrator.bmp_g = ConverToEdgedBitmap(orchestrator.bmp);
+
+                pictureBox3.Image = orchestrator.bmp_g;
+
+                orchestrator.ProcessVisual(counter++); 
 
                 CycleLabel.Text = counter.ToString();
                 CycleLabel.Refresh();
             }
-
-            // Draw SOM layers for all regions
+            
             DrawAllSomLayers();
 
             if (label_done.Text == "Finished Processing Image")

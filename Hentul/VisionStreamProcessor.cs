@@ -18,8 +18,7 @@ namespace Hentul
         private static readonly string baseDir = AppContext.BaseDirectory;
         public int NumBBMNeededV { get; private set; }
 
-        public int BlockSize;                        
-        
+        public int BlockSize;                                
 
         public int Range { get; private set; }
 
@@ -32,39 +31,35 @@ namespace Hentul
         public LogMode LogMode { get; private set; }
 
         // Multiple encoders for different scales
-        public PixelEncoder pEncoderV1 { get; private set; }                
+        public PixelEncoder pEncoder { get; private set; }                
 
+        public SBBM SomBBM { get; private set; }        
 
-        public Bitmap bmpV1 { get; private set; }        
+        public string logfilename { get; private set; }                
 
-        public string logfilename { get; private set; }        
-
-        public VisionStreamProcessor(int range, int numColumns, int x, LogMode logMode, bool isMock, bool shouldInit)
+        public VisionStreamProcessor(LogMode logMode, bool isMock, bool shouldInit)
         {
-            this.X = x;
+            this.X = 3_000_000;
 
-            this.NumColumns = numColumns;
+            NumColumns = 10;            
 
             IsMock = isMock;
 
             Z = 5;
 
-            CycleNum = 0;
+            CycleNum = 0;            
+                       
+            NumBBMNeededV = 300_000;
 
-            if (range != 10)
-            {
-                throw new InvalidOperationException("Invalid Operation !");
-            }
+            pEncoder = new PixelEncoder(X, NumColumns);            
 
-            Range = range;
-           
-            BlockSize = (2 * range) * (2 * range);
-            NumBBMNeededV = 100;
-            pEncoderV1 = new PixelEncoder(100, 400);
-            bmpV1 = new Bitmap(range + range, range + range);            
+            SBBM.Initialize(X, NumColumns, Z, LayerType.Layer_3B, logMode);
 
-            numPixelsProcessedPerBBM = 4;
-            logfilename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
+            SomBBM = SBBM.Instance;
+
+            numPixelsProcessedPerBBM =  // needs to be computed!
+
+            logfilename = Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log");
 
             if (shouldInit)
             {                
@@ -81,74 +76,25 @@ namespace Hentul
         #endregion
 
 
-        public void ProcessInput(Bitmap greyScalebmp, ulong cycle)
+        public void Train(Bitmap greyScalebmp, ulong cycle)
         {
             CycleNum = cycle;
-                       
 
-            // Always process V1
-            ProcessV1(greyScalebmp, cycle);
+            var sdr = pEncoder.EncodeBitmap(greyScalebmp);
+
+            
                        
 
             Clean();
         }
-
-        private void ProcessV1(Bitmap greyScalebmp, ulong cycle)
-        {            
-            pEncoderV1.ParseBitmap(greyScalebmp);            
-        }               
-        
-        private Bitmap ApplySubsampling(Bitmap source, int targetWidth, int targetHeight)
-        {
-            var result = new Bitmap(targetWidth, targetHeight);
-            var stepX = (double)source.Width / targetWidth;
-            var stepY = (double)source.Height / targetHeight;
-
-            using (var g = Graphics.FromImage(result))
-            {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                g.DrawImage(source, 0, 0, targetWidth, targetHeight);
-            }
-
-            return result;
-        }
-
-        private Bitmap ApplyPixelSubsampling(Bitmap source, int step)
-        {
-            var result = new Bitmap(source.Width, source.Height);
-
-            for (int y = 0; y < source.Height; y += step)
-            {
-                for (int x = 0; x < source.Width; x += step)
-                {
-                    if (x < source.Width && y < source.Height)
-                    {
-                        var color = source.GetPixel(x, y);
-                        // Fill the step area with the same color
-                        for (int dy = 0; dy < step && y + dy < source.Height; dy++)
-                        {
-                            for (int dx = 0; dx < step && x + dx < source.Width; dx++)
-                            {
-                                result.SetPixel(x + dx, y + dy, color);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-                                          
+                                                              
 
         internal void SetNetworkModeToPrediction()
         {
             
         }
 
-        public void LearnNewObject(string objectName)
-        {
-            
-        }        
+          
 
         internal void Clean()
         {

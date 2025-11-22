@@ -51,8 +51,10 @@ namespace HentulWinforms
             label3 = new Label();
             pictureBox2 = new PictureBox();
             openFileDialog1 = new OpenFileDialog();
+            pictureBox3 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
             SuspendLayout();
             // 
             // StartButton
@@ -234,9 +236,9 @@ namespace HentulWinforms
             // 
             // pictureBox2
             // 
-            pictureBox2.Location = new Point(445, 123);
+            pictureBox2.Location = new Point(244, 136);
             pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(1000, 600);
+            pictureBox2.Size = new Size(708, 600);
             pictureBox2.TabIndex = 39;
             pictureBox2.TabStop = false;
             // 
@@ -245,12 +247,21 @@ namespace HentulWinforms
             openFileDialog1.FileName = "openFileDialog1";
             openFileDialog1.FileOk += openFileDialog1_FileOk;
             // 
+            // pictureBox3
+            // 
+            pictureBox3.Location = new Point(1018, 136);
+            pictureBox3.Name = "pictureBox3";
+            pictureBox3.Size = new Size(652, 600);
+            pictureBox3.TabIndex = 40;
+            pictureBox3.TabStop = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(1924, 1002);
+            Controls.Add(pictureBox3);
             Controls.Add(pictureBox2);
             Controls.Add(label3);
             Controls.Add(pictureBox1);
@@ -276,6 +287,7 @@ namespace HentulWinforms
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -322,5 +334,6 @@ namespace HentulWinforms
         private Label label3;
         private PictureBox pictureBox2;
         private OpenFileDialog openFileDialog1;
+        private PictureBox pictureBox3;
     }
 }

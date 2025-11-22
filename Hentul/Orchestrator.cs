@@ -81,6 +81,7 @@
         private int NumColumns, X, Z;
 
         public Bitmap bmpV2, bmpV3;
+        public Bitmap bmp_g;
 
         #endregion
         private static readonly string baseDir = AppContext.BaseDirectory;
@@ -96,7 +97,7 @@
             NMode = nMode;
             logMode = Common.LogMode.BurstOnly;
 
-            VisionProcessor = new VisionStreamProcessor(Range, NumColumns, X, logMode, isMock, ShouldInit);
+            VisionProcessor = new VisionStreamProcessor(logMode, isMock, ShouldInit);
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
             if (isMock)
@@ -181,10 +182,10 @@
             return bmp;
         }
 
-        public void ProcessVisual(Bitmap greyScalebmp, ulong cycle)
+        public void ProcessVisual(ulong cycle)
         {
             //ParseNFireBitmap(greyScalebmp);
-            VisionProcessor.ProcessInput(greyScalebmp, cycle);
+            VisionProcessor.Train(bmp_g, cycle);
         }
 
         public void AddNewCharacterSensationToHC(char ch)
