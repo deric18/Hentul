@@ -382,9 +382,9 @@
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
         }
 
-        internal void BeginTraining(string objectLabel)
+        internal void SetUpNewObjectLabel(string objectLabel)
         {
-            somBBM_L3B_V.BeginTraining(objectLabel);
+            somBBM_L3B_V.SetUpNewObjectLabel(objectLabel);
         }
     }
 }

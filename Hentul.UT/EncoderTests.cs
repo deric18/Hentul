@@ -1,17 +1,21 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using Common;
-using Hentul;
-using Hentul.Encoders;
-
-namespace Hentul.UT
+﻿namespace Hentul.UT
 {
+
+    using NUnit.Framework;
+    using System;
+    using System.Collections.Generic;
+    using Common;
+    using Hentul;
+    using Hentul.Encoders;
+    using System.Drawing;
+
+
     public class EncoderTest
     {
         private LocationEncoder locationEncoder;
         private MotorEncoder motorEncoder;
         private MotorStreamProcessor motorStream;
+        private PixelEncoder pixelEncoder;
 
         [SetUp]
         public void Setup()
@@ -19,6 +23,9 @@ namespace Hentul.UT
             locationEncoder = new LocationEncoder(iType.TEMPORAL);
             motorEncoder = new MotorEncoder();
             motorStream = new MotorStreamProcessor(numColumns: 10, z: 5, logMode: LogMode.None);
+
+            // Use the intended large grid that keeps ~2% sparsity for 1000x600 input
+            pixelEncoder = new PixelEncoder(3_000_000, 10);
         }
 
         #region MotorStreamProcessor Tests (2 Positive / 2 Negative)
@@ -130,6 +137,84 @@ namespace Hentul.UT
             var empty = new SDR_SOM(10, 4, new List<Position_SOM>(), iType.TEMPORAL);
             var decoded = motorEncoder.Decode(empty);
             Assert.IsNull(decoded);
+        }
+
+        #endregion
+
+        #region PixelEncoder Tests (constructor validation, sparsity, uniqueness, bounds)
+
+        [Test]
+        public void PixelEncoder_Constructor_ThrowsWhenTotalBitsLessThanPixelCount()
+        {
+            // Suggestion: constructor should validate that TotalBits >= PixelCount and throw otherwise.
+            // This test documents the expected behavior (will fail until validation is added).
+            Assert.Throws<InvalidOperationException>(() => new PixelEncoder(100, 1));
+        }
+
+        [Test]
+        public void PixelEncoder_EncodeBitmap_ProducesSDRWithExpectedSparsity()
+        {
+            using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
+            var sdr = pixelEncoder.EncodeBitmap(bmp);
+
+            // Active bits should equal number of input pixels
+            Assert.AreEqual(PixelEncoder.ImgWidth * PixelEncoder.ImgHeight, sdr.ActiveBits.Count);
+
+            // SDR dimensions must match encoder grid
+            Assert.AreEqual(3_000_000, sdr.Length);
+            Assert.AreEqual(10, sdr.Breadth);
+
+            // Density (sparsity) ~ 2% => tolerance small
+            double density = sdr.ActiveBits.Count / (double)(3_000_000L * 10L);
+            Assert.AreEqual(0.02, density, 0.0001, "Density should be approximately 2%");
+        }
+
+        [Test]
+        public void PixelEncoder_UniqueMappings_NoDuplicates()
+        {
+            using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
+            var lookup = pixelEncoder.BuildMappingLookup(bmp);
+
+            // All input pixels present
+            Assert.AreEqual(PixelEncoder.PixelCount, lookup.Count);
+
+            // All mapped positions must be unique
+            var unique = new HashSet<Position_SOM>(lookup.Values);
+            Assert.AreEqual(lookup.Count, unique.Count, "Mapped Position_SOM values should be unique (no collisions).");
+        }
+
+        [Test]
+        public void PixelEncoder_GetMappedPosition_OutOfRangeThrows()
+        {
+            // Negative x
+            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(-1, 0));
+            // x >= ImgWidth
+            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(PixelEncoder.ImgWidth, 0));
+            // Negative y
+            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(0, -1));
+            // y >= ImgHeight
+            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(0, PixelEncoder.ImgHeight));
+        }
+
+        [Test]
+        public void PixelEncoder_MappedPositionsWithinBounds_ForSamplePoints()
+        {
+            var samples = new (int x, int y)[]
+            {
+                (0,0),
+                (PixelEncoder.ImgWidth - 1, PixelEncoder.ImgHeight - 1),
+                (500, 300),
+                (123, 456)
+            };
+
+            foreach (var (x, y) in samples)
+            {
+                var p = pixelEncoder.GetMappedPosition(x, y);
+                Assert.GreaterOrEqual(p.X, 0);
+                Assert.Less(p.X, 3_000_000);
+                Assert.GreaterOrEqual(p.Y, 0);
+                Assert.Less(p.Y, 10);
+            }
         }
 
         #endregion

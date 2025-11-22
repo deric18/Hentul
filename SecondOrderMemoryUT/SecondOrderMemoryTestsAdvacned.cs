@@ -33,7 +33,7 @@
 
             bbManager.Init(1);
 
-            bbManager.BeginTraining(testObjectLabel);
+            bbManager.SetUpNewObjectLabel(testObjectLabel);
 
             rand1 = new Random();
         }
@@ -55,7 +55,7 @@
             string currentObjectLabel = "Apple";
             ulong cycle = 0;
 
-            bbManager.BeginTraining(currentObjectLabel);            
+            bbManager.SetUpNewObjectLabel(currentObjectLabel);            
             bbManager.ChangeCurrentObjectLabel(currentObjectLabel);
 
             foreach (var sdr in object1)
@@ -144,7 +144,7 @@
             // use Object1 and Create a method in TestUtils that creates these Position_SOM objects
             string currentObjectLabel1 = "Apple";
 
-            bbManager.BeginTraining(currentObjectLabel1);
+            bbManager.SetUpNewObjectLabel(currentObjectLabel1);
 
             ulong cycle = 0;
 
@@ -179,7 +179,7 @@
             string currentObjectLabel1 = "Apple";
             string currentObjectLabel2 = "Orange";
 
-            bbManager.BeginTraining(currentObjectLabel1);
+            bbManager.SetUpNewObjectLabel(currentObjectLabel1);
 
             ulong cycle = 0;
 
@@ -234,7 +234,7 @@
             string currentObjectLabel2 = "Orange";
             string currentObjectLabel3 = "Annanas";
 
-            bbManager.BeginTraining(currentObjectLabel1);
+            bbManager.SetUpNewObjectLabel(currentObjectLabel1);
 
             ulong cycle = 0;
 

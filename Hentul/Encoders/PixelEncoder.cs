@@ -44,6 +44,12 @@ namespace Hentul.Encoders
             GridX = X;
             GridY = Y;
             TotalBits = (long)GridX * GridY;
+
+            if(TotalBits < ( 50 * ImgWidth * ImgHeight ) )
+            {
+                throw new InvalidOperationException("TotalBits in Grid should be greater than 50 times the total bitmap image size");
+            }
+
             Step = TotalBits / PixelCount;
         }
 

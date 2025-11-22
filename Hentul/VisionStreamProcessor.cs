@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Hentul
+﻿namespace Hentul
 {
     using System.Drawing;
     using Common;
@@ -18,9 +16,7 @@ namespace Hentul
         private static readonly string baseDir = AppContext.BaseDirectory;
         public int NumBBMNeededV { get; private set; }
 
-        public int BlockSize;                                
-
-        public int Range { get; private set; }
+        public int BlockSize;        
 
         int X, NumColumns, Z;
 
@@ -51,22 +47,20 @@ namespace Hentul
                        
             NumBBMNeededV = 300_000;
 
-            pEncoder = new PixelEncoder(X, NumColumns);            
+            pEncoder = new PixelEncoder(X, NumColumns);
 
-            SBBM.Initialize(X, NumColumns, Z, LayerType.Layer_3B, logMode);
-
-            SomBBM = SBBM.Instance;
-
-            numPixelsProcessedPerBBM =  // needs to be computed!
+            numPixelsProcessedPerBBM = 0;// needs to be computed!
 
             logfilename = Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log");
 
             if (shouldInit)
             {                
-
-                Console.WriteLine("V1 - Total Number of Pixels: " + (Range * Range * 4).ToString());
+                
                 Console.WriteLine("V1 - Total First Order BBMs Created: " + NumBBMNeededV.ToString());
                 Console.WriteLine("V2/V3 - Available on demand (not yet initialized)");
+
+                SBBM.Initialize(X, NumColumns, Z, LayerType.Layer_3B, logMode);
+                SomBBM = SBBM.Instance;
             }
 
             LogMode = logMode;
@@ -76,13 +70,13 @@ namespace Hentul
         #endregion
 
 
-        public void Train(Bitmap greyScalebmp, ulong cycle)
+        public void Train(Bitmap greyScalebmp, ulong cycle, string objectLabel)
         {
             CycleNum = cycle;
 
             var sdr = pEncoder.EncodeBitmap(greyScalebmp);
 
-            
+            SomBBM.Fire(sdr,cycle);
                        
 
             Clean();
@@ -101,10 +95,10 @@ namespace Hentul
            
         }
 
-
-        internal void BeginTraining(string objectLabel)
+        internal void SetUpObjectLabelOnce(string objectLabel)
         {
-            
+            if (!SomBBM.SetUpNewObjectLabel(objectLabel))
+                throw new InvalidOperationException("Object Label Could not be set up!");
         }
     }
 }

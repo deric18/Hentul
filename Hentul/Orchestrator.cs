@@ -138,9 +138,14 @@
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
+
         public void BeginTraining(string objectLabel)
         {
-            VisionProcessor.BeginTraining(objectLabel);
+            //ParseNFireBitmap(greyScalebmp);
+
+            VisionProcessor.SetUpObjectLabelOnce(objectLabel);
+
+            VisionProcessor.Train(bmp_g, CycleNum, objectLabel);
         }
 
         #endregion
@@ -184,8 +189,7 @@
 
         public void ProcessVisual(ulong cycle)
         {
-            //ParseNFireBitmap(greyScalebmp);
-            VisionProcessor.Train(bmp_g, cycle);
+           
         }
 
         public void AddNewCharacterSensationToHC(char ch)
