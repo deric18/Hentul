@@ -97,51 +97,7 @@
             }
 
             return false;
-        }
-
-        public Position2D VerifyObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false, uint iterationToConfirmation = 10)
-        {
-            string objectLabel = null;
-            Position2D toReturn = null;
-            Sensation_Location orginalSensei = sensei;
-
-            if (networkMode != NetworkMode.PREDICTION)
-            {
-                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
-            }
-
-            if (Objects.Count == 0)
-            {
-                throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
-            }
-
-            matchingObjectList = Objects.Values.ToList(); //ParseAllKnownObjectsForIncomingPattern(sensei, prediction);        // Traditional Pipeline.
-
-            if (matchingObjectList.Count > 0)
-            {
-                _cachedPosition = Orchestrator.GetCurrentPointerPosition1();
-
-                ObjectState = RecognitionState.IsBeingVerified;
-
-                foreach (var matchingObject in matchingObjectList)
-                {
-                    if (matchingObject.Verify(null, isMock, iterationToConfirmation) == true)
-                    {
-                        currentmatchingObject = matchingObject;
-                        ObjectState = RecognitionState.Recognised;
-                        return new Position2D(int.MaxValue, int.MaxValue);
-                    }
-                    else
-                    {
-                        Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
-                    }
-                }
-            }
-
-            toReturn = new Position2D(int.MinValue, int.MinValue);
-
-            return toReturn;
-        }       //Traditional Pipeline
+        }        
 
         /// Uses Graph to predict object and store them                
         public List<Position2D> StoreObjectInGraph(Sensation_Location sensei, Sensation_Location? predictionU, bool isMock = false)
@@ -428,14 +384,6 @@
 
         #region Unused 
 
-        private Tuple<Sensation_Location, Sensation_Location> ProcessStep1N2FromOrchestrator()
-        {
-            var instance = Orchestrator.GetInstance();
-            instance.RecordPixels();
-            var bmp = instance.ConverToEdgedBitmap();
-            instance.ProcessVisual(bmp, 0);
-            return instance.GetSDRFromL3B();
-        }
 
         internal static bool VerifyObjectSensei(Sensation_Location sourceSensei, Sensation_Location objectSensei, string label = null, string filename = null)
         {
@@ -532,10 +480,70 @@
             networkMode = NetworkMode.PREDICTION;
         }
 
-        #endregion       
-      
+        #endregion
 
-        #endregion        
+
+        #endregion
+
+
+
+        #region LEGACY CODE
+
+        //public Position2D VerifyObject(Sensation_Location sensei, Sensation_Location? prediction = null, bool isMock = false, uint iterationToConfirmation = 10)
+        //{
+        //    string objectLabel = null;
+        //    Position2D toReturn = null;
+        //    Sensation_Location orginalSensei = sensei;
+
+        //    if (networkMode != NetworkMode.PREDICTION)
+        //    {
+        //        throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
+        //    }
+
+        //    if (Objects.Count == 0)
+        //    {
+        //        throw new InvalidOperationException("Object Cannot be null under Prediction Mode");
+        //    }
+
+        //    matchingObjectList = Objects.Values.ToList(); //ParseAllKnownObjectsForIncomingPattern(sensei, prediction);        // Traditional Pipeline.
+
+        //    if (matchingObjectList.Count > 0)
+        //    {
+        //        _cachedPosition = Orchestrator.GetCurrentPointerPosition1();
+
+        //        ObjectState = RecognitionState.IsBeingVerified;
+
+        //        foreach (var matchingObject in matchingObjectList)
+        //        {
+        //            if (matchingObject.Verify(null, isMock, iterationToConfirmation) == true)
+        //            {
+        //                currentmatchingObject = matchingObject;
+        //                ObjectState = RecognitionState.Recognised;
+        //                return new Position2D(int.MaxValue, int.MaxValue);
+        //            }
+        //            else
+        //            {
+        //                Orchestrator.MoveCursorToSpecificPosition(_cachedPosition.X, _cachedPosition.Y);
+        //            }
+        //        }
+        //    }
+
+        //    toReturn = new Position2D(int.MinValue, int.MinValue);
+
+        //    return toReturn;
+        //}
+
+
+
+        //private Tuple<Sensation_Location, Sensation_Location> ProcessStep1N2FromOrchestrator()
+        //{
+        //    var instance = Orchestrator.GetInstance();
+        //    instance.RecordPixels();
+        //    var bmp = instance.ConverToEdgedBitmap();
+        //    instance.ProcessVisual(bmp, 0);
+        //    return instance.GetSDRFromL3B();
+        //}
+        #endregion
     }
 
     #region ENUMS

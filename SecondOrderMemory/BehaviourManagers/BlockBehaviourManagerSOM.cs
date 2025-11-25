@@ -294,7 +294,7 @@
             IsMock = isMock;
         }
 
-        public void BeginTraining(string Label)
+        public bool SetUpNewObjectLabel(string Label)
         {
             if (Label == null | Label == string.Empty)
             {
@@ -304,7 +304,7 @@
             NetWorkMode = NetworkMode.TRAINING;
             CurrentObjectLabel = Label;
 
-            AddNewLabelToSupportedLabels(Label);
+            return AddNewLabelToSupportedLabels(Label);
         }
 
         public void ChangeCurrentObjectLabel(string objectName)

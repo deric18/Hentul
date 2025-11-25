@@ -17,60 +17,7 @@
             orchestrator = Orchestrator.GetInstance(true, false, NetworkMode.PREDICTION);
             
             hc = orchestrator.HCAccessor;           
-        }
-
-        [Test, Ignore("currently ignore for now")]
-        public void TestPredictObject1PositiveTest()
-        {
-            List<RecognisedVisualEntity> entities = GenerateRecognisedEntity();
-
-            List<Position2D> activeBits1 = new List<Position2D>()
-                    {
-                        new Position2D(777, 10),
-                        new Position2D(222, 10),
-                        new Position2D(333, 10),
-                        new Position2D(444, 10)
-                    };
-           
-            List<Position2D> activeBits3 = new List<Position2D>()
-                    {
-                        new Position2D(111, 10),
-                        new Position2D(555, 10)
-                    };
-          
-            List<Position2D> activeBits5 = new List<Position2D>()
-                    {
-                        new Position2D(243, 10),
-                        new Position2D(234, 4),
-                        new Position2D(464, 5),
-                        new Position2D(33, 66),
-                        new Position2D(22, 10)
-                    };
-
-            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
-            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(24, activeBits5);
-
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
-
-            dict1.Add("111-888-0", kvp1);
-            dict1.Add("234-456-0", kvp2);
-            dict1.Add("567-343-0", kvp3);
-
-            Position2D posexpected = new Position2D(4432, 2163);
-
-            Sensation_Location source = new Sensation_Location(dict1, posexpected);
-
-            hc.SetNetworkModeToPrediction();
-
-            hc.LoadMockObject(entities, true);
-
-            Position2D pos = hc.VerifyObject(source, null, true);
-
-            Assert.AreEqual(posexpected.X, pos.X);
-            Assert.AreEqual(posexpected.Y, pos.Y);
-
-        }
+        }       
 
         [Test]
         public void TestCode()
@@ -83,71 +30,7 @@
             int bp = 1;
 
         }
-
-        [Test, Ignore(" Needs Work!")]
-        public void TestVerifyObjectSensei()
-        {
-            List<RecognisedVisualEntity> entities = GenerateRecognisedEntity();
-
-            List<Position2D> activeBits1 = new List<Position2D>()
-                    {
-                        new Position2D(777, 10),
-                        new Position2D(222, 10),
-                        new Position2D(333, 10),
-                        new Position2D(444, 10)
-                    };
-
-            List<Position2D> activeBits3 = new List<Position2D>()
-                    {
-                        new Position2D(111, 10),
-                        new Position2D(555, 10)
-                    };
-
-            List<Position2D> activeBits5 = new List<Position2D>()
-                    {
-                        new Position2D(243, 10),
-                        new Position2D(234, 4),
-                        new Position2D(464, 5),
-                        new Position2D(33, 66),
-                        new Position2D(22, 10)
-                    };
-
-            KeyValuePair<int, List<Position2D>> kvp1 = new KeyValuePair<int, List<Position2D>>(77, activeBits1);
-            KeyValuePair<int, List<Position2D>> kvp2 = new KeyValuePair<int, List<Position2D>>(11, activeBits3);
-            KeyValuePair<int, List<Position2D>> kvp3 = new KeyValuePair<int, List<Position2D>>(24, activeBits5);
-
-            SortedDictionary<string, KeyValuePair<int, List<Position2D>>> dict1 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
-
-            dict1.Add("111-888-0", kvp1);
-            dict1.Add("234-456-0", kvp2);
-            dict1.Add("567-343-0", kvp3);
-
-            Position2D posexpected = new Position2D(4432, 2163);
-
-            Sensation_Location source = new Sensation_Location(dict1, posexpected);
-
-            hc.LoadMockObject(entities, true);
-
-
-            Position2D pos = hc.VerifyObject(source, null, true);
-
-        }
-
-
-
-        [Test, Ignore("Needs Work!!!")]
-        public void TestVerify()
-        {
-            List<RecognisedVisualEntity> entities = TestUtils.GenerateRandomEntities(4);
-
-            hc.LoadMockObject(entities, true);
-
-            RecognisedVisualEntity entity = entities[0];            
-
-            entity.Verify(null, true, 6);            
-        }
-
-
+      
         [Test, Ignore("Needs a lot more Work")]
         public void TestPreditObject2PositiveTest()
         {

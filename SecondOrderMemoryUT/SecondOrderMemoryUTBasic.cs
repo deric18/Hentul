@@ -26,7 +26,7 @@ namespace SecondOrderMemoryUnitTest
 
             bbManager.Init(1);
 
-            bbManager.BeginTraining(testObjectLabel);
+            bbManager.SetUpNewObjectLabel(testObjectLabel);
 
             rand1 = new Random();
         }
@@ -115,7 +115,7 @@ namespace SecondOrderMemoryUnitTest
         {
             SDR_SOM sdr1 = TestUtils.ConvertPositionToSDR(new List<Position_SOM>() { new Position_SOM(0, 2) }, iType.SPATIAL);
 
-            bbManager.BeginTraining("Apple");
+            bbManager.SetUpNewObjectLabel("Apple");
 
             bbManager.Fire(sdr1, 1);
 

@@ -97,7 +97,7 @@
 
 
         // Supports both Training and Prediction Mode
-        public void Process(PixelEncoder pEncoder, ulong cycleNum)
+        public void Process(PixelEncoderOld pEncoder, ulong cycleNum)
         {
             CycleNum = cycleNum;
 
@@ -149,7 +149,7 @@
 
             foreach (var fomID in firingFOM_V)
             {
-                posList.AddRange(PixelEncoder.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
+                posList.AddRange(PixelEncoderOld.GetSOMEquivalentPositionsofFOM(fomBBMV[fomID].GetAllColumnsBurstingLatestCycle(CycleNum).ActiveBits, fomID));
             }
 
             if (logMode == Common.LogMode.BurstOnly)
@@ -177,7 +177,7 @@
 
 
         // Should be called after pixelEncoder has processed the bitmap, parses all the FOMBBMIDS and fires FOMS and tracks all the firing FOMs into firingFOM
-        private void FireFOMsV(PixelEncoder pEncoder, ulong CycleNum)
+        private void FireFOMsV(PixelEncoderOld pEncoder, ulong CycleNum)
         {
             foreach (var kvp in pEncoder.FOMBBMIDS)
             {
@@ -382,9 +382,9 @@
             somBBM_L3B_V.ChangeNetworkModeToPrediction();
         }
 
-        internal void BeginTraining(string objectLabel)
+        internal void SetUpNewObjectLabel(string objectLabel)
         {
-            somBBM_L3B_V.BeginTraining(objectLabel);
+            somBBM_L3B_V.SetUpNewObjectLabel(objectLabel);
         }
     }
 }
