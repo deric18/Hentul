@@ -2,6 +2,7 @@
 {
     using System;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Linq;
     using System.Xml;
     using Common;
@@ -734,15 +735,20 @@
                 }
             }
 
+
             if (NetWorkMode == NetworkMode.PREDICTION)
                 UpdateCurentPredictions();
 
+
             PrepNetworkForNextCycle(ignorePostCycleCleanUp, incomingPattern.InputPatternType);
+
 
             if (ignorePostCycleCleanUp == false)
                 PostCycleCleanup(incomingPattern.InputPatternType);
 
+
             ValidateNetwork();
+
 
             return true;
         }
@@ -836,7 +842,7 @@
                 {
                     var neuron = GetNeuronFromString(neuroString);
 
-                    if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
+                    if (CheckNeuronListHasThisNeuron(neuron) == false)
                     {
                         if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                         {
@@ -857,7 +863,7 @@
                 {
                     foreach (var neuron in column.Neurons)
                     {
-                        if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
+                        if (CheckNeuronListHasThisNeuron(neuron) == false)
                         {
                             if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                             {
@@ -1100,6 +1106,25 @@
 
 
             return firingList;
+        }
+
+        private bool CheckNeuronListHasThisNeuron(Neuron neuron)
+        {
+            bool found = false;
+
+            var sw = Stopwatch.StartNew();
+
+            found = NeuronsFiringThisCycle.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
+
+            sw.Stop();
+
+            var timestamp = DateTime.UtcNow.ToString("o");
+            var listCount = NeuronsFiringThisCycle?.Count ?? 0;
+            var nidStr = neuron?.NeuronID.ToString() ?? "null";
+            var msg = $"{timestamp} :: BBMUtils.CheckNeuronListHasThisNeuron :: elapsed_ms={sw.Elapsed.TotalMilliseconds:F3} :: result={found} :: listCount={listCount} :: neuron={nidStr}";
+            File.AppendAllText(BlockBehaviourManagerSOM.LogFileName, msg + Environment.NewLine);
+
+            return found;
         }
 
         public void FireBlank(ulong currentCycle)
@@ -1652,7 +1677,7 @@
             // BUG : If the neuron did fire this cycle as well and it is still spiking then it should be allowed to stay spiking 
             foreach (var neuron in GetSpikingNeuronList())
             {
-                if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) == false)
+                if (CheckNeuronListHasThisNeuron(neuron) == false)
                 {
                     neuron.CheckSpikingFlush(CycleNum);
                 }
@@ -1665,7 +1690,7 @@
                 {
                     foreach (var neuron in column.Neurons)
                     {
-                        if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) && neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE)
+                        if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && CheckNeuronListHasThisNeuron(neuron))
                         {
                             if (Mode != LogMode.None)
                             {
@@ -2136,7 +2161,7 @@
             {
                 var neuron = GetNeuronFromString(neuroString);
 
-                if (BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron) && neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE)
+                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron))
                 {
 
                     Console.WriteLine(" WARNING :: Neuron that was heavily Predicted to a level fo firing did not get Fired!!!");
