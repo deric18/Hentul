@@ -35,9 +35,9 @@
 
         public VisionStreamProcessor(LogMode logMode, bool isMock, bool shouldInit)
         {
-            this.X = 3_000_000;
+            this.X = 1200;
 
-            NumColumns = 10;            
+            NumColumns = 600;            
 
             IsMock = isMock;
 

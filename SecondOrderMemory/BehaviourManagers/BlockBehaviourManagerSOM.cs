@@ -397,6 +397,11 @@
             {
                 Column col = _instance.Columns[x, y];
 
+                if(col.Neurons.Count <= z)
+                {
+                    bool breakpoint2 = true;
+                }
+
                 Neuron neuron = col.Neurons[z];
 
                 toRet = neuron.InitProximalConnectionForDendriticConnection(i, j, k);
@@ -835,8 +840,9 @@
                     {
                         if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                         {
-                            if (Mode < LogMode.BurstOnly)
+                            if (Mode >= LogMode.BurstOnly)
                             {
+                                //Todo : This needs to be addressed ! Neurons in the predicted list should not be in Firing State.
                                 WriteLogsToFile("INFO :: Neuron in the Predicted List was in firing state. Adding it back now! Missed Count : " + PrintBlockDetailsSingleLine());
 
                                 neruonMissedinNeuronsFiringThisCycleCount++;
@@ -2778,7 +2784,7 @@
         {
             #region REAL Code                       
 
-            if (X == 1250 && Y == 10 && Z == 5)
+            if (X == 1200 && Y == 600 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }
@@ -2828,7 +2834,7 @@
                     int x = Convert.ToInt32(item.Attributes[0]?.Value);
                     var y = Convert.ToInt32(item.Attributes[1]?.Value);
 
-                    if (x == 0 && y == 1)
+                    if (x == 0 && y == 0)
                     {
                         int breakpoint = 0;
                     }
@@ -2946,7 +2952,7 @@
             schemToLoad = SchemaType.INVALID;
 
 
-            if (X == 1250 && Y == 10 && Z == 5)
+            if (X == 1200 && Y == 600 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
             }

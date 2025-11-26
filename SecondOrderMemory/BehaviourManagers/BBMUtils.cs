@@ -1,6 +1,7 @@
 ﻿namespace SecondOrderMemory.Models
 {    
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using Common;
 
@@ -105,8 +106,24 @@
             return false;
         }
 
-        public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron) =>
-            neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);        
+        public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron)
+        {
+            bool found = false;
+
+            var sw = Stopwatch.StartNew();
+
+            found = neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
+
+            sw.Stop();
+
+            var timestamp = DateTime.UtcNow.ToString("o");
+            var listCount = neuronList?.Count ?? 0;
+            var nidStr = neuron?.NeuronID.ToString() ?? "null";
+            var msg = $"{timestamp} :: BBMUtils.CheckNeuronListHasThisNeuron :: elapsed_ms={sw.Elapsed.TotalMilliseconds:F3} :: result={found} :: listCount={listCount} :: neuron={nidStr}";
+            File.AppendAllText(BlockBehaviourManagerSOM.LogFileName, msg + Environment.NewLine);
+
+            return found;
+        }
 
         public static bool CheckifNeuronListStringHAsNeuron(List<string> stringlist, Neuron neuron)
         {

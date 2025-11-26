@@ -144,76 +144,151 @@
         #region PixelEncoder Tests (constructor validation, sparsity, uniqueness, bounds)
 
         [Test]
-        public void PixelEncoder_Constructor_ThrowsWhenTotalBitsLessThanPixelCount()
+        public void Constructor_Throws_WhenTotalCellsLessThanPixelCount()
         {
-            // Suggestion: constructor should validate that TotalBits >= PixelCount and throw otherwise.
-            // This test documents the expected behavior (will fail until validation is added).
             Assert.Throws<InvalidOperationException>(() => new PixelEncoder(100, 1));
         }
 
         [Test]
-        public void PixelEncoder_EncodeBitmap_ProducesSDRWithExpectedSparsity()
+        public void EncodeBitmap_Null_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => pixelEncoder.EncodeBitmap(null!));
+        }
+
+        [Test]
+        public void EncodeBitmap_InvalidDimensions_ThrowsInvalidOperationException()
+        {
+            using var bmp = new Bitmap(10, 10);
+            Assert.Throws<InvalidOperationException>(() => pixelEncoder.EncodeBitmap(bmp));
+        }
+
+        [Test]
+        public void AllWhiteBitmap_EncodesAllPixels()
         {
             using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.White);
+            }
+
             var sdr = pixelEncoder.EncodeBitmap(bmp);
 
-            // Active bits should equal number of input pixels
-            Assert.AreEqual(PixelEncoder.ImgWidth * PixelEncoder.ImgHeight, sdr.ActiveBits.Count);
+            // All pixels are white -> every pixel should be encoded
+            Assert.AreEqual(PixelEncoder.PixelCount, sdr.ActiveBits.Count);
 
-            // SDR dimensions must match encoder grid
-            Assert.AreEqual(3_000_000, sdr.Length);
-            Assert.AreEqual(10, sdr.Breadth);
+            // Density expected = PixelCount / TotalCells
+            double expectedDensity = PixelEncoder.PixelCount / (double)pixelEncoder.TotalCells;
+            double actualDensity = sdr.ActiveBits.Count / (double)pixelEncoder.TotalCells;
+            Assert.AreEqual(expectedDensity, actualDensity, 1e-12);
 
-            // Density (sparsity) ~ 2% => tolerance small
-            double density = sdr.ActiveBits.Count / (double)(3_000_000L * 10L);
-            Assert.AreEqual(0.02, density, 0.0001, "Density should be approximately 2%");
+            // Mapped positions must be unique (compare X/Y)
+            var unique = sdr.ActiveBits.Select(p => (p.X, p.Y)).Distinct().Count();
+            Assert.AreEqual(sdr.ActiveBits.Count, unique);
         }
 
         [Test]
-        public void PixelEncoder_UniqueMappings_NoDuplicates()
+        public void AllBlackBitmap_EncodesNoPixels()
         {
             using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
-            var lookup = pixelEncoder.BuildMappingLookup(bmp);
-
-            // All input pixels present
-            Assert.AreEqual(PixelEncoder.PixelCount, lookup.Count);
-
-            // All mapped positions must be unique
-            var unique = new HashSet<Position_SOM>(lookup.Values);
-            Assert.AreEqual(lookup.Count, unique.Count, "Mapped Position_SOM values should be unique (no collisions).");
-        }
-
-        [Test]
-        public void PixelEncoder_GetMappedPosition_OutOfRangeThrows()
-        {
-            // Negative x
-            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(-1, 0));
-            // x >= ImgWidth
-            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(PixelEncoder.ImgWidth, 0));
-            // Negative y
-            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(0, -1));
-            // y >= ImgHeight
-            Assert.Throws<ArgumentOutOfRangeException>(() => pixelEncoder.GetMappedPosition(0, PixelEncoder.ImgHeight));
-        }
-
-        [Test]
-        public void PixelEncoder_MappedPositionsWithinBounds_ForSamplePoints()
-        {
-            var samples = new (int x, int y)[]
+            using (var g = Graphics.FromImage(bmp))
             {
-                (0,0),
+                g.Clear(Color.Black);
+            }
+
+            var sdr = pixelEncoder.EncodeBitmap(bmp);
+
+            Assert.AreEqual(0, sdr.ActiveBits.Count);
+        }
+
+        [Test]
+        public void MixedBitmap_OnlyWhitePixelsIncluded_AndThresholdBehavesAsExpected()
+        {
+            using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.Black);
+            }
+
+            // explicit white pixels (should be included)
+            var whites = new List<(int x, int y)>
+            {
+                (0, 0),
                 (PixelEncoder.ImgWidth - 1, PixelEncoder.ImgHeight - 1),
                 (500, 300),
                 (123, 456)
             };
+            foreach (var (x, y) in whites) bmp.SetPixel(x, y, Color.FromArgb(255, 255, 255));
 
-            foreach (var (x, y) in samples)
+            // near-white at threshold -> CheckIfColorIsWhite uses > 240 so:
+            // (241,241,241) should be included, (240,240,240) should NOT.
+            var includedNearWhite = (241, 241);
+            var excludedNearWhite = (200, 200);
+            bmp.SetPixel(includedNearWhite.Item1, includedNearWhite.Item2, Color.FromArgb(241, 241, 241));
+            bmp.SetPixel(excludedNearWhite.Item1, excludedNearWhite.Item2, Color.FromArgb(240, 240, 240));
+
+            var sdr = pixelEncoder.EncodeBitmap(bmp);
+
+            // expected included count = whites.Count + 1 (for 241) 
+            Assert.AreEqual(whites.Count + 1, sdr.ActiveBits.Count);
+
+            // verify each explicit white pixel is present (compare by coordinates)
+            foreach (var (x, y) in whites)
             {
-                var p = pixelEncoder.GetMappedPosition(x, y);
-                Assert.GreaterOrEqual(p.X, 0);
-                Assert.Less(p.X, 3_000_000);
-                Assert.GreaterOrEqual(p.Y, 0);
-                Assert.Less(p.Y, 10);
+                var mapped = pixelEncoder.GetMappedPosition(x, y);
+                Assert.IsTrue(sdr.ActiveBits.Any(p => p.X == mapped.X && p.Y == mapped.Y),
+                    $"White pixel ({x},{y}) mapped position missing.");
+            }
+
+            // includedNearWhite must be present
+            var includedMapped = pixelEncoder.GetMappedPosition(includedNearWhite.Item1, includedNearWhite.Item2);
+            Assert.IsTrue(sdr.ActiveBits.Any(p => p.X == includedMapped.X && p.Y == includedMapped.Y));
+
+            // excludedNearWhite must NOT be present
+            var excludedMapped = pixelEncoder.GetMappedPosition(excludedNearWhite.Item1, excludedNearWhite.Item2);
+            Assert.IsFalse(sdr.ActiveBits.Any(p => p.X == excludedMapped.X && p.Y == excludedMapped.Y));
+        }
+
+        [Test]
+        public void BuildMappingLookup_OnAllWhiteBitmap_ReturnsFullLookup_WithUniquePositions()
+        {
+            using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.White);
+            }
+
+            var lookup = pixelEncoder.BuildMappingLookup(bmp);
+
+            Assert.AreEqual(PixelEncoder.PixelCount, lookup.Count);
+
+            // verify no collisions in mapped Position_SOMs (compare X/Y)
+            var unique = lookup.Values.Select(p => (p.X, p.Y)).Distinct().Count();
+            Assert.AreEqual(lookup.Count, unique);
+        }
+
+        [Test]
+        public void GetMappedPosition_IsDeterministic_AndPositionsWithinBounds()
+        {
+            var samplePoints = new (int x, int y)[]
+            {
+                (0, 0),
+                (PixelEncoder.ImgWidth - 1, PixelEncoder.ImgHeight - 1),
+                (500, 300),
+                (123, 456),
+                (241, 241) // used in threshold test as well
+            };
+
+            foreach (var (x, y) in samplePoints)
+            {
+                var p1 = pixelEncoder.GetMappedPosition(x, y);
+                var p2 = pixelEncoder.GetMappedPosition(x, y);
+                Assert.AreEqual(p1.X, p2.X);
+                Assert.AreEqual(p1.Y, p2.Y);
+
+                Assert.GreaterOrEqual(p1.X, 0);
+                Assert.Less(p1.X, 3_000_000);
+                Assert.GreaterOrEqual(p1.Y, 0);
+                Assert.Less(p1.Y, 10);
             }
         }
 

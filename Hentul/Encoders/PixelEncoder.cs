@@ -25,7 +25,7 @@ namespace Hentul.Encoders
     public class PixelEncoder
     {
         // Input image size expected by this encoder.
-        public const int ImgWidth = 1000;
+        public const int ImgWidth = 1200;
         public const int ImgHeight = 600;
         public const int PixelCount = ImgWidth * ImgHeight; // 600,000
 
@@ -33,7 +33,7 @@ namespace Hentul.Encoders
         // These choices yield totalBits = 3_000_000 * 10 = 30_000_000
         private readonly int GridX;
         private readonly int GridY;
-        public readonly long TotalBits; // 30_000_000
+        public readonly long TotalCells; // 30_000_000
 
         // Step between mapped pixels in the bit-space (TotalBits / PixelCount)
         // For the chosen constants this equals 50 -> enforces 2% sparsity
@@ -43,14 +43,14 @@ namespace Hentul.Encoders
         {
             GridX = X;
             GridY = Y;
-            TotalBits = (long)GridX * GridY;
+            TotalCells = (long)GridX * GridY;
 
-            if(TotalBits < ( 50 * ImgWidth * ImgHeight ) )
+            if(TotalCells < ( ImgWidth * ImgHeight ) )
             {
                 throw new InvalidOperationException("TotalBits in Grid should be greater than 50 times the total bitmap image size");
             }
 
-            Step = TotalBits / PixelCount;
+            Step = TotalCells / PixelCount;
         }
 
         /// <summary>
@@ -72,14 +72,22 @@ namespace Hentul.Encoders
             {
                 for (int x = 0; x < ImgWidth; x++)
                 {
-                    var pos = GetMappedPosition(x, y);
-                    list.Add(pos);
+
+                    if(CheckIfColorIsWhite(bmp.GetPixel(x, y)))
+                    {
+                        var pos = GetMappedPosition(x, y);
+
+                        list.Add(pos);
+                    }
                 }
             }
 
             // Return SDR_SOM with the mapped active bits; default to SPATIAL input type.
             return new SDR_SOM(GridX, GridY, list, iType.SPATIAL);
         }
+
+        private bool CheckIfColorIsWhite(Color color)
+           => color.R > 240 && color.G > 240 && color.B > 240;
 
         /// <summary>
         /// Deterministic mapping of a single pixel coordinate (px,py) -> Position_SOM in the global bit-space.
@@ -95,7 +103,7 @@ namespace Hentul.Encoders
 
             long linearIndex = (long)py * ImgWidth + px;               // 0 .. PixelCount-1
             long absoluteIndex = linearIndex * Step;                   // spread into big space
-            if (absoluteIndex < 0 || absoluteIndex >= TotalBits)
+            if (absoluteIndex < 0 || absoluteIndex >= TotalCells)
                 throw new InvalidOperationException("Calculated absolute index is out of global bit-space bounds.");
 
             int mappedX = (int)(absoluteIndex % GridX);

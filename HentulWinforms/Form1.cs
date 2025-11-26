@@ -16,8 +16,8 @@ namespace HentulWinforms
         int imageIndex = 0;
         int totalImagesToProcess = 1;
         List<string> objectList = new();
-        
-        
+
+
         Orchestrator.POINT LeftTop = new Orchestrator.POINT();
         Orchestrator.POINT RightTop = new Orchestrator.POINT();
         Orchestrator.POINT LeftBottom = new Orchestrator.POINT();
@@ -76,6 +76,7 @@ namespace HentulWinforms
                 orchestrator.bmp_g = ConverToEdgedBitmap(orchestrator.bmp);
 
                 pictureBox3.Image = orchestrator.bmp_g;
+                pictureBox3.Refresh();
 
                 orchestrator.BeginTraining(objectBox.Text);
 
@@ -83,7 +84,7 @@ namespace HentulWinforms
 
                 CycleLabel.Refresh();
             }
-            
+
             DrawAllSomLayers();
 
             if (label_done.Text == "Finished Processing Image")
@@ -115,7 +116,7 @@ namespace HentulWinforms
 
             DrawSomLayer();
         }
-       
+
 
         private async void button1_Click(object sender, EventArgs e)
         {
@@ -154,7 +155,7 @@ namespace HentulWinforms
         }
 
         private Bitmap ConverToEdgedBitmap(Bitmap incoming)
-        {            
+        {
             string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
             orchestrator.bmp.Save(filename);
 

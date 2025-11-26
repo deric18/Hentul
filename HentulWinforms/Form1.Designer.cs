@@ -59,7 +59,7 @@ namespace HentulWinforms
             // 
             // StartButton
             // 
-            StartButton.Location = new Point(382, 40);
+            StartButton.Location = new Point(401, 0);
             StartButton.Margin = new Padding(3, 4, 3, 4);
             StartButton.Name = "StartButton";
             StartButton.Size = new Size(155, 29);
@@ -89,7 +89,7 @@ namespace HentulWinforms
             // 
             // Start
             // 
-            Start.Location = new Point(176, 40);
+            Start.Location = new Point(207, 0);
             Start.Margin = new Padding(3, 4, 3, 4);
             Start.Name = "Start";
             Start.Size = new Size(155, 29);
@@ -167,7 +167,7 @@ namespace HentulWinforms
             // 
             // train_another_object
             // 
-            train_another_object.Location = new Point(797, 40);
+            train_another_object.Location = new Point(789, 0);
             train_another_object.Margin = new Padding(3, 4, 3, 4);
             train_another_object.Name = "train_another_object";
             train_another_object.Size = new Size(155, 29);
@@ -178,7 +178,7 @@ namespace HentulWinforms
             // 
             // objectBox
             // 
-            objectBox.Location = new Point(1476, 48);
+            objectBox.Location = new Point(1268, 7);
             objectBox.Margin = new Padding(3, 4, 3, 4);
             objectBox.Name = "objectBox";
             objectBox.Size = new Size(114, 26);
@@ -187,7 +187,7 @@ namespace HentulWinforms
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(1353, 55);
+            label2.Location = new Point(1099, 10);
             label2.Name = "label2";
             label2.Size = new Size(117, 19);
             label2.TabIndex = 17;
@@ -196,7 +196,7 @@ namespace HentulWinforms
             // 
             // button1
             // 
-            button1.Location = new Point(1655, 45);
+            button1.Location = new Point(1486, 10);
             button1.Margin = new Padding(3, 4, 3, 4);
             button1.Name = "button1";
             button1.Size = new Size(123, 29);
@@ -207,7 +207,7 @@ namespace HentulWinforms
             // 
             // startClassificationButton
             // 
-            startClassificationButton.Location = new Point(586, 40);
+            startClassificationButton.Location = new Point(593, 0);
             startClassificationButton.Margin = new Padding(3, 4, 3, 4);
             startClassificationButton.Name = "startClassificationButton";
             startClassificationButton.Size = new Size(155, 29);
@@ -236,9 +236,9 @@ namespace HentulWinforms
             // 
             // pictureBox2
             // 
-            pictureBox2.Location = new Point(244, 136);
+            pictureBox2.Location = new Point(33, 145);
             pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(708, 600);
+            pictureBox2.Size = new Size(401, 362);
             pictureBox2.TabIndex = 39;
             pictureBox2.TabStop = false;
             // 
@@ -249,9 +249,9 @@ namespace HentulWinforms
             // 
             // pictureBox3
             // 
-            pictureBox3.Location = new Point(1018, 136);
+            pictureBox3.Location = new Point(638, 145);
             pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(652, 600);
+            pictureBox3.Size = new Size(1245, 623);
             pictureBox3.TabIndex = 40;
             pictureBox3.TabStop = false;
             // 
