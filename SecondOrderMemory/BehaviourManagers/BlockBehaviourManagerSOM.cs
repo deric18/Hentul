@@ -35,7 +35,7 @@
 
         public Dictionary<string, List<Neuron>> NeuronFiringNextCycle { get; private set; }
 
-        public List<Neuron> NeuronsFiringThisCycle { get; private set; }
+        public Dictionary<string, Neuron> NeuronsFiringThisCycle { get; private set; }
 
         public List<Neuron> NeuronsFiringLastCycle { get; private set; }
 
@@ -226,7 +226,7 @@
 
             NeuronFiringNextCycle = new Dictionary<string, List<Neuron>>();
 
-            NeuronsFiringThisCycle = new List<Neuron>();
+            NeuronsFiringThisCycle = new();
 
             NeuronsFiringLastCycle = new List<Neuron>();
 
@@ -759,7 +759,7 @@
 
             List<string> cyclePredictions = new();
 
-            foreach (var neuron in NeuronsFiringThisCycle)
+            foreach (var neuron in NeuronsFiringThisCycle.Values)
             {
                 if (neuron.NeuronID.ToString() == "210-6-0-N")
                 {
@@ -821,7 +821,7 @@
             if (NeuronsFiringThisCycle?.Count == 0)
                 throw new InvalidOperationException("Error : BlockBehaviourManagerSOm.cs : PerformHigherORderSequencing : NeuronsFiringThisCycle cannot be empty!");
 
-            var nextNeuronIds = NeuronsFiringThisCycle.Where(x => x.nType == NeuronType.NORMAL).Select(x => x.NeuronID.ToString()).ToList();
+            var nextNeuronIds = NeuronsFiringThisCycle.Values.Where(x => x.nType == NeuronType.NORMAL).Select(x => x.NeuronID.ToString()).ToList();
 
             foreach (var prevneuron in NeuronsFiringLastCycle)
             {
@@ -854,7 +854,8 @@
                                 neruonMissedinNeuronsFiringThisCycleCount++;
                             }
 
-                            NeuronsFiringThisCycle.Add(neuron);
+                            if(!NeuronsFiringThisCycle.ContainsKey(neuron.NeuronID.ToString()))
+                                NeuronsFiringThisCycle.Add(neuron.NeuronID.ToString(), neuron);
                         }
                     }
                 }
@@ -867,7 +868,8 @@
                         {
                             if (neuron.nType == NeuronType.NORMAL && (neuron.Voltage > Neuron.COMMON_NEURONAL_FIRE_VOLTAGE || neuron.CurrentState == NeuronState.FIRING))
                             {
-                                NeuronsFiringThisCycle.Add(neuron);
+                                if (!NeuronsFiringThisCycle.ContainsKey(neuron.NeuronID.ToString()))
+                                    NeuronsFiringThisCycle.Add(neuron.NeuronID.ToString(), neuron);
 
                                 WriteLogsToFile("ERROR :: Neuron in the Network was in firing state. Adding it back now! Missed Count : " + neruonMissedinNeuronsFiringThisCycleCount.ToString() + PrintBlockDetailsSingleLine());
                             }
@@ -878,7 +880,7 @@
 
 
             // Iterate through NeuronsFiringTHisCycle and fire!
-            foreach (var neuron in NeuronsFiringThisCycle)
+            foreach (var neuron in NeuronsFiringThisCycle.Values)
             {
                 neuron.Fire(CycleNum, CurrentObjectLabel, Mode, LogFileName);
 
@@ -965,6 +967,7 @@
             }
 
             //Do not added Temporal and Apical Neurons to NeuronsFiringThisCycle, it throws off Wiring.                                
+            
             AddPredictedNeuronForNextCycle(dendronalNeuron, axonalNeuron);
         }
 
@@ -1108,24 +1111,7 @@
             return firingList;
         }
 
-        private bool CheckNeuronListHasThisNeuron(Neuron neuron)
-        {
-            bool found = false;
-
-            var sw = Stopwatch.StartNew();
-
-            found = NeuronsFiringThisCycle.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
-
-            sw.Stop();
-
-            var timestamp = DateTime.UtcNow.ToString("o");
-            var listCount = NeuronsFiringThisCycle?.Count ?? 0;
-            var nidStr = neuron?.NeuronID.ToString() ?? "null";
-            var msg = $"{timestamp} :: BBMUtils.CheckNeuronListHasThisNeuron :: elapsed_ms={sw.Elapsed.TotalMilliseconds:F3} :: result={found} :: listCount={listCount} :: neuron={nidStr}";
-            File.AppendAllText(BlockBehaviourManagerSOM.LogFileName, msg + Environment.NewLine);
-
-            return found;
-        }
+        private bool CheckNeuronListHasThisNeuron(Neuron neuron)    => NeuronsFiringThisCycle.ContainsKey(neuron.NeuronID.ToString());
 
         public void FireBlank(ulong currentCycle)
         {
@@ -1171,7 +1157,7 @@
                 }
                 ;
 
-                var correctPredictionList = NeuronsFiringThisCycle.Intersect(predictedNeuronList).ToList<Neuron>();
+                var correctPredictionList = NeuronsFiringThisCycle.Values.Intersect(predictedNeuronList).ToList<Neuron>();
 
                 if (ColumnsThatBurst.Count == 0 && correctPredictionList.Count != 0 && correctPredictionList.Count >= NumberOfColumnsThatFiredThisCycle)
                 {
@@ -1409,7 +1395,7 @@
                 CurrentiType = iType.TEMPORAL;
 
                 //Get intersection between temporal input SDR and the firing Neurons if any fired and strengthen it
-                foreach (var neuron in NeuronsFiringThisCycle)
+                foreach (var neuron in NeuronsFiringThisCycle.Values)
                 {
                     if (neuron.nType.Equals(NeuronType.NORMAL))
                     {
@@ -1429,7 +1415,7 @@
 
                 CurrentiType = iType.APICAL;
 
-                foreach (var neuron in NeuronsFiringThisCycle)
+                foreach (var neuron in NeuronsFiringThisCycle.Values)
                 {
                     foreach (var apicalContributor in apicalContributors)
                     {
@@ -1460,7 +1446,7 @@
             {
                 NeuronsFiringLastCycle.Clear();
 
-                foreach (var neuron in NeuronsFiringThisCycle)
+                foreach (var neuron in NeuronsFiringThisCycle.Values)
                 {
                     //Prep for Next cycle Prediction
                     if (neuron.nType.Equals(NeuronType.NORMAL))
@@ -1650,10 +1636,10 @@
             // since that will run the temporal dynamics of the system.
             if (CurrentiType == iType.SPATIAL)
             {
-                foreach (var neuron in NeuronsFiringThisCycle)
+                foreach (var neuron in NeuronsFiringThisCycle.Values)
                 {
                     //Cleanup voltages of all the Neurons that Fired this cycle unless its Spiking
-                    if (neuron.CurrentState != NeuronState.SPIKING && BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuron, NeuronsFiringThisCycle, this))
+                    if (neuron.CurrentState != NeuronState.SPIKING && BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(neuron, NeuronsFiringThisCycle.Values.ToList(), this))
                         neuron.FlushVoltage(CycleNum);
                 }
 
@@ -1729,7 +1715,7 @@
         /// Checks if Neurons is Present in Spike Train
         /// </summary>        
         /// <returns>fallse if neuron is present in spike train true otherwise</returns>
-        public static bool CheckNeuronIsNotInSpikeTrain(Neuron neuron, List<Neuron> spikeList, BlockBehaviourManagerSOM bbManager)
+        public static bool CheckNeuronIsNotInSpikeTrain(Neuron neuron, IList<Neuron> spikeList, BlockBehaviourManagerSOM bbManager)
         {
             int level = SPIKE_HIERARCHY_LOOKUP;
 
@@ -2132,7 +2118,7 @@
         {
             foreach (var axonalneuron in NeuronsFiringLastCycle)
             {
-                foreach (var dendronalNeuron in NeuronsFiringThisCycle)
+                foreach (var dendronalNeuron in NeuronsFiringThisCycle.Values)
                 {
                     if (CheckifBothNeuronsAreSameOrintheSameColumn(axonalneuron, dendronalNeuron) == false)
                         if (ConnectTwoNeurons(axonalneuron, dendronalNeuron, ConnectionType.DISTALDENDRITICNEURON) == ConnectionRemovalReturnType.HARDFALSE)
@@ -2161,7 +2147,7 @@
             {
                 var neuron = GetNeuronFromString(neuroString);
 
-                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle, neuron))
+                if (neuron.Voltage >= Neuron.COMMON_NEURONAL_FIRE_VOLTAGE && BBMUtils.CheckNeuronListHasThisNeuron(NeuronsFiringThisCycle.Values.ToList(), neuron))
                 {
 
                     Console.WriteLine(" WARNING :: Neuron that was heavily Predicted to a level fo firing did not get Fired!!!");
@@ -2626,7 +2612,7 @@
         {
             var firingList = new List<Neuron>();
 
-            foreach (var neuron in NeuronsFiringThisCycle)
+            foreach (var neuron in NeuronsFiringThisCycle.Values)
             {
                 if (!burstList.Any(item => item.NeuronID.X == neuron.NeuronID.X && item.NeuronID.Y == neuron.NeuronID.Y && item.NeuronID.Z == neuron.NeuronID.Z))
                 {
@@ -2735,7 +2721,7 @@
 
         private void AddNeuronToNeuronsFiringThisCycleList(Neuron neuronToAdd)
         {
-            foreach (var neuron in NeuronsFiringThisCycle)
+            foreach (var neuron in NeuronsFiringThisCycle.Values)
             {
                 if (neuron.NeuronID.Equals(neuronToAdd.NeuronID))
                 {
@@ -2743,7 +2729,10 @@
                 }
             }
 
-            NeuronsFiringThisCycle.Add(neuronToAdd);
+            string key = neuronToAdd.NeuronID.ToString();
+
+            if (!NeuronsFiringThisCycle.ContainsKey(key))
+                NeuronsFiringThisCycle.Add(key, neuronToAdd);
         }
 
         private void GenerateApicalLines()

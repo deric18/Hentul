@@ -41,7 +41,7 @@ namespace SecondOrderMemoryUnitTest
         [Test]
         public void TestAxonalAndDendronalConnectionsOnNeuronsUT()
         {
-            for (int i = 0; i < bbManager?.X - 50; i++)
+            for (int i = 0; i < bbManager?.X; i++)
             {
                 for (int j = 0; j < bbManager.Y; j++)
                 {
@@ -227,7 +227,7 @@ namespace SecondOrderMemoryUnitTest
 
             int counter = 0;
 
-            foreach (var neuron in bbManager.NeuronsFiringThisCycle)
+            foreach (var neuron in bbManager.NeuronsFiringThisCycle.Values)
             {
                 if (neuron.NeuronID.Equals(bbManager.Columns[0, 2].Neurons[3].NeuronID))
                 {

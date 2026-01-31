@@ -2,8 +2,7 @@
 {
     using System.Drawing;
     using Common;
-    using Encoders;
-    using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
+    using Encoders;    
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
     public class VisionStreamProcessor
@@ -24,12 +23,16 @@
 
         public ulong CycleNum;
 
+        SDR_SOM apical_SOM;
+
         public LogMode LogMode { get; private set; }
 
         // Multiple encoders for different scales
         public PixelEncoder pEncoder { get; private set; }                
 
-        public SBBM SomBBM { get; private set; }        
+        public SBBM SomBBM { get; private set; }
+
+        public SDR_SOM SomSDR { get; private set; }
 
         public string logfilename { get; private set; }                
 
@@ -71,28 +74,35 @@
        
 
         #endregion
+                
 
-
-        public void Train(Bitmap greyScalebmp, ulong cycle, string objectLabel)
+        internal void SetUpObjectLabelOnce(Bitmap greyScaleBitmap, string objectLabel)
         {
-            CycleNum = cycle;
+            if (!SomBBM.SetUpNewObjectLabel(objectLabel))
+                throw new InvalidOperationException("Object Label Could not be set up!");
 
-            var sdr = pEncoder.EncodeBitmap(greyScalebmp);
+            SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap);
 
-            SomBBM.Fire(sdr,cycle);                                   
+            apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
         }
-                                                              
+
+
+        public void Train()
+        {            
+            SomBBM.Fire(SomSDR, CycleNum++);
+        }
+
+
+        public void SendApical(int maxRepetitions)
+        {
+
+            for (int i = 0; i < maxRepetitions; i++)
+                SomBBM.Fire(apical_SOM, CycleNum++);
+        }
 
         internal void SetNetworkModeToPrediction()
         {
             SomBBM.ChangeNetworkModeToPrediction();
-        }
-          
-
-        internal void SetUpObjectLabelOnce(string objectLabel)
-        {
-            if (!SomBBM.SetUpNewObjectLabel(objectLabel))
-                throw new InvalidOperationException("Object Label Could not be set up!");
         }
     }
 }

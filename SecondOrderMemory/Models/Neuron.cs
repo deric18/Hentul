@@ -183,7 +183,7 @@
 
                     var Instance = BlockBehaviourManagerSOM.Instance;
 
-                    if (BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(contributingNeuron, Instance.NeuronsFiringThisCycle, Instance))
+                    if (BlockBehaviourManagerSOM.CheckNeuronIsNotInSpikeTrain(contributingNeuron, Instance.NeuronsFiringThisCycle.Values.ToList(), Instance))
                     {
                         ClearContributingList();
                     }

@@ -3,9 +3,7 @@ namespace HentulWinforms
     using Common;
     using Hentul;
     using OpenCvSharp;
-    using OpenCvSharp.Extensions;
-    using System.Drawing.Drawing2D;
-    using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+    using OpenCvSharp.Extensions;        
 
     public partial class Form1 : Form
     {
@@ -73,30 +71,88 @@ namespace HentulWinforms
                 orchestrator.bmp = (Bitmap)pictureBox2.Image;
 
                 // Process visual data for all regions simultaneously
-                orchestrator.bmp_g = ConverToEdgedBitmap(orchestrator.bmp);
+                orchestrator.bmp_g = ConverToEdgedBitmap(orchestrator.bmp);                
 
-                pictureBox3.Image = orchestrator.bmp_g;
-                pictureBox3.Refresh();
+                orchestrator.SetUpLabel(objectBox.Text);
 
-                orchestrator.BeginTraining(objectBox.Text);
+                UpdateEncoderImage(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+
+                orchestrator.TrainImage();
+
+                // WORK IN PROGRESS
+
+
+                    
 
                 CycleLabel.Text = counter.ToString();
 
                 CycleLabel.Refresh();
-            }
+            }            
 
-            DrawAllSomLayers();
 
-            if (label_done.Text == "Finished Processing Image")
+            startClassificationButton.Visible = true;
+
+            if (networkMode == NetworkMode.TRAINING)
             {
-                startClassificationButton.Visible = true;
+                StartButton.Text = "Start Another Image";
+                StartButton.Refresh();
+                label_done.Text = "Completed!"; label_done.Refresh();
+            }
+        }
 
-                if (networkMode == NetworkMode.TRAINING)
+        /// <summary>
+        /// Draw active bits pixels on the forms UI
+        /// </summary>
+        /// <param name="onBits"></param>
+        private void UpdateEncoderImage(List<Position_SOM> onBits)
+        {
+            const int imgWidth = 1200;
+            const int imgHeight = 600;
+
+            // Create bitmap where each grid cell maps to one pixel (1200x600)
+            var bmp = new System.Drawing.Bitmap(imgWidth, imgHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            using (var g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                // Clear background to white
+                g.Clear(System.Drawing.Color.White);
+
+                // Use a single brush for performance
+                using var blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue);
+
+                if (onBits != null)
                 {
-                    StartButton.Text = "Start Another Image";
-                    StartButton.Refresh();
+                    foreach (var pos in onBits)
+                    {
+                        if (pos == null) continue;
+
+                        int x = pos.X;
+                        int y = pos.Y;
+
+                        // Bounds check: ignore positions outside the 1200x600 grid
+                        if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight)
+                            continue;
+
+                        // Paint the single grid cell (1x1 pixel) blue
+                        g.FillRectangle(blueBrush, x, y, 1, 1);
+                    }
                 }
             }
+
+            // Assign bitmap to pictureBox4 on UI thread; dispose previous image to avoid leaks
+            void SetImage()
+            {
+                var old = pictureBox4.Image;
+                pictureBox4.Image = bmp;
+                pictureBox4.SizeMode = PictureBoxSizeMode.Zoom;
+                pictureBox4.Refresh();
+                old?.Dispose();
+            }
+
+            if (pictureBox4.InvokeRequired)
+                pictureBox4.Invoke((Action)SetImage);
+            else
+                SetImage();
         }
 
         private void startClassificationButton_Click(object sender, EventArgs e)
@@ -116,8 +172,7 @@ namespace HentulWinforms
 
             DrawSomLayer();
         }
-
-
+       
         private async void button1_Click(object sender, EventArgs e)
         {
             label_done.Text = "Initializing...";
@@ -132,7 +187,7 @@ namespace HentulWinforms
                     orchestrator = Orchestrator.GetInstance();
                 });
 
-                // Rest of your existing code unchanged         
+                // Rest of your existing code unchanged
                 label_done.Text = "Ready";
 
                 openFileDialog1.ShowDialog();

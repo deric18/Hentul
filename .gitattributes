@@ -1,0 +1,4 @@
+*.xml filter=lfs diff=lfs merge=lfs -text
+SecondOrderMemory/Schema[[:space:]]Docs/1K[[:space:]]Club/*.xml filter=lfs diff=lfs merge=lfs -text
+SecondOrderMemory/Schema[[:space:]]Docs/1K[[:space:]]Club/AxonalSchema-SOM.xml filter=lfs diff=lfs merge=lfs -text
+SecondOrderMemory/Schema[[:space:]]Docs/1K[[:space:]]Club/DendriticSchemaSOM.xml filter=lfs diff=lfs merge=lfs -text

@@ -52,7 +52,7 @@
 
         public string logFileName;
 
-        public LogMode logMode;
+        public LogMode logMode;         
 
         private List<string> objectlabellist { get; set; }
 
@@ -71,6 +71,7 @@
         public ulong CycleNum { get; private set; }                        
 
         #endregion
+
         private static readonly string baseDir = AppContext.BaseDirectory;
         
         private Orchestrator(bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
@@ -78,7 +79,7 @@
             LogMode = false;            
             NMode = nMode;
             logMode = Common.LogMode.BurstOnly;
-
+            
             VisionProcessor = new VisionStreamProcessor(logMode, isMock, ShouldInit);
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
@@ -124,16 +125,24 @@
         #region Public API         
 
 
-        public void BeginTraining(string objectLabel)
+        public void SetUpLabel(string objectLabel)
         {
             //ParseNFireBitmap(greyScalebmp);
 
-            VisionProcessor.SetUpObjectLabelOnce(objectLabel);
-
-            VisionProcessor.Train(bmp_g, CycleNum, objectLabel);
+            VisionProcessor.SetUpObjectLabelOnce(bmp_g, objectLabel);
+            
         }
 
 
+        public void TrainImage()
+        {
+            VisionProcessor.Train();        //Train it 5 times.
+
+            VisionProcessor.SendApical(5);   //Reinforce it to solidify the learnings.
+        }
+
+
+        
 
         public void AddNewCharacterSensationToHC(char ch)
         {

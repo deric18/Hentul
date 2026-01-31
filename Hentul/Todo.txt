@@ -1,29 +1,7 @@
-﻿Cuurent Feature :  Support of Hippocampus for Classification.
+﻿Current Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
 
-Major Sub Features:
-1. Provide support for Spatial Map of the environment around the agent with Boundary cells, Grid cell like Graph Cells storing locations of objects.
-2. Support and classify Favourite spots for every object for easier classification and differentiation.
-3. Provide Support for Path Integration for the agent So it can move from position to position with Burst Avoidance along the path for self assertion of the computed path.
-
-
-Implementation:
-1. SPATIAL MAP:
--
-
-
-
-- Can static SOM BBM support multiple objects ? if not undo all the singleton logic.
-
-
-
-
-
-
-
-
-
-
-
+//  what to do once you train an image in the form
+->: Make it train on other occuar vairiations of the same image. while at the same time higher layer still continues to associate all the variations with the same image.
 
 
 
@@ -31,11 +9,14 @@ Implementation:
 Big Direction -------------------
 
 
--Narrow vs Broad Vision[0]--> v1, v2, v3 
--Multi Modal Regions[0] --> A1
--Schema Based Region Init [0]
--Temporal timestamp driven firings. [1]
--Hierarchical Processing. [1]
--Integration into  HC-EC complex. [1]
--Motor Learning.[2]
--Sensory - Motor Integration [2]
+-SEQUENCE MEMORY
+-NARROW VS BROAD VISION SCOPE
+-2D SINGLE OCULAR OBJECT RECOGNITION
+-MULTI OCULAR OBJECT RECOGNITION
+-MULTI OCULAR MULTI OBJECT RECOGNITION
+-HIPPOCAMPAL SHORT TERM MEMORY INTEGRATION
+-SPATIAL MAP / GLOBAL POSITIONING SYSTEM
+-PATH INTEGRATION AND OBJECT PATH MOVEMENT
+-MULTI MODAL OBJECT TOKEN CLASSIFICATION
+-MOTOR MOVEMENT AND INTEGRATION
+-SENSORY MOTOR INTEGRATION

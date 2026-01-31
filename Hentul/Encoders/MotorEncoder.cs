@@ -38,9 +38,7 @@ namespace Hentul.Encoders
 
         // Lazy-built reverse map of canonical position sets -> MouseMove
         private static Dictionary<MouseMove, HashSet<(int x, int y)>>? _canonicalPatterns;
-        private static readonly object _lock = new();
-
-        public int Encode(MouseMove move) => codeMap[move];
+        private static readonly object _lock = new();        
 
         public SDR_SOM ToSDR(MouseMove move, int numColumns = 10, int z = 4, iType type = iType.SPATIAL)
         {
