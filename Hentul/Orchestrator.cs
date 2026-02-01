@@ -5,8 +5,7 @@
     using System;
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
-    using System.Drawing;
-    using Hentul.Encoders;    
+    using System.Drawing;    
 
     public class Orchestrator
     {
@@ -70,6 +69,8 @@
 
         public ulong CycleNum { get; private set; }                        
 
+        public VisionScope visionScope { get; private set; }
+
         #endregion
 
         private static readonly string baseDir = AppContext.BaseDirectory;
@@ -100,6 +101,7 @@
             imageIndex = 1;
             fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
             logFileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
+            visionScope = VisionScope.NARROW;
         }
 
 
@@ -112,6 +114,7 @@
             return _orchestrator;
         }
 
+
         private void Init()
         {
             Console.WriteLine("Finished Init for this Instance \n");            
@@ -120,16 +123,24 @@
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
         }
 
+
         #endregion
 
-        #region Public API         
+        #region Public API
+
+
+        public void InitHC()
+        {
+            // Capture entire screen dimensions.
+            // Initialise HC graph 
+            // move cursor with offsets and store rough object approxximations for there locations
+            HCAccessor.Init();
+        }
 
 
         public void SetUpLabel(string objectLabel)
-        {
-            //ParseNFireBitmap(greyScalebmp);
-
-            VisionProcessor.SetUpObjectLabelOnce(bmp_g, objectLabel);
+        {            
+            VisionProcessor.SetUpObjectLabelOnce(bmp_g, objectLabel, visionScope);
             
         }
 
@@ -140,8 +151,6 @@
 
             VisionProcessor.SendApical(5);   //Reinforce it to solidify the learnings.
         }
-
-
         
 
         public void AddNewCharacterSensationToHC(char ch)
@@ -179,9 +188,96 @@
             VisionProcessor.SetNetworkModeToPrediction();
             //HCAccessor.DoneWithTraining();
             //HCAccessor.SetNetworkModeToPrediction()
-        }        
+        }
+
+
 
         #endregion
+
+        #region PRIVATE HELPER METHODS
+
+
+        private void GetPixelsAsPerScope()
+        {
+
+            POINT currentMousePosition = GetCurrentPointerPosition();
+
+            switch (GetScope())
+            {
+                case VisionScope.NARROW:       // High Detail In-Object Scope
+                    {
+                        break;
+                    }
+                case VisionScope.OBJECT:       // Fully View of Object
+                    {
+                        break;
+                    }
+                case VisionScope.BROAD:        // complete visual view at capacity.
+                    {
+                        break;
+                    }
+                case VisionScope.INVALID:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+        }
+
+        private VisionScope GetScope()
+        {
+            VisionScope scopeToReturn = VisionScope.NARROW;
+
+            bool makesSense = false;
+
+            while (makesSense != false)
+            {
+
+                // Get Screen Pixel Values 
+
+                // Analyse
+
+                // Increase or decrease Scope && try again
+
+                makesSense = DoesItMakeSense();
+            }
+
+            return scopeToReturn;
+        }
+
+
+
+        private bool DoesItMakeSense()
+        {
+            // Check if cursor is currently on top of an object or just screen saver ?
+            //If object , check what is the size of the object and return the dimension needed to cover the whole object.
+            AdjustScopetoNearestObject();
+
+
+            //if Scope is not on Object then return broad scope to grab the whole screen view with lower pixel rate.
+            GrabWholeScreen();
+
+            return true;
+
+        }
+
+        private Bitmap GrabWholeScreen()
+        {
+
+            // Bitmap bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            throw new NotImplementedException();
+        }
+
+        private void AdjustScopetoNearestObject()
+        {
+            POINT p = GetCurrentPointerPosition();
+        }
+
+
+        #endregion        
 
         #region Private Methods
 
@@ -515,284 +611,7 @@
             _orchestrator.HCAccessor = HippocampalComplex.Restore();
         }
 
-        #endregion
-
-        #region Future Work
-
-        private void MoveToNextObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void StoreObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        #region PRIVATE HELPER METHODS
-
-        private void GetPixelsAsPerScope()
-        {
-
-            POINT currentMousePosition = GetCurrentPointerPosition();
-
-
-            switch (GetScope())
-            {
-                case VisionScope.NarrowScope:       // High Detail In-Object Scope
-                    {
-                        break;
-                    }
-                case VisionScope.ObjectScope:       // Fully View of Object
-                    {
-                        break;
-                    }
-                case VisionScope.BroadScope:        // complete visual view at capacity.
-                    {
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-        }
-
-        private VisionScope GetScope()
-        {
-            VisionScope scopeToReturn = VisionScope.NarrowScope;
-
-            bool makesSense = false;
-
-            while (makesSense != false)
-            {
-
-                // Get Screen Pixel Values 
-
-                // Analyse
-
-                // Increase or decrease Scope && try again
-
-                makesSense = DoesItMakeSense();
-            }
-
-            return scopeToReturn;
-        }
-
-
-
-        private bool DoesItMakeSense()
-        {
-            // Check if cursor is currently on top of an object or just screen saver ?
-            //If object , check what is the size of the object and return the dimension needed to cover the whole object.
-            AdjustScopetoNearestObject();
-
-
-            //if Scope is not on Object then return broad scope to grab the whole screen view with lower pixel rate.
-            GrabWholeScreen();
-
-            return true;
-
-        }
-
-        private Bitmap GrabWholeScreen()
-        {
-
-            // Bitmap bmpScreenCapture = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-            throw new NotImplementedException();
-
-
-
-        }
-
-
-
-        private void AdjustScopetoNearestObject()
-        {
-            POINT p = GetCurrentPointerPosition();
-
-
-
-
-
-        }
-
-
-        #region TRASH
-
-
-        //public void GrabNProcess(ref bool[,] booleans)          //We process one image at once.
-        //{
-        //    //Todo : Pixel combination should not be serial , it should be randomly distributed through out the unit
-
-        //    Stopwatch stopWatch = new Stopwatch();
-
-        //    stopWatch.Start();
-
-        //    int TotalReps = 2;
-
-        //    int TotalNumberOfPixelsToProcess_X = GetRoundedTotalNumberOfPixelsToProcess(bmp.Width);
-        //    int TotalNumberOfPixelsToProcess_Y = GetRoundedTotalNumberOfPixelsToProcess(bmp.Height);
-
-        //    int TotalPixelsCoveredPerIteration = BlockOffset * BlockOffset; //2500            
-
-        //    int num_blocks_per_bmp_x = (int)(TotalNumberOfPixelsToProcess_X / BlockOffset);
-        //    int num_blocks_per_bmp_y = (int)(TotalNumberOfPixelsToProcess_Y / BlockOffset);
-
-        //    int num_unit_per_block_x = 5;
-        //    int num_unit_per_block_y = 5;
-
-        //    int num_pixels_per_Unit_x = 10;
-        //    int num_pixels_per_Unit_y = 10;
-
-        //    for (int reps = 0; reps < TotalReps; reps++)
-        //    {
-        //        for (int blockid_y = 0; blockid_y < num_blocks_per_bmp_y; blockid_y++)
-        //        {
-        //            for (int blockid_x = 0; blockid_x < num_blocks_per_bmp_x; blockid_x++)
-        //            {
-        //                int bbmId = 0;
-
-        //                for (int unitId_y = 0; unitId_y < num_unit_per_block_y; unitId_y++)
-        //                {
-        //                    for (int unitId_x = 0; unitId_x < num_unit_per_block_x; unitId_x++)
-        //                    {
-        //                        BoolEncoder boolEncoder = new BoolEncoder(100, 20);
-
-        //                        for (int j = 0; j < num_pixels_per_Unit_x; j++)
-        //                        {
-        //                            for (int i = 0; i < num_pixels_per_Unit_y; i++)
-        //                            {
-        //                                int pixel_x = blockid_x * BlockOffset + unitId_x * UnitOffset + i;
-        //                                int pixel_y = blockid_y * BlockOffset + unitId_y * UnitOffset + j;
-
-        //                                //if the pixel is Black then tag the pixel location
-
-        //                                if (blockid_x == 6 && blockid_y == 0 && unitId_x == 4 && unitId_y == 2 && j == 2)
-        //                                {
-        //                                    int bp = 1;
-        //                                }
-
-        //                                if (CheckifPixelisBlack(pixel_x, pixel_y))
-        //                                {
-
-        //                                    var dataToEncode = (j % 2).ToString() + "-" + i.ToString();
-        //                                    boolEncoder.SetEncoderValues(dataToEncode);
-
-        //                                }
-        //                            }
-
-        //                            if (j % 2 == 1)     //Bcoz one BBM covers 2 lines of pixel per unit
-        //                            {
-        //                                if (fomBBM[bbmId].TemporalLineArray[0, 0] == null)
-        //                                {
-        //                                    fomBBM[bbmId].Init(blockid_x, blockid_y, unitId_x, unitId_y, bbmId);
-        //                                }
-
-        //                                if (boolEncoder.HasValues())
-        //                                {
-        //                                    CycleNum++;
-
-        //                                    var imageSDR = boolEncoder.Encode(iType.SPATIAL);
-
-        //                                    fomBBM[bbmId++].Fire(imageSDR);
-
-        //                                    SDR_SOM fomSDR = fomBBM[bbmId].GetPredictedSDR();
-
-        //                                    if (fomSDR != null && fomSDR.ActiveBits.Count != 0)
-        //                                    {
-        //                                        fomSDR = AddSOMOverheadtoFOMSDR(fomSDR, blockid_x, blockid_y);
-
-        //                                        somBBM_L3BV.Fire(fomSDR);
-        //                                    }
-
-        //                                }
-
-        //                                boolEncoder.ClearEncoderValues();
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-
-
-        //    PrintMoreBlockVitals();
-
-        //    BackUp();
-
-        //    Console.WriteLine("Finished Processing Pixel Values : Total Time Elapsed in seconds : " + (stopWatch.ElapsedMilliseconds / 1000).ToString());
-
-        //    Console.WriteLine("Black Pixel Count :: " + blackPixelCount.ToString());
-
-        //    Console.WriteLine("Done Processing Image");
-
-        //    Console.Read();
-        //}
-
-        //public int GetRoundedTotalNumberOfPixelsToProcess(int numberOfPixels_Index)
-        //{
-        //    if (numberOfPixels_Index % BlockOffset == 0)
-        //    {
-        //        return numberOfPixels_Index;
-        //    }
-
-        //    int nextMinNumberOfPixels = numberOfPixels_Index;
-
-        //    int halfOfnextMinNumberOfPixels = numberOfPixels_Index / 2;
-
-        //    while (nextMinNumberOfPixels % 50 != 0)
-        //    {
-        //        nextMinNumberOfPixels--;
-
-        //        if (nextMinNumberOfPixels < halfOfnextMinNumberOfPixels)
-        //        {
-        //            Console.WriteLine(" GetRoundedTotalNumberOfPixelsToProcess() :: Unable to find the proper lower Bound");
-        //        }
-
-        //    }
-
-        //    if (nextMinNumberOfPixels % 50 != 0)
-        //        throw new InvalidDataException("Grab :: blockLength should always be factor of NumPixelToProcess");
-
-        //    return nextMinNumberOfPixels;
-        //}
-
-
-        // Already grey scalled.
-        //private void GetColorByRange(int x1, int y1, int x2, int y2)
-        //{
-        //    IntPtr desk = GetDesktopWindow();
-
-        //    IntPtr dc = GetWindowDC(desk);
-
-
-        //    for (int i = x1, k = 0; i < x2 && k < Range + Range; i++, k++)
-        //    {
-        //        for (int j = y1, l = 0; j < y2 && l < Range + Range; j++, l++)
-        //        {
-        //            int a = (int)GetPixel(dc, i, j);
-
-        //            Color color = System.Drawing.Color.FromArgb(255,
-        //                                         (a >> 0) & 0xff,
-        //                                         (a >> 8) & 0xff,
-        //                                         (a >> 16) & 0xff);
-
-        //            bmp.SetPixel(k, l, color);
-
-        //        }
-
-        //    }
-
-        //    ReleaseDC(desk, dc);
-        //}
-
-        #endregion
-
-        #endregion
-
-        #endregion
+        #endregion      
 
         #region LEGACY CODE
 
@@ -976,11 +795,11 @@
     }
 
     public enum VisionScope
-    {
-        BroadScope,
-        ObjectScope,
-        NarrowScope,
-        UNKNOWN
+    {        
+        NARROW,        
+        OBJECT,
+        BROAD,
+        INVALID
     }
 
     #endregion

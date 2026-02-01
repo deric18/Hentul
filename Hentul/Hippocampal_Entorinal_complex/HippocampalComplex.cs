@@ -480,6 +480,11 @@
             networkMode = NetworkMode.PREDICTION;
         }
 
+        internal void Init()
+        {
+            
+        }
+
         #endregion
 
 

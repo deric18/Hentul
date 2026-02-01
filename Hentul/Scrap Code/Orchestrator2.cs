@@ -212,7 +212,7 @@ namespace Hentul
 
             switch (GetScope())
             {
-                case VisionScope.NarrowScope:       // High Detail In-Object Scope
+                case VisionScope.NARROW:       // High Detail In-Object Scope
                     {
                         break;
                     }

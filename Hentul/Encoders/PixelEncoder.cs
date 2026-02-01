@@ -8,15 +8,15 @@ using Hentul.Hippocampal_Entorinal_complex;
 namespace Hentul.Encoders
 {
     /// <summary>
-    /// Maps every pixel of a 1000x600 bitmap into a unique Position_SOM within a
+    /// Maps every pixel of a 1200x600 bitmap into a unique Position_SOM within a
     /// large bit-space of size GridX x GridY. Mapping is deterministic and
-    /// preserves a global sparsity of 2%: PixelCount / (GridX * GridY) = 0.02.
+    /// aims to preserve a global sparsity of ~2%: PixelCount / (GridX * GridY) ≈ 0.02
     /// 
     /// Strategy:
     /// - Linearize pixel coordinates (row-major) into index i in [0 .. PixelCount-1].
     /// - Spread indices across the larger bit-space by multiplying with a fixed step:
     ///     absoluteIndex = i * Step
-    ///   where Step = (GridX * GridY) / PixelCount (should be integer for exact 2%).
+    ///   where Step = (GridX * GridY) / PixelCount (computed at runtime).
     /// - Convert absoluteIndex -> (x = absoluteIndex % GridX, y = absoluteIndex / GridX).
     /// 
     /// This produces exactly one unique Position_SOM per input pixel and achieves
@@ -27,16 +27,18 @@ namespace Hentul.Encoders
         // Input image size expected by this encoder.
         public const int ImgWidth = 1200;
         public const int ImgHeight = 600;
-        public const int PixelCount = ImgWidth * ImgHeight; // 600,000
+        public const int PixelCount = ImgWidth * ImgHeight; // 720,000
 
         // Global bit-space dimensions (x in [0..GridX-1], y in [0..GridY-1])
-        // These choices yield totalBits = 3_000_000 * 10 = 30_000_000
+        // TotalCells is computed from constructor parameters: TotalCells = GridX * GridY
         private readonly int GridX;
         private readonly int GridY;
-        public readonly long TotalCells; // 30_000_000
+        public readonly long TotalCells; // GridX * GridY (computed at runtime)
 
-        // Step between mapped pixels in the bit-space (TotalBits / PixelCount)
-        // For the chosen constants this equals 50 -> enforces 2% sparsity
+        // Step between mapped pixels in the bit-space (TotalCells / PixelCount)
+        // Computed at runtime in the constructor. For an intended 2% sparsity
+        // Step should be approximately 50 (i.e. TotalCells ≈ PixelCount * 50), but
+        // actual value depends on the GridX/GridY provided.
         public readonly long Step;
 
         public PixelEncoder(int X, int Y)
@@ -45,16 +47,16 @@ namespace Hentul.Encoders
             GridY = Y;
             TotalCells = (long)GridX * GridY;
 
-            if(TotalCells < ( ImgWidth * ImgHeight ) )
+            if (TotalCells < (ImgWidth * ImgHeight))
             {
-                throw new InvalidOperationException("TotalBits in Grid should be greater than 50 times the total bitmap image size");
+                throw new InvalidOperationException("TotalCells in Grid must be greater than or equal to the total bitmap pixel count (ImgWidth * ImgHeight).");
             }
 
             Step = TotalCells / PixelCount;
         }
 
         /// <summary>
-        /// Encode the given 1000x600 bitmap into an SDR_SOM whose ActiveBits are the mapped Position_SOMs.
+        /// Encode the given 1200x600 bitmap into an SDR_SOM whose ActiveBits are the mapped Position_SOMs.
         /// The SDR_SOM Length/Breadth correspond to the global bit-space (GridX x GridY).
         /// </summary>
         /// <exception cref="ArgumentNullException"/>
@@ -73,7 +75,7 @@ namespace Hentul.Encoders
                 for (int x = 0; x < ImgWidth; x++)
                 {
 
-                    if(CheckIfColorIsWhite(bmp.GetPixel(x, y)))
+                    if (CheckIfColorIsWhite(bmp.GetPixel(x, y)))
                     {
                         var pos = GetMappedPosition(x, y);
 
@@ -115,6 +117,11 @@ namespace Hentul.Encoders
         /// <summary>
         /// Convenience: encode image and return dictionary mapping input pixel (x,y) -> Position_SOM.
         /// Useful for lookup rather than ordered list.
+        /// 
+        /// Note: EncodeBitmap only adds mappings for white pixels, so the returned SDR_SOM.ActiveBits
+        /// may have fewer than PixelCount entries. This method currently assumes a mapping entry
+        /// exists for every (x,y); if non-white pixels are expected, update this method to account
+        /// for missing entries or build the mapping without filtering by color.
         /// </summary>
         public Dictionary<(int x, int y), Position_SOM> BuildMappingLookup(Bitmap bmp)
         {

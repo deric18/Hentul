@@ -1,5 +1,14 @@
-﻿Current Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
+﻿Current Feature : SPATIAL MAP / GLOBAL POSITIONING SYSTEM 
 
+
+
+
+Next Feature :  Narrow vs Broad Vision Scope
+
+-  
+
+
+Next Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
 //  what to do once you train an image in the form
 ->: Make it train on other occuar vairiations of the same image. while at the same time higher layer still continues to associate all the variations with the same image.
 
@@ -10,12 +19,12 @@ Big Direction -------------------
 
 
 -SEQUENCE MEMORY
+-SPATIAL MAP / GLOBAL POSITIONING SYSTEM
 -NARROW VS BROAD VISION SCOPE
 -2D SINGLE OCULAR OBJECT RECOGNITION
 -MULTI OCULAR OBJECT RECOGNITION
 -MULTI OCULAR MULTI OBJECT RECOGNITION
 -HIPPOCAMPAL SHORT TERM MEMORY INTEGRATION
--SPATIAL MAP / GLOBAL POSITIONING SYSTEM
 -PATH INTEGRATION AND OBJECT PATH MOVEMENT
 -MULTI MODAL OBJECT TOKEN CLASSIFICATION
 -MOTOR MOVEMENT AND INTEGRATION

@@ -66,24 +66,19 @@ namespace HentulWinforms
             objectList.Add(objectBox.Text);
 
             if (networkMode.Equals(NetworkMode.TRAINING))
-            {
-
-                orchestrator.bmp = (Bitmap)pictureBox2.Image;
+            {                
 
                 // Process visual data for all regions simultaneously
-                orchestrator.bmp_g = ConverToEdgedBitmap(orchestrator.bmp);                
+                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);                
 
-                orchestrator.SetUpLabel(objectBox.Text);
+                orchestrator.SetUpLabel(objectBox.Text, bmp_g);
 
                 UpdateEncoderImage(orchestrator.VisionProcessor.SomSDR.ActiveBits);
 
                 orchestrator.TrainImage();
 
                 // WORK IN PROGRESS
-
-
-                    
-
+                
                 CycleLabel.Text = counter.ToString();
 
                 CycleLabel.Refresh();
@@ -212,10 +207,13 @@ namespace HentulWinforms
         private Bitmap ConverToEdgedBitmap(Bitmap incoming)
         {
             string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
+
             orchestrator.bmp.Save(filename);
 
             var edgeImage = Cv2.ImRead(filename);
+
             var imgdetect = new Mat();
+
             Cv2.Canny(edgeImage, imgdetect, 50, 200);
 
             return BitmapConverter.ToBitmap(imgdetect);

@@ -76,12 +76,19 @@
         #endregion
                 
 
-        internal void SetUpObjectLabelOnce(Bitmap greyScaleBitmap, string objectLabel)
+        internal void SetUpObjectLabelOnce(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope)
         {
             if (!SomBBM.SetUpNewObjectLabel(objectLabel))
                 throw new InvalidOperationException("Object Label Could not be set up!");
 
-            SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap);
+            if (vScope == VisionScope.NARROW)
+            {
+                SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap);
+            }
+            else if (vScope == VisionScope.BROAD)
+            {
+
+            }
 
             apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
         }
