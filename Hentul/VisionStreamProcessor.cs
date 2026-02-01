@@ -79,8 +79,9 @@
         internal void SetUpObjectLabelOnce(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope)
         {
             if (!SomBBM.SetUpNewObjectLabel(objectLabel))
-                throw new InvalidOperationException("Object Label Could not be set up!");
+                throw new InvalidOperationException("Object Label Could not be set up in SOM Layer!");
 
+            // Extract pixels based on vision scope
             if (vScope == VisionScope.NARROW)
             {
                 SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap);

@@ -61,23 +61,84 @@ namespace Hentul.Encoders
         /// </summary>
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="InvalidOperationException">if bitmap dimensions mismatch.</exception>
-        public SDR_SOM EncodeBitmap(Bitmap bmp)
+        public SDR_SOM EncodeBitmap(Bitmap bmp, VisionScope vScope, Position2D cursorPosition)
         {
             if (bmp is null) throw new ArgumentNullException(nameof(bmp));
-            if (bmp.Width != ImgWidth || bmp.Height != ImgHeight)
-                throw new InvalidOperationException($"Bitmap must be {ImgWidth}x{ImgHeight}.");
+
+            // Validate dimensions based on vision scope
+            if (vScope == VisionScope.NARROW)
+            {
+                if (bmp.Width != ImgWidth || bmp.Height != ImgHeight)
+                    throw new InvalidOperationException($"For NARROW vision, bitmap must be {ImgWidth}x{ImgHeight}.");
+            }
+            else if (vScope == VisionScope.BROAD)
+            {
+                // "3 times more than that" -> both dimensions are 3x
+                var expectedW = ImgWidth * 3;
+                var expectedH = ImgHeight * 3;
+                if (bmp.Width != expectedW || bmp.Height != expectedH)
+                    throw new InvalidOperationException($"For BROAD vision, bitmap must be {expectedW}x{expectedH}.");
+            }
+            else
+            {
+                // Fallback: treat OBJECT same as NARROW unless you want different behaviour
+                if (bmp.Width != ImgWidth || bmp.Height != ImgHeight)
+                    throw new InvalidOperationException($"Bitmap must be {ImgWidth}x{ImgHeight} for the requested vision scope.");
+            }
+
+            // Ensure cursorPosition is inside the bitmap
+            if (cursorPosition is null)
+                throw new ArgumentNullException(nameof(cursorPosition));
+            if (cursorPosition.X < 0 || cursorPosition.X >= bmp.Width ||
+                cursorPosition.Y < 0 || cursorPosition.Y >= bmp.Height)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cursorPosition), "Cursor position must be inside the bitmap bounds.");
+            }
 
             var list = new List<Position_SOM>(PixelCount);
 
-            // Row-major traversal: y in [0..ImgHeight-1], x in [0..ImgWidth-1]
-            for (int y = 0; y < ImgHeight; y++)
-            {
-                for (int x = 0; x < ImgWidth; x++)
-                {
+            // Decide sampling scale: 1 for narrow (or object), 3 for broad
+            int scale = (vScope == VisionScope.BROAD) ? 3 : 1;
 
+            // Start traversal from cursorPosition and wrap around; use nested loops (sequential dual for loop)
+            // Outer loop iterates rows starting at cursorPosition.Y, inner loop iterates columns starting at cursorPosition.X.
+            int height = bmp.Height;
+            int width = bmp.Width;
+            int startY = cursorPosition.Y;
+            int startX = cursorPosition.X;
+
+            // Linear counter to allow selective sampling for BROAD (one in 3 pixels)
+            long sequentialCounter = 0;
+
+            for (int dy = 0; dy < height; dy++)
+            {
+                int y = (startY + dy) % height;
+                for (int dx = 0; dx < width; dx++)
+                {
+                    int x = (startX + dx) % width;
+
+                    // For BROAD scope sample one in 3 pixels in the traversal order
+                    if (vScope == VisionScope.BROAD)
+                    {
+                        if ((sequentialCounter % 3L) != 0L)
+                        {
+                            sequentialCounter++;
+                            continue;
+                        }
+                    }
+
+                    sequentialCounter++;
+
+                    // Check white
                     if (CheckIfColorIsWhite(bmp.GetPixel(x, y)))
                     {
-                        var pos = GetMappedPosition(x, y);
+                        // When bmp is larger (BROAD), map pixel coordinates down to the base ImgWidth/ImgHeight
+                        // so GetMappedPosition remains valid. This collapses each scale x scale block to a single source pixel.
+                        int mappedPx = x / scale;
+                        int mappedPy = y / scale;
+
+                        // Safety — GetMappedPosition already validates against ImgWidth/ImgHeight
+                        var pos = GetMappedPosition(mappedPx, mappedPy);
 
                         list.Add(pos);
                     }
