@@ -216,11 +216,11 @@ namespace Hentul
                     {
                         break;
                     }
-                case VisionScope.ObjectScope:       // Fully View of Object
+                case VisionScope.OBJECT:       // Fully View of Object
                     {
                         break;
                     }
-                case VisionScope.BroadScope:        // complete visual view at capacity.
+                case VisionScope.BROAD:        // complete visual view at capacity.
                     {
                         break;
                     }
@@ -235,7 +235,7 @@ namespace Hentul
 
         private VisionScope GetScope()
         {
-            VisionScope scopeToReturn = VisionScope.UNKNOWN;
+            VisionScope scopeToReturn = VisionScope.INVALID;
 
             bool makesSense = false;
 

@@ -138,9 +138,9 @@
         }
 
 
-        public void SetUpLabel(string objectLabel)
+        public void SetUpLabel(string objectLabel, Bitmap bmp)
         {            
-            VisionProcessor.SetUpObjectLabelOnce(bmp_g, objectLabel, visionScope);
+            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope);
             
         }
 
