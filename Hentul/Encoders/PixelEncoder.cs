@@ -66,14 +66,13 @@ namespace Hentul.Encoders
             if (bmp is null) throw new ArgumentNullException(nameof(bmp));
 
             // Validate dimensions based on vision scope
-            if (vScope == VisionScope.NARROW)
+            if (vScope == VisionScope.NARROW || vScope == VisionScope.OBJECT)
             {
                 if (bmp.Width != ImgWidth || bmp.Height != ImgHeight)
-                    throw new InvalidOperationException($"For NARROW vision, bitmap must be {ImgWidth}x{ImgHeight}.");
+                    throw new InvalidOperationException($"For NARROW/OBJECT vision, bitmap must be {ImgWidth}x{ImgHeight}.");
             }
             else if (vScope == VisionScope.BROAD)
             {
-                // "3 times more than that" -> both dimensions are 3x
                 var expectedW = ImgWidth * 3;
                 var expectedH = ImgHeight * 3;
                 if (bmp.Width != expectedW || bmp.Height != expectedH)
@@ -81,13 +80,11 @@ namespace Hentul.Encoders
             }
             else
             {
-                // Fallback: treat OBJECT same as NARROW unless you want different behaviour
-                if (bmp.Width != ImgWidth || bmp.Height != ImgHeight)
-                    throw new InvalidOperationException($"Bitmap must be {ImgWidth}x{ImgHeight} for the requested vision scope.");
+                throw new InvalidOperationException("vision scope should not be invalid");
             }
 
             // Ensure cursorPosition is inside the bitmap
-            if (cursorPosition is null)
+            if (cursorPosition == null)
                 throw new ArgumentNullException(nameof(cursorPosition));
             if (cursorPosition.X < 0 || cursorPosition.X >= bmp.Width ||
                 cursorPosition.Y < 0 || cursorPosition.Y >= bmp.Height)
@@ -97,55 +94,40 @@ namespace Hentul.Encoders
 
             var list = new List<Position_SOM>(PixelCount);
 
-            // Decide sampling scale: 1 for narrow (or object), 3 for broad
+            // sampling scale and step: broad = sparser sampling (scale 3, step 3), narrow = dense (scale 1, step 1)
             int scale = (vScope == VisionScope.BROAD) ? 3 : 1;
+            int step = (vScope == VisionScope.BROAD) ? 3 : 1;
 
-            // Start traversal from cursorPosition and wrap around; use nested loops (sequential dual for loop)
-            // Outer loop iterates rows starting at cursorPosition.Y, inner loop iterates columns starting at cursorPosition.X.
-            int height = bmp.Height;
+            // Determine square half-size (offset) centered on cursorPosition.
+            // Use a base half-size derived from the base image; for BROAD multiply by 3.
+            int baseHalf = Math.Min(ImgWidth, ImgHeight) / 2;      // base half-size (300 for 1200x600 -> min=600 -> 300)
+            int offset = (vScope == VisionScope.BROAD) ? baseHalf * 3 : baseHalf;
+
             int width = bmp.Width;
-            int startY = cursorPosition.Y;
-            int startX = cursorPosition.X;
+            int height = bmp.Height;
 
-            // Linear counter to allow selective sampling for BROAD (one in 3 pixels)
-            long sequentialCounter = 0;
+            // Square bounds (clamped to image)
+            int startY = Math.Max(0, cursorPosition.Y - offset);
+            int endY   = Math.Min(height - 1, cursorPosition.Y + offset);
+            int startX = Math.Max(0, cursorPosition.X - offset);
+            int endX   = Math.Min(width - 1, cursorPosition.X + offset);
 
-            for (int dy = 0; dy < height; dy++)
+            for (int y = startY; y <= endY; y += step)
             {
-                int y = (startY + dy) % height;
-                for (int dx = 0; dx < width; dx++)
+                for (int x = startX; x <= endX; x += step)
                 {
-                    int x = (startX + dx) % width;
-
-                    // For BROAD scope sample one in 3 pixels in the traversal order
-                    if (vScope == VisionScope.BROAD)
-                    {
-                        if ((sequentialCounter % 3L) != 0L)
-                        {
-                            sequentialCounter++;
-                            continue;
-                        }
-                    }
-
-                    sequentialCounter++;
-
-                    // Check white
                     if (CheckIfColorIsWhite(bmp.GetPixel(x, y)))
                     {
-                        // When bmp is larger (BROAD), map pixel coordinates down to the base ImgWidth/ImgHeight
-                        // so GetMappedPosition remains valid. This collapses each scale x scale block to a single source pixel.
-                        int mappedPx = x / scale;
-                        int mappedPy = y / scale;
+                        // If the input bitmap is BROAD (3x), downsample coordinates before mapping
+                        int mappedPx = Math.Clamp(x / scale, 0, ImgWidth - 1);
+                        int mappedPy = Math.Clamp(y / scale, 0, ImgHeight - 1);
 
-                        // Safety — GetMappedPosition already validates against ImgWidth/ImgHeight
                         var pos = GetMappedPosition(mappedPx, mappedPy);
-
                         list.Add(pos);
                     }
                 }
             }
 
-            // Return SDR_SOM with the mapped active bits; default to SPATIAL input type.
             return new SDR_SOM(GridX, GridY, list, iType.SPATIAL);
         }
 
@@ -184,9 +166,10 @@ namespace Hentul.Encoders
         /// exists for every (x,y); if non-white pixels are expected, update this method to account
         /// for missing entries or build the mapping without filtering by color.
         /// </summary>
-        public Dictionary<(int x, int y), Position_SOM> BuildMappingLookup(Bitmap bmp)
+        public Dictionary<(int x, int y), Position_SOM> BuildMappingLookup(Bitmap bmp, VisionScope vScope)
         {
-            var sdr = EncodeBitmap(bmp);
+            var point = new Position2D(1500, 1500);
+            var sdr = EncodeBitmap(bmp, vScope, point);
             var positions = sdr.ActiveBits; // List<Position_SOM>
             var dict = new Dictionary<(int x, int y), Position_SOM>(PixelCount);
             int idx = 0;

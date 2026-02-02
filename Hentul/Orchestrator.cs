@@ -140,7 +140,9 @@
 
         public void SetUpLabel(Bitmap bmp, string objectLabel)
         {   
-            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope);
+            var currentMousePosition = GetCurrentPointerPosition1();
+
+            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope, currentMousePosition);
             
 
 
@@ -538,9 +540,9 @@
             return point;
         }
 
-        public static Position GetCurrentPointerPosition1()
+        public static Position2D GetCurrentPointerPosition1()
         {
-            Position position = null;
+            Position2D position = null;
             POINT point;
 
             point = new POINT();
@@ -551,7 +553,7 @@
             {
                 //Console.Clear();
                 //Console.WriteLine(point.X.ToString() + " " + point.Y.ToString());
-                position = new Position(point.X, point.Y);
+                position = new Position2D(point.X, point.Y);
             }
 
             return position;

@@ -16,6 +16,7 @@
         private MotorEncoder motorEncoder;
         private MotorStreamProcessor motorStream;
         private PixelEncoder pixelEncoder;
+        private Position2D cursorPosition;
 
         [SetUp]
         public void Setup()
@@ -26,6 +27,7 @@
 
             // Use the intended large grid that keeps ~2% sparsity for 1000x600 input
             pixelEncoder = new PixelEncoder(3_000_000, 10);
+            cursorPosition = new Position2D(1500, 1500);
         }
 
         #region MotorStreamProcessor Tests (2 Positive / 2 Negative)
@@ -152,14 +154,14 @@
         [Test]
         public void EncodeBitmap_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => pixelEncoder.EncodeBitmap(null!));
+            Assert.Throws<ArgumentNullException>(() => pixelEncoder.EncodeBitmap(null, VisionScope.NARROW, cursorPosition));
         }
 
         [Test]
         public void EncodeBitmap_InvalidDimensions_ThrowsInvalidOperationException()
         {
             using var bmp = new Bitmap(10, 10);
-            Assert.Throws<InvalidOperationException>(() => pixelEncoder.EncodeBitmap(bmp));
+            Assert.Throws<InvalidOperationException>(() => pixelEncoder.EncodeBitmap(bmp, VisionScope.NARROW, cursorPosition));
         }
 
         [Test]
@@ -171,7 +173,7 @@
                 g.Clear(Color.White);
             }
 
-            var sdr = pixelEncoder.EncodeBitmap(bmp);
+            var sdr = pixelEncoder.EncodeBitmap(bmp, VisionScope.NARROW, cursorPosition);
 
             // All pixels are white -> every pixel should be encoded
             Assert.AreEqual(PixelEncoder.PixelCount, sdr.ActiveBits.Count);
@@ -195,7 +197,7 @@
                 g.Clear(Color.Black);
             }
 
-            var sdr = pixelEncoder.EncodeBitmap(bmp);
+            var sdr = pixelEncoder.EncodeBitmap(bmp, VisionScope.NARROW, cursorPosition);
 
             Assert.AreEqual(0, sdr.ActiveBits.Count);
         }
@@ -226,7 +228,7 @@
             bmp.SetPixel(includedNearWhite.Item1, includedNearWhite.Item2, Color.FromArgb(241, 241, 241));
             bmp.SetPixel(excludedNearWhite.Item1, excludedNearWhite.Item2, Color.FromArgb(240, 240, 240));
 
-            var sdr = pixelEncoder.EncodeBitmap(bmp);
+            var sdr = pixelEncoder.EncodeBitmap(bmp, VisionScope.NARROW, cursorPosition);
 
             // expected included count = whites.Count + 1 (for 241) 
             Assert.AreEqual(whites.Count + 1, sdr.ActiveBits.Count);
@@ -257,7 +259,7 @@
                 g.Clear(Color.White);
             }
 
-            var lookup = pixelEncoder.BuildMappingLookup(bmp);
+            var lookup = pixelEncoder.BuildMappingLookup(bmp, VisionScope.NARROW);
 
             Assert.AreEqual(PixelEncoder.PixelCount, lookup.Count);
 

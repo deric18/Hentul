@@ -3,7 +3,9 @@ namespace HentulWinforms
     using Common;
     using Hentul;
     using OpenCvSharp;
-    using OpenCvSharp.Extensions;        
+    using OpenCvSharp.Extensions;
+    using System.Linq;
+    using System.Reflection;
 
     public partial class Form1 : Form
     {
@@ -39,11 +41,38 @@ namespace HentulWinforms
         public Form1()
         {
             InitializeComponent();
+
+            // Ensure non-nullable fields are initialized to valid values to satisfy the compiler.
+            orchestrator = Orchestrator.GetInstance();
+            fomPictureBoxes = Array.Empty<PictureBox>();
+
+            // Use these fields once so the compiler won't warn about "assigned but never used".
+            _ = numPixels;
+            _ = imageIndex;
+
             backupDirHC = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));
             backupDirFOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\FOM\"));
             backupDirSOM = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\SOM\"));
             networkMode = NetworkMode.TRAINING;
             train_another_object.Visible = false;
+
+            // Attempt to populate fomPictureBoxes from designer-created controls (if present).
+            try
+            {
+                var pics = new List<PictureBox>();
+                for (int i = 2; i <= 11; i++)
+                {
+                    var field = this.GetType().GetField($"pictureBox{i}", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    if (field?.GetValue(this) is PictureBox pb)
+                        pics.Add(pb);
+                }
+                if (pics.Count > 0)
+                    fomPictureBoxes = pics.ToArray();
+            }
+            catch
+            {
+                // ignore reflection failures - leave as empty array
+            }
         }
 
         private void StartButton_Click(object sender, EventArgs e)
@@ -66,23 +95,25 @@ namespace HentulWinforms
             objectList.Add(objectBox.Text);
 
             if (networkMode.Equals(NetworkMode.TRAINING))
-            {                
+            {
 
                 // Process visual data for all regions simultaneously
-                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);                
+                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);
 
-                orchestrator.SetUpLabel(objectBox.Text, bmp_g);
+                // Fix: Orchestrator.SetUpLabel signature is (Bitmap bmp, string objectLabel)
+                orchestrator.SetUpLabel(bmp_g, objectBox.Text);
 
                 UpdateEncoderImage(orchestrator.VisionProcessor.SomSDR.ActiveBits);
 
                 orchestrator.TrainImage();
 
                 // WORK IN PROGRESS
-                
+
                 CycleLabel.Text = counter.ToString();
 
                 CycleLabel.Refresh();
-            }            
+            }
+
 
 
             startClassificationButton.Visible = true;
@@ -167,7 +198,7 @@ namespace HentulWinforms
 
             DrawSomLayer();
         }
-       
+
         private async void button1_Click(object sender, EventArgs e)
         {
             label_done.Text = "Initializing...";
@@ -208,6 +239,7 @@ namespace HentulWinforms
         {
             string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
 
+            // Ensure orchestrator.bmp access is safe (orchestrator initialized in ctor)
             orchestrator.bmp.Save(filename);
 
             var edgeImage = Cv2.ImRead(filename);
