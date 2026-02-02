@@ -4,6 +4,7 @@
     using NUnit.Framework;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Common;
     using Hentul;
     using Hentul.Encoders;
@@ -23,9 +24,10 @@
         {
             locationEncoder = new LocationEncoder(iType.TEMPORAL);
             motorEncoder = new MotorEncoder();
-            motorStream = new MotorStreamProcessor(numColumns: 10, z: 5, logMode: LogMode.None);
+            // LogMode.All used to match available enum values in the codebase
+            motorStream = new MotorStreamProcessor(numColumns: 10, z: 5, logMode: LogMode.All);
 
-            // Use the intended large grid that keeps ~2% sparsity for 1000x600 input
+            // Use the intended large grid that keeps ~2% sparsity for the configured input
             pixelEncoder = new PixelEncoder(3_000_000, 10);
             cursorPosition = new Position2D(300, 300);
         }
@@ -248,6 +250,60 @@
             // excludedNearWhite must NOT be present
             var excludedMapped = pixelEncoder.GetMappedPosition(excludedNearWhite.Item1, excludedNearWhite.Item2);
             Assert.IsFalse(sdr.ActiveBits.Any(p => p.X == excludedMapped.X && p.Y == excludedMapped.Y));
+        }
+
+        [Test]
+        public void SingleBlackPixelInsideWhiteSquare_IsExcluded_InNarrowMode()
+        {
+            // Arrange: create a small white square centered at cursor and make the center pixel black
+            int half = 5;
+            int side = 2 * half + 1;
+            int cx = cursorPosition.X;
+            int cy = cursorPosition.Y;
+
+            using var bmp = new Bitmap(PixelEncoder.ImgWidth, PixelEncoder.ImgHeight);
+            using (var g = Graphics.FromImage(bmp)) g.Clear(Color.Black);
+
+            // draw square of white pixels
+            for (int y = cy - half; y <= cy + half; y++)
+            {
+                for (int x = cx - half; x <= cx + half; x++)
+                {
+                    if (x < 0 || x >= PixelEncoder.ImgWidth || y < 0 || y >= PixelEncoder.ImgHeight) continue;
+                    bmp.SetPixel(x, y, Color.White);
+                }
+            }
+
+            // set the central pixel to black (should be excluded by encoder)
+            bmp.SetPixel(cx, cy, Color.Black);
+
+            // Act
+            var sdr = pixelEncoder.EncodeBitmap(bmp, VisionScope.NARROW, cursorPosition);
+
+            // Assert: expected = total white pixels in square minus the single black center
+            int expected = side * side - 1;
+            Assert.AreEqual(expected, sdr.ActiveBits.Count, "Encoder should exclude the black center pixel in NARROW mode.");
+
+            // verify the mapping for the center pixel is not present
+            var centerMapped = pixelEncoder.GetMappedPosition(cx, cy);
+            Assert.IsFalse(sdr.ActiveBits.Any(p => p.X == centerMapped.X && p.Y == centerMapped.Y),
+                "Center black pixel must not be present in active bits.");
+
+            // verify all other white pixels are present
+            var expectedSet = new HashSet<(int x, int y)>();
+            for (int y = cy - half; y <= cy + half; y++)
+            {
+                for (int x = cx - half; x <= cx + half; x++)
+                {
+                    if (x < 0 || x >= PixelEncoder.ImgWidth || y < 0 || y >= PixelEncoder.ImgHeight) continue;
+                    if (x == cx && y == cy) continue; // skip center (black)
+                    var mapped = pixelEncoder.GetMappedPosition(x, y);
+                    expectedSet.Add((mapped.X, mapped.Y));
+                }
+            }
+
+            var actualSet = new HashSet<(int x, int y)>(sdr.ActiveBits.Select(p => (p.X, p.Y)));
+            Assert.IsTrue(expectedSet.SetEquals(actualSet), "Encoded mappings should exactly match the white-square minus the black center.");
         }
 
         [Test]
