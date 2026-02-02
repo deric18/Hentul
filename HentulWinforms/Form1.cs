@@ -240,7 +240,7 @@ namespace HentulWinforms
             string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
 
             // Ensure orchestrator.bmp access is safe (orchestrator initialized in ctor)
-            orchestrator.bmp.Save(filename);
+            incoming.Save(filename);
 
             var edgeImage = Cv2.ImRead(filename);
 

@@ -25,7 +25,7 @@ namespace Hentul.Encoders
     public class PixelEncoder
     {
         // Input image size expected by this encoder.
-        public const int ImgWidth = 1200;
+        public const int ImgWidth = 600;
         public const int ImgHeight = 600;
         public const int PixelCount = ImgWidth * ImgHeight; // 720,000
 
@@ -86,8 +86,7 @@ namespace Hentul.Encoders
             // Ensure cursorPosition is inside the bitmap
             if (cursorPosition == null)
                 throw new ArgumentNullException(nameof(cursorPosition));
-            if (cursorPosition.X < 0 || cursorPosition.X >= bmp.Width ||
-                cursorPosition.Y < 0 || cursorPosition.Y >= bmp.Height)
+            if (cursorPosition.X < 0 || cursorPosition.Y < 0 )
             {
                 throw new ArgumentOutOfRangeException(nameof(cursorPosition), "Cursor position must be inside the bitmap bounds.");
             }
@@ -166,10 +165,9 @@ namespace Hentul.Encoders
         /// exists for every (x,y); if non-white pixels are expected, update this method to account
         /// for missing entries or build the mapping without filtering by color.
         /// </summary>
-        public Dictionary<(int x, int y), Position_SOM> BuildMappingLookup(Bitmap bmp, VisionScope vScope)
-        {
-            var point = new Position2D(1500, 1500);
-            var sdr = EncodeBitmap(bmp, vScope, point);
+        public Dictionary<(int x, int y), Position_SOM> BuildMappingLookup(Bitmap bmp, VisionScope vScope, Position2D curPos)
+        {            
+            var sdr = EncodeBitmap(bmp, vScope, curPos);
             var positions = sdr.ActiveBits; // List<Position_SOM>
             var dict = new Dictionary<(int x, int y), Position_SOM>(PixelCount);
             int idx = 0;

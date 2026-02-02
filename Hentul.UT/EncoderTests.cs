@@ -27,7 +27,7 @@
 
             // Use the intended large grid that keeps ~2% sparsity for 1000x600 input
             pixelEncoder = new PixelEncoder(3_000_000, 10);
-            cursorPosition = new Position2D(1500, 1500);
+            cursorPosition = new Position2D(300, 300);
         }
 
         #region MotorStreamProcessor Tests (2 Positive / 2 Negative)
@@ -259,7 +259,7 @@
                 g.Clear(Color.White);
             }
 
-            var lookup = pixelEncoder.BuildMappingLookup(bmp, VisionScope.NARROW);
+            var lookup = pixelEncoder.BuildMappingLookup(bmp, VisionScope.NARROW, cursorPosition);
 
             Assert.AreEqual(PixelEncoder.PixelCount, lookup.Count);
 
