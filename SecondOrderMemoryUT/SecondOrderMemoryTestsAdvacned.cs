@@ -15,8 +15,8 @@
     {
 
         BlockBehaviourManagerSOM? bbManager;
-        const int X = 1250;
-        const int Y = 10;
+        const int X = 1200;
+        const int Y = 600;
         int Z = 5;
         Random rand1;
         string testObjectLabel = "RandomObject 1";

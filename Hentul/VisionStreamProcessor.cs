@@ -2,8 +2,7 @@
 {
     using System.Drawing;
     using Common;
-    using Encoders;
-    using FBBM = FirstOrderMemory.BehaviourManagers.BlockBehaviourManagerFOM;
+    using Encoders;    
     using SBBM = SecondOrderMemory.Models.BlockBehaviourManagerSOM;
 
     public class VisionStreamProcessor
@@ -24,20 +23,24 @@
 
         public ulong CycleNum;
 
+        SDR_SOM apical_SOM;
+
         public LogMode LogMode { get; private set; }
 
         // Multiple encoders for different scales
         public PixelEncoder pEncoder { get; private set; }                
 
-        public SBBM SomBBM { get; private set; }        
+        public SBBM SomBBM { get; private set; }
+
+        public SDR_SOM SomSDR { get; private set; }
 
         public string logfilename { get; private set; }                
 
         public VisionStreamProcessor(LogMode logMode, bool isMock, bool shouldInit)
         {
-            this.X = 3_000_000;
+            this.X = 1200;
 
-            NumColumns = 10;            
+            NumColumns = 600;            
 
             IsMock = isMock;
 
@@ -71,28 +74,43 @@
        
 
         #endregion
+                
 
-
-        public void Train(Bitmap greyScalebmp, ulong cycle, string objectLabel)
+        internal void SetUpObjectLabelOnce(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope, Position2D cursorPosition)
         {
-            CycleNum = cycle;
+            if (!SomBBM.SetUpNewObjectLabel(objectLabel))
+                throw new InvalidOperationException("Object Label Could not be set up in SOM Layer!");
 
-            var sdr = pEncoder.EncodeBitmap(greyScalebmp);
+            // Extract pixels based on vision scope
+            if (vScope == VisionScope.NARROW)
+            {
+                SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap, vScope, cursorPosition);
+            }
+            else if (vScope == VisionScope.BROAD)
+            {
 
-            SomBBM.Fire(sdr,cycle);                                   
+            }
+
+            apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
         }
-                                                              
+
+
+        public void Train()
+        {            
+            SomBBM.Fire(SomSDR, CycleNum++);
+        }
+
+
+        public void SendApical(int maxRepetitions)
+        {
+
+            for (int i = 0; i < maxRepetitions; i++)
+                SomBBM.Fire(apical_SOM, CycleNum++);
+        }
 
         internal void SetNetworkModeToPrediction()
         {
             SomBBM.ChangeNetworkModeToPrediction();
-        }
-          
-
-        internal void SetUpObjectLabelOnce(string objectLabel)
-        {
-            if (!SomBBM.SetUpNewObjectLabel(objectLabel))
-                throw new InvalidOperationException("Object Label Could not be set up!");
         }
     }
 }

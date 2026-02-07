@@ -1,8 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;
-    using OpenCvSharp.Text;
+    using Common;    
     using System.Xml;
 
     public class HippocampalComplex
@@ -478,6 +477,11 @@
         public void SetNetworkModeToPrediction()
         {
             networkMode = NetworkMode.PREDICTION;
+        }
+
+        internal void Init()
+        {
+            
         }
 
         #endregion
