@@ -71,7 +71,7 @@
 
         #region PUBLIC API
 
-        #region PREDICTION
+        #region OBJECT PERMANENCE
 
 
         public bool AddNewSensationLocationToObject(Sensation_Location sensei)
