@@ -1,11 +1,26 @@
-﻿Current Feature : SPATIAL MAP / GLOBAL POSITIONING SYSTEM 
+﻿Current Feature : SPATIAL MAP / GLOBAL POSITIONING SYSTEM
 
 
 
 
-Next Feature :  Narrow vs Broad Vision Scope
 
--  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Next Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
@@ -15,12 +30,14 @@ Next Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
 
 
 
-Big Direction -------------------
+-----------------------------------------------------------Big Direction -----------------------------------------------------------
+
+FEATURE ---------------------------------------------------------------------------------------STATUS-------------------------------
 
 
--SEQUENCE MEMORY
--SPATIAL MAP / GLOBAL POSITIONING SYSTEM
--NARROW VS BROAD VISION SCOPE
+-SEQUENCE MEMORY...............................................................................DONE	
+-NARROW VS BROAD VISION SCOPE..................................................................DONE
+-SPATIAL MAP / GLOBAL POSITIONING SYSTEM.......................................................IN PROGRESS
 -2D SINGLE OCULAR OBJECT RECOGNITION
 -MULTI OCULAR OBJECT RECOGNITION
 -MULTI OCULAR MULTI OBJECT RECOGNITION

@@ -1,8 +1,7 @@
 ﻿namespace Hentul.Hippocampal_Entorinal_complex
 {
 
-    using Common;
-    using OpenCvSharp.Text;
+    using Common;    
     using System.Xml;
 
     public class HippocampalComplex
