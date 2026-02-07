@@ -142,12 +142,7 @@
         {   
             var currentMousePosition = GetCurrentPointerPosition1();
 
-            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope, currentMousePosition);
-            
-
-
-
-
+            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope, currentMousePosition);            
         }
 
 

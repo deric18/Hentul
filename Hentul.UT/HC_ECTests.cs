@@ -47,7 +47,7 @@
             labelList.Add(entities[1].Label);
             labelList.Add(entities[0].Label);
 
-            List<Position2D> positions = hc.StoreObjectInGraph(sensei, prediction);
+            List<Position2D> positions = hc.StoreNewObjectLocationInGraph(sensei);
 
             Assert.IsTrue(positions.Count != 0);
         }

@@ -98,24 +98,65 @@
             return false;
         }        
 
-        /// Uses Graph to predict object and store them                
-        public List<Position2D> StoreObjectInGraph(Sensation_Location sensei, Sensation_Location? predictionU, bool isMock = false)
-        {
-            // Get predicted Labels 
+        /// In Broad vision mode and experienced a new object and now trying to store a rough representation            
+        public List<Position2D> StoreNewObjectLocationInGraph(Sensation_Location sensei, bool isMock = false)
+        {        
+            //Ensure visionScope is Broad and networkMode is Training mode
+            //Collect the broad narrow sensation and store it into entity/ nide and sotre in Graph sngleton object.
 
-            string objectLabel = null;
-            List<Position2D> toReturn = null;
-            Sensation_Location orginalSensei = sensei;
-
-            if (networkMode != NetworkMode.PREDICTION)
+            if (networkMode == NetworkMode.PREDICTION)
             {
-                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
+                throw new InvalidOperationException("Network should be in training mode while recognising environment");
             }
 
-            // Use Verify Method to verify incoming object.
-            // 
+            if(Orchestrator.GetInstance().visionScope != VisionScope.BROAD)
+            {
+                throw new InvalidOperationException("Vision Scope should always be BROAD to process locations!");
+            }
 
-            return null;
+            if (sensei == null)
+                throw new System.ArgumentNullException(nameof(sensei));
+
+            // nothing to add
+            if (sensei.sensLoc == null || sensei.sensLoc.Count == 0)
+                return new List<Position2D>();
+
+            var addedPositions = new List<Position2D>();
+
+            // Add each sensed location (key is the location string) as a node in the Graph.
+            // Use Position2D.ConvertStringToPosition to get a Position2D instance.
+            foreach (var locKey in sensei.sensLoc.Keys)
+            {
+                try
+                {
+                    var pos = Position2D.ConvertStringToPosition(locKey);
+                    if (pos == null)
+                        continue;
+
+                    // Graph.AddNewNode returns bool; it will return false for invalid coordinates (<= 0)
+                    // We attempt to add and collect successfully added positions.
+                    bool added = false;
+                    try
+                    {
+                        added = Graph.AddNewNode(pos);
+                    }
+                    catch
+                    {
+                        // swallow exceptions from Graph (e.g., invalid pos) and continue
+                        added = false;
+                    }
+
+                    if (added)
+                        addedPositions.Add(pos);
+                }
+                catch
+                {
+                    // If conversion fails for any location string, skip it and continue.
+                    continue;
+                }
+            }            
+
+            return addedPositions;
         }
 
 
