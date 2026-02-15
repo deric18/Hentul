@@ -99,7 +99,7 @@
         }        
 
         /// In Broad vision mode and experienced a new object and now trying to store a rough representation            
-        public List<Position2D> StoreNewObjectLocationInGraph(Sensation_Location sensei, bool isMock = false)
+        public List<Position2D> StoreNewObjectLocationInGraph(SDR_SOM sdr, bool isMock = false)
         {        
             //Ensure visionScope is Broad and networkMode is Training mode
             //Collect the broad narrow sensation and store it into entity/ nide and sotre in Graph sngleton object.
@@ -114,22 +114,24 @@
                 throw new InvalidOperationException("Vision Scope should always be BROAD to process locations!");
             }
 
-            if (sensei == null)
-                throw new System.ArgumentNullException(nameof(sensei));
+            if (sdr == null)
+                throw new System.ArgumentNullException(nameof(sdr));
 
             // nothing to add
-            if (sensei.sensLoc == null || sensei.sensLoc.Count == 0)
+            if (sdr.ActiveBits == null || sdr.ActiveBits.Count == 0)
                 return new List<Position2D>();
 
             var addedPositions = new List<Position2D>();
 
-            // Add each sensed location (key is the location string) as a node in the Graph.
-            // Use Position2D.ConvertStringToPosition to get a Position2D instance.
-            foreach (var locKey in sensei.sensLoc.Keys)
+            // Parse through each Position_SOM in ActiveBits and add as a node in the Graph.
+            // Convert Position_SOM (X, Y) to Position2D and add to Graph.
+            foreach (var posSom in sdr.ActiveBits)
             {
                 try
                 {
-                    var pos = Position2D.ConvertStringToPosition(locKey);
+                    // Convert Position_SOM to Position2D using X and Y coordinates
+                    var pos = new Position2D(posSom.X, posSom.Y);
+                    
                     if (pos == null)
                         continue;
 
@@ -151,7 +153,7 @@
                 }
                 catch
                 {
-                    // If conversion fails for any location string, skip it and continue.
+                    // If conversion fails for any position, skip it and continue.
                     continue;
                 }
             }            

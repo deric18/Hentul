@@ -38,16 +38,20 @@
 
             hc.LoadMockObject(entities, true);
 
-
+            // Build an SDR_SOM from an existing Sensation_Location in the mock entity
             Sensation_Location sensei = entities[1].ObjectSnapshot.ElementAt(2);
-            Sensation_Location prediction = entities[1].ObjectSnapshot.ElementAt(3);
 
-            List<string> labelList = new List<string>();
+            var activeBits = new List<Position_SOM>();
+            foreach (var key in sensei.sensLoc.Keys)
+            {
+                var p = Position2D.ConvertStringToPosition(key);
+                if (p != null)
+                    activeBits.Add(new Position_SOM(p.X, p.Y));
+            }
 
-            labelList.Add(entities[1].Label);
-            labelList.Add(entities[0].Label);
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
 
-            List<Position2D> positions = hc.StoreNewObjectLocationInGraph(sensei);
+            List<Position2D> positions = hc.StoreNewObjectLocationInGraph(sdr);
 
             Assert.IsTrue(positions.Count != 0);
         }
@@ -59,12 +63,221 @@
 
             orchestrator.ChangeNetworkModeToTraining();
 
-
-
             Assert.IsTrue(hc.AddNewSensationToObject(newSensation));
 
             Assert.IsFalse(hc.AddNewSensationToObject(newSensation));
         }
+
+        #region StoreNewObjectLocationInGraph Tests
+
+        /// <summary>
+        /// Positive test: verifies that when the network is in TRAINING mode and VisionScope is BROAD,
+        /// valid sensation locations are added to the graph and returned.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_ValidSensationLocations_ReturnsAddedPositions()
+        {
+            // Arrange: put orchestrator/hc into TRAINING mode and set VisionScope to BROAD
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            // Build an SDR_SOM with Position_SOM active bits that have positive X and Y coordinates
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 20),
+                new Position_SOM(30, 40),
+                new Position_SOM(50, 60)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr);
+
+            // Assert: we expect 3 positions to be added (one per active bit)
+            Assert.IsNotNull(addedPositions);
+            Assert.AreEqual(3, addedPositions.Count, "Expected 3 positions to be added to the graph.");
+
+            // Verify the positions match the SDR active bits
+            Assert.IsTrue(addedPositions.Any(p => p.X == 10 && p.Y == 20), "Position (10,20) should be in the result.");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 30 && p.Y == 40), "Position (30,40) should be in the result.");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 50 && p.Y == 60), "Position (50,60) should be in the result.");
+        }
+
+        /// <summary>
+        /// Negative test: verifies that calling StoreNewObjectLocationInGraph when network is in PREDICTION mode
+        /// throws an InvalidOperationException.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_InPredictionMode_ThrowsInvalidOperationException()
+        {
+            // Arrange: ensure network is in PREDICTION mode
+            orchestrator.ChangeNetworkModeToPrediction(true);
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 20)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+
+            // Act & Assert: should throw because network is in PREDICTION mode
+            var ex = Assert.Throws<InvalidOperationException>(() => hc.StoreNewObjectLocationInGraph(sdr));
+            Assert.IsNotNull(ex);
+            StringAssert.Contains("training", ex.Message.ToLower(), "Exception message should mention training mode requirement.");
+        }
+
+
+        /// <summary>
+        /// Test: verifies that nodes are actually created in the Graph for each position returned
+        /// by StoreNewObjectLocationInGraph, and that Graph.GetNode can retrieve them with correct coordinates.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_CreatesNodesInGraph_NodesAreRetrievable()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(5, 10),
+                new Position_SOM(15, 25),
+                new Position_SOM(35, 45)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr);
+
+            // Assert: verify positions were returned
+            Assert.AreEqual(3, addedPositions.Count, "Expected 3 positions to be added.");
+
+            // Verify each position has a corresponding node in the Graph
+            foreach (var pos in addedPositions)
+            {
+                var node = hc.Graph.GetNode(pos);
+                Assert.IsNotNull(node, $"Graph should contain a node at position ({pos.X},{pos.Y})");
+                Assert.AreEqual(pos.X, node.PixelCordinates.X, $"Node X coordinate should match position X: {pos.X}");
+                Assert.AreEqual(pos.Y, node.PixelCordinates.Y, $"Node Y coordinate should match position Y: {pos.Y}");
+            }
+        }
+
+        /// <summary>
+        /// Test: verifies that multiple calls to StoreNewObjectLocationInGraph accumulate positions
+        /// in the Graph and that the Graph's TotalCount increases accordingly.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_MultipleCalls_AccumulatesNodesInGraph()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var initialCount = hc.Graph.TotalCount;
+
+            // First call
+            var activeBits1 = new List<Position_SOM>
+            {
+                new Position_SOM(20, 30),
+                new Position_SOM(40, 50)
+            };
+            var sdr1 = new SDR_SOM(1200, 600, activeBits1, iType.SPATIAL);
+
+            // Act: First addition
+            var addedPositions1 = hc.StoreNewObjectLocationInGraph(sdr1);
+
+            // Assert: verify first batch
+            Assert.AreEqual(2, addedPositions1.Count, "Expected 2 positions from first call.");
+            var countAfterFirst = hc.Graph.TotalCount;
+            Assert.Greater(countAfterFirst, initialCount, "Graph TotalCount should increase after first addition.");
+
+            // Second call with different positions
+            var activeBits2 = new List<Position_SOM>
+            {
+                new Position_SOM(60, 70),
+                new Position_SOM(80, 90),
+                new Position_SOM(100, 110)
+            };
+            var sdr2 = new SDR_SOM(1200, 600, activeBits2, iType.SPATIAL);
+
+            // Act: Second addition
+            var addedPositions2 = hc.StoreNewObjectLocationInGraph(sdr2);
+
+            // Assert: verify second batch
+            Assert.AreEqual(3, addedPositions2.Count, "Expected 3 positions from second call.");
+            var countAfterSecond = hc.Graph.TotalCount;
+            Assert.Greater(countAfterSecond, countAfterFirst, "Graph TotalCount should increase after second addition.");
+
+            // Verify all nodes from both calls are retrievable
+            var allPositions = addedPositions1.Concat(addedPositions2).ToList();
+            foreach (var pos in allPositions)
+            {
+                var node = hc.Graph.GetNode(pos);
+                Assert.IsNotNull(node, $"Graph should contain node at ({pos.X},{pos.Y})");
+                Assert.AreEqual(pos.X, node.PixelCordinates.X);
+                Assert.AreEqual(pos.Y, node.PixelCordinates.Y);
+            }
+        }
+
+        /// <summary>
+        /// Test: validates Graph state after adding nodes - checks Base node exists,
+        /// TotalCount is updated, and MaxRight/MaxUp boundaries are tracked.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_ValidatesGraphState_BaseAndBoundariesCorrect()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var initialMaxRight = hc.Graph.MaxRight;
+            var initialMaxUp = hc.Graph.MaxUp;
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(5, 5),
+                new Position_SOM(25, 15),
+                new Position_SOM(45, 35),
+                new Position_SOM(65, 55)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr);
+
+            // Assert: Basic Graph state validation
+            Assert.IsNotNull(hc.Graph, "Graph should be initialized.");
+            Assert.IsNotNull(hc.Graph.Base, "Graph.Base node should exist.");
+            Assert.AreEqual(0, hc.Graph.Base.PixelCordinates.X, "Graph.Base should be at X=0.");
+            Assert.AreEqual(0, hc.Graph.Base.PixelCordinates.Y, "Graph.Base should be at Y=0.");
+
+            // Assert: TotalCount should have increased
+            Assert.Greater(hc.Graph.TotalCount, 0u, "Graph.TotalCount should be greater than 0 after adding nodes.");
+
+            // Assert: MaxRight and MaxUp should reflect the added positions
+            var maxX = activeBits.Max(p => p.X);
+            var maxY = activeBits.Max(p => p.Y);
+
+            Assert.GreaterOrEqual(hc.Graph.MaxRight, (uint)maxX,
+                $"Graph.MaxRight should be at least {maxX} after adding positions.");
+            Assert.GreaterOrEqual(hc.Graph.MaxUp, (uint)maxY,
+                $"Graph.MaxUp should be at least {maxY} after adding positions.");
+
+            // Assert: All added positions are retrievable
+            Assert.AreEqual(4, addedPositions.Count, "Expected 4 positions to be added.");
+            foreach (var pos in addedPositions)
+            {
+                var node = hc.Graph.GetNode(pos);
+                Assert.IsNotNull(node, $"Node at ({pos.X},{pos.Y}) should be retrievable from Graph.");
+            }
+        }
+
+
+        #endregion
 
         private Sensation GenerateNewSensationforTextualObject(int maxBBM, int numPositions = 4)
         {

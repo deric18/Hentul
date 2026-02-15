@@ -1,22 +1,14 @@
 ﻿Current Feature : SPATIAL MAP / GLOBAL POSITIONING SYSTEM
 
 
+Finished StoreNewObjectLocationInGraph() method in Hippocampal Complex
 
+Inprgress : Complete explore() method
+-- Need to complete explore() method in orchestrator.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Next :
+-ExploreSpecificObject()
+-
 
 
 

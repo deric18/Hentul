@@ -148,9 +148,12 @@
 
         public void TrainImage()
         {
-            VisionProcessor.Train();        //Train it 5 times.
+            VisionProcessor.Train();        //Train it 5 times.            
+        }
 
-            VisionProcessor.SendApical(5);   //Reinforce it to solidify the learnings.
+        public void Explore()
+        {
+            
         }
         
 
@@ -176,22 +179,21 @@
             {
                 throw new InvalidOperationException("Could Not Add Object to HC! Sensation already exist in the current Object");
             }
-        }       
+        }
 
         public void DoneWithTraining(string label = "")
         {
             HCAccessor.DoneWithTraining(label);
         }
 
-        public void ChangeNetworkToPredictionMode()
-        {
-            NMode = NetworkMode.PREDICTION;
-            VisionProcessor.SetNetworkModeToPrediction();
-            //HCAccessor.DoneWithTraining();
-            //HCAccessor.SetNetworkModeToPrediction()
-        }
 
-
+        //public void ChangeNetworkToPredictionMode()
+        //{
+        //    NMode = NetworkMode.PREDICTION;
+        //    VisionProcessor.SetNetworkModeToPrediction();
+        //    //HCAccessor.DoneWithTraining();
+        //    //HCAccessor.SetNetworkModeToPrediction()
+        //}
 
         #endregion
 
@@ -580,11 +582,11 @@
             return (color.R < 200 && color.G < 200 && color.B < 200);
         }
 
-        public void ChangeNetworkModeToPrediction()
+        public void ChangeNetworkModeToPrediction(bool isMock = false)
         {
-            NMode = NetworkMode.PREDICTION;            
-            VisionProcessor.SetNetworkModeToPrediction();
-            //HCAccessor.SetNetworkModeToPrediction();
+            NMode = NetworkMode.PREDICTION;
+            VisionProcessor.SetNetworkModeToPrediction(isMock);
+            HCAccessor.SetNetworkModeToPrediction();
         }
 
         public void ChangeNetworkModeToTraining()
@@ -592,8 +594,15 @@
             NMode = NetworkMode.TRAINING;
             HCAccessor.SetNetworkModeToTraining();
         }
-       
 
+        public void SetVisionScope(VisionScope scope, bool isMock = false)
+        {
+            if (!isMock)
+                throw new InvalidOperationException("Cannot Set Vision Scope from Outside the class!");
+
+            visionScope = scope;
+        }
+       
         public void BackUp()
         {
             
@@ -620,7 +629,7 @@
         //{
         //    Position2D motorOutput = null;
         //    List<Position2D> positionToConfirm = new List<Position2D>();
-
+        
         //    if (!NMode.Equals(NetworkMode.PREDICTION))
         //    {
         //        throw new InvalidOperationException("Invalid State Managemnt!");

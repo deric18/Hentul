@@ -5,8 +5,6 @@
 
     public class Sensation_Location
     {
-
-
         #region MEMBER & CONSTRUCTORS
         public string Id { get; set; }
 

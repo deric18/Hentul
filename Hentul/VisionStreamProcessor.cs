@@ -13,6 +13,7 @@
         public int numPixelsProcessedPerBBM;
 
         private static readonly string baseDir = AppContext.BaseDirectory;
+
         public int NumBBMNeededV { get; private set; }
 
         public int BlockSize;        
@@ -108,8 +109,13 @@
                 SomBBM.Fire(apical_SOM, CycleNum++);
         }
 
-        internal void SetNetworkModeToPrediction()
+        internal void SetNetworkModeToPrediction(bool isMock = false)
         {
+            if(isMock)
+            {
+                return;
+            }
+
             SomBBM.ChangeNetworkModeToPrediction();
         }
     }
