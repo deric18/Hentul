@@ -138,24 +138,19 @@
         }
 
 
-        public void SetUpLabel(Bitmap bmp, string objectLabel)
+        public void SetupLabel(Bitmap bmp, string objectLabel)
         {   
             var currentMousePosition = GetCurrentPointerPosition1();
 
-            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope, currentMousePosition);            
+            VisionProcessor.SetupLabel(bmp, objectLabel, visionScope, currentMousePosition);            
         }
 
 
         public void TrainImage()
         {
-            VisionProcessor.Train();        //Train it 5 times.            
-        }
+            VisionProcessor.Train();        //Train it 5 times.
+        }       
 
-        public void Explore()
-        {
-            
-        }
-        
 
         public void AddNewCharacterSensationToHC(char ch)
         {
@@ -180,6 +175,7 @@
                 throw new InvalidOperationException("Could Not Add Object to HC! Sensation already exist in the current Object");
             }
         }
+
 
         public void DoneWithTraining(string label = "")
         {
@@ -572,6 +568,49 @@
             return toRet;
         }
 
+
+        public void RecordPixels(VisionScope scope = VisionScope.NARROW)
+        {
+
+            int w = 0;
+            int h = 0;
+            int currentrange = 3;
+
+            switch (scope)
+            {
+                case VisionScope.NARROW:
+                    {
+                        w = 600;
+                        h = 1200;
+                        break;
+                    }
+                case VisionScope.BROAD:
+                    {
+                        w = 600 * currentrange;
+                        h = 1200 * currentrange;
+                        break;
+                    }
+            };
+
+            var cur = GetCurrentPointerPosition();
+            
+
+            int x = Math.Max(0, cur.X - w);
+            int y = Math.Max(0, cur.Y - h);
+
+            var rect = new Rectangle(x, y, w, h);
+
+            bmp = CaptureScreenRegion(rect);
+        }
+
+        private Bitmap CaptureScreenRegion(Rectangle rect)
+        {
+            var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            using var g = Graphics.FromImage(bmp);
+            g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
+            return bmp;
+        }
+
         public bool CheckifPixelisBlack(int x, int y)
         {
             if (x >= bmp.Width || y >= bmp.Height)
@@ -754,41 +793,6 @@
         //public void LearnNewObject(string v)
         //{
         //    VisionProcessor.LearnNewObject(v);
-        //}
-
-        //public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
-        //{
-        //    int currentRange = regionType switch
-        //    {
-        //        LearningUnitType.V1 => Range,      // 10  -> 40x20
-        //        LearningUnitType.V2 => Range * 5,  // 50  -> 200x100
-        //        LearningUnitType.V3 => Range * 10, // 100 -> 400x200
-        //        _ => Range
-        //    };
-
-        //    var cur = GetCurrentPointerPosition();
-        //    int w = currentRange * 4;
-        //    int h = currentRange * 2;
-
-        //    int x = Math.Max(0, cur.X - currentRange);
-        //    int y = Math.Max(0, cur.Y - currentRange);
-
-        //    var rect = new Rectangle(x, y, w, h);
-
-        //    switch (regionType)
-        //    {
-        //        case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
-        //        case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
-        //        case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
-        //    }
-        //}
-
-        //private Bitmap CaptureScreenRegion(Rectangle rect)
-        //{
-        //    var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-        //    using var g = Graphics.FromImage(bmp);
-        //    g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
-        //    return bmp;
         //}
 
         #endregion

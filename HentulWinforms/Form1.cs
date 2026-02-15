@@ -101,9 +101,9 @@ namespace HentulWinforms
                 var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);
 
                 // Fix: Orchestrator.SetUpLabel signature is (Bitmap bmp, string objectLabel)
-                orchestrator.SetUpLabel(bmp_g, objectBox.Text);
+                orchestrator.SetupLabel(bmp_g, objectBox.Text);
 
-                UpdateEncoderImage(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+                UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
 
                 orchestrator.TrainImage();
 
@@ -113,8 +113,6 @@ namespace HentulWinforms
 
                 CycleLabel.Refresh();
             }
-
-
 
             startClassificationButton.Visible = true;
 
@@ -126,11 +124,86 @@ namespace HentulWinforms
             }
         }
 
+
+        private void Explore_Click(object sender, EventArgs e)
+        {
+            // 1. Validate network is in training mode and vision scope is BROAD
+            if (networkMode != NetworkMode.TRAINING)
+                throw new InvalidOperationException("Network must be in TRAINING mode to explore!");
+
+            if (orchestrator.visionScope != VisionScope.BROAD)
+                throw new InvalidOperationException("VisionScope must be set to BROAD before exploring!");
+
+            if (string.IsNullOrEmpty(objectBox.Text))
+            {
+                label_done.Text = "Enter object label before exploring!";
+                return;
+            }
+                
+            label_done.Text = "Exploring...";
+            label_done.Refresh();
+
+            // 2. Get primary screen dimensions
+            int screenWidth = Screen.PrimaryScreen!.Bounds.Width;
+            int screenHeight = Screen.PrimaryScreen!.Bounds.Height;
+
+            const int chunkWidth = 1200;
+            const int chunkHeight = 600;
+
+            // Calculate number of chunks needed to cover the entire screen
+            int chunksX = (int)Math.Ceiling((double)screenWidth / chunkWidth);
+            int chunksY = (int)Math.Ceiling((double)screenHeight / chunkHeight);
+
+            int chunkCount = 0;
+            int totalChunks = chunksX * chunksY;
+
+            // 3. Iterate over the screen in 1200x600 chunks
+            for (int row = 0; row < chunksY; row++)
+            {
+                for (int col = 0; col < chunksX; col++)
+                {
+                    // Compute the center of the current chunk
+                    int centerX = Math.Min(col * chunkWidth + chunkWidth / 2, screenWidth - 1);
+                    int centerY = Math.Min(row * chunkHeight + chunkHeight / 2, screenHeight - 1);
+
+                    // Move cursor to chunk center
+                    Orchestrator.MoveCursorToSpecificPosition(centerX, centerY);
+
+                    // Capture the current cursor position
+                    Position2D cursorPos = Orchestrator.GetCurrentPointerPosition1();
+
+                    // Record pixels at the current position (BROAD scope uses orchestrator.bmp)
+                    orchestrator.RecordPixels(VisionScope.BROAD);
+
+                    // Convert captured bitmap to edge-detected version
+                    var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
+
+                    // Feed the chunk into the vision pipeline
+                    orchestrator.SetupLabel(edgedBmp, objectBox.Text);
+
+                    // Train on this chunk
+                    orchestrator.VisionProcessor.Train();
+
+                    chunkCount++;
+                    label_done.Text = $"Exploring chunk {chunkCount}/{totalChunks}...";
+                    label_done.Refresh();
+                    Application.DoEvents();
+                }
+            }
+
+            counter++;
+            CycleLabel.Text = counter.ToString();
+            CycleLabel.Refresh();
+
+            label_done.Text = $"Exploration complete! Processed {totalChunks} chunks.";
+            label_done.Refresh();
+        }
+
         /// <summary>
         /// Draw active bits pixels on the forms UI
         /// </summary>
         /// <param name="onBits"></param>
-        private void UpdateEncoderImage(List<Position_SOM> onBits)
+        private void UpdateUI(List<Position_SOM> onBits)
         {
             const int imgWidth = 1200;
             const int imgHeight = 600;
@@ -406,6 +479,6 @@ namespace HentulWinforms
             old?.Dispose();
 
             pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-        }
+        }      
     }
 }
