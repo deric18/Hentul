@@ -99,7 +99,7 @@
         }        
 
         /// In Broad vision mode and experienced a new object and now trying to store a rough representation            
-        public List<Position2D> StoreNewObjectLocationInGraph(SDR_SOM sdr, bool isMock = false)
+        public List<Position2D> StoreNewObjectLocationInGraph(SDR_SOM sdr, int offsetX, int offsetY, bool isMock = false)
         {        
             //Ensure visionScope is Broad and networkMode is Training mode
             //Collect the broad narrow sensation and store it into entity/ nide and sotre in Graph sngleton object.

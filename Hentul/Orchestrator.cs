@@ -84,19 +84,9 @@
             VisionProcessor = new VisionStreamProcessor(logMode, isMock, ShouldInit);
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
-            if (isMock)
-                ImageIndex = mockImageIndex;
-            else
-                ImageIndex = 0;
-
-            Init();
-
             HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
 
-            objectlabellist = new List<string>
-            {
-                "Apple", "Ananas", "Watermelon", "JackFruit", "Grapes"
-            };
+            Init();                        
 
             imageIndex = 1;
             fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
@@ -120,7 +110,12 @@
             Console.WriteLine("Finished Init for this Instance \n");            
             Console.WriteLine("Initing SOM Instance now ... \n");
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
+
+            InitHC();
+
+
             Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
+
         }
 
 
@@ -146,9 +141,14 @@
         }
 
 
-        public void TrainImage()
+        public void TrainImage(int offsetX, int offsetY)
         {
-            VisionProcessor.Train();        //Train it 5 times.
+
+            var locationSDR = VisionProcessor.pEncoder.GetCahced();
+
+            HCAccessor.StoreNewObjectLocationInGraph(locationSDR, offsetX, offsetY);
+
+            VisionProcessor.Train();            //Train it 5 times for apical reconnections to prevent burst avoidance.
         }       
 
 

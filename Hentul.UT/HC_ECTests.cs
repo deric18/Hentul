@@ -51,7 +51,7 @@
 
             var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
 
-            List<Position2D> positions = hc.StoreNewObjectLocationInGraph(sdr);
+            List<Position2D> positions = hc.StoreNewObjectLocationInGraph(sdr, 0, 0);
 
             Assert.IsTrue(positions.Count != 0);
         }
@@ -92,7 +92,7 @@
             var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
 
             // Act
-            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr);
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, 0, 0);
 
             // Assert: we expect 3 positions to be added (one per active bit)
             Assert.IsNotNull(addedPositions);
@@ -123,7 +123,7 @@
             var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
 
             // Act & Assert: should throw because network is in PREDICTION mode
-            var ex = Assert.Throws<InvalidOperationException>(() => hc.StoreNewObjectLocationInGraph(sdr));
+            var ex = Assert.Throws<InvalidOperationException>(() => hc.StoreNewObjectLocationInGraph(sdr, 0, 0));
             Assert.IsNotNull(ex);
             StringAssert.Contains("training", ex.Message.ToLower(), "Exception message should mention training mode requirement.");
         }
@@ -150,7 +150,7 @@
             var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
 
             // Act
-            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr);
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, 0, 0);
 
             // Assert: verify positions were returned
             Assert.AreEqual(3, addedPositions.Count, "Expected 3 positions to be added.");
@@ -187,7 +187,7 @@
             var sdr1 = new SDR_SOM(1200, 600, activeBits1, iType.SPATIAL);
 
             // Act: First addition
-            var addedPositions1 = hc.StoreNewObjectLocationInGraph(sdr1);
+            var addedPositions1 = hc.StoreNewObjectLocationInGraph(sdr1, 0, 0);
 
             // Assert: verify first batch
             Assert.AreEqual(2, addedPositions1.Count, "Expected 2 positions from first call.");
@@ -204,7 +204,7 @@
             var sdr2 = new SDR_SOM(1200, 600, activeBits2, iType.SPATIAL);
 
             // Act: Second addition
-            var addedPositions2 = hc.StoreNewObjectLocationInGraph(sdr2);
+            var addedPositions2 = hc.StoreNewObjectLocationInGraph(sdr2, 0, 0);
 
             // Assert: verify second batch
             Assert.AreEqual(3, addedPositions2.Count, "Expected 3 positions from second call.");
@@ -247,7 +247,7 @@
             var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
 
             // Act
-            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr);
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, 0, 0);
 
             // Assert: Basic Graph state validation
             Assert.IsNotNull(hc.Graph, "Graph should be initialized.");

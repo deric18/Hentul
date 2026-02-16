@@ -41,15 +41,18 @@ namespace Hentul.Encoders
         // actual value depends on the GridX/GridY provided.
         public readonly long Step;
 
+        private SDR_SOM _cached;
+
+
         public PixelEncoder(int X, int Y)
         {
             GridX = X;
             GridY = Y;
             TotalCells = (long)GridX * GridY;
 
-            if (TotalCells < (ImgWidth * ImgHeight))
+            if (TotalCells < (PixelCount))
             {
-                throw new InvalidOperationException("TotalCells in Grid must be greater than or equal to the total bitmap pixel count (ImgWidth * ImgHeight).");
+                throw new InvalidOperationException("TotalCells in Grid must be greater than or equal to the incoming  bitmap pixel count (ImgWidth * ImgHeight).");
             }
 
             Step = TotalCells / PixelCount;
@@ -127,8 +130,23 @@ namespace Hentul.Encoders
                 }
             }
 
-            return new SDR_SOM(GridX, GridY, list, iType.SPATIAL);
+            _cached = new SDR_SOM(GridX, GridY, list, iType.SPATIAL);
+
+            return _cached;
         }
+
+        public SDR_SOM GetCahced()
+        {
+            if(_cached == null)
+            {
+                throw new InvalidOperationException("Cache is Null!! You messed up somewhere! Check your code right!!! Damn!");
+            }
+
+            return _cached;
+        }
+
+
+        public void ClearCache() => _cached = null;
 
         private bool CheckIfColorIsWhite(Color color)
            => color.R > 240 && color.G > 240 && color.B > 240;

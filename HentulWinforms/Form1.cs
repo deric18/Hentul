@@ -76,52 +76,7 @@ namespace HentulWinforms
         }
 
         private void StartButton_Click(object sender, EventArgs e)
-        {
-            label_done.Text = "Processing";
-            label_done.Refresh();
-
-            if (string.IsNullOrEmpty(objectBox.Text))
-            {
-                label_done.Text = "Enter object label before you train!!";
-                return;
-            }
-
-            if (objectList.Contains(objectBox.Text))
-            {
-                label_done.Text = "Object Already Trained!!";
-                return;
-            }
-
-            objectList.Add(objectBox.Text);
-
-            if (networkMode.Equals(NetworkMode.TRAINING))
-            {
-
-                // Process visual data for all regions simultaneously
-                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);
-
-                // Fix: Orchestrator.SetUpLabel signature is (Bitmap bmp, string objectLabel)
-                orchestrator.SetupLabel(bmp_g, objectBox.Text);
-
-                UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
-
-                orchestrator.TrainImage();
-
-                // WORK IN PROGRESS
-
-                CycleLabel.Text = counter.ToString();
-
-                CycleLabel.Refresh();
-            }
-
-            startClassificationButton.Visible = true;
-
-            if (networkMode == NetworkMode.TRAINING)
-            {
-                StartButton.Text = "Start Another Image";
-                StartButton.Refresh();
-                label_done.Text = "Completed!"; label_done.Refresh();
-            }
+        {            
         }
 
 
@@ -147,8 +102,8 @@ namespace HentulWinforms
             int screenWidth = Screen.PrimaryScreen!.Bounds.Width;
             int screenHeight = Screen.PrimaryScreen!.Bounds.Height;
 
-            const int chunkWidth = 1200;
-            const int chunkHeight = 600;
+            const int chunkWidth = 600;
+            const int chunkHeight = 1200;
 
             // Calculate number of chunks needed to cover the entire screen
             int chunksX = (int)Math.Ceiling((double)screenWidth / chunkWidth);
@@ -182,7 +137,7 @@ namespace HentulWinforms
                     orchestrator.SetupLabel(edgedBmp, objectBox.Text);
 
                     // Train on this chunk
-                    orchestrator.VisionProcessor.Train();
+                    orchestrator.TrainImage(row, col);
 
                     chunkCount++;
                     label_done.Text = $"Exploring chunk {chunkCount}/{totalChunks}...";
@@ -454,6 +409,55 @@ namespace HentulWinforms
             //    old?.Dispose();
             //}
         }
+
+        /*
+         * StartButton Legacy logic 
+         * label_done.Text = "Processing";
+            label_done.Refresh();
+
+            if (string.IsNullOrEmpty(objectBox.Text))
+            {
+                label_done.Text = "Enter object label before you train!!";
+                return;
+            }
+
+            if (objectList.Contains(objectBox.Text))
+            {
+                label_done.Text = "Object Already Trained!!";
+                return;
+            }
+
+            objectList.Add(objectBox.Text);
+
+            if (networkMode.Equals(NetworkMode.TRAINING))
+            {
+
+                // Process visual data for all regions simultaneously
+                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);
+
+                // Fix: Orchestrator.SetUpLabel signature is (Bitmap bmp, string objectLabel)
+                orchestrator.SetupLabel(bmp_g, objectBox.Text);
+
+                UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+
+                orchestrator.TrainImage();
+
+                // WORK IN PROGRESS
+
+                CycleLabel.Text = counter.ToString();
+
+                CycleLabel.Refresh();
+            }
+
+            startClassificationButton.Visible = true;
+
+            if (networkMode == NetworkMode.TRAINING)
+            {
+                StartButton.Text = "Start Another Image";
+                StartButton.Refresh();
+                label_done.Text = "Completed!"; label_done.Refresh();
+            }
+         */
 
         private void CurrentImage_Click(object sender, EventArgs e)
         {
