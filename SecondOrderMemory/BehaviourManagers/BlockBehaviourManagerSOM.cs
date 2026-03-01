@@ -296,7 +296,7 @@
 
         public bool SetUpNewObjectLabel(string Label)
         {
-            if (Label == null | Label == string.Empty)
+            if (Label == null || Label == string.Empty)
             {
                 throw new InvalidDataException("Label cannot be empty!");
             }

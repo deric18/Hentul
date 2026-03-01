@@ -85,7 +85,7 @@
             }
 
             // Need to include logic for what object is currently being sensed and
-            return CurrentObject.AddNewSenei(sensei);            
+            return CurrentObject.AddNewSenei(sensei);
         }
 
         public bool AddNewSensationToObject(Sensation sensation)
@@ -109,7 +109,8 @@
                 throw new InvalidOperationException("Network should be in training mode while recognising environment");
             }
 
-            if(Orchestrator.GetInstance().visionScope != VisionScope.BROAD)
+            //Todo: Only valid till LEarnSpecificObject() method is NOT complete!
+            if (Orchestrator.GetInstance().visionScope != VisionScope.BROAD)     
             {
                 throw new InvalidOperationException("Vision Scope should always be BROAD to process locations!");
             }
@@ -130,7 +131,7 @@
                 try
                 {
                     // Convert Position_SOM to Position2D using X and Y coordinates
-                    var pos = new Position2D(posSom.X, posSom.Y);
+                    var pos = new Position2D(posSom.X + offsetX, posSom.Y + offsetY);
                     
                     if (pos == null)
                         continue;

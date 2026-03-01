@@ -10,6 +10,7 @@
     public class Orchestrator
     {
 
+
         public struct POINT
         {
             public int X;
@@ -35,9 +36,7 @@
 
         #region CONSTRUCTOR
 
-        #region Used Variables                
-
-        private bool LogMode { get; set; }
+        #region Used Variables                        
 
         public bool IsMock { get; private set; }
 
@@ -51,11 +50,11 @@
 
         public string logFileName;
 
-        public LogMode logMode;         
+        public LogMode logMode;
 
-        private List<string> objectlabellist { get; set; }
+        private const string objectString = "Objejct";
 
-        private int imageIndex { get; set; }
+        private int objectIndex { get; set; }
 
         private string fileName;
 
@@ -69,26 +68,25 @@
 
         public ulong CycleNum { get; private set; }                        
 
-        public VisionScope visionScope { get; private set; }
+        public VisionScope visionScope { get; set; }
 
         #endregion
 
         private static readonly string baseDir = AppContext.BaseDirectory;
         
         private Orchestrator(bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
-        {            
-            LogMode = false;            
+        {                        
             NMode = nMode;
             logMode = Common.LogMode.BurstOnly;
             
             VisionProcessor = new VisionStreamProcessor(logMode, isMock, ShouldInit);
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
-            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
+            HCAccessor = new HippocampalComplex("Object0", isMock, nMode);            
 
             Init();                        
 
-            imageIndex = 1;
+            objectIndex = 1;
             fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
             logFileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
             visionScope = VisionScope.NARROW;
@@ -118,7 +116,6 @@
 
         }
 
-
         #endregion
 
         #region Public API
@@ -137,9 +134,19 @@
         {   
             var currentMousePosition = GetCurrentPointerPosition1();
 
+            if (NMode == NetworkMode.EXPLORE && string.IsNullOrEmpty(objectLabel))
+            {
+                objectLabel = GetNextObjectLabel();
+            }
+
             VisionProcessor.SetupLabel(bmp, objectLabel, visionScope, currentMousePosition);            
         }
 
+        private string GetNextObjectLabel()
+        {
+            objectIndex++;
+            return objectString + objectIndex.ToString();
+        }
 
         public void TrainImage(int offsetX, int offsetY)
         {
@@ -581,13 +588,13 @@
                 case VisionScope.NARROW:
                     {
                         w = 600;
-                        h = 1200;
+                        h = 600;
                         break;
                     }
                 case VisionScope.BROAD:
                     {
                         w = 600 * currentrange;
-                        h = 1200 * currentrange;
+                        h = 600 * currentrange;
                         break;
                     }
             };

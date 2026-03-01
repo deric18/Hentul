@@ -1,10 +1,12 @@
 ﻿Current Feature : SPATIAL MAP / GLOBAL POSITIONING SYSTEM
 
 
+Completed:
 Finished StoreNewObjectLocationInGraph() method in Hippocampal Complex
+Complete explore() method
 
-Inprgress : Complete explore() method
--- Need to complete explore() method in orchestrator.
+
+Inprgress :  Fix the SetupObjectLabel() bug , where you dont have setup lable while exploring but get an approximate object count rather!
 
 Next :
 -ExploreSpecificObject()
@@ -29,7 +31,8 @@ FEATURE ------------------------------------------------------------------------
 
 -SEQUENCE MEMORY...............................................................................DONE	
 -NARROW VS BROAD VISION SCOPE..................................................................DONE
--SPATIAL MAP / GLOBAL POSITIONING SYSTEM.......................................................IN PROGRESS
+-SPATIAL MAP / GLOBAL POSITIONING SYSTEM.......................................................DONE
+-EXPLORE INFRA PIEPELINE.......................................................................IN PROGRESS
 -2D SINGLE OCULAR OBJECT RECOGNITION
 -MULTI OCULAR OBJECT RECOGNITION
 -MULTI OCULAR MULTI OBJECT RECOGNITION

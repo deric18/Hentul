@@ -279,6 +279,342 @@
 
         #endregion
 
+        #region Offset Parameter Tests
+
+        /// <summary>
+        /// Test: verifies that positive offsetX and offsetY are correctly added to each position's coordinates.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithPositiveOffsets_AddsOffsetsToCoordinates()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 20),
+                new Position_SOM(30, 40)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = 100;
+            int offsetY = 200;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert: positions should have offsets applied
+            Assert.AreEqual(2, addedPositions.Count, "Expected 2 positions to be added.");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 110 && p.Y == 220), 
+                "Position (10,20) + offset (100,200) should result in (110,220).");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 130 && p.Y == 240), 
+                "Position (30,40) + offset (100,200) should result in (130,240).");
+
+            // Verify nodes are retrievable at the offset positions
+            foreach (var pos in addedPositions)
+            {
+                var node = hc.Graph.GetNode(pos);
+                Assert.IsNotNull(node, $"Node at ({pos.X},{pos.Y}) should exist in Graph.");
+            }
+        }
+
+        /// <summary>
+        /// Test: verifies that zero offsets leave coordinates unchanged.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithZeroOffsets_CoordinatesUnchanged()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(15, 25),
+                new Position_SOM(35, 45)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, 0, 0);
+
+            // Assert: positions should be unchanged
+            Assert.AreEqual(2, addedPositions.Count, "Expected 2 positions to be added.");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 15 && p.Y == 25), 
+                "Position (15,25) should remain unchanged with zero offset.");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 35 && p.Y == 45), 
+                "Position (35,45) should remain unchanged with zero offset.");
+        }
+
+        /// <summary>
+        /// Test: verifies that large offsets correctly shift positions to high coordinate values.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithLargeOffsets_PositionsShiftedCorrectly()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(5, 10),
+                new Position_SOM(15, 20)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = 1000;
+            int offsetY = 2000;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert
+            Assert.AreEqual(2, addedPositions.Count, "Expected 2 positions to be added.");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 1005 && p.Y == 2010), 
+                "Position (5,10) + offset (1000,2000) should result in (1005,2010).");
+            Assert.IsTrue(addedPositions.Any(p => p.X == 1015 && p.Y == 2020), 
+                "Position (15,20) + offset (1000,2000) should result in (1015,2020).");
+        }
+
+        /// <summary>
+        /// Test: verifies that only offsetX is applied when offsetY is zero.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithOnlyOffsetX_OnlyXCoordinateShifted()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 20)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = 500;
+            int offsetY = 0;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert
+            Assert.AreEqual(1, addedPositions.Count, "Expected 1 position to be added.");
+            Assert.AreEqual(510, addedPositions[0].X, "X should be shifted by offsetX.");
+            Assert.AreEqual(20, addedPositions[0].Y, "Y should remain unchanged.");
+        }
+
+        /// <summary>
+        /// Test: verifies that only offsetY is applied when offsetX is zero.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithOnlyOffsetY_OnlyYCoordinateShifted()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 20)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = 0;
+            int offsetY = 300;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert
+            Assert.AreEqual(1, addedPositions.Count, "Expected 1 position to be added.");
+            Assert.AreEqual(10, addedPositions[0].X, "X should remain unchanged.");
+            Assert.AreEqual(320, addedPositions[0].Y, "Y should be shifted by offsetY.");
+        }
+
+        /// <summary>
+        /// Test: verifies that negative offsets result in positions that may not be added 
+        /// if they become invalid (e.g., coordinates <= 0).
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithNegativeOffsetsResultingInInvalidPositions_PositionsNotAdded()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            // Position (5, 10) with offset (-10, -20) would result in (-5, -10) which is invalid
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(5, 10)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = -10;
+            int offsetY = -20;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert: position should not be added since resulting coordinates are negative
+            Assert.AreEqual(0, addedPositions.Count, 
+                "Position resulting in negative coordinates should not be added.");
+        }
+
+        /// <summary>
+        /// Test: verifies that negative offsets that still result in valid (positive) coordinates work correctly.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithNegativeOffsetsResultingInValidPositions_PositionsAdded()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            // Position (100, 200) with offset (-50, -100) results in (50, 100) which is valid
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(100, 200)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = -50;
+            int offsetY = -100;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert
+            Assert.AreEqual(1, addedPositions.Count, "Expected 1 position to be added.");
+            Assert.AreEqual(50, addedPositions[0].X, "X should be 100 - 50 = 50.");
+            Assert.AreEqual(100, addedPositions[0].Y, "Y should be 200 - 100 = 100.");
+        }
+
+        /// <summary>
+        /// Test: verifies that mixed valid and invalid positions (after offset) correctly filters results.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_MixedValidAndInvalidAfterOffset_OnlyValidPositionsAdded()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(5, 5),     // After offset (-10, -10): (-5, -5) -> INVALID
+                new Position_SOM(50, 50),   // After offset (-10, -10): (40, 40) -> VALID
+                new Position_SOM(10, 10)    // After offset (-10, -10): (0, 0) -> may be invalid depending on Graph
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = -10;
+            int offsetY = -10;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert: only valid positions should be added
+            Assert.IsTrue(addedPositions.Any(p => p.X == 40 && p.Y == 40), 
+                "Position (50,50) - offset (10,10) = (40,40) should be added.");
+            
+            // Verify invalid position was not added
+            Assert.IsFalse(addedPositions.Any(p => p.X < 0 || p.Y < 0), 
+                "No position with negative coordinates should be added.");
+        }
+
+        /// <summary>
+        /// Test: verifies Graph boundaries (MaxRight, MaxUp) are updated correctly based on offset positions.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_WithOffsets_GraphBoundariesUpdatedCorrectly()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            var activeBits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 20),
+                new Position_SOM(30, 40)
+            };
+
+            var sdr = new SDR_SOM(1200, 600, activeBits, iType.SPATIAL);
+            int offsetX = 500;
+            int offsetY = 600;
+
+            // Act
+            var addedPositions = hc.StoreNewObjectLocationInGraph(sdr, offsetX, offsetY);
+
+            // Assert: Graph boundaries should reflect offset positions
+            // Expected max positions: (510, 620) and (530, 640)
+            Assert.GreaterOrEqual(hc.Graph.MaxRight, 530u, 
+                "Graph.MaxRight should be at least 530 (30 + 500).");
+            Assert.GreaterOrEqual(hc.Graph.MaxUp, 640u, 
+                "Graph.MaxUp should be at least 640 (40 + 600).");
+        }
+
+        /// <summary>
+        /// Test: verifies multiple chunks with different offsets accumulate correctly in Graph.
+        /// Simulates screen exploration where each chunk has different offsets.
+        /// </summary>
+        [Test]
+        public void StoreNewObjectLocationInGraph_MultipleChunksWithDifferentOffsets_AllPositionsAccumulated()
+        {
+            // Arrange
+            orchestrator.ChangeNetworkModeToTraining();
+            orchestrator.SetVisionScope(VisionScope.BROAD, true);
+
+            // First chunk at offset (0, 0)
+            var chunk1Bits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 10),
+                new Position_SOM(20, 20)
+            };
+            var sdr1 = new SDR_SOM(1200, 600, chunk1Bits, iType.SPATIAL);
+
+            // Second chunk at offset (600, 0) - simulating next horizontal chunk
+            var chunk2Bits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 10),
+                new Position_SOM(20, 20)
+            };
+            var sdr2 = new SDR_SOM(1200, 600, chunk2Bits, iType.SPATIAL);
+
+            // Third chunk at offset (0, 1200) - simulating next vertical chunk
+            var chunk3Bits = new List<Position_SOM>
+            {
+                new Position_SOM(10, 10)
+            };
+            var sdr3 = new SDR_SOM(1200, 600, chunk3Bits, iType.SPATIAL);
+
+            // Act
+            var positions1 = hc.StoreNewObjectLocationInGraph(sdr1, 0, 0);
+            var positions2 = hc.StoreNewObjectLocationInGraph(sdr2, 600, 0);
+            var positions3 = hc.StoreNewObjectLocationInGraph(sdr3, 0, 1200);
+
+            // Assert
+            Assert.AreEqual(2, positions1.Count, "First chunk should add 2 positions.");
+            Assert.AreEqual(2, positions2.Count, "Second chunk should add 2 positions.");
+            Assert.AreEqual(1, positions3.Count, "Third chunk should add 1 position.");
+
+            // Verify positions from chunk 1 (offset 0, 0)
+            Assert.IsTrue(positions1.Any(p => p.X == 10 && p.Y == 10));
+            Assert.IsTrue(positions1.Any(p => p.X == 20 && p.Y == 20));
+
+            // Verify positions from chunk 2 (offset 600, 0)
+            Assert.IsTrue(positions2.Any(p => p.X == 610 && p.Y == 10));
+            Assert.IsTrue(positions2.Any(p => p.X == 620 && p.Y == 20));
+
+            // Verify positions from chunk 3 (offset 0, 1200)
+            Assert.IsTrue(positions3.Any(p => p.X == 10 && p.Y == 1210));
+        }
+
+        #endregion
+
         private Sensation GenerateNewSensationforTextualObject(int maxBBM, int numPositions = 4)
         {
             Random rand = new Random();            

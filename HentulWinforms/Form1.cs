@@ -83,18 +83,18 @@ namespace HentulWinforms
         private void Explore_Click(object sender, EventArgs e)
         {
             // 1. Validate network is in training mode and vision scope is BROAD
-            if (networkMode != NetworkMode.TRAINING)
-                throw new InvalidOperationException("Network must be in TRAINING mode to explore!");
+            if (networkMode != NetworkMode.EXPLORE)
+                networkMode = NetworkMode.EXPLORE;
 
             if (orchestrator.visionScope != VisionScope.BROAD)
-                throw new InvalidOperationException("VisionScope must be set to BROAD before exploring!");
+                orchestrator.visionScope = VisionScope.BROAD;
 
             if (string.IsNullOrEmpty(objectBox.Text))
             {
                 label_done.Text = "Enter object label before exploring!";
                 return;
             }
-                
+            
             label_done.Text = "Exploring...";
             label_done.Refresh();
 
@@ -135,6 +135,8 @@ namespace HentulWinforms
 
                     // Feed the chunk into the vision pipeline
                     orchestrator.SetupLabel(edgedBmp, objectBox.Text);
+
+                    UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
 
                     // Train on this chunk
                     orchestrator.TrainImage(row, col);
