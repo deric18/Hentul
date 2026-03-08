@@ -1,7 +1,7 @@
 ﻿namespace SecondOrderMemory.Models
 {    
     using System.Collections.Generic;
-    using System.Diagnostics;
+    using System.IO;
     using System.Linq;
     using Common;
 
@@ -108,19 +108,16 @@
 
         public static bool CheckNeuronListHasThisNeuron(List<Neuron> neuronList, Neuron neuron)
         {
-            bool found = false;
+            bool found = neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
 
-            var sw = Stopwatch.StartNew();
-
-            found = neuronList.Any(x => x.NeuronID.X == neuron.NeuronID.X && x.NeuronID.Y == neuron.NeuronID.Y && x.NeuronID.Z == neuron.NeuronID.Z);
-
-            sw.Stop();
-
-            var timestamp = DateTime.UtcNow.ToString("o");
-            var listCount = neuronList?.Count ?? 0;
-            var nidStr = neuron?.NeuronID.ToString() ?? "null";
-            var msg = $"{timestamp} :: BBMUtils.CheckNeuronListHasThisNeuron :: elapsed_ms={sw.Elapsed.TotalMilliseconds:F3} :: result={found} :: listCount={listCount} :: neuron={nidStr}";
-            File.AppendAllText(BlockBehaviourManagerSOM.LogFileName, msg + Environment.NewLine);
+            // Only write to disk when there is actual activity — avoids hot-path I/O on empty lists.
+            int listCount = neuronList?.Count ?? 0;
+            if (found || listCount > 0)
+            {
+                var nidStr = neuron?.NeuronID.ToString() ?? "null";
+                var msg = $"{DateTime.UtcNow:o} :: BBMUtils.CheckNeuronListHasThisNeuron :: result={found} :: listCount={listCount} :: neuron={nidStr}";
+                File.AppendAllText(BlockBehaviourManagerSOM.LogFileName, msg + Environment.NewLine);
+            }
 
             return found;
         }

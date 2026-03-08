@@ -1,8 +1,10 @@
 ﻿namespace SecondOrderMemory.Models
 {
     using System;
-    using System.ComponentModel;    
+    using System.ComponentModel;
+    using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using System.Xml;
     using Common;
 
@@ -334,20 +336,11 @@
         {
             BBMID = bbmID;
 
-            for (int i = 0; i < X; i++)
+            Parallel.For(0, X, i =>
             {
                 for (int j = 0; j < Y; j++)
-                {
-                    try
-                    {
-                        _instance.Columns[i, j] = new Column(i, j, Z, BBMID);
-                    }
-                    catch (Exception ex)
-                    {
-                        int breakpoint = 0;
-                    }
-                }
-            }
+                    _instance.Columns[i, j] = new Column(i, j, Z, BBMID);
+            });
 
             ReadDendriticSchema();
 
@@ -2690,24 +2683,22 @@
             // T : (x,y, z) => (0,y,x)
             // Dont make any changes without understanding this Co mpletely !! Burned hands 
 
-            for (int i = 0; i < Y; i++)
+            Parallel.For(0, Y, i =>
             {
                 for (int j = 0; j < Z; j++)
                 {
                     if (_instance.TemporalLineArray[i, j] == null)
                         _instance.TemporalLineArray[i, j] = new Neuron(new Position_SOM(0, i, j, 'T'), BBMID, NeuronType.TEMPORAL);
 
-
                     for (int k = 0; k < X; k++)
                     {
-
                         if (ConnectTwoNeurons(_instance.TemporalLineArray[i, j], Columns[k, i].Neurons[j], ConnectionType.TEMPRORAL, true) == ConnectionRemovalReturnType.HARDFALSE)
                         {
                             throw new InvalidOperationException("Unable to connect two neurons!");
                         }
                     }
                 }
-            }
+            });
         }
 
         public void AddNeuronListToNeuronsFiringThisCycleList(List<Neuron> neuronToAddList)
@@ -2736,7 +2727,7 @@
 
         private void GenerateApicalLines()
         {
-            for (int i = 0; i < X; i++)
+            Parallel.For(0, X, i =>
             {
                 for (int j = 0; j < Y; j++)
                 {
@@ -2750,7 +2741,7 @@
                         }
                     }
                 }
-            }
+            });
         }
 
         private List<Neuron> TransformTemporalCoordinatesToSpatialCoordinates(List<Position_SOM> activeBits)
@@ -2795,8 +2786,6 @@
 
         private void ReadDendriticSchema()
         {
-            #region REAL Code                       
-
             if (X == 1200 && Y == 600 && Z == 5)
             {
                 schemToLoad = SchemaType.SOMSCHEMA_VISION;
@@ -2806,164 +2795,31 @@
                 schemToLoad = SchemaType.SOMSCHEMA_TEXT;
             }
 
-            XmlDocument document = new XmlDocument();
-
-            string dendriteDocumentPath = null;
-
             if (schemToLoad == SchemaType.INVALID)
-            {
                 throw new InvalidOperationException("Schema Type Cannot be Invalid");
-            }
 
+            string dendriteDocumentPath;
             if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
-            {
-                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\DendriticSchemaSOM.xml")); 
-            }
-            else if (schemToLoad == SchemaType.SOMSCHEMA_TEXT)
-            {
-                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\Text\DendriticSchemaSOM.xml")); 
-            }
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\DendriticSchemaSOM.xml"));
+            else
+                dendriteDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\Text\DendriticSchemaSOM.xml"));
 
-            if (File.Exists(dendriteDocumentPath) == false)
-            {
+            if (!File.Exists(dendriteDocumentPath))
                 throw new FileNotFoundException(dendriteDocumentPath);
-            }
 
-            document.Load(dendriteDocumentPath);
+            string binPath = Path.ChangeExtension(dendriteDocumentPath, ".bin");
+            SchemaCache.EnsureDendriticBinary(dendriteDocumentPath, binPath);
 
-            using (XmlNodeList columns = document.GetElementsByTagName("Column"))
+            SchemaCache.LoadDendriticBinary(binPath, (a, b, c, e, f, g) =>
             {
-
-                var numColumns = columns.Count;
-
-                for (int i = 0; i < numColumns; i++)
-                {
-                    //Column
-
-                    axonCounter = 0;
-
-                    var item = columns[i];
-
-                    int x = Convert.ToInt32(item.Attributes[0]?.Value);
-                    var y = Convert.ToInt32(item.Attributes[1]?.Value);
-
-                    if (x == 0 && y == 0)
-                    {
-                        int breakpoint = 0;
-                    }
-
-                    try
-                    {
-                        Columns[x, y].Init++;
-                    }
-                    catch (Exception e)
-                    {
-                        throw;
-                        int breakpoint = 1;
-                    }
-
-                    foreach (XmlNode node in item.ChildNodes)
-                    {   //Neuron                   
-
-                        if (node?.Attributes == null)
-                        {
-                            continue;
-                        }
-
-                        if (node.Attributes.Count != 3)
-                        {
-                            throw new InvalidOperationException("Invalid Neuron Id Supplied in Schema");
-                        }
-
-                        int a = Convert.ToInt32(node.Attributes[0]?.Value);
-                        int b = Convert.ToInt32(node.Attributes[1]?.Value);
-                        int c = Convert.ToInt32(node.Attributes[2]?.Value);
-
-                        //Console.WriteLine("Dendritic A :" + a.ToString() + " B: " + b.ToString() + " C :" + c.ToString());
-
-                        var proximalNodes = node.ChildNodes;
-
-                        //var neuronNodes = proximalNodes.Item(0)
-                        //    .SelectNodes("Neuron");
-
-                        if (!(proximalNodes.Count == 4 || proximalNodes.Count == 2))
-                        {
-                            throw new InvalidOperationException("Invalid Number of Neuronal Connections defined for Neuron" + a.ToString() + b.ToString() + c.ToString());
-                        }
-
-                        //4 -> 2 Proximal Dendronal Connections
-                        int numDendriticConnectionCount = 0;
-
-                        foreach (XmlNode neuron in proximalNodes)
-                        {
-                            //ProximalConnection
-                            if (neuron?.Attributes?.Count != 3)
-                            {
-                                throw new InvalidOperationException("Number of Attributes in Neuronal Node is not 3");
-                            }
-
-                            int e = Convert.ToInt32(neuron.Attributes[0].Value);
-                            int f = Convert.ToInt32(neuron.Attributes[1].Value);
-                            int g = Convert.ToInt32(neuron.Attributes[2].Value);
-
-                            //Money Shot!!!
-                            if (InitDendriticConnectionForConnector(a, b, c, e, f, g) == false)
-                            {
-                                throw new InvalidDataException("InitDendriticConnectionForConnector :: Duplicate Dendritic Coo0rdiantes");
-                            }
-
-                            numDendriticConnectionCount++;
-
-                            if (numDendriticConnectionCount == 2)
-                                break;
-                        }
-
-                        string key = a.ToString() + "-" + b.ToString() + "-" + c.ToString();
-
-                        axonCounter++;
-                    }
-                }
-            }
-
-            #endregion
+                if (InitDendriticConnectionForConnector(a, b, c, e, f, g) == false)
+                    throw new InvalidDataException("InitDendriticConnectionForConnector :: Duplicate Dendritic Coordinates");
+            });
         }
 
         public void ReadAxonalSchema()
         {
-            #region Cache : Cache Code
-            //if (AxonalCache.Count != 0)
-            //{
-            //    foreach (var item in AxonalCache)
-            //    {
-            //        var parts = item.Key.Split('-');
-
-            //        if (parts.Length != 3 && parts[0] != null && parts[1] != null && parts[2] != null)
-            //        {
-            //            throw new Exception();
-            //        }
-            //        int i = Convert.ToInt32(parts[0]);
-            //        int j = Convert.ToInt32(parts[1]);
-            //        int k = Convert.ToInt32(parts[2]);
-
-            //        int offset = 3;
-
-            //        //4 Axonaal Connections
-            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0], item.Value[1], item.Value[2]);
-            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 1], item.Value[1 + offset * 1], item.Value[2 + offset * 1]);
-            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 2], item.Value[1 + offset * 2], item.Value[2 + offset * 2]);
-            //        InitAxonalConnectionForConnector(i, j, k, item.Value[0 + offset * 3], item.Value[1 + offset * 3], item.Value[2 + offset * 3]);
-
-            //        //Console.WriteLine("SOM :: ReadAxonalSchema : Loading connection From Cache : " + i + j + k);
-
-            //    }
-
-            //    return;
-            //}
-
-            #endregion
-
             schemToLoad = SchemaType.INVALID;
-
 
             if (X == 1200 && Y == 600 && Z == 5)
             {
@@ -2974,98 +2830,33 @@
                 schemToLoad = SchemaType.SOMSCHEMA_TEXT;
             }
 
-            XmlDocument document = new XmlDocument();
-
-            string axonalDocumentPath = null;
-
             if (schemToLoad == SchemaType.INVALID)
-            {
                 throw new InvalidOperationException("Schema Type Cannot be Invalid");
-            }
 
-
+            string axonalDocumentPath;
             if (schemToLoad == SchemaType.SOMSCHEMA_VISION)
-            {
-                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\AxonalSchema-SOM.xml")); 
-            }
-            else if (schemToLoad == SchemaType.SOMSCHEMA_TEXT)
-            {
+                axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\AxonalSchema-SOM.xml"));
+            else
                 axonalDocumentPath = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\SecondOrderMemory\Schema Docs\1K Club\Text\AxonalSchemaSOM.xml"));
-            }
 
             if (!File.Exists(axonalDocumentPath))
-            {
                 throw new FileNotFoundException(axonalDocumentPath);
-            }
 
-            document.Load(axonalDocumentPath);
+            string binPath = Path.ChangeExtension(axonalDocumentPath, ".bin");
+            SchemaCache.EnsureAxonalBinary(axonalDocumentPath, binPath);
 
-            XmlNodeList columns = document.GetElementsByTagName("AxonalConnection");
-
-            for (int icount = 0; icount < columns.Count; icount++)
-            {//axonalConnection
-
-                XmlNode connection = columns[icount];
-
-                if (connection.Attributes.Count != 3)
-                {
-                    throw new InvalidDataException();
-                }
-
-                int x = Convert.ToInt32(connection.Attributes[0].Value);
-                int y = Convert.ToInt32(connection.Attributes[1].Value);
-                int z = Convert.ToInt32(connection.Attributes[2].Value);
-
-                //Console.WriteLine("Axonal X :" + x.ToString() + " Y: " + y.ToString() + " Z :" + z.ToString());
-
-                XmlNodeList axonList = connection.ChildNodes;
-
-                //4 -> 2 Proximal Dendronal Connections
-                int numAxonalConnectionCount = 0;
-
-                foreach (XmlNode axon in axonList)
-                {
-                    if (axon.Attributes.Count != 3)
-                    {
-                        throw new InvalidDataException();
-                    }
-
-                    try
-                    {
-                        int i = Convert.ToInt32(axon.Attributes[0].Value);
-                        int j = Convert.ToInt32(axon.Attributes[1].Value);
-                        int k = Convert.ToInt32(axon.Attributes[2].Value);
-
-                        if (x == 5 && y == 7 && z == 5)
-                        {
-                            int breakpoint = 1;
-                        }
-
-                        InitAxonalConnectionForConnector(x, y, z, i, j, k);
-
-                        numAxonalConnectionCount++;
-
-                        if (numAxonalConnectionCount == 2)
-                            break;
-
-                        //Console.WriteLine("New Connection From Schema Doc", x, y, z, i, j, k);
-                    }
-                    catch (Exception e)
-                    {
-                        int bp = 1;
-                        throw new InvalidDataException("ReadAXonalSchema : Invalid Data , Tryign to add new Connections to cache");
-                    }
-
-                    axonCounter++;
-                }
-            }
+            SchemaCache.LoadAxonalBinary(binPath, (x, y, z, i, j, k) =>
+            {
+                InitAxonalConnectionForConnector(x, y, z, i, j, k);
+            });
         }
 
+        private static readonly object _logLock = new object();
         private void WriteLogsToFile(string logline)
         {
-            File.AppendAllText(LogFileName, logline + "\n");
-
-        }        
+            lock (_logLock)
+                File.AppendAllText(LogFileName, logline + "\n");
+        }
 
         private bool AddNewLabelToSupportedLabels(string label)
         {
