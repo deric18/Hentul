@@ -76,8 +76,8 @@ namespace Hentul.Encoders
             }
             else if (vScope == VisionScope.BROAD)
             {
-                var expectedW = ImgWidth * 3;
-                var expectedH = ImgHeight * 3;
+                var expectedW = ImgWidth * 6;   // 3600
+                var expectedH = ImgHeight * 3;  // 1800
                 if (bmp.Width != expectedW || bmp.Height != expectedH)
                     throw new InvalidOperationException($"For BROAD vision, bitmap must be {expectedW}x{expectedH}.");
             }
@@ -96,33 +96,36 @@ namespace Hentul.Encoders
 
             var list = new List<Position_SOM>(PixelCount);
 
-            // sampling scale and step: broad = sparser sampling (scale 3, step 3), narrow = dense (scale 1, step 1)
-            int scale = (vScope == VisionScope.BROAD) ? 3 : 1;
-            int step = (vScope == VisionScope.BROAD) ? 3 : 1;
+            // For BROAD: scaleX=6 maps 3600→600, scaleY=3 maps 1800→600
+            // For NARROW/OBJECT: scale=1 (no downsampling)
+            int scaleX = (vScope == VisionScope.BROAD) ? 6 : 1;
+            int scaleY = (vScope == VisionScope.BROAD) ? 3 : 1;
+            int stepX  = scaleX;
+            int stepY  = scaleY;
 
-            // Determine square half-size (offset) centered on cursorPosition.
-            // Use a base half-size derived from the base image; for BROAD multiply by 3.
-            int baseHalf = Math.Min(ImgWidth, ImgHeight) / 2;      // base half-size (300 for 1200x600 -> min=600 -> 300)
-            int offset = (vScope == VisionScope.BROAD) ? baseHalf * 3 : baseHalf;
+            // Half-window offsets centered on cursorPosition
+            // BROAD: offsetX=1800 (half of 3600), offsetY=900 (half of 1800)
+            int offsetX = (vScope == VisionScope.BROAD) ? (ImgWidth / 2) * 6 : ImgWidth / 2;
+            int offsetY = (vScope == VisionScope.BROAD) ? (ImgHeight / 2) * 3 : ImgHeight / 2;
 
-            int width = bmp.Width;
+            int width  = bmp.Width;
             int height = bmp.Height;
 
             // Square bounds (clamped to image)
-            int startY = Math.Max(0, cursorPosition.Y - offset);
-            int endY   = Math.Min(height - 1, cursorPosition.Y + offset);
-            int startX = Math.Max(0, cursorPosition.X - offset);
-            int endX   = Math.Min(width - 1, cursorPosition.X + offset);
+            int startY = Math.Max(0, cursorPosition.Y - offsetY);
+            int endY   = Math.Min(height - 1, cursorPosition.Y + offsetY);
+            int startX = Math.Max(0, cursorPosition.X - offsetX);
+            int endX   = Math.Min(width - 1, cursorPosition.X + offsetX);
 
-            for (int y = startY; y <= endY; y += step)
+            for (int y = startY; y <= endY; y += stepY)
             {
-                for (int x = startX; x <= endX; x += step)
+                for (int x = startX; x <= endX; x += stepX)
                 {
                     if (CheckIfColorIsWhite(bmp.GetPixel(x, y)))
                     {
-                        // If the input bitmap is BROAD (3x), downsample coordinates before mapping
-                        int mappedPx = Math.Clamp(x / scale, 0, ImgWidth - 1);
-                        int mappedPy = Math.Clamp(y / scale, 0, ImgHeight - 1);
+                        // Downsample coordinates to fit the 600x600 encoding grid
+                        int mappedPx = Math.Clamp(x / scaleX, 0, ImgWidth - 1);
+                        int mappedPy = Math.Clamp(y / scaleY, 0, ImgHeight - 1);
 
                         var pos = GetMappedPosition(mappedPx, mappedPy);
                         list.Add(pos);

@@ -250,9 +250,9 @@ namespace HentulWinforms
             // 
             // pictureBox4
             // 
-            pictureBox4.Location = new Point(578, 145);
+            pictureBox4.Location = new Point(12, 145);
             pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(903, 611);
+            pictureBox4.Size = new Size(2500, 1800);
             pictureBox4.TabIndex = 41;
             pictureBox4.TabStop = false;
             // 

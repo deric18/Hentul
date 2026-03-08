@@ -26,6 +26,9 @@ namespace HentulWinforms
         string backupDirHC;
         string backupDirFOM;
         string backupDirSOM;
+        private const int ChunkWidth = 3600;
+        private const int ChunkHeight = 1800;
+
         private const int SOM_X_V1 = 1250; // matches LearningUnit V1 X
         private const int SOM_X_V2 = 5000; // V2: 100x100 -> X * 4 in LearningUnit
         private const int SOM_X_V3 = 20000; // V3: 200x200 -> X * 16 in LearningUnit
@@ -82,78 +85,116 @@ namespace HentulWinforms
 
         private void Explore_Click(object sender, EventArgs e)
         {
-            // 1. Validate network is in training mode and vision scope is BROAD
-            if (networkMode != NetworkMode.EXPLORE)
-                networkMode = NetworkMode.EXPLORE;
+            SetExploreMode();           
 
-            if (orchestrator.visionScope != VisionScope.BROAD)
-                orchestrator.visionScope = VisionScope.BROAD;
+            UpdateStatusLabel("Exploring...");
 
-            if (string.IsNullOrEmpty(objectBox.Text))
+            var chunks = GetScreenChunks(chunkWidth: ChunkWidth, chunkHeight: ChunkHeight);
+            int processed = 0;
+
+            foreach (var chunk in chunks)
             {
-                label_done.Text = "Enter object label before exploring!";
-                return;
-            }
-            
-            label_done.Text = "Exploring...";
-            label_done.Refresh();
-
-            // 2. Get primary screen dimensions
-            int screenWidth = Screen.PrimaryScreen!.Bounds.Width;
-            int screenHeight = Screen.PrimaryScreen!.Bounds.Height;
-
-            const int chunkWidth = 600;
-            const int chunkHeight = 1200;
-
-            // Calculate number of chunks needed to cover the entire screen
-            int chunksX = (int)Math.Ceiling((double)screenWidth / chunkWidth);
-            int chunksY = (int)Math.Ceiling((double)screenHeight / chunkHeight);
-
-            int chunkCount = 0;
-            int totalChunks = chunksX * chunksY;
-
-            // 3. Iterate over the screen in 1200x600 chunks
-            for (int row = 0; row < chunksY; row++)
-            {
-                for (int col = 0; col < chunksX; col++)
-                {
-                    // Compute the center of the current chunk
-                    int centerX = Math.Min(col * chunkWidth + chunkWidth / 2, screenWidth - 1);
-                    int centerY = Math.Min(row * chunkHeight + chunkHeight / 2, screenHeight - 1);
-
-                    // Move cursor to chunk center
-                    Orchestrator.MoveCursorToSpecificPosition(centerX, centerY);
-
-                    // Capture the current cursor position
-                    Position2D cursorPos = Orchestrator.GetCurrentPointerPosition1();
-
-                    // Record pixels at the current position (BROAD scope uses orchestrator.bmp)
-                    orchestrator.RecordPixels(VisionScope.BROAD);
-
-                    // Convert captured bitmap to edge-detected version
-                    var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
-
-                    // Feed the chunk into the vision pipeline
-                    orchestrator.SetupLabel(edgedBmp, objectBox.Text);
-
-                    UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
-
-                    // Train on this chunk
-                    orchestrator.TrainImage(row, col);
-
-                    chunkCount++;
-                    label_done.Text = $"Exploring chunk {chunkCount}/{totalChunks}...";
-                    label_done.Refresh();
-                    Application.DoEvents();
-                }
+                ProcessSingleChunk(chunk);
+                processed++;
+                UpdateStatusLabel($"Exploring chunk {processed}/{chunks.Count}...");
+                Application.DoEvents();
             }
 
             counter++;
             CycleLabel.Text = counter.ToString();
             CycleLabel.Refresh();
 
-            label_done.Text = $"Exploration complete! Processed {totalChunks} chunks.";
+            UpdateStatusLabel($"Exploration complete! Processed {chunks.Count} chunks.");
+        }
+
+        #region Explore Helpers
+
+        private void SetExploreMode()
+        {
+            if (orchestrator.NMode != NetworkMode.EXPLORE)
+            {
+                networkMode = NetworkMode.EXPLORE;
+                orchestrator.NMode = NetworkMode.EXPLORE;
+            }
+
+            if (orchestrator.visionScope != VisionScope.BROAD)
+                orchestrator.visionScope = VisionScope.BROAD;
+        }
+
+        private record ScreenChunk(int StartX, int StartY, int CenterX, int CenterY, int Width, int Height);
+
+        private List<ScreenChunk> GetScreenChunks(int chunkWidth, int chunkHeight)
+        {
+            int screenWidth = Screen.PrimaryScreen!.Bounds.Width;
+            int screenHeight = Screen.PrimaryScreen!.Bounds.Height;
+
+            int chunksX = (int)Math.Ceiling((double)screenWidth / chunkWidth);
+            int chunksY = (int)Math.Ceiling((double)screenHeight / chunkHeight);
+
+            var chunks = new List<ScreenChunk>(chunksX * chunksY);
+
+            for (int row = 0; row < chunksY; row++)
+            {
+                for (int col = 0; col < chunksX; col++)
+                {
+                    int startX = col * chunkWidth;
+                    int startY = row * chunkHeight;
+                    chunks.Add(new ScreenChunk(
+                        startX, startY,
+                        startX + chunkWidth / 2,
+                        startY + chunkHeight / 2,
+                        chunkWidth, chunkHeight));
+                }
+            }
+
+            return chunks;
+        }
+
+        private void ProcessSingleChunk(ScreenChunk chunk)
+        {
+            // 1. Point the cursor at the chunk centre so RecordPixels captures it
+            Orchestrator.MoveCursorToSpecificPosition(chunk.CenterX, chunk.CenterY);
+
+            // 2. Capture pixels from screen using chunk dimensions
+            orchestrator.RecordPixels(chunk.Width, chunk.Height);
+
+            // 3. Edge-detect the captured bitmap
+            var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
+
+            // 4. Encode the bitmap into an SDR
+            bool isSdrEmpty = orchestrator.SetupLabel(edgedBmp);
+
+            if (isSdrEmpty)
+            {
+                UpdateObjectLabel("Chunk is empty!");
+                ClearUI();
+                return;
+            }
+
+            // 5. Visualise the active bits on the UI
+            UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+
+            // 6. Train on this chunk with its screen-coordinate offsets
+            orchestrator.TrainImage(chunk.StartX, chunk.StartY);
+        }
+
+        private void UpdateStatusLabel(string text)
+        {
+            label_done.Text = text;
             label_done.Refresh();
+        }
+
+        private void UpdateObjectLabel(string text)
+        {
+            ObjectLabel.Text = text;
+            ObjectLabel.Refresh();
+        }
+
+        #endregion
+
+        private void ClearUI()
+        {
+            pictureBox4.Controls.Clear();pictureBox4.Refresh();
         }
 
         /// <summary>
@@ -162,7 +203,7 @@ namespace HentulWinforms
         /// <param name="onBits"></param>
         private void UpdateUI(List<Position_SOM> onBits)
         {
-            const int imgWidth = 1200;
+            const int imgWidth = 600;
             const int imgHeight = 600;
 
             // Create bitmap where each grid cell maps to one pixel (1200x600)
@@ -244,9 +285,7 @@ namespace HentulWinforms
                 });
 
                 // Rest of your existing code unchanged
-                label_done.Text = "Ready";
-
-                openFileDialog1.ShowDialog();
+                label_done.Text = "Ready";                
             }
             catch (Exception ex)
             {

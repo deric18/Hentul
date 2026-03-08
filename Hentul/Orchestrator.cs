@@ -77,7 +77,7 @@
         private Orchestrator(bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
         {                        
             NMode = nMode;
-            logMode = Common.LogMode.BurstOnly;
+            logMode = LogMode.BurstOnly;
             
             VisionProcessor = new VisionStreamProcessor(logMode, isMock, ShouldInit);
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
@@ -130,7 +130,7 @@
         }
 
 
-        public void SetupLabel(Bitmap bmp, string objectLabel)
+        public bool SetupLabel(Bitmap bmp, string objectLabel = null)
         {   
             var currentMousePosition = GetCurrentPointerPosition1();
 
@@ -139,11 +139,16 @@
                 objectLabel = GetNextObjectLabel();
             }
 
-            VisionProcessor.SetupLabel(bmp, objectLabel, visionScope, currentMousePosition);            
+            return VisionProcessor.SetupLabel(bmp, objectLabel, visionScope, currentMousePosition);            
         }
 
         private string GetNextObjectLabel()
         {
+            if(logMode >= LogMode.Trace)
+            {
+                WriteLogsToFile("Object Label i being changed to next label");
+            }
+
             objectIndex++;
             return objectString + objectIndex.ToString();
         }
@@ -576,38 +581,40 @@
         }
 
 
-        public void RecordPixels(VisionScope scope = VisionScope.NARROW)
+        public void RecordPixels(VisionScope scope)
         {
-
             int w = 0;
             int h = 0;
-            int currentrange = 3;
 
             switch (scope)
             {
                 case VisionScope.NARROW:
-                    {
-                        w = 600;
-                        h = 600;
-                        break;
-                    }
+                    w = 600;
+                    h = 600;
+                    break;
                 case VisionScope.BROAD:
-                    {
-                        w = 600 * currentrange;
-                        h = 600 * currentrange;
-                        break;
-                    }
+                    w = 3600;
+                    h = 1800;
+                    break;
             };
 
             var cur = GetCurrentPointerPosition();
-            
 
-            int x = Math.Max(0, cur.X - w);
-            int y = Math.Max(0, cur.Y - h);
+            // Center the capture rectangle on the cursor position
+            int x = Math.Max(0, cur.X - w / 2);
+            int y = Math.Max(0, cur.Y - h / 2);
 
-            var rect = new Rectangle(x, y, w, h);
+            bmp = CaptureScreenRegion(new Rectangle(x, y, w, h));
+        }
 
-            bmp = CaptureScreenRegion(rect);
+        public void RecordPixels(int width, int height)
+        {
+            var cur = GetCurrentPointerPosition();
+
+            int x = Math.Max(0, cur.X - width / 2);
+            int y = Math.Max(0, cur.Y - height / 2);
+
+            bmp = CaptureScreenRegion(new Rectangle(x, y, width, height));
         }
 
         private Bitmap CaptureScreenRegion(Rectangle rect)

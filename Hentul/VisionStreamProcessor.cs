@@ -77,14 +77,20 @@
         #endregion
                 
 
-        internal void SetupLabel(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope, Position2D cursorPosition)
+        internal bool SetupLabel(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope, Position2D cursorPosition)
         {
             if (!SomBBM.SetUpNewObjectLabel(objectLabel))
                 throw new InvalidOperationException("Object Label Could not be set up in SOM Layer!");
 
             SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap, vScope, cursorPosition);
 
-            apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
+            if(SomSDR.ActiveBits.Count != 0)
+            {
+                apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
+                return false;
+            }
+
+            return true;
         }
 
 
