@@ -6,22 +6,18 @@ Finished StoreNewObjectLocationInGraph() method in Hippocampal Complex
 Complete explore() method
 
 
+
 Inprgress :  Fix the SetupObjectLabel() bug , where you dont have setup lable while exploring but get an approximate object count rather!
 
+
 Next :
--ExploreSpecificObject()
--
-
-
-
-
+-LoadAllObjectsintoHCComplex();
+-ExploreSpecificObject();
 
 
 Next Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
 //  what to do once you train an image in the form
 ->: Make it train on other occuar vairiations of the same image. while at the same time higher layer still continues to associate all the variations with the same image.
-
-
 
 
 -----------------------------------------------------------Big Direction -----------------------------------------------------------
@@ -31,8 +27,7 @@ FEATURE ------------------------------------------------------------------------
 
 -SEQUENCE MEMORY...............................................................................DONE	
 -NARROW VS BROAD VISION SCOPE..................................................................DONE
--SPATIAL MAP / GLOBAL POSITIONING SYSTEM.......................................................DONE
--EXPLORE INFRA PIEPELINE.......................................................................IN PROGRESS
+-SPATIAL MAP / GLOBAL POSITIONING SYSTEM.......................................................IN PROGRESS
 -2D SINGLE OCULAR OBJECT RECOGNITION
 -MULTI OCULAR OBJECT RECOGNITION
 -MULTI OCULAR MULTI OBJECT RECOGNITION

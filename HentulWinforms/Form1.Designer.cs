@@ -250,7 +250,7 @@ namespace HentulWinforms
             // 
             // pictureBox4
             // 
-            pictureBox4.Location = new Point(12, 145);
+            pictureBox4.Location = new Point(7, 126);
             pictureBox4.Name = "pictureBox4";
             pictureBox4.Size = new Size(2500, 1800);
             pictureBox4.TabIndex = 41;
@@ -271,7 +271,7 @@ namespace HentulWinforms
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
-            ClientSize = new Size(1924, 1002);
+            ClientSize = new Size(2272, 1581);
             Controls.Add(button2);
             Controls.Add(pictureBox4);
             Controls.Add(pictureBox2);
