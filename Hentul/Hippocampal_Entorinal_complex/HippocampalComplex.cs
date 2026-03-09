@@ -55,9 +55,11 @@
 
         #region OBJECT PERMANENCE
 
-        public void SetupGlobalRFrame()
+        public void SetupGlobalRFrame(uint right, uint up)
         {
+            // Stores the entire primary screens dimensions adn insitalises graph
 
+            Graph.InitGraph(right, up);
         }
 
 

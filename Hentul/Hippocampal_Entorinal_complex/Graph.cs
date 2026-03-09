@@ -30,7 +30,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             TotalCount = 0;
             MaxRight = 0;
             MaxUp = 0;
-        }
+        }        
 
         public static Graph GetInstance()
         {
@@ -40,6 +40,13 @@ namespace Hentul.Hippocampal_Entorinal_complex
             }
 
             return _graph;
+        }
+
+        public void InitGraph(uint up, uint right)
+        {
+            _graph.MaxUp = up;
+            _graph.MaxRight = right;
+            _graph.TotalCount = up * right;
         }
 
 
