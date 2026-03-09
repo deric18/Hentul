@@ -53,7 +53,14 @@
 
         #region PUBLIC API
 
-        #region OBJECT PERMANENCE       
+        #region OBJECT PERMANENCE
+
+        public void SetupGlobalRFrame()
+        {
+
+        }
+
+
 
 
         /// In Broad vision mode and experienced a new object and now trying to store a rough representation            

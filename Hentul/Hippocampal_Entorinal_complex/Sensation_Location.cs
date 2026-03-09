@@ -3,7 +3,7 @@
     using FirstOrderMemory.Models;
     using Common;
 
-    public class Sensation_Location
+    public class Sensation_Location : Entity
     {
         #region MEMBER & CONSTRUCTORS
         public string Id { get; set; }
@@ -15,9 +15,7 @@
         /// Value : KeyValuePair<int, ActiveBits> Key : BBMID, Value : ActiveBits
         /// Generally 4 or less
         /// </summary>
-        public SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sensLoc { get; private set; }
-
-        public Position2D CenterPosition { get; private set; }
+        public SortedDictionary<string, KeyValuePair<int, List<Position2D>>> sensLoc { get; private set; }        
 
 
         // Used only for Mock Purposes

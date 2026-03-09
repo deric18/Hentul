@@ -17,16 +17,17 @@ namespace Hentul.Hippocampal_Entorinal_complex
         /// </summary>
         public int offsetScale { get; private set; }
 
-        public RFrame(List<Sensation_Location> senselocList)
+        public RFrame(IEnumerable<Entity> senselocList)
         {
-            DisplacementTable = new double[senselocList.Count, senselocList.Count];
+            var list = senselocList.ToList();
+            DisplacementTable = new double[list.Count, list.Count];
             offsetScale = 0;
-            Init(senselocList);
+            Init(list);
             ComputeScale();
             ComputeBoundaries();
         }
 
-        public bool Init(List<Sensation_Location> senselocList)
+        public bool Init(IReadOnlyList<Entity> senselocList)
         {
             if (senselocList == null || senselocList.Count == 0)
             {
