@@ -142,25 +142,22 @@
             return VisionProcessor.SetupLabel(bmp, objectLabel, visionScope, currentMousePosition);            
         }
 
-        private string GetNextObjectLabel()
-        {
-            if(logMode >= LogMode.Trace)
-            {
-                WriteLogsToFile("Object Label i being changed to next label");
-            }
-
-            objectIndex++;
-            return objectString + objectIndex.ToString();
-        }
+       
 
         public void TrainImage(int offsetX, int offsetY)
         {
 
             var locationSDR = VisionProcessor.pEncoder.GetCahced();
 
-            HCAccessor.StoreNewObjectLocationInGraph(locationSDR, offsetX, offsetY);
+            // Count Total Number Of Objects in the processed chunk
 
-            VisionProcessor.Train();            //Train it 5 times for apical reconnections to prevent burst avoidance.
+            // Transform each object into Entities
+
+            //Store them in HC-EC Complex.
+
+            HCAccessor.StoreNewObjectLocationInGraph(locationSDR, offsetX, offsetY);
+            
+            VisionProcessor.SendAPicalFeedback();            
         }       
 
 
@@ -207,6 +204,16 @@
 
         #region PRIVATE HELPER METHODS
 
+        private string GetNextObjectLabel()
+        {
+            if (logMode >= LogMode.Trace)
+            {
+                WriteLogsToFile("Object Label i being changed to next label");
+            }
+
+            objectIndex++;
+            return objectString + objectIndex.ToString();
+        }
 
         private void GetPixelsAsPerScope()
         {

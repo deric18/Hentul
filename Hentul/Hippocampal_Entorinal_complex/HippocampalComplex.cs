@@ -17,13 +17,9 @@
 
         public Position CurrentPosition { get; private set; }
 
-        public Position[] BoundaryPositions { get; private set; }
+        public RFrame GlobalFrame { get; private set; }
 
-        private NetworkMode networkMode;
-
-        private List<RecognisedVisualEntity> matchingObjectList;
-
-        private Position _cachedPosition;
+        private NetworkMode networkMode;                
 
         private RecognisedVisualEntity currentmatchingObject;
         private static readonly string baseDir = AppContext.BaseDirectory;
@@ -31,13 +27,9 @@
 
         public int currentIterationToConfirmation;
 
-        public int NumberOfITerationsToConfirmation { get; private set; }
+        public int NumberOfIterationsToConfirmation { get; private set; }
 
-        private string backupDir;
-
-        private List<string> objectlabellist;
-
-        private int imageIndex;
+        private string backupDir;                
 
         private bool isMock;
 
@@ -49,21 +41,11 @@
             CurrentObject.Label = firstLabel;
             isMock = Ismock;
             networkMode = nMode;
-            NumberOfITerationsToConfirmation = 6;
-            matchingObjectList = new List<RecognisedVisualEntity>();
+            NumberOfIterationsToConfirmation = 6;            
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
             currentIterationToConfirmation = 0;
-            backupDir = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\")); 
-            objectlabellist = new List<string>
-            {
-                "Apple",
-                "Ananas",
-                "Watermelon",
-                "JackFruit",
-                "Grapes"
-            };
-            imageIndex = 1;
+            backupDir = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));                         
         }
 
         #endregion
@@ -71,32 +53,8 @@
 
         #region PUBLIC API
 
-        #region OBJECT PERMANENCE
+        #region OBJECT PERMANENCE       
 
-
-        public bool AddNewSensationLocationToObject(Sensation_Location sensei)
-        {
-            if (CurrentObject.sType == SenseType.Unknown)
-                CurrentObject.sType = SenseType.SenseNLocation;
-
-            if (CurrentObject.sType == SenseType.SenseOnly)
-            {
-                throw new InvalidOperationException(" Cannot add a Sense Location to a Sense Only Object !");
-            }
-
-            // Need to include logic for what object is currently being sensed and
-            return CurrentObject.AddNewSenei(sensei);
-        }
-
-        public bool AddNewSensationToObject(Sensation sensation)
-        {
-            if(ValidateTInput(sensation))
-            { 
-                return CurrentObject.AddNewSensationToObject(sensation);
-            }
-
-            return false;
-        }        
 
         /// In Broad vision mode and experienced a new object and now trying to store a rough representation            
         public List<Position2D> StoreNewObjectLocationInGraph(SDR_SOM sdr, int offsetX, int offsetY, bool isMock = false)
@@ -157,11 +115,29 @@
                     // If conversion fails for any position, skip it and continue.
                     continue;
                 }
-            }            
+            }
+
 
             return addedPositions;
-        }
+        }       
 
+        public void DoneWithTraining(string label = "")
+        {
+            ConvertUnrecognisedObjectToRecognisedObject();
+
+            CurrentObject = new UnrecognisedEntity();
+
+            if (label != "")
+            {
+                CurrentObject.Label = label;
+                CurrentObject.sType = SenseType.Unknown;
+                return;
+            }
+
+            if (CurrentObject.Label == string.Empty)
+            {                
+            }
+        }
 
         private RecognisedVisualEntity GetRecognisedEntityFromList(string label)
         {
@@ -182,28 +158,35 @@
             }
 
             return matchedEntity;
-        }        
-
-        public void DoneWithTraining(string label = "")
-        {
-            ConvertUnrecognisedObjectToRecognisedObject();
-
-            CurrentObject = new UnrecognisedEntity();
-
-            if (label != "")
-            {
-                CurrentObject.Label = label;
-                CurrentObject.sType = SenseType.Unknown;
-                return;
-            }
-
-            if (CurrentObject.Label == string.Empty)
-            {
-                CurrentObject.Label = objectlabellist[imageIndex];
-                CurrentObject.sType = SenseType.Unknown;
-                imageIndex++;
-            }
         }
+
+        #region LEGACY 
+
+        public bool AddNewSensationLocationToObject(Sensation_Location sensei)
+        {
+            if (CurrentObject.sType == SenseType.Unknown)
+                CurrentObject.sType = SenseType.SenseNLocation;
+
+            if (CurrentObject.sType == SenseType.SenseOnly)
+            {
+                throw new InvalidOperationException(" Cannot add a Sense Location to a Sense Only Object !");
+            }
+
+            // Need to include logic for what object is currently being sensed and
+            return CurrentObject.AddNewSenei(sensei);
+        }
+
+        public bool AddNewSensationToObject(Sensation sensation)
+        {
+            if (ValidateTInput(sensation))
+            {
+                return CurrentObject.AddNewSensationToObject(sensation);
+            }
+
+            return false;
+        }
+
+        #endregion
 
         #endregion
 
@@ -412,9 +395,7 @@
             }
 
             if (CurrentObject.Label == string.Empty)
-            {
-                CurrentObject.Label = objectlabellist[imageIndex];
-                imageIndex++;
+            {                
             }
 
             RecognisedVisualEntity newObject = new RecognisedVisualEntity(CurrentObject);
@@ -513,8 +494,7 @@
 
             if (CurrentObject == null)
             {
-                CurrentObject = new UnrecognisedEntity();
-                CurrentObject.Label = objectlabellist[imageIndex++];
+                CurrentObject = new UnrecognisedEntity();                
             }
         }
 

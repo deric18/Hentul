@@ -13,7 +13,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
 
         /// <summary>
-        /// Should be zero when the whole image fits inside 400 pixels, and should be icnremented accordingly based o nthe size with reference to 400 pixels
+        /// Should be zero when the whole image fits inside 400 pixels, and should be incremented accordingly based on the size with reference to 400 pixels
         /// </summary>
         public int offsetScale { get; private set; }
 

@@ -94,7 +94,7 @@
         }
 
 
-        public void Train()
+        public void SendAPicalFeedback()
         {            
             SomBBM.Fire(SomSDR, CycleNum++);
         }
