@@ -32,6 +32,11 @@
         public static extern long SetCursorPos(int x, int y);
         [DllImport("User32.Dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+        [DllImport("user32.dll")]
+        public static extern int GetSystemMetrics(int nIndex);
+        // SM_CXSCREEN = 0 (primary screen width), SM_CYSCREEN = 1 (primary screen height)
+        private const int SM_CXSCREEN = 0;
+        private const int SM_CYSCREEN = 1;
         #endregion
 
         #region CONSTRUCTOR
@@ -123,10 +128,13 @@
 
         public void InitHC()
         {
-            // Capture entire screen dimensions.
-            // Initialise HC graph 
-            // move cursor with offsets and store rough object approxximations for there locations
-            HCAccessor.Init();
+            // Read primary screen dimensions via Win32 and initialise the Graph's environment bounds.
+            int screenWidth  = GetSystemMetrics(SM_CXSCREEN);
+            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+            HCAccessor.InitialiseEnvironment(screenWidth, screenHeight);
+
+            Console.WriteLine($"[HC] Environment initialised: {screenWidth}x{screenHeight}");
         }
 
 

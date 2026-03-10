@@ -22,7 +22,10 @@
         private NetworkMode networkMode;                
 
         private RecognisedVisualEntity currentmatchingObject;
+
+
         private static readonly string baseDir = AppContext.BaseDirectory;
+
         public RecognitionState ObjectState { get; private set; }
 
         public int currentIterationToConfirmation;
@@ -61,6 +64,34 @@
 
             Graph.InitGraph(right, up);
         }
+
+        /// <summary>
+        /// Initialises the environment with the primary screen dimensions.
+        /// Call once at startup before any training or exploration begins.
+        /// Sets the Graph's environment bounds so all object positions are
+        /// validated and stored relative to the full screen space.
+        /// </summary>
+        public void InitialiseEnvironment(int screenWidth, int screenHeight)
+        {
+            Graph.SetEnvironmentBounds(screenWidth, screenHeight);
+        }
+
+        /// <summary>Returns the environment dimensions set at startup.</summary>
+        public EnvironmentBounds GetEnvironmentBounds() => Graph.Environment;
+
+        /// <summary>Returns bounding boxes for all objects currently loaded in the environment.</summary>
+        public IReadOnlyList<ObjectBounds> GetAllObjectsInEnvironment() => Graph.GetAllObjectsInEnvironment();
+
+        /// <summary>Returns the bounding box for a specific object by label, or null if not loaded.</summary>
+        public ObjectBounds GetObjectBounds(string label) => Graph.GetObjectBounds(label);
+
+        /// <summary>Returns all objects whose bounding boxes overlap the given screen region.</summary>
+        public List<ObjectBounds> GetObjectsInRegion(int x, int y, int width, int height) =>
+            Graph.GetObjectsInRegion(x, y, width, height);
+
+        /// <summary>Returns all objects present at a specific screen position.</summary>
+        public List<ObjectBounds> GetObjectsAtPosition(Position2D pos) =>
+            Graph.GetObjectsAtPosition(pos);
 
 
 
