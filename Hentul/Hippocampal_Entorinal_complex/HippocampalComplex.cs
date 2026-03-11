@@ -443,6 +443,8 @@
             newObject.DoneTraining();
 
             Objects.Add(newObject.Label, newObject);
+
+            Graph.LoadObject(newObject);
         }
 
 
