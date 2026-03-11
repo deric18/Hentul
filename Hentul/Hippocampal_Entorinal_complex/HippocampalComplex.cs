@@ -66,6 +66,18 @@
         }
 
         /// <summary>
+        /// Prepares the current UnrecognisedEntity for NARROW vision training.
+        /// Sets the label and marks the sense type as SenseNLocation so that
+        /// Sensation_Location entries can be added via AddNewSensationLocationToObject.
+        /// </summary>
+        public void SetCurrentObjectLabel(string label)
+        {
+            CurrentObject.Label = label;
+            if (CurrentObject.sType == SenseType.Unknown)
+                CurrentObject.sType = SenseType.SenseNLocation;
+        }
+
+        /// <summary>
         /// Initialises the environment with the primary screen dimensions.
         /// Call once at startup before any training or exploration begins.
         /// Sets the Graph's environment bounds so all object positions are

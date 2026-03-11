@@ -85,26 +85,93 @@ namespace HentulWinforms
 
         private void Explore_Click(object sender, EventArgs e)
         {
-            SetExploreMode();           
+            // ── Phase 1: BROAD scan ─────────────────────────────────────────
+            // Sweep the full screen in BROAD chunks and use contour detection
+            // to find candidate object regions. No SOM training in this phase.
 
-            UpdateStatusLabel("Exploring...");
+            orchestrator.visionScope = VisionScope.BROAD;
+            orchestrator.NMode = NetworkMode.EXPLORE;
 
+            UpdateStatusLabel("Phase 1: broad scan...");
+
+            var allRegions = new List<DetectedRegion>();
             var chunks = GetScreenChunks(chunkWidth: ChunkWidth, chunkHeight: ChunkHeight);
-            int processed = 0;
 
-            foreach (var chunk in chunks)
+            for (int ci = 0; ci < chunks.Count; ci++)
             {
-                ProcessSingleChunk(chunk);
-                processed++;
-                UpdateStatusLabel($"Exploring chunk {processed}/{chunks.Count}...");
+                var chunk = chunks[ci];
+                UpdateStatusLabel($"Phase 1: scanning chunk {ci + 1}/{chunks.Count}...");
                 Application.DoEvents();
+
+                Orchestrator.MoveCursorToSpecificPosition(chunk.CenterX, chunk.CenterY);
+                orchestrator.RecordPixels(chunk.Width, chunk.Height);
+
+                using var edgedMat = GetEdgedMat(orchestrator.bmp);
+                var regions = SegmentObjectsFromMat(edgedMat, chunk.StartX, chunk.StartY);
+                allRegions.AddRange(regions);
+            }
+
+            UpdateStatusLabel($"Phase 1 done: {allRegions.Count} object(s) found. Starting deep scan...");
+            Application.DoEvents();
+
+            // ── Phase 2: NARROW deep learning ───────────────────────────────
+            // For every region discovered above, move the cursor to its centre,
+            // capture a 600×600 NARROW bitmap, encode it, fire the SOM several
+            // times (sequence memory), then commit the object to HC.
+
+            orchestrator.visionScope = VisionScope.NARROW;
+            orchestrator.NMode = NetworkMode.TRAINING;
+
+            int learnedCount = 0;
+
+            for (int ri = 0; ri < allRegions.Count; ri++)
+            {
+                var region = allRegions[ri];
+                string label = $"Object{ri + 1}";
+
+                UpdateStatusLabel($"Phase 2: learning {label} ({ri + 1}/{allRegions.Count})...");
+                Application.DoEvents();
+
+                // 1. Move cursor to detected object's centre
+                Orchestrator.MoveCursorToSpecificPosition(region.CenterX, region.CenterY);
+                System.Threading.Thread.Sleep(50);
+
+                // 2. Capture NARROW (600×600) bitmap
+                orchestrator.RecordPixels(VisionScope.NARROW);
+
+                // 3. Edge-detect
+                var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
+
+                // 4. Prepare HC label + encode into SDR
+                orchestrator.PrepareNewObjectTraining(label);
+                bool isEmpty = orchestrator.SetupLabel(edgedBmp, label);
+
+                if (isEmpty)
+                {
+                    UpdateObjectLabel($"{label}: empty, skipping");
+                    continue;
+                }
+
+                // 5. Build Sensation_Location from the encoded SDR and store in HC
+                var screenPos = Orchestrator.GetCurrentPointerPosition1();
+                var sensationLoc = orchestrator.BuildSensationLocationFromCurrentSDR(screenPos);
+                orchestrator.StoreSensationInCurrentObject(sensationLoc);
+
+                // 6. Fire SOM multiple times so sequence memory captures the pattern
+                orchestrator.VisionProcessor.SendApical(5);
+
+                // 7. Commit: convert UnrecognisedEntity → RecognisedVisualEntity + load in Graph
+                orchestrator.DoneWithTraining();
+
+                UpdateObjectLabel(label);
+                UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+                learnedCount++;
             }
 
             counter++;
             CycleLabel.Text = counter.ToString();
             CycleLabel.Refresh();
-
-            UpdateStatusLabel($"Exploration complete! Processed {chunks.Count} chunks.");
+            UpdateStatusLabel($"Complete! Learned {learnedCount}/{allRegions.Count} object(s).");
         }
 
         #region Explore Helpers
@@ -188,6 +255,56 @@ namespace HentulWinforms
         {
             ObjectLabel.Text = text;
             ObjectLabel.Refresh();
+        }
+
+        // Minimum contour area (pixels²) to be treated as a real object
+        private const int MinContourArea = 500;
+
+        /// <summary>
+        /// Run Canny edge detection on <paramref name="bmp"/> and return the resulting Mat.
+        /// Caller is responsible for disposing the returned Mat.
+        /// </summary>
+        private Mat GetEdgedMat(Bitmap bmp)
+        {
+            string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
+            bmp.Save(filename);
+            var src = Cv2.ImRead(filename);
+            var edged = new Mat();
+            Cv2.Canny(src, edged, 50, 200);
+            src.Dispose();
+            return edged;
+        }
+
+        /// <summary>
+        /// Find contours in <paramref name="edgedMat"/> and return each distinct object
+        /// as a <see cref="Orchestrator.DetectedRegion"/> in screen coordinates.
+        /// </summary>
+        private List<DetectedRegion> SegmentObjectsFromMat(
+            Mat edgedMat, int chunkStartX, int chunkStartY)
+        {
+            var regions = new List<DetectedRegion>();
+
+            Cv2.FindContours(
+                edgedMat,
+                out OpenCvSharp.Point[][] contours,
+                out _,
+                RetrievalModes.External,
+                ContourApproximationModes.ApproxSimple);
+
+            foreach (var contour in contours)
+            {
+                double area = Cv2.ContourArea(contour);
+                if (area < MinContourArea) continue;
+
+                var rect = Cv2.BoundingRect(contour);
+                regions.Add(new DetectedRegion(
+                    chunkStartX + rect.X,
+                    chunkStartY + rect.Y,
+                    rect.Width,
+                    rect.Height));
+            }
+
+            return regions;
         }
 
         #endregion

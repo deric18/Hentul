@@ -3,6 +3,7 @@
     using Common;
     using System.Runtime.InteropServices;
     using System;
+    using System.Linq;
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
     using System.Drawing;    
@@ -198,6 +199,39 @@
         {
             HCAccessor.DoneWithTraining(label);
         }
+
+
+        /// <summary>
+        /// Prepares the HC for NARROW vision training of a new object.
+        /// Must be called before SetupLabel + StoreSensationInCurrentObject.
+        /// </summary>
+        public void PrepareNewObjectTraining(string label)
+        {
+            HCAccessor.SetCurrentObjectLabel(label);
+        }
+
+        /// <summary>
+        /// Builds a Sensation_Location from the current SomSDR after SetupLabel has been called.
+        /// <paramref name="screenPos"/> is the cursor's screen position (becomes the CenterPosition).
+        /// </summary>
+        public Sensation_Location BuildSensationLocationFromCurrentSDR(Position2D screenPos)
+        {
+            var activeBits = VisionProcessor.SomSDR.ActiveBits
+                .Select(p => new Position2D(p.X, p.Y))
+                .ToList();
+
+            var posKey = $"{screenPos.X}/{screenPos.Y}";
+            var sensLocDict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
+            sensLocDict[posKey] = new KeyValuePair<int, List<Position2D>>(0, activeBits);
+
+            return new Sensation_Location(sensLocDict, screenPos);
+        }
+
+        /// <summary>
+        /// Stores a Sensation_Location into the current UnrecognisedEntity in HC.
+        /// </summary>
+        public bool StoreSensationInCurrentObject(Sensation_Location sl)
+            => HCAccessor.AddNewSensationLocationToObject(sl);
 
 
         //public void ChangeNetworkToPredictionMode()
@@ -843,6 +877,16 @@
         OBJECT,
         BROAD,
         INVALID
+    }
+
+    /// <summary>
+    /// A screen-space region discovered during a BROAD scan.
+    /// Produced by Phase 1 (contour detection) and consumed by Phase 2 (NARROW deep learning).
+    /// </summary>
+    public record DetectedRegion(int ScreenX, int ScreenY, int Width, int Height)
+    {
+        public int CenterX => ScreenX + Width / 2;
+        public int CenterY => ScreenY + Height / 2;
     }
 
     #endregion

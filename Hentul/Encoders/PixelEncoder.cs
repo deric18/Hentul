@@ -103,7 +103,14 @@ namespace Hentul.Encoders
             int stepX  = scaleX;
             int stepY  = scaleY;
 
-            // Half-window offsets centered on cursorPosition
+            // For NARROW/OBJECT the bitmap is already captured centered on the cursor.
+            // Using screen coordinates here would only encode a small off-center strip.
+            // Always treat the window center as the bitmap's geometric center.
+            Position2D encodingPos = (vScope == VisionScope.NARROW || vScope == VisionScope.OBJECT)
+                ? new Position2D(bmp.Width / 2, bmp.Height / 2)
+                : cursorPosition;
+
+            // Half-window offsets centered on encodingPos
             // BROAD: offsetX=1800 (half of 3600), offsetY=900 (half of 1800)
             int offsetX = (vScope == VisionScope.BROAD) ? (ImgWidth / 2) * 6 : ImgWidth / 2;
             int offsetY = (vScope == VisionScope.BROAD) ? (ImgHeight / 2) * 3 : ImgHeight / 2;
@@ -112,10 +119,10 @@ namespace Hentul.Encoders
             int height = bmp.Height;
 
             // Square bounds (clamped to image)
-            int startY = Math.Max(0, cursorPosition.Y - offsetY);
-            int endY   = Math.Min(height - 1, cursorPosition.Y + offsetY);
-            int startX = Math.Max(0, cursorPosition.X - offsetX);
-            int endX   = Math.Min(width - 1, cursorPosition.X + offsetX);
+            int startY = Math.Max(0, encodingPos.Y - offsetY);
+            int endY   = Math.Min(height - 1, encodingPos.Y + offsetY);
+            int startX = Math.Max(0, encodingPos.X - offsetX);
+            int endX   = Math.Min(width - 1, encodingPos.X + offsetX);
 
             for (int y = startY; y <= endY; y += stepY)
             {
