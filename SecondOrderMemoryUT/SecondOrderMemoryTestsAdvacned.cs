@@ -1,6 +1,7 @@
 ﻿namespace SecondOrderMemoryUnitTest
 {
     using System.ComponentModel;
+    using System.Linq;
     using System.Reflection.Emit;
     using Common;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -329,6 +330,65 @@
         public void TestDifferentRandomObjectTraining()
         {
             // Train on a bunch of random patterns for object 1 , change to prediction , update another object train on the new object , run prediction for object 1 and then 2 see if return correct labels.
+        }
+
+        /// <summary>
+        /// Train the network on Pattern A (3 spatial steps) once, then reinforce via 10 rounds
+        /// of apical feedback for the same pattern. After switching to prediction mode, fire 3
+        /// sequences that are "similar but different" to Pattern A and assert that none of them
+        /// causes the network to predict Pattern A.
+        /// 
+        /// Pattern B1 shares one position with A's first step, then diverges.
+        /// Pattern B2 has an unrelated first step, shares one position with A's second step, then diverges.
+        /// Pattern B3 is completely unrelated to Pattern A in all three steps.
+        /// </summary>
+        [Test]
+        [Description("Train Pattern A + 10 apical reinforcements; verify 3 similar-but-different patterns do not elicit a Pattern A prediction")]
+        [TestCategory("Higher Order Sequencing")]
+        public void TestApicalReinforcementDoesNotMatchSimilarPatterns()
+        {
+            const string labelA = "PatternA";
+            var patternA = TestUtils.GeneratePatternAForApicalTest();
+            var similarPatterns = TestUtils.GenerateSimilarButDifferentPatternsForApicalTest();
+            ulong cycle = 1;
+
+            bbManager.SetUpNewObjectLabel(labelA);
+            bbManager.ChangeCurrentObjectLabel(labelA);
+
+            // --- Phase 1: train Pattern A once with synapse creation ---
+            foreach (var step in patternA)
+                bbManager.Fire(step, cycle++, CreateActiveSynapses: true);
+
+            // --- Phase 2: reinforce via 10 rounds of apical feedback for Pattern A ---
+            var patternA_apical = patternA
+                .Select(s => new SDR_SOM(s.Length, s.Breadth, new List<Position_SOM>(s.ActiveBits), iType.APICAL))
+                .ToList();
+
+            for (int repetition = 0; repetition < 10; repetition++)
+                foreach (var apicalStep in patternA_apical)
+                    bbManager.Fire(apicalStep, cycle++);
+
+            // --- Switch to prediction mode ---
+            bbManager.ChangeNetworkModeToPrediction();
+
+            Assert.IsTrue(
+                bbManager.GetSupportedLabels().Contains(labelA),
+                $"'{labelA}' should be a supported label after training");
+
+            // --- Phase 3: fire 3 similar-but-different patterns and assert no Pattern A prediction ---
+            // similarPatterns layout: indices 0-2 = B1, 3-5 = B2, 6-8 = B3
+            string[] patternNames = { "B1", "B2", "B3" };
+            for (int b = 0; b < 3; b++)
+            {
+                var bPattern = similarPatterns.Skip(b * 3).Take(3).ToList();
+                foreach (var step in bPattern)
+                    bbManager.Fire(step, cycle++);
+
+                var predictions = bbManager.GetCurrentPredictions();
+                Assert.IsFalse(
+                    predictions.Contains(labelA),
+                    $"Pattern {patternNames[b]}: network incorrectly predicted '{labelA}' after a divergent sequence");
+            }
         }
 
         [Test]

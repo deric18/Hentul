@@ -437,6 +437,120 @@
             return positionList;
         }
 
+        /// <summary>
+        /// Pattern A: a deterministic 3-step spatial sequence used in apical reinforcement tests.
+        /// Step 1 activates columns near X≈100–140, step 2 near X≈200–240, step 3 near X≈300–340.
+        /// All Y values are 0–4, all Z values are 0–4 (within the 1200×600×5 SOM).
+        /// </summary>
+        internal static List<SDR_SOM> GeneratePatternAForApicalTest()
+        {
+            const int length = 1200, breadth = 600;
+
+            var step1 = new List<Position_SOM>
+            {
+                new Position_SOM(100, 0, 0), new Position_SOM(110, 1, 1),
+                new Position_SOM(120, 2, 2), new Position_SOM(130, 3, 3), new Position_SOM(140, 4, 4)
+            };
+            var step2 = new List<Position_SOM>
+            {
+                new Position_SOM(200, 0, 0), new Position_SOM(210, 1, 1),
+                new Position_SOM(220, 2, 2), new Position_SOM(230, 3, 3), new Position_SOM(240, 4, 4)
+            };
+            var step3 = new List<Position_SOM>
+            {
+                new Position_SOM(300, 0, 0), new Position_SOM(310, 1, 1),
+                new Position_SOM(320, 2, 2), new Position_SOM(330, 3, 3), new Position_SOM(340, 4, 4)
+            };
+
+            return new List<SDR_SOM>
+            {
+                new SDR_SOM(length, breadth, step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, step3, iType.SPATIAL)
+            };
+        }
+
+        /// <summary>
+        /// Returns 9 SDRs (3 patterns × 3 steps) similar in structure to Pattern A but with
+        /// different exact column positions so that Pattern A's temporal chains are not triggered.
+        ///
+        /// B1 (indices 0–2): shares one position with A step-1, diverges completely after.
+        /// B2 (indices 3–5): unrelated step-1, shares one position with A step-2, diverges for step-3.
+        /// B3 (indices 6–8): entirely unrelated to Pattern A in all three steps.
+        /// </summary>
+        internal static List<SDR_SOM> GenerateSimilarButDifferentPatternsForApicalTest()
+        {
+            const int length = 1200, breadth = 600;
+
+            // B1 — shares Position(100,0,0) with A step-1; all other positions differ
+            var b1Step1 = new List<Position_SOM>
+            {
+                new Position_SOM(100, 0, 0),   // shared with A step-1
+                new Position_SOM(113, 1, 1), new Position_SOM(123, 2, 2),
+                new Position_SOM(133, 3, 3), new Position_SOM(143, 4, 4)
+            };
+            var b1Step2 = new List<Position_SOM>
+            {
+                new Position_SOM(207, 0, 0), new Position_SOM(217, 1, 1),
+                new Position_SOM(227, 2, 2), new Position_SOM(237, 3, 3), new Position_SOM(247, 4, 4)
+            };
+            var b1Step3 = new List<Position_SOM>
+            {
+                new Position_SOM(307, 0, 0), new Position_SOM(317, 1, 1),
+                new Position_SOM(327, 2, 2), new Position_SOM(337, 3, 3), new Position_SOM(347, 4, 4)
+            };
+
+            // B2 — unrelated step-1; shares Position(200,0,0) with A step-2; diverges for step-3
+            var b2Step1 = new List<Position_SOM>
+            {
+                new Position_SOM(155, 0, 0), new Position_SOM(165, 1, 1),
+                new Position_SOM(175, 2, 2), new Position_SOM(185, 3, 3), new Position_SOM(195, 4, 4)
+            };
+            var b2Step2 = new List<Position_SOM>
+            {
+                new Position_SOM(200, 0, 0),   // shared with A step-2
+                new Position_SOM(213, 1, 1), new Position_SOM(223, 2, 2),
+                new Position_SOM(233, 3, 3), new Position_SOM(243, 4, 4)
+            };
+            var b2Step3 = new List<Position_SOM>
+            {
+                new Position_SOM(355, 0, 0), new Position_SOM(365, 1, 1),
+                new Position_SOM(375, 2, 2), new Position_SOM(385, 3, 3), new Position_SOM(395, 4, 4)
+            };
+
+            // B3 — completely unrelated to Pattern A in all three steps
+            var b3Step1 = new List<Position_SOM>
+            {
+                new Position_SOM(450, 0, 0), new Position_SOM(460, 1, 1),
+                new Position_SOM(470, 2, 2), new Position_SOM(480, 3, 3), new Position_SOM(490, 4, 4)
+            };
+            var b3Step2 = new List<Position_SOM>
+            {
+                new Position_SOM(550, 0, 0), new Position_SOM(560, 1, 1),
+                new Position_SOM(570, 2, 2), new Position_SOM(580, 3, 3), new Position_SOM(590, 4, 4)
+            };
+            var b3Step3 = new List<Position_SOM>
+            {
+                new Position_SOM(650, 0, 0), new Position_SOM(660, 1, 1),
+                new Position_SOM(670, 2, 2), new Position_SOM(680, 3, 3), new Position_SOM(690, 4, 4)
+            };
+
+            return new List<SDR_SOM>
+            {
+                new SDR_SOM(length, breadth, b1Step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b1Step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b1Step3, iType.SPATIAL),
+
+                new SDR_SOM(length, breadth, b2Step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b2Step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b2Step3, iType.SPATIAL),
+
+                new SDR_SOM(length, breadth, b3Step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b3Step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b3Step3, iType.SPATIAL),
+            };
+        }
+
         private static List<Position_SOM> GetExclusivePositionList(List<Position_SOM> lastFiringCells, LayerType layerType)
         {
             List<Position_SOM> exlcudedPosList = new List<Position_SOM>();
