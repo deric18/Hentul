@@ -116,8 +116,9 @@ namespace HentulWinforms
 
             // ── Phase 2: NARROW deep learning ───────────────────────────────
             // For every region discovered above, move the cursor to its centre,
-            // capture a 600×600 NARROW bitmap, encode it, fire the SOM several
-            // times (sequence memory), then commit the object to HC.
+            // capture a 600×600 NARROW bitmap, encode it, then fire the SOM
+            // several times so sequence memory learns the visual pattern.
+            // No HC object snapshot is built here — that is the SOM's job.
 
             orchestrator.visionScope = VisionScope.NARROW;
             orchestrator.NMode = NetworkMode.TRAINING;
@@ -142,8 +143,7 @@ namespace HentulWinforms
                 // 3. Edge-detect
                 var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
 
-                // 4. Prepare HC label + encode into SDR
-                orchestrator.PrepareNewObjectTraining(label);
+                // 4. Encode into SDR and set the SOM label
                 bool isEmpty = orchestrator.SetupLabel(edgedBmp, label);
 
                 if (isEmpty)
@@ -152,16 +152,8 @@ namespace HentulWinforms
                     continue;
                 }
 
-                // 5. Build Sensation_Location from the encoded SDR and store in HC
-                var screenPos = Orchestrator.GetCurrentPointerPosition1();
-                var sensationLoc = orchestrator.BuildSensationLocationFromCurrentSDR(screenPos);
-                orchestrator.StoreSensationInCurrentObject(sensationLoc);
-
-                // 6. Fire SOM multiple times so sequence memory captures the pattern
+                // 5. Fire SOM multiple times so sequence memory captures the pattern
                 orchestrator.VisionProcessor.SendApical(5);
-
-                // 7. Commit: convert UnrecognisedEntity → RecognisedVisualEntity + load in Graph
-                orchestrator.DoneWithTraining();
 
                 UpdateObjectLabel(label);
                 UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);

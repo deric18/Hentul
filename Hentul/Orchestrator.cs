@@ -201,39 +201,6 @@
         }
 
 
-        /// <summary>
-        /// Prepares the HC for NARROW vision training of a new object.
-        /// Must be called before SetupLabel + StoreSensationInCurrentObject.
-        /// </summary>
-        public void PrepareNewObjectTraining(string label)
-        {
-            HCAccessor.SetCurrentObjectLabel(label);
-        }
-
-        /// <summary>
-        /// Builds a Sensation_Location from the current SomSDR after SetupLabel has been called.
-        /// <paramref name="screenPos"/> is the cursor's screen position (becomes the CenterPosition).
-        /// </summary>
-        public Sensation_Location BuildSensationLocationFromCurrentSDR(Position2D screenPos)
-        {
-            var activeBits = VisionProcessor.SomSDR.ActiveBits
-                .Select(p => new Position2D(p.X, p.Y))
-                .ToList();
-
-            var posKey = $"{screenPos.X}/{screenPos.Y}";
-            var sensLocDict = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
-            sensLocDict[posKey] = new KeyValuePair<int, List<Position2D>>(0, activeBits);
-
-            return new Sensation_Location(sensLocDict, screenPos);
-        }
-
-        /// <summary>
-        /// Stores a Sensation_Location into the current UnrecognisedEntity in HC.
-        /// </summary>
-        public bool StoreSensationInCurrentObject(Sensation_Location sl)
-            => HCAccessor.AddNewSensationLocationToObject(sl);
-
-
         //public void ChangeNetworkToPredictionMode()
         //{
         //    NMode = NetworkMode.PREDICTION;
