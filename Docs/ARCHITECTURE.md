@@ -48,24 +48,33 @@ Hentul is a **biologically-inspired hierarchical visual object recognition syste
 The **Orchestrator** acts as the central coordinator, capturing visual input from the screen, routing it through the **Vision Stream Processor** (which encodes and fires the SOM network), and simultaneously updating the **Hippocampal Complex** with spatial location data.
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                     ORCHESTRATOR                       │
-│  ┌──────────────┐   RecordPixels()   ┌─────────────┐  │
-│  │  Screen /    │──────────────────▶│  PixelEncoder│  │
-│  │  Cursor API  │                   │  (SDR_SOM)   │  │
-│  └──────────────┘                   └──────┬───────┘  │
-│                                            │           │
-│                          ┌─────────────────┴────────┐  │
-│                          │  VisionStreamProcessor    │  │
-│                          │  (BlockBehaviourManagerSOM│  │
-│                          │   Layer 3A / 3B)          │  │
-│                          └─────────────┬─────────────┘  │
-│                                        │                │
-│                          ┌─────────────▼─────────────┐  │
-│                          │   HippocampalComplex       │  │
-│                          │   (Graph + Objects)        │  │
-│                          └───────────────────────────┘  │
-└────────────────────────────────────────────────────────┘
+                    ┌───────────────────────────────────────────┐
+                    │              ORCHESTRATOR                 │
+                    │  (Central Controller — owns all control   │
+                    │   flow, phase switching, and coordination) │
+                    │                                           │
+                    │  RecordPixels()  TrainImage()  GetPredictedObject()
+                    └──────────┬─────────────────┬─────────────┘
+                               │                 │
+              ┌────────────────┘                 └─────────────────┐
+              │ Screen capture + encode                             │ Store/query
+              │ SendApical(N)                                       │ spatial location
+              ▼                                                     ▼
+┌─────────────────────────────┐               ┌──────────────────────────────┐
+│   VisionStreamProcessor     │               │     HippocampalComplex       │
+│  ┌───────────────────────┐  │               │  ┌────────────────────────┐  │
+│  │   PixelEncoder        │  │               │  │  Graph (quad-tree)     │  │
+│  │  (SDR_SOM encoding)   │  │               │  │  RecognisedVisualEntity│  │
+│  └──────────┬────────────┘  │               │  │  UnrecognisedEntity    │  │
+│             │               │               │  └────────────────────────┘  │
+│  ┌──────────▼────────────┐  │               │                              │
+│  │BlockBehaviourManagerSOM│ │               │  StoreNewObjectLocationInGraph│
+│  │  (Sequence Memory)    │  │               │  ConvertUnrecognised→Recognised
+│  │  Layer 3A / 3B        │  │               │                              │
+│  └──────────┬────────────┘  │               └──────────────────────────────┘
+│             │               │
+│  CurrentPredictions         │
+└─────────────────────────────┘
 ```
 
 ---
@@ -602,46 +611,51 @@ The 5 repetitions in `SendApical(5)` allow the SOM to see the same pattern multi
 ## 7. Full Data-Flow Diagram
 
 ```
-Screen
-  │
-  │ CopyFromScreen()
-  ▼
-Bitmap (3600×1800 BROAD  or  600×600 NARROW)
-  │
-  │ ConverToEdgedBitmap()   [Canny edge detection via OpenCvSharp]
-  ▼
-Edge Bitmap
-  │
-  ├──────────────────────────────────────────────────────────────────┐
-  │  PHASE 1 (BROAD)                                                 │
-  │  SegmentObjectsFromMat()                                         │
-  │  → List<DetectedRegion>  ─────────────────────────────────────▶ │
-  │                                         used to steer Phase 2   │
-  └──────────────────────────────────────────────────────────────────┘
-  │
-  │  PHASE 2 (NARROW)
-  │  PixelEncoder.EncodeBitmap()
-  ▼
-SDR_SOM (List<Position_SOM>, iType.SPATIAL)
-  │
-  ├──────────────────────────────────────────────────────┐
-  │                                                      │
-  │ VisionStreamProcessor.SendApical(5)                  │ Orchestrator.TrainImage()
-  │    apical_SOM (iType.APICAL) × 5 firings             │    StoreNewObjectLocationInGraph()
-  ▼                                                      ▼
-BlockBehaviourManagerSOM                        HippocampalComplex
-  │                                                      │
-  │  Sequence Memory                                     │  Quad-tree Graph
-  │  Higher-Order Sequencing                             │  Screen-space positions
-  │  Temporal Distal Dendrites                           │  RecognisedVisualEntity
-  ▼                                                      ▼
-CurrentPredictions (List<string>)             Objects["label"] + Graph nodes
-  │                                                      │
-  └──────────────────────────────────────────────────────┘
-                          │
-                          ▼
-               Orchestrator.GetPredictedObject()
-               → recognised label + spatial position
+                           ┌──────────────────────────────────────────┐
+                           │              ORCHESTRATOR                │
+                           │   (Central Controller — drives all phases│
+                           │    and coordinates every subsystem)      │
+                           └──────┬──────────────────────┬────────────┘
+                                  │                      │
+              ┌───────────────────▼──────────┐    ┌──────▼───────────────────────┐
+              │     VisionStreamProcessor    │    │      HippocampalComplex      │
+              │                              │    │                              │
+              │  RecordPixels()              │    │  TrainImage()                │
+              │  CopyFromScreen()            │    │  StoreNewObjectLocationInGraph│
+              │  ConverToEdgedBitmap()       │    │  GetPredictedObject()        │
+              │  (Canny edge detection)      │    │                              │
+              └──────────┬───────────────────┘    └──────┬───────────────────────┘
+                         │                               │
+          ┌──────────────▼────────────────┐     ┌────────▼────────────────┐
+          │  PHASE 1 (BROAD 3600×1800)    │     │  Graph (quad-tree)      │
+          │  SegmentObjectsFromMat()      │     │  RecognisedVisualEntity │
+          │  → List<DetectedRegion>       │     │  UnrecognisedEntity     │
+          └──────────┬────────────────────┘     │  Objects["label"]       │
+                     │                          │  Screen-space positions │
+          ┌──────────▼────────────────────┐     └─────────────────────────┘
+          │  PHASE 2 (NARROW 600×600)     │
+          │  PixelEncoder.EncodeBitmap()  │
+          │  → SDR_SOM (iType.SPATIAL)    │
+          │                               │
+          │  VisionStreamProcessor        │
+          │    .SendApical(5)             │
+          │    (iType.APICAL × 5 firings) │
+          └──────────┬────────────────────┘
+                     │
+          ┌──────────▼────────────────────┐
+          │   BlockBehaviourManagerSOM    │
+          │   (Sequence Memory)           │
+          │   Higher-Order Sequencing     │
+          │   Temporal Distal Dendrites   │
+          │                               │
+          │  → CurrentPredictions         │
+          │     (List<string>)            │
+          └───────────────────────────────┘
+                     │
+                     └─────────────────────────────────────┐
+                                                           ▼
+                                              Orchestrator.GetPredictedObject()
+                                              → recognised label + spatial position
 ```
 
 ---
