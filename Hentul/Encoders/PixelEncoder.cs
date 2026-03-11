@@ -41,15 +41,18 @@ namespace Hentul.Encoders
         // actual value depends on the GridX/GridY provided.
         public readonly long Step;
 
+        private SDR_SOM _cached;
+
+
         public PixelEncoder(int X, int Y)
         {
             GridX = X;
             GridY = Y;
             TotalCells = (long)GridX * GridY;
 
-            if (TotalCells < (ImgWidth * ImgHeight))
+            if (TotalCells < (PixelCount))
             {
-                throw new InvalidOperationException("TotalCells in Grid must be greater than or equal to the total bitmap pixel count (ImgWidth * ImgHeight).");
+                throw new InvalidOperationException("TotalCells in Grid must be greater than or equal to the incoming  bitmap pixel count (ImgWidth * ImgHeight).");
             }
 
             Step = TotalCells / PixelCount;
@@ -73,8 +76,8 @@ namespace Hentul.Encoders
             }
             else if (vScope == VisionScope.BROAD)
             {
-                var expectedW = ImgWidth * 3;
-                var expectedH = ImgHeight * 3;
+                var expectedW = ImgWidth * 6;   // 3600
+                var expectedH = ImgHeight * 3;  // 1800
                 if (bmp.Width != expectedW || bmp.Height != expectedH)
                     throw new InvalidOperationException($"For BROAD vision, bitmap must be {expectedW}x{expectedH}.");
             }
@@ -93,33 +96,43 @@ namespace Hentul.Encoders
 
             var list = new List<Position_SOM>(PixelCount);
 
-            // sampling scale and step: broad = sparser sampling (scale 3, step 3), narrow = dense (scale 1, step 1)
-            int scale = (vScope == VisionScope.BROAD) ? 3 : 1;
-            int step = (vScope == VisionScope.BROAD) ? 3 : 1;
+            // For BROAD: scaleX=6 maps 3600→600, scaleY=3 maps 1800→600
+            // For NARROW/OBJECT: scale=1 (no downsampling)
+            int scaleX = (vScope == VisionScope.BROAD) ? 6 : 1;
+            int scaleY = (vScope == VisionScope.BROAD) ? 3 : 1;
+            int stepX  = scaleX;
+            int stepY  = scaleY;
 
-            // Determine square half-size (offset) centered on cursorPosition.
-            // Use a base half-size derived from the base image; for BROAD multiply by 3.
-            int baseHalf = Math.Min(ImgWidth, ImgHeight) / 2;      // base half-size (300 for 1200x600 -> min=600 -> 300)
-            int offset = (vScope == VisionScope.BROAD) ? baseHalf * 3 : baseHalf;
+            // For NARROW/OBJECT the bitmap is already captured centered on the cursor.
+            // Using screen coordinates here would only encode a small off-center strip.
+            // Always treat the window center as the bitmap's geometric center.
+            Position2D encodingPos = (vScope == VisionScope.NARROW || vScope == VisionScope.OBJECT)
+                ? new Position2D(bmp.Width / 2, bmp.Height / 2)
+                : cursorPosition;
 
-            int width = bmp.Width;
+            // Half-window offsets centered on encodingPos
+            // BROAD: offsetX=1800 (half of 3600), offsetY=900 (half of 1800)
+            int offsetX = (vScope == VisionScope.BROAD) ? (ImgWidth / 2) * 6 : ImgWidth / 2;
+            int offsetY = (vScope == VisionScope.BROAD) ? (ImgHeight / 2) * 3 : ImgHeight / 2;
+
+            int width  = bmp.Width;
             int height = bmp.Height;
 
             // Square bounds (clamped to image)
-            int startY = Math.Max(0, cursorPosition.Y - offset);
-            int endY   = Math.Min(height - 1, cursorPosition.Y + offset);
-            int startX = Math.Max(0, cursorPosition.X - offset);
-            int endX   = Math.Min(width - 1, cursorPosition.X + offset);
+            int startY = Math.Max(0, encodingPos.Y - offsetY);
+            int endY   = Math.Min(height - 1, encodingPos.Y + offsetY);
+            int startX = Math.Max(0, encodingPos.X - offsetX);
+            int endX   = Math.Min(width - 1, encodingPos.X + offsetX);
 
-            for (int y = startY; y <= endY; y += step)
+            for (int y = startY; y <= endY; y += stepY)
             {
-                for (int x = startX; x <= endX; x += step)
+                for (int x = startX; x <= endX; x += stepX)
                 {
                     if (CheckIfColorIsWhite(bmp.GetPixel(x, y)))
                     {
-                        // If the input bitmap is BROAD (3x), downsample coordinates before mapping
-                        int mappedPx = Math.Clamp(x / scale, 0, ImgWidth - 1);
-                        int mappedPy = Math.Clamp(y / scale, 0, ImgHeight - 1);
+                        // Downsample coordinates to fit the 600x600 encoding grid
+                        int mappedPx = Math.Clamp(x / scaleX, 0, ImgWidth - 1);
+                        int mappedPy = Math.Clamp(y / scaleY, 0, ImgHeight - 1);
 
                         var pos = GetMappedPosition(mappedPx, mappedPy);
                         list.Add(pos);
@@ -127,8 +140,23 @@ namespace Hentul.Encoders
                 }
             }
 
-            return new SDR_SOM(GridX, GridY, list, iType.SPATIAL);
+            _cached = new SDR_SOM(GridX, GridY, list, iType.SPATIAL);
+
+            return _cached;
         }
+
+        public SDR_SOM GetCahced()
+        {
+            if(_cached == null)
+            {
+                throw new InvalidOperationException("Cache is Null!! You messed up somewhere! Check your code right!!! Damn!");
+            }
+
+            return _cached;
+        }
+
+
+        public void ClearCache() => _cached = null;
 
         private bool CheckIfColorIsWhite(Color color)
            => color.R > 240 && color.G > 240 && color.B > 240;

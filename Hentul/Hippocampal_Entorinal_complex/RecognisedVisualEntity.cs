@@ -58,6 +58,7 @@ namespace Hentul.Hippocampal_Entorinal_complex
             {
                 sensei.RefreshID();
             }
+
             frame = new RFrame(ObjectSnapshot);
         }
 

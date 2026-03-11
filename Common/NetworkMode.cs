@@ -2,6 +2,7 @@
 {
     public enum NetworkMode
     {
+        EXPLORE,
         TRAINING,
         PREDICTION,
         DONE

@@ -17,27 +17,22 @@
 
         public Position CurrentPosition { get; private set; }
 
-        public Position[] BoundaryPositions { get; private set; }
+        public RFrame GlobalFrame { get; private set; }
 
-        private NetworkMode networkMode;
-
-        private List<RecognisedVisualEntity> matchingObjectList;
-
-        private Position _cachedPosition;
+        private NetworkMode networkMode;                
 
         private RecognisedVisualEntity currentmatchingObject;
+
+
         private static readonly string baseDir = AppContext.BaseDirectory;
+
         public RecognitionState ObjectState { get; private set; }
 
         public int currentIterationToConfirmation;
 
-        public int NumberOfITerationsToConfirmation { get; private set; }
+        public int NumberOfIterationsToConfirmation { get; private set; }
 
-        private string backupDir;
-
-        private List<string> objectlabellist;
-
-        private int imageIndex;
+        private string backupDir;                
 
         private bool isMock;
 
@@ -49,21 +44,11 @@
             CurrentObject.Label = firstLabel;
             isMock = Ismock;
             networkMode = nMode;
-            NumberOfITerationsToConfirmation = 6;
-            matchingObjectList = new List<RecognisedVisualEntity>();
+            NumberOfIterationsToConfirmation = 6;            
             currentmatchingObject = null;
             ObjectState = RecognitionState.None;
             currentIterationToConfirmation = 0;
-            backupDir = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\")); 
-            objectlabellist = new List<string>
-            {
-                "Apple",
-                "Ananas",
-                "Watermelon",
-                "JackFruit",
-                "Grapes"
-            };
-            imageIndex = 1;
+            backupDir = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\BackUp\HC-EC\"));                         
         }
 
         #endregion
@@ -71,53 +56,128 @@
 
         #region PUBLIC API
 
-        #region PREDICTION
+        #region OBJECT PERMANENCE
 
-
-        public bool AddNewSensationLocationToObject(Sensation_Location sensei)
+        public void SetupGlobalRFrame(uint right, uint up)
         {
-            if (CurrentObject.sType == SenseType.Unknown)
-                CurrentObject.sType = SenseType.SenseNLocation;
+            // Stores the entire primary screens dimensions adn insitalises graph
 
-            if (CurrentObject.sType == SenseType.SenseOnly)
-            {
-                throw new InvalidOperationException(" Cannot add a Sense Location to a Sense Only Object !");
-            }
-
-            // Need to include logic for what object is currently being sensed and
-            return CurrentObject.AddNewSenei(sensei);            
+            Graph.InitGraph(right, up);
         }
 
-        public bool AddNewSensationToObject(Sensation sensation)
+        /// <summary>
+        /// Initialises the environment with the primary screen dimensions.
+        /// Call once at startup before any training or exploration begins.
+        /// Sets the Graph's environment bounds so all object positions are
+        /// validated and stored relative to the full screen space.
+        /// </summary>
+        public void InitialiseEnvironment(int screenWidth, int screenHeight)
         {
-            if(ValidateTInput(sensation))
-            { 
-                return CurrentObject.AddNewSensationToObject(sensation);
-            }
-
-            return false;
-        }        
-
-        /// Uses Graph to predict object and store them                
-        public List<Position2D> StoreObjectInGraph(Sensation_Location sensei, Sensation_Location? predictionU, bool isMock = false)
-        {
-            // Get predicted Labels 
-
-            string objectLabel = null;
-            List<Position2D> toReturn = null;
-            Sensation_Location orginalSensei = sensei;
-
-            if (networkMode != NetworkMode.PREDICTION)
-            {
-                throw new InvalidOperationException("cannot Predict Objects unless in network is in Prediction Mode!");
-            }
-
-            // Use Verify Method to verify incoming object.
-            // 
-
-            return null;
+            Graph.SetEnvironmentBounds(screenWidth, screenHeight);
         }
 
+        /// <summary>Returns the environment dimensions set at startup.</summary>
+        public EnvironmentBounds GetEnvironmentBounds() => Graph.Environment;
+
+        /// <summary>Returns bounding boxes for all objects currently loaded in the environment.</summary>
+        public IReadOnlyList<ObjectBounds> GetAllObjectsInEnvironment() => Graph.GetAllObjectsInEnvironment();
+
+        /// <summary>Returns the bounding box for a specific object by label, or null if not loaded.</summary>
+        public ObjectBounds GetObjectBounds(string label) => Graph.GetObjectBounds(label);
+
+        /// <summary>Returns all objects whose bounding boxes overlap the given screen region.</summary>
+        public List<ObjectBounds> GetObjectsInRegion(int x, int y, int width, int height) =>
+            Graph.GetObjectsInRegion(x, y, width, height);
+
+        /// <summary>Returns all objects present at a specific screen position.</summary>
+        public List<ObjectBounds> GetObjectsAtPosition(Position2D pos) =>
+            Graph.GetObjectsAtPosition(pos);
+
+
+
+
+        /// In Broad vision mode and experienced a new object and now trying to store a rough representation            
+        public List<Position2D> StoreNewObjectLocationInGraph(SDR_SOM sdr, int offsetX, int offsetY, bool isMock = false)
+        {        
+            //Ensure visionScope is Broad and networkMode is Training mode
+            //Collect the broad narrow sensation and store it into entity/ nide and sotre in Graph sngleton object.
+
+            if (networkMode == NetworkMode.PREDICTION)
+            {
+                throw new InvalidOperationException("Network should be in training mode while recognising environment");
+            }
+
+            //Todo: Only valid till LEarnSpecificObject() method is NOT complete!
+            if (Orchestrator.GetInstance().visionScope != VisionScope.BROAD)     
+            {
+                throw new InvalidOperationException("Vision Scope should always be BROAD to process locations!");
+            }
+
+            if (sdr == null)
+                throw new System.ArgumentNullException(nameof(sdr));
+
+            // nothing to add
+            if (sdr.ActiveBits == null || sdr.ActiveBits.Count == 0)
+                return new List<Position2D>();
+
+            var addedPositions = new List<Position2D>();
+
+            // Parse through each Position_SOM in ActiveBits and add as a node in the Graph.
+            // Convert Position_SOM (X, Y) to Position2D and add to Graph.
+            foreach (var posSom in sdr.ActiveBits)
+            {
+                try
+                {
+                    // Convert Position_SOM to Position2D using X and Y coordinates
+                    var pos = new Position2D(posSom.X + offsetX, posSom.Y + offsetY);
+                    
+                    if (pos == null)
+                        continue;
+
+                    // Graph.AddNewNode returns bool; it will return false for invalid coordinates (<= 0)
+                    // We attempt to add and collect successfully added positions.
+                    bool added = false;
+                    try
+                    {
+                        added = Graph.AddNewNode(pos);
+                    }
+                    catch
+                    {
+                        // swallow exceptions from Graph (e.g., invalid pos) and continue
+                        added = false;
+                    }
+
+                    if (added)
+                        addedPositions.Add(pos);
+                }
+                catch
+                {
+                    // If conversion fails for any position, skip it and continue.
+                    continue;
+                }
+            }
+
+
+            return addedPositions;
+        }       
+
+        public void DoneWithTraining(string label = "")
+        {
+            ConvertUnrecognisedObjectToRecognisedObject();
+
+            CurrentObject = new UnrecognisedEntity();
+
+            if (label != "")
+            {
+                CurrentObject.Label = label;
+                CurrentObject.sType = SenseType.Unknown;
+                return;
+            }
+
+            if (CurrentObject.Label == string.Empty)
+            {                
+            }
+        }
 
         private RecognisedVisualEntity GetRecognisedEntityFromList(string label)
         {
@@ -138,28 +198,35 @@
             }
 
             return matchedEntity;
-        }        
-
-        public void DoneWithTraining(string label = "")
-        {
-            ConvertUnrecognisedObjectToRecognisedObject();
-
-            CurrentObject = new UnrecognisedEntity();
-
-            if (label != "")
-            {
-                CurrentObject.Label = label;
-                CurrentObject.sType = SenseType.Unknown;
-                return;
-            }
-
-            if (CurrentObject.Label == string.Empty)
-            {
-                CurrentObject.Label = objectlabellist[imageIndex];
-                CurrentObject.sType = SenseType.Unknown;
-                imageIndex++;
-            }
         }
+
+        #region LEGACY 
+
+        public bool AddNewSensationLocationToObject(Sensation_Location sensei)
+        {
+            if (CurrentObject.sType == SenseType.Unknown)
+                CurrentObject.sType = SenseType.SenseNLocation;
+
+            if (CurrentObject.sType == SenseType.SenseOnly)
+            {
+                throw new InvalidOperationException(" Cannot add a Sense Location to a Sense Only Object !");
+            }
+
+            // Need to include logic for what object is currently being sensed and
+            return CurrentObject.AddNewSenei(sensei);
+        }
+
+        public bool AddNewSensationToObject(Sensation sensation)
+        {
+            if (ValidateTInput(sensation))
+            {
+                return CurrentObject.AddNewSensationToObject(sensation);
+            }
+
+            return false;
+        }
+
+        #endregion
 
         #endregion
 
@@ -368,9 +435,7 @@
             }
 
             if (CurrentObject.Label == string.Empty)
-            {
-                CurrentObject.Label = objectlabellist[imageIndex];
-                imageIndex++;
+            {                
             }
 
             RecognisedVisualEntity newObject = new RecognisedVisualEntity(CurrentObject);
@@ -378,6 +443,8 @@
             newObject.DoneTraining();
 
             Objects.Add(newObject.Label, newObject);
+
+            Graph.LoadObject(newObject);
         }
 
 
@@ -469,8 +536,7 @@
 
             if (CurrentObject == null)
             {
-                CurrentObject = new UnrecognisedEntity();
-                CurrentObject.Label = objectlabellist[imageIndex++];
+                CurrentObject = new UnrecognisedEntity();                
             }
         }
 

@@ -3,12 +3,14 @@
     using Common;
     using System.Runtime.InteropServices;
     using System;
+    using System.Linq;
     using Hentul.Hippocampal_Entorinal_complex;
     using System.Drawing.Imaging;
     using System.Drawing;    
 
     public class Orchestrator
     {
+
 
         public struct POINT
         {
@@ -31,13 +33,64 @@
         public static extern long SetCursorPos(int x, int y);
         [DllImport("User32.Dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+        [DllImport("user32.dll")]
+        public static extern int GetSystemMetrics(int nIndex);
+        // SM_CXSCREEN = 0 (primary screen width), SM_CYSCREEN = 1 (primary screen height)
+        private const int SM_CXSCREEN = 0;
+        private const int SM_CYSCREEN = 1;
+
+        // Monitor enumeration P/Invoke
+        private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT { public int Left, Top, Right, Bottom; }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
+            private const uint MONITORINFOF_PRIMARY = 1;
+            public bool IsPrimary => (dwFlags & MONITORINFOF_PRIMARY) != 0;
+        }
+
+        [ThreadStatic]
+        private static List<Rectangle>? _monitorCollector;
+
+        /// <summary>Returns the bounds of the first non-primary monitor, or null if none exists.</summary>
+        private static Rectangle? GetSecondaryScreenBounds()
+        {
+            _monitorCollector = new List<Rectangle>();
+            EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, SecondaryMonitorCallback, IntPtr.Zero);
+            var result = _monitorCollector.Count > 0 ? _monitorCollector[0] : (Rectangle?)null;
+            _monitorCollector = null;
+            return result;
+        }
+
+        private static bool SecondaryMonitorCallback(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData)
+        {
+            var info = new MONITORINFO { cbSize = Marshal.SizeOf(typeof(MONITORINFO)) };
+            if (GetMonitorInfo(hMonitor, ref info) && !info.IsPrimary)
+            {
+                var r = info.rcMonitor;
+                _monitorCollector!.Add(new Rectangle(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top));
+                return false; // stop after first secondary
+            }
+            return true;
+        }
         #endregion
 
         #region CONSTRUCTOR
 
-        #region Used Variables                
-
-        private bool LogMode { get; set; }
+        #region Used Variables                        
 
         public bool IsMock { get; private set; }
 
@@ -51,11 +104,11 @@
 
         public string logFileName;
 
-        public LogMode logMode;         
+        public LogMode logMode;
 
-        private List<string> objectlabellist { get; set; }
+        private const string objectString = "Objejct";
 
-        private int imageIndex { get; set; }
+        private int objectIndex { get; set; }
 
         private string fileName;
 
@@ -69,36 +122,25 @@
 
         public ulong CycleNum { get; private set; }                        
 
-        public VisionScope visionScope { get; private set; }
+        public VisionScope visionScope { get; set; }
 
         #endregion
 
         private static readonly string baseDir = AppContext.BaseDirectory;
         
         private Orchestrator(bool isMock = false, bool ShouldInit = true, NetworkMode nMode = NetworkMode.TRAINING, int mockImageIndex = 7)
-        {            
-            LogMode = false;            
+        {                        
             NMode = nMode;
-            logMode = Common.LogMode.BurstOnly;
+            logMode = LogMode.BurstOnly;
             
             VisionProcessor = new VisionStreamProcessor(logMode, isMock, ShouldInit);
             TextProcessor = new TextStreamProcessor(10, 5, logMode);
 
-            if (isMock)
-                ImageIndex = mockImageIndex;
-            else
-                ImageIndex = 0;
+            HCAccessor = new HippocampalComplex("Object0", isMock, nMode);            
 
-            Init();
+            Init();                        
 
-            HCAccessor = new HippocampalComplex("Apple", isMock, nMode);
-
-            objectlabellist = new List<string>
-            {
-                "Apple", "Ananas", "Watermelon", "JackFruit", "Grapes"
-            };
-
-            imageIndex = 1;
+            objectIndex = 1;
             fileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
             logFileName = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Logs\Hentul-Orchestrator.log"));
             visionScope = VisionScope.NARROW;
@@ -120,9 +162,13 @@
             Console.WriteLine("Finished Init for this Instance \n");            
             Console.WriteLine("Initing SOM Instance now ... \n");
             Console.WriteLine("Finished Init for SOM Instance , Total Time ELapsed : \n");
-            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
-        }
 
+            InitHC();
+
+
+            Console.WriteLine("Finished Initting of all Instances, System Ready!" + "\n");
+
+        }
 
         #endregion
 
@@ -131,33 +177,46 @@
 
         public void InitHC()
         {
-            // Capture entire screen dimensions.
-            // Initialise HC graph 
-            // move cursor with offsets and store rough object approxximations for there locations
-            HCAccessor.Init();
+            // Read primary screen dimensions via Win32 and initialise the Graph's environment bounds.
+            int screenWidth  = GetSystemMetrics(SM_CXSCREEN);
+            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+            HCAccessor.InitialiseEnvironment(screenWidth, screenHeight);
+
+            Console.WriteLine($"[HC] Environment initialised: {screenWidth}x{screenHeight}");
         }
 
 
-        public void SetUpLabel(Bitmap bmp, string objectLabel)
+        public bool SetupLabel(Bitmap bmp, string objectLabel = null)
         {   
             var currentMousePosition = GetCurrentPointerPosition1();
 
-            VisionProcessor.SetUpObjectLabelOnce(bmp, objectLabel, visionScope, currentMousePosition);
-            
+            if (NMode == NetworkMode.EXPLORE && string.IsNullOrEmpty(objectLabel))
+            {
+                objectLabel = GetNextObjectLabel();
+            }
 
-
-
-
+            return VisionProcessor.SetupLabel(bmp, objectLabel, visionScope, currentMousePosition);            
         }
 
+       
 
-        public void TrainImage()
+        public void TrainImage(int offsetX, int offsetY)
         {
-            VisionProcessor.Train();        //Train it 5 times.
 
-            VisionProcessor.SendApical(5);   //Reinforce it to solidify the learnings.
-        }
-        
+            var locationSDR = VisionProcessor.pEncoder.GetCahced();
+
+            // Count Total Number Of Objects in the processed chunk
+
+            // Transform each object into Entities
+
+            //Store them in HC-EC Complex.
+
+            HCAccessor.StoreNewObjectLocationInGraph(locationSDR, offsetX, offsetY);
+            
+            VisionProcessor.SendAPicalFeedback();            
+        }       
+
 
         public void AddNewCharacterSensationToHC(char ch)
         {
@@ -181,27 +240,37 @@
             {
                 throw new InvalidOperationException("Could Not Add Object to HC! Sensation already exist in the current Object");
             }
-        }       
+        }
+
 
         public void DoneWithTraining(string label = "")
         {
             HCAccessor.DoneWithTraining(label);
         }
 
-        public void ChangeNetworkToPredictionMode()
-        {
-            NMode = NetworkMode.PREDICTION;
-            VisionProcessor.SetNetworkModeToPrediction();
-            //HCAccessor.DoneWithTraining();
-            //HCAccessor.SetNetworkModeToPrediction()
-        }
 
-
+        //public void ChangeNetworkToPredictionMode()
+        //{
+        //    NMode = NetworkMode.PREDICTION;
+        //    VisionProcessor.SetNetworkModeToPrediction();
+        //    //HCAccessor.DoneWithTraining();
+        //    //HCAccessor.SetNetworkModeToPrediction()
+        //}
 
         #endregion
 
         #region PRIVATE HELPER METHODS
 
+        private string GetNextObjectLabel()
+        {
+            if (logMode >= LogMode.Trace)
+            {
+                WriteLogsToFile("Object Label i being changed to next label");
+            }
+
+            objectIndex++;
+            return objectString + objectIndex.ToString();
+        }
 
         private void GetPixelsAsPerScope()
         {
@@ -498,17 +567,7 @@
 
         public static void MoveCursorToSpecificPosition(int x, int y)
         {
-            POINT p;
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            p.X = x;
-            p.Y = y;
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
+            SetCursorPos(x, y);
         }
 
         public void MoveCursor(POINT p)
@@ -575,6 +634,52 @@
             return toRet;
         }
 
+
+        public void RecordPixels(VisionScope scope)
+        {
+            int w = 0;
+            int h = 0;
+
+            switch (scope)
+            {
+                case VisionScope.NARROW:
+                    w = 600;
+                    h = 600;
+                    break;
+                case VisionScope.BROAD:
+                    w = 3600;
+                    h = 1800;
+                    break;
+            };
+
+            var cur = GetCurrentPointerPosition();
+            var screen = GetSecondaryScreenBounds() ?? new Rectangle(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+
+            int x = Math.Max(screen.Left, Math.Min(cur.X - w / 2, screen.Right  - w));
+            int y = Math.Max(screen.Top,  Math.Min(cur.Y - h / 2, screen.Bottom - h));
+
+            bmp = CaptureScreenRegion(new Rectangle(x, y, w, h));
+        }
+
+        public void RecordPixels(int width, int height)
+        {
+            var cur = GetCurrentPointerPosition();
+            var screen = GetSecondaryScreenBounds() ?? new Rectangle(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+
+            int x = Math.Max(screen.Left, Math.Min(cur.X - width  / 2, screen.Right  - width));
+            int y = Math.Max(screen.Top,  Math.Min(cur.Y - height / 2, screen.Bottom - height));
+
+            bmp = CaptureScreenRegion(new Rectangle(x, y, width, height));
+        }
+
+        private Bitmap CaptureScreenRegion(Rectangle rect)
+        {
+            var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            using var g = Graphics.FromImage(bmp);
+            g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
+            return bmp;
+        }
+
         public bool CheckifPixelisBlack(int x, int y)
         {
             if (x >= bmp.Width || y >= bmp.Height)
@@ -585,11 +690,11 @@
             return (color.R < 200 && color.G < 200 && color.B < 200);
         }
 
-        public void ChangeNetworkModeToPrediction()
+        public void ChangeNetworkModeToPrediction(bool isMock = false)
         {
-            NMode = NetworkMode.PREDICTION;            
-            VisionProcessor.SetNetworkModeToPrediction();
-            //HCAccessor.SetNetworkModeToPrediction();
+            NMode = NetworkMode.PREDICTION;
+            VisionProcessor.SetNetworkModeToPrediction(isMock);
+            HCAccessor.SetNetworkModeToPrediction();
         }
 
         public void ChangeNetworkModeToTraining()
@@ -597,8 +702,15 @@
             NMode = NetworkMode.TRAINING;
             HCAccessor.SetNetworkModeToTraining();
         }
-       
 
+        public void SetVisionScope(VisionScope scope, bool isMock = false)
+        {
+            if (!isMock)
+                throw new InvalidOperationException("Cannot Set Vision Scope from Outside the class!");
+
+            visionScope = scope;
+        }
+       
         public void BackUp()
         {
             
@@ -625,7 +737,7 @@
         //{
         //    Position2D motorOutput = null;
         //    List<Position2D> positionToConfirm = new List<Position2D>();
-
+        
         //    if (!NMode.Equals(NetworkMode.PREDICTION))
         //    {
         //        throw new InvalidOperationException("Invalid State Managemnt!");
@@ -752,41 +864,6 @@
         //    VisionProcessor.LearnNewObject(v);
         //}
 
-        //public void RecordPixels(LearningUnitType regionType = LearningUnitType.V1)
-        //{
-        //    int currentRange = regionType switch
-        //    {
-        //        LearningUnitType.V1 => Range,      // 10  -> 40x20
-        //        LearningUnitType.V2 => Range * 5,  // 50  -> 200x100
-        //        LearningUnitType.V3 => Range * 10, // 100 -> 400x200
-        //        _ => Range
-        //    };
-
-        //    var cur = GetCurrentPointerPosition();
-        //    int w = currentRange * 4;
-        //    int h = currentRange * 2;
-
-        //    int x = Math.Max(0, cur.X - currentRange);
-        //    int y = Math.Max(0, cur.Y - currentRange);
-
-        //    var rect = new Rectangle(x, y, w, h);
-
-        //    switch (regionType)
-        //    {
-        //        case LearningUnitType.V1: bmp = CaptureScreenRegion(rect); break;
-        //        case LearningUnitType.V2: bmpV2 = CaptureScreenRegion(rect); break;
-        //        case LearningUnitType.V3: bmpV3 = CaptureScreenRegion(rect); break;
-        //    }
-        //}
-
-        //private Bitmap CaptureScreenRegion(Rectangle rect)
-        //{
-        //    var bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-        //    using var g = Graphics.FromImage(bmp);
-        //    g.CopyFromScreen(rect.Location, Point.Empty, rect.Size);
-        //    return bmp;
-        //}
-
         #endregion
     }
 
@@ -806,6 +883,16 @@
         OBJECT,
         BROAD,
         INVALID
+    }
+
+    /// <summary>
+    /// A screen-space region discovered during a BROAD scan.
+    /// Produced by Phase 1 (contour detection) and consumed by Phase 2 (NARROW deep learning).
+    /// </summary>
+    public record DetectedRegion(int ScreenX, int ScreenY, int Width, int Height)
+    {
+        public int CenterX => ScreenX + Width / 2;
+        public int CenterY => ScreenY + Height / 2;
     }
 
     #endregion
