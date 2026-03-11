@@ -335,12 +335,15 @@
         /// <summary>
         /// Train the network on Pattern A (3 spatial steps) once, then reinforce via 10 rounds
         /// of apical feedback for the same pattern. After switching to prediction mode, fire 3
-        /// sequences that are "similar but different" to Pattern A and assert that none of them
-        /// causes the network to predict Pattern A.
-        /// 
-        /// Pattern B1 shares one position with A's first step, then diverges.
-        /// Pattern B2 has an unrelated first step, shares one position with A's second step, then diverges.
-        /// Pattern B3 is completely unrelated to Pattern A in all three steps.
+        /// sequences that are "similar but different" to Pattern A — same 3-step structure and
+        /// same number of active positions per step, but using entirely different SOM columns —
+        /// and assert that none of them causes the network to predict Pattern A.
+        ///
+        /// The SOM prediction mechanism is column-specific: when untrained columns fire they
+        /// burst-produce empty cycle predictions, so the network will not lock on to "PatternA".
+        /// This verifies that the learned pattern identity is not spuriously generalised.
+        ///
+        /// B1 (X≈400–640), B2 (X≈150–390 gaps), and B3 (X≈700–940) are the three test sequences.
         /// </summary>
         [Test]
         [Description("Train Pattern A + 10 apical reinforcements; verify 3 similar-but-different patterns do not elicit a Pattern A prediction")]

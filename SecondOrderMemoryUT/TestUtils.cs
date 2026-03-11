@@ -471,68 +471,71 @@
         }
 
         /// <summary>
-        /// Returns 9 SDRs (3 patterns × 3 steps) similar in structure to Pattern A but with
-        /// different exact column positions so that Pattern A's temporal chains are not triggered.
+        /// Returns 9 SDRs (3 patterns × 3 steps) that are structurally similar to Pattern A
+        /// (same 3-step format, 5 positions per step, X values progressing in ~100-unit increments)
+        /// but use entirely different column positions — zero overlap with Pattern A's trained columns.
         ///
-        /// B1 (indices 0–2): shares one position with A step-1, diverges completely after.
-        /// B2 (indices 3–5): unrelated step-1, shares one position with A step-2, diverges for step-3.
-        /// B3 (indices 6–8): entirely unrelated to Pattern A in all three steps.
+        /// Pattern A trains on: X≈100–140 (step1), X≈200–240 (step2), X≈300–340 (step3).
+        /// Firing columns that were never trained produces empty cycle-predictions, so the network
+        /// will NOT classify any of these sequences as "PatternA".
+        ///
+        /// B1 (indices 0–2): X≈400–640 (same spacing as A, different location).
+        /// B2 (indices 3–5): X≈150–390 (in the gaps between A's trained bands).
+        /// B3 (indices 6–8): X≈700–940 (distant region).
         /// </summary>
         internal static List<SDR_SOM> GenerateSimilarButDifferentPatternsForApicalTest()
         {
             const int length = 1200, breadth = 600;
 
-            // B1 — shares Position(100,0,0) with A step-1; all other positions differ
+            // B1 — same 10-unit spacing as A but at X=400–640
             var b1Step1 = new List<Position_SOM>
             {
-                new Position_SOM(100, 0, 0),   // shared with A step-1
-                new Position_SOM(113, 1, 1), new Position_SOM(123, 2, 2),
-                new Position_SOM(133, 3, 3), new Position_SOM(143, 4, 4)
+                new Position_SOM(400, 0, 0), new Position_SOM(410, 1, 1),
+                new Position_SOM(420, 2, 2), new Position_SOM(430, 3, 3), new Position_SOM(440, 4, 4)
             };
             var b1Step2 = new List<Position_SOM>
             {
-                new Position_SOM(207, 0, 0), new Position_SOM(217, 1, 1),
-                new Position_SOM(227, 2, 2), new Position_SOM(237, 3, 3), new Position_SOM(247, 4, 4)
+                new Position_SOM(500, 0, 0), new Position_SOM(510, 1, 1),
+                new Position_SOM(520, 2, 2), new Position_SOM(530, 3, 3), new Position_SOM(540, 4, 4)
             };
             var b1Step3 = new List<Position_SOM>
             {
-                new Position_SOM(307, 0, 0), new Position_SOM(317, 1, 1),
-                new Position_SOM(327, 2, 2), new Position_SOM(337, 3, 3), new Position_SOM(347, 4, 4)
+                new Position_SOM(600, 0, 0), new Position_SOM(610, 1, 1),
+                new Position_SOM(620, 2, 2), new Position_SOM(630, 3, 3), new Position_SOM(640, 4, 4)
             };
 
-            // B2 — unrelated step-1; shares Position(200,0,0) with A step-2; diverges for step-3
+            // B2 — same structure, X=150–390 (fills the gaps between A's trained bands)
             var b2Step1 = new List<Position_SOM>
             {
-                new Position_SOM(155, 0, 0), new Position_SOM(165, 1, 1),
-                new Position_SOM(175, 2, 2), new Position_SOM(185, 3, 3), new Position_SOM(195, 4, 4)
+                new Position_SOM(150, 0, 0), new Position_SOM(160, 1, 1),
+                new Position_SOM(170, 2, 2), new Position_SOM(180, 3, 3), new Position_SOM(190, 4, 4)
             };
             var b2Step2 = new List<Position_SOM>
             {
-                new Position_SOM(200, 0, 0),   // shared with A step-2
-                new Position_SOM(213, 1, 1), new Position_SOM(223, 2, 2),
-                new Position_SOM(233, 3, 3), new Position_SOM(243, 4, 4)
+                new Position_SOM(250, 0, 0), new Position_SOM(260, 1, 1),
+                new Position_SOM(270, 2, 2), new Position_SOM(280, 3, 3), new Position_SOM(290, 4, 4)
             };
             var b2Step3 = new List<Position_SOM>
             {
-                new Position_SOM(355, 0, 0), new Position_SOM(365, 1, 1),
-                new Position_SOM(375, 2, 2), new Position_SOM(385, 3, 3), new Position_SOM(395, 4, 4)
+                new Position_SOM(350, 0, 0), new Position_SOM(360, 1, 1),
+                new Position_SOM(370, 2, 2), new Position_SOM(380, 3, 3), new Position_SOM(390, 4, 4)
             };
 
-            // B3 — completely unrelated to Pattern A in all three steps
+            // B3 — distant region, X=700–940
             var b3Step1 = new List<Position_SOM>
             {
-                new Position_SOM(450, 0, 0), new Position_SOM(460, 1, 1),
-                new Position_SOM(470, 2, 2), new Position_SOM(480, 3, 3), new Position_SOM(490, 4, 4)
+                new Position_SOM(700, 0, 0), new Position_SOM(710, 1, 1),
+                new Position_SOM(720, 2, 2), new Position_SOM(730, 3, 3), new Position_SOM(740, 4, 4)
             };
             var b3Step2 = new List<Position_SOM>
             {
-                new Position_SOM(550, 0, 0), new Position_SOM(560, 1, 1),
-                new Position_SOM(570, 2, 2), new Position_SOM(580, 3, 3), new Position_SOM(590, 4, 4)
+                new Position_SOM(800, 0, 0), new Position_SOM(810, 1, 1),
+                new Position_SOM(820, 2, 2), new Position_SOM(830, 3, 3), new Position_SOM(840, 4, 4)
             };
             var b3Step3 = new List<Position_SOM>
             {
-                new Position_SOM(650, 0, 0), new Position_SOM(660, 1, 1),
-                new Position_SOM(670, 2, 2), new Position_SOM(680, 3, 3), new Position_SOM(690, 4, 4)
+                new Position_SOM(900, 0, 0), new Position_SOM(910, 1, 1),
+                new Position_SOM(920, 2, 2), new Position_SOM(930, 3, 3), new Position_SOM(940, 4, 4)
             };
 
             return new List<SDR_SOM>
