@@ -52,6 +52,7 @@ namespace HentulWinforms
             pictureBox2 = new PictureBox();
             openFileDialog1 = new OpenFileDialog();
             pictureBox4 = new PictureBox();
+            button2 = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
@@ -249,18 +250,30 @@ namespace HentulWinforms
             // 
             // pictureBox4
             // 
-            pictureBox4.Location = new Point(578, 145);
+            pictureBox4.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            pictureBox4.Location = new Point(450, 145);
             pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(903, 611);
+            pictureBox4.Size = new Size(1800, 600);
             pictureBox4.TabIndex = 41;
             pictureBox4.TabStop = false;
+            // 
+            // button2
+            // 
+            button2.Location = new Point(207, 69);
+            button2.Name = "button2";
+            button2.Size = new Size(155, 39);
+            button2.TabIndex = 42;
+            button2.Text = "Explore";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += Explore_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
-            ClientSize = new Size(1924, 1002);
+            ClientSize = new Size(2272, 1581);
+            Controls.Add(button2);
             Controls.Add(pictureBox4);
             Controls.Add(pictureBox2);
             Controls.Add(label3);
@@ -335,5 +348,6 @@ namespace HentulWinforms
         private PictureBox pictureBox2;
         private OpenFileDialog openFileDialog1;
         private PictureBox pictureBox4;
+        private Button button2;
     }
 }

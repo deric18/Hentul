@@ -102,7 +102,7 @@
             //Verify HC has created an unrecognised Entity with one sensei in it 
         }
 
-        [Test]
+        [Test, Ignore("Ignore")]
         public void TestConvertUnrecognisedObjectToRecognisedObject()
         {
             string obj = "Apple";

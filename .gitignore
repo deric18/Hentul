@@ -13,6 +13,8 @@ Hentul/obj
 Hentul/bin
 Hentul.log
 Hentul/Images/.*
+# Generated binary schema caches (rebuilt automatically on first run)
+SecondOrderMemory/Schema Docs/**/*.bin
 #OS junk files
     [Tt]humbs.db
     *.DS_Store

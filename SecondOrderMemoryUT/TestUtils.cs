@@ -437,6 +437,123 @@
             return positionList;
         }
 
+        /// <summary>
+        /// Pattern A: a deterministic 3-step spatial sequence used in apical reinforcement tests.
+        /// Step 1 activates columns near X≈100–140, step 2 near X≈200–240, step 3 near X≈300–340.
+        /// All Y values are 0–4, all Z values are 0–4 (within the 1200×600×5 SOM).
+        /// </summary>
+        internal static List<SDR_SOM> GeneratePatternAForApicalTest()
+        {
+            const int length = 1200, breadth = 600;
+
+            var step1 = new List<Position_SOM>
+            {
+                new Position_SOM(100, 0, 0), new Position_SOM(110, 1, 1),
+                new Position_SOM(120, 2, 2), new Position_SOM(130, 3, 3), new Position_SOM(140, 4, 4)
+            };
+            var step2 = new List<Position_SOM>
+            {
+                new Position_SOM(200, 0, 0), new Position_SOM(210, 1, 1),
+                new Position_SOM(220, 2, 2), new Position_SOM(230, 3, 3), new Position_SOM(240, 4, 4)
+            };
+            var step3 = new List<Position_SOM>
+            {
+                new Position_SOM(300, 0, 0), new Position_SOM(310, 1, 1),
+                new Position_SOM(320, 2, 2), new Position_SOM(330, 3, 3), new Position_SOM(340, 4, 4)
+            };
+
+            return new List<SDR_SOM>
+            {
+                new SDR_SOM(length, breadth, step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, step3, iType.SPATIAL)
+            };
+        }
+
+        /// <summary>
+        /// Returns 9 SDRs (3 patterns × 3 steps) that are structurally similar to Pattern A
+        /// (same 3-step format, 5 positions per step, X values progressing in ~100-unit increments)
+        /// but use entirely different column positions — zero overlap with Pattern A's trained columns.
+        ///
+        /// Pattern A trains on: X≈100–140 (step1), X≈200–240 (step2), X≈300–340 (step3).
+        /// Firing columns that were never trained produces empty cycle-predictions, so the network
+        /// will NOT classify any of these sequences as "PatternA".
+        ///
+        /// B1 (indices 0–2): X≈400–640 (same spacing as A, different location).
+        /// B2 (indices 3–5): X≈150–390 (in the gaps between A's trained bands).
+        /// B3 (indices 6–8): X≈700–940 (distant region).
+        /// </summary>
+        internal static List<SDR_SOM> GenerateSimilarButDifferentPatternsForApicalTest()
+        {
+            const int length = 1200, breadth = 600;
+
+            // B1 — same 10-unit spacing as A but at X=400–640
+            var b1Step1 = new List<Position_SOM>
+            {
+                new Position_SOM(400, 0, 0), new Position_SOM(410, 1, 1),
+                new Position_SOM(420, 2, 2), new Position_SOM(430, 3, 3), new Position_SOM(440, 4, 4)
+            };
+            var b1Step2 = new List<Position_SOM>
+            {
+                new Position_SOM(500, 0, 0), new Position_SOM(510, 1, 1),
+                new Position_SOM(520, 2, 2), new Position_SOM(530, 3, 3), new Position_SOM(540, 4, 4)
+            };
+            var b1Step3 = new List<Position_SOM>
+            {
+                new Position_SOM(600, 0, 0), new Position_SOM(610, 1, 1),
+                new Position_SOM(620, 2, 2), new Position_SOM(630, 3, 3), new Position_SOM(640, 4, 4)
+            };
+
+            // B2 — same structure, X=150–390 (fills the gaps between A's trained bands)
+            var b2Step1 = new List<Position_SOM>
+            {
+                new Position_SOM(150, 0, 0), new Position_SOM(160, 1, 1),
+                new Position_SOM(170, 2, 2), new Position_SOM(180, 3, 3), new Position_SOM(190, 4, 4)
+            };
+            var b2Step2 = new List<Position_SOM>
+            {
+                new Position_SOM(250, 0, 0), new Position_SOM(260, 1, 1),
+                new Position_SOM(270, 2, 2), new Position_SOM(280, 3, 3), new Position_SOM(290, 4, 4)
+            };
+            var b2Step3 = new List<Position_SOM>
+            {
+                new Position_SOM(350, 0, 0), new Position_SOM(360, 1, 1),
+                new Position_SOM(370, 2, 2), new Position_SOM(380, 3, 3), new Position_SOM(390, 4, 4)
+            };
+
+            // B3 — distant region, X=700–940
+            var b3Step1 = new List<Position_SOM>
+            {
+                new Position_SOM(700, 0, 0), new Position_SOM(710, 1, 1),
+                new Position_SOM(720, 2, 2), new Position_SOM(730, 3, 3), new Position_SOM(740, 4, 4)
+            };
+            var b3Step2 = new List<Position_SOM>
+            {
+                new Position_SOM(800, 0, 0), new Position_SOM(810, 1, 1),
+                new Position_SOM(820, 2, 2), new Position_SOM(830, 3, 3), new Position_SOM(840, 4, 4)
+            };
+            var b3Step3 = new List<Position_SOM>
+            {
+                new Position_SOM(900, 0, 0), new Position_SOM(910, 1, 1),
+                new Position_SOM(920, 2, 2), new Position_SOM(930, 3, 3), new Position_SOM(940, 4, 4)
+            };
+
+            return new List<SDR_SOM>
+            {
+                new SDR_SOM(length, breadth, b1Step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b1Step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b1Step3, iType.SPATIAL),
+
+                new SDR_SOM(length, breadth, b2Step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b2Step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b2Step3, iType.SPATIAL),
+
+                new SDR_SOM(length, breadth, b3Step1, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b3Step2, iType.SPATIAL),
+                new SDR_SOM(length, breadth, b3Step3, iType.SPATIAL),
+            };
+        }
+
         private static List<Position_SOM> GetExclusivePositionList(List<Position_SOM> lastFiringCells, LayerType layerType)
         {
             List<Position_SOM> exlcudedPosList = new List<Position_SOM>();

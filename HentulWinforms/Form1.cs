@@ -26,6 +26,9 @@ namespace HentulWinforms
         string backupDirHC;
         string backupDirFOM;
         string backupDirSOM;
+        private const int ChunkWidth = 3600;
+        private const int ChunkHeight = 1800;
+
         private const int SOM_X_V1 = 1250; // matches LearningUnit V1 X
         private const int SOM_X_V2 = 5000; // V2: 100x100 -> X * 4 in LearningUnit
         private const int SOM_X_V3 = 20000; // V3: 200x200 -> X * 16 in LearningUnit
@@ -76,64 +79,243 @@ namespace HentulWinforms
         }
 
         private void StartButton_Click(object sender, EventArgs e)
+        {            
+        }
+
+
+        private void Explore_Click(object sender, EventArgs e)
         {
-            label_done.Text = "Processing";
+            // ── Phase 1: BROAD scan ─────────────────────────────────────────
+            // Sweep the full screen in BROAD chunks and use contour detection
+            // to find candidate object regions. No SOM training in this phase.
+
+            orchestrator.visionScope = VisionScope.BROAD;
+            orchestrator.NMode = NetworkMode.EXPLORE;
+
+            UpdateStatusLabel("Phase 1: broad scan...");
+
+            var allRegions = new List<DetectedRegion>();
+            var chunks = GetScreenChunks(chunkWidth: ChunkWidth, chunkHeight: ChunkHeight);
+
+            for (int ci = 0; ci < chunks.Count; ci++)
+            {
+                var chunk = chunks[ci];
+                UpdateStatusLabel($"Phase 1: scanning chunk {ci + 1}/{chunks.Count}...");
+                Application.DoEvents();
+
+                Orchestrator.MoveCursorToSpecificPosition(chunk.CenterX, chunk.CenterY);
+                orchestrator.RecordPixels(chunk.Width, chunk.Height);
+
+                using var edgedMat = GetEdgedMat(orchestrator.bmp);
+                var regions = SegmentObjectsFromMat(edgedMat, chunk.StartX, chunk.StartY);
+                allRegions.AddRange(regions);
+            }
+
+            UpdateStatusLabel($"Phase 1 done: {allRegions.Count} object(s) found. Starting deep scan...");
+            Application.DoEvents();
+
+            // ── Phase 2: NARROW deep learning ───────────────────────────────
+            // For every region discovered above, move the cursor to its centre,
+            // capture a 600×600 NARROW bitmap, encode it, then fire the SOM
+            // several times so sequence memory learns the visual pattern.
+            // No HC object snapshot is built here — that is the SOM's job.
+
+            orchestrator.visionScope = VisionScope.NARROW;
+            orchestrator.NMode = NetworkMode.TRAINING;
+
+            int learnedCount = 0;
+
+            for (int ri = 0; ri < allRegions.Count; ri++)
+            {
+                var region = allRegions[ri];
+                string label = $"Object{ri + 1}";
+
+                UpdateStatusLabel($"Phase 2: learning {label} ({ri + 1}/{allRegions.Count})...");
+                Application.DoEvents();
+
+                // 1. Move cursor to detected object's centre
+                Orchestrator.MoveCursorToSpecificPosition(region.CenterX, region.CenterY);
+                System.Threading.Thread.Sleep(50);
+
+                // 2. Capture NARROW (600×600) bitmap
+                orchestrator.RecordPixels(VisionScope.NARROW);
+
+                // 3. Edge-detect
+                var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
+
+                // 4. Encode into SDR and set the SOM label
+                bool isEmpty = orchestrator.SetupLabel(edgedBmp, label);
+
+                if (isEmpty)
+                {
+                    UpdateObjectLabel($"{label}: empty, skipping");
+                    continue;
+                }
+
+                // 5. Fire SOM multiple times so sequence memory captures the pattern
+                orchestrator.VisionProcessor.SendApical(5);
+
+                UpdateObjectLabel(label);
+                UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+                learnedCount++;
+            }
+
+            counter++;
+            CycleLabel.Text = counter.ToString();
+            CycleLabel.Refresh();
+            UpdateStatusLabel($"Complete! Learned {learnedCount}/{allRegions.Count} object(s).");
+        }
+
+        #region Explore Helpers
+
+        private void SetExploreMode()
+        {
+            if (orchestrator.NMode != NetworkMode.EXPLORE)
+            {
+                networkMode = NetworkMode.EXPLORE;
+                orchestrator.NMode = NetworkMode.EXPLORE;
+            }
+
+            if (orchestrator.visionScope != VisionScope.BROAD)
+                orchestrator.visionScope = VisionScope.BROAD;
+        }
+
+        private record ScreenChunk(int StartX, int StartY, int CenterX, int CenterY, int Width, int Height);
+
+        private List<ScreenChunk> GetScreenChunks(int chunkWidth, int chunkHeight)
+        {
+            var target = Screen.AllScreens.FirstOrDefault(s => !s.Primary)
+                         ?? Screen.PrimaryScreen!;
+            var bounds  = target.Bounds;
+            int baseX   = bounds.X;
+            int baseY   = bounds.Y;
+            int chunksX = (int)Math.Ceiling((double)bounds.Width  / chunkWidth);
+            int chunksY = (int)Math.Ceiling((double)bounds.Height / chunkHeight);
+
+            var chunks = new List<ScreenChunk>(chunksX * chunksY);
+
+            for (int row = 0; row < chunksY; row++)
+            {
+                for (int col = 0; col < chunksX; col++)
+                {
+                    int startX = baseX + col * chunkWidth;
+                    int startY = baseY + row * chunkHeight;
+                    chunks.Add(new ScreenChunk(
+                        startX, startY,
+                        startX + chunkWidth / 2,
+                        startY + chunkHeight / 2,
+                        chunkWidth, chunkHeight));
+                }
+            }
+
+            return chunks;
+        }
+
+        private void ProcessSingleChunk(ScreenChunk chunk)
+        {
+            // 1. Point the cursor at the chunk centre so RecordPixels captures it
+            Orchestrator.MoveCursorToSpecificPosition(chunk.CenterX, chunk.CenterY);
+
+            // 2. Capture pixels from screen using chunk dimensions
+            orchestrator.RecordPixels(chunk.Width, chunk.Height);
+
+            // 3. Edge-detect the captured bitmap
+            var edgedBmp = ConverToEdgedBitmap(orchestrator.bmp);
+
+            // 4. Encode the bitmap into an SDR
+            bool isSdrEmpty = orchestrator.SetupLabel(edgedBmp);
+
+            if (isSdrEmpty)
+            {
+                UpdateObjectLabel("Chunk is empty!");
+                ClearUI();
+                return;
+            }
+
+            // 5. Visualise the active bits on the UI
+            UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+
+            // 6. Train on this chunk with its screen-coordinate offsets
+            orchestrator.TrainImage(chunk.StartX, chunk.StartY);
+        }
+
+        private void UpdateStatusLabel(string text)
+        {
+            label_done.Text = text;
             label_done.Refresh();
+        }
 
-            if (string.IsNullOrEmpty(objectBox.Text))
+        private void UpdateObjectLabel(string text)
+        {
+            ObjectLabel.Text = text;
+            ObjectLabel.Refresh();
+        }
+
+        // Minimum contour area (pixels²) to be treated as a real object
+        private const int MinContourArea = 500;
+
+        /// <summary>
+        /// Run Canny edge detection on <paramref name="bmp"/> and return the resulting Mat.
+        /// Caller is responsible for disposing the returned Mat.
+        /// </summary>
+        private Mat GetEdgedMat(Bitmap bmp)
+        {
+            string filename = Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\Hentul\Hentul\Images\savedImage.png"));
+            bmp.Save(filename);
+            var src = Cv2.ImRead(filename);
+            var edged = new Mat();
+            Cv2.Canny(src, edged, 50, 200);
+            src.Dispose();
+            return edged;
+        }
+
+        /// <summary>
+        /// Find contours in <paramref name="edgedMat"/> and return each distinct object
+        /// as a <see cref="Orchestrator.DetectedRegion"/> in screen coordinates.
+        /// </summary>
+        private List<DetectedRegion> SegmentObjectsFromMat(
+            Mat edgedMat, int chunkStartX, int chunkStartY)
+        {
+            var regions = new List<DetectedRegion>();
+
+            Cv2.FindContours(
+                edgedMat,
+                out OpenCvSharp.Point[][] contours,
+                out _,
+                RetrievalModes.External,
+                ContourApproximationModes.ApproxSimple);
+
+            foreach (var contour in contours)
             {
-                label_done.Text = "Enter object label before you train!!";
-                return;
+                double area = Cv2.ContourArea(contour);
+                if (area < MinContourArea) continue;
+
+                var rect = Cv2.BoundingRect(contour);
+                regions.Add(new DetectedRegion(
+                    chunkStartX + rect.X,
+                    chunkStartY + rect.Y,
+                    rect.Width,
+                    rect.Height));
             }
 
-            if (objectList.Contains(objectBox.Text))
-            {
-                label_done.Text = "Object Already Trained!!";
-                return;
-            }
+            return regions;
+        }
 
-            objectList.Add(objectBox.Text);
+        #endregion
 
-            if (networkMode.Equals(NetworkMode.TRAINING))
-            {
-
-                // Process visual data for all regions simultaneously
-                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);
-
-                // Fix: Orchestrator.SetUpLabel signature is (Bitmap bmp, string objectLabel)
-                orchestrator.SetUpLabel(bmp_g, objectBox.Text);
-
-                UpdateEncoderImage(orchestrator.VisionProcessor.SomSDR.ActiveBits);
-
-                orchestrator.TrainImage();
-
-                // WORK IN PROGRESS
-
-                CycleLabel.Text = counter.ToString();
-
-                CycleLabel.Refresh();
-            }
-
-
-
-            startClassificationButton.Visible = true;
-
-            if (networkMode == NetworkMode.TRAINING)
-            {
-                StartButton.Text = "Start Another Image";
-                StartButton.Refresh();
-                label_done.Text = "Completed!"; label_done.Refresh();
-            }
+        private void ClearUI()
+        {
+            pictureBox4.Controls.Clear();pictureBox4.Refresh();
         }
 
         /// <summary>
         /// Draw active bits pixels on the forms UI
         /// </summary>
         /// <param name="onBits"></param>
-        private void UpdateEncoderImage(List<Position_SOM> onBits)
+        private void UpdateUI(List<Position_SOM> onBits)
         {
-            const int imgWidth = 1200;
-            const int imgHeight = 600;
+            const int imgWidth  = 1200; // matches SOM Length (GridX)
+            const int imgHeight = 600;  // matches SOM Breadth (GridY)
 
             // Create bitmap where each grid cell maps to one pixel (1200x600)
             var bmp = new System.Drawing.Bitmap(imgWidth, imgHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -214,9 +396,7 @@ namespace HentulWinforms
                 });
 
                 // Rest of your existing code unchanged
-                label_done.Text = "Ready";
-
-                openFileDialog1.ShowDialog();
+                label_done.Text = "Ready";                
             }
             catch (Exception ex)
             {
@@ -382,6 +562,55 @@ namespace HentulWinforms
             //}
         }
 
+        /*
+         * StartButton Legacy logic 
+         * label_done.Text = "Processing";
+            label_done.Refresh();
+
+            if (string.IsNullOrEmpty(objectBox.Text))
+            {
+                label_done.Text = "Enter object label before you train!!";
+                return;
+            }
+
+            if (objectList.Contains(objectBox.Text))
+            {
+                label_done.Text = "Object Already Trained!!";
+                return;
+            }
+
+            objectList.Add(objectBox.Text);
+
+            if (networkMode.Equals(NetworkMode.TRAINING))
+            {
+
+                // Process visual data for all regions simultaneously
+                var bmp_g = ConverToEdgedBitmap((Bitmap)pictureBox2.Image);
+
+                // Fix: Orchestrator.SetUpLabel signature is (Bitmap bmp, string objectLabel)
+                orchestrator.SetupLabel(bmp_g, objectBox.Text);
+
+                UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
+
+                orchestrator.TrainImage();
+
+                // WORK IN PROGRESS
+
+                CycleLabel.Text = counter.ToString();
+
+                CycleLabel.Refresh();
+            }
+
+            startClassificationButton.Visible = true;
+
+            if (networkMode == NetworkMode.TRAINING)
+            {
+                StartButton.Text = "Start Another Image";
+                StartButton.Refresh();
+                label_done.Text = "Completed!"; label_done.Refresh();
+            }
+         */
+
         private void CurrentImage_Click(object sender, EventArgs e)
         {
 
@@ -406,6 +635,6 @@ namespace HentulWinforms
             old?.Dispose();
 
             pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-        }
+        }      
     }
 }

@@ -1,33 +1,23 @@
 ﻿Current Feature : SPATIAL MAP / GLOBAL POSITIONING SYSTEM
 
 
+Completed:
+Finished StoreNewObjectLocationInGraph() method in Hippocampal Complex
+Complete explore() method
 
 
 
+Inprgress :  Fix the SetupObjectLabel() bug , where you dont have setup lable while exploring but get an approximate object count rather!
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Next :
+-LoadAllObjectsintoHCComplex();
+-ExploreSpecificObject();
 
 
 Next Feature : 2D SINGLE OCULAR OBJECT RECOGNITION
 //  what to do once you train an image in the form
 ->: Make it train on other occuar vairiations of the same image. while at the same time higher layer still continues to associate all the variations with the same image.
-
-
 
 
 -----------------------------------------------------------Big Direction -----------------------------------------------------------

@@ -23,10 +23,17 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
         public List<string> CurrentLabels { get; private set; }
 
+        /// <summary>Physical dimensions of the environment (primary screen).</summary>
+        public EnvironmentBounds Environment { get; private set; }
+
+        /// <summary>Bounding boxes for all objects that have been loaded into the Graph.</summary>
+        private Dictionary<string, ObjectBounds> _objectBoundsCache;
+
         private Graph()
         {
             Base = new Node(new Position2D(0, 0), null);
-            CurrentLabels = new List<string>();            
+            CurrentLabels = new List<string>();
+            _objectBoundsCache = new Dictionary<string, ObjectBounds>();
             TotalCount = 0;
             MaxRight = 0;
             MaxUp = 0;
@@ -42,6 +49,22 @@ namespace Hentul.Hippocampal_Entorinal_complex
             return _graph;
         }
 
+        public void InitGraph(uint up, uint right)
+        {
+            _graph.MaxUp = up;
+            _graph.MaxRight = right;
+            _graph.TotalCount = up * right;
+        }
+
+        /// <summary>
+        /// Sets the physical screen dimensions as the environment boundary.
+        /// Call once at startup (e.g. from HippocampalComplex.InitialiseEnvironment).
+        /// </summary>
+        public void SetEnvironmentBounds(int screenWidth, int screenHeight)
+        {
+            Environment = new EnvironmentBounds(screenWidth, screenHeight);
+            InitGraph((uint)screenHeight, (uint)screenWidth);
+        }
 
         #endregion
 
@@ -95,6 +118,9 @@ namespace Hentul.Hippocampal_Entorinal_complex
             if (CurrentLabels.Contains(entity.Label) == false)
                 CurrentLabels.Add(entity.Label);
 
+            // Compute and cache the bounding box for this object.
+            _objectBoundsCache[entity.Label] = ObjectBounds.FromEntity(entity);
+
             return true;
         }
 
@@ -117,10 +143,66 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             UnloadPositionsForLabel(posList, entity.Label);
 
-            if (CurrentLabels.Contains(entity.Label) == false)
-                CurrentLabels.Add(entity.Label);
+            if (CurrentLabels.Contains(entity.Label))
+                CurrentLabels.Remove(entity.Label);
+
+            _objectBoundsCache.Remove(entity.Label);
 
             return true;
+        }
+
+        /// <summary>Returns the bounding box for a loaded object, or null if not loaded.</summary>
+        public ObjectBounds GetObjectBounds(string label)
+        {
+            _objectBoundsCache.TryGetValue(label, out var bounds);
+            return bounds;
+        }
+
+        /// <summary>
+        /// Returns the bounding box for every object currently loaded in the environment.
+        /// </summary>
+        public IReadOnlyList<ObjectBounds> GetAllObjectsInEnvironment()
+        {
+            return _objectBoundsCache.Values.ToList();
+        }
+
+        /// <summary>
+        /// Returns all objects whose bounding boxes overlap with the given region.
+        /// Useful for querying "what is near position X,Y?".
+        /// </summary>
+        public List<ObjectBounds> GetObjectsInRegion(int x, int y, int width, int height)
+        {
+            var result = new List<ObjectBounds>();
+
+            foreach (var bounds in _objectBoundsCache.Values)
+            {
+                bool overlapsX = bounds.MinX <= x + width  && bounds.MaxX >= x;
+                bool overlapsY = bounds.MinY <= y + height && bounds.MaxY >= y;
+
+                if (overlapsX && overlapsY)
+                    result.Add(bounds);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns all objects whose bounding boxes contain the given point.
+        /// </summary>
+        public List<ObjectBounds> GetObjectsAtPosition(Position2D pos)
+        {
+            var result = new List<ObjectBounds>();
+
+            foreach (var bounds in _objectBoundsCache.Values)
+            {
+                if (pos.X >= bounds.MinX && pos.X <= bounds.MaxX &&
+                    pos.Y >= bounds.MinY && pos.Y <= bounds.MaxY)
+                {
+                    result.Add(bounds);
+                }
+            }
+
+            return result;
         }
 
         public Node GetNode(Position2D? pos, Node currentNode = null, bool speedUpY = false)
@@ -208,26 +290,20 @@ namespace Hentul.Hippocampal_Entorinal_complex
 
             Node current = this.Base;
 
-            List<Position2D> retList= new List<Position2D> ();
+            List<Position2D> retList= new List<Position2D>();
 
-            for( int i = 0; current.Right != null; i++)
+            for (int i = 0; current != null && current.Right != null; i++, current = current.Right)
             {
-                Node cacheBase = current;
+                Node colBase = current;
+                Node colCurrent = current;
 
-                for(int j = 0; current.Up != null; i++)
+                for (int j = 0; colCurrent != null; j++, colCurrent = colCurrent.Up)
                 {
-                    if(current != null &&  current.Flags.Contains(label))
+                    if (colCurrent.Flags != null && colCurrent.Flags.Contains(label))
                     {
-                        retList.Add(current.PixelCordinates);
+                        retList.Add(colCurrent.PixelCordinates);
                     }
-
-                    if (current.Up == null)
-                        break;
-                    else
-                         current = current.Up;
                 }
-
-                current = cacheBase.Right;
             }
 
             return retList;

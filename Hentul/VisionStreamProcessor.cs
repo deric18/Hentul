@@ -13,6 +13,7 @@
         public int numPixelsProcessedPerBBM;
 
         private static readonly string baseDir = AppContext.BaseDirectory;
+
         public int NumBBMNeededV { get; private set; }
 
         public int BlockSize;        
@@ -76,29 +77,29 @@
         #endregion
                 
 
-        internal void SetUpObjectLabelOnce(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope, Position2D cursorPosition)
+        internal bool SetupLabel(Bitmap greyScaleBitmap, string objectLabel, VisionScope vScope, Position2D cursorPosition)
         {
             if (!SomBBM.SetUpNewObjectLabel(objectLabel))
                 throw new InvalidOperationException("Object Label Could not be set up in SOM Layer!");
 
-            // Extract pixels based on vision scope
-            if (vScope == VisionScope.NARROW)
-            {
-                SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap, vScope, cursorPosition);
-            }
-            else if (vScope == VisionScope.BROAD)
-            {
+            SomSDR = pEncoder.EncodeBitmap(greyScaleBitmap, vScope, cursorPosition);
 
+            if(SomSDR.ActiveBits.Count != 0)
+            {
+                apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
+                return false;
             }
 
-            apical_SOM = new SDR_SOM(SomSDR.Length, SomSDR.Breadth, SomSDR.ActiveBits, iType.APICAL);
+            return true;
         }
 
 
-        public void Train()
+        public void SendAPicalFeedback()
         {            
             SomBBM.Fire(SomSDR, CycleNum++);
         }
+
+
 
 
         public void SendApical(int maxRepetitions)
@@ -108,8 +109,13 @@
                 SomBBM.Fire(apical_SOM, CycleNum++);
         }
 
-        internal void SetNetworkModeToPrediction()
+        internal void SetNetworkModeToPrediction(bool isMock = false)
         {
+            if(isMock)
+            {
+                return;
+            }
+
             SomBBM.ChangeNetworkModeToPrediction();
         }
     }
