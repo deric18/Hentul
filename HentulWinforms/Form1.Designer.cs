@@ -250,9 +250,10 @@ namespace HentulWinforms
             // 
             // pictureBox4
             // 
-            pictureBox4.Location = new Point(7, 126);
+            pictureBox4.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            pictureBox4.Location = new Point(450, 145);
             pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(2500, 1800);
+            pictureBox4.Size = new Size(1800, 600);
             pictureBox4.TabIndex = 41;
             pictureBox4.TabStop = false;
             // 

@@ -184,11 +184,13 @@ namespace HentulWinforms
 
         private List<ScreenChunk> GetScreenChunks(int chunkWidth, int chunkHeight)
         {
-            int screenWidth = Screen.PrimaryScreen!.Bounds.Width;
-            int screenHeight = Screen.PrimaryScreen!.Bounds.Height;
-
-            int chunksX = (int)Math.Ceiling((double)screenWidth / chunkWidth);
-            int chunksY = (int)Math.Ceiling((double)screenHeight / chunkHeight);
+            var target = Screen.AllScreens.FirstOrDefault(s => !s.Primary)
+                         ?? Screen.PrimaryScreen!;
+            var bounds  = target.Bounds;
+            int baseX   = bounds.X;
+            int baseY   = bounds.Y;
+            int chunksX = (int)Math.Ceiling((double)bounds.Width  / chunkWidth);
+            int chunksY = (int)Math.Ceiling((double)bounds.Height / chunkHeight);
 
             var chunks = new List<ScreenChunk>(chunksX * chunksY);
 
@@ -196,8 +198,8 @@ namespace HentulWinforms
             {
                 for (int col = 0; col < chunksX; col++)
                 {
-                    int startX = col * chunkWidth;
-                    int startY = row * chunkHeight;
+                    int startX = baseX + col * chunkWidth;
+                    int startY = baseY + row * chunkHeight;
                     chunks.Add(new ScreenChunk(
                         startX, startY,
                         startX + chunkWidth / 2,
@@ -312,8 +314,8 @@ namespace HentulWinforms
         /// <param name="onBits"></param>
         private void UpdateUI(List<Position_SOM> onBits)
         {
-            const int imgWidth = 600;
-            const int imgHeight = 600;
+            const int imgWidth  = 1200; // matches SOM Length (GridX)
+            const int imgHeight = 600;  // matches SOM Breadth (GridY)
 
             // Create bitmap where each grid cell maps to one pixel (1200x600)
             var bmp = new System.Drawing.Bitmap(imgWidth, imgHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);

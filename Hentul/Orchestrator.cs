@@ -38,6 +38,54 @@
         // SM_CXSCREEN = 0 (primary screen width), SM_CYSCREEN = 1 (primary screen height)
         private const int SM_CXSCREEN = 0;
         private const int SM_CYSCREEN = 1;
+
+        // Monitor enumeration P/Invoke
+        private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT { public int Left, Top, Right, Bottom; }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
+            private const uint MONITORINFOF_PRIMARY = 1;
+            public bool IsPrimary => (dwFlags & MONITORINFOF_PRIMARY) != 0;
+        }
+
+        [ThreadStatic]
+        private static List<Rectangle>? _monitorCollector;
+
+        /// <summary>Returns the bounds of the first non-primary monitor, or null if none exists.</summary>
+        private static Rectangle? GetSecondaryScreenBounds()
+        {
+            _monitorCollector = new List<Rectangle>();
+            EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, SecondaryMonitorCallback, IntPtr.Zero);
+            var result = _monitorCollector.Count > 0 ? _monitorCollector[0] : (Rectangle?)null;
+            _monitorCollector = null;
+            return result;
+        }
+
+        private static bool SecondaryMonitorCallback(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData)
+        {
+            var info = new MONITORINFO { cbSize = Marshal.SizeOf(typeof(MONITORINFO)) };
+            if (GetMonitorInfo(hMonitor, ref info) && !info.IsPrimary)
+            {
+                var r = info.rcMonitor;
+                _monitorCollector!.Add(new Rectangle(r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top));
+                return false; // stop after first secondary
+            }
+            return true;
+        }
         #endregion
 
         #region CONSTRUCTOR
@@ -519,17 +567,7 @@
 
         public static void MoveCursorToSpecificPosition(int x, int y)
         {
-            POINT p;
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            p.X = x;
-            p.Y = y;
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
+            SetCursorPos(x, y);
         }
 
         public void MoveCursor(POINT p)
@@ -615,10 +653,10 @@
             };
 
             var cur = GetCurrentPointerPosition();
+            var screen = GetSecondaryScreenBounds() ?? new Rectangle(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 
-            // Center the capture rectangle on the cursor position
-            int x = Math.Max(0, cur.X - w / 2);
-            int y = Math.Max(0, cur.Y - h / 2);
+            int x = Math.Max(screen.Left, Math.Min(cur.X - w / 2, screen.Right  - w));
+            int y = Math.Max(screen.Top,  Math.Min(cur.Y - h / 2, screen.Bottom - h));
 
             bmp = CaptureScreenRegion(new Rectangle(x, y, w, h));
         }
@@ -626,9 +664,10 @@
         public void RecordPixels(int width, int height)
         {
             var cur = GetCurrentPointerPosition();
+            var screen = GetSecondaryScreenBounds() ?? new Rectangle(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 
-            int x = Math.Max(0, cur.X - width / 2);
-            int y = Math.Max(0, cur.Y - height / 2);
+            int x = Math.Max(screen.Left, Math.Min(cur.X - width  / 2, screen.Right  - width));
+            int y = Math.Max(screen.Top,  Math.Min(cur.Y - height / 2, screen.Bottom - height));
 
             bmp = CaptureScreenRegion(new Rectangle(x, y, width, height));
         }

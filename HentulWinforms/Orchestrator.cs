@@ -541,17 +541,7 @@
 
         public void MoveCursorToSpecificPosition(int x, int y)
         {
-            POINT p;
-            IntPtr desk = GetDesktopWindow();
-            IntPtr dc = GetWindowDC(desk);
-
-            p.X = x;
-            p.Y = y;
-
-            ClientToScreen(dc, ref p);
-            SetCursorPos(p.X, p.Y);
-
-            ReleaseDC(desk, dc);
+            SetCursorPos(x, y);
         }
 
         public void MoveCursor(POINT p)
