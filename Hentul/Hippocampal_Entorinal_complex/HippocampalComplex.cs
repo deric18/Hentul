@@ -93,6 +93,17 @@
         public List<ObjectBounds> GetObjectsAtPosition(Position2D pos) =>
             Graph.GetObjectsAtPosition(pos);
 
+        /// <summary>
+        /// Resets CurrentObject and assigns the given label, ready for a new training pass.
+        /// Call this before adding sensations for each new object during an Explore cycle.
+        /// </summary>
+        public void PrepareObjectForTraining(string label)
+        {
+            CurrentObject = new UnrecognisedEntity();
+            CurrentObject.Label = label;
+            CurrentObject.sType = SenseType.Unknown;
+        }
+
 
 
 

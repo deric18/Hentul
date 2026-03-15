@@ -152,5 +152,40 @@ namespace Hentul.UT
             }
 
         }
+        [Test]
+        public void TestDirectLoadObjectBounds_StoresAndRetrieves()
+        {
+            // Simulates what RecordObjectInGraph does for the visualiser
+            string label = "TestVisObject_" + Guid.NewGuid().ToString("N")[..6];
+            int minX = 300, minY = 200, maxX = 550, maxY = 430;
+
+            graph.DirectLoadObjectBounds(label, minX, minY, maxX, maxY);
+
+            var all = graph.GetAllObjectsInEnvironment();
+            var stored = all.FirstOrDefault(o => o.Label == label);
+
+            Assert.IsNotNull(stored, "DirectLoadObjectBounds should store the bounds so GetAllObjectsInEnvironment finds it.");
+            Assert.AreEqual(minX, stored.MinX);
+            Assert.AreEqual(minY, stored.MinY);
+            Assert.AreEqual(maxX, stored.MaxX);
+            Assert.AreEqual(maxY, stored.MaxY);
+            Assert.AreEqual(maxX - minX, stored.Width,  "Width should be MaxX - MinX");
+            Assert.AreEqual(maxY - minY, stored.Height, "Height should be MaxY - MinY");
+        }
+
+        [Test]
+        public void TestDirectLoadObjectBounds_MultipleObjects()
+        {
+            string label1 = "Obj_A_" + Guid.NewGuid().ToString("N")[..6];
+            string label2 = "Obj_B_" + Guid.NewGuid().ToString("N")[..6];
+
+            graph.DirectLoadObjectBounds(label1, 100, 150, 300, 400);
+            graph.DirectLoadObjectBounds(label2, 800, 500, 1100, 750);
+
+            var all = graph.GetAllObjectsInEnvironment();
+
+            Assert.IsTrue(all.Any(o => o.Label == label1), "Object A should be in environment");
+            Assert.IsTrue(all.Any(o => o.Label == label2), "Object B should be in environment");
+        }
     }
 }

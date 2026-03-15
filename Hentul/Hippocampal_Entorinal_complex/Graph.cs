@@ -159,6 +159,22 @@ namespace Hentul.Hippocampal_Entorinal_complex
         }
 
         /// <summary>
+        /// Directly stores a bounding box for an object without traversing the quad tree.
+        /// Use this as a lightweight alternative to LoadObject when only visualisation bounds
+        /// are needed (e.g. during an Explore cycle).
+        /// </summary>
+        public void DirectLoadObjectBounds(string label, int minX, int minY, int maxX, int maxY)
+        {
+            if (string.IsNullOrEmpty(label))
+                throw new ArgumentException("Label cannot be empty.", nameof(label));
+
+            _objectBoundsCache[label] = new ObjectBounds(label, minX, minY, maxX, maxY);
+
+            if (!CurrentLabels.Contains(label))
+                CurrentLabels.Add(label);
+        }
+
+        /// <summary>
         /// Returns the bounding box for every object currently loaded in the environment.
         /// </summary>
         public IReadOnlyList<ObjectBounds> GetAllObjectsInEnvironment()

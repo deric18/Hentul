@@ -53,6 +53,7 @@ namespace HentulWinforms
             openFileDialog1 = new OpenFileDialog();
             pictureBox4 = new PictureBox();
             button2 = new Button();
+            btnShowGraph = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
@@ -267,6 +268,16 @@ namespace HentulWinforms
             button2.UseVisualStyleBackColor = true;
             button2.Click += Explore_Click;
             // 
+            // btnShowGraph
+            // 
+            btnShowGraph.Location = new Point(400, 69);
+            btnShowGraph.Name = "btnShowGraph";
+            btnShowGraph.Size = new Size(155, 39);
+            btnShowGraph.TabIndex = 43;
+            btnShowGraph.Text = "Graph Network";
+            btnShowGraph.UseVisualStyleBackColor = true;
+            btnShowGraph.Click += BtnShowGraph_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
@@ -274,6 +285,7 @@ namespace HentulWinforms
             BackColor = SystemColors.ActiveBorder;
             ClientSize = new Size(2272, 1581);
             Controls.Add(button2);
+            Controls.Add(btnShowGraph);
             Controls.Add(pictureBox4);
             Controls.Add(pictureBox2);
             Controls.Add(label3);
@@ -349,5 +361,6 @@ namespace HentulWinforms
         private OpenFileDialog openFileDialog1;
         private PictureBox pictureBox4;
         private Button button2;
+        private Button btnShowGraph;
     }
 }

@@ -146,16 +146,24 @@ namespace HentulWinforms
                 // 4. Encode into SDR and set the SOM label
                 bool isEmpty = orchestrator.SetupLabel(edgedBmp, label);
 
+                // ALWAYS record the detected region in the Graph so it appears in the
+                // visualiser, regardless of whether the SDR encoding produced any bits.
+                bool stored = orchestrator.RecordObjectInGraph(
+                    label,
+                    region.ScreenX, region.ScreenY,
+                    region.Width,   region.Height);
+
                 if (isEmpty)
                 {
-                    UpdateObjectLabel($"{label}: empty, skipping");
+                    UpdateObjectLabel($"{label}: empty SDR — bounds saved");
+                    learnedCount++;
                     continue;
                 }
 
                 // 5. Fire SOM multiple times so sequence memory captures the pattern
                 orchestrator.VisionProcessor.SendApical(5);
 
-                UpdateObjectLabel(label);
+                UpdateObjectLabel(stored ? label : $"{label}: skipped (empty SDR or duplicate)");
                 UpdateUI(orchestrator.VisionProcessor.SomSDR.ActiveBits);
                 learnedCount++;
             }
@@ -164,6 +172,16 @@ namespace HentulWinforms
             CycleLabel.Text = counter.ToString();
             CycleLabel.Refresh();
             UpdateStatusLabel($"Complete! Learned {learnedCount}/{allRegions.Count} object(s).");
+
+            // Push detected regions directly into the graph visualiser so it
+            // doesn't depend on the HC→Graph pipeline being wired correctly.
+            if (_graphForm != null && !_graphForm.IsDisposed)
+            {
+                var objectData = allRegions
+                    .Select((r, i) => ($"Object{i + 1}", r.ScreenX, r.ScreenY, r.Width, r.Height))
+                    .ToList();
+                _graphForm.ShowObjects(objectData);
+            }
         }
 
         #region Explore Helpers
@@ -617,8 +635,18 @@ namespace HentulWinforms
         }
 
 
-        private void openFileDialog1_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        private Form2? _graphForm;
+
+        private void BtnShowGraph_Click(object sender, EventArgs e)
         {
+            if (_graphForm == null || _graphForm.IsDisposed)
+                _graphForm = new Form2();
+
+            _graphForm.Show();
+            _graphForm.BringToFront();
+        }
+
+        private void openFileDialog1_FileOk(object sender, System.ComponentModel.CancelEventArgs e)        {
             var dlg = sender as OpenFileDialog ?? openFileDialog1;
             var file = dlg?.FileName;
             if (string.IsNullOrEmpty(file) || !System.IO.File.Exists(file))
