@@ -248,6 +248,75 @@
             HCAccessor.DoneWithTraining(label);
         }
 
+        /// <summary>
+        /// Builds Sensation_Location entries from the current SOM SDR active bits, anchored at the
+        /// top-left and bottom-right of the detected screen region, then stores the resulting
+        /// RecognisedVisualEntity in the HippocampalComplex and loads it into the Graph.
+        /// Call once per detected region after SetupLabel + SendApical during an Explore cycle.
+        /// Returns false and is a no-op if the SDR is empty or the label is already trained.
+        /// </summary>
+        public bool RecordObjectInGraph(string label, int screenX, int screenY, int width, int height)
+        {
+            int maxX = screenX + width;
+            int maxY = screenY + height;
+
+            // ── Step 1: ALWAYS store bounds first ─────────────────────────────────────
+            // This must happen before any early-out so the visualiser always has data,
+            // even when the SDR is empty or the cognitive path throws.
+            HCAccessor.Graph.DirectLoadObjectBounds(label, screenX, screenY, maxX, maxY);
+
+            // ── Step 2: Try the full cognitive path ────────────────────────────────────
+            // Requires a valid SOM SDR from the most recent SetupLabel call.
+            var activeBits = VisionProcessor.SomSDR?.ActiveBits;
+            if (activeBits == null || activeBits.Count == 0)
+                return true;   // Bounds saved; no SDR to build a cognitive entry from.
+
+            if (!HCAccessor.Objects.ContainsKey(label))
+            {
+                try
+                {
+                    var pos2DList = activeBits.Select(p => new Position2D(p.X, p.Y)).ToList();
+
+                    var topLeft     = new Position2D(screenX, screenY);
+                    var bottomRight = new Position2D(maxX,    maxY);
+
+                    // Use BBM ID 0 for topLeft, BBM ID 1 for bottomRight.
+                    // CRITICAL: they MUST be different.  If both share BBM ID 0,
+                    // ComputeBBMIDMisses sees a "match" on the ID and scores the
+                    // second sensation at 100%, sending it to MatchedSensations instead
+                    // of ObjectSnapshot.  That leaves only one sensation, so
+                    // ObjectBounds.FromEntity produces Width=0/Height=0 and overwrites
+                    // the correct bounds we already saved above.
+                    var sensLoc1 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
+                    sensLoc1[topLeft.ToString()] =
+                        new KeyValuePair<int, List<Position2D>>(0, pos2DList);
+
+                    var sensLoc2 = new SortedDictionary<string, KeyValuePair<int, List<Position2D>>>();
+                    sensLoc2[bottomRight.ToString()] =
+                        new KeyValuePair<int, List<Position2D>>(1, new List<Position2D>(pos2DList));
+
+                    HCAccessor.PrepareObjectForTraining(label);
+                    HCAccessor.AddNewSensationLocationToObject(new Sensation_Location(sensLoc1, topLeft));
+                    HCAccessor.AddNewSensationLocationToObject(new Sensation_Location(sensLoc2, bottomRight));
+                    HCAccessor.DoneWithTraining();
+
+                    // Step 3: DoneWithTraining → LoadObject → ObjectBounds.FromEntity now
+                    // has both sensations and produces the correct bounds.  Re-apply
+                    // DirectLoadObjectBounds as a safety-net in case any intermediate
+                    // step still produced a degenerate (single-point) bounding box.
+                    HCAccessor.Graph.DirectLoadObjectBounds(label, screenX, screenY, maxX, maxY);
+                }
+                catch (Exception ex)
+                {
+                    // Cognitive path failed.  Bounds are already correct from Step 1.
+                    if (logMode >= LogMode.BurstOnly)
+                        WriteLogsToFile($"[RecordObjectInGraph] Sensation path failed for '{label}': {ex.Message}");
+                }
+            }
+
+            return true;
+        }
+
 
         //public void ChangeNetworkToPredictionMode()
         //{
